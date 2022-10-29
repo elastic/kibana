@@ -158,9 +158,21 @@
             "label": "schema",
             "description": [],
             "signature": [
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<{ enabled: ",
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<boolean>; }>"
             ],
             "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_config.ts",

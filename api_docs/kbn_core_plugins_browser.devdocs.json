@@ -52,7 +52,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<TPluginsStart, TStart>, plugins: TPluginsSetup) => TSetup"
             ],
             "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
@@ -67,7 +73,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<TPluginsStart, TStart>"
                 ],
                 "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
@@ -102,7 +114,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
               ", plugins: TPluginsStart) => TStart"
             ],
             "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
@@ -117,7 +135,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
                 "deprecated": false,
@@ -209,9 +233,21 @@
             "description": [],
             "signature": [
               "{ mode: Readonly<",
-              "EnvironmentMode",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.EnvironmentMode",
+                "text": "EnvironmentMode"
+              },
               ">; packageInfo: Readonly<",
-              "PackageInfo",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.PackageInfo",
+                "text": "PackageInfo"
+              },
               ">; }"
             ],
             "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",

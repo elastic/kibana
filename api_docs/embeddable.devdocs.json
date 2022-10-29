@@ -215,7 +215,13 @@
                 "label": "overlays",
                 "description": [],
                 "signature": [
-                  "OverlayStart"
+                  {
+                    "pluginId": "@kbn/core-overlays-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                    "section": "def-common.OverlayStart",
+                    "text": "OverlayStart"
+                  }
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -230,7 +236,13 @@
                 "label": "notifications",
                 "description": [],
                 "signature": [
-                  "NotificationsStart"
+                  {
+                    "pluginId": "@kbn/core-notifications-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                    "section": "def-common.NotificationsStart",
+                    "text": "NotificationsStart"
+                  }
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -260,7 +272,13 @@
                 "label": "theme",
                 "description": [],
                 "signature": [
-                  "ThemeServiceStart"
+                  {
+                    "pluginId": "@kbn/core-theme-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreThemeBrowserPluginApi",
+                    "section": "def-common.ThemeServiceStart",
+                    "text": "ThemeServiceStart"
+                  }
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -293,7 +311,7 @@
             "label": "getDisplayName",
             "description": [],
             "signature": [
-              "() => string"
+              "() => any"
             ],
             "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
             "deprecated": false,
@@ -502,7 +520,13 @@
                 "label": "toasts",
                 "description": [],
                 "signature": [
-                  "IToasts"
+                  {
+                    "pluginId": "@kbn/core-notifications-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                    "section": "def-common.IToasts",
+                    "text": "IToasts"
+                  }
                 ],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
@@ -2096,7 +2120,13 @@
                 "label": "application",
                 "description": [],
                 "signature": [
-                  "ApplicationStart"
+                  {
+                    "pluginId": "@kbn/core-application-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                    "section": "def-common.ApplicationStart",
+                    "text": "ApplicationStart"
+                  }
                 ],
                 "path": "src/plugins/embeddable/public/lib/actions/edit_panel_action.ts",
                 "deprecated": false,
@@ -2151,7 +2181,7 @@
             "label": "getDisplayName",
             "description": [],
             "signature": [
-              "({ embeddable }: ActionContext) => string"
+              "({ embeddable }: ActionContext) => any"
             ],
             "path": "src/plugins/embeddable/public/lib/actions/edit_panel_action.ts",
             "deprecated": false,
@@ -3805,7 +3835,13 @@
                 "description": [],
                 "signature": [
                   "(appId: string, options?: ",
-                  "NavigateToAppOptions",
+                  {
+                    "pluginId": "@kbn/core-application-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                    "section": "def-common.NavigateToAppOptions",
+                    "text": "NavigateToAppOptions"
+                  },
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
@@ -3838,7 +3874,13 @@
                 "description": [],
                 "signature": [
                   "ReadonlyMap<string, ",
-                  "PublicAppInfo",
+                  {
+                    "pluginId": "@kbn/core-application-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                    "section": "def-common.PublicAppInfo",
+                    "text": "PublicAppInfo"
+                  },
                   "> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
@@ -4583,7 +4625,13 @@
             "text": "IEmbeddable"
           },
           "<I, O, any>, T = ",
-          "SavedObjectAttributes",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          },
           ">(def: ",
           {
             "pluginId": "embeddable",
@@ -5630,13 +5678,37 @@
             "text": "EmbeddableOutput"
           },
           ", any>, unknown>>; overlays: ",
-          "OverlayStart",
+          {
+            "pluginId": "@kbn/core-overlays-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+            "section": "def-common.OverlayStart",
+            "text": "OverlayStart"
+          },
           "; notifications: ",
-          "NotificationsStart",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-common.NotificationsStart",
+            "text": "NotificationsStart"
+          },
           "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined; theme: ",
-          "ThemeServiceStart",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.ThemeServiceStart",
+            "text": "ThemeServiceStart"
+          },
           "; }) => ",
-          "OverlayRef"
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-common.OverlayRef",
+            "text": "OverlayRef"
+          }
         ],
         "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
         "deprecated": false,
@@ -5846,7 +5918,13 @@
                 "label": "overlays",
                 "description": [],
                 "signature": [
-                  "OverlayStart"
+                  {
+                    "pluginId": "@kbn/core-overlays-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                    "section": "def-common.OverlayStart",
+                    "text": "OverlayStart"
+                  }
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false,
@@ -5860,7 +5938,13 @@
                 "label": "notifications",
                 "description": [],
                 "signature": [
-                  "NotificationsStart"
+                  {
+                    "pluginId": "@kbn/core-notifications-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                    "section": "def-common.NotificationsStart",
+                    "text": "NotificationsStart"
+                  }
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false,
@@ -5916,7 +6000,13 @@
                 "label": "theme",
                 "description": [],
                 "signature": [
-                  "ThemeServiceStart"
+                  {
+                    "pluginId": "@kbn/core-theme-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreThemeBrowserPluginApi",
+                    "section": "def-common.ThemeServiceStart",
+                    "text": "ThemeServiceStart"
+                  }
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false,
@@ -7739,7 +7829,13 @@
             ],
             "signature": [
               "() => Promise<",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]>"
             ],
             "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
@@ -7759,9 +7855,21 @@
             ],
             "signature": [
               "() => Promise<",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | ",
-              "AggregateQuery",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
               " | undefined>"
             ],
             "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
@@ -9719,9 +9827,21 @@
             "text": "ViewMode"
           },
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",
-          "KibanaExecutionContext",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/embeddable/common/types.ts",
@@ -9926,10 +10046,13 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.contextMenuTrigger.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9937,10 +10060,13 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.contextMenuTrigger.description",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "description",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9973,10 +10099,13 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.panelBadgeTrigger.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9984,10 +10113,13 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.panelBadgeTrigger.description",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "description",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10020,10 +10152,13 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.panelNotificationTrigger.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10031,10 +10166,13 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.panelNotificationTrigger.description",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "description",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10173,7 +10311,13 @@
               "text": "EnhancementRegistryDefinition"
             },
             "<",
-            "SerializableRecord",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "server",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-server.SerializableRecord",
+              "text": "SerializableRecord"
+            },
             ">) => void"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
@@ -10196,7 +10340,13 @@
                   "text": "EnhancementRegistryDefinition"
                 },
                 "<",
-                "SerializableRecord",
+                {
+                  "pluginId": "@kbn/utility-types",
+                  "scope": "server",
+                  "docId": "kibKbnUtilityTypesPluginApi",
+                  "section": "def-server.SerializableRecord",
+                  "text": "SerializableRecord"
+                },
                 ">"
               ],
               "path": "src/plugins/embeddable/public/plugin.tsx",
@@ -10871,7 +11021,13 @@
               "text": "EnhancementRegistryDefinition"
             },
             "<",
-            "SerializableRecord",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "server",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-server.SerializableRecord",
+              "text": "SerializableRecord"
+            },
             ">) => void"
           ],
           "path": "src/plugins/embeddable/server/plugin.ts",
@@ -10894,7 +11050,13 @@
                   "text": "EnhancementRegistryDefinition"
                 },
                 "<",
-                "SerializableRecord",
+                {
+                  "pluginId": "@kbn/utility-types",
+                  "scope": "server",
+                  "docId": "kibKbnUtilityTypesPluginApi",
+                  "section": "def-server.SerializableRecord",
+                  "text": "SerializableRecord"
+                },
                 ">"
               ],
               "path": "src/plugins/embeddable/server/plugin.ts",
@@ -11060,7 +11222,13 @@
                 "text": "PersistableState"
               },
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               "> & { isContainerType: boolean; }"
             ],
             "path": "src/plugins/embeddable/common/types.ts",
@@ -11102,7 +11270,13 @@
                 "text": "PersistableState"
               },
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">"
             ],
             "path": "src/plugins/embeddable/common/types.ts",
@@ -11297,9 +11471,21 @@
             "text": "ViewMode"
           },
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",
-          "KibanaExecutionContext",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/embeddable/common/types.ts",

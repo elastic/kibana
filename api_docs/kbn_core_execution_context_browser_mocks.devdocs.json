@@ -43,7 +43,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "PublicMethodsOf",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
               "<",
               "ExecutionContextService",
               ">>"
@@ -63,7 +69,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ExecutionContextSetup",
+              {
+                "pluginId": "@kbn/core-execution-context-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
@@ -81,7 +93,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ExecutionContextSetup",
+              {
+                "pluginId": "@kbn/core-execution-context-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
@@ -99,7 +117,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ExecutionContextSetup",
+              {
+                "pluginId": "@kbn/core-execution-context-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
@@ -117,7 +141,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ExecutionContextSetup",
+              {
+                "pluginId": "@kbn/core-execution-context-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",

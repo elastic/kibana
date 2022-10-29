@@ -42,7 +42,13 @@
             ],
             "signature": [
               "(mount: ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement>, priority?: number | undefined) => string"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
@@ -59,7 +65,13 @@
                   "{@link MountPoint }"
                 ],
                 "signature": [
-                  "MountPoint",
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
                   "<HTMLElement>"
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
@@ -138,7 +150,13 @@
             ],
             "signature": [
               "(id: string | undefined, mount: ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement>, priority?: number | undefined) => string"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
@@ -172,7 +190,13 @@
                   "{@link MountPoint }"
                 ],
                 "signature": [
-                  "MountPoint",
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
                   "<HTMLElement>"
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
@@ -384,7 +408,13 @@
             ],
             "signature": [
               "((flyout: ",
-              "OverlayRef",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.OverlayRef",
+                "text": "OverlayRef"
+              },
               ") => void) | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
@@ -399,7 +429,13 @@
                 "label": "flyout",
                 "description": [],
                 "signature": [
-                  "OverlayRef"
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.OverlayRef",
+                    "text": "OverlayRef"
+                  }
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
                 "deprecated": false,
@@ -438,7 +474,13 @@
             ],
             "signature": [
               "(mount: ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
@@ -448,7 +490,13 @@
                 "text": "OverlayFlyoutOpenOptions"
               },
               " | undefined) => ",
-              "OverlayRef"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.OverlayRef",
+                "text": "OverlayRef"
+              }
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
             "deprecated": false,
@@ -464,7 +512,13 @@
                   "{@link MountPoint } - Mounts the children inside a flyout panel"
                 ],
                 "signature": [
-                  "MountPoint",
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
                   "<HTMLElement>"
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
@@ -741,7 +795,13 @@
             ],
             "signature": [
               "(mount: ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
@@ -751,7 +811,13 @@
                 "text": "OverlayModalOpenOptions"
               },
               " | undefined) => ",
-              "OverlayRef"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.OverlayRef",
+                "text": "OverlayRef"
+              }
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
@@ -767,7 +833,13 @@
                   "{@link MountPoint } - Mounts the children inside the modal"
                 ],
                 "signature": [
-                  "MountPoint",
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
                   "<HTMLElement>"
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
@@ -813,7 +885,13 @@
             ],
             "signature": [
               "(message: string | ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
@@ -839,7 +917,13 @@
                 ],
                 "signature": [
                   "string | ",
-                  "MountPoint",
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
                   "<HTMLElement>"
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
@@ -921,7 +1005,13 @@
             ],
             "signature": [
               "(mount: ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
@@ -931,7 +1021,13 @@
                 "text": "OverlayFlyoutOpenOptions"
               },
               " | undefined) => ",
-              "OverlayRef"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.OverlayRef",
+                "text": "OverlayRef"
+              }
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/overlays.ts",
             "deprecated": false,
@@ -947,7 +1043,13 @@
                 "description": [],
                 "signature": [
                   "(element: HTMLElement) => ",
-                  "UnmountCallback"
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.UnmountCallback",
+                    "text": "UnmountCallback"
+                  }
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
                 "deprecated": false,
@@ -964,7 +1066,7 @@
                     "signature": [
                       "T"
                     ],
-                    "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
+                    "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1004,7 +1106,13 @@
             ],
             "signature": [
               "(mount: ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
@@ -1014,7 +1122,13 @@
                 "text": "OverlayModalOpenOptions"
               },
               " | undefined) => ",
-              "OverlayRef"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.OverlayRef",
+                "text": "OverlayRef"
+              }
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/overlays.ts",
             "deprecated": false,
@@ -1030,7 +1144,13 @@
                 "description": [],
                 "signature": [
                   "(element: HTMLElement) => ",
-                  "UnmountCallback"
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.UnmountCallback",
+                    "text": "UnmountCallback"
+                  }
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
                 "deprecated": false,
@@ -1047,7 +1167,7 @@
                     "signature": [
                       "T"
                     ],
-                    "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
+                    "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1087,7 +1207,13 @@
             ],
             "signature": [
               "(message: string | ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
@@ -1112,7 +1238,13 @@
                 "description": [],
                 "signature": [
                   "string | ",
-                  "MountPoint",
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
                   "<HTMLElement>"
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",

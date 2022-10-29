@@ -209,7 +209,13 @@
             ],
             "signature": [
               "[appId: string, options?: ",
-              "NavigateToAppOptions",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.NavigateToAppOptions",
+                "text": "NavigateToAppOptions"
+              },
               " | undefined] | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
@@ -307,7 +313,13 @@
             ],
             "signature": [
               "[appId: string, options?: ",
-              "NavigateToAppOptions",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.NavigateToAppOptions",
+                "text": "NavigateToAppOptions"
+              },
               " | undefined] | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
@@ -341,7 +353,13 @@
             ],
             "signature": [
               "[appId: string, options?: ",
-              "NavigateToAppOptions",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.NavigateToAppOptions",
+                "text": "NavigateToAppOptions"
+              },
               " | undefined] | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
@@ -359,7 +377,13 @@
             ],
             "signature": [
               "[appId: string, options?: ",
-              "NavigateToAppOptions",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.NavigateToAppOptions",
+                "text": "NavigateToAppOptions"
+              },
               " | undefined] | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
@@ -3550,6 +3574,52 @@
             "label": "settings_edit_fleet_server_hosts",
             "description": [],
             "signature": [
+              "({ itemId }: ",
+              {
+                "pluginId": "fleet",
+                "scope": "public",
+                "docId": "kibFleetPluginApi",
+                "section": "def-public.DynamicPagePathValues",
+                "text": "DynamicPagePathValues"
+              },
+              ") => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.pagePathGetters.settings_edit_fleet_server_hosts.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ itemId }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "public",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-public.DynamicPagePathValues",
+                    "text": "DynamicPagePathValues"
+                  }
+                ],
+                "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.settings_create_fleet_server_hosts",
+            "type": "Function",
+            "tags": [],
+            "label": "settings_create_fleet_server_hosts",
+            "description": [],
+            "signature": [
               "() => [string, string]"
             ],
             "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
@@ -4200,7 +4270,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", id: string, withPackagePolicies?: boolean) => Promise<",
               {
                 "pluginId": "fleet",
@@ -4224,7 +4300,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
@@ -4263,7 +4345,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", options: Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; }) => Promise<{ items: ",
               {
                 "pluginId": "fleet",
@@ -4287,7 +4375,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
@@ -4318,7 +4412,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", id: string, options?: { standalone: boolean; } | undefined) => Promise<",
               {
                 "pluginId": "fleet",
@@ -4342,7 +4442,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
@@ -4384,7 +4490,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", ids: string[], options?: { fields?: string[] | undefined; withPackagePolicies?: boolean | undefined; ignoreMissing?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "fleet",
@@ -4408,7 +4520,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
@@ -4471,7 +4589,13 @@
             ],
             "signature": [
               "(req: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "fleet",
@@ -4493,7 +4617,13 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
@@ -4857,7 +4987,13 @@
             "description": [],
             "signature": [
               "(savedObjectsClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", pkgName: string, datasetPath: string) => Promise<string | undefined>"
             ],
             "path": "x-pack/plugins/fleet/server/services/index.ts",
@@ -4872,7 +5008,13 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/index.ts",
                 "deprecated": false,
@@ -5416,9 +5558,21 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", esClient: ",
-              "ElasticsearchClient",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
               ", packagePolicy: ",
               {
                 "pluginId": "fleet",
@@ -5465,7 +5619,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -5480,7 +5640,13 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "ElasticsearchClient"
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-server.ElasticsearchClient",
+                    "text": "ElasticsearchClient"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -5673,9 +5839,21 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", esClient: ",
-              "ElasticsearchClient",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
               ", packagePolicies: ",
               "NewPackagePolicyWithId",
               "[], options?: { user?: ",
@@ -5708,7 +5886,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -5723,7 +5907,13 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "ElasticsearchClient"
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-server.ElasticsearchClient",
+                    "text": "ElasticsearchClient"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -5820,9 +6010,21 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", esClient: ",
-              "ElasticsearchClient",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
               ", packagePolicyUpdates: (",
               {
                 "pluginId": "fleet",
@@ -5861,7 +6063,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -5876,7 +6084,13 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "ElasticsearchClient"
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-server.ElasticsearchClient",
+                    "text": "ElasticsearchClient"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -5981,7 +6195,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", id: string) => Promise<",
               {
                 "pluginId": "fleet",
@@ -6004,7 +6224,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6038,7 +6264,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", agentPolicyId: string) => Promise<",
               {
                 "pluginId": "fleet",
@@ -6061,7 +6293,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6095,7 +6333,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", ids: string[], options?: { ignoreMissing?: boolean | undefined; } | undefined) => Promise<",
               {
                 "pluginId": "fleet",
@@ -6118,7 +6362,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6179,7 +6429,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", options: ",
               {
                 "pluginId": "fleet",
@@ -6218,7 +6474,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6258,7 +6520,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", options: ",
               {
                 "pluginId": "fleet",
@@ -6289,7 +6557,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6329,9 +6603,21 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", esClient: ",
-              "ElasticsearchClient",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
               ", id: string, packagePolicyUpdate: ",
               {
                 "pluginId": "fleet",
@@ -6370,7 +6656,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6385,7 +6677,13 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "ElasticsearchClient"
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-server.ElasticsearchClient",
+                    "text": "ElasticsearchClient"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6517,9 +6815,21 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", esClient: ",
-              "ElasticsearchClient",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
               ", ids: string[], options?: { user?: ",
               {
                 "pluginId": "security",
@@ -6550,7 +6860,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6565,7 +6881,13 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "ElasticsearchClient"
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-server.ElasticsearchClient",
+                    "text": "ElasticsearchClient"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6661,9 +6983,21 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", esClient: ",
-              "ElasticsearchClient",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
               ", ids: string[], options?: { user?: ",
               {
                 "pluginId": "security",
@@ -6702,7 +7036,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6717,7 +7057,13 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "ElasticsearchClient"
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-server.ElasticsearchClient",
+                    "text": "ElasticsearchClient"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6822,7 +7168,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", id: string, packagePolicy?: ",
               {
                 "pluginId": "fleet",
@@ -6853,7 +7205,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6924,7 +7282,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", newPolicy: ",
               {
                 "pluginId": "fleet",
@@ -6955,7 +7319,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -6995,9 +7365,21 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", pkgName: string, logger?: ",
-              "Logger",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              },
               " | undefined) => Promise<",
               {
                 "pluginId": "fleet",
@@ -7020,7 +7402,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -7050,7 +7438,13 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  "Logger",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.Logger",
+                    "text": "Logger"
+                  },
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
@@ -7094,9 +7488,21 @@
                 "text": "NewPackagePolicy"
               },
               ", context: ",
-              "RequestHandlerContext",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
               ", request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => Promise<A extends \"postPackagePolicyDelete\" ? void : A extends \"packagePolicyPostCreate\" ? ",
               {
                 "pluginId": "fleet",
@@ -7180,7 +7586,13 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "RequestHandlerContext"
+                  {
+                    "pluginId": "@kbn/core-http-request-handler-context-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                    "section": "def-server.RequestHandlerContext",
+                    "text": "RequestHandlerContext"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -7195,7 +7607,13 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
@@ -7261,7 +7679,13 @@
             "description": [],
             "signature": [
               "(soClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", id: string) => Promise<{ packagePolicy: ",
               {
                 "pluginId": "fleet",
@@ -7294,7 +7718,13 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -7342,7 +7772,13 @@
             "description": [],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "fleet",
@@ -7364,7 +7800,13 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
@@ -7471,9 +7913,21 @@
             "text": "NewPackagePolicy"
           },
           ", context: ",
-          "RequestHandlerContext",
+          {
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-server.RequestHandlerContext",
+            "text": "RequestHandlerContext"
+          },
           ", request: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>) => Promise<",
           {
             "pluginId": "fleet",
@@ -7517,7 +7971,13 @@
             "label": "context",
             "description": [],
             "signature": [
-              "RequestHandlerContext"
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              }
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
             "deprecated": false,
@@ -7531,7 +7991,13 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
@@ -7609,9 +8075,21 @@
             "text": "PackagePolicy"
           },
           ", context: ",
-          "RequestHandlerContext",
+          {
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-server.RequestHandlerContext",
+            "text": "RequestHandlerContext"
+          },
           ", request: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>) => Promise<",
           {
             "pluginId": "fleet",
@@ -7655,7 +8133,13 @@
             "label": "context",
             "description": [],
             "signature": [
-              "RequestHandlerContext"
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              }
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
             "deprecated": false,
@@ -7669,7 +8153,13 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
@@ -7696,9 +8186,21 @@
             "text": "UpdatePackagePolicy"
           },
           ", context: ",
-          "RequestHandlerContext",
+          {
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-server.RequestHandlerContext",
+            "text": "RequestHandlerContext"
+          },
           ", request: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>) => Promise<",
           {
             "pluginId": "fleet",
@@ -7742,7 +8244,13 @@
             "label": "context",
             "description": [],
             "signature": [
-              "RequestHandlerContext"
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              }
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
             "deprecated": false,
@@ -7756,7 +8264,13 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
@@ -7824,7 +8338,13 @@
           "description": [],
           "signature": [
             "{ fromRequest(request: ",
-            "KibanaRequest",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
             "<unknown, unknown, unknown, any>): Promise<",
             {
               "pluginId": "fleet",
@@ -10734,7 +11254,13 @@
             "text": "Installation"
           },
           " extends ",
-          "SavedObjectAttributes"
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          }
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -11154,7 +11680,13 @@
             "text": "ListWithKuery"
           },
           " extends ",
-          "HttpFetchQuery"
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpFetchQuery",
+            "text": "HttpFetchQuery"
+          }
         ],
         "path": "x-pack/plugins/fleet/common/types/rest_spec/common.ts",
         "deprecated": false,
@@ -11426,6 +11958,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "download_source_id",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.fleet_server_host_id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fleet_server_host_id",
             "description": [],
             "signature": [
               "string | null | undefined"
@@ -14312,7 +14858,13 @@
         "description": [],
         "signature": [
           "Pick<",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           ", \"id\"> & { type: ",
           {
             "pluginId": "fleet",
@@ -14690,7 +15242,13 @@
         "description": [],
         "signature": [
           "T & { status: \"installed\"; savedObject: ",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "fleet",
@@ -14730,7 +15288,13 @@
         "description": [],
         "signature": [
           "T & { status: \"installing\"; savedObject: ",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "fleet",
@@ -14815,7 +15379,13 @@
         "description": [],
         "signature": [
           "Pick<",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           ", \"id\"> & { type: ",
           {
             "pluginId": "fleet",
@@ -15030,7 +15600,13 @@
         "description": [],
         "signature": [
           "Pick<",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           ", \"id\"> & { type: \"epm-packages-assets\"; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",

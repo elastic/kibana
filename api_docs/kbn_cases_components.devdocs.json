@@ -27,7 +27,7 @@
         "label": "getStatusConfiguration",
         "description": [],
         "signature": [
-          "() => { open: { color: string; label: string; icon: \"folderOpen\"; }; \"in-progress\": { color: string; label: string; icon: \"folderExclamation\"; }; closed: { color: string; label: string; icon: \"folderCheck\"; }; }"
+          "() => { open: { color: string; label: any; icon: \"folderOpen\"; }; \"in-progress\": { color: string; label: any; icon: \"folderExclamation\"; }; closed: { color: string; label: any; icon: \"folderCheck\"; }; }"
         ],
         "path": "packages/kbn-cases-components/src/status/config.ts",
         "deprecated": false,

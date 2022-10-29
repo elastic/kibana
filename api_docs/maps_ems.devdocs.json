@@ -433,7 +433,13 @@
             "text": "MapsEmsPlugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "server",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-server.Plugin",
+            "text": "Plugin"
+          },
           "<",
           {
             "pluginId": "mapsEms",
@@ -456,7 +462,13 @@
             "label": "_initializerContext",
             "description": [],
             "signature": [
-              "PluginInitializerContext",
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.PluginInitializerContext",
+                "text": "PluginInitializerContext"
+              },
               "<Readonly<{} & { tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; includeElasticMapsService: boolean; emsUrl: string; emsFileApiUrl: string; emsTileApiUrl: string; emsLandingPageUrl: string; emsFontLibraryUrl: string; emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }>>"
             ],
             "path": "src/plugins/maps_ems/server/index.ts",
@@ -485,7 +497,13 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  "PluginInitializerContext",
+                  {
+                    "pluginId": "@kbn/core-plugins-server",
+                    "scope": "server",
+                    "docId": "kibKbnCorePluginsServerPluginApi",
+                    "section": "def-server.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
                   "<Readonly<{} & { tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; includeElasticMapsService: boolean; emsUrl: string; emsFileApiUrl: string; emsTileApiUrl: string; emsLandingPageUrl: string; emsFontLibraryUrl: string; emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }>>"
                 ],
                 "path": "src/plugins/maps_ems/server/index.ts",
@@ -505,7 +523,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>, plugins: MapsEmsSetupServerDependencies) => { config: Readonly<{} & { tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; includeElasticMapsService: boolean; emsUrl: string; emsFileApiUrl: string; emsTileApiUrl: string; emsLandingPageUrl: string; emsFontLibraryUrl: string; emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }>; createEMSSettings: () => ",
               {
                 "pluginId": "mapsEms",
@@ -528,7 +552,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/maps_ems/server/index.ts",

@@ -20,7 +20,13 @@
         "description": [],
         "signature": [
           "() => ",
-          "ConfigDeprecation",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecation",
+            "text": "ConfigDeprecation"
+          },
           "[]"
         ],
         "path": "packages/core/config/core-config-server-internal/src/deprecation/core_deprecations.ts",

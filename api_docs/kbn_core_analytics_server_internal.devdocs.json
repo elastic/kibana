@@ -62,7 +62,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "AnalyticsServicePreboot"
+              {
+                "pluginId": "@kbn/core-analytics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreAnalyticsServerPluginApi",
+                "section": "def-server.AnalyticsServicePreboot",
+                "text": "AnalyticsServicePreboot"
+              }
             ],
             "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
             "deprecated": false,
@@ -79,7 +85,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "AnalyticsServiceSetup"
+              {
+                "pluginId": "@kbn/core-analytics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreAnalyticsServerPluginApi",
+                "section": "def-server.AnalyticsServiceSetup",
+                "text": "AnalyticsServiceSetup"
+              }
             ],
             "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
             "deprecated": false,
@@ -96,7 +108,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "AnalyticsServiceStart"
+              {
+                "pluginId": "@kbn/core-analytics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreAnalyticsServerPluginApi",
+                "section": "def-server.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              }
             ],
             "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
             "deprecated": false,

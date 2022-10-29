@@ -34,7 +34,13 @@
             "text": "UiSettingsClient"
           },
           " implements ",
-          "IUiSettingsClient"
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-common.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          }
         ],
         "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
         "deprecated": false,
@@ -81,9 +87,21 @@
             "description": [],
             "signature": [
               "() => Record<string, ",
-              "PublicUiSettingsParams",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.PublicUiSettingsParams",
+                "text": "PublicUiSettingsParams"
+              },
               " & ",
-              "UserProvidedValues",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UserProvidedValues",
+                "text": "UserProvidedValues"
+              },
               "<any>>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",

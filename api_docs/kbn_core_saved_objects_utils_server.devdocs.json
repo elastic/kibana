@@ -1601,9 +1601,21 @@
             ],
             "signature": [
               "<T, A>({ page, perPage, }: ",
-              "SavedObjectsFindOptions",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsFindOptions",
+                "text": "SavedObjectsFindOptions"
+              },
               ") => ",
-              "SavedObjectsFindResponse",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsFindResponse",
+                "text": "SavedObjectsFindResponse"
+              },
               "<T, A>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
@@ -1618,7 +1630,13 @@
                 "label": "{\n    page = FIND_DEFAULT_PAGE,\n    perPage = FIND_DEFAULT_PER_PAGE,\n  }",
                 "description": [],
                 "signature": [
-                  "SavedObjectsFindOptions"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsFindOptions",
+                    "text": "SavedObjectsFindOptions"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
                 "deprecated": false,
@@ -1772,11 +1790,29 @@
         ],
         "signature": [
           "(map1: ",
-          "SavedObjectMigrationMap",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          },
           ", map2: ",
-          "SavedObjectMigrationMap",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          },
           ") => ",
-          "SavedObjectMigrationMap"
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          }
         ],
         "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
         "deprecated": false,
@@ -1790,7 +1826,13 @@
             "label": "map1",
             "description": [],
             "signature": [
-              "SavedObjectMigrationMap"
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectMigrationMap",
+                "text": "SavedObjectMigrationMap"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
             "deprecated": false,
@@ -1805,7 +1847,13 @@
             "label": "map2",
             "description": [],
             "signature": [
-              "SavedObjectMigrationMap"
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectMigrationMap",
+                "text": "SavedObjectMigrationMap"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
             "deprecated": false,

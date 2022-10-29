@@ -187,9 +187,21 @@
         ],
         "signature": [
           "(headers: ",
-          "Headers",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.Headers",
+            "text": "Headers"
+          },
           ", logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           ", compressOverride: boolean | undefined, flushFix: boolean | undefined) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
@@ -206,7 +218,13 @@
               "- Request headers."
             ],
             "signature": [
-              "Headers"
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.Headers",
+                "text": "Headers"
+              }
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,
@@ -223,7 +241,13 @@
               "- Kibana logger."
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,
@@ -281,9 +305,21 @@
         ],
         "signature": [
           "(headers: ",
-          "Headers",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.Headers",
+            "text": "Headers"
+          },
           ", logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           ", compressOverride: boolean, flushFix: boolean) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
@@ -300,7 +336,13 @@
               "- Request headers."
             ],
             "signature": [
-              "Headers"
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.Headers",
+                "text": "Headers"
+              }
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,
@@ -317,7 +359,13 @@
               "- Kibana logger."
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,

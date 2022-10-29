@@ -11,7 +11,36 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-node-server-internal",
+        "id": "def-server.PrebootDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrebootDeps",
+        "description": [],
+        "path": "packages/core/node/core-node-server-internal/src/node_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-node-server-internal",
+            "id": "def-server.PrebootDeps.loggingSystem",
+            "type": "Object",
+            "tags": [],
+            "label": "loggingSystem",
+            "description": [],
+            "signature": [
+              "ILoggingSystem"
+            ],
+            "path": "packages/core/node/core-node-server-internal/src/node_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [
@@ -48,9 +77,21 @@
             "label": "schema",
             "description": [],
             "signature": [
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<{ roles: ",
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<\"*\"[] | (\"ui\" | \"background_tasks\")[]>; }>"
             ],
             "path": "packages/core/node/core-node-server-internal/src/node_config.ts",

@@ -73,7 +73,13 @@
         ],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
-          "TableListViewKibanaDependencies",
+          {
+            "pluginId": "@kbn/content-management-table-list",
+            "scope": "common",
+            "docId": "kibKbnContentManagementTableListPluginApi",
+            "section": "def-common.TableListViewKibanaDependencies",
+            "text": "TableListViewKibanaDependencies"
+          },
           ">) => JSX.Element"
         ],
         "path": "packages/content-management/table_list/src/services.tsx",
@@ -89,7 +95,13 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "TableListViewKibanaDependencies",
+              {
+                "pluginId": "@kbn/content-management-table-list",
+                "scope": "common",
+                "docId": "kibKbnContentManagementTableListPluginApi",
+                "section": "def-common.TableListViewKibanaDependencies",
+                "text": "TableListViewKibanaDependencies"
+              },
               ">"
             ],
             "path": "packages/content-management/table_list/src/services.tsx",
@@ -142,6 +154,144 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-management-table-list",
+        "id": "def-common.TableListViewKibanaDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "TableListViewKibanaDependencies",
+        "description": [
+          "\nKibana-specific service types."
+        ],
+        "path": "packages/content-management/table_list/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.TableListViewKibanaDependencies.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [
+              "CoreStart contract"
+            ],
+            "signature": [
+              "{ application: { capabilities: { advancedSettings?: { save: boolean; } | undefined; }; getUrlForApp: (app: string, options: { path: string; }) => string; currentAppId$: ",
+              "Observable",
+              "<string | undefined>; navigateToUrl: (url: string) => void | Promise<void>; }; notifications: { toasts: { addDanger: (notifyArgs: { title: MountPoint; text?: string | undefined; }) => void; }; }; }"
+            ],
+            "path": "packages/content-management/table_list/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.TableListViewKibanaDependencies.toMountPoint",
+            "type": "Function",
+            "tags": [],
+            "label": "toMountPoint",
+            "description": [
+              "\nHandler from the '@kbn/kibana-react-plugin/public' Plugin\n\n```\nimport { toMountPoint } from '@kbn/kibana-react-plugin/public';\n```"
+            ],
+            "signature": [
+              "(node: React.ReactNode, options?: { theme$: ",
+              "Observable",
+              "<{ readonly darkMode: boolean; }>; } | undefined) => MountPoint"
+            ],
+            "path": "packages/content-management/table_list/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-table-list",
+                "id": "def-common.TableListViewKibanaDependencies.toMountPoint.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "React.ReactNode"
+                ],
+                "path": "packages/content-management/table_list/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-table-list",
+                "id": "def-common.TableListViewKibanaDependencies.toMountPoint.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "packages/content-management/table_list/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/content-management-table-list",
+                    "id": "def-common.TableListViewKibanaDependencies.toMountPoint.$2.theme$",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "theme$",
+                    "description": [],
+                    "signature": [
+                      "Observable",
+                      "<{ readonly darkMode: boolean; }>"
+                    ],
+                    "path": "packages/content-management/table_list/src/services.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.TableListViewKibanaDependencies.savedObjectsTagging",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsTagging",
+            "description": [
+              "\nThe public API from the savedObjectsTaggingOss plugin.\nIt is returned by calling `getTaggingApi()` from the SavedObjectTaggingOssPluginStart\n\n```js\nconst savedObjectsTagging = savedObjectsTaggingOss?.getTaggingApi()\n```"
+            ],
+            "signature": [
+              "{ ui: { components: { TagList: React.FC<{ object: { references: ",
+              "SavedObjectsReference",
+              "[]; }; onClick?: ((tag: { name: string; description: string; color: string; }) => void) | undefined; }>; }; parseSearchQuery: (query: string, options?: { useName?: boolean | undefined; tagField?: string | undefined; } | undefined) => { searchTerm: string; tagReferences: ",
+              "SavedObjectsFindOptionsReference",
+              "[]; valid: boolean; }; getSearchBarFilter: (options?: { useName?: boolean | undefined; tagField?: string | undefined; } | undefined) => ",
+              "SearchFilterConfig",
+              "; getTagIdsFromReferences: (references: ",
+              "SavedObjectsReference",
+              "[]) => string[]; }; } | undefined"
+            ],
+            "path": "packages/content-management/table_list/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.TableListViewKibanaDependencies.FormattedRelative",
+            "type": "Object",
+            "tags": [],
+            "label": "FormattedRelative",
+            "description": [
+              "The <FormattedRelative /> component from the @kbn/i18n-react package"
+            ],
+            "signature": [
+              "typeof ReactIntl.FormattedRelative"
+            ],
+            "path": "packages/content-management/table_list/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/content-management-table-list",
         "id": "def-common.UserContentCommonSchema",

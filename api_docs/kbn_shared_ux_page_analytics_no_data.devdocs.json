@@ -182,7 +182,7 @@
         "description": [
           "\nProps for the `AnalyticsNoDataPage` component."
         ],
-        "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,7 +198,7 @@
             "signature": [
               "(dataView: unknown) => void"
             ],
-            "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -212,7 +212,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+                "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -246,7 +246,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -271,7 +271,7 @@
           " & ",
           "NoDataViewsPromptServices"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

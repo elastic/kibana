@@ -141,7 +141,7 @@
             "section": "def-public.SavedSearch",
             "text": "SavedSearch"
           },
-          ") => Promise<string>"
+          ") => Promise<any>"
         ],
         "path": "src/plugins/saved_search/public/services/saved_searches/saved_searches_utils.ts",
         "deprecated": false,
@@ -517,7 +517,13 @@
                 "text": "SerializedSearchSourceFields"
               },
               "; serialize: () => { searchSourceJSON: string; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]; }; toExpressionAst: ({ asDatatable }?: ExpressionAstOptions) => ",
               {
                 "pluginId": "expressions",

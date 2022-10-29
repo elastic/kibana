@@ -166,7 +166,13 @@
                 "text": "SavedObjectsImportOptions"
               },
               ") => Promise<",
-              "SavedObjectsImportResponse",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportResponse",
+                "text": "SavedObjectsImportResponse"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
@@ -218,7 +224,13 @@
                 "text": "SavedObjectsResolveImportErrorsOptions"
               },
               ") => Promise<",
-              "SavedObjectsImportResponse",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportResponse",
+                "text": "SavedObjectsImportResponse"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
@@ -1033,7 +1045,13 @@
               "The http request initiating the export."
             ],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
@@ -1290,7 +1308,13 @@
             "label": "client",
             "description": [],
             "signature": [
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
             "deprecated": false,
@@ -1324,7 +1348,13 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
@@ -1374,7 +1404,13 @@
               "optional array of objects to export."
             ],
             "signature": [
-              "SavedObjectTypeIdTuple",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectTypeIdTuple",
+                "text": "SavedObjectTypeIdTuple"
+              },
               "[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
@@ -1440,7 +1476,13 @@
               "optional array of references to search object for."
             ],
             "signature": [
-              "SavedObjectsFindOptionsReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsFindOptionsReference",
+                "text": "SavedObjectsFindOptionsReference"
+              },
               "[] | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
@@ -1571,7 +1613,13 @@
               "missing references details"
             ],
             "signature": [
-              "SavedObjectTypeIdTuple",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectTypeIdTuple",
+                "text": "SavedObjectTypeIdTuple"
+              },
               "[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
@@ -1640,7 +1688,13 @@
               "\nThe request that initiated the export request. Can be used to create scoped\nservices or client inside the {@link SavedObjectsExportTransform | transformation}"
             ],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
@@ -1673,7 +1727,13 @@
               "\nAn optional list of warnings to display in the UI when the import succeeds."
             ],
             "signature": [
-              "SavedObjectsImportWarning",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportWarning",
+                "text": "SavedObjectsImportWarning"
+              },
               "[] | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
@@ -1901,7 +1961,28 @@
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
-            "references": [],
+            "references": [
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/server/saved_objects/saved_object_migrations.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_to_730/migrations_730.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_to_730/migrations_730.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migration_logger.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server",
@@ -1962,9 +2043,21 @@
             "description": [],
             "signature": [
               "<Meta extends ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               " = ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               ">(msg: string, meta: Meta) => void"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
@@ -2172,7 +2265,13 @@
             "label": "migrationVersion",
             "description": [],
             "signature": [
-              "SavedObjectsMigrationVersion",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsMigrationVersion",
+                "text": "SavedObjectsMigrationVersion"
+              },
               " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
@@ -2215,7 +2314,13 @@
             "label": "references",
             "description": [],
             "signature": [
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[] | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
@@ -2277,9 +2382,21 @@
             ],
             "signature": [
               "(req: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => ",
-              "ISavedObjectsRepository"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
             "deprecated": false,
@@ -2293,7 +2410,13 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
@@ -2332,7 +2455,13 @@
             ],
             "signature": [
               "(includedHiddenTypes?: string[] | undefined) => ",
-              "ISavedObjectsRepository"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
             "deprecated": false,
@@ -2382,7 +2511,13 @@
             "label": "client",
             "description": [],
             "signature": [
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
             "deprecated": false,
@@ -2425,7 +2560,13 @@
                 "text": "SavedObjectsClientProviderOptions"
               },
               " | undefined) => ",
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
             "deprecated": false,
@@ -2465,7 +2606,13 @@
             "description": [],
             "signature": [
               "(client: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ") => ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -2487,7 +2634,13 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
                 "deprecated": false,
@@ -2506,7 +2659,13 @@
             "description": [],
             "signature": [
               "(client: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ") => ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -2528,7 +2687,13 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
                 "deprecated": false,
@@ -2580,7 +2745,13 @@
               "saved object import references to retry"
             ],
             "signature": [
-              "SavedObjectsImportRetry",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportRetry",
+                "text": "SavedObjectsImportRetry"
+              },
               "[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
@@ -2852,7 +3023,13 @@
             ],
             "signature": [
               "(req: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -2862,7 +3039,13 @@
                 "text": "SavedObjectsClientProviderOptions"
               },
               " | undefined) => ",
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
             "deprecated": false,
@@ -2876,7 +3059,13 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
@@ -2920,9 +3109,21 @@
             ],
             "signature": [
               "(req: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => ",
-              "ISavedObjectsRepository"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
             "deprecated": false,
@@ -2938,7 +3139,13 @@
                   "- The request to create the scoped repository from."
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
@@ -2977,7 +3184,13 @@
             ],
             "signature": [
               "(includedHiddenTypes?: string[] | undefined) => ",
-              "ISavedObjectsRepository"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
             "deprecated": false,
@@ -3039,7 +3252,13 @@
             ],
             "signature": [
               "(client: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ") => ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -3061,7 +3280,13 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
                 "deprecated": false,
@@ -3082,7 +3307,13 @@
             ],
             "signature": [
               "(client: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ") => ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -3104,7 +3335,13 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
                 "deprecated": false,
@@ -3530,7 +3767,13 @@
             ],
             "signature": [
               "((savedObject: ",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<Attributes>) => string) | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
@@ -3545,7 +3788,13 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
                   "<Attributes>"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
@@ -3567,7 +3816,13 @@
             ],
             "signature": [
               "((savedObject: ",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<Attributes>) => string) | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
@@ -3582,7 +3837,13 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
                   "<Attributes>"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
@@ -3604,7 +3865,13 @@
             ],
             "signature": [
               "((savedObject: ",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<Attributes>) => { path: string; uiCapabilitiesPath: string; }) | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
@@ -3619,7 +3886,13 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
                   "<Attributes>"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
@@ -3806,7 +4079,13 @@
         "label": "CreatedObject",
         "description": [],
         "signature": [
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<T> & { destinationId?: string | undefined; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
@@ -3864,7 +4143,13 @@
             "description": [],
             "signature": [
               "SavedObjectDoc<InputAttributes> & { references?: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[] | undefined; }"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
@@ -3905,7 +4190,13 @@
         ],
         "signature": [
           "SavedObjectDoc<T> & { references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           "[]; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
@@ -3924,9 +4215,21 @@
         ],
         "signature": [
           "({ request, includedHiddenTypes, }: { request: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; }) => ",
-          "SavedObjectsClientContract"
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          }
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
         "deprecated": false,
@@ -3942,7 +4245,13 @@
             "description": [],
             "signature": [
               "{ request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; }"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
@@ -4026,7 +4335,13 @@
             "text": "SavedObjectsClientWrapperOptions"
           },
           ") => ",
-          "SavedObjectsClientContract"
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          }
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
         "deprecated": false,
@@ -4065,7 +4380,13 @@
         "description": [],
         "signature": [
           "(obj: ",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<Attributes>) => boolean"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
@@ -4081,7 +4402,13 @@
             "label": "obj",
             "description": [],
             "signature": [
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<Attributes>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
@@ -4110,11 +4437,29 @@
             "text": "SavedObjectsExportTransformContext"
           },
           ", objects: ",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<T>[]) => ",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<unknown>[] | Promise<",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<unknown>[]>"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
@@ -4150,7 +4495,13 @@
             "label": "objects",
             "description": [],
             "signature": [
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<T>[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
@@ -4191,7 +4542,13 @@
         ],
         "signature": [
           "(objects: ",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<T>[]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
@@ -4223,7 +4580,13 @@
             "label": "objects",
             "description": [],
             "signature": [
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<T>[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
@@ -4243,7 +4606,13 @@
           "\nAllows for validating properties using @kbn/config-schema validations.\n"
         ],
         "signature": [
-          "ObjectType",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ObjectType",
+            "text": "ObjectType"
+          },
           "<any>"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/validation.ts",
@@ -4264,9 +4633,21 @@
         ],
         "signature": [
           "(toolkit: { readonlyEsClient: Pick<",
-          "ElasticsearchClient",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
           ", \"search\">; }) => ",
-          "MaybePromise",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.MaybePromise",
+            "text": "MaybePromise"
+          },
           "<",
           "QueryDslQueryContainer",
           ">"
@@ -4285,7 +4666,13 @@
             "description": [],
             "signature": [
               "{ readonlyEsClient: Pick<",
-              "ElasticsearchClient",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
               ", \"search\">; }"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
@@ -4306,7 +4693,13 @@
         ],
         "signature": [
           "SavedObjectDoc<T> & { references?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           "[] | undefined; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",

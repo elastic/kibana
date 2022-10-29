@@ -18,7 +18,13 @@
             "text": "Plugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
           "<",
           {
             "pluginId": "actions",
@@ -55,7 +61,13 @@
                 "label": "ctx",
                 "description": [],
                 "signature": [
-                  "PluginInitializerContext",
+                  {
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
                   "<",
                   "Config",
                   ">"
@@ -527,7 +539,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
@@ -880,7 +898,13 @@
         "description": [],
         "signature": [
           "(source: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>) => ",
           "HttpRequestExecutionSource"
         ],
@@ -896,7 +920,13 @@
             "label": "source",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
@@ -917,7 +947,13 @@
         "description": [],
         "signature": [
           "(source: Omit<",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           ", \"name\">) => ",
           "SavedObjectExecutionSource"
         ],
@@ -934,7 +970,13 @@
             "description": [],
             "signature": [
               "Omit<",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               ", \"name\">"
             ],
             "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
@@ -1493,7 +1535,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
@@ -1773,7 +1821,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
@@ -2294,9 +2348,21 @@
           "description": [],
           "signature": [
             "(request: ",
-            "KibanaRequest",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
             "<unknown, unknown, unknown, any>) => Promise<",
-            "PublicMethodsOf",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "server",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-server.PublicMethodsOf",
+              "text": "PublicMethodsOf"
+            },
             "<",
             {
               "pluginId": "actions",
@@ -2319,7 +2385,13 @@
               "label": "request",
               "description": [],
               "signature": [
-                "KibanaRequest",
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
@@ -2339,9 +2411,21 @@
           "description": [],
           "signature": [
             "(request: ",
-            "KibanaRequest",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
             "<unknown, unknown, unknown, any>) => ",
-            "PublicMethodsOf",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "server",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-server.PublicMethodsOf",
+              "text": "PublicMethodsOf"
+            },
             "<",
             {
               "pluginId": "actions",
@@ -2364,7 +2448,13 @@
               "label": "request",
               "description": [],
               "signature": [
-                "KibanaRequest",
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
@@ -3644,10 +3734,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.AlertingConnectorFeature.name",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "name",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3655,10 +3748,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.AlertingConnectorFeature.compatibility",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "compatibility",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3691,10 +3787,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.CasesConnectorFeature.name",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "name",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3702,10 +3801,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.CasesConnectorFeature.compatibility",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "compatibility",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3753,10 +3855,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.SecuritySolutionFeature.name",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "name",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3764,10 +3869,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.SecuritySolutionFeature.compatibility",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "compatibility",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3800,10 +3908,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.UptimeConnectorFeature.name",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "name",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3811,10 +3922,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.UptimeConnectorFeature.compatibility",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "compatibility",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false

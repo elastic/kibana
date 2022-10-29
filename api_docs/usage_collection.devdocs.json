@@ -1547,7 +1547,13 @@
               "\nRequest-scoped Saved Objects client"
             ],
             "signature": [
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false,
@@ -1589,7 +1595,13 @@
               "Logger"
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false,
@@ -1894,7 +1906,7 @@
         "signature": [
           "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"byte\" | \"float\" | \"integer\""
         ],
-        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2085,7 +2097,13 @@
           "\nThe structure of the SavedObjects of type \"usage-counters\""
         ],
         "signature": [
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "usageCollection",

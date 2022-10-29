@@ -1466,7 +1466,9 @@
           "ConditionalTypeValue",
           ", B, C>(leftOperand: ",
           "Reference",
-          "<A>, rightOperand: ",
+          "<A>, rightOperand: A | ",
+          "Reference",
+          "<A> | ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "server",
@@ -1474,9 +1476,7 @@
             "section": "def-server.Type",
             "text": "Type"
           },
-          "<unknown> | A | ",
-          "Reference",
-          "<A>, equalType: ",
+          "<unknown>, equalType: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "server",
@@ -2521,7 +2521,9 @@
               "ConditionalTypeValue",
               ", B, C>(leftOperand: ",
               "Reference",
-              "<A>, rightOperand: ",
+              "<A>, rightOperand: A | ",
+              "Reference",
+              "<A> | ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "server",
@@ -2529,9 +2531,7 @@
                 "section": "def-server.Type",
                 "text": "Type"
               },
-              "<unknown> | A | ",
-              "Reference",
-              "<A>, equalType: ",
+              "<unknown>, equalType: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "server",
@@ -2587,6 +2587,9 @@
                 "label": "rightOperand",
                 "description": [],
                 "signature": [
+                  "A | ",
+                  "Reference",
+                  "<A> | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "server",
@@ -2594,9 +2597,7 @@
                     "section": "def-server.Type",
                     "text": "Type"
                   },
-                  "<unknown> | A | ",
-                  "Reference",
-                  "<A>"
+                  "<unknown>"
                 ],
                 "path": "packages/kbn-config-schema/index.ts",
                 "deprecated": false,

@@ -769,7 +769,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }>"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
@@ -2252,7 +2258,13 @@
             "text": "DataLayerArgs"
           },
           ", \"palette\"> & { type: \"dataLayer\"; layerType: \"data\"; palette: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<{ [key: string]: unknown; }>; table: ",
           {
             "pluginId": "expressions",
@@ -2286,7 +2298,13 @@
             "text": "DataLayerArgs"
           },
           ", \"palette\"> & { type: \"dataLayer\"; layerType: \"data\"; palette: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<{ [key: string]: unknown; }>; table: ",
           {
             "pluginId": "expressions",
@@ -2328,7 +2346,13 @@
           "Omit<",
           "ExtendedDataLayerArgs",
           ", \"palette\"> & { type: \"extendedDataLayer\"; layerType: \"data\"; palette: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<{ [key: string]: unknown; }>; table: ",
           {
             "pluginId": "expressions",

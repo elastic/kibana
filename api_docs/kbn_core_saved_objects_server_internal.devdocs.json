@@ -30,7 +30,13 @@
           "<",
           "InternalSavedObjectsServiceSetup",
           ", ",
-          "SavedObjectsServiceStart",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsServiceStart",
+            "text": "SavedObjectsServiceStart"
+          },
           ">"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
@@ -116,7 +122,13 @@
               "({ elasticsearch, pluginsInitialized, docLinks, }: ",
               "SavedObjectsStartDeps",
               ") => Promise<",
-              "SavedObjectsServiceStart",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsServiceStart",
+                "text": "SavedObjectsServiceStart"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
@@ -775,7 +787,13 @@
           ", { kibanaVersion, coreUsageData, logger, }: { kibanaVersion: string; coreUsageData: ",
           "InternalCoreUsageDataSetup",
           "; logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; }) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/export.ts",
@@ -841,7 +859,13 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  "Logger"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.Logger",
+                    "text": "Logger"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/export.ts",
                 "deprecated": false,
@@ -866,7 +890,13 @@
           ", { maxImportPayloadBytes, coreUsageData, logger, }: { maxImportPayloadBytes: number; coreUsageData: ",
           "InternalCoreUsageDataSetup",
           "; logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; }) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts",
@@ -932,7 +962,13 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  "Logger"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.Logger",
+                    "text": "Logger"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts",
                 "deprecated": false,
@@ -1160,7 +1196,13 @@
         "label": "InternalSavedObjectsServiceStart",
         "description": [],
         "signature": [
-          "SavedObjectsServiceStart"
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsServiceStart",
+            "text": "SavedObjectsServiceStart"
+          }
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
         "deprecated": false,

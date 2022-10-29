@@ -18,7 +18,13 @@
             "text": "NavigationPublicPlugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
           "<",
           {
             "pluginId": "navigation",
@@ -63,7 +69,13 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  "PluginInitializerContext",
+                  {
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
                   "<object>"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
@@ -83,7 +95,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>) => ",
               {
                 "pluginId": "navigation",
@@ -105,7 +123,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
@@ -125,7 +149,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
               ", { unifiedSearch }: ",
               "NavigationPluginStartDependencies",
               ") => ",
@@ -149,7 +179,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
@@ -673,7 +709,13 @@
             "text": "UnifiedSearchPublicPluginStart"
           },
           " | undefined; className?: string | undefined; visible?: boolean | undefined; setMenuMountPoint?: ((menuMount: ",
-          "MountPoint",
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-common.MountPoint",
+            "text": "MountPoint"
+          },
           "<HTMLElement> | undefined) => void) | undefined; }"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
@@ -759,7 +801,13 @@
               "text": "TopNavMenuProps"
             },
             "<",
-            "Query",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.Query",
+              "text": "Query"
+            },
             ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; AggregateQueryTopNavMenu: (props: ",
             {
               "pluginId": "navigation",
@@ -769,7 +817,13 @@
               "text": "TopNavMenuProps"
             },
             "<",
-            "AggregateQuery",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.AggregateQuery",
+              "text": "AggregateQuery"
+            },
             ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
           ],
           "path": "src/plugins/navigation/public/types.ts",

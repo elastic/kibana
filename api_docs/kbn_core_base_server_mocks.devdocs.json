@@ -35,13 +35,31 @@
             "description": [],
             "signature": [
               "({ env, logger, configService, }?: { env?: ",
-              "Env",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.Env",
+                "text": "Env"
+              },
               " | undefined; logger?: jest.Mocked<",
-              "LoggerFactory",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LoggerFactory",
+                "text": "LoggerFactory"
+              },
               "> | undefined; configService?: jest.Mocked<",
               "IConfigService",
               "> | undefined; }) => ",
-              "DeeplyMockedKeys",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-server.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
+              },
               "<",
               "CoreContext",
               ">"
@@ -60,9 +78,21 @@
                 "description": [],
                 "signature": [
                   "{ env?: ",
-                  "Env",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "server",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-server.Env",
+                    "text": "Env"
+                  },
                   " | undefined; logger?: jest.Mocked<",
-                  "LoggerFactory",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.LoggerFactory",
+                    "text": "LoggerFactory"
+                  },
                   "> | undefined; configService?: jest.Mocked<",
                   "IConfigService",
                   "> | undefined; }"
