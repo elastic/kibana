@@ -67,8 +67,8 @@ export const useAdHocDataViews = ({
         toDataView: newDataView.id,
         usedDataViews: [],
       } as ActionExecutionContext);
-
-      stateContainer.replaceUrlAppState({ index: newDataView.id });
+      stateContainer.actions.setDataView(newDataView);
+      await stateContainer.replaceUrlAppState({ index: newDataView.id });
       setUrlTracking(newDataView);
       return newDataView;
     },

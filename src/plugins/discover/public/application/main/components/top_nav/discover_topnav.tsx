@@ -21,7 +21,7 @@ import { onSaveSearch } from './on_save_search';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
-  'dataView' | 'navigateTo' | 'savedSearch' | 'searchSource'
+  'navigateTo' | 'savedSearch' | 'searchSource'
 > & {
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
@@ -41,7 +41,6 @@ export type DiscoverTopNavProps = Pick<
 };
 
 export const DiscoverTopNav = ({
-  dataView,
   onOpenInspector,
   query,
   savedQuery,
@@ -60,6 +59,7 @@ export const DiscoverTopNav = ({
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const adHocDataViewList = useInternalStateSelector((state) => state.dataViewsAdHoc);
+  const dataView = useInternalStateSelector((state) => state.dataView!);
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,

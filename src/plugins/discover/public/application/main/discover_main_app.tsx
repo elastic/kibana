@@ -50,7 +50,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   const {
     data$,
-    dataView,
     inspectorAdapters,
     onChangeDataView,
     onUpdateQuery,
@@ -101,7 +100,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   return (
     <DiscoverMainProvider value={stateContainer}>
       <DiscoverLayoutMemoized
-        dataView={dataView}
         inspectorAdapters={inspectorAdapters}
         expandedDoc={expandedDoc}
         onChangeDataView={onChangeDataView}

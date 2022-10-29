@@ -56,13 +56,16 @@ export function DiscoverMainRoute(props: Props) {
     dataViewEditor,
   } = services;
   const [error, setError] = useState<Error>();
+  const [loading, setLoading] = useState(true);
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
-  const dataView = savedSearch?.searchSource?.getField('index');
   const [dataViewList, setDataViewList] = useState<DataViewListItem[]>([]);
   const [hasESData, setHasESData] = useState(false);
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const { id } = useParams<DiscoverLandingParams>();
+  useEffect(() => {
+    setLoading(true);
+  }, [id]);
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -160,6 +163,7 @@ export function DiscoverMainRoute(props: Props) {
           currentSavedSearch.id
         );
       }
+      setLoading(false);
     } catch (e) {
       if (e instanceof DataViewSavedObjectConflictError) {
         setError(e);
@@ -202,6 +206,7 @@ export function DiscoverMainRoute(props: Props) {
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
       if (nextDataView) {
+        setLoading(true);
         setShowNoDataPage(false);
         setError(undefined);
         await loadSavedSearch();
@@ -250,7 +255,7 @@ export function DiscoverMainRoute(props: Props) {
     return <DiscoverError error={error} />;
   }
 
-  if (!dataView || !savedSearch) {
+  if (loading || !savedSearch) {
     return <LoadingIndicator type="elastic" />;
   }
 

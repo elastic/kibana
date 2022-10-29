@@ -30,7 +30,7 @@ describe('DiscoverMainApp', () => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
     }) as unknown as DataViewListItem[];
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.internalState.transitions.setDataView(dataViewMock);
+    stateContainer.actions.setDataView(dataViewMock);
     const props = {
       dataViewList,
       savedSearch: savedSearchMock,
@@ -50,6 +50,6 @@ describe('DiscoverMainApp', () => {
     );
 
     expect(component.find(DiscoverTopNav).exists()).toBe(true);
-    expect(component.find(DiscoverTopNav).prop('dataView')).toEqual(dataViewMock);
+    expect(component.find(DiscoverTopNav).prop('savedSearch')).toEqual(savedSearchMock);
   });
 });

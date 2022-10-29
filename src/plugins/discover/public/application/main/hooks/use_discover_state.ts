@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useCallback } from 'react';
+import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
@@ -55,8 +55,6 @@ export function useDiscoverState({
     return savedSearch.searchSource.createChild();
   }, [savedSearch, dataView]);
 
-  const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
-
   const stateContainer = useMemo(() => {
     const container = getDiscoverStateContainer({
       history,
@@ -65,9 +63,13 @@ export function useDiscoverState({
     });
     container.actions.setDataView(dataView);
     return container;
-  }, [dataView, history, savedSearch, services]);
+  }, [history, savedSearch, services, dataView]);
+
+  const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
   const { appState, replaceUrlAppState } = stateContainer;
+
+  const [state, setState] = useState(appState.getState());
 
   /**
    * Search session logic
@@ -90,7 +92,6 @@ export function useDiscoverState({
    */
   const onChangeDataView = useCallback(
     async (id: string) => {
-      const state = stateContainer.appState.getState();
       const nextDataView = await dataViews.get(id);
       if (nextDataView && dataView) {
         const nextAppState = getDataViewAppState(
@@ -103,12 +104,21 @@ export function useDiscoverState({
           state.query
         );
         setUrlTracking(nextDataView);
-        stateContainer.actions.setDataView(nextDataView);
         stateContainer.setAppState(nextAppState);
       }
       setExpandedDoc(undefined);
     },
-    [setUrlTracking, uiSettings, dataView, dataViews, setExpandedDoc, stateContainer]
+    [
+      setUrlTracking,
+      uiSettings,
+      dataView,
+      dataViews,
+      setExpandedDoc,
+      state.columns,
+      state.query,
+      state.sort,
+      stateContainer,
+    ]
   );
 
   /**
@@ -157,6 +167,8 @@ export function useDiscoverState({
    */
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(dataView, filterManager, data);
+    setState(stateContainer.appState.getState());
+
     return () => stopSync();
   }, [stateContainer, filterManager, data, dataView]);
 
@@ -165,7 +177,7 @@ export function useDiscoverState({
    */
   useEffect(() => {
     const unsubscribe = appState.subscribe(async (nextState) => {
-      const { hideChart, interval, sort, index } = stateContainer.getPreviousAppState();
+      const { hideChart, interval, sort, index } = state;
       // chart was hidden, now it should be displayed, so data is needed
       const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
       const chartIntervalChanged = nextState.interval !== interval;
@@ -204,17 +216,18 @@ export function useDiscoverState({
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
         refetch$.next(undefined);
       }
+      setState(nextState);
     });
     return () => unsubscribe();
   }, [
+    services,
     appState,
+    state,
     refetch$,
-    replaceUrlAppState,
+    data$,
     reset,
     savedSearch.searchSource,
-    services.dataViews,
-    services.toastNotifications,
-    services.uiSettings,
+    replaceUrlAppState,
     stateContainer,
   ]);
 
@@ -243,6 +256,7 @@ export function useDiscoverState({
       });
 
       await stateContainer.replaceUrlAppState(newAppState);
+      setState(newAppState);
     },
     [services, dataView, stateContainer]
   );
@@ -281,7 +295,6 @@ export function useDiscoverState({
 
   return {
     data$,
-    dataView,
     inspectorAdapters,
     refetch$,
     resetSavedSearch,

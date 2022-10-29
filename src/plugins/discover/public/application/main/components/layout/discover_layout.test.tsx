@@ -157,7 +157,6 @@ async function mountComponent(
   stateContainer.internalState.transitions.setDataView(dataView);
 
   const props: DiscoverLayoutProps = {
-    dataView,
     inspectorAdapters: { requests: new RequestAdapter() },
     navigateTo: jest.fn(),
     onChangeDataView: jest.fn(),

@@ -84,20 +84,19 @@ export function DiscoverLayout({
     inspector,
   } = useDiscoverServices();
   const { main$ } = savedSearchData$;
-  const [viewMode, query, savedQuery, filters, columns, sort] = useAppStateSelector((state) => [
-    state.viewMode,
+  const [query, savedQuery, filters, columns, sort] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
     state.filters,
     state.columns,
     state.sort,
   ]);
+  const viewMode: VIEW_MODE = useAppStateSelector((state) => {
+    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
+    return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
+  });
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const dataState: DataMainMsg = useDataState(main$);
-  const currentViewMode = useMemo(() => {
-    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
-    return viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
-  }, [uiSettings, viewMode]);
 
   const fetchCounter = useRef<number>(0);
 
@@ -163,7 +162,6 @@ export function DiscoverLayout({
   const onFieldEdited = useCallback(async () => {
     if (!dataView.isPersisted()) {
       await updateAdHocDataViewId(dataView);
-      return;
     }
     savedSearchRefetch$.next('reset');
   }, [dataView, savedSearchRefetch$, updateAdHocDataViewId]);
@@ -186,8 +184,9 @@ export function DiscoverLayout({
       if (nextDataView.id) {
         onChangeDataView(nextDataView.id);
       }
+      savedSearchRefetch$.next('reset');
     },
-    [onChangeDataView]
+    [onChangeDataView, savedSearchRefetch$]
   );
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);
@@ -224,7 +223,6 @@ export function DiscoverLayout({
             })}
       </h1>
       <TopNavMemoized
-        dataView={dataView}
         onOpenInspector={onOpenInspector}
         query={query}
         navigateTo={navigateTo}
@@ -261,7 +259,7 @@ export function DiscoverLayout({
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onFieldEdited={onFieldEdited}
-              viewMode={currentViewMode}
+              viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
             />
@@ -324,7 +322,7 @@ export function DiscoverLayout({
                   savedSearchRefetch$={savedSearchRefetch$}
                   stateContainer={stateContainer}
                   isTimeBased={isTimeBased}
-                  viewMode={currentViewMode}
+                  viewMode={viewMode}
                   onAddFilter={onAddFilter as DocViewFilterFn}
                   onFieldEdited={onFieldEdited}
                   columns={currentColumns}

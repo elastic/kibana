@@ -35,7 +35,6 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
 
   return {
     stateContainer,
-    dataView: dataViewMock,
     savedSearch: savedSearchMock,
     navigateTo: jest.fn(),
     query: {} as Query,
