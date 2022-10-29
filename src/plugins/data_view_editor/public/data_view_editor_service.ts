@@ -17,7 +17,7 @@ import {
 } from '@kbn/data-views-plugin/public';
 
 import { RollupIndicesCapsResponse, MatchedIndicesSet, TimestampOption } from './types';
-import { getMatchedIndices, ensureMinimumTime, extractTimeFields } from './lib';
+import { getMatchedIndices, ensureMinimumTime, extractTimeFields, removeSpaces } from './lib';
 import { GetFieldsOptions } from './shared_imports';
 
 export const matchedIndiciesDefault = {
@@ -28,19 +28,40 @@ export const matchedIndiciesDefault = {
 };
 
 export interface DataViewEditorServiceConstructorArgs {
-  http: HttpSetup;
-  dataViews: DataViewsServicePublic;
+  services: {
+    http: HttpSetup;
+    dataViews: DataViewsServicePublic;
+  };
   initialName?: string;
+  requireTimestampField?: boolean;
+  // todo add initial type, allowHidden, indexPattern
 }
 
 export class DataViewEditorService {
-  constructor({ http, dataViews, initialName }: DataViewEditorServiceConstructorArgs) {
+  constructor({
+    services: { http, dataViews },
+    initialName,
+    requireTimestampField = false,
+  }: DataViewEditorServiceConstructorArgs) {
     this.http = http;
     this.dataViews = dataViews;
+    this.requireTimestampField = requireTimestampField;
 
     // fire off a couple of requests that we know we'll need
     this.rollupCapsResponse = this.getRollupIndexCaps();
     this.dataViewNames = this.loadDataViewNames(initialName);
+
+    this.matchedIndices$.subscribe((matchedIndices) => {
+      // might be a good idea to pass in matchedIndices, would make it a pure function
+      this.loadTimestampFields(
+        // do this at input
+        removeSpaces(this.indexPattern),
+        this.type,
+        this.requireTimestampField,
+        // this can return null but we can treat it as undefined
+        this.rollupIndex$.getValue() || undefined
+      );
+    });
 
     // alternate value with undefined so validation knows when its getting a fresh value
     this.matchedIndices$.subscribe((matchedIndices) => {
@@ -57,6 +78,13 @@ export class DataViewEditorService {
 
   private http: HttpSetup;
   private dataViews: DataViewsServicePublic;
+  // config
+  private requireTimestampField: boolean;
+  private type = INDEX_PATTERN_TYPE.DEFAULT;
+
+  // state
+  private indexPattern = '';
+  private allowHidden = false;
 
   // used for data view name validation - no dupes!
   dataViewNames: Promise<string[]>;
@@ -81,7 +109,7 @@ export class DataViewEditorService {
   });
 
   // alernates between value and undefined so validation can treat new value as thought its a promise
-  matchedIndicesForProvider$ = new Subject<MatchedIndicesSet | undefined>();
+  private matchedIndicesForProvider$ = new Subject<MatchedIndicesSet | undefined>();
 
   private rollupCapsResponse: Promise<RollupIndicesCapsResponse>;
 
@@ -101,12 +129,12 @@ export class DataViewEditorService {
 
   private getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
-  getIsRollupIndex = async () => {
+  private getIsRollupIndex = async () => {
     const response = await this.rollupCapsResponse;
     return (indexName: string) => this.getRollupIndices(response).includes(indexName);
   };
 
-  loadMatchedIndices = async (
+  private loadMatchedIndices = async (
     query: string,
     allowHidden: boolean,
     allSources: MatchedItem[],
@@ -165,7 +193,23 @@ export class DataViewEditorService {
     }
   };
 
-  loadIndices = async (title: string, allowHidden: boolean, type: INDEX_PATTERN_TYPE) => {
+  update = ({
+    indexPattern,
+    allowHidden,
+    type,
+  }: {
+    indexPattern: string;
+    allowHidden: boolean;
+    type: INDEX_PATTERN_TYPE;
+  }) => {
+    this.indexPattern = indexPattern;
+    this.allowHidden = allowHidden;
+    this.type = type;
+
+    this.loadIndices(indexPattern, allowHidden, type);
+  };
+
+  private loadIndices = async (title: string, allowHidden: boolean, type: INDEX_PATTERN_TYPE) => {
     const isRollupIndex = await this.getIsRollupIndex();
     const allSrcs = await this.dataViews.getIndices({
       isRollupIndex,
@@ -185,7 +229,10 @@ export class DataViewEditorService {
 
   private getIndicesMemory: Record<string, Promise<MatchedItem[]>> = {};
 
-  getIndicesCached = async (props: { pattern: string; showAllIndices?: boolean | undefined }) => {
+  private getIndicesCached = async (props: {
+    pattern: string;
+    showAllIndices?: boolean | undefined;
+  }) => {
     const key = JSON.stringify(props);
 
     this.getIndicesMemory[key] =
@@ -230,7 +277,7 @@ export class DataViewEditorService {
     return await getTimestampOptionsPromise;
   };
 
-  loadTimestampFields = async (
+  private loadTimestampFields = async (
     index: string,
     type: INDEX_PATTERN_TYPE,
     requireTimestampField: boolean,

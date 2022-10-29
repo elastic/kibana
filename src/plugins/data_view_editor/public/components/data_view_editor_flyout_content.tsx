@@ -195,30 +195,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // could this be moved to the service?
   // initial loading of indicies and data view names
+
   useEffect(() => {
     let isCancelled = false;
 
-    // subscribe to matches indices updates and update timestamp field options
-    const matchedIndicesSub = dataViewEditorService.matchedIndices$.subscribe((matchedIndices) => {
-      const timeFieldQuery = editData ? editData.getIndexPattern() : title;
-      // might be a good idea to pass in matchedIndices, would make it a pure function
-      dataViewEditorService.loadTimestampFields(
-        removeSpaces(timeFieldQuery),
-        type,
-        requireTimestampField,
-        // this can return null but we can treat it as undefined
-        dataViewEditorService.rollupIndex$.getValue() || undefined
-      );
-    });
-
-    // run loadMAtchedIndices on initial load
-    // TODO THIS IS A BIT UNCLEAR
-    // this is firing too much
-    // ... should it load current matches?
-    // todo - set title, alowHidden, type on service and have it do the right thing
-    dataViewEditorService.loadIndices(title, allowHidden, type);
-
-    // this should happen only on initial page load and should not change.
     // todo - see if this code can be removed
     dataViewEditorService.dataViewNames.then((names) => {
       if (isCancelled) return;
@@ -228,9 +208,17 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
     return () => {
       isCancelled = true;
-      matchedIndicesSub.unsubscribe();
     };
-  }, [editData, type, title, allowHidden, requireTimestampField, dataViewEditorService]);
+  }, [dataViewEditorService.dataViewNames]);
+
+  useEffect(() => {
+    // run loadMAtchedIndices on initial load
+    // TODO THIS IS A BIT UNCLEAR
+    // this is firing too much
+    // ... should it load current matches?
+    // todo - set title, alowHidden, type on service and have it do the right thing
+    dataViewEditorService.update({ indexPattern: title, allowHidden, type });
+  }, [dataViewEditorService, type, title, allowHidden]);
 
   // part of service?
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);

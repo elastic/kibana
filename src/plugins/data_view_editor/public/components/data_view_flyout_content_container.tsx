@@ -69,9 +69,9 @@ const DataViewFlyoutContentContainer = ({
   };
 
   const dataViewEditorService = new DataViewEditorService({
-    http,
-    dataViews,
+    services: { http, dataViews },
     initialName: editData?.name,
+    requireTimestampField,
   });
 
   return (
