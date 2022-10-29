@@ -299,7 +299,13 @@
             "label": "schema",
             "description": [],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<T>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
@@ -323,7 +329,24 @@
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": true,
             "trackAdoption": false,
-            "references": []
+            "references": [
+              {
+                "plugin": "advancedSettings",
+                "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/server/ui_settings.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/server/ui_settings.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/server/ui_settings.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false

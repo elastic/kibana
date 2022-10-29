@@ -170,6 +170,7 @@ export function WaterfallWithSummary<TSample extends {}>({
         </EuiFlexItem>
       )}
 
+<<<<<<< HEAD
       <EuiFlexItem grow={false}>
         <TransactionTabs
           transaction={entryTransaction}
@@ -184,5 +185,21 @@ export function WaterfallWithSummary<TSample extends {}>({
         />
       </EuiFlexItem>
     </EuiFlexGroup>
+=======
+      <EuiSpacer size="s" />
+
+      <TransactionTabs
+        transaction={entryTransaction}
+        detailTab={detailTab}
+        serviceName={serviceName}
+        waterfallItemId={waterfallItemId}
+        onTabClick={onTabClick}
+        waterfall={waterfallFetchResult.waterfall}
+        isLoading={isLoading}
+        showCriticalPath={showCriticalPath}
+        onShowCriticalPathChange={onShowCriticalPathChange}
+      />
+    </>
+>>>>>>> 796751e2d3f36499cb8eb61b436c03006632f1ef
   );
 }
