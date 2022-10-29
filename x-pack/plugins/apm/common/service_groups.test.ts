@@ -39,16 +39,16 @@ describe('service_groups common utils', () => {
       const result = validateServiceGroupKuery(
         `service.name: testbeans* or agent.name: "nodejs"`
       );
-      expect(result).toHaveProperty('isValid', true);
-      expect(result).toHaveProperty('isParsingError', false);
-      expect(result).toHaveProperty('message', '');
+      expect(result).toHaveProperty('isValidFields', true);
+      expect(result).toHaveProperty('isValidSyntax', true);
+      expect(result).not.toHaveProperty('message');
     });
     it('should return validation error when unsupported fields are used', () => {
       const result = validateServiceGroupKuery(
         `service.name: testbeans* or agent.name: "nodejs" or transaction.type: request`
       );
-      expect(result).toHaveProperty('isValid', false);
-      expect(result).toHaveProperty('isParsingError', false);
+      expect(result).toHaveProperty('isValidFields', false);
+      expect(result).toHaveProperty('isValidSyntax', true);
       expect(result).toHaveProperty(
         'message',
         'Query filter for service group does not support fields [transaction.type]'
@@ -58,8 +58,8 @@ describe('service_groups common utils', () => {
       const result = validateServiceGroupKuery(
         `service.name: testbeans* or agent.name: "nod`
       );
-      expect(result).toHaveProperty('isValid', false);
-      expect(result).toHaveProperty('isParsingError', true);
+      expect(result).toHaveProperty('isValidFields', false);
+      expect(result).toHaveProperty('isValidSyntax', false);
       expect(result).toHaveProperty('message');
       expect(result).not.toBe('');
     });

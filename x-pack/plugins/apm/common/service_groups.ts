@@ -48,31 +48,35 @@ export function isSupportedField(fieldName: string) {
   );
 }
 
-export function validateServiceGroupKuery(kuery: string) {
+export function validateServiceGroupKuery(kuery: string): {
+  isValidFields: boolean;
+  isValidSyntax: boolean;
+  message?: string;
+} {
   try {
     const kueryFields = getKueryFields([fromKueryExpression(kuery)]);
     const unsupportedKueryFields = kueryFields.filter(
       (fieldName) => !isSupportedField(fieldName)
     );
-    if (unsupportedKueryFields.length > 0) {
-      return {
-        isValid: false,
-        isParsingError: false,
-        message: i18n.translate(
-          'xpack.apm.serviceGroups.invalidFields.message',
-          {
-            defaultMessage:
-              'Query filter for service group does not support fields [{unsupportedFieldNames}]',
-            values: {
-              unsupportedFieldNames: unsupportedKueryFields.join(', '),
-            },
-          }
-        ),
-      };
-    } else {
-      return { isValid: true, isParsingError: false, message: '' };
+    if (unsupportedKueryFields.length === 0) {
+      return { isValidFields: true, isValidSyntax: true };
     }
+    return {
+      isValidFields: false,
+      isValidSyntax: true,
+      message: i18n.translate('xpack.apm.serviceGroups.invalidFields.message', {
+        defaultMessage:
+          'Query filter for service group does not support fields [{unsupportedFieldNames}]',
+        values: {
+          unsupportedFieldNames: unsupportedKueryFields.join(', '),
+        },
+      }),
+    };
   } catch (error) {
-    return { isValid: false, isParsingError: true, message: error.message };
+    return {
+      isValidFields: false,
+      isValidSyntax: false,
+      message: error.message,
+    };
   }
 }

@@ -82,13 +82,8 @@ export function SelectServices({
     if (!stagedKuery) {
       return;
     }
-    const { isValid, isParsingError, message } =
-      validateServiceGroupKuery(stagedKuery);
-    if (isValid || isParsingError) {
-      setKueryValidationMessage(undefined);
-    } else {
-      setKueryValidationMessage(message);
-    }
+    const { message } = validateServiceGroupKuery(stagedKuery);
+    setKueryValidationMessage(message);
   }, [stagedKuery]);
 
   const { start, end } = useMemo(

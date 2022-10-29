@@ -124,8 +124,10 @@ const serviceGroupSaveRoute = createApmServerRoute({
     const {
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
-    const { isValid, message } = validateServiceGroupKuery(params.body.kuery);
-    if (!isValid) {
+    const { isValidFields, isValidSyntax, message } = validateServiceGroupKuery(
+      params.body.kuery
+    );
+    if (!(isValidFields && isValidSyntax)) {
       throw Boom.badRequest(message);
     }
 
