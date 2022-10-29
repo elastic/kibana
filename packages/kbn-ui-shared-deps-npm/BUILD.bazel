@@ -8,7 +8,6 @@ PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-npm"
 
 SOURCE_FILES = glob(
   [
-    "**/*.ts",
     "**/*.js",
   ],
   exclude = [
