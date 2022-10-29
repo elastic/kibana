@@ -15,7 +15,7 @@ import { getMergeStrategy } from '../../../signals/source_fields_merging/strateg
 import type { BaseSignalHit, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
-import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { buildRuleNameFromMapping } from '../../../signals/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../../signals/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../../signals/mappings/build_risk_score_from_mapping';
@@ -51,7 +51,8 @@ export const buildBulkBody = (
   ignoreFields: ConfigType['alertIgnoreFields'],
   applyOverrides: boolean,
   buildReasonMessage: BuildReasonMessage,
-  indicesToQuery: string[]
+  indicesToQuery: string[],
+  alertTimestampOverride: Date | undefined
 ): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const eventFields = buildEventTypeAlert(mergedDoc);
@@ -87,7 +88,15 @@ export const buildBulkBody = (
     return {
       ...filteredSource,
       ...eventFields,
-      ...buildAlert([mergedDoc], completeRule, spaceId, reason, indicesToQuery, overrides),
+      ...buildAlert(
+        [mergedDoc],
+        completeRule,
+        spaceId,
+        reason,
+        indicesToQuery,
+        alertTimestampOverride,
+        overrides
+      ),
       ...additionalAlertFields({ ...mergedDoc, _source: { ...mergedDoc._source, ...eventFields } }),
     };
   }

@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "common/**/*",
@@ -16,7 +15,7 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
@@ -47,6 +46,7 @@
     { "path": "../security/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../threat_intelligence/tsconfig.json" },
-    { "path": "../timelines/tsconfig.json" }
+    { "path": "../timelines/tsconfig.json" },
+    { "path": "../files/tsconfig.json"}
   ]
 }

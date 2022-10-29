@@ -10,8 +10,8 @@ import { isEmpty } from 'lodash/fp';
 import { EuiFormRow } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { FieldHook } from '../../common/shared_imports';
-import { getFieldValidityAndErrorMessage } from '../../common/shared_imports';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
 import type { ActionConnector } from '../../../common/api';
 

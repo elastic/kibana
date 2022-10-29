@@ -51,7 +51,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "StatusServiceSetup",
+              {
+                "pluginId": "@kbn/core-status-server",
+                "scope": "server",
+                "docId": "kibKbnCoreStatusServerPluginApi",
+                "section": "def-server.StatusServiceSetup",
+                "text": "StatusServiceSetup"
+              },
               ">"
             ],
             "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",

@@ -9,7 +9,7 @@
  * Copyright (c) 2017 The xterm.js authors. All rights reserved.
  * @license MIT
  */
-import { Terminal, IDisposable, ITerminalAddon, ISelectionPosition } from 'xterm';
+import { Terminal, IDisposable, ITerminalAddon, IBufferRange } from 'xterm';
 
 export interface ISearchOptions {
   regex?: boolean;
@@ -83,14 +83,14 @@ export class SearchAddon implements ITerminalAddon {
 
     let startCol = 0;
     let startRow = 0;
-    let currentSelection: ISelectionPosition | undefined;
+    let currentSelection: IBufferRange | undefined;
     if (this._terminal.hasSelection()) {
       const incremental = searchOptions ? searchOptions.incremental : false;
       // Start from the selection end if there is a selection
       // For incremental search, use existing row
       currentSelection = this._terminal.getSelectionPosition()!;
-      startRow = incremental ? currentSelection.startRow : currentSelection.endRow;
-      startCol = incremental ? currentSelection.startColumn : currentSelection.endColumn;
+      startRow = incremental ? currentSelection.start.y : currentSelection.end.y;
+      startCol = incremental ? currentSelection.start.x : currentSelection.end.x;
     }
 
     if (searchOptions?.lastLineOnly) {
@@ -139,7 +139,7 @@ export class SearchAddon implements ITerminalAddon {
 
     // If there is only one result, wrap back and return selection if it exists.
     if (!result && currentSelection) {
-      searchPosition.startRow = currentSelection.startRow;
+      searchPosition.startRow = currentSelection.start.y;
       searchPosition.startCol = 0;
       result = this._findInLine(term, searchPosition, searchOptions);
     }
@@ -170,12 +170,12 @@ export class SearchAddon implements ITerminalAddon {
     let startCol = this._terminal.cols;
     let result: ISearchResult | undefined;
     const incremental = searchOptions ? searchOptions.incremental : false;
-    let currentSelection: ISelectionPosition | undefined;
+    let currentSelection: IBufferRange | undefined;
     if (this._terminal.hasSelection()) {
       currentSelection = this._terminal.getSelectionPosition()!;
       // Start from selection start if there is a selection
-      startRow = currentSelection.startRow;
-      startCol = currentSelection.startColumn;
+      startRow = currentSelection.start.y;
+      startCol = currentSelection.start.x;
     } else if (searchOptions?.lastLineOnly) {
       startRow = this._terminal.buffer.active.cursorY - 1;
       startCol = this._terminal.cols;
@@ -194,8 +194,8 @@ export class SearchAddon implements ITerminalAddon {
       if (!isOldResultHighlighted) {
         // If selection was not able to be expanded to the right, then try reverse search
         if (currentSelection) {
-          searchPosition.startRow = currentSelection.endRow;
-          searchPosition.startCol = currentSelection.endColumn;
+          searchPosition.startRow = currentSelection.end.y;
+          searchPosition.startCol = currentSelection.end.x;
         }
         result = this._findInLine(term, searchPosition, searchOptions, true);
       }

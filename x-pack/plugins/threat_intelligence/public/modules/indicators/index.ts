@@ -11,3 +11,4 @@ export * from './hooks/use_sourcerer_data_view';
 export * from './hooks/use_total_count';
 export * from './utils/field_value';
 export * from './utils/unwrap_value';
+export * from './types/indicator';

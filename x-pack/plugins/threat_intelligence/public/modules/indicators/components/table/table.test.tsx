@@ -9,7 +9,7 @@ import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import { IndicatorsTable, IndicatorsTableProps, TABLE_UPDATE_PROGRESS_TEST_ID } from '.';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import { generateMockIndicator, Indicator } from '../../types';
 import { BUTTON_TEST_ID } from './components/open_flyout_button';
 import { TITLE_TEST_ID } from '../flyout';
 import { SecuritySolutionDataViewBase } from '../../../../types';

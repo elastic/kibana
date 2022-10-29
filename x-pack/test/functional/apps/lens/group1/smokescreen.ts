@@ -263,7 +263,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // check for value labels
       data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-      expect(data?.bars?.[0].labels.length).to.eql(0);
+      expect(data?.bars?.[0].labels).not.to.eql(0);
     });
 
     it('should override axis title', async () => {
