@@ -440,9 +440,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('triggersActionsConnectors');
         await pageObjects.triggersActionsUI.searchConnectors(connector.name);
         await testSubjects.click('deleteConnector');
-        await testSubjects.existOrFail('deleteIdsConfirmation');
-        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-        await testSubjects.missingOrFail('deleteIdsConfirmation');
+        await testSubjects.exists('rulesDeleteIdsConfirmation');
+        await testSubjects.click('confirmModalConfirmButton');
 
         const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql('Deleted 1 connector');
@@ -507,9 +506,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('triggersActionsConnectors');
         await pageObjects.triggersActionsUI.searchConnectors(connector.name);
         await testSubjects.click('deleteConnector');
-        await testSubjects.existOrFail('deleteIdsConfirmation');
-        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-        await testSubjects.missingOrFail('deleteIdsConfirmation');
+        await testSubjects.exists('rulesDeleteIdsConfirmation');
+        await testSubjects.click('confirmModalConfirmButton');
 
         const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql('Deleted 1 connector');
