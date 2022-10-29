@@ -181,3 +181,26 @@ export const doFieldsExist = async (
 
   return fieldsExisted;
 };
+
+export const validGroupByForContext =
+  [
+    'host.name',
+    'host.hostname',
+    'host.id',
+    'kubernetes.pod.uid',
+    'container.id'
+  ];
+
+export const hasAdditionalContext = (groupBy: string | string[] | undefined) => {
+  return groupBy
+    ? Array.isArray(groupBy)
+      ? groupBy.every(group => validGroupByForContext.includes(group))
+      : validGroupByForContext.includes(groupBy)
+    : false;
+};
+
+export const shouldTermsAggOnContainer = (groupBy: string | string[] | undefined) => {
+  return groupBy && Array.isArray(groupBy)
+    ? groupBy.includes(KUBERNETES_POD_UID)
+    : groupBy === KUBERNETES_POD_UID;
+};

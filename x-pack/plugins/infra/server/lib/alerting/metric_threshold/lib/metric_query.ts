@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
-import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
+import { hasAdditionalContext, KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, shouldTermsAggOnContainer, termsAggField } from '../../common/utils';
 import { createBucketSelector } from './create_bucket_selector';
 import { createPercentileAggregation } from './create_percentile_aggregation';
 import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
@@ -82,12 +82,8 @@ export const getElasticsearchMetricQuery = (
 
   const currentPeriod = wrapInCurrentPeriod(currentTimeframe, metricAggregations);
 
-  const shouldTermsAggOnContainer = groupBy && Array.isArray(groupBy)
-    ? groupBy.includes(KUBERNETES_POD_UID)
-    : groupBy === KUBERNETES_POD_UID;
-
   const containerContextAgg =
-    shouldTermsAggOnContainer && fieldsExisted &&
+    shouldTermsAggOnContainer(groupBy) && fieldsExisted &&
       fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {
         containerContext: {
@@ -113,7 +109,7 @@ export const getElasticsearchMetricQuery = (
   const excludesList = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
   if(!containerContextAgg) includesList.push('container.*');
 
-  const additionalContextAgg = {
+  const additionalContextAgg = hasAdditionalContext(groupBy) ? {
     additionalContext: {
       top_hits: {
         size: 1,
@@ -123,7 +119,7 @@ export const getElasticsearchMetricQuery = (
         },
       },
     },
-  };
+  } : void 0;
 
   const aggs: any = groupBy
     ? {

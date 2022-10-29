@@ -31,6 +31,7 @@ import {
   getAlertDetailsUrl,
   getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
+  hasAdditionalContext,
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
@@ -62,15 +63,6 @@ type MetricThresholdAlertFactory = (
   threshold?: number | undefined,
   value?: number | undefined
 ) => MetricThresholdAlert;
-
-export const groupByListForContext =
-  [
-    'host.name',
-    'host.hostname',
-    'host.id',
-    'kubernetes.pod.uid',
-    'container.id'
-  ];
 
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
@@ -391,10 +383,3 @@ const formatAlertResult = <AlertResult>(
   };
 };
 
-const hasAdditionalContext = (groupBy: string | string[] | null) => {
-  return groupBy
-    ? Array.isArray(groupBy)
-      ? groupBy.every(group => groupByListForContext.includes(group))
-      : groupByListForContext.includes(groupBy)
-    : false;
-};
