@@ -7419,7 +7419,6 @@
     "xpack.apm.mlCallout.updateAvailableCalloutButtonText": "ジョブの更新",
     "xpack.apm.mlCallout.updateAvailableCalloutText": "劣化したパフォーマンスに関する詳細な分析を提供する異常検知ジョブを更新し、スループットと失敗したトランザクションレートの検知機能を追加しました。アップグレードを選択する場合は、新しいジョブが作成され、既存のレガシージョブが終了します。APMアプリに表示されるデータは自動的に新しいジョブに切り替わります。新しいジョブの作成を選択した場合は、すべての既存のジョブを移行するオプションを使用できません。",
     "xpack.apm.mlCallout.updateAvailableCalloutTitle": "更新が可能です",
-    "xpack.apm.navigation.allServicesTitle": "すべてのサービス",
     "xpack.apm.navigation.apmSettingsTitle": "設定",
     "xpack.apm.navigation.dependenciesTitle": "依存関係",
     "xpack.apm.navigation.serviceMapTitle": "サービスマップ",

@@ -7431,7 +7431,6 @@
     "xpack.apm.mlCallout.updateAvailableCalloutButtonText": "Mettre à jour les tâches",
     "xpack.apm.mlCallout.updateAvailableCalloutText": "Nous avons mis à jour les tâches de détection des anomalies qui fournissent des indications sur la dégradation des performances et ajouté des détecteurs de débit et de taux de transactions ayant échoué. Si vous choisissez de mettre à jour, nous créerons les nouvelles tâches et fermerons les tâches héritées. Les données affichées dans l'application APM passeront automatiquement aux nouvelles. Veuillez noter que l'option de migration de toutes les tâches existantes ne sera pas disponible si vous choisissez de créer une nouvelle tâche.",
     "xpack.apm.mlCallout.updateAvailableCalloutTitle": "Mises à jour disponibles",
-    "xpack.apm.navigation.allServicesTitle": "Tous les services",
     "xpack.apm.navigation.apmSettingsTitle": "Paramètres",
     "xpack.apm.navigation.dependenciesTitle": "Dépendances",
     "xpack.apm.navigation.serviceMapTitle": "Carte des services",

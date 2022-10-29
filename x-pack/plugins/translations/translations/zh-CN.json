@@ -7435,7 +7435,6 @@
     "xpack.apm.mlCallout.updateAvailableCalloutButtonText": "更新作业",
     "xpack.apm.mlCallout.updateAvailableCalloutText": "我们已更新有助于深入了解性能降级的异常检测作业，并添加了检测工具以获取吞吐量和失败事务率。如果您选择进行升级，我们将创建新作业，并关闭现有的旧版作业。APM 应用中显示的数据将自动切换到新数据。请注意，如果您选择创建新作业，用于迁移所有现有作业的选项将不可用。",
     "xpack.apm.mlCallout.updateAvailableCalloutTitle": "可用更新",
-    "xpack.apm.navigation.allServicesTitle": "所有服务",
     "xpack.apm.navigation.apmSettingsTitle": "设置",
     "xpack.apm.navigation.dependenciesTitle": "依赖项",
     "xpack.apm.navigation.serviceMapTitle": "服务地图",

@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { ElasticDocsLink } from '../../shared/links/elastic_docs_link';
 
-export type TourType = 'createGroup' | 'editGroup' | 'serviceGroupsAllServices';
+export type TourType = 'createGroup' | 'editGroup';
 
 interface Props {
   title: string;

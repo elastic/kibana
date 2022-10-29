@@ -103,6 +103,13 @@ const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
   defaultMessage: 'Services',
 });
 
+const serviceGroupsTitle = i18n.translate(
+  'xpack.apm.navigation.serviceGroupsTitle',
+  {
+    defaultMessage: 'Service groups',
+  }
+);
+
 const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
   defaultMessage: 'Traces',
 });
@@ -270,7 +277,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       deepLinks: [
         {
           id: 'service-groups-list',
-          title: servicesTitle,
+          title: serviceGroupsTitle,
           path: '/service-groups',
         },
         {
