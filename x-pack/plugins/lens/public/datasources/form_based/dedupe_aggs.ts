@@ -13,7 +13,10 @@ import {
 import { GenericOperationDefinition } from './operations';
 import { extractAggId, OriginalColumn } from './to_expression';
 
-function groupByKey<T>(items: T[], getKey: (item: T) => string | undefined): Record<string, T[]> {
+export function groupByKey<T>(
+  items: T[],
+  getKey: (item: T) => string | undefined
+): Record<string, T[]> {
   const groups: Record<string, T[]> = {};
 
   items.forEach((item) => {

@@ -32,6 +32,8 @@ import { useDebouncedValue } from '../../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { groupByKey } from '../../dedupe_aggs';
+import { getGroupByKey } from './get_group_by_key';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -177,24 +179,11 @@ export const percentileOperation: OperationDefinition<
     let aggs = [..._aggs];
     const esAggsIdMap = { ..._esAggsIdMap };
 
-    const percentileExpressionsByArgs: Record<string, ExpressionAstExpressionBuilder[]> = {};
-
-    // group percentile dimensions by differentiating parameters
-    aggs.forEach((expressionBuilder) => {
-      const {
-        functions: [fnBuilder],
-      } = expressionBuilder;
-      if (fnBuilder.name === 'aggSinglePercentile') {
-        const groupByKey = `${fnBuilder.getArgument('field')?.[0]}-${
-          fnBuilder.getArgument('timeShift')?.[0]
-        }`;
-        if (!(groupByKey in percentileExpressionsByArgs)) {
-          percentileExpressionsByArgs[groupByKey] = [];
-        }
-
-        percentileExpressionsByArgs[groupByKey].push(expressionBuilder);
-      }
-    });
+    const percentileExpressionsByArgs = groupByKey<ExpressionAstExpressionBuilder>(
+      aggs,
+      (expressionBuilder) =>
+        getGroupByKey(expressionBuilder, ['aggSinglePercentile'], [{ name: 'field' }])
+    );
 
     const termsFuncs = aggs
       .map((agg) => agg.functions[0])
