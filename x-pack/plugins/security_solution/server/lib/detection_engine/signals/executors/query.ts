@@ -106,6 +106,6 @@ export const queryExecutor = async ({
       }
     }
 
-    return { ...result, state: {} };
+    return result;
   });
 };
