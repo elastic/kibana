@@ -99,8 +99,6 @@ module.exports = (_, argv) => {
         'react-dom/server',
         'react-router-dom',
         'react-router',
-        'react-use',
-        'react-use/lib',
         'react',
         'rison-node',
         'rxjs',
