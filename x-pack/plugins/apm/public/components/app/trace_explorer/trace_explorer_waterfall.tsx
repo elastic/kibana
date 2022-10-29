@@ -56,7 +56,8 @@ export function TraceExplorerWaterfall() {
   return (
     <WaterfallWithSummary
       waterfallFetchResult={waterfallFetchResult}
-      traceSamplesFetchResult={traceSamplesFetchResult}
+      traceSamples={traceSamplesFetchResult.data.traceSamples}
+      traceSamplesFetchStatus={traceSamplesFetchResult.status}
       environment={environment}
       onSampleClick={(sample) => {
         push(history, {

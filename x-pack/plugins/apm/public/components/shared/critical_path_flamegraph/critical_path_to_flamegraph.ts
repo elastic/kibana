@@ -7,17 +7,13 @@
 
 import type { ColumnarViewModel } from '@elastic/charts';
 import { memoize, sumBy } from 'lodash';
-import { parseToRgb, lighten } from 'polished';
+import { lighten, parseToRgb } from 'polished';
 import seedrandom from 'seedrandom';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { CriticalPathResponse } from '../../../../server/routes/traces/get_aggregated_critical_path';
-
-interface Node {
-  nodeId: string;
-  children: Node[];
-  countInclusive: number;
-  countExclusive: number;
-}
+import {
+  CriticalPathTreeNode,
+  getAggregatedCriticalPathRootNodes,
+} from '../../../../common/critical_path/get_aggregated_critical_path_root_nodes';
 
 const lightenColor = lighten(0.2);
 
@@ -52,71 +48,7 @@ export function criticalPathToFlamegraph(
     sum += count;
   }
 
-  let maxDepth = 20; // min max depth
   let maxValue = 0;
-
-  function getRootNodesFromFilters({
-    serviceName,
-    transactionName,
-  }: {
-    serviceName: string;
-    transactionName: string;
-  }): Node[] {
-    const rootOperationIds: string[] = [];
-    const rootNodeIds: string[] = [];
-
-    Object.keys(criticalPath.metadata).forEach((opId) => {
-      const metadata = criticalPath.metadata[opId];
-      if (
-        metadata['service.name'] === serviceName &&
-        metadata['processor.event'] === ProcessorEvent.transaction &&
-        metadata['transaction.name'] === transactionName
-      ) {
-        rootOperationIds.push(opId);
-      }
-    });
-
-    Object.keys(criticalPath.operationIdByNodeId).forEach((nodeId) => {
-      const opId = criticalPath.operationIdByNodeId[nodeId];
-      if (rootOperationIds.includes(opId)) {
-        rootNodeIds.push(nodeId);
-      }
-    });
-
-    const rootNodes = rootNodeIds.map((nodeId) => getNode(nodeId, 1));
-
-    if (rootNodes.length) {
-      const totalCountInclusive = sumBy(rootNodes, 'countInclusive');
-      const totalCountExclusive = sumBy(rootNodes, 'countExclusive');
-      return [
-        {
-          ...rootNodes[0],
-          children: rootNodes.flatMap((node) => node.children),
-          countInclusive: totalCountInclusive,
-          countExclusive: totalCountExclusive,
-        },
-      ];
-    }
-    return [];
-  }
-
-  function getNode(nodeId: string, depth: number): Node {
-    maxDepth = Math.max(maxDepth, depth);
-
-    const children = criticalPath.nodes[nodeId].map((childNodeId) =>
-      getNode(childNodeId, depth + 1)
-    );
-    const nodeCountExclusive = criticalPath.timeByNodeId[nodeId] || 0;
-    const nodeCountInclusive =
-      sumBy(children, (child) => child.countInclusive) + nodeCountExclusive;
-
-    return {
-      nodeId,
-      children,
-      countInclusive: nodeCountInclusive,
-      countExclusive: nodeCountExclusive,
-    };
-  }
 
   let index = 0;
 
@@ -134,7 +66,13 @@ export function criticalPathToFlamegraph(
     return availableColors[idx];
   });
 
-  function addNodeToFlamegraph(node: Node, x: number, y: number) {
+  const { rootNodes, maxDepth } = getAggregatedCriticalPathRootNodes(params);
+
+  function addNodeToFlamegraph(
+    node: CriticalPathTreeNode,
+    x: number,
+    y: number
+  ) {
     let nodeOperationId: string;
     let nodeLabel: string;
     let operationMetadata: CriticalPathResponse['metadata'][string] | undefined;
@@ -176,15 +114,7 @@ export function criticalPathToFlamegraph(
     });
   }
 
-  const rootNodes =
-    'serviceName' in params && 'transactionName' in params
-      ? getRootNodesFromFilters({
-          serviceName: params.serviceName,
-          transactionName: params.transactionName,
-        })
-      : criticalPath.rootNodes.map((nodeId) => getNode(nodeId, 1));
-
-  const root: Node = {
+  const root: CriticalPathTreeNode = {
     children: rootNodes,
     nodeId: 'root',
     countExclusive: 0,

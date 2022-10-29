@@ -123,7 +123,7 @@ export function WaterfallWithSummary<TSample extends {}>({
             {!!traceSamples?.length && (
               <EuiPagination
                 pageCount={traceSamples.length}
-                activePage={sampleActivePage}
+                activePage={samplePageIndex}
                 onPageClick={goToSample}
                 compressed
               />

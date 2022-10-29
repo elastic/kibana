@@ -27,7 +27,7 @@ import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { traceSamplesTab } from './trace_samples_tab';
 import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useCriticalPathEnabledSetting } from '../../../hooks/use_critical_path_enabled_setting';
+import { useCriticalPathFeatureEnabledSetting } from '../../../hooks/use_critical_path_feature_enabled_setting';
 import { aggregatedCriticalPathTab } from './aggregated_critical_path_tab';
 
 export interface TabContentProps {
@@ -48,7 +48,7 @@ const tabs = [
 export function TransactionDetailsTabs() {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
-  const isCriticalPathFeatureEnabled = useCriticalPathEnabledSetting();
+  const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
 
   const availableTabs = isCriticalPathFeatureEnabled
     ? tabs.concat(aggregatedCriticalPathTab)

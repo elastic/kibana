@@ -65,8 +65,9 @@ export async function getAggregatedCriticalPath({
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
-      size: 0,
-      track_total_hits: false,
+      size: 10,
+      docvalue_fields: ['trace.id'],
+      track_total_hits: true,
       query: {
         bool: {
           filter: [
@@ -87,7 +88,7 @@ export async function getAggregatedCriticalPath({
             map_script: {
               source: `
                 String toHash (def item) {
-                  return item.hashCode().toString();
+                  return item.toString();
                 }
                 
                 def id;
@@ -138,7 +139,7 @@ export async function getAggregatedCriticalPath({
             reduce_script: {
               source: `
                 String toHash (def item) {
-                  return item.hashCode().toString();
+                  return item.toString();
                 }
                 
                 def processEvent (def context, def event) {
@@ -263,7 +264,7 @@ export async function getAggregatedCriticalPath({
                   }
                   
                   if (normalizedChildEnd < scanTime - 1000) {
-                    count(context, childId, scanTime - normalizedChildEnd); 
+                    count(context, nodeId, scanTime - normalizedChildEnd); 
                   }
                   
                   scan(context, child, normalizedChildStart, childEnd, childPath);
@@ -333,8 +334,7 @@ export async function getAggregatedCriticalPath({
                 "nodes": nodes,
                 "rootNodes": rootNodes,
                 "operationIdByNodeId": operationIdByNodeId
-              ];
-              `,
+              ];`,
             },
           },
         },

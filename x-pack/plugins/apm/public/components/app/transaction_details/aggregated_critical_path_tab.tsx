@@ -23,8 +23,10 @@ function TransactionDetailAggregatedCriticalPath({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const traceIds = useMemo(() => {
-    return traceSamplesFetchResult.data.traceSamples.map(
-      (sample) => sample.traceId
+    return (
+      traceSamplesFetchResult.data?.traceSamples.map(
+        (sample) => sample.traceId
+      ) ?? []
     );
   }, [traceSamplesFetchResult.data]);
 
