@@ -74,6 +74,7 @@
   },
   "resolutions": {
     "**/@types/node": "16.11.41",
+    "**/acorn": "8.8.0",
     "**/chokidar": "^3.5.3",
     "**/deepmerge": "^4.2.2",
     "**/fast-deep-equal": "^3.1.1",
@@ -423,8 +424,8 @@
     "@opentelemetry/semantic-conventions": "^1.4.0",
     "@reduxjs/toolkit": "1.7.2",
     "@slack/webhook": "^5.0.4",
-    "@tanstack/react-query": "^4.12.0",
-    "@tanstack/react-query-devtools": "^4.12.0",
+    "@tanstack/react-query": "^4.13.4",
+    "@tanstack/react-query-devtools": "^4.13.4",
     "@turf/along": "6.0.1",
     "@turf/area": "6.0.1",
     "@turf/bbox": "6.0.1",
