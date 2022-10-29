@@ -11,10 +11,16 @@ import {
   ALERT_THROTTLE_START,
   ALERT_THROTTLE_END,
   ALERT_THROTTLE_COUNT,
+  ALERT_THROTTLE_FIELDS,
 } from '../field_names';
 
 export const alertsFieldMap860 = {
   ...alertsFieldMap840,
+  [ALERT_THROTTLE_FIELDS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   [ALERT_THROTTLE_VALUES]: {
     type: 'keyword',
     array: true,

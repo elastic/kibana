@@ -62,51 +62,50 @@ export const queryExecutor = async ({
       exceptionFilter: runOpts.exceptionFilter,
     });
 
-    if (ruleParams.alertGrouping?.groupBy != null) {
-      return groupAndBulkCreate({
-        runOpts,
-        services,
-        spaceId,
-        filter: esFilter,
-        buildReasonMessage: buildReasonMessageForQueryAlert,
-        bucketHistory,
-        groupByFields: ruleParams.alertGrouping.groupBy,
-      });
-    } else {
-      const result = await searchAfterAndBulkCreate({
-        tuple: runOpts.tuple,
-        exceptionsList: runOpts.unprocessedExceptions,
-        services,
-        listClient: runOpts.listClient,
-        ruleExecutionLogger: runOpts.ruleExecutionLogger,
-        eventsTelemetry,
-        inputIndexPattern: runOpts.inputIndex,
-        pageSize: runOpts.searchAfterSize,
-        filter: esFilter,
-        buildReasonMessage: buildReasonMessageForQueryAlert,
-        bulkCreate: runOpts.bulkCreate,
-        wrapHits: runOpts.wrapHits,
-        runtimeMappings: runOpts.runtimeMappings,
-        primaryTimestamp: runOpts.primaryTimestamp,
-        secondaryTimestamp: runOpts.secondaryTimestamp,
-      });
+    const result =
+      ruleParams.alertGrouping?.groupBy != null
+        ? await groupAndBulkCreate({
+            runOpts,
+            services,
+            spaceId,
+            filter: esFilter,
+            buildReasonMessage: buildReasonMessageForQueryAlert,
+            bucketHistory,
+            groupByFields: ruleParams.alertGrouping.groupBy,
+          })
+        : await searchAfterAndBulkCreate({
+            tuple: runOpts.tuple,
+            exceptionsList: runOpts.unprocessedExceptions,
+            services,
+            listClient: runOpts.listClient,
+            ruleExecutionLogger: runOpts.ruleExecutionLogger,
+            eventsTelemetry,
+            inputIndexPattern: runOpts.inputIndex,
+            pageSize: runOpts.searchAfterSize,
+            filter: esFilter,
+            buildReasonMessage: buildReasonMessageForQueryAlert,
+            bulkCreate: runOpts.bulkCreate,
+            wrapHits: runOpts.wrapHits,
+            runtimeMappings: runOpts.runtimeMappings,
+            primaryTimestamp: runOpts.primaryTimestamp,
+            secondaryTimestamp: runOpts.secondaryTimestamp,
+          });
 
-      const license = await firstValueFrom(licensing.license$);
-      const hasGoldLicense = license.hasAtLeast('gold');
+    const license = await firstValueFrom(licensing.license$);
+    const hasGoldLicense = license.hasAtLeast('gold');
 
-      if (hasGoldLicense) {
-        if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
-          scheduleNotificationResponseActions(
-            {
-              signals: result.createdSignals,
-              responseActions: completeRule.ruleParams.responseActions,
-            },
-            osqueryCreateAction
-          );
-        }
+    if (hasGoldLicense) {
+      if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
+        scheduleNotificationResponseActions(
+          {
+            signals: result.createdSignals,
+            responseActions: completeRule.ruleParams.responseActions,
+          },
+          osqueryCreateAction
+        );
       }
-
-      return { ...result, state: {} };
     }
+
+    return { ...result, state: {} };
   });
 };

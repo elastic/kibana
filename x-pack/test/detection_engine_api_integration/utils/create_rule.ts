@@ -58,7 +58,6 @@ export const createRule = async (
       throw new Error('When creating a rule found an unexpected conflict (404)');
     }
   } else if (response.status !== 200) {
-    log.error(JSON.stringify(response.body));
     throw new Error(
       `Unexpected non 200 ok when attempting to create a rule: ${JSON.stringify(response.status)}`
     );

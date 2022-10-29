@@ -537,14 +537,17 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should generate new alerts for new data on subsequent rule executions', async () => {
+      it('should not count documents that were covered by previous alerts', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['throttling-data']),
           query: `host.name: *`,
           alert_grouping: {
             groupBy: ['host.name', 'source.ip'],
           },
-          from: 'now-1h',
+          // The first invocation covers half of the source docs, the second invocation covers all documents.
+          // We will check and make sure the second invocation correctly filters out the first half that
+          // were alerted on by the first invocation.
+          from: 'now-2h',
           interval: '1h',
         };
 
@@ -558,7 +561,7 @@ export default ({ getService }: FtrProviderContext) => {
           es,
           previewId,
           size: 1000,
-          sort: ['host.name', 'source.ip'],
+          sort: ['host.name', 'source.ip', ALERT_ORIGINAL_TIME],
         });
         expect(previewAlerts.length).to.eql(12);
 

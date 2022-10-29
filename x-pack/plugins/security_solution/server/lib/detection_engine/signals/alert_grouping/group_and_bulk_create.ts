@@ -46,7 +46,7 @@ export const buildBucketHistoryFilter = ({
       bool: {
         must_not: buckets.map((bucket) => ({
           bool: {
-            must: [
+            filter: [
               ...Object.entries(bucket.key).map(([field, value]) => ({
                 term: {
                   [field]: value,

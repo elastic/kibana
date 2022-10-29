@@ -75,6 +75,7 @@ export const singleSearchAfter = async <
         primaryTimestamp,
         secondaryTimestamp,
         trackTotalHits,
+        additionalFilters,
       });
 
       const start = performance.now();
