@@ -72,7 +72,6 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     },
     kibana: {
       alert: {
-        // flapping: true, // this is for testing
         rule: {
           rule_type_id: ruleType.id,
           ...(consumer ? { consumer } : {}),
