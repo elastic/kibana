@@ -118,6 +118,9 @@ describe('useExecuteBulkAction', () => {
         actions: {
           setLoadingRules,
         },
+        state: {
+          isAllSelected: false,
+        },
       });
     });
 
