@@ -32,6 +32,7 @@ interface CloudPostureScoreChartProps {
   data: Stats;
   id: string;
   partitionOnElementClick: (elements: PartitionElementEvent[]) => void;
+  trendGraphHeight: number;
 }
 
 const getPostureScorePercentage = (postureScore: number): string => `${Math.round(postureScore)}%`;
@@ -112,58 +113,68 @@ const convertTrendToEpochTime = (trend: PostureTrend) => ({
   timestamp: moment(trend.timestamp).valueOf(),
 });
 
-const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
+const ComplianceTrendChart = ({
+  trend,
+  trendGraphHeight = '100%',
+}: {
+  trend: PostureTrend[];
+  trendGraphHeight: number;
+}) => {
+  console.log(trend);
   const epochTimeTrend = trend.map(convertTrendToEpochTime);
   const {
     services: { charts },
   } = useKibana();
 
   return (
-    <Chart>
-      <Settings
-        theme={charts.theme.useChartsTheme()}
-        baseTheme={charts.theme.useChartsBaseTheme()}
-        showLegend={false}
-        legendPosition="right"
-        tooltip={{
-          headerFormatter: ({ value }) => (
-            <>
-              <FormattedDate value={value} month="short" day="numeric" />
-              {', '}
-              <FormattedTime value={value} />
-            </>
-          ),
-        }}
-      />
-      <AreaSeries
-        // EuiChart is using this id in the tooltip label
-        id="Posture Score"
-        data={epochTimeTrend}
-        xScaleType="time"
-        xAccessor={'timestamp'}
-        yAccessors={['postureScore']}
-      />
-      <Axis
-        id="bottom-axis"
-        position="bottom"
-        tickFormat={timeFormatter(niceTimeFormatByDay(2))}
-        ticks={4}
-      />
-      <Axis
-        ticks={3}
-        id="left-axis"
-        position="left"
-        showGridLines
-        domain={{ min: 0, max: 100 }}
-        tickFormat={(rawScore) => getPostureScorePercentage(rawScore)}
-      />
-    </Chart>
+    <div style={{ height: trendGraphHeight }}>
+      <Chart>
+        <Settings
+          theme={charts.theme.useChartsTheme()}
+          baseTheme={charts.theme.useChartsBaseTheme()}
+          showLegend={false}
+          legendPosition="right"
+          tooltip={{
+            headerFormatter: ({ value }) => (
+              <>
+                <FormattedDate value={value} month="short" day="numeric" />
+                {', '}
+                <FormattedTime value={value} />
+              </>
+            ),
+          }}
+        />
+        <AreaSeries
+          // EuiChart is using this id in the tooltip label
+          id="Posture Score"
+          data={epochTimeTrend}
+          xScaleType="time"
+          xAccessor={'timestamp'}
+          yAccessors={['postureScore']}
+        />
+        <Axis
+          id="bottom-axis"
+          position="bottom"
+          tickFormat={timeFormatter(niceTimeFormatByDay(2))}
+          ticks={4}
+        />
+        <Axis
+          ticks={3}
+          id="left-axis"
+          position="left"
+          showGridLines
+          domain={{ min: 0, max: 100 }}
+          tickFormat={(rawScore) => getPostureScorePercentage(rawScore)}
+        />
+      </Chart>
+    </div>
   );
 };
 
 export const CloudPostureScoreChart = ({
   data,
   trend,
+  trendGraphHeight,
   id,
   partitionOnElementClick,
 }: CloudPostureScoreChartProps) => (
@@ -180,7 +191,7 @@ export const CloudPostureScoreChart = ({
     </EuiFlexItem>
     <EuiHorizontalRule margin="xs" />
     <EuiFlexItem grow={6}>
-      <ComplianceTrendChart trend={trend} />
+      <ComplianceTrendChart trend={trend} trendGraphHeight={trendGraphHeight} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
