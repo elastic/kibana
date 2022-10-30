@@ -176,6 +176,7 @@ describe('getAlertSummary()', () => {
         "consumer": "rule-consumer",
         "enabled": true,
         "errorMessages": Array [],
+        "flapping": false,
         "id": "1",
         "lastRun": "2019-02-12T21:01:32.479Z",
         "muteAll": false,

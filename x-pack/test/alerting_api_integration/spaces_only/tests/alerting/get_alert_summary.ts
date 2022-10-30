@@ -76,6 +76,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
         enabled: true,
         error_messages: [],
         alerts: {},
+        flapping: false,
       });
     });
 
