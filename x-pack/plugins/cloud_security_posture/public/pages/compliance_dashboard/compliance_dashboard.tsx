@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiSpacer, EuiPageHeader } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { INTERNAL_FEATURE_FLAGS } from '../../../common/constants';
 import { CloudSummarySection } from './dashboard_sections/cloud_summary_section';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
@@ -19,8 +20,6 @@ import { useComplianceDashboardDataApi } from '../../common/api';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudBenchmarksSection } from './dashboard_sections/cloud_benchmarks_section';
-
-const useOldDashboard = false;
 
 export const ComplianceDashboard = () => {
   const getSetupStatus = useCspSetupStatusApi();
@@ -52,18 +51,18 @@ export const ComplianceDashboard = () => {
           margin-right: auto;
         `}
       >
-        {useOldDashboard ? (
-          <>
-            <SummarySection complianceData={getDashboardData.data!} />
-            <EuiSpacer />
-            <BenchmarksSection complianceData={getDashboardData.data!} />
-            <EuiSpacer />
-          </>
-        ) : (
+        {INTERNAL_FEATURE_FLAGS.showNewDashboard ? (
           <>
             <CloudSummarySection complianceData={getDashboardData.data!} />
             <EuiSpacer />
             <CloudBenchmarksSection complianceData={getDashboardData.data!} />
+            <EuiSpacer />
+          </>
+        ) : (
+          <>
+            <SummarySection complianceData={getDashboardData.data!} />
+            <EuiSpacer />
+            <BenchmarksSection complianceData={getDashboardData.data!} />
             <EuiSpacer />
           </>
         )}

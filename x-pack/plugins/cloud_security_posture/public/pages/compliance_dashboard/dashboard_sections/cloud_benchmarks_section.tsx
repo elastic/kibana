@@ -16,6 +16,7 @@ import { RisksTable } from '../compliance_charts/risks_table';
 import { RULE_FAILED } from '../../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { ClusterDetailsBox } from './cluster_details_box';
+import { dashboardColumnsGrow } from './cloud_summary_section';
 
 export const CloudBenchmarksSection = ({
   complianceData,
@@ -57,7 +58,7 @@ export const CloudBenchmarksSection = ({
           paddingBottom: euiTheme.size.s,
         }}
       >
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={dashboardColumnsGrow.first}>
           <EuiTitle size="xxs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
             <h5>
               <FormattedMessage
@@ -67,7 +68,7 @@ export const CloudBenchmarksSection = ({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={4}>
+        <EuiFlexItem grow={dashboardColumnsGrow.second}>
           <EuiTitle
             size="xxs"
             css={{ fontWeight: euiTheme.font.weight.semiBold, paddingLeft: euiTheme.size.xl }}
@@ -80,7 +81,7 @@ export const CloudBenchmarksSection = ({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={4}>
+        <EuiFlexItem grow={dashboardColumnsGrow.third}>
           <EuiTitle
             size="xxs"
             css={{ fontWeight: euiTheme.font.weight.semiBold, paddingLeft: euiTheme.size.xl }}
@@ -100,10 +101,10 @@ export const CloudBenchmarksSection = ({
           gutterSize="l"
           style={{ borderBottom: euiTheme.border.thin }}
         >
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={dashboardColumnsGrow.first}>
             <ClusterDetailsBox cluster={cluster} />
           </EuiFlexItem>
-          <EuiFlexItem grow={4}>
+          <EuiFlexItem grow={dashboardColumnsGrow.second}>
             <ChartPanel hasBorder={false}>
               <CloudPostureScoreChart
                 id={`${cluster.meta.clusterId}_score_chart`}
@@ -115,7 +116,7 @@ export const CloudBenchmarksSection = ({
               />
             </ChartPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow={4}>
+          <EuiFlexItem grow={dashboardColumnsGrow.third}>
             <ChartPanel hasBorder={false}>
               <RisksTable
                 data={cluster.groupedFindingsEvaluation}

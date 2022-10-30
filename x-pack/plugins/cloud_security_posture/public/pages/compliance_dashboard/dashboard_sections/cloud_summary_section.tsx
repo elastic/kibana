@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { PartitionElementEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
 import { ChartPanel } from '../../../components/chart_panel';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
@@ -21,6 +22,12 @@ const defaultHeight = 360;
 // TODO: limit this to desktop media queries only
 const summarySectionWrapperStyle = {
   height: defaultHeight,
+};
+
+export const dashboardColumnsGrow: Record<string, FlexItemGrowSize> = {
+  first: 3,
+  second: 8,
+  third: 8,
 };
 
 export const CloudSummarySection = ({
@@ -51,8 +58,8 @@ export const CloudSummarySection = ({
 
   return (
     <EuiFlexGroup gutterSize="l" style={summarySectionWrapperStyle}>
-      <EuiFlexItem grow={2} />
-      <EuiFlexItem grow={4}>
+      <EuiFlexItem grow={dashboardColumnsGrow.first} />
+      <EuiFlexItem grow={dashboardColumnsGrow.second}>
         <ChartPanel
           title={i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
             defaultMessage: 'Cloud Posture Score',
@@ -66,7 +73,7 @@ export const CloudSummarySection = ({
           />
         </ChartPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={4}>
+      <EuiFlexItem grow={dashboardColumnsGrow.third}>
         <ChartPanel
           title={i18n.translate('xpack.csp.dashboard.summarySection.failedFindingsPanelTitle', {
             defaultMessage: 'Failed Findings',
