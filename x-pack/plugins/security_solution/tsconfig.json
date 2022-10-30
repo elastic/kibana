@@ -13,6 +13,7 @@
     "scripts/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
+    "scripts/**/*.json",
     "public/**/*.json",
     "../../../typings/**/*"
   ],

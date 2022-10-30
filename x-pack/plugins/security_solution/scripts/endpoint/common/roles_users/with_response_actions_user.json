@@ -2,6 +2,5 @@
   "username": "withResponseActions",
   "full_name": "With RA",
   "password": "changeme",
-  "roles": [with_response_actions_role],
-  "email": "withResponseActions@example.com"
+  "roles": ["withResponseActions"]
 }

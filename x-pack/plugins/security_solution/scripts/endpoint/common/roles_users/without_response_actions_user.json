@@ -1,7 +1,6 @@
 {
   "password": "changeme",
-  "roles": [without_response_actions_role],
+  "roles": ["noResponseActions"],
   "username": "noResponseActions",
-  "full_name": "No RA",
-  "email": "noResponseActions@example.com"
+  "full_name": "No RA"
 }

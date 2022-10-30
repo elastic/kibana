@@ -102,7 +102,7 @@ interface UserInterface {
   email: string;
 }
 
-export interface RoleInterface {
+interface RoleInterface {
   elasticsearch: {
     cluster: string[];
     indices: Array<{
