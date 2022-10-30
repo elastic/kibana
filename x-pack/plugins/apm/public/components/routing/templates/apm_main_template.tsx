@@ -114,9 +114,10 @@ export function ApmMainTemplate({
         pageTitle,
         rightSideItems,
         ...pageHeader,
-        children: showServiceGroupsNav ? (
-          <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
-        ) : null,
+        children:
+          showServiceGroupsNav && selectedNavButton ? (
+            <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+          ) : null,
       }}
       {...pageTemplateProps}
     >
