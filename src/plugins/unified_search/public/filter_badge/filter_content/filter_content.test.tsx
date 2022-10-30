@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import FilterLabel from './filter_label';
+import FilterContent from './filter_content';
 import { render } from '@testing-library/react';
 import { phraseFilter } from '@kbn/data-plugin/common/stubs';
 
@@ -19,7 +19,7 @@ test('alias', () => {
       alias: 'geo.coordinates in US',
     },
   };
-  const { container } = render(<FilterLabel filter={filter} />);
+  const { container } = render(<FilterContent filter={filter} valueLabel={'ios'} />);
   expect(container).toMatchSnapshot();
 });
 
@@ -31,7 +31,9 @@ test('field custom label', () => {
       alias: 'geo.coordinates in US',
     },
   };
-  const { container } = render(<FilterLabel filter={filter} fieldLabel="test label" />);
+  const { container } = render(
+    <FilterContent filter={filter} valueLabel={'ios'} fieldLabel="test label" />
+  );
   expect(container).toMatchSnapshot();
 });
 
@@ -44,9 +46,7 @@ test('alias with warning status', () => {
       negate: true,
     },
   };
-  const { container } = render(
-    <FilterLabel filter={filter} valueLabel={'Warning'} filterLabelStatus={'warn'} />
-  );
+  const { container } = render(<FilterContent filter={filter} valueLabel={'Warning'} />);
   expect(container).toMatchSnapshot();
 });
 
@@ -59,18 +59,16 @@ test('alias with error status', () => {
       negate: true,
     },
   };
-  const { container } = render(
-    <FilterLabel filter={filter} valueLabel={'Error'} filterLabelStatus={'error'} />
-  );
+  const { container } = render(<FilterContent filter={filter} valueLabel={'Error'} />);
   expect(container).toMatchSnapshot();
 });
 
 test('warning', () => {
-  const { container } = render(<FilterLabel filter={phraseFilter} valueLabel={'Warning'} />);
+  const { container } = render(<FilterContent filter={phraseFilter} valueLabel={'Warning'} />);
   expect(container).toMatchSnapshot();
 });
 
 test('error', () => {
-  const { container } = render(<FilterLabel filter={phraseFilter} valueLabel={'Error'} />);
+  const { container } = render(<FilterContent filter={phraseFilter} valueLabel={'Error'} />);
   expect(container).toMatchSnapshot();
 });

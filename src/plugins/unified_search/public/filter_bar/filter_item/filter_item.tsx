@@ -22,11 +22,7 @@ import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import {
-  getIndexPatternFromFilter,
-  getDisplayValueFromFilter,
-  getFieldDisplayValueFromFilter,
-} from '@kbn/data-plugin/public';
+import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
 import { FilterPanelOption } from '../../types';
@@ -290,7 +286,7 @@ export function FilterItem(props: FilterItemProps) {
       label.message = props.intl.formatMessage(
         {
           id: 'unifiedSearch.filter.filterBar.labelWarningInfo',
-          defaultMessage: 'Field {fieldName} does not exist in current view',
+          defaultMessage: 'Fields {fieldName} does not exist in current view',
         },
         {
           fieldName: filter.meta.key,
@@ -314,7 +310,6 @@ export function FilterItem(props: FilterItemProps) {
     filter,
     readOnly,
     valueLabel: valueLabelConfig.title,
-    fieldLabel: getFieldDisplayValueFromFilter(filter, indexPatterns),
     filterLabelStatus: valueLabelConfig.status,
     errorMessage: valueLabelConfig.message,
     className: getClasses(!!filter.meta.negate, valueLabelConfig),

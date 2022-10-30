@@ -21,3 +21,16 @@ export const FilterBadgeLazy = React.lazy(() => import('./filter_badge'));
  * a predefined fallback and error boundary.
  */
 export const FilterBadge = withSuspense(FilterBadgeLazy);
+
+/**
+ * The Lazily-loaded `FilterContent` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
+ */
+export const FilterContentLazy = React.lazy(() => import('./filter_content/filter_content'));
+
+/**
+ * A `FilterContent` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `FilterContentLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const FilterContent = withSuspense(FilterContentLazy);

@@ -11,20 +11,25 @@ import { EuiTextColor } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { LabelOptions } from './filter_badge_utils';
-import { existsOperator, isOneOfOperator } from '../filter_bar/filter_editor';
+import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
 
-const FilterBadgeExpressionValueRightPart = ({ value }: { value: string | number }) => {
+const FilterValue = ({ value }: { value: string | number }) => {
   return (
     <EuiTextColor color={typeof value === 'string' ? 'success' : 'accent'}> {value}</EuiTextColor>
   );
 };
 
-const FilterBadgeExpressionValueLeftPart = ({ filter }: { filter: Filter }) => {
+const FilterField = ({
+  filter,
+  fieldLabel,
+}: {
+  filter: Filter;
+  fieldLabel?: string | undefined;
+}) => {
   return (
     <>
       <Prefix prefix={filter.meta.negate} />
-      {filter.meta.key}:
+      {fieldLabel || filter.meta.key}:
     </>
   );
 };
@@ -38,47 +43,52 @@ const Prefix = ({ prefix }: { prefix?: boolean }) =>
     </EuiTextColor>
   ) : null;
 
-export const FilterContent = ({ filter, label }: { filter: Filter; label: LabelOptions }) => {
+export interface FilterContentProps {
+  filter: Filter;
+  valueLabel: string;
+  fieldLabel?: string;
+}
+
+function FilterContent({ filter, valueLabel, fieldLabel }: FilterContentProps) {
   switch (filter.meta.type) {
     case FILTERS.EXISTS:
       return (
         <>
-          <FilterBadgeExpressionValueLeftPart filter={filter} />
-          <FilterBadgeExpressionValueRightPart value={`${existsOperator.message}`} />
+          <FilterField filter={filter} fieldLabel={fieldLabel} />
+          <FilterValue value={`${existsOperator.message}`} />
         </>
       );
     case FILTERS.PHRASES:
       return (
         <>
-          <FilterBadgeExpressionValueLeftPart filter={filter} />
-          <FilterBadgeExpressionValueRightPart
-            value={`${isOneOfOperator.message} ${label.title}`}
-          />
+          <FilterField filter={filter} fieldLabel={fieldLabel} />
+          <FilterValue value={`${isOneOfOperator.message} ${valueLabel}`} />
         </>
       );
     case FILTERS.QUERY_STRING:
       return (
         <>
-          <Prefix prefix={filter.meta.negate} />{' '}
-          <FilterBadgeExpressionValueRightPart value={label.title} />
+          <Prefix prefix={filter.meta.negate} /> <FilterValue value={valueLabel} />
         </>
       );
     case FILTERS.PHRASE:
     case FILTERS.RANGE:
       return (
         <>
-          <FilterBadgeExpressionValueLeftPart filter={filter} />
-          <FilterBadgeExpressionValueRightPart value={label.title} />
+          <FilterField filter={filter} fieldLabel={fieldLabel} />
+          <FilterValue value={valueLabel} />
         </>
       );
     default:
       return (
         <>
           <Prefix prefix={filter.meta.negate} />
-          <FilterBadgeExpressionValueRightPart
-            value={`${JSON.stringify(filter.query) || filter.meta.value}`}
-          />
+          <FilterValue value={`${JSON.stringify(filter.query) || filter.meta.value}`} />
         </>
       );
   }
-};
+}
+
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FilterContent;

@@ -15,13 +15,14 @@ import { BooleanRelation, isCombinedFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
+import { FilterBadgeContextType } from './filter_badge_context';
 
 export interface FilterBadgeProps {
   filter: Filter;
   dataViews: DataView[];
-  valueLabel?: string;
+  valueLabel: string;
   hideAlias?: boolean;
-  filterLabelStatus?: FilterLabelStatus;
+  filterLabelStatus: FilterLabelStatus;
 }
 
 const rootLevelConditionType = BooleanRelation.AND;
@@ -72,14 +73,7 @@ function FilterBadge({
   };
 
   return (
-    <EuiBadge
-      className={badgePading}
-      color="hollow"
-      iconType="cross"
-      iconSide="right"
-      title=""
-      {...rest}
-    >
+    <EuiBadge className={badgePading} color="hollow" iconType="cross" iconSide="right" {...rest}>
       {!hideAlias && filter.meta.alias !== null ? (
         <>
           <EuiIcon type="save" size="s" />
@@ -90,14 +84,20 @@ function FilterBadge({
           </span>
         </>
       ) : (
-        <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-          <FilterBadgeGroup
-            filters={isCombinedFilter(filter) ? filter.meta.params : [filter]}
-            dataViews={dataViews}
-            booleanRelation={rootLevelConditionType}
-            isRootLevel={true}
-          />
-        </EuiFlexGroup>
+        <FilterBadgeContextType.Provider
+          value={{
+            dataViews,
+            filterLabelStatus: valueLabel,
+          }}
+        >
+          <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+            <FilterBadgeGroup
+              filters={isCombinedFilter(filter) ? filter.meta.params : [filter]}
+              booleanRelation={rootLevelConditionType}
+              isRootLevel={true}
+            />
+          </EuiFlexGroup>
+        </FilterBadgeContextType.Provider>
       )}
     </EuiBadge>
   );

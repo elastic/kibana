@@ -2,8 +2,14 @@
 
 exports[`alias 1`] = `
 <div>
-  
-  geo.coordinates in US
+  machine.os
+  :
+  <span
+    class="emotion-euiTextColor-success"
+  >
+     
+    ios
+  </span>
 </div>
 `;
 
@@ -12,13 +18,14 @@ exports[`alias with error status 1`] = `
   <span
     class="emotion-euiTextColor-danger"
   >
-     NOT 
+    NOT 
   </span>
-  geo.coordinates in US
-  : 
+  machine.os
+  :
   <span
-    class="globalFilterLabel__value"
+    class="emotion-euiTextColor-success"
   >
+     
     Error
   </span>
 </div>
@@ -29,13 +36,14 @@ exports[`alias with warning status 1`] = `
   <span
     class="emotion-euiTextColor-danger"
   >
-     NOT 
+    NOT 
   </span>
-  geo.coordinates in US
-  : 
+  machine.os
+  :
   <span
-    class="globalFilterLabel__value"
+    class="emotion-euiTextColor-success"
   >
+     
     Warning
   </span>
 </div>
@@ -43,12 +51,12 @@ exports[`alias with warning status 1`] = `
 
 exports[`error 1`] = `
 <div>
-  
   machine.os
-  : 
+  :
   <span
-    class="globalFilterLabel__value"
+    class="emotion-euiTextColor-success"
   >
+     
     Error
   </span>
 </div>
@@ -56,19 +64,25 @@ exports[`error 1`] = `
 
 exports[`field custom label 1`] = `
 <div>
-  
-  geo.coordinates in US
+  test label
+  :
+  <span
+    class="emotion-euiTextColor-success"
+  >
+     
+    ios
+  </span>
 </div>
 `;
 
 exports[`warning 1`] = `
 <div>
-  
   machine.os
-  : 
+  :
   <span
-    class="globalFilterLabel__value"
+    class="emotion-euiTextColor-success"
   >
+     
     Warning
   </span>
 </div>

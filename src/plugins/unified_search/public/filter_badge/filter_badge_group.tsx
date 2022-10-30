@@ -7,7 +7,6 @@
  */
 
 import React, { useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, BooleanRelation } from '@kbn/es-query';
 import { EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -15,7 +14,6 @@ import { FilterExpressionBadge } from './filter_badge_expression';
 
 export interface FilterBadgeGroupProps {
   filters: Filter[];
-  dataViews: DataView[];
   booleanRelation?: BooleanRelation;
   isRootLevel?: boolean;
 }
@@ -32,17 +30,12 @@ const BooleanRelationDelimiter = ({ conditional }: { conditional: BooleanRelatio
   return <EuiTextColor className={bracketСolor}>{conditional}</EuiTextColor>;
 };
 
-export function FilterBadgeGroup({
-  filters,
-  dataViews,
-  booleanRelation,
-  isRootLevel,
-}: FilterBadgeGroupProps) {
+export function FilterBadgeGroup({ filters, booleanRelation, isRootLevel }: FilterBadgeGroupProps) {
   return (
     <>
       {filters.map((filter, index, acc) => (
         <>
-          <FilterExpressionBadge filter={filter} dataViews={dataViews} isRootLevel={isRootLevel} />
+          <FilterExpressionBadge filter={filter} isRootLevel={isRootLevel} />
           {booleanRelation && index + 1 < acc.length ? (
             <BooleanRelationDelimiter conditional={booleanRelation} />
           ) : null}

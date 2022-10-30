@@ -6,30 +6,40 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import type { BooleanRelation } from '@kbn/es-query';
 import { EuiTextColor, useEuiPaddingCSS, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FilterBadgeGroup } from './filter_badge_group';
-import type { LabelOptions } from './filter_badge_utils';
-import { FILTER_LABLE_STATUS, getValueLabel } from './filter_badge_utils';
-import { FilterContent } from './filter_badge_expression_filter_content';
+import { FilterContent } from './filter_content/filter_content';
 import { getBooleanRelationType } from '../utils';
+import { FilterBadgeContextType } from './filter_badge_context';
 
 export interface FilterBadgeExpressionProps {
   filter: Filter;
-  dataViews: DataView[];
   booleanRelation?: BooleanRelation;
   isRootLevel?: boolean;
 }
 
-export function FilterExpressionBadge({
-  filter,
-  dataViews,
-  isRootLevel,
-}: FilterBadgeExpressionProps) {
+interface FilterBadgeContentProps {
+  filter: Filter;
+  dataViews: DataView[];
+  filterLabelStatus: string;
+}
+
+const FilterBadgeContent = ({ filter, dataViews, filterLabelStatus }: FilterBadgeContentProps) => {
+  const valueLabel = filterLabelStatus
+    ? filterLabelStatus
+    : getDisplayValueFromFilter(filter, dataViews);
+  const fieldLabel = getFieldDisplayValueFromFilter(filter, dataViews);
+  return <FilterContent filter={filter} valueLabel={valueLabel} fieldLabel={fieldLabel} />;
+};
+
+export function FilterExpressionBadge({ filter, isRootLevel }: FilterBadgeExpressionProps) {
+  const { dataViews, filterLabelStatus } = useContext(FilterBadgeContextType);
   const conditionalOperationType = getBooleanRelationType(filter);
 
   const paddingLeft = useEuiPaddingCSS('left').xs;
@@ -44,16 +54,6 @@ export function FilterExpressionBadge({
     [euiTheme.colors.primary]
   );
 
-  let label: LabelOptions = {
-    title: '',
-    message: '',
-    status: FILTER_LABLE_STATUS.FILTER_ITEM_OK,
-  };
-
-  if (!conditionalOperationType) {
-    label = getValueLabel(filter, dataViews);
-  }
-
   return conditionalOperationType ? (
     <>
       {!isRootLevel ? (
@@ -61,11 +61,7 @@ export function FilterExpressionBadge({
           <EuiTextColor className={bracketСolor}>(</EuiTextColor>
         </span>
       ) : null}
-      <FilterBadgeGroup
-        filters={filter.meta?.params}
-        dataViews={dataViews}
-        booleanRelation={conditionalOperationType}
-      />
+      <FilterBadgeGroup filters={filter.meta?.params} booleanRelation={conditionalOperationType} />
       {!isRootLevel ? (
         <span css={paddingRight}>
           <EuiTextColor className={bracketСolor}>)</EuiTextColor>
@@ -74,7 +70,11 @@ export function FilterExpressionBadge({
     </>
   ) : (
     <span css={[paddingLeft, paddingRight]}>
-      <FilterContent filter={filter} label={label} />
+      <FilterBadgeContent
+        filter={filter}
+        dataViews={dataViews}
+        filterLabelStatus={filterLabelStatus}
+      />
     </span>
   );
 }
