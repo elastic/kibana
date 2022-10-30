@@ -13,7 +13,7 @@ import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { InternalCoreStart } from '../../../internal_types';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
