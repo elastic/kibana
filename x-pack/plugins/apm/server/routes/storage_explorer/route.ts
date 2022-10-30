@@ -9,10 +9,14 @@ import * as t from 'io-ts';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { indexLifecyclePhaseRt } from '../../../common/storage_explorer_types';
+import {
+  indexLifecyclePhaseRt,
+  IndexLifecyclePhaseSelectOption,
+} from '../../../common/storage_explorer_types';
 import { getServiceStatistics } from './get_service_statistics';
 import {
   probabilityRt,
@@ -21,7 +25,10 @@ import {
   rangeRt,
 } from '../default_api_types';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { getStorageDetailsPerProcessorEvent } from './get_storage_details_per_processor_event';
+import {
+  getStorageDetailsPerIndex,
+  getStorageDetailsPerProcessorEvent,
+} from './get_storage_details_per_service';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getSizeTimeseries } from './get_size_timeseries';
 import { hasStorageExplorerPrivileges } from './has_storage_explorer_privileges';
@@ -29,6 +36,9 @@ import {
   getMainSummaryStats,
   getTracesPerMinute,
 } from './get_summary_statistics';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { isCrossClusterSearch } from './is_cross_cluster_search';
+import { getServiceNamesFromTermsEnum } from '../services/get_services/get_sorted_and_filtered_services';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -71,19 +81,21 @@ const storageExplorerRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient: setup.apmEventClient,
+      apmEventClient,
       config: setup.config,
       kuery,
     });
 
     const serviceStatistics = await getServiceStatistics({
       setup,
+      apmEventClient,
       context,
       indexLifecyclePhase,
       randomSampler,
@@ -127,6 +139,15 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
       docs: number;
       size: number;
     }>;
+    indicesStats: Array<{
+      indexName: string;
+      numberOfDocs: number;
+      primary?: number | string;
+      replica?: number | string;
+      size?: number;
+      dataStream?: string;
+      lifecyclePhase?: string;
+    }>;
   }> => {
     const {
       params,
@@ -147,24 +168,40 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const processorEventStats = await getStorageDetailsPerProcessorEvent({
-      setup,
-      context,
-      indexLifecyclePhase,
-      randomSampler,
-      environment,
-      kuery,
-      start,
-      end,
-      serviceName,
-    });
+    const [processorEventStats, indicesStats] = await Promise.all([
+      getStorageDetailsPerProcessorEvent({
+        apmEventClient,
+        setup,
+        context,
+        indexLifecyclePhase,
+        randomSampler,
+        environment,
+        kuery,
+        start,
+        end,
+        serviceName,
+      }),
+      getStorageDetailsPerIndex({
+        apmEventClient,
+        setup,
+        context,
+        indexLifecyclePhase,
+        randomSampler,
+        environment,
+        kuery,
+        start,
+        end,
+        serviceName,
+      }),
+    ]);
 
-    return { processorEventStats };
+    return { processorEventStats, indicesStats };
   },
 });
 
@@ -206,13 +243,14 @@ const storageChartRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient: setup.apmEventClient,
+      apmEventClient,
       config: setup.config,
       kuery,
     });
@@ -226,6 +264,7 @@ const storageChartRoute = createApmServerRoute({
       start,
       end,
       setup,
+      apmEventClient,
       context,
     });
 
@@ -274,7 +313,9 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
   ): Promise<{
     tracesPerMinute: number;
     numberOfServices: number;
-    estimatedSize: number;
+    totalSize: number;
+    diskSpaceUsedPct: number;
+    estimatedIncrementalSize: number;
     dailyDataGeneration: number;
   }> => {
     const {
@@ -295,13 +336,14 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient: setup.apmEventClient,
+      apmEventClient,
       config: setup.config,
       kuery,
     });
@@ -309,6 +351,7 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
     const [mainSummaryStats, tracesPerMinute] = await Promise.all([
       getMainSummaryStats({
         setup,
+        apmEventClient,
         context,
         indexLifecyclePhase,
         randomSampler,
@@ -318,7 +361,7 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
         kuery,
       }),
       getTracesPerMinute({
-        setup,
+        apmEventClient,
         indexLifecyclePhase,
         start,
         end,
@@ -335,12 +378,68 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
   },
 });
 
+const storageExplorerIsCrossClusterSearchRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/storage_explorer/is_cross_cluster_search',
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<{ isCrossClusterSearch: boolean }> => {
+    const setup = await setupRequest(resources);
+    return { isCrossClusterSearch: isCrossClusterSearch(setup) };
+  },
+});
+
+const storageExplorerGetServices = createApmServerRoute({
+  endpoint: 'GET /internal/apm/storage_explorer/get_services',
+  options: {
+    tags: ['access:apm'],
+  },
+  params: t.type({
+    query: t.intersection([indexLifecyclePhaseRt, environmentRt, kueryRt]),
+  }),
+  handler: async (
+    resources
+  ): Promise<{
+    services: Array<{
+      serviceName: string;
+    }>;
+  }> => {
+    const {
+      query: { environment, kuery, indexLifecyclePhase },
+    } = resources.params;
+
+    if (
+      kuery ||
+      indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All ||
+      environment !== ENVIRONMENT_ALL.value
+    ) {
+      return {
+        services: [],
+      };
+    }
+
+    const apmEventClient = await getApmEventClient(resources);
+
+    const services = await getServiceNamesFromTermsEnum({
+      apmEventClient,
+      environment,
+      maxNumberOfServices: 500,
+    });
+
+    return {
+      services: services.map((serviceName): { serviceName: string } => ({
+        serviceName,
+      })),
+    };
+  },
+});
+
 export const storageExplorerRouteRepository = {
   ...storageExplorerRoute,
   ...storageExplorerServiceDetailsRoute,
   ...storageChartRoute,
   ...storageExplorerPrivilegesRoute,
   ...storageExplorerSummaryStatsRoute,
+  ...storageExplorerIsCrossClusterSearchRoute,
+  ...storageExplorerGetServices,
 };
 
 const SECURITY_REQUIRED_MESSAGE = i18n.translate(
