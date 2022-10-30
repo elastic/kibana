@@ -39,12 +39,12 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
   const { mutateAsync } = useBulkActionMutation();
   const rulesTableContext = useRulesTableContextOptional();
   const setLoadingRules = rulesTableContext?.actions.setLoadingRules;
-  const isAllSelected = !!rulesTableContext?.state.isAllSelected;
-  rulesTableContext?.state.rules.map((r) => r.id);
 
   const executeBulkAction = useCallback(
     async (bulkActionDescriptor: BulkActionDescriptor) => {
       try {
+        const isAllSelected = !!rulesTableContext?.state.isAllSelected;
+
         setLoadingRules?.({
           ids:
             bulkActionDescriptor.ids ??
@@ -66,7 +66,7 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
         setLoadingRules?.({ ids: [], action: null });
       }
     },
-    [options?.suppressSuccessToast, setLoadingRules, mutateAsync, toasts]
+    [options?.suppressSuccessToast, rulesTableContext, setLoadingRules, mutateAsync, toasts]
   );
 
   return { executeBulkAction };
