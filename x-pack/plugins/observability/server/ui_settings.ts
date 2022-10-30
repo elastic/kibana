@@ -15,7 +15,6 @@ import {
   maxSuggestions,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
-  enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
@@ -160,24 +159,6 @@ export const uiSettings: Record<string, UiSettings> = {
         }
       ),
     },
-    showInLabs: true,
-  },
-  [enableServiceGroups]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableServiceGroups', {
-      defaultMessage: 'Service groups feature',
-    }),
-    value: false,
-    description: i18n.translate('xpack.observability.enableServiceGroupsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the Service groups feature on APM UI. {feedbackLink}.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-service-groups' }),
-      },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
     showInLabs: true,
   },
   [enableServiceMetrics]: {
