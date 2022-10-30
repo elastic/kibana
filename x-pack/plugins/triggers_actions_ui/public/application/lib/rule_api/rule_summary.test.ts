@@ -54,6 +54,7 @@ describe('loadRuleSummary', () => {
         average: 0,
         valuesWithTimestamp: {},
       },
+      flapping: false,
     });
 
     const result = await loadRuleSummary({ http, ruleId: 'te/st' });
