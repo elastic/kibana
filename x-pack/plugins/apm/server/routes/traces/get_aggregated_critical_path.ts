@@ -8,6 +8,7 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
+  AGENT_NAME,
   PROCESSOR_EVENT,
   SERVICE_NAME,
   SPAN_NAME,
@@ -17,10 +18,12 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 type OperationMetadata = {
   [SERVICE_NAME]: string;
+  [AGENT_NAME]: AgentName;
 } & (
   | {
       [PROCESSOR_EVENT]: ProcessorEvent.transaction;
@@ -54,11 +57,15 @@ export async function getAggregatedCriticalPath({
   start,
   end,
   apmEventClient,
+  serviceName,
+  transactionName,
 }: {
   traceIds: string[];
   start: number;
   end: number;
   apmEventClient: APMEventClient;
+  serviceName: string | null;
+  transactionName: string | null;
 }): Promise<{ criticalPath: CriticalPathResponse | null }> {
   const response = await apmEventClient.search('get_aggregated_critical_path', {
     apm: {
@@ -79,6 +86,11 @@ export async function getAggregatedCriticalPath({
       aggs: {
         critical_path: {
           scripted_metric: {
+            params: {
+              // can't send null parameters to ES. undefined will be removed during JSON serialisation
+              serviceName: serviceName || undefined,
+              transactionName: transactionName || undefined,
+            },
             init_script: {
               source: `
                 state.eventsById = [:];
@@ -96,7 +108,8 @@ export async function getAggregatedCriticalPath({
                 
                 def operationMetadata = [
                   "service.name": doc['service.name'].value,
-                  "processor.event": doc['processor.event'].value
+                  "processor.event": doc['processor.event'].value,
+                  "agent.name": doc['agent.name'].value
                 ];
                 
                 if (!doc['span.id'].empty) {
@@ -151,9 +164,7 @@ export async function getAggregatedCriticalPath({
                   "children": []
                 ];
                 
-                if(event.parentId == null) {
-                  context.entryTransactions.add(processedEvent);
-                } else {
+                if(event.parentId != null) {
                   def parent = context.events[event.parentId];
                   if (parent == null) {
                     return null;
@@ -168,6 +179,22 @@ export async function getAggregatedCriticalPath({
                 context.processedEvents.put(event.id, processedEvent);
                 
                 processedEvent.putAll(event);
+
+                if (context.params.serviceName != null && context.params.transactionName != null) {
+                  
+                  def metadata = context.metadata[event.operationId];
+                  
+                  if (metadata != null
+                    && context.params.serviceName == metadata['service.name']
+                    && metadata['transaction.name'] != null 
+                    && context.params.transactionName == metadata['transaction.name']
+                  ) {
+                    context.entryTransactions.add(processedEvent);
+                  }
+
+                } else if (event.parentId == null) {
+                  context.entryTransactions.add(processedEvent);
+                }
                 
                 return processedEvent;
               }
@@ -219,13 +246,13 @@ export async function getAggregatedCriticalPath({
                 context.operationIdByNodeId[nodeId] = item.operationId;
                 
                 if (item.children.size() == 0) {
-                  count(context, nodeId, item.duration);
+                  count(context, nodeId, end - start);
                   return;
                 }
                 
                 item.children.sort((a, b) -> {
                   if (b.end === a.end) {
-                    return b.operationId.compareTo(a.operationId) > 0 ? 1 : -1;
+                    return 0;
                   }
                   if (b.end > a.end) {
                     return 1;
@@ -242,15 +269,13 @@ export async function getAggregatedCriticalPath({
                   double normalizedChildEnd = Math.min(childEnd, scanTime);
             
                   def isOnCriticalPath = !(
-                    (
-                      normalizedChildStart >= scanTime ||
-                      normalizedChildEnd < start ||
-                      childEnd > scanTime
-                    )
+                    normalizedChildStart >= scanTime ||
+                    normalizedChildEnd < start ||
+                    childEnd > scanTime
                   );
-            
+                  
                   if (!isOnCriticalPath) {
-                    return;
+                    continue;
                   }
                   
                   def childPath = path.clone();
@@ -263,7 +288,7 @@ export async function getAggregatedCriticalPath({
                     childNodes.add(childId);
                   }
                   
-                  if (normalizedChildEnd < scanTime - 1000) {
+                  if (normalizedChildEnd < (scanTime - 1000)) {
                     count(context, nodeId, scanTime - normalizedChildEnd); 
                   }
                   
@@ -295,7 +320,8 @@ export async function getAggregatedCriticalPath({
                 "entryTransactions": entryTransactions,
                 "timeByNodeId": timeByNodeId,
                 "nodes": nodes,
-                "operationIdByNodeId": operationIdByNodeId
+                "operationIdByNodeId": operationIdByNodeId,
+                "params": params
               ];
             
               for(state in states) {

@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
@@ -204,6 +205,8 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
     body: t.intersection([
       t.type({
         traceIds: t.array(t.string),
+        serviceName: t.union([nonEmptyStringRt, t.null]),
+        transactionName: t.union([nonEmptyStringRt, t.null]),
       }),
       rangeRt,
     ]),
@@ -216,7 +219,7 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
   ): Promise<{ criticalPath: CriticalPathResponse | null }> => {
     const {
       params: {
-        body: { traceIds, start, end },
+        body: { traceIds, start, end, serviceName, transactionName },
       },
     } = resources;
 
@@ -227,6 +230,8 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
       start,
       end,
       apmEventClient,
+      serviceName,
+      transactionName,
     });
   },
 });

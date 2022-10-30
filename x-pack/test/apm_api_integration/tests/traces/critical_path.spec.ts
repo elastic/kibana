@@ -46,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   async function fetchAndBuildCriticalPathTree(
     options: { fn: () => EntityIterable } & ({ serviceName: string; transactionName: string } | {})
   ) {
-    const { fn, ...filterOptions } = options;
+    const { fn } = options;
 
     const generator = fn();
 
@@ -64,6 +64,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             start: new Date(start).toISOString(),
             end: new Date(end).toISOString(),
             traceIds,
+            serviceName: 'serviceName' in options ? options.serviceName : null,
+            transactionName: 'transactionName' in options ? options.transactionName : null,
           },
         },
       })
@@ -74,7 +76,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const { rootNodes, maxDepth } = getAggregatedCriticalPathRootNodes({
           criticalPath,
-          ...filterOptions,
         });
 
         function hydrateNode(node: Node): HydratedNode {
@@ -122,6 +123,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         'processor.event': 'transaction',
         'transaction.type': 'request',
         'service.name': 'java',
+        'agent.name': 'java',
         'transaction.name': 'GET /api',
       });
     });
@@ -199,7 +201,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .service({ name: 'downstream', environment: 'production', agentName: 'java' })
         .instance('downstream');
 
-      const rate = 1;
+      const rate = 10;
 
       function generateTrace() {
         return timerange(start, end)
@@ -296,6 +298,86 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         {
           name: 'downstream',
           value: 2 * 400 * 1000 * rate,
+          children: [],
+        },
+      ]);
+    });
+
+    it('calculates the critical path for a specific transaction if its not part of the critical path of the entire trace', async () => {
+      const upstream = apm
+        .service({ name: 'upstream', environment: 'production', agentName: 'java' })
+        .instance('upstream');
+
+      const downstreamA = apm
+        .service({ name: 'downstreamA', environment: 'production', agentName: 'java' })
+        .instance('downstreamB');
+
+      const downstreamB = apm
+        .service({ name: 'downstreamB', environment: 'production', agentName: 'java' })
+        .instance('downstreamB');
+
+      const rate = 10;
+
+      function generateTrace() {
+        return timerange(start, end)
+          .interval('15m')
+          .rate(rate)
+          .generator((timestamp) => {
+            return [
+              upstream
+                .transaction('GET /upstream')
+                .timestamp(timestamp)
+                .duration(500)
+                .children(
+                  upstream
+                    .span('GET /downstreamA', 'external', 'http')
+                    .timestamp(timestamp)
+                    .duration(500)
+                    .children(
+                      downstreamA
+                        .transaction('downstreamA')
+                        .timestamp(timestamp + 50)
+                        .duration(400)
+                    ),
+                  upstream
+                    .span('GET /downstreamB', 'external', 'http')
+                    .timestamp(timestamp)
+                    .duration(400)
+                    .children(
+                      downstreamB
+                        .transaction('downstreamB')
+                        .timestamp(timestamp + 50)
+                        .duration(400)
+                    )
+                ),
+            ];
+          });
+      }
+
+      const { rootNodes: unfilteredRootNodes } = await fetchAndBuildCriticalPathTree({
+        fn: () => generateTrace(),
+      });
+
+      expect(formatTree(unfilteredRootNodes)[0].children[0].children).to.eql([
+        {
+          name: 'downstreamA',
+          value: 400 * rate * 1000,
+          children: [],
+        },
+      ]);
+
+      await synthtraceEsClient.clean();
+
+      const { rootNodes: filteredRootNodes } = await fetchAndBuildCriticalPathTree({
+        fn: () => generateTrace(),
+        serviceName: 'downstreamB',
+        transactionName: 'downstreamB',
+      });
+
+      expect(formatTree(filteredRootNodes)).to.eql([
+        {
+          name: 'downstreamB',
+          value: 400 * rate * 1000,
           children: [],
         },
       ]);

@@ -25,7 +25,7 @@ export function criticalPathToFlamegraph(
 ): {
   viewModel: ColumnarViewModel;
   operationId: string[];
-  countInclusive: Float64Array;
+  countExclusive: Float64Array;
   sum: number;
 } {
   let sum = 0;
@@ -136,7 +136,7 @@ export function criticalPathToFlamegraph(
       size1: size,
     },
     operationId,
-    countInclusive,
+    countExclusive,
     sum,
   };
 }
