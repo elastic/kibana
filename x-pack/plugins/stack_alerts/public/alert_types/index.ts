@@ -10,15 +10,12 @@ import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/publi
 import { getAlertType as getGeoContainmentAlertType } from './geo_containment';
 import { getAlertType as getThresholdAlertType } from './threshold';
 import { getAlertType as getEsQueryAlertType } from './es_query';
-import { Config } from '../../common';
 
 export function registerAlertTypes({
   ruleTypeRegistry,
-  config,
   alerting,
 }: {
   ruleTypeRegistry: TriggersAndActionsUIPublicPluginSetup['ruleTypeRegistry'];
-  config: Config;
   alerting: AlertingSetup;
 }) {
   ruleTypeRegistry.register(getGeoContainmentAlertType());
