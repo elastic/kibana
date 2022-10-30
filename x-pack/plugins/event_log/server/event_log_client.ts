@@ -12,7 +12,7 @@ import { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
-import { KueryNode } from '@kbn/core-saved-objects-api-server';
+import { KueryNode } from '@kbn/es-query';
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';

@@ -5,13 +5,61 @@
     "functions": [
       {
         "parentPluginId": "files",
+        "id": "def-public.FilePicker",
+        "type": "Function",
+        "tags": [],
+        "label": "FilePicker",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          "<string>) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/files/public/components/file_picker/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilePicker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "files",
+                "scope": "public",
+                "docId": "kibFilesPluginApi",
+                "section": "def-public.Props",
+                "text": "Props"
+              },
+              "<string>"
+            ],
+            "path": "x-pack/plugins/files/public/components/file_picker/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
         "id": "def-public.FilesContext",
         "type": "Function",
         "tags": [],
         "label": "FilesContext",
         "description": [],
         "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+          "({ client, children }: React.PropsWithChildren<ContextProps>) => JSX.Element"
         ],
         "path": "x-pack/plugins/files/public/components/context.tsx",
         "deprecated": false,
@@ -20,12 +68,12 @@
           {
             "parentPluginId": "files",
             "id": "def-public.FilesContext.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{ children }",
+            "label": "{ client, children }",
             "description": [],
             "signature": [
-              "{ children?: React.ReactNode; }"
+              "React.PropsWithChildren<ContextProps>"
             ],
             "path": "x-pack/plugins/files/public/components/context.tsx",
             "deprecated": false,
@@ -163,7 +211,7 @@
               "\nCreate a new file object with the provided metadata.\n"
             ],
             "signature": [
-              "(args: Readonly<{ meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; mimeType?: string | undefined; } & { name: string; }> & { kind: string; }) => Promise<{ file: ",
+              "(args: Readonly<{ meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; mimeType?: string | undefined; } & { name: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }) => Promise<{ file: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -188,7 +236,7 @@
                   "- create file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { abortSignal?: AbortSignal | undefined; } & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -206,7 +254,7 @@
               "\nDelete a file object and all associated share and content objects.\n"
             ],
             "signature": [
-              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ ok: true; }>"
+              "(args: Readonly<{} & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }) => Promise<{ ok: true; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -223,7 +271,7 @@
                   "- delete file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { abortSignal?: AbortSignal | undefined; } & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -241,7 +289,7 @@
               "\nGet a file object by ID.\n"
             ],
             "signature": [
-              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ file: ",
+              "(args: Readonly<{} & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }) => Promise<{ file: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -266,7 +314,7 @@
                   "- get file by ID args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { abortSignal?: AbortSignal | undefined; } & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -284,7 +332,7 @@
               "\nList all file objects, of a given {@link FileKind}.\n"
             ],
             "signature": [
-              "(args: Readonly<{ name?: string | string[] | undefined; status?: string | string[] | undefined; meta?: Readonly<{} & {}> | undefined; extension?: string | string[] | undefined; } & {}> & Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { kind: string; }) => Promise<{ files: ",
+              "(args: Readonly<{ name?: string | string[] | undefined; status?: string | string[] | undefined; meta?: Readonly<{} & {}> | undefined; extension?: string | string[] | undefined; } & {}> & Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }) => Promise<{ files: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -309,7 +357,7 @@
                   "- list files args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { abortSignal?: AbortSignal | undefined; } & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -327,7 +375,7 @@
               "\nUpdate a set of of metadata values of the file object.\n"
             ],
             "signature": [
-              "(args: Readonly<{ name?: string | undefined; meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; } & {}> & Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ file: ",
+              "(args: Readonly<{ name?: string | undefined; meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; } & {}> & Readonly<{} & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }) => Promise<{ file: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -352,7 +400,7 @@
                   "- update file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { abortSignal?: AbortSignal | undefined; } & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -406,7 +454,7 @@
               "\nStream a download of the file object's content.\n"
             ],
             "signature": [
-              "(args: Readonly<{ fileName?: string | undefined; } & { id: string; }> & { kind: string; }) => Promise<any>"
+              "(args: Readonly<{ fileName?: string | undefined; } & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }) => Promise<any>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -423,7 +471,7 @@
                   "- download file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { abortSignal?: AbortSignal | undefined; } & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -495,7 +543,7 @@
               "\nShare a file by creating a new file share instance.\n"
             ],
             "signature": [
-              "(args: Readonly<{ name?: string | undefined; validUntil?: number | undefined; } & {}> & Readonly<{} & { fileId: string; }> & { kind: string; }) => Promise<",
+              "(args: Readonly<{ name?: string | undefined; validUntil?: number | undefined; } & {}> & Readonly<{} & { fileId: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }) => Promise<",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -520,7 +568,7 @@
                   "- File share arguments"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { abortSignal?: AbortSignal | undefined; } & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -538,7 +586,7 @@
               "\nDelete a file share instance.\n"
             ],
             "signature": [
-              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ ok: true; }>"
+              "(args: Readonly<{} & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }) => Promise<{ ok: true; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -555,7 +603,7 @@
                   "- File unshare arguments"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { abortSignal?: AbortSignal | undefined; } & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -573,7 +621,7 @@
               "\nGet a file share instance.\n"
             ],
             "signature": [
-              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ share: ",
+              "(args: Readonly<{} & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }) => Promise<{ share: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -598,7 +646,7 @@
                   "- Get file share arguments"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { abortSignal?: AbortSignal | undefined; } & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -616,7 +664,7 @@
               "\nList all file shares. Optionally scoping to a specific\nfile.\n"
             ],
             "signature": [
-              "(args: Readonly<{ page?: number | undefined; perPage?: number | undefined; forFileId?: string | undefined; } & {}> & { kind: string; }) => Promise<{ shares: ",
+              "(args: Readonly<{ page?: number | undefined; perPage?: number | undefined; forFileId?: string | undefined; } & {}> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }) => Promise<{ shares: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -641,7 +689,7 @@
                   "- Get file share arguments"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { abortSignal?: AbortSignal | undefined; } & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -898,29 +946,6 @@
           },
           {
             "parentPluginId": "files",
-            "id": "def-public.Props.client",
-            "type": "Object",
-            "tags": [],
-            "label": "client",
-            "description": [
-              "\nA files client that will be used process uploads."
-            ],
-            "signature": [
-              {
-                "pluginId": "files",
-                "scope": "public",
-                "docId": "kibFilesPluginApi",
-                "section": "def-public.FilesClient",
-                "text": "FilesClient"
-              },
-              "<any>"
-            ],
-            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
             "id": "def-public.Props.allowClear",
             "type": "CompoundType",
             "tags": [
@@ -971,6 +996,22 @@
           },
           {
             "parentPluginId": "files",
+            "id": "def-public.Props.fullWidth",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fullWidth",
+            "description": [
+              "\nWhether to display the file picker with width 100%;"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
             "id": "def-public.Props.allowRepeatedUploads",
             "type": "CompoundType",
             "tags": [
@@ -982,6 +1023,22 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.initialPromptText",
+            "type": "string",
+            "tags": [],
+            "label": "initialPromptText",
+            "description": [
+              "\nThe initial text prompt"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
             "deprecated": false,
@@ -1054,6 +1111,224 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onUploadStart",
+            "type": "Function",
+            "tags": [],
+            "label": "onUploadStart",
+            "description": [
+              "\nWill be called whenever an upload starts"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onUploadEnd",
+            "type": "Function",
+            "tags": [],
+            "label": "onUploadEnd",
+            "description": [
+              "\nWill be called when attempt ends, in error otherwise"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.compressed",
+            "type": "CompoundType",
+            "tags": [
+              "default",
+              "note"
+            ],
+            "label": "compressed",
+            "description": [
+              "\nWhether to display the component in it's compact form.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.multiple",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "multiple",
+            "description": [
+              "\nAllow upload more than one file at a time\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          "<Kind>"
+        ],
+        "path": "x-pack/plugins/files/public/components/file_picker/file_picker.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.kind",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "kind",
+            "description": [
+              "\nThe file kind that was passed to the registry."
+            ],
+            "signature": [
+              "Kind"
+            ],
+            "path": "x-pack/plugins/files/public/components/file_picker/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [
+              "\nWill be called when the modal is closed"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/files/public/components/file_picker/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onDone",
+            "type": "Function",
+            "tags": [],
+            "label": "onDone",
+            "description": [
+              "\nWill be called after a user has a selected a set of files"
+            ],
+            "signature": [
+              "(fileIds: string[]) => void"
+            ],
+            "path": "x-pack/plugins/files/public/components/file_picker/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.Props.onDone.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "fileIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/files/public/components/file_picker/file_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onUpload",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpload",
+            "description": [
+              "\nWhen a user has succesfully uploaded some files this callback will be called"
+            ],
+            "signature": [
+              "((done: ",
+              "DoneNotification",
+              "[]) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/file_picker/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.Props.onUpload.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "done",
+                "description": [],
+                "signature": [
+                  "DoneNotification",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/files/public/components/file_picker/file_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [
+              "\nThe number of results to show per page."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/file_picker/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1158,7 +1433,7 @@
           "\nA files client that is scoped to a specific {@link FileKind}.\n\nMore convenient if you want to re-use the same client for the same file kind\nand not specify the kind every time."
         ],
         "signature": [
-          "{ create: (arg: Omit<Readonly<{ meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; mimeType?: string | undefined; } & { name: string; }> & { kind: string; }, \"kind\">) => Promise<{ file: ",
+          "{ create: (arg: Omit<Readonly<{ meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; mimeType?: string | undefined; } & { name: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }, \"kind\">) => Promise<{ file: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1166,7 +1441,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<M>; }>; delete: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ ok: true; }>; getById: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ file: ",
+          "<M>; }>; delete: (arg: Omit<Readonly<{} & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }, \"kind\">) => Promise<{ ok: true; }>; getById: (arg: Omit<Readonly<{} & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }, \"kind\">) => Promise<{ file: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1174,7 +1449,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<M>; }>; list: (arg?: Omit<Readonly<{ name?: string | string[] | undefined; status?: string | string[] | undefined; meta?: Readonly<{} & {}> | undefined; extension?: string | string[] | undefined; } & {}> & Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { kind: string; }, \"kind\"> | undefined) => Promise<{ files: ",
+          "<M>; }>; list: (arg?: Omit<Readonly<{ name?: string | string[] | undefined; status?: string | string[] | undefined; meta?: Readonly<{} & {}> | undefined; extension?: string | string[] | undefined; } & {}> & Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }, \"kind\"> | undefined) => Promise<{ files: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1182,7 +1457,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<M>[]; total: number; }>; update: (arg: Omit<Readonly<{ name?: string | undefined; meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; } & {}> & Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ file: ",
+          "<M>[]; total: number; }>; update: (arg: Omit<Readonly<{ name?: string | undefined; meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; } & {}> & Readonly<{} & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }, \"kind\">) => Promise<{ file: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1190,7 +1465,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<M>; }>; upload: (arg: Omit<Readonly<{} & { id: string; }> & Readonly<{ selfDestructOnAbort?: boolean | undefined; } & {}> & { body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }, \"kind\">) => Promise<{ ok: true; size: number; }>; download: (arg: Omit<Readonly<{ fileName?: string | undefined; } & { id: string; }> & { kind: string; }, \"kind\">) => Promise<any>; getDownloadHref: (arg: Omit<Pick<",
+          "<M>; }>; upload: (arg: Omit<Readonly<{} & { id: string; }> & Readonly<{ selfDestructOnAbort?: boolean | undefined; } & {}> & { body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }, \"kind\">) => Promise<{ ok: true; size: number; }>; download: (arg: Omit<Readonly<{ fileName?: string | undefined; } & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }, \"kind\">) => Promise<any>; getDownloadHref: (arg: Omit<Pick<",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1198,7 +1473,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>, \"id\" | \"fileKind\">, \"kind\">) => string; share: (arg: Omit<Readonly<{ name?: string | undefined; validUntil?: number | undefined; } & {}> & Readonly<{} & { fileId: string; }> & { kind: string; }, \"kind\">) => Promise<",
+          "<unknown>, \"id\" | \"fileKind\">, \"kind\">) => string; share: (arg: Omit<Readonly<{ name?: string | undefined; validUntil?: number | undefined; } & {}> & Readonly<{} & { fileId: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }, \"kind\">) => Promise<",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1206,7 +1481,7 @@
             "section": "def-common.FileShareJSONWithToken",
             "text": "FileShareJSONWithToken"
           },
-          ">; unshare: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ ok: true; }>; getShare: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ share: ",
+          ">; unshare: (arg: Omit<Readonly<{} & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }, \"kind\">) => Promise<{ ok: true; }>; getShare: (arg: Omit<Readonly<{} & { id: string; }> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }, \"kind\">) => Promise<{ share: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1214,7 +1489,7 @@
             "section": "def-common.FileShareJSON",
             "text": "FileShareJSON"
           },
-          "; }>; listShares: (arg: Omit<Readonly<{ page?: number | undefined; perPage?: number | undefined; forFileId?: string | undefined; } & {}> & { kind: string; }, \"kind\">) => Promise<{ shares: ",
+          "; }>; listShares: (arg: Omit<Readonly<{ page?: number | undefined; perPage?: number | undefined; forFileId?: string | undefined; } & {}> & { abortSignal?: AbortSignal | undefined; } & { kind: string; }, \"kind\">) => Promise<{ shares: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1230,7 +1505,7 @@
             "section": "def-common.FilesMetrics",
             "text": "FilesMetrics"
           },
-          ">; publicDownload: (arg: Omit<Readonly<{ fileName?: string | undefined; } & {}> & Readonly<{} & { token: string; }>, \"kind\">) => Promise<any>; find: (arg: Omit<Readonly<{ name?: string | string[] | undefined; status?: string | string[] | undefined; meta?: Readonly<{} & {}> | undefined; kind?: string | string[] | undefined; extension?: string | string[] | undefined; } & {}> & Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}>, \"kind\">) => Promise<{ files: ",
+          ">; publicDownload: (arg: Omit<Readonly<{ fileName?: string | undefined; } & {}> & Readonly<{} & { token: string; }> & { abortSignal?: AbortSignal | undefined; }, \"kind\">) => Promise<any>; find: (arg: Omit<Readonly<{ name?: string | string[] | undefined; status?: string | string[] | undefined; meta?: Readonly<{} & {}> | undefined; kind?: string | string[] | undefined; extension?: string | string[] | undefined; } & {}> & Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { abortSignal?: AbortSignal | undefined; }, \"kind\">) => Promise<{ files: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -2696,7 +2971,13 @@
               "\nA logger for debuggin purposes"
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
@@ -3886,7 +4167,13 @@
             ],
             "signature": [
               "(req: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "files",
@@ -3910,7 +4197,13 @@
                   "- the Kibana request to scope the service to"
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/files/server/file_service/file_service_factory.ts",
@@ -6539,7 +6832,13 @@
           "\nAn {@link SavedObject} containing a file object (i.e., metadata only)."
         ],
         "signature": [
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "files",

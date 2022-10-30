@@ -212,7 +212,7 @@
             "label": "getDisplayName",
             "description": [],
             "signature": [
-              "() => string"
+              "() => any"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
@@ -552,7 +552,13 @@
                 "text": "DashboardStart"
               },
               "; }, unknown, ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
               ">"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
@@ -642,7 +648,13 @@
               "; navigate(options: ",
               "RedirectOptions",
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
               {
                 "pluginId": "share",
@@ -758,7 +770,13 @@
               "; navigate(options: ",
               "RedirectOptions",
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">): void; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
@@ -964,7 +982,13 @@
             "text": "SerializedEvent"
           },
           "; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           "[]; }"
         ],
         "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
@@ -1016,7 +1040,13 @@
             "text": "SerializedEvent"
           },
           ", references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           "[]) => ",
           {
             "pluginId": "uiActionsEnhanced",

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
@@ -16,6 +16,7 @@ import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-ana
 import { trackClicks } from './track_clicks';
 import { getSessionId } from './get_session_id';
 import { createLogger } from './logger';
+import { trackViewportSize } from './track_viewport_size';
 
 /** @internal */
 export interface AnalyticsServiceSetupDeps {
@@ -24,6 +25,7 @@ export interface AnalyticsServiceSetupDeps {
 
 export class AnalyticsService {
   private readonly analyticsClient: AnalyticsClient;
+  private readonly subscriptionsHandler = new Subscription();
 
   constructor(core: CoreContext) {
     this.analyticsClient = createAnalytics({
@@ -41,7 +43,8 @@ export class AnalyticsService {
     // and can benefit other consumers of the client.
     this.registerSessionIdContext();
     this.registerBrowserInfoAnalyticsContext();
-    trackClicks(this.analyticsClient, core.env.mode.dev);
+    this.subscriptionsHandler.add(trackClicks(this.analyticsClient, core.env.mode.dev));
+    this.subscriptionsHandler.add(trackViewportSize(this.analyticsClient));
   }
 
   public setup({ injectedMetadata }: AnalyticsServiceSetupDeps): AnalyticsServiceSetup {
@@ -67,6 +70,7 @@ export class AnalyticsService {
   }
 
   public stop() {
+    this.subscriptionsHandler.unsubscribe();
     this.analyticsClient.shutdown();
   }
 
