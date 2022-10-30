@@ -43,12 +43,10 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
   const executeBulkAction = useCallback(
     async (bulkActionDescriptor: BulkActionDescriptor) => {
       try {
-        const isAllSelected = !!rulesTableContext?.state.isAllSelected;
-
         setLoadingRules?.({
           ids:
             bulkActionDescriptor.ids ??
-            (isAllSelected ? rulesTableContext?.state.rules.map((r) => r.id) ?? [] : []),
+            allRuleIdsForBulkAction(rulesTableContext, bulkActionDescriptor),
           action: bulkActionDescriptor.type,
         });
 
@@ -94,4 +92,19 @@ function sendTelemetry(action: BulkAction, response: BulkActionResponse): void {
         : TELEMETRY_EVENT.CUSTOM_RULE_ENABLED
     );
   }
+}
+
+function allRuleIdsForBulkAction(
+  rulesTableContext: ReturnType<typeof useRulesTableContextOptional>,
+  bulkActionDescriptor: BulkActionDescriptor
+): string[] {
+  const allRules = rulesTableContext?.state.isAllSelected ? rulesTableContext.state.rules : [];
+  const processingRules =
+    bulkActionDescriptor.type === BulkAction.enable
+      ? allRules.filter((x) => !x.enabled)
+      : bulkActionDescriptor.type === BulkAction.disable
+      ? allRules.filter((x) => x.enabled)
+      : allRules;
+
+  return processingRules.map((r) => r.id);
 }
