@@ -11,7 +11,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { FilterLabel } from '@kbn/unified-search-plugin/public';
+import { FilterContent } from '@kbn/unified-search-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { SeverityBadge } from '../severity_badge';
@@ -147,7 +147,7 @@ describe('helpers', () => {
         } as unknown as DataViewBase,
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
-      const filterLabelComponent = wrapper.find(FilterLabel).at(0);
+      const filterLabelComponent = wrapper.find(FilterContent).at(0);
 
       expect(result[0].title).toEqual(<>{i18n.FILTERS_LABEL} </>);
       expect(filterLabelComponent.prop('valueLabel')).toEqual('file');

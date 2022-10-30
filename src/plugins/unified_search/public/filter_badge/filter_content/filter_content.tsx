@@ -49,7 +49,7 @@ export interface FilterContentProps {
   fieldLabel?: string;
 }
 
-function FilterContent({ filter, valueLabel, fieldLabel }: FilterContentProps) {
+export function FilterContent({ filter, valueLabel, fieldLabel }: FilterContentProps) {
   switch (filter.meta.type) {
     case FILTERS.EXISTS:
       return (
