@@ -140,6 +140,13 @@ export default function (providerContext: FtrProviderContext) {
       expect(typeof agent3data.body.item.unenrollment_started_at).to.be('undefined');
       expect(typeof agent3data.body.item.unenrolled_at).to.be('undefined');
       expect(agent2data.body.item.active).to.eql(true);
+
+      const { body } = await supertest
+        .get(`/api/fleet/agents/action_status`)
+        .set('kbn-xsrf', 'xxx');
+      const actionStatus = body.items[0];
+      expect(actionStatus.status).to.eql('FAILED');
+      expect(actionStatus.nbAgentsFailed).to.eql(2);
     });
 
     it('/agents/bulk_unenroll should allow to unenroll multiple agents by id from an regular agent policy', async () => {

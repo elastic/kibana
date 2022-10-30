@@ -16,7 +16,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
 import { SecuritySolutionContext } from '../../containers/security_solution_context';
 import { getSecuritySolutionContextMock } from './mock_security_context';
-import { IndicatorsFiltersContext } from '../../modules/indicators/context';
+import { IndicatorsFiltersContext } from '../../modules/indicators';
 import { FieldTypesContext } from '../../containers/field_types_provider';
 import { generateFieldTypeMap } from './mock_field_type_map';
 import { mockUiSettingsService } from './mock_kibana_ui_settings_service';

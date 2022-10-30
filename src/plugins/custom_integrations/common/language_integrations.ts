@@ -37,9 +37,9 @@ export const languageIntegrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.JavascriptDescription', {
       defaultMessage: 'Index data to Elasticsearch with the JavaScript client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/javascript-api/{branch}/introduction.html`,
+    docUrlTemplate: '',
     integrationsAppUrl: `/app/integrations/language_clients/javascript/overview`,
-    exportLanguageUiComponent: false,
+    exportLanguageUiComponent: true,
   },
   {
     id: 'ruby',
@@ -145,4 +145,18 @@ export const languageIntegrations: LanguageIntegration[] = [
     integrationsAppUrl: `/app/integrations/language_clients/java/overview`,
     exportLanguageUiComponent: false,
   },
+  // Uncomment to show the sample language client card + README UI
+  // {
+  //   id: 'sample',
+  //   title: i18n.translate('customIntegrations.languageclients.SampleTitle', {
+  //     defaultMessage: 'Sample Language Client',
+  //   }),
+  //   icon: 'es.svg',
+  //   description: i18n.translate('customIntegrations.languageclients.SampleDescription', {
+  //     defaultMessage: 'Sample language client',
+  //   }),
+  //   docUrlTemplate: '',
+  //   integrationsAppUrl: `/app/integrations/language_clients/sample/overview`,
+  //   exportLanguageUiComponent: true,
+  // },
 ];

@@ -6,8 +6,8 @@
  */
 
 import { assertNever } from '@kbn/std';
-import { AllCasesSelectorModalProps } from '../all_cases/selector_modal';
-import { CreateCaseFlyoutProps } from '../create/flyout';
+import type { AllCasesSelectorModalProps } from '../all_cases/selector_modal';
+import type { CreateCaseFlyoutProps } from '../create/flyout';
 
 export const getInitialCasesContextState = (): CasesContextState => {
   return {

@@ -10,11 +10,13 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { Inspect, Maybe, PageInfoPaginated } from '../../../common';
 import type { RequestOptionsPaginated } from '../..';
 import type { SortableUsersFields } from '../common';
+import type { RiskSeverity } from '../../risk_score';
 
 export interface User {
   name: string;
   lastSeen: string;
   domain: string;
+  risk?: RiskSeverity;
 }
 
 export interface UsersStrategyResponse extends IEsSearchResponse {

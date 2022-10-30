@@ -7,8 +7,6 @@
 
 import * as t from 'io-ts';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
-import { keyBy, mapValues } from 'lodash';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
 import { getServiceGroups } from './get_service_groups';
@@ -18,6 +16,7 @@ import { deleteServiceGroup } from './delete_service_group';
 import { lookupServices } from './lookup_services';
 import { SavedServiceGroup } from '../../../common/service_groups';
 import { getServicesCounts } from './get_services_counts';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const serviceGroupsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-groups',
@@ -52,50 +51,26 @@ const serviceGroupsWithServiceCountRoute = createApmServerRoute({
     const { context, params } = resources;
     const {
       savedObjects: { client: savedObjectsClient },
-      uiSettings: { client: uiSettingsClient },
     } = await context.core;
 
     const {
       query: { start, end },
     } = params;
 
-    const [setup, maxNumberOfServices] = await Promise.all([
-      setupRequest(resources),
-      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
 
     const serviceGroups = await getServiceGroups({
       savedObjectsClient,
     });
 
-    const serviceGroupsWithServiceCount = await Promise.all(
-      serviceGroups.map(
-        async ({
-          id,
-          kuery,
-        }): Promise<{ id: string; servicesCount: number }> => {
-          const servicesCount = await getServicesCounts({
-            setup,
-            kuery,
-            maxNumberOfServices,
-            start,
-            end,
-          });
-
-          return {
-            id,
-            servicesCount,
-          };
-        }
-      )
-    );
-
-    const servicesCounts = mapValues(
-      keyBy(serviceGroupsWithServiceCount, 'id'),
-      'servicesCount'
-    );
-
-    return { servicesCounts };
+    return {
+      servicesCounts: await getServicesCounts({
+        apmEventClient,
+        serviceGroups,
+        start,
+        end,
+      }),
+    };
   },
 });
 
@@ -189,12 +164,12 @@ const serviceGroupServicesRoute = createApmServerRoute({
     const {
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
-    const [setup, maxNumberOfServices] = await Promise.all([
-      setupRequest(resources),
+    const [apmEventClient, maxNumberOfServices] = await Promise.all([
+      getApmEventClient(resources),
       uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
     ]);
     const items = await lookupServices({
-      setup,
+      apmEventClient,
       kuery,
       start,
       end,

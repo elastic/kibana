@@ -12,12 +12,14 @@
   "requiredPlugins": [
     "actions",
     "data",
+    "licensing",
     "dataViews",
     "discover",
     "features",
     "navigation",
     "taskManager",
     "triggersActionsUi",
+    "ruleRegistry",
     "security"
   ],
   "server": true,

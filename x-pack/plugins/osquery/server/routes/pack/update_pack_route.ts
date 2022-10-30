@@ -285,6 +285,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     {
                       queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
                         removeMultiLines: true,
+                        removeResultType: true,
                       }),
                     }
                   );
@@ -315,7 +316,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      queries: updatedPackSO.attributes.queries,
+                      queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
+                        removeResultType: true,
+                      }),
                     }
                   );
 

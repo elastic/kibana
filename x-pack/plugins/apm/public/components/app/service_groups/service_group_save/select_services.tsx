@@ -36,7 +36,7 @@ const CentralizedContainer = styled.div`
 `;
 
 const MAX_CONTAINER_HEIGHT = 600;
-const MODAL_HEADER_HEIGHT = 122;
+const MODAL_HEADER_HEIGHT = 180;
 const MODAL_FOOTER_HEIGHT = 80;
 
 const suggestedFieldsWhitelist = [
@@ -118,10 +118,73 @@ export function SelectServices({
               'xpack.apm.serviceGroups.selectServicesForm.subtitle',
               {
                 defaultMessage:
-                  'Use a query to select services for this group. Services that match this query within the last 24 hours will be assigned to the group.',
+                  'Use a query to select services for this group. The preview shows services that match this query within the last 24 hours.',
               }
             )}
           </EuiText>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <KueryBar
+                placeholder={i18n.translate(
+                  'xpack.apm.serviceGroups.selectServicesForm.kql',
+                  { defaultMessage: 'E.g. labels.team: "web"' }
+                )}
+                onSubmit={(value) => {
+                  setKuery(value);
+                }}
+                onChange={(value) => {
+                  setStagedKuery(value);
+                }}
+                value={kuery}
+                suggestionFilter={(querySuggestion) => {
+                  if ('field' in querySuggestion) {
+                    const {
+                      field: {
+                        spec: { name: fieldName },
+                      },
+                    } = querySuggestion;
+
+                    return (
+                      fieldName.startsWith('label') ||
+                      suggestedFieldsWhitelist.includes(fieldName)
+                    );
+                  }
+                  return true;
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => {
+                  setKuery(stagedKuery);
+                }}
+                iconType={!kuery ? 'search' : 'refresh'}
+                isDisabled={isServiceListPreviewLoading || !stagedKuery}
+              >
+                {!kuery
+                  ? i18n.translate(
+                      'xpack.apm.serviceGroups.selectServicesForm.preview',
+                      { defaultMessage: 'Preview' }
+                    )
+                  : i18n.translate(
+                      'xpack.apm.serviceGroups.selectServicesForm.refresh',
+                      { defaultMessage: 'Refresh' }
+                    )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {kuery && data?.items && (
+            <EuiText color="success" size="s">
+              {i18n.translate(
+                'xpack.apm.serviceGroups.selectServicesForm.matchingServiceCount',
+                {
+                  defaultMessage:
+                    '{servicesCount} {servicesCount, plural, =0 {services} one {service} other {services}} match the query',
+                  values: { servicesCount: data?.items.length },
+                }
+              )}
+            </EuiText>
+          )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody
@@ -136,73 +199,6 @@ export function SelectServices({
           gutterSize="s"
           style={{ height: '100%' }}
         >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <KueryBar
-                  placeholder={i18n.translate(
-                    'xpack.apm.serviceGroups.selectServicesForm.kql',
-                    { defaultMessage: 'E.g. labels.team: "web"' }
-                  )}
-                  onSubmit={(value) => {
-                    setKuery(value);
-                  }}
-                  onChange={(value) => {
-                    setStagedKuery(value);
-                  }}
-                  value={kuery}
-                  suggestionFilter={(querySuggestion) => {
-                    if ('field' in querySuggestion) {
-                      const {
-                        field: {
-                          spec: { name: fieldName },
-                        },
-                      } = querySuggestion;
-
-                      return (
-                        fieldName.startsWith('label') ||
-                        suggestedFieldsWhitelist.includes(fieldName)
-                      );
-                    }
-                    return true;
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={() => {
-                    setKuery(stagedKuery);
-                  }}
-                  iconType={!kuery ? 'search' : 'refresh'}
-                  isDisabled={isServiceListPreviewLoading || !stagedKuery}
-                >
-                  {!kuery
-                    ? i18n.translate(
-                        'xpack.apm.serviceGroups.selectServicesForm.preview',
-                        { defaultMessage: 'Preview' }
-                      )
-                    : i18n.translate(
-                        'xpack.apm.serviceGroups.selectServicesForm.refresh',
-                        { defaultMessage: 'Refresh' }
-                      )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {kuery && data?.items && (
-            <EuiFlexItem grow={false}>
-              <EuiText color="success" size="s">
-                {i18n.translate(
-                  'xpack.apm.serviceGroups.selectServicesForm.matchingServiceCount',
-                  {
-                    defaultMessage:
-                      '{servicesCount} {servicesCount, plural, =0 {services} one {service} other {services}} match the query',
-                    values: { servicesCount: data?.items.length },
-                  }
-                )}
-              </EuiText>
-            </EuiFlexItem>
-          )}
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder paddingSize="s">
               {!kuery && (

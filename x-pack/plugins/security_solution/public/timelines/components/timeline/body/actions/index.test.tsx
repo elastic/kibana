@@ -7,12 +7,13 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-
+import { TableId, TimelineId } from '../../../../../../common/types/timeline';
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions, isAlert } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { licenseService } from '../../../../../common/hooks/use_license';
 
 jest.mock('../../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
@@ -63,6 +64,19 @@ jest.mock('../../../../../common/lib/kibana', () => {
   };
 });
 
+jest.mock('../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+    isEnterprise: jest.fn(() => false),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
+
 const defaultProps = {
   ariaRowindex: 2,
   checked: false,
@@ -83,7 +97,7 @@ const defaultProps = {
   setEventsLoading: () => {},
   showCheckboxes: true,
   showNotes: false,
-  timelineId: 'test',
+  timelineId: TimelineId.test,
   toggleShowNotes: () => {},
 };
 
@@ -122,6 +136,7 @@ describe('Actions', () => {
 
     expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
   });
+
   describe('Alert context menu enabled?', () => {
     test('it disables for eventType=raw', () => {
       const wrapper = mount(
@@ -224,6 +239,65 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
+    });
+
+    test('it should not show session view button on action tabs for basic users', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entry_leader: { entity_id: ['test_id'] } },
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(false);
+    });
+
+    test('it should show session view button on action tabs when user access the session viewer via K8S dashboard', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entry_leader: { entity_id: ['test_id'] } },
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions
+            {...defaultProps}
+            ecsData={ecsData}
+            timelineId={TableId.kubernetesPageSessions} // not a bug, this needs to be fixed by providing a generic interface for actions registry
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
+    });
+
+    test('it should show session view button on action tabs for enterprise users', () => {
+      const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+      licenseServiceMock.isEnterprise.mockReturnValue(true);
+
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entry_leader: { entity_id: ['test_id'] } },
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
     });
   });
 

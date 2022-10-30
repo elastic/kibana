@@ -126,6 +126,7 @@ export const useResponseActionsLogTable = ({
           wasSuccessful,
           isExpired,
           command: _command,
+          comment,
           parameters,
         } = item;
 
@@ -156,6 +157,10 @@ export const useResponseActionsLogTable = ({
           {
             title: OUTPUT_MESSAGES.expandSection.parameters,
             description: parametersList ? parametersList : emptyValue,
+          },
+          {
+            title: OUTPUT_MESSAGES.expandSection.comment,
+            description: comment ? comment : emptyValue,
           },
         ].map(({ title, description }) => {
           return {

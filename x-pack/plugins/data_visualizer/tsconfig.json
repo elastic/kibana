@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "../../../typings/**/*",
@@ -14,7 +13,7 @@
     "server/**/*",
     "types/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
@@ -28,6 +27,7 @@
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
     { "path": "../../../src/plugins/unified_search/tsconfig.json" },
     { "path": "../cloud/tsconfig.json" },
+    { "path": "../cloud_integrations/cloud_chat/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" }
   ]
 }

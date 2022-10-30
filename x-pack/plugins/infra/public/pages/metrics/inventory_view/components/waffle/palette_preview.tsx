@@ -28,9 +28,9 @@ export const PalettePreview = ({ steps, palette, reverse }: Props) => {
 };
 
 const Swatch = euiStyled.div`
-  width: 15px;
+  max-width: 15px;
   height: 12px;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   &:first-child {
     border-radius: ${(props) => props.theme.eui.euiBorderRadius} 0 0 ${(props) =>
   props.theme.eui.euiBorderRadius};

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { createDashboardSavedObjectType } from './dashboard';
+export { createDashboardSavedObjectType } from './dashboard_saved_object';

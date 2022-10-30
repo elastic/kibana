@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
+import { KueryNode } from '@kbn/es-query';
 import { SnoozeSchedule, BulkEditResponse } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
@@ -37,7 +38,7 @@ export async function snoozeRule({
 
 export interface BulkSnoozeRulesProps {
   ids?: string[];
-  filter?: string;
+  filter?: KueryNode | null | undefined;
   snoozeSchedule: SnoozeSchedule;
 }
 
@@ -51,7 +52,7 @@ export function bulkSnoozeRules({
   try {
     body = JSON.stringify({
       ids: ids?.length ? ids : undefined,
-      filter,
+      ...(filter ? { filter: JSON.stringify(filter) } : {}),
       operations: [
         {
           operation: 'set',

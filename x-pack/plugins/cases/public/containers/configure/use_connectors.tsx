@@ -9,14 +9,14 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchConnectors } from './api';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
 import * as i18n from './translations';
-import { CASE_CONNECTORS_CACHE_KEY } from '../constants';
-import { ServerError } from '../../types';
+import { casesQueriesKeys } from '../constants';
+import type { ServerError } from '../../types';
 
 export function useGetConnectors() {
   const toasts = useToasts();
   const { actions } = useApplicationCapabilities();
   return useQuery(
-    [CASE_CONNECTORS_CACHE_KEY],
+    casesQueriesKeys.connectorsList(),
     async () => {
       if (!actions.read) {
         return [];

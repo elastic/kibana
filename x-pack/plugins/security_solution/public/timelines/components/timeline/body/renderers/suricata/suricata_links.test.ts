@@ -9,13 +9,13 @@ import { getLinksFromSignature, getBeginningTokens } from './suricata_links';
 
 describe('SuricataLinks', () => {
   describe('#getLinksFromSignature', () => {
-    test('it should return an empty array when the link does not exist', () => {
-      const links = getLinksFromSignature(9999999999);
+    test('it should return an empty array when the link does not exist', async () => {
+      const links = await getLinksFromSignature(9999999999);
       expect(links).toEqual([]);
     });
 
-    test('it should return a valid unique set of rules (if analyst has added duplicate refs)', () => {
-      const links = getLinksFromSignature(2019415);
+    test('it should return a valid unique set of rules (if analyst has added duplicate refs)', async () => {
+      const links = await getLinksFromSignature(2019415);
       expect(links).toEqual([
         'http://cve.mitre.org/cgi-bin/cvename.cgi?name=2014-3566',
         'http://blog.fox-it.com/2014/10/15/poodle/',

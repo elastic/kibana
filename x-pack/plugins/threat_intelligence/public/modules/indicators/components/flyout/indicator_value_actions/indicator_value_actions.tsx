@@ -5,18 +5,30 @@
  * 2.0.
  */
 
-import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import React, { VFC } from 'react';
-import { Indicator } from '../../../../../../common/types/indicator';
-import { FilterIn } from '../../../../query_bar/components/filter_in';
-import { FilterOut } from '../../../../query_bar/components/filter_out';
-import { AddToTimeline } from '../../../../timeline/components/add_to_timeline';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils/field_value';
+import React, { useState, VFC } from 'react';
+import {
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Indicator } from '../../../types';
+import { FilterInButtonIcon, FilterOutButtonIcon } from '../../../../query_bar';
+import { AddToTimelineContextMenu } from '../../../../timeline';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils';
+import { CopyToClipboardContextMenu } from '../../copy_to_clipboard';
 
 export const TIMELINE_BUTTON_TEST_ID = 'TimelineButton';
 export const FILTER_IN_BUTTON_TEST_ID = 'FilterInButton';
 export const FILTER_OUT_BUTTON_TEST_ID = 'FilterOutButton';
+export const COPY_TO_CLIPBOARD_BUTTON_TEST_ID = 'CopyToClipboardButton';
+export const POPOVER_BUTTON_TEST_ID = 'PopoverButton';
+
+const MORE_ACTIONS_BUTTON_LABEL = i18n.translate('xpack.threatIntelligence.more-actions.popover', {
+  defaultMessage: 'More actions',
+});
 
 interface IndicatorValueActions {
   /**
@@ -28,10 +40,6 @@ interface IndicatorValueActions {
    */
   field: string;
   /**
-   * Only used with `EuiDataGrid` (see {@link AddToTimelineButtonProps}).
-   */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  /**
    * Used for unit and e2e tests.
    */
   ['data-test-subj']?: string;
@@ -40,28 +48,51 @@ interface IndicatorValueActions {
 export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
   indicator,
   field,
-  Component,
-  ...props
+  'data-test-subj': dataTestSubj,
 }) => {
+  const [isPopoverOpen, setPopover] = useState(false);
+
   const { key, value } = getIndicatorFieldAndValue(indicator, field);
   if (!fieldAndValueValid(key, value)) {
     return null;
   }
 
-  const filterInTestId = `${props['data-test-subj']}${FILTER_IN_BUTTON_TEST_ID}`;
-  const filterOutTestId = `${props['data-test-subj']}${FILTER_OUT_BUTTON_TEST_ID}`;
-  const timelineTestId = `${props['data-test-subj']}${TIMELINE_BUTTON_TEST_ID}`;
+  const filterInTestId = `${dataTestSubj}${FILTER_IN_BUTTON_TEST_ID}`;
+  const filterOutTestId = `${dataTestSubj}${FILTER_OUT_BUTTON_TEST_ID}`;
+  const timelineTestId = `${dataTestSubj}${TIMELINE_BUTTON_TEST_ID}`;
+  const copyToClipboardTestId = `${dataTestSubj}${COPY_TO_CLIPBOARD_BUTTON_TEST_ID}`;
+  const popoverTestId = `${dataTestSubj}${POPOVER_BUTTON_TEST_ID}`;
+
+  const popoverItems = [
+    <AddToTimelineContextMenu data={indicator} field={field} data-test-subj={timelineTestId} />,
+    <CopyToClipboardContextMenu value={value as string} data-test-subj={copyToClipboardTestId} />,
+  ];
 
   return (
     <EuiFlexGroup justifyContent="center" alignItems="center">
-      <FilterIn as={Component} data={indicator} field={field} data-test-subj={filterInTestId} />
-      <FilterOut as={Component} data={indicator} field={field} data-test-subj={filterOutTestId} />
-      <AddToTimeline
-        as={Component}
-        data={indicator}
-        field={field}
-        data-test-subj={timelineTestId}
-      />
+      <FilterInButtonIcon data={indicator} field={field} data-test-subj={filterInTestId} />
+      <FilterOutButtonIcon data={indicator} field={field} data-test-subj={filterOutTestId} />
+      <EuiPopover
+        data-test-subj={popoverTestId}
+        button={
+          <EuiToolTip content={MORE_ACTIONS_BUTTON_LABEL}>
+            <EuiButtonIcon
+              aria-label={MORE_ACTIONS_BUTTON_LABEL}
+              iconType="boxesHorizontal"
+              iconSize="s"
+              size="xs"
+              onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
+              style={{ height: '100%' }}
+            />
+          </EuiToolTip>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => setPopover(false)}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenuPanel size="s" items={popoverItems} />
+      </EuiPopover>
     </EuiFlexGroup>
   );
 };

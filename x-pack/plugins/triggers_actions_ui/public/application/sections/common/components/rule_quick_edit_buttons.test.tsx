@@ -43,7 +43,7 @@ describe('rule_quick_edit_buttons', () => {
     const wrapper = mountWithIntl(
       <RuleQuickEditButtons
         isAllSelected={false}
-        getFilter={() => ''}
+        getFilter={() => null}
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
@@ -80,7 +80,7 @@ describe('rule_quick_edit_buttons', () => {
     const wrapper = mountWithIntl(
       <RuleQuickEditButtons
         isAllSelected={false}
-        getFilter={() => ''}
+        getFilter={() => null}
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
@@ -111,7 +111,7 @@ describe('rule_quick_edit_buttons', () => {
     const wrapper = mountWithIntl(
       <RuleQuickEditButtons
         isAllSelected={true}
-        getFilter={() => ''}
+        getFilter={() => null}
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
@@ -152,7 +152,7 @@ describe('rule_quick_edit_buttons', () => {
     const wrapper = mountWithIntl(
       <RuleQuickEditButtons
         isAllSelected={false}
-        getFilter={() => ''}
+        getFilter={() => null}
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
@@ -202,7 +202,7 @@ describe('rule_quick_edit_buttons', () => {
     const wrapper = mountWithIntl(
       <RuleQuickEditButtons
         isAllSelected={true}
-        getFilter={() => ''}
+        getFilter={() => null}
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}

@@ -98,6 +98,19 @@ export function RuleComponent({
 
   const tabs = [
     {
+      id: ALERT_LIST_TAB,
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.alertsTabText', {
+        defaultMessage: 'Alerts',
+      }),
+      'data-test-subj': 'ruleAlertListTab',
+      content: (
+        <>
+          <EuiSpacer />
+          {renderRuleAlertList()}
+        </>
+      ),
+    },
+    {
       id: EVENT_LOG_LIST_TAB,
       name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.eventLogTabText', {
         defaultMessage: 'History',
@@ -117,14 +130,6 @@ export function RuleComponent({
         onChangeDuration,
         requestRefresh,
       }),
-    },
-    {
-      id: ALERT_LIST_TAB,
-      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.alertsTabText', {
-        defaultMessage: 'Alerts',
-      }),
-      'data-test-subj': 'ruleAlertListTab',
-      content: renderRuleAlertList(),
     },
   ];
 

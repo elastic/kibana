@@ -8,9 +8,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useQuery } from '@tanstack/react-query';
-import { useInspector } from '../../../hooks/use_inspector';
-import { Indicator } from '../../../../common/types/indicator';
-import { useKibana } from '../../../hooks/use_kibana';
+import { EuiDataGridSorting } from '@elastic/eui';
+import { useInspector, useKibana } from '../../../hooks';
+import { Indicator } from '../types';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import { createFetchIndicators, FetchParams, Pagination } from '../services/fetch_indicators';
 
@@ -21,12 +21,16 @@ export const DEFAULT_PAGE_SIZE = PAGE_SIZES[1];
 export interface UseIndicatorsParams {
   filterQuery: Query;
   filters: Filter[];
-  timeRange?: TimeRange;
-  sorting: any[];
+  timeRange: TimeRange;
+  sorting: EuiDataGridSorting['columns'];
 }
 
 export interface UseIndicatorsValue {
   handleRefresh: () => void;
+
+  /**
+   * Array of {@link Indicator} ready to render inside the IndicatorTable component
+   */
   indicators: Indicator[];
   indicatorCount: number;
   pagination: Pagination;
@@ -42,6 +46,8 @@ export interface UseIndicatorsValue {
    * Data loading is in progress (see docs on `isFetching` here: https://tanstack.com/query/v4/docs/guides/queries)
    */
   isFetching: boolean;
+
+  dataUpdatedAt: number;
 }
 
 export const useIndicators = ({
@@ -90,7 +96,7 @@ export const useIndicators = ({
     [inspectorAdapters, searchService]
   );
 
-  const { isLoading, isFetching, data, refetch } = useQuery(
+  const { isLoading, isFetching, data, refetch, dataUpdatedAt } = useQuery(
     [
       'indicatorsTable',
       {
@@ -127,5 +133,6 @@ export const useIndicators = ({
     isLoading,
     isFetching,
     handleRefresh,
+    dataUpdatedAt,
   };
 };

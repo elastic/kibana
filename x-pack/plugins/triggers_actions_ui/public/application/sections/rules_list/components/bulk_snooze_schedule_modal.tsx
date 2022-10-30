@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
@@ -50,8 +51,8 @@ const deleteConfirmSingle = (ruleName: string) =>
 export type BulkSnoozeScheduleModalProps = {
   rulesToSchedule: RuleTableItem[];
   rulesToUnschedule: RuleTableItem[];
-  rulesToScheduleFilter?: string;
-  rulesToUnscheduleFilter?: string;
+  rulesToScheduleFilter?: KueryNode | null | undefined;
+  rulesToUnscheduleFilter?: KueryNode | null | undefined;
   numberOfSelectedRules?: number;
   onClose: () => void;
   onSave: () => void;
@@ -83,14 +84,14 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
   const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
   const isScheduleModalOpen = useMemo(() => {
-    if (rulesToScheduleFilter) {
+    if (typeof rulesToScheduleFilter !== 'undefined') {
       return true;
     }
     return rulesToSchedule.length > 0;
   }, [rulesToSchedule, rulesToScheduleFilter]);
 
   const isUnscheduleModalOpen = useMemo(() => {
-    if (rulesToUnscheduleFilter) {
+    if (typeof rulesToUnscheduleFilter !== 'undefined') {
       return true;
     }
     return rulesToUnschedule.length > 0;

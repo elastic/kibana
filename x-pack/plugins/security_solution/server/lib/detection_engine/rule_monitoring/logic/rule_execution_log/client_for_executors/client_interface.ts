@@ -115,5 +115,6 @@ export interface StatusChangeArgs {
 export interface MetricsArgs {
   searchDurations?: string[];
   indexingDurations?: string[];
+  enrichmentDurations?: string[];
   executionGap?: Duration;
 }

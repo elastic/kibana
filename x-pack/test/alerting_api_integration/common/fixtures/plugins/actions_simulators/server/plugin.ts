@@ -7,10 +7,13 @@
 
 import http from 'http';
 import https from 'https';
-import { Plugin, CoreSetup, IRouter } from '@kbn/core/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server/plugin';
+import {
+  PluginSetupContract as ActionsPluginSetupContract,
+  PluginStartContract as ActionsPluginStartContract,
+} from '@kbn/actions-plugin/server/plugin';
 import { ActionType } from '@kbn/actions-plugin/server';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';
@@ -22,10 +25,12 @@ import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
 import { initPlugin as initXmatters } from './xmatters_simulation';
+import { initPlugin as initUnsecuredAction } from './unsecured_actions_simulation';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
 export enum ExternalServiceSimulator {
+  OPSGENIE = 'opsgenie',
   PAGERDUTY = 'pagerduty',
   SWIMLANE = 'swimlane',
   SERVICENOW = 'servicenow',
@@ -81,8 +86,9 @@ interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
 }
 
-interface FixtureStartDeps {
+export interface FixtureStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  actions: ActionsPluginStartContract;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
@@ -125,7 +131,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     });
 
-    const router: IRouter = core.http.createRouter();
+    const router = core.http.createRouter();
 
     initXmatters(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS));
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
@@ -136,8 +142,10 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       router,
       getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
     );
+    initUnsecuredAction(router, core);
   }
 
   public start() {}
+
   public stop() {}
 }

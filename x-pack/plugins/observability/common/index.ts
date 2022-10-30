@@ -27,6 +27,7 @@ export {
   enableInfrastructureHostsView,
   enableServiceMetrics,
   enableAwsLambdaMetrics,
+  enableCriticalPath,
 } from './ui_settings_keys';
 
 export {
@@ -52,3 +53,16 @@ export const casesPath = '/cases';
 export const uptimeOverviewLocatorID = 'UPTIME_OVERVIEW_LOCATOR';
 export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCATOR';
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
+
+export {
+  NETWORK_TIMINGS_FIELDS,
+  SYNTHETICS_BLOCKED_TIMINGS,
+  SYNTHETICS_CONNECT_TIMINGS,
+  SYNTHETICS_DNS_TIMINGS,
+  SYNTHETICS_RECEIVE_TIMINGS,
+  SYNTHETICS_SEND_TIMINGS,
+  SYNTHETICS_SSL_TIMINGS,
+  SYNTHETICS_STEP_DURATION,
+  SYNTHETICS_TOTAL_TIMINGS,
+  SYNTHETICS_WAIT_TIMINGS,
+} from './field_names/synthetics';

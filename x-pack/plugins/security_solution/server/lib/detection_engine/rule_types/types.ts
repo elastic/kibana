@@ -29,7 +29,7 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { Filter } from '@kbn/es-query';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
-import type { CompleteRule, RuleParams } from '../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../rule_schema';
 import type {
   BulkCreate,
   SearchAfterAndBulkCreateReturnType,
@@ -42,6 +42,7 @@ import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '..
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
+  enrichmentTimes: string[];
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
@@ -107,6 +108,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   ruleDataClient: IRuleDataClient;
   ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
   version: string;
+  isPreview?: boolean;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

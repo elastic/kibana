@@ -84,6 +84,7 @@ interface AgentBase {
   policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_message?: string;
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
   tags?: string[];
@@ -93,7 +94,15 @@ interface AgentBase {
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
+  // @deprecated
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
+  outputs?: Record<
+    string,
+    {
+      api_key_id: string;
+      to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
+    }
+  >;
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
@@ -229,6 +238,10 @@ export interface FleetServerAgent {
    * Last checkin status
    */
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  /**
+   * Last checkin message
+   */
+  last_checkin_message?: string;
   /**
    * ID of the API key the Elastic Agent uses to authenticate with elasticsearch
    */

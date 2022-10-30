@@ -521,6 +521,10 @@
                 "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
               },
@@ -546,7 +550,7 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
@@ -561,8 +565,8 @@
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-internal",
-                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-internal",
@@ -583,6 +587,38 @@
               {
                 "plugin": "@kbn/core-analytics-server-internal",
                 "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
               },
               {
                 "plugin": "@kbn/core-status-server-internal",
@@ -621,6 +657,30 @@
                 "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
               },
               {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-analytics-browser-mocks",
                 "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
               },
@@ -651,6 +711,14 @@
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-internal",
@@ -879,8 +947,8 @@
                 "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.tsx"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
               },
               {
                 "plugin": "telemetry",
@@ -889,6 +957,10 @@
               {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
@@ -947,48 +1019,72 @@
                 "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
               },
               {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
                 "plugin": "@kbn/core-status-server-internal",
                 "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -1036,19 +1132,19 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-internal",
@@ -4100,12 +4196,70 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.ChromeStart.getGlobalHelpExtensionMenuLinks$",
+            "type": "Function",
+            "tags": [],
+            "label": "getGlobalHelpExtensionMenuLinks$",
+            "description": [
+              "\nGet the list of the registered global help extension menu links"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              "ChromeGlobalHelpExtensionMenuLink",
+              "[]>"
+            ],
+            "path": "node_modules/@types/kbn__core-chrome-browser/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ChromeStart.registerGlobalHelpExtensionMenuLink",
+            "type": "Function",
+            "tags": [],
+            "label": "registerGlobalHelpExtensionMenuLink",
+            "description": [
+              "\nAppend a global help extension menu link"
+            ],
+            "signature": [
+              "(globalHelpExtensionMenuLink: ",
+              "ChromeGlobalHelpExtensionMenuLink",
+              ") => void"
+            ],
+            "path": "node_modules/@types/kbn__core-chrome-browser/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ChromeStart.registerGlobalHelpExtensionMenuLink.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "globalHelpExtensionMenuLink",
+                "description": [],
+                "signature": [
+                  "ChromeGlobalHelpExtensionMenuLink"
+                ],
+                "path": "node_modules/@types/kbn__core-chrome-browser/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.ChromeStart.getHelpExtension$",
             "type": "Function",
             "tags": [],
             "label": "getHelpExtension$",
             "description": [
-              "\nGet an observable of the current custom help conttent"
+              "\nGet an observable of the current custom help content"
             ],
             "signature": [
               "() => ",
@@ -10361,7 +10515,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"exactMatch\" | \"aliasMatch\" | \"conflict\""
+              "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
             ],
             "path": "node_modules/@types/kbn__core-saved-objects-api-browser/index.d.ts",
             "deprecated": false,
@@ -10504,6 +10658,22 @@
             "label": "version",
             "description": [
               "An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObject.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [
+              "Timestamp of the time this document had been created."
             ],
             "signature": [
               "string | undefined"
@@ -10823,6 +10993,14 @@
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
           },
           {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object.ts"
+          },
+          {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
           },
@@ -10893,14 +11071,6 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
           },
           {
             "plugin": "savedObjects",
@@ -11056,18 +11226,6 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
@@ -11132,19 +11290,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "taskManager",
@@ -11156,11 +11314,15 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/dashboard_migrations.ts"
+            "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_extract_panel_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/dashboard_migrations.ts"
+            "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_extract_panel_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry_collection_task.ts"
           },
           {
             "plugin": "dashboard",
@@ -11204,43 +11366,35 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "ml",
@@ -11249,6 +11403,30 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/save_dashboard_state_to_saved_object.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/save_dashboard_state_to_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-server-internal",
@@ -13820,6 +13998,20 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.SimpleSavedObject.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-browser/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.SimpleSavedObject.namespaces",
             "type": "Array",
             "tags": [],
@@ -14751,6 +14943,14 @@
             "path": "x-pack/plugins/security_solution/public/app/app.tsx"
           },
           {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/hooks/timeline/use_timeline_save_prompt.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/hooks/timeline/use_timeline_save_prompt.ts"
+          },
+          {
             "plugin": "@kbn/core-application-browser-internal",
             "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
           },
@@ -15328,13 +15528,17 @@
         "label": "SavedObjectsFindOptions",
         "description": [],
         "signature": [
-          "{ type: string | string[]; filter?: any; search?: string | undefined; aggs?: Record<string, ",
+          "{ type: string | string[]; filter?: any; search?: string | undefined; fields?: string[] | undefined; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; fields?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; searchFields?: string[] | undefined; hasReference?: ",
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
-          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "SavedObjectsFindOptionsReference",
+          " | ",
+          "SavedObjectsFindOptionsReference",
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"
         ],
         "path": "node_modules/@types/kbn__core-saved-objects-api-browser/index.d.ts",
         "deprecated": false,
@@ -19232,6 +19436,10 @@
                 "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
               },
@@ -19257,7 +19465,7 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
@@ -19272,8 +19480,8 @@
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-internal",
-                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-internal",
@@ -19294,6 +19502,38 @@
               {
                 "plugin": "@kbn/core-analytics-server-internal",
                 "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
               },
               {
                 "plugin": "@kbn/core-status-server-internal",
@@ -19332,6 +19572,30 @@
                 "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
               },
               {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-analytics-browser-mocks",
                 "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
               },
@@ -19362,6 +19626,14 @@
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-internal",
@@ -19590,8 +19862,8 @@
                 "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.tsx"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
               },
               {
                 "plugin": "telemetry",
@@ -19600,6 +19872,10 @@
               {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
@@ -19658,48 +19934,72 @@
                 "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
               },
               {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
                 "plugin": "@kbn/core-status-server-internal",
                 "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -19747,19 +20047,19 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-internal",
@@ -19977,20 +20277,23 @@
           "\nA plugin with asynchronous lifecycle methods.\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.AsyncPlugin",
-            "text": "AsyncPlugin"
-          },
+          "AsyncPlugin",
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
         "deprecated": true,
         "removeBy": "8.8.0",
         "trackAdoption": false,
-        "references": [],
+        "references": [
+          {
+            "plugin": "@kbn/core-plugins-server-internal",
+            "path": "packages/core/plugins/core-plugins-server-internal/src/plugin.ts"
+          },
+          {
+            "plugin": "@kbn/core-plugins-server-internal",
+            "path": "packages/core/plugins/core-plugins-server-internal/src/plugin.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "core",
@@ -20001,16 +20304,10 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>, plugins: TPluginsSetup) => TSetup | Promise<TSetup>"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -20022,16 +20319,10 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
-                "path": "src/core/server/plugins/types.ts",
+                "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -20046,7 +20337,7 @@
                 "signature": [
                   "TPluginsSetup"
                 ],
-                "path": "src/core/server/plugins/types.ts",
+                "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -20063,16 +20354,10 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", plugins: TPluginsStart) => TStart | Promise<TStart>"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -20084,15 +20369,9 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
-                "path": "src/core/server/plugins/types.ts",
+                "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -20107,7 +20386,7 @@
                 "signature": [
                   "TPluginsStart"
                 ],
-                "path": "src/core/server/plugins/types.ts",
+                "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -20125,7 +20404,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -21414,7 +21693,10 @@
         "description": [
           "\nContext passed to the `setup` method of `preboot` plugins."
         ],
-        "path": "src/core/server/index.ts",
+        "signature": [
+          "CorePreboot"
+        ],
+        "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -21446,7 +21728,7 @@
               "ContextProviderOpts",
               "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21462,7 +21744,7 @@
             "signature": [
               "ElasticsearchServicePreboot"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21478,16 +21760,10 @@
             "signature": [
               "HttpServicePreboot",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ">"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21503,7 +21779,7 @@
             "signature": [
               "PrebootServicePreboot"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -21519,7 +21795,10 @@
         "description": [
           "\nThe `core` context provided to route handler.\n\nProvides the following clients and services:\n   - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client\n     which uses the credentials of the incoming request\n   - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing\n     all the registered types.\n   - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch\n     data client which uses the credentials of the incoming request\n   - {@link IUiSettingsClient | uiSettings.client} - uiSettings client\n     which uses the credentials of the incoming request"
         ],
-        "path": "src/core/server/core_route_handler_context.ts",
+        "signature": [
+          "CoreRequestHandlerContext"
+        ],
+        "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -21533,7 +21812,7 @@
             "signature": [
               "SavedObjectsRequestHandlerContext"
             ],
-            "path": "src/core/server/core_route_handler_context.ts",
+            "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21547,7 +21826,7 @@
             "signature": [
               "ElasticsearchRequestHandlerContext"
             ],
-            "path": "src/core/server/core_route_handler_context.ts",
+            "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21561,7 +21840,7 @@
             "signature": [
               "UiSettingsRequestHandlerContext"
             ],
-            "path": "src/core/server/core_route_handler_context.ts",
+            "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21575,7 +21854,7 @@
             "signature": [
               "DeprecationsRequestHandlerContext"
             ],
-            "path": "src/core/server/core_route_handler_context.ts",
+            "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -21625,16 +21904,10 @@
           "\nContext passed to the `setup` method of `standard` plugins.\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.CoreSetup",
-            "text": "CoreSetup"
-          },
+          "CoreSetup",
           "<TPluginsStart, TStart>"
         ],
-        "path": "src/core/server/index.ts",
+        "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -21666,7 +21939,7 @@
               "ContextProviderOpts",
               "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21682,7 +21955,7 @@
             "signature": [
               "CapabilitiesSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21698,7 +21971,7 @@
             "signature": [
               "DocLinksServiceSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21714,7 +21987,7 @@
             "signature": [
               "ElasticsearchServiceSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21730,7 +22003,7 @@
             "signature": [
               "ExecutionContextSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21746,24 +22019,12 @@
             "signature": [
               "HttpServiceSetup",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               "> & { resources: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResources",
-                "text": "HttpResources"
-              },
+              "HttpResources",
               "; }"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21779,7 +22040,7 @@
             "signature": [
               "I18nServiceSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21795,7 +22056,7 @@
             "signature": [
               "LoggingServiceSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21811,7 +22072,7 @@
             "signature": [
               "MetricsServiceSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21827,7 +22088,7 @@
             "signature": [
               "SavedObjectsServiceSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21843,7 +22104,7 @@
             "signature": [
               "StatusServiceSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21859,7 +22120,7 @@
             "signature": [
               "UiSettingsServiceSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21875,7 +22136,7 @@
             "signature": [
               "DeprecationsServiceSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21890,16 +22151,10 @@
             ],
             "signature": [
               "() => Promise<[",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", TPluginsStart, TStart]>"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -21917,7 +22172,10 @@
         "description": [
           "\nContext passed to the plugins `start` method.\n"
         ],
-        "path": "src/core/server/index.ts",
+        "signature": [
+          "CoreStart"
+        ],
+        "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -21939,7 +22197,7 @@
               "TelemetryCounter",
               ">; }"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21955,7 +22213,7 @@
             "signature": [
               "CapabilitiesStart"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21971,7 +22229,7 @@
             "signature": [
               "DocLinksServiceSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21987,7 +22245,7 @@
             "signature": [
               "ElasticsearchServiceStart"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -22003,7 +22261,7 @@
             "signature": [
               "ExecutionContextSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -22019,7 +22277,7 @@
             "signature": [
               "HttpServiceStart"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -22035,7 +22293,7 @@
             "signature": [
               "MetricsServiceSetup"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -22051,7 +22309,7 @@
             "signature": [
               "SavedObjectsServiceStart"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -22067,7 +22325,7 @@
             "signature": [
               "UiSettingsServiceStart"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -24557,6 +24815,31 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.maxIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxIdleSockets",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.idleSocketTimeout",
+            "type": "Object",
+            "tags": [],
+            "label": "idleSocketTimeout",
+            "description": [],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.ElasticsearchClientConfig.compression",
             "type": "boolean",
             "tags": [],
@@ -25082,6 +25365,14 @@
               {
                 "plugin": "@kbn/core-elasticsearch-server-internal",
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
               },
               {
                 "plugin": "@kbn/core-elasticsearch-server-internal",
@@ -25879,7 +26170,10 @@
         "description": [
           "\nHttpResources service is responsible for serving static & dynamic assets for Kibana application via HTTP.\nProvides API allowing plug-ins to respond with:\n- a pre-configured HTML page bootstrapping Kibana client app\n- custom HTML page\n- custom JS script file."
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "signature": [
+          "HttpResources"
+        ],
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -25894,34 +26188,16 @@
             ],
             "signature": [
               "<P, Q, B, Context extends ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               " = ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ">(route: ",
               "RouteConfig",
               "<P, Q, B, \"get\">, handler: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResourcesRequestHandler",
-                "text": "HttpResourcesRequestHandler"
-              },
+              "HttpResourcesRequestHandler",
               "<P, Q, B, Context>) => void"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -25936,7 +26212,7 @@
                   "RouteConfig",
                   "<P, Q, B, \"get\">"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -25949,16 +26225,10 @@
                 "label": "handler",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.HttpResourcesRequestHandler",
-                    "text": "HttpResourcesRequestHandler"
-                  },
+                  "HttpResourcesRequestHandler",
                   "<P, Q, B, Context>"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -25978,7 +26248,10 @@
         "description": [
           "\nAllows to configure HTTP response parameters"
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "signature": [
+          "HttpResourcesRenderOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -25995,7 +26268,7 @@
               "ResponseHeaders",
               " | undefined"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -26011,7 +26284,10 @@
         "description": [
           "\nExtended set of {@link KibanaResponseFactory} helpers used to respond with HTML or JS resource."
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "signature": [
+          "HttpResourcesServiceToolkit"
+        ],
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -26026,18 +26302,12 @@
             ],
             "signature": [
               "(options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined) => Promise<",
               "IKibanaResponse",
               "<any>>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26049,16 +26319,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.HttpResourcesRenderOptions",
-                    "text": "HttpResourcesRenderOptions"
-                  },
+                  "HttpResourcesRenderOptions",
                   " | undefined"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -26077,18 +26341,12 @@
             ],
             "signature": [
               "(options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined) => Promise<",
               "IKibanaResponse",
               "<any>>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26100,16 +26358,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.HttpResourcesRenderOptions",
-                    "text": "HttpResourcesRenderOptions"
-                  },
+                  "HttpResourcesRenderOptions",
                   " | undefined"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -26133,7 +26385,7 @@
               "IKibanaResponse",
               "<any>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26147,7 +26399,7 @@
                 "signature": [
                   "HttpResponseOptions"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -26171,7 +26423,7 @@
               "IKibanaResponse",
               "<any>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26185,7 +26437,45 @@
                 "signature": [
                   "HttpResponseOptions"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.HttpResourcesServiceToolkit.renderCss",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCss",
+            "description": [
+              "To respond with a custom CSS script file."
+            ],
+            "signature": [
+              "(options: ",
+              "HttpResponseOptions",
+              ") => ",
+              "IKibanaResponse",
+              "<any>"
+            ],
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.HttpResourcesServiceToolkit.renderCss.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpResponseOptions"
+                ],
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -27345,17 +27635,15 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
-              "default",
-              "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -29332,36 +29620,6 @@
               "{ 50: number; 75: number; 95: number; 99: number; }"
             ],
             "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.IRenderOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "IRenderOptions",
-        "description": [],
-        "path": "src/core/server/rendering/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.IRenderOptions.isAnonymousPage",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isAnonymousPage",
-            "description": [
-              "\nSet whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata.\n`false` by default."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/core/server/rendering/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -32548,17 +32806,15 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
-              "default",
-              "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -33752,17 +34008,15 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
-              "default",
-              "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -36859,6 +37113,22 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.OpsMetrics.elasticsearch_client",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch_client",
+            "description": [
+              "\nMetrics related to the elasticsearch client"
+            ],
+            "signature": [
+              "ElasticsearchClientsMetrics"
+            ],
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.OpsMetrics.process",
             "type": "Object",
             "tags": [
@@ -37473,16 +37743,10 @@
           "\nThe interface that should be returned by a `PluginInitializer` for a `standard` plugin.\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37495,16 +37759,10 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>, plugins: TPluginsSetup) => TSetup"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -37516,16 +37774,10 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
-                "path": "src/core/server/plugins/types.ts",
+                "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -37540,7 +37792,7 @@
                 "signature": [
                   "TPluginsSetup"
                 ],
-                "path": "src/core/server/plugins/types.ts",
+                "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -37557,16 +37809,10 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", plugins: TPluginsStart) => TStart"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -37578,15 +37824,9 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
-                "path": "src/core/server/plugins/types.ts",
+                "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -37601,7 +37841,7 @@
                 "signature": [
                   "TPluginsStart"
                 ],
-                "path": "src/core/server/plugins/types.ts",
+                "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -37619,7 +37859,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -37638,16 +37878,10 @@
           "\nDescribes a plugin configuration properties.\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.PluginConfigDescriptor",
-            "text": "PluginConfigDescriptor"
-          },
+          "PluginConfigDescriptor",
           "<T>"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37664,7 +37898,7 @@
               "ConfigDeprecationProvider",
               " | undefined"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37678,16 +37912,10 @@
               "\nList of configuration properties that will be available on the client-side plugin."
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ExposedToBrowserDescriptor",
-                "text": "ExposedToBrowserDescriptor"
-              },
+              "ExposedToBrowserDescriptor",
               "<T> | undefined"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37704,7 +37932,7 @@
               "Type",
               "<T>"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37718,16 +37946,10 @@
               "\nExpose non-default configs to usage collection to be sent via telemetry.\nset a config to `true` to report the actual changed config value.\nset a config to `false` to report the changed config value as [redacted].\n\nAll changed configs except booleans and numbers will be reported\nas [redacted] unless otherwise specified.\n\n{@link MakeUsageFromSchema}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.MakeUsageFromSchema",
-                "text": "MakeUsageFromSchema"
-              },
+              "MakeUsageFromSchema",
               "<T> | undefined"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -37744,16 +37966,10 @@
           "\nContext that's available to plugins during initialization stage.\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.PluginInitializerContext",
-            "text": "PluginInitializerContext"
-          },
+          "PluginInitializerContext",
           "<ConfigSchema>"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37767,7 +37983,7 @@
             "signature": [
               "symbol"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37785,7 +38001,7 @@
               "PackageInfo",
               ">; instanceUuid: string; configs: readonly string[]; }"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37801,7 +38017,7 @@
             "signature": [
               "NodeInfo"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37817,7 +38033,7 @@
             "signature": [
               "LoggerFactory"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37849,7 +38065,7 @@
               "Observable",
               "<T>; get: <T = ConfigSchema>() => T; }"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -37865,7 +38081,10 @@
         "description": [
           "\nDescribes the set of required and optional properties plugin can define in its\nmandatory JSON manifest file.\n"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "signature": [
+          "PluginManifest"
+        ],
+        "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37878,7 +38097,7 @@
             "description": [
               "\nIdentifier of the plugin. Must be a string in camelCase. Part of a plugin public contract.\nOther plugins leverage it to access plugin API, navigate to the plugin, etc."
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37891,7 +38110,7 @@
             "description": [
               "\nVersion of the plugin."
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37904,7 +38123,7 @@
             "description": [
               "\nThe version of Kibana the plugin is compatible with, defaults to \"version\"."
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37920,7 +38139,7 @@
             "signature": [
               "PluginType"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37936,7 +38155,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37952,7 +38171,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37968,7 +38187,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37984,7 +38203,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37997,7 +38216,7 @@
             "description": [
               "\nSpecifies whether plugin includes some client/browser specific functionality\nthat should be included into client bundle via `public/ui_plugin.js` file."
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -38010,7 +38229,7 @@
             "description": [
               "\nSpecifies whether plugin includes some server-side specific functionality."
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -38028,10 +38247,35 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": true,
             "trackAdoption": false,
-            "references": []
+            "references": [
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "core",
@@ -38045,7 +38289,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -38059,7 +38303,7 @@
             "signature": [
               "{ readonly name: string; readonly githubTeam?: string | undefined; }"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -38075,7 +38319,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -38091,7 +38335,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -38290,17 +38534,15 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
-              "default",
-              "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -39366,6 +39608,37 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.PrebootCoreRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrebootCoreRequestHandlerContext",
+        "description": [],
+        "signature": [
+          "PrebootCoreRequestHandlerContext"
+        ],
+        "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PrebootCoreRequestHandlerContext.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "PrebootUiSettingsRequestHandlerContext"
+            ],
+            "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.PrebootPlugin",
         "type": "Interface",
         "tags": [],
@@ -39374,16 +39647,10 @@
           "\nThe interface that should be returned by a `PluginInitializer` for a `preboot` plugin.\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.PrebootPlugin",
-            "text": "PrebootPlugin"
-          },
+          "PrebootPlugin",
           "<TSetup, TPluginsSetup>"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39396,16 +39663,10 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CorePreboot",
-                "text": "CorePreboot"
-              },
+              "CorePreboot",
               ", plugins: TPluginsSetup) => TSetup"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -39417,15 +39678,9 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CorePreboot",
-                    "text": "CorePreboot"
-                  }
+                  "CorePreboot"
                 ],
-                "path": "src/core/server/plugins/types.ts",
+                "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -39440,7 +39695,7 @@
                 "signature": [
                   "TPluginsSetup"
                 ],
-                "path": "src/core/server/plugins/types.ts",
+                "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -39458,11 +39713,46 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.PrebootRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrebootRequestHandlerContext",
+        "description": [],
+        "signature": [
+          "PrebootRequestHandlerContext",
+          " extends ",
+          "RequestHandlerContextBase"
+        ],
+        "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PrebootRequestHandlerContext.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              "Promise<",
+              "PrebootCoreRequestHandlerContext",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -39532,17 +39822,11 @@
           "\nBase context passed to a route handler, containing the `core` context part.\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          },
+          "RequestHandlerContext",
           " extends ",
           "RequestHandlerContextBase"
         ],
-        "path": "src/core/server/index.ts",
+        "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39555,16 +39839,10 @@
             "description": [],
             "signature": [
               "Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreRequestHandlerContext",
-                "text": "CoreRequestHandlerContext"
-              },
+              "CoreRequestHandlerContext",
               ">"
             ],
-            "path": "src/core/server/index.ts",
+            "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -40123,6 +40401,22 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.SavedObject.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [
+              "Timestamp of the time this document had been created."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.SavedObject.updated_at",
             "type": "string",
             "tags": [],
@@ -40432,6 +40726,14 @@
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
           },
           {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object.ts"
+          },
+          {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
           },
@@ -40502,14 +40804,6 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
           },
           {
             "plugin": "savedObjects",
@@ -40665,18 +40959,6 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
@@ -40741,19 +41023,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "taskManager",
@@ -40765,11 +41047,15 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/dashboard_migrations.ts"
+            "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_extract_panel_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/dashboard_migrations.ts"
+            "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_extract_panel_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry_collection_task.ts"
           },
           {
             "plugin": "dashboard",
@@ -40813,43 +41099,35 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
+            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "ml",
@@ -40858,6 +41136,30 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/save_dashboard_state_to_saved_object.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/save_dashboard_state_to_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-server-internal",
@@ -44227,6 +44529,41 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.SavedObjectsFindOptions.hasNoReference",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasNoReference",
+            "description": [
+              "\nSearch for documents *not* having a reference to the specified objects.\nUse `hasNoReferenceOperator` to specify the operator to use when searching for multiple references."
+            ],
+            "signature": [
+              "SavedObjectsFindOptionsReference",
+              " | ",
+              "SavedObjectsFindOptionsReference",
+              "[] | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsFindOptions.hasNoReferenceOperator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasNoReferenceOperator",
+            "description": [
+              "\nThe operator to use when searching by multiple references using the `hasNoReference` option. Defaults to `OR`"
+            ],
+            "signature": [
+              "\"AND\" | \"OR\" | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.SavedObjectsFindOptions.defaultSearchOperator",
             "type": "CompoundType",
             "tags": [],
@@ -45678,11 +46015,11 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
+                "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_to_730/migrations_730.ts"
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
+                "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_to_730/migrations_730.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
@@ -46149,6 +46486,20 @@
             "type": "string",
             "tags": [],
             "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRawDocSource.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
             "description": [],
             "signature": [
               "string | undefined"
@@ -46663,7 +47014,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"exactMatch\" | \"aliasMatch\" | \"conflict\""
+              "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
             ],
             "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
             "deprecated": false,
@@ -50120,16 +50471,10 @@
           "\nMixin allowing plugins to define their own request handler contexts.\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          },
+          "RequestHandlerContext",
           " & { [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>; }"
         ],
-        "path": "src/core/server/index.ts",
+        "path": "node_modules/@types/kbn__core-http-request-handler-context-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -50515,17 +50860,15 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "UpdateResponse",
-          "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+          "<TDocumentR>>; }; asyncSearch: ",
+          "default",
+          "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
           "default",
           "; helpers: ",
           "default",
           "; child: (opts: ",
           "ClientOptions",
           ") => ",
-          "default",
-          "; Internal: ",
-          "default",
-          "; asyncSearch: ",
           "default",
           "; autoscaling: ",
           "default",
@@ -51582,17 +51925,15 @@
           "\nType defining the list of configuration properties that will be exposed on the client-side\nObject properties can either be fully exposed\n"
         ],
         "signature": [
-          "{ [Key in keyof T]?: (T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? boolean | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ExposedToBrowserDescriptor",
-            "text": "ExposedToBrowserDescriptor"
-          },
+          "{ [Key in keyof T]?: (T[Key] extends ",
+          "Maybe",
+          "<any[]> ? boolean : T[Key] extends ",
+          "Maybe",
+          "<object> ? boolean | ",
+          "ExposedToBrowserDescriptor",
           "<T[Key]> : boolean) | undefined; }"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -51811,20 +52152,14 @@
           "<T>): ",
           "IKibanaResponse",
           "<any>; } & ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.HttpResourcesServiceToolkit",
-            "text": "HttpResourcesServiceToolkit"
-          },
+          "HttpResourcesServiceToolkit",
           ") => ",
           "IKibanaResponse",
           "<any> | Promise<",
           "IKibanaResponse",
           "<any>>"
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -51893,7 +52228,7 @@
         "signature": [
           "HttpResponseOptions"
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52245,17 +52580,17 @@
           "\nList of configuration values that will be exposed to usage collection.\nIf parent node or actual config path is set to `true` then the actual value\nof these configs will be reoprted.\nIf parent node or actual config path is set to `false` then the config\nwill be reported as [redacted].\n"
         ],
         "signature": [
-          "{ [Key in keyof T]?: (T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? boolean | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.MakeUsageFromSchema",
-            "text": "MakeUsageFromSchema"
-          },
+          "{ [Key in keyof T]?: (T[Key] extends ",
+          "Maybe",
+          "<object[]> ? false : T[Key] extends ",
+          "Maybe",
+          "<any[]> ? boolean : T[Key] extends ",
+          "Maybe",
+          "<object> ? boolean | ",
+          "MakeUsageFromSchema",
           "<T[Key]> : boolean) | undefined; }"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52617,7 +52952,7 @@
           "Type",
           "<T>"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52633,40 +52968,16 @@
         ],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.PluginInitializerContext",
-            "text": "PluginInitializerContext"
-          },
+          "PluginInitializerContext",
           "<unknown>) => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<TSetup, TStart, TPluginsSetup, TPluginsStart> | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.PrebootPlugin",
-            "text": "PrebootPlugin"
-          },
+          "PrebootPlugin",
           "<TSetup, TPluginsSetup> | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.AsyncPlugin",
-            "text": "AsyncPlugin"
-          },
+          "AsyncPlugin",
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -52679,16 +52990,10 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.PluginInitializerContext",
-                "text": "PluginInitializerContext"
-              },
+              "PluginInitializerContext",
               "<unknown>"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -53606,15 +53911,19 @@
         "label": "SavedObjectsCreatePointInTimeFinderOptions",
         "description": [],
         "signature": [
-          "{ type: string | string[]; filter?: any; search?: string | undefined; aggs?: Record<string, ",
+          "{ type: string | string[]; filter?: any; search?: string | undefined; fields?: string[] | undefined; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; fields?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
+          "> | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
           "SortOrder",
           " | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
-          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "SavedObjectsFindOptionsReference",
+          " | ",
+          "SavedObjectsFindOptionsReference",
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
         ],
         "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
         "deprecated": false,
@@ -53867,10 +54176,9 @@
           "\n A user credentials container.\nIt accommodates the necessary auth credentials to impersonate the current user.\n"
         ],
         "signature": [
-          "FakeRequest",
-          " | ",
           "KibanaRequest",
-          "<unknown, unknown, unknown, any>"
+          "<unknown, unknown, unknown, any> | ",
+          "FakeRequest"
         ],
         "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
@@ -53910,7 +54218,7 @@
           "ByteSizeValue",
           ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ByteSizeValueUnit | undefined) => string; }>; }>; }"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-plugins-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -53926,16 +54234,10 @@
         ],
         "signature": [
           "() => Promise<[",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ", TPluginsStart, TStart]>"
         ],
-        "path": "src/core/server/index.ts",
+        "path": "node_modules/@types/kbn__core-lifecycle-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],

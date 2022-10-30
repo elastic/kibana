@@ -8,8 +8,8 @@
 import { EuiBasicTableColumn, EuiInMemoryTable, EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, VFC } from 'react';
-import { Indicator } from '../../../../../../common/types/indicator';
-import { IndicatorFieldValue } from '../../indicator_field_value';
+import { Indicator } from '../../../types';
+import { IndicatorFieldValue } from '../../field_value';
 import { IndicatorValueActions } from '../indicator_value_actions';
 
 export interface IndicatorFieldsTableProps {
@@ -22,7 +22,7 @@ export interface IndicatorFieldsTableProps {
 export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
   fields,
   indicator,
-  ...rest
+  'data-test-subj': dataTestSubj,
 }) => {
   const columns = useMemo(
     () =>
@@ -49,15 +49,26 @@ export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
           actions: [
             {
               render: (field: string) => (
-                <IndicatorValueActions field={field} indicator={indicator} {...rest} />
+                <IndicatorValueActions
+                  field={field}
+                  indicator={indicator}
+                  data-test-subj={dataTestSubj}
+                />
               ),
               width: '72px',
             },
           ],
         },
       ] as Array<EuiBasicTableColumn<string>>,
-    [indicator, rest]
+    [indicator, dataTestSubj]
   );
 
-  return <EuiInMemoryTable items={fields} columns={columns} sorting={true} {...rest} />;
+  return (
+    <EuiInMemoryTable
+      items={fields}
+      columns={columns}
+      sorting={true}
+      data-test-subj={dataTestSubj}
+    />
+  );
 };

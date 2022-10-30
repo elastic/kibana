@@ -8,9 +8,9 @@
 import React from 'react';
 import { mockIndicatorsFiltersContext } from '../../../../../common/mocks/mock_indicators_filters_context';
 import { IndicatorFieldsTable } from '.';
-import { generateMockIndicator } from '../../../../../../common/types/indicator';
+import { generateMockIndicator } from '../../../types';
 import { StoryProvidersComponent } from '../../../../../common/mocks/story_providers';
-import { IndicatorsFiltersContext } from '../../../context';
+import { IndicatorsFiltersContext } from '../../../containers/filters';
 
 export default {
   component: IndicatorFieldsTable,

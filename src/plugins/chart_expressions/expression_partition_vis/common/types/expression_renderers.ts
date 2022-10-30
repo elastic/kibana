@@ -108,6 +108,7 @@ export interface RenderValue {
   visType: ChartTypes;
   visConfig: PartitionVisParams;
   syncColors: boolean;
+  canNavigateToLens?: boolean;
 }
 
 export enum LabelPositions {

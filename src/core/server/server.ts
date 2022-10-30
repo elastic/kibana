@@ -58,16 +58,29 @@ import {
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService, statusConfig } from '@kbn/core-status-server-internal';
 import { UiSettingsService, uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
+import {
+  CoreRouteHandlerContext,
+  PrebootCoreRouteHandlerContext,
+} from '@kbn/core-http-request-handler-context-server-internal';
+import type {
+  RequestHandlerContext,
+  PrebootRequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
+import { RenderingService } from '@kbn/core-rendering-server-internal';
 
+import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
+import {
+  InternalCorePreboot,
+  InternalCoreSetup,
+  InternalCoreStart,
+} from '@kbn/core-lifecycle-server-internal';
+import {
+  DiscoveredPlugins,
+  PluginsService,
+  config as pluginsConfig,
+} from '@kbn/core-plugins-server-internal';
 import { CoreApp } from './core_app';
-import { HttpResourcesService } from './http_resources';
-import { RenderingService } from './rendering';
-import { PluginsService, config as pluginsConfig } from './plugins';
-import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
-import { CoreRouteHandlerContext } from './core_route_handler_context';
-import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
-import { DiscoveredPlugins } from './plugins';
-import type { RequestHandlerContext, PrebootRequestHandlerContext } from '.';
+import { elasticApmConfig } from './root/elastic_config';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -128,7 +141,7 @@ export class Server {
     public readonly env: Env,
     private readonly loggingSystem: ILoggingSystem
   ) {
-    const constructorStartUptime = process.uptime();
+    const constructorStartUptime = performance.now();
 
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
@@ -162,12 +175,12 @@ export class Server {
       this.resolveSavedObjectsStartPromise = resolve;
     });
 
-    this.uptimePerStep.constructor = { start: constructorStartUptime, end: process.uptime() };
+    this.uptimePerStep.constructor = { start: constructorStartUptime, end: performance.now() };
   }
 
   public async preboot() {
     this.log.debug('prebooting server');
-    const prebootStartUptime = process.uptime();
+    const prebootStartUptime = performance.now();
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
     const analyticsPreboot = this.analytics.preboot();
@@ -230,13 +243,13 @@ export class Server {
     this.coreApp.preboot(corePreboot, uiPlugins);
 
     prebootTransaction?.end();
-    this.uptimePerStep.preboot = { start: prebootStartUptime, end: process.uptime() };
+    this.uptimePerStep.preboot = { start: prebootStartUptime, end: performance.now() };
     return corePreboot;
   }
 
   public async setup() {
     this.log.debug('setting up server');
-    const setupStartUptime = process.uptime();
+    const setupStartUptime = performance.now();
     const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
 
     const analyticsSetup = this.analytics.setup();
@@ -275,7 +288,10 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+    const metricsSetup = await this.metrics.setup({
+      http: httpSetup,
+      elasticsearchService: elasticsearchServiceSetup,
+    });
 
     const coreUsageDataSetup = this.coreUsageData.setup({
       http: httpSetup,
@@ -349,13 +365,13 @@ export class Server {
     this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction?.end();
-    this.uptimePerStep.setup = { start: setupStartUptime, end: process.uptime() };
+    this.uptimePerStep.setup = { start: setupStartUptime, end: performance.now() };
     return coreSetup;
   }
 
   public async start() {
     this.log.debug('starting server');
-    const startStartUptime = process.uptime();
+    const startStartUptime = performance.now();
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
     const analyticsStart = this.analytics.start();
@@ -404,7 +420,7 @@ export class Server {
 
     startTransaction?.end();
 
-    this.uptimePerStep.start = { start: startStartUptime, end: process.uptime() };
+    this.uptimePerStep.start = { start: startStartUptime, end: performance.now() };
     this.reportKibanaStartedEvents(analyticsStart);
 
     return this.coreStart;
@@ -442,6 +458,7 @@ export class Server {
       cspConfig,
       deprecationConfig,
       elasticsearchConfig,
+      elasticApmConfig,
       executionContextConfig,
       externalUrlConfig,
       httpConfig,
@@ -571,21 +588,20 @@ export class Server {
 
     const ups = this.uptimePerStep;
 
-    const toMs = (sec: number) => Math.round(sec * 1000);
     // Report the metric-shaped KIBANA_STARTED_EVENT.
     reportPerformanceMetricEvent(analyticsStart, {
       eventName: KIBANA_STARTED_EVENT,
-      duration: toMs(ups.start!.end - ups.constructor!.start),
+      duration: ups.start!.end - ups.constructor!.start,
       key1: 'time_to_constructor',
-      value1: toMs(ups.constructor!.start),
+      value1: ups.constructor!.start,
       key2: 'constructor_time',
-      value2: toMs(ups.constructor!.end - ups.constructor!.start),
+      value2: ups.constructor!.end - ups.constructor!.start,
       key3: 'preboot_time',
-      value3: toMs(ups.preboot!.end - ups.preboot!.start),
+      value3: ups.preboot!.end - ups.preboot!.start,
       key4: 'setup_time',
-      value4: toMs(ups.setup!.end - ups.setup!.start),
+      value4: ups.setup!.end - ups.setup!.start,
       key5: 'start_time',
-      value5: toMs(ups.start!.end - ups.start!.start),
+      value5: ups.start!.end - ups.start!.start,
     });
   }
 }

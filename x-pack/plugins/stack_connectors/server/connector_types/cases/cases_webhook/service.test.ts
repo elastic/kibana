@@ -474,6 +474,77 @@ describe('Cases webhook service', () => {
       expect(requestMock).not.toHaveBeenCalled();
       expect(res).toBeUndefined();
     });
+
+    test('properly encodes external system id as string in request body', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+          },
+        })
+      );
+      service = createExternalService(
+        actionId,
+        {
+          config: {
+            ...config,
+            createCommentJson: '{"body":{{{case.comment}}},"id":{{{external.system.id}}}}',
+          },
+          secrets,
+        },
+        logger,
+        configurationUtilities
+      );
+      await service.createComment(commentReq);
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        logger,
+        method: CasesWebhookMethods.POST,
+        configurationUtilities,
+        url: 'https://coolsite.net/issue/1/comment',
+        data: `{"body":"comment","id":"1"}`,
+      });
+    });
+
+    test('properly encodes external system id as number in request body', async () => {
+      const commentReq2 = {
+        incidentId: 1 as unknown as string,
+        comment: {
+          comment: 'comment',
+          commentId: 'comment-1',
+        },
+      };
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+          },
+        })
+      );
+      service = createExternalService(
+        actionId,
+        {
+          config: {
+            ...config,
+            createCommentJson: '{"body":{{{case.comment}}},"id":{{{external.system.id}}}}',
+          },
+          secrets,
+        },
+        logger,
+        configurationUtilities
+      );
+      await service.createComment(commentReq2);
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        logger,
+        method: CasesWebhookMethods.POST,
+        configurationUtilities,
+        url: 'https://coolsite.net/issue/1/comment',
+        data: `{"body":"comment","id":1}`,
+      });
+    });
   });
 
   describe('bad urls', () => {

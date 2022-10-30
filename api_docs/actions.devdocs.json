@@ -741,13 +741,9 @@
             "label": "request",
             "description": [],
             "signature": [
-              "<R>({ url, data, method, responseSchema, headers, ...config }: { url: string; responseSchema: ",
-              "Type",
-              "<R>; method?: ",
-              "Method",
-              " | undefined; } & ",
-              "AxiosRequestConfig",
-              "<any>) => Promise<",
+              "<R>({ url, data, method, responseSchema, headers, ...config }: ",
+              "SubActionRequestParams",
+              "<R>) => Promise<",
               "AxiosResponse",
               "<R, any>>"
             ],
@@ -763,15 +759,106 @@
                 "label": "{\n    url,\n    data,\n    method = 'get',\n    responseSchema,\n    headers,\n    ...config\n  }",
                 "description": [],
                 "signature": [
-                  "{ url: string; responseSchema: ",
-                  "Type",
-                  "<R>; method?: ",
-                  "Method",
-                  " | undefined; } & ",
-                  "AxiosRequestConfig",
-                  "<any>"
+                  "SubActionRequestParams",
+                  "<R>"
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.UnsecuredActionsClient",
+        "type": "Class",
+        "tags": [],
+        "label": "UnsecuredActionsClient",
+        "description": [],
+        "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.UnsecuredActionsClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.UnsecuredActionsClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "UnsecuredActionsClientOpts"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.UnsecuredActionsClient.bulkEnqueueExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkEnqueueExecution",
+            "description": [],
+            "signature": [
+              "(requesterId: string, actionsToExecute: ",
+              "ExecuteOptions",
+              "[]) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.UnsecuredActionsClient.bulkEnqueueExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "requesterId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.UnsecuredActionsClient.bulkEnqueueExecution.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "actionsToExecute",
+                "description": [],
+                "signature": [
+                  "ExecuteOptions",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -851,6 +938,41 @@
               ", \"name\">"
             ],
             "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.urlAllowListValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "urlAllowListValidator",
+        "description": [],
+        "signature": [
+          "<T>(urlKey: string) => (obj: T, validatorServices: ",
+          "ValidatorServices",
+          ") => void"
+        ],
+        "path": "x-pack/plugins/actions/server/sub_action_framework/helpers/validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.urlAllowListValidator.$1",
+            "type": "string",
+            "tags": [],
+            "label": "urlKey",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/helpers/validators.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1191,7 +1313,13 @@
             "label": "validate",
             "description": [],
             "signature": [
-              "{ params?: ValidatorType<Params> | undefined; config?: ValidatorType<Config> | undefined; secrets?: ValidatorType<Secrets> | undefined; connector?: ((config: Config, secrets: Secrets) => string | null) | undefined; } | undefined"
+              "{ params?: ",
+              "ValidatorType",
+              "<Params> | undefined; config?: ",
+              "ValidatorType",
+              "<Config> | undefined; secrets?: ",
+              "ValidatorType",
+              "<Secrets> | undefined; connector?: ((config: Config, secrets: Secrets) => string | null) | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
@@ -1205,59 +1333,12 @@
             "label": "renderParameterTemplates",
             "description": [],
             "signature": [
-              "((params: Params, variables: Record<string, unknown>, actionId?: string | undefined) => Params) | undefined"
+              "RenderParameterTemplates",
+              "<Params> | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.renderParameterTemplates.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "Params"
-                ],
-                "path": "x-pack/plugins/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.renderParameterTemplates.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "variables",
-                "description": [],
-                "signature": [
-                  "Record<string, unknown>"
-                ],
-                "path": "x-pack/plugins/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.renderParameterTemplates.$3",
-                "type": "string",
-                "tags": [],
-                "label": "actionId",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/plugins/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1406,6 +1487,20 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ActionTypeExecutorOptions.isEphemeral",
             "type": "CompoundType",
             "tags": [],
@@ -1491,6 +1586,70 @@
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.IUnsecuredActionsClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "IUnsecuredActionsClient",
+        "description": [],
+        "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.IUnsecuredActionsClient.bulkEnqueueExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkEnqueueExecution",
+            "description": [],
+            "signature": [
+              "(requesterId: string, actionsToExecute: ",
+              "ExecuteOptions",
+              "[]) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.IUnsecuredActionsClient.bulkEnqueueExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "requesterId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.IUnsecuredActionsClient.bulkEnqueueExecution.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "actionsToExecute",
+                "description": [],
+                "signature": [
+                  "ExecuteOptions",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2240,6 +2399,29 @@
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginStartContract.getUnsecuredActionsClient",
+          "type": "Function",
+          "tags": [],
+          "label": "getUnsecuredActionsClient",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.IUnsecuredActionsClient",
+              "text": "IUnsecuredActionsClient"
+            }
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "actions",

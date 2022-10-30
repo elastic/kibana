@@ -6,19 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { RasterTileSource } from 'maplibre-gl';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
-import { ITMSSource } from '../tms_source';
-import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
+import {
+  XYZTMSSourceDescriptor,
+  DataRequestMeta,
+  Timeslice,
+} from '../../../../common/descriptor_types';
 import { AbstractSource, ImmutableSourceProperty } from '../source';
 import { XYZTMSSourceConfig } from './xyz_tms_editor';
+import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
+import { DataRequest } from '../../util/data_request';
+import { IRasterSource, RasterTileSourceData } from '../raster_source';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
   defaultMessage: 'Tile Map Service',
 });
 
-export class XYZTMSSource extends AbstractSource implements ITMSSource {
+export class XYZTMSSource extends AbstractSource implements IRasterSource {
   static type = SOURCE_TYPES.EMS_XYZ;
 
   readonly _descriptor: XYZTMSSourceDescriptor;
@@ -48,6 +55,31 @@ export class XYZTMSSource extends AbstractSource implements ITMSSource {
 
   async getUrlTemplate(): Promise<string> {
     return this._descriptor.urlTemplate;
+  }
+
+  isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData): boolean {
+    if (!sourceData.url) {
+      return false;
+    }
+    return mbSource.tiles?.[0] !== sourceData.url;
+  }
+
+  async canSkipSourceUpdate(
+    prevDataRequest: DataRequest,
+    nextMeta: DataRequestMeta
+  ): Promise<boolean> {
+    const prevMeta = prevDataRequest?.getMeta();
+    const canSkip = await canSkipSourceUpdate({
+      extentAware: false,
+      source: this,
+      prevDataRequest,
+      nextRequestMeta: nextMeta,
+      getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
+        if (!prevMeta) return true;
+        return this.getUpdateDueToTimeslice(prevMeta, timeslice);
+      },
+    });
+    return canSkip;
   }
 }
 

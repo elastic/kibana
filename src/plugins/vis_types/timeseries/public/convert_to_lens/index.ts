@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { TimeRange } from '@kbn/data-plugin/common';
 import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
@@ -21,6 +22,18 @@ const getConvertFnByType = (type: PANEL_TYPES) => {
       const { convertToLens } = await import('./top_n');
       return convertToLens;
     },
+    [PANEL_TYPES.METRIC]: async () => {
+      const { convertToLens } = await import('./metric');
+      return convertToLens;
+    },
+    [PANEL_TYPES.GAUGE]: async () => {
+      const { convertToLens } = await import('./gauge');
+      return convertToLens;
+    },
+    [PANEL_TYPES.TABLE]: async () => {
+      const { convertToLens } = await import('./table');
+      return convertToLens;
+    },
   };
 
   return convertionFns[type]?.();
@@ -31,17 +44,17 @@ const getConvertFnByType = (type: PANEL_TYPES) => {
  * Returns the Lens model, only if it is supported. If not, it returns null.
  * In case of null, the menu item is disabled and the user can't navigate to Lens.
  */
-export const convertTSVBtoLensConfiguration = async (model: Panel, timeRange?: TimeRange) => {
+export const convertTSVBtoLensConfiguration = async (vis: Vis<Panel>, timeRange?: TimeRange) => {
   // Disables the option for not supported charts, for the string mode and for series with annotations
-  if (!model.use_kibana_indexes) {
+  if (!vis.params.use_kibana_indexes) {
     return null;
   }
   // Disables if model is invalid
-  if (model.isModelInvalid) {
+  if (vis.params.isModelInvalid) {
     return null;
   }
 
-  const convertFn = await getConvertFnByType(model.type);
+  const convertFn = await getConvertFnByType(vis.params.type);
 
-  return (await convertFn?.(model, timeRange)) ?? null;
+  return (await convertFn?.(vis, timeRange)) ?? null;
 };

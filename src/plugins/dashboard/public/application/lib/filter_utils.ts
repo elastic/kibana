@@ -8,12 +8,7 @@
 
 import _ from 'lodash';
 import moment, { Moment } from 'moment';
-import type { Optional } from '@kbn/utility-types';
-import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type { Filter, TimeRange } from '@kbn/es-query';
-
-type TimeRangeCompare = Optional<TimeRange>;
-type RefreshIntervalCompare = Optional<RefreshInterval>;
+import type { Filter } from '@kbn/es-query';
 
 /**
  * Converts the time to a utc formatted string. If the time is not valid (e.g. it might be in a relative format like
@@ -32,22 +27,6 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
   }
 };
 
-export const areTimeRangesEqual = (rangeA: TimeRangeCompare, rangeB: TimeRangeCompare): boolean =>
-  areTimesEqual(rangeA.from, rangeB.from) && areTimesEqual(rangeA.to, rangeB.to);
-
-export const areRefreshIntervalsEqual = (
-  refreshA?: RefreshIntervalCompare,
-  refreshB?: RefreshIntervalCompare
-): boolean => refreshA?.pause === refreshB?.pause && refreshA?.value === refreshB?.value;
-
-/**
- * Compares the two times, making sure they are in both compared in string format. Absolute times
- * are sometimes stored as moment objects, but converted to strings when reloaded. Relative times are
- * strings that are not convertible to moment objects.
- * @param timeA {string|Moment}
- * @param timeB {string|Moment}
- * @returns {boolean}
- */
 export const areTimesEqual = (timeA?: string | Moment, timeB?: string | Moment) => {
   return convertTimeToUTCString(timeA) === convertTimeToUTCString(timeB);
 };

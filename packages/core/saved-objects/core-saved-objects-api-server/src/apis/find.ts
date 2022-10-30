@@ -66,10 +66,22 @@ export interface SavedObjectsFindOptions {
    * Use `hasReferenceOperator` to specify the operator to use when searching for multiple references.
    */
   hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
+
   /**
    * The operator to use when searching by multiple references using the `hasReference` option. Defaults to `OR`
    */
   hasReferenceOperator?: 'AND' | 'OR';
+
+  /**
+   * Search for documents *not* having a reference to the specified objects.
+   * Use `hasNoReferenceOperator` to specify the operator to use when searching for multiple references.
+   */
+  hasNoReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
+
+  /**
+   * The operator to use when searching by multiple references using the `hasNoReference` option. Defaults to `OR`
+   */
+  hasNoReferenceOperator?: 'AND' | 'OR';
 
   /**
    * The search operator to use with the provided filter. Defaults to `OR`

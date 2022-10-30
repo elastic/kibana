@@ -77,9 +77,9 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
   const [polling, setPolling] = useState(props.settings.polling);
   const [pollInterval, setPollInterval] = useState(props.settings.pollInterval);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
-  const [isHistoryDisabled, setIsHistoryDisabled] = useState(props.settings.isHistoryDisabled);
-  const [isKeyboardShortcutsDisabled, setIsKeyboardShortcutsDisabled] = useState(
-    props.settings.isKeyboardShortcutsDisabled
+  const [isHistoryEnabled, setIsHistoryEnabled] = useState(props.settings.isHistoryEnabled);
+  const [isKeyboardShortcutsEnabled, setIsKeyboardShortcutsEnabled] = useState(
+    props.settings.isKeyboardShortcutsEnabled
   );
 
   const autoCompleteCheckboxes = [
@@ -140,8 +140,8 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       polling,
       pollInterval,
       tripleQuotes,
-      isHistoryDisabled,
-      isKeyboardShortcutsDisabled,
+      isHistoryEnabled,
+      isKeyboardShortcutsEnabled,
     });
   }
 
@@ -153,17 +153,17 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
   }, []);
 
   const toggleKeyboardShortcuts = useCallback(
-    (isDisabled: boolean) => {
+    (isEnabled: boolean) => {
       if (props.editorInstance) {
         unregisterCommands(props.editorInstance);
-        setIsKeyboardShortcutsDisabled(isDisabled);
+        setIsKeyboardShortcutsEnabled(isEnabled);
       }
     },
     [props.editorInstance]
   );
 
   const toggleSavingToHistory = useCallback(
-    (isDisabled: boolean) => setIsHistoryDisabled(isDisabled),
+    (isEnabled: boolean) => setIsHistoryEnabled(isEnabled),
     []
   );
 
@@ -289,11 +289,11 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
           }
         >
           <EuiSwitch
-            checked={isHistoryDisabled}
+            checked={isHistoryEnabled}
             label={
               <FormattedMessage
-                defaultMessage="Disable saving requests to history"
-                id="console.settingsPage.savingRequestsToHistoryMessage"
+                defaultMessage="Save requests to history"
+                id="console.settingsPage.saveRequestsToHistoryLabel"
               />
             }
             onChange={(e) => toggleSavingToHistory(e.target.checked)}
@@ -309,11 +309,11 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
           }
         >
           <EuiSwitch
-            checked={isKeyboardShortcutsDisabled}
+            checked={isKeyboardShortcutsEnabled}
             label={
               <FormattedMessage
-                defaultMessage="Disable keyboard shortcuts"
-                id="console.settingsPage.disableKeyboardShortcutsMessage"
+                defaultMessage="Enable keyboard shortcuts"
+                id="console.settingsPage.enableKeyboardShortcutsLabel"
               />
             }
             onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}

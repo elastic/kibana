@@ -19,12 +19,11 @@ import {
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
 } from '../common';
-import { languageIntegrations } from '../common/language_integrations';
-
-import { OverviewComponent } from './components/fleet_integration/overview_component';
 
 import { CustomIntegrationsServicesProvider } from './services';
 import { servicesFactory } from './services/kibana';
+import { SampleClientReadme } from './components/fleet_integration/sample/sample_client_readme';
+import { ElasticsearchJsClientReadme } from './components/fleet_integration/elasticsearch_js/elasticsearch_js_readme';
 
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart>
@@ -48,16 +47,10 @@ export class CustomIntegrationsPlugin
   ): CustomIntegrationsStart {
     const services = servicesFactory({ coreStart, startPlugins });
 
-    const languageClientsUiComponents = new Map<string, React.FC>();
-
-    // Set the language clients components to render in Fleet plugin under Integrations app
-    // Export component only if the integration has exportLanguageUiComponent = true
-    languageIntegrations
-      .filter((int) => int.exportLanguageUiComponent)
-      .map((int) => {
-        const ReadmeComponent = () => <OverviewComponent packageName={`${int.id}`} />;
-        languageClientsUiComponents.set(`language_client.${int.id}`, ReadmeComponent);
-      });
+    const languageClientsUiComponents = {
+      sample: SampleClientReadme,
+      javascript: ElasticsearchJsClientReadme,
+    };
 
     const ContextProvider: React.FC = ({ children }) => (
       <CustomIntegrationsServicesProvider {...services}>

@@ -24,6 +24,7 @@ import { isEqual, isEmpty, omit } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
+import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -35,7 +36,7 @@ import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common
 import {
   filterRuleFieldsForType,
   getStepDataDataSource,
-} from '../../../pages/detection_engine/rules/create/helpers';
+} from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 import type { DefineStepRule, RuleStepProps } from '../../../pages/detection_engine/rules/types';
 import { RuleStep, DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
@@ -88,6 +89,7 @@ interface StepDefineRuleProps extends RuleStepProps {
   defaultValues: DefineStepRule;
   onRuleDataChange?: (data: DefineStepRule) => void;
   onPreviewDisabledStateChange?: (isDisabled: boolean) => void;
+  defaultSavedQuery?: SavedQuery;
 }
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
@@ -124,6 +126,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   threatIndicesConfig,
   onRuleDataChange,
   onPreviewDisabledStateChange,
+  defaultSavedQuery,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -615,6 +618,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             onValidityChange: setIsQueryBarValid,
             onCloseTimelineSearch: handleCloseTimelineSearch,
             onSavedQueryError: handleSavedQueryError,
+            defaultSavedQuery,
           } as QueryBarDefineRuleProps
         }
       />
@@ -629,6 +633,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       openTimelineSearch,
       formShouldLoadQueryDynamically,
       handleSavedQueryError,
+      defaultSavedQuery,
     ]
   );
   const onOptionsChange = useCallback((field: FieldsEqlOptions, value: string | undefined) => {

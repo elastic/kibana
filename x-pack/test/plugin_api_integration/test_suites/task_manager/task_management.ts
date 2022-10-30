@@ -54,7 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
-  describe('scheduling and running tasks', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/141055
+  describe.skip('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
       return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
@@ -696,9 +697,10 @@ export default function ({ getService }: FtrProviderContext) {
       // disable the task
       await bulkDisable([scheduledTask.id]);
 
+      let disabledTask: SerializedConcreteTaskInstance;
       await retry.try(async () => {
-        const task = await currentTask(scheduledTask.id);
-        expect(task.enabled).to.eql(false);
+        disabledTask = await currentTask(scheduledTask.id);
+        expect(disabledTask.enabled).to.eql(false);
       });
 
       // re-enable the task
@@ -708,7 +710,7 @@ export default function ({ getService }: FtrProviderContext) {
         const task = await currentTask(scheduledTask.id);
 
         expect(task.enabled).to.eql(true);
-        expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(scheduledTask.scheduledAt));
+        expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(disabledTask.scheduledAt));
       });
     });
 

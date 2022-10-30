@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -18,13 +17,28 @@ import {
   EuiText,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
-import type { LayerType, Visualization } from '../../../..';
-import type { LayerAction } from './types';
-
+import type { CoreStart } from '@kbn/core/public';
+import type { LayerType } from '../../../..';
+import type { LayerAction, Visualization } from '../../../../types';
 import { getCloneLayerAction } from './clone_layer_action';
 import { getRemoveLayerAction } from './remove_layer_action';
 
 export interface LayerActionsProps {
+  layerIndex: number;
+  actions: LayerAction[];
+}
+
+/** @internal **/
+export const getSharedActions = ({
+  core,
+  layerIndex,
+  layerType,
+  activeVisualization,
+  isOnlyLayer,
+  isTextBasedLanguage,
+  onCloneLayer,
+  onRemoveLayer,
+}: {
   onRemoveLayer: () => void;
   onCloneLayer: () => void;
   layerIndex: number;
@@ -33,14 +47,25 @@ export interface LayerActionsProps {
   layerType?: LayerType;
   isTextBasedLanguage?: boolean;
   core: Pick<CoreStart, 'overlays' | 'theme'>;
-}
+}) => [
+  getCloneLayerAction({
+    execute: onCloneLayer,
+    layerIndex,
+    activeVisualization,
+    isTextBasedLanguage,
+  }),
+  getRemoveLayerAction({
+    execute: onRemoveLayer,
+    layerIndex,
+    activeVisualization,
+    layerType,
+    isOnlyLayer,
+    core,
+  }),
+];
 
 /** @internal **/
-const InContextMenuActions = (
-  props: LayerActionsProps & {
-    actions: LayerAction[];
-  }
-) => {
+const InContextMenuActions = (props: LayerActionsProps) => {
   const dataTestSubject = `lnsLayerSplitButton--${props.layerIndex}`;
   const [isPopoverOpen, setPopover] = useState(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
@@ -79,6 +104,9 @@ const InContextMenuActions = (
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        panelProps={{
+          'data-test-subj': 'lnsLayerActionsMenu',
+        }}
       >
         <EuiContextMenuPanel
           size="s"
@@ -105,47 +133,24 @@ const InContextMenuActions = (
 };
 
 export const LayerActions = (props: LayerActionsProps) => {
-  const compatibleActions = useMemo(
-    () =>
-      [
-        getCloneLayerAction({
-          execute: props.onCloneLayer,
-          layerIndex: props.layerIndex,
-          activeVisualization: props.activeVisualization,
-          isTextBasedLanguage: props.isTextBasedLanguage,
-        }),
-        getRemoveLayerAction({
-          execute: props.onRemoveLayer,
-          layerIndex: props.layerIndex,
-          activeVisualization: props.activeVisualization,
-          layerType: props.layerType,
-          isOnlyLayer: props.isOnlyLayer,
-          core: props.core,
-        }),
-      ].filter((i) => i.isCompatible),
-    [props]
-  );
-
-  if (!compatibleActions.length) {
+  if (!props.actions.length) {
     return null;
   }
 
-  if (compatibleActions.length > 1) {
-    return <InContextMenuActions {...props} actions={compatibleActions} />;
-  } else {
-    const [{ displayName, execute, icon, color, 'data-test-subj': dataTestSubj }] =
-      compatibleActions;
-
-    return (
-      <EuiButtonIcon
-        size="xs"
-        iconType={icon}
-        color={color}
-        data-test-subj={dataTestSubj}
-        aria-label={displayName}
-        title={displayName}
-        onClick={execute}
-      />
-    );
+  if (props.actions.length > 1) {
+    return <InContextMenuActions {...props} />;
   }
+  const [{ displayName, execute, icon, color, 'data-test-subj': dataTestSubj }] = props.actions;
+
+  return (
+    <EuiButtonIcon
+      size="xs"
+      iconType={icon}
+      color={color}
+      data-test-subj={dataTestSubj}
+      aria-label={displayName}
+      title={displayName}
+      onClick={execute}
+    />
+  );
 };

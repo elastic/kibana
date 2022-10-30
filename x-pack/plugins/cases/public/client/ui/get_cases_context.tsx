@@ -6,8 +6,9 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import React, { lazy, ReactNode, Suspense } from 'react';
-import { CasesContextProps } from '../../components/cases_context';
+import type { ReactNode } from 'react';
+import React, { lazy, Suspense } from 'react';
+import type { CasesContextProps } from '../../components/cases_context';
 
 export type GetCasesContextPropsInternal = CasesContextProps;
 export type GetCasesContextProps = Omit<
