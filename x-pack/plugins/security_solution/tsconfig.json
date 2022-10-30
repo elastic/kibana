@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
-    "declaration": true,
+    "declaration": true
   },
   "include": [
     "common/**/*",

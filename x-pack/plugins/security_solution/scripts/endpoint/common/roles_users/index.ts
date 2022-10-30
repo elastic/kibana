@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as withResponseActionsRole from './with_response_actions_role.json';
-import * as withResponseActionsUser from './with_response_actions_user.json';
-import * as noResponseActionsRole from './without_response_actions_role.json';
-import * as noResponseActionsUser from './without_response_actions_user.json';
+import withResponseActionsRole from './with_response_actions_role.json';
+import withResponseActionsUser from './with_response_actions_user.json';
+import noResponseActionsRole from './without_response_actions_role.json';
+import noResponseActionsUser from './without_response_actions_user.json';
 export {
   withResponseActionsRole,
   withResponseActionsUser,

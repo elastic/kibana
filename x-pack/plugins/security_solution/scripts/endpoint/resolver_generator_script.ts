@@ -15,14 +15,18 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 import type { Role } from '@kbn/security-plugin/common';
-import type { AxiosResponse } from 'axios';
 import { METADATA_DATASTREAM } from '../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion } from './common/stack_services';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
-import { withResponseActionsRole, withResponseActionsUser } from './common/roles_users';
+import {
+  withResponseActionsRole,
+  withResponseActionsUser,
+  noResponseActionsRole,
+  noResponseActionsUser,
+} from './common/roles_users';
 
 main();
 
@@ -46,28 +50,25 @@ async function deleteIndices(indices: string[], client: Client) {
   }
 }
 
-async function addRole(kbnClient: KbnClient, role: Role): Promise<Role | undefined> {
+async function addRole(kbnClient: KbnClient, role: Role): Promise<string | undefined> {
   if (!role) {
     console.log('No role data given');
     return;
   }
+
   const { name, ...permissions } = role;
   const path = `/api/security/role/${name}?createOnly=true`;
 
   // add role if doesn't exist already
   try {
     console.log(`Adding ${name} role`);
-    const addedRole = (
-      (await kbnClient.request<Promise<Omit<Role, 'name'>>>({
-        method: 'PUT',
-        path,
-        body: permissions,
-      })) as AxiosResponse
-    ).data;
+    await kbnClient.request({
+      method: 'PUT',
+      path,
+      body: permissions,
+    });
 
-    console.log('the data', addedRole);
-
-    return addedRole;
+    return name;
   } catch (error) {
     console.log(error);
     handleErr(error);
@@ -372,15 +373,28 @@ async function main() {
   }
 
   if (argv.rbacUser) {
+    // Add role and user with response actions kibana privileges
     const withRARole = await addRole(kbnClient, {
       name: 'withResponseActions',
       ...withResponseActionsRole,
     });
     if (withRARole) {
-      console.log(`Successfully added ${withRARole.name} role`);
+      console.log(`Successfully added ${withRARole} role`);
       await addUser(client, withResponseActionsUser);
     } else {
       console.log('Failed to add role, withResponseActions');
+    }
+
+    // Add role and user with no response actions kibana privileges
+    const noRARole = await addRole(kbnClient, {
+      name: 'noResponseActions',
+      ...noResponseActionsRole,
+    });
+    if (noRARole) {
+      console.log(`Successfully added ${noRARole} role`);
+      await addUser(client, noResponseActionsUser);
+    } else {
+      console.log('Failed to add role, noResponseActions');
     }
   }
 
