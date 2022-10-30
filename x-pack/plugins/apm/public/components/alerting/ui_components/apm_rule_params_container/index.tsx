@@ -7,6 +7,7 @@
 
 import { EuiCallOut, EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
   getTimeUnitLabel,
@@ -80,6 +81,18 @@ function MinimumWindowSizeWarning({
 }: {
   minimumWindowSize: MinimumWindowSize;
 }) {
+  const description = i18n.translate(
+    'xpack.apm.alertTypes.minimumWindowSize.description',
+    {
+      defaultMessage:
+        'The recommended minimum value is {sizeValue} {sizeUnit}. This is to ensure that the alert has enough data to evaluate. If you choose a value that is too low, the alert may not fire as expected.',
+      values: {
+        sizeValue: minimumWindowSize.value,
+        sizeUnit: getTimeUnitLabel(minimumWindowSize.unit),
+      },
+    }
+  );
+
   return (
     <EuiCallOut
       title={`Please increase "For the last" to at least ${
@@ -88,12 +101,7 @@ function MinimumWindowSizeWarning({
       color="warning"
       iconType="alert"
     >
-      <p>
-        The recommended minimum value is {minimumWindowSize.value}{' '}
-        {getTimeUnitLabel(minimumWindowSize.unit)}. This is to ensure that the
-        alert has enough data to evaluate. If you choose a value that is too
-        low, the alert may not fire as expected.
-      </p>
+      <p>{description}</p>
     </EuiCallOut>
   );
 }
