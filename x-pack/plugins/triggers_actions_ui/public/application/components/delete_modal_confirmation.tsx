@@ -64,7 +64,7 @@ export const DeleteModalConfirmation = ({
   return (
     <EuiConfirmModal
       buttonColor="danger"
-      data-test-subj="rulesDeleteIdsConfirmation"
+      data-test-subj="deleteIdsConfirmation"
       title={getConfirmButtonText(numIdsToDelete, singleTitle, multipleTitle)}
       onCancel={() => {
         setDeleteModalVisibility(false);
