@@ -78,7 +78,13 @@
         "label": "configSchema",
         "description": [],
         "signature": [
-          "ObjectType",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ObjectType",
+            "text": "ObjectType"
+          },
           "<{}>"
         ],
         "path": "x-pack/plugins/stack_alerts/common/config.ts",

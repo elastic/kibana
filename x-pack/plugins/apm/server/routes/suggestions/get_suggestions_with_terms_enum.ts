@@ -6,13 +6,13 @@
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getSuggestionsWithTermsEnum({
   fieldName,
   fieldValue,
   searchAggregatedTransactions,
-  setup,
+  apmEventClient,
   size,
   start,
   end,
@@ -20,40 +20,35 @@ export async function getSuggestionsWithTermsEnum({
   fieldName: string;
   fieldValue: string;
   searchAggregatedTransactions: boolean;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   size: number;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
-  const response = await apmEventClient.termsEnum(
-    'get_suggestions_with_terms_enum',
-    {
-      apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
-          ProcessorEvent.error,
-          ProcessorEvent.metric,
-        ],
-      },
-      body: {
-        case_insensitive: true,
-        field: fieldName,
-        size,
-        string: fieldValue,
-        index_filter: {
-          range: {
-            ['@timestamp']: {
-              gte: start,
-              lte: end,
-              format: 'epoch_millis',
-            },
+  const response = await apmEventClient.termsEnum('get_suggestions', {
+    apm: {
+      events: [
+        getProcessorEventForTransactions(searchAggregatedTransactions),
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
+    },
+    body: {
+      case_insensitive: true,
+      field: fieldName,
+      size,
+      string: fieldValue,
+      index_filter: {
+        range: {
+          ['@timestamp']: {
+            gte: start,
+            lte: end,
+            format: 'epoch_millis',
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return { terms: response.terms };
 }

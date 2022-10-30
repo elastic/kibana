@@ -20,7 +20,13 @@
         "description": [],
         "signature": [
           "({ provider, settings, path, }: { provider: ",
-          "ConfigDeprecationProvider",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecationProvider",
+            "text": "ConfigDeprecationProvider"
+          },
           "; settings?: Record<string, any> | undefined; path: string; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
         ],
         "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
@@ -47,9 +53,21 @@
                 "description": [],
                 "signature": [
                   "(factory: ",
-                  "ConfigDeprecationFactory",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "server",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-server.ConfigDeprecationFactory",
+                    "text": "ConfigDeprecationFactory"
+                  },
                   ") => ",
-                  "ConfigDeprecation",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "server",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-server.ConfigDeprecation",
+                    "text": "ConfigDeprecation"
+                  },
                   "[]"
                 ],
                 "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
@@ -65,9 +83,15 @@
                     "label": "factory",
                     "description": [],
                     "signature": [
-                      "ConfigDeprecationFactory"
+                      {
+                        "pluginId": "@kbn/config",
+                        "scope": "server",
+                        "docId": "kibKbnConfigPluginApi",
+                        "section": "def-server.ConfigDeprecationFactory",
+                        "text": "ConfigDeprecationFactory"
+                      }
                     ],
-                    "path": "node_modules/@types/kbn__config/index.d.ts",
+                    "path": "packages/kbn-config/src/deprecation/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -113,7 +137,13 @@
         "description": [],
         "signature": [
           "({ provider, settings, }: { provider: ",
-          "ConfigDeprecationProvider",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecationProvider",
+            "text": "ConfigDeprecationProvider"
+          },
           "; settings?: Record<string, any> | undefined; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
         ],
         "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
@@ -140,9 +170,21 @@
                 "description": [],
                 "signature": [
                   "(factory: ",
-                  "ConfigDeprecationFactory",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "server",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-server.ConfigDeprecationFactory",
+                    "text": "ConfigDeprecationFactory"
+                  },
                   ") => ",
-                  "ConfigDeprecation",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "server",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-server.ConfigDeprecation",
+                    "text": "ConfigDeprecation"
+                  },
                   "[]"
                 ],
                 "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
@@ -158,9 +200,15 @@
                     "label": "factory",
                     "description": [],
                     "signature": [
-                      "ConfigDeprecationFactory"
+                      {
+                        "pluginId": "@kbn/config",
+                        "scope": "server",
+                        "docId": "kibKbnConfigPluginApi",
+                        "section": "def-server.ConfigDeprecationFactory",
+                        "text": "ConfigDeprecationFactory"
+                      }
                     ],
-                    "path": "node_modules/@types/kbn__config/index.d.ts",
+                    "path": "packages/kbn-config/src/deprecation/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
