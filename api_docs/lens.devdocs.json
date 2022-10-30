@@ -383,7 +383,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
@@ -642,7 +648,13 @@
             ],
             "signature": [
               "() => Promise<",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]>"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
@@ -664,7 +676,13 @@
             ],
             "signature": [
               "() => Promise<",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined>"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
@@ -1365,7 +1383,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }>"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
@@ -1564,11 +1588,29 @@
                 "text": "Datatable"
               },
               "> | undefined, timeRange?: ",
-              "TimeRange",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined) => { error: string; } | Record<\"disabled\" | \"enabled\", { kuery: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               "[][]; lucene: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               "[][]; }>"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -1606,7 +1648,13 @@
                 "label": "timeRange",
                 "description": [],
                 "signature": [
-                  "TimeRange",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.TimeRange",
+                    "text": "TimeRange"
+                  },
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
@@ -2182,7 +2230,13 @@
             ],
             "signature": [
               "(id: string, column: { formula: string; label?: string | undefined; filter?: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined; reducedTimeRange?: string | undefined; timeScale?: ",
               "TimeScaleUnit",
               " | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }, layer: ",
@@ -2276,7 +2330,13 @@
                     "label": "filter",
                     "description": [],
                     "signature": [
-                      "Query",
+                      {
+                        "pluginId": "@kbn/es-query",
+                        "scope": "common",
+                        "docId": "kibKbnEsQueryPluginApi",
+                        "section": "def-common.Query",
+                        "text": "Query"
+                      },
                       " | undefined"
                     ],
                     "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
@@ -2562,9 +2622,21 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<",
-              "CustomPaletteParams",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
               "> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
@@ -3480,7 +3552,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
@@ -4009,7 +4087,13 @@
             "label": "mainPalette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -4292,7 +4376,13 @@
             ],
             "signature": [
               "(addNewLayer: () => string, state?: T | undefined, mainPalette?: ",
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }> | undefined) => T"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -4337,7 +4427,13 @@
                 "label": "mainPalette",
                 "description": [],
                 "signature": [
-                  "PaletteOutput",
+                  {
+                    "pluginId": "@kbn/coloring",
+                    "scope": "common",
+                    "docId": "kibKbnColoringPluginApi",
+                    "section": "def-common.PaletteOutput",
+                    "text": "PaletteOutput"
+                  },
                   "<{ [key: string]: unknown; }> | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
@@ -4438,7 +4534,13 @@
             "description": [],
             "signature": [
               "((state: T) => ",
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }> | undefined) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -4626,7 +4728,13 @@
             ],
             "signature": [
               "((state: T) => { state: P; savedObjectReferences: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]; }) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -4662,7 +4770,13 @@
             ],
             "signature": [
               "((state: P, references?: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[] | undefined, initialContext?: ",
               {
                 "pluginId": "uiActions",
@@ -4710,7 +4824,13 @@
                 "label": "references",
                 "description": [],
                 "signature": [
-                  "SavedObjectReference",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
                   "[] | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
@@ -6199,7 +6319,13 @@
                 "text": "DatasourcePublicAPI"
               },
               ">>, attributes?: Partial<{ title: string; description: string; }> | undefined, datasourceExpressionsByLayers?: Record<string, ",
-              "Ast",
+              {
+                "pluginId": "@kbn/interpreter",
+                "scope": "common",
+                "docId": "kibKbnInterpreterPluginApi",
+                "section": "def-common.Ast",
+                "text": "Ast"
+              },
               "> | undefined) => string | ",
               {
                 "pluginId": "expressions",
@@ -6276,7 +6402,13 @@
                 "description": [],
                 "signature": [
                   "Record<string, ",
-                  "Ast",
+                  {
+                    "pluginId": "@kbn/interpreter",
+                    "scope": "common",
+                    "docId": "kibKbnInterpreterPluginApi",
+                    "section": "def-common.Ast",
+                    "text": "Ast"
+                  },
                   "> | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
@@ -6306,7 +6438,13 @@
                 "text": "DatasourcePublicAPI"
               },
               ">>, datasourceExpressionsByLayers?: Record<string, ",
-              "Ast",
+              {
+                "pluginId": "@kbn/interpreter",
+                "scope": "common",
+                "docId": "kibKbnInterpreterPluginApi",
+                "section": "def-common.Ast",
+                "text": "Ast"
+              },
               "> | undefined) => string | ",
               {
                 "pluginId": "expressions",
@@ -6368,7 +6506,13 @@
                 "description": [],
                 "signature": [
                   "Record<string, ",
-                  "Ast",
+                  {
+                    "pluginId": "@kbn/interpreter",
+                    "scope": "common",
+                    "docId": "kibKbnInterpreterPluginApi",
+                    "section": "def-common.Ast",
+                    "text": "Ast"
+                  },
                   "> | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
@@ -7667,7 +7811,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
@@ -8624,7 +8774,13 @@
             "text": "DataLayerArgs"
           },
           ", \"palette\"> & { type: \"dataLayer\"; layerType: \"data\"; palette: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<{ [key: string]: unknown; }>; table: ",
           {
             "pluginId": "expressions",
@@ -8905,9 +9061,21 @@
         "description": [],
         "signature": [
           "{ description?: string | undefined; title: string; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[]; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
@@ -8917,9 +9085,21 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           "[] | undefined; }; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           "[]; visualizationType: string | null; }"
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
@@ -9496,7 +9676,13 @@
             "text": "LensServerPlugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "server",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-server.Plugin",
+            "text": "Plugin"
+          },
           "<",
           {
             "pluginId": "lens",
@@ -9536,7 +9722,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<",
               {
                 "pluginId": "lens",
@@ -9591,7 +9783,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<",
                   {
                     "pluginId": "lens",
@@ -9640,7 +9838,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
               ", plugins: ",
               {
                 "pluginId": "lens",
@@ -9663,7 +9867,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "x-pack/plugins/lens/server/plugin.tsx",
                 "deprecated": false,
@@ -9785,7 +9995,13 @@
             "description": [],
             "signature": [
               "{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; visualization: VisualizationState; query: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               "; filters: ",
               {
                 "pluginId": "lens",
@@ -9880,9 +10096,21 @@
                 "text": "OperationTypePost712"
               },
               "; }>; }>; }; }; visualization: VisualizationState; query: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               "; filters: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]; }"
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -9969,9 +10197,21 @@
                 "text": "OperationTypePre712"
               },
               "; }>; }>; }; }; query: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               "; visualization: VisualizationState; filters: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]; }"
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -10435,9 +10675,21 @@
             "text": "OperationTypePost712"
           },
           "; }>; }>; }; }; visualization: unknown; query: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "; filters: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[]; }, \"datasourceStates\"> & { datasourceStates: { indexpattern: Omit<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: ",
           {
             "pluginId": "lens",
@@ -10494,9 +10746,21 @@
             "text": "OperationTypePost712"
           },
           "; }>; }>; }; }; visualization: unknown; query: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "; filters: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[]; }, \"datasourceStates\"> & { datasourceStates: { indexpattern: Omit<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: ",
           {
             "pluginId": "lens",
@@ -10545,9 +10809,21 @@
             "text": "LensDocShape715"
           },
           "<VisualizationState>, \"filters\" | \"state\"> & { filters: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[]; state: Omit<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; visualization: VisualizationState; query: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "; filters: ",
           {
             "pluginId": "lens",
@@ -10588,9 +10864,21 @@
             "text": "LensDocShape715"
           },
           "<VisualizationState>, \"filters\" | \"state\"> & { filters: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[]; state: Omit<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; visualization: VisualizationState; query: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "; filters: ",
           {
             "pluginId": "lens",
@@ -10631,9 +10919,21 @@
             "text": "LensDocShape715"
           },
           "<VisualizationState>, \"filters\" | \"state\"> & { filters: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[]; state: Omit<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; visualization: VisualizationState; query: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "; filters: ",
           {
             "pluginId": "lens",
@@ -10674,9 +10974,21 @@
             "text": "LensDocShape715"
           },
           "<VisualizationState>, \"filters\" | \"state\"> & { filters: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[]; state: Omit<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; visualization: VisualizationState; query: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "; filters: ",
           {
             "pluginId": "lens",
@@ -10717,7 +11029,13 @@
             "text": "LensDocShape850"
           },
           "<VisualizationState>, \"state\"> & { state: Omit<Omit<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; visualization: VisualizationState; query: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "; filters: ",
           {
             "pluginId": "lens",
@@ -10780,13 +11098,37 @@
         "description": [],
         "signature": [
           "{ columns: { palette?: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<",
-          "CustomPaletteParams",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
           "> | undefined; colorMode?: \"none\" | \"text\" | \"cell\" | undefined; }[]; } | { palette?: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<",
-          "CustomPaletteParams",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
           "> | undefined; }"
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -11296,9 +11638,21 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<",
-              "CustomPaletteParams",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
               "> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
@@ -11366,7 +11720,13 @@
             "text": "PersistableFilter"
           },
           " extends ",
-          "Filter"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          }
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -11411,7 +11771,13 @@
             "text": "PersistableFilterMeta"
           },
           " extends ",
-          "FilterMeta"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.FilterMeta",
+            "text": "FilterMeta"
+          }
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -11488,7 +11854,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
@@ -11855,7 +12227,13 @@
             "text": "SerializedFieldFormat"
           },
           "<{}, ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -11886,7 +12264,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               "> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
