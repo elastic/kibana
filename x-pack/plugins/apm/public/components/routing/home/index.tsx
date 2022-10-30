@@ -24,7 +24,6 @@ import { TraceExplorerWaterfall } from '../../app/trace_explorer/trace_explorer_
 import { TraceOverview } from '../../app/trace_overview';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 import { RedirectTo } from '../redirect_to';
-import { ServiceGroupsRedirect } from '../service_groups_redirect';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 import { ServiceGroupTemplate } from '../templates/service_group_template';
 import { dependencies } from './dependencies';
@@ -257,13 +256,7 @@ export const home = {
       ...dependencies,
       ...legacyBackends,
       ...storageExplorer,
-      '/': {
-        element: (
-          <ServiceGroupsRedirect>
-            <RedirectTo pathname="/service-groups" />
-          </ServiceGroupsRedirect>
-        ),
-      },
+      '/': { element: <RedirectTo pathname="/services" /> },
     },
   },
 };
