@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { PartitionElementEvent } from '@elastic/charts';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ChartPanel } from '../../../components/chart_panel';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
 import { RULE_FAILED } from '../../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { ClusterDetailsBox } from './cluster_details_box';
-
-const cardHeight = 300;
 
 export const CloudBenchmarksSection = ({
   complianceData,
@@ -45,94 +45,90 @@ export const CloudBenchmarksSection = ({
     navToFindings({ cluster_id: clusterId, 'result.evaluation': RULE_FAILED });
   };
 
-  const columns = [
-    {
-      headerCellProps: {},
-      field: 'firstName',
-      name: 'Cluster Name',
-      width: '20%',
-      render: (a, cluster) => {
-        // console.log(a, b);
-        return <ClusterDetailsBox cluster={cluster} />;
-      },
-      valign: 'top',
-    },
-    {
-      field: 'firstName',
-      name: 'Compliance Score',
-      width: '40%',
-      valign: 'top',
-
-      render: (a, cluster) => {
-        // console.log(a, b);
-        return (
-          <CloudPostureScoreChart
-            trendGraphHeight={120}
-            id={`${cluster.meta.clusterId}_score_chart`}
-            data={cluster.stats}
-            trend={cluster.trend}
-            partitionOnElementClick={(elements) =>
-              handleElementClick(cluster.meta.clusterId, elements)
-            }
-          />
-        );
-      },
-    },
-    {
-      field: 'firstName',
-      name: 'Compliance by CIS Section',
-      width: '40%',
-      valign: 'top',
-      render: (a, cluster) => {
-        // console.log(a, b);
-        return (
-          <RisksTable
-            data={cluster.groupedFindingsEvaluation}
-            maxItems={3}
-            onCellClick={(resourceTypeName) =>
-              handleCellClick(cluster.meta.clusterId, resourceTypeName)
-            }
-            onViewAllClick={() => handleViewAllClick(cluster.meta.clusterId)}
-          />
-        );
-      },
-    },
-  ];
-
   return (
-    <div
-      css={`
-        .first-table > .euiTableHeaderCell > .euiTableCellContent {
-          border-bottom: 3px solid black;
-        }
-      `}
-    >
-      <EuiBasicTable
-        className={'first-table'}
-        css={`
-          .first-table {
-            .euiTableHeaderCell {
-              .euiTableCellContent {
-                border-bottom: 3px solid black;
-              }
-            }
-          }
-        `}
-        items={complianceData.clusters}
-        rowHeader="firstName"
-        columns={columns}
-        cellProps={{
-          style: {
-            borderTop: 'initial',
-            padding: '0 24px',
-          },
+    <>
+      <EuiFlexGroup
+        alignItems="flexStart"
+        gutterSize="none"
+        style={{
+          borderBottom: euiTheme.border.thick,
+          borderBottomColor: euiTheme.colors.text,
+          marginBottom: euiTheme.size.l,
+          paddingBottom: euiTheme.size.s,
         }}
-        // rowProps={{
-        //   style: {
-        //     borderTop: '3px solid black',
-        //   },
-        // }}
-      />
-    </div>
+      >
+        <EuiFlexItem grow={2}>
+          <EuiTitle size="xxs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+            <h5>
+              <FormattedMessage
+                id="xpack.csp.dashboard.cloudBenchmarkSection.columnsHeader.clusterNameTitle"
+                defaultMessage="Cluster Name"
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={4}>
+          <EuiTitle
+            size="xxs"
+            css={{ fontWeight: euiTheme.font.weight.semiBold, paddingLeft: euiTheme.size.xl }}
+          >
+            <h5>
+              <FormattedMessage
+                id="xpack.csp.dashboard.cloudBenchmarkSection.columnsHeader.complianceScoreTitle"
+                defaultMessage="Compliance Score"
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={4}>
+          <EuiTitle
+            size="xxs"
+            css={{ fontWeight: euiTheme.font.weight.semiBold, paddingLeft: euiTheme.size.xl }}
+          >
+            <h5>
+              <FormattedMessage
+                id="xpack.csp.dashboard.cloudBenchmarkSection.columnsHeader.complianceByCisSectionTitle"
+                defaultMessage="Compliance by CIS Section"
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {complianceData.clusters.map((cluster) => (
+        <EuiFlexGroup
+          key={cluster.meta.clusterId}
+          gutterSize="l"
+          style={{ borderBottom: euiTheme.border.thin }}
+        >
+          <EuiFlexItem grow={2}>
+            <ClusterDetailsBox cluster={cluster} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={4}>
+            <ChartPanel hasBorder={false}>
+              <CloudPostureScoreChart
+                id={`${cluster.meta.clusterId}_score_chart`}
+                data={cluster.stats}
+                trend={cluster.trend}
+                partitionOnElementClick={(elements) =>
+                  handleElementClick(cluster.meta.clusterId, elements)
+                }
+              />
+            </ChartPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={4}>
+            <ChartPanel hasBorder={false}>
+              <RisksTable
+                data={cluster.groupedFindingsEvaluation}
+                maxItems={3}
+                onCellClick={(resourceTypeName) =>
+                  handleCellClick(cluster.meta.clusterId, resourceTypeName)
+                }
+                onViewAllClick={() => handleViewAllClick(cluster.meta.clusterId)}
+              />
+            </ChartPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ))}
+    </>
   );
 };

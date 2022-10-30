@@ -51,7 +51,7 @@ export const CloudSummarySection = ({
 
   return (
     <EuiFlexGroup gutterSize="l" style={summarySectionWrapperStyle}>
-      <EuiFlexItem grow={2}>Counters placeholder</EuiFlexItem>
+      <EuiFlexItem grow={2} />
       <EuiFlexItem grow={4}>
         <ChartPanel
           title={i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
