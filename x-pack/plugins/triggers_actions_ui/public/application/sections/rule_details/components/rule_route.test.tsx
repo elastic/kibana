@@ -173,6 +173,7 @@ function mockRuleSummary(overloads: Partial<any> = {}): any {
       average: 0,
       valuesWithTimestamp: {},
     },
+    flapping: false,
   };
   return summary;
 }

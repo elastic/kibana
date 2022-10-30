@@ -107,6 +107,7 @@ export function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSumma
       average: 100,
       valuesWithTimestamp: {},
     },
+    flapping: false,
   };
   return { ...summary, ...overloads };
 }

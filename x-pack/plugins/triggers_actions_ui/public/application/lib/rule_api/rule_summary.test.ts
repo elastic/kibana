@@ -32,6 +32,7 @@ describe('loadRuleSummary', () => {
         average: 0,
         valuesWithTimestamp: {},
       },
+      flapping: false,
     };
 
     http.get.mockResolvedValueOnce({

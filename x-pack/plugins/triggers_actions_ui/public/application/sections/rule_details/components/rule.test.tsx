@@ -479,6 +479,7 @@ function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSummary {
       average: 0,
       valuesWithTimestamp: {},
     },
+    flapping: false,
   };
   return { ...summary, ...overloads };
 }
