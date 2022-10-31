@@ -37,6 +37,7 @@ export type {
   ScriptedPhraseFilter,
   ScriptedRangeFilter,
   TimeRange,
+  CombinedFilter,
 } from './src/filters';
 
 export type {
@@ -108,7 +109,6 @@ export {
   extractTimeRange,
   convertRangeFilterToTimeRange,
   BooleanRelation,
-  CombinedFilter,
 } from './src/filters';
 
 export {
