@@ -7,14 +7,22 @@
 import { useCallback } from 'react';
 import { useQueryToggle } from '../../containers/query_toggle';
 
-export const useToggleStatus = ({ id }: { id: string }) => {
+export const useToggleStatus = ({
+  id,
+  setQuerySkip,
+}: {
+  id: string;
+  setQuerySkip: (skip: boolean) => void;
+}) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(id);
 
   const toggleQuery = useCallback(
     (status: boolean) => {
       setToggleStatus(status);
+      // toggle on = skipQuery false
+      setQuerySkip(!status);
     },
-    [setToggleStatus]
+    [setQuerySkip, setToggleStatus]
   );
   const toggle = useCallback(() => toggleQuery(!toggleStatus), [toggleQuery, toggleStatus]);
 

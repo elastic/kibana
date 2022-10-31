@@ -56,10 +56,10 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
+      ...filterFromSearchBar,
       ...getHostDetailsPageFilter('mockHost'),
       ...hostNameExistsFilter,
       ...getIndexFilters(['auditbeat-*']),
-      ...filterFromSearchBar,
     ]);
   });
 

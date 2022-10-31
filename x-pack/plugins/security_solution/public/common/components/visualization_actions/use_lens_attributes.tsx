@@ -79,10 +79,10 @@ export const useLensAttributes = ({
         query,
         filters: [
           ...attrs.state.filters,
+          ...filters,
           ...pageFilters,
           ...tabsFilters,
           ...indexFilters,
-          ...filters, // Global filters has higher priority than index filters from the data view
         ],
       },
       references: attrs.references.map((ref: { id: string; name: string; type: string }) => ({
