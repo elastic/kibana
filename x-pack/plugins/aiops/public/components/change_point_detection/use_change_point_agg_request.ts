@@ -6,9 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { TimeRange } from '@kbn/data-plugin/common';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { cloneDeep } from 'lodash';
 import {
   ChangePointDetectionRequestParams,
   ChangePointType,
@@ -23,37 +21,18 @@ interface RequestOptions {
   splitField: string;
   timeField: string;
   timeInterval: string;
-  timeRange: TimeRange;
 }
 
 function getChangePointDetectionRequestBody(
-  { index, fn, metricField, splitField, timeField, timeInterval, timeRange }: RequestOptions,
+  { index, fn, metricField, splitField, timeInterval, timeField }: RequestOptions,
   query: QueryDslQueryContainer
 ) {
-  const resultQuery = cloneDeep(query);
-
-  if (!Array.isArray(resultQuery.bool?.filter)) {
-    if (!resultQuery.bool) {
-      resultQuery.bool = {};
-    }
-    resultQuery.bool.filter = [];
-  }
-
-  resultQuery.bool!.filter.push({
-    range: {
-      [timeField]: {
-        from: timeRange.from,
-        to: timeRange.to,
-      },
-    },
-  });
-
   return {
     params: {
       index,
       size: 0,
       body: {
-        query: resultQuery,
+        query,
         aggregations: {
           groupings: {
             terms: {
@@ -88,16 +67,14 @@ function getChangePointDetectionRequestBody(
 
 export function useChangePointRequest(
   requestParams: ChangePointDetectionRequestParams,
-  timeRange: TimeRange,
   query: QueryDslQueryContainer
 ) {
   const { dataView } = useDataSource();
 
-  const requestBoby = useMemo(() => {
+  const requestPayload = useMemo(() => {
     const params = {
       index: dataView.getIndexPattern(),
       fn: requestParams.fn,
-      timeRange,
       timeInterval: requestParams.interval,
       metricField: requestParams.metricField,
       timeField: dataView.timeFieldName!,
@@ -105,10 +82,10 @@ export function useChangePointRequest(
     };
 
     return getChangePointDetectionRequestBody(params, query);
-  }, [timeRange, dataView, requestParams, query]);
+  }, [dataView, requestParams, query]);
 
-  return useCancellableRequest<typeof requestBoby, { rawResponse: ChangePointAggResponse }>(
-    requestBoby
+  return useCancellableRequest<typeof requestPayload, { rawResponse: ChangePointAggResponse }>(
+    requestPayload
   );
 }
 

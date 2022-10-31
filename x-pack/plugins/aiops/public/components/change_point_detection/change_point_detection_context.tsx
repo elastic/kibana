@@ -29,6 +29,7 @@ import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buck
 import { useDataSource } from '../../hooks/use_data_source';
 import { usePageUrlState } from '../../hooks/use_url_state';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
+import { useSplitFieldCardinality } from './use_split_field_cardinality';
 
 export interface ChangePointDetectionRequestParams {
   fn: string;
@@ -204,12 +205,30 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   );
 
   const combinedQuery = useMemo(() => {
-    return createMergedEsQuery(resultQuery, resultFilters, dataView, uiSettings);
-  }, [resultFilters, resultQuery, uiSettings, dataView]);
+    const mergedQuery = createMergedEsQuery(resultQuery, resultFilters, dataView, uiSettings);
+    if (!Array.isArray(mergedQuery.bool?.filter)) {
+      if (!mergedQuery.bool) {
+        mergedQuery.bool = {};
+      }
+      mergedQuery.bool.filter = [];
+    }
+
+    mergedQuery.bool!.filter.push({
+      range: {
+        [dataView.timeFieldName!]: {
+          from: timeRange.from,
+          to: timeRange.to,
+        },
+      },
+    });
+
+    return mergedQuery;
+  }, [resultFilters, resultQuery, uiSettings, dataView, timeRange]);
+
+  const splitFieldCardinality = useSplitFieldCardinality(requestParams.splitField, combinedQuery);
 
   const { runRequest, cancelRequest, isLoading } = useChangePointRequest(
     requestParams,
-    timeRange,
     combinedQuery
   );
 
