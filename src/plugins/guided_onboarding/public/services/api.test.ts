@@ -83,6 +83,16 @@ describe('GuidedOnboarding ApiService', () => {
       expect(httpClient.get).toHaveBeenCalledTimes(2);
     });
 
+    it(`doesn't send multiple requests in a loop when there is no state`, async () => {
+      httpClient.get.mockResolvedValueOnce({
+        state: [],
+      });
+      subscription = apiService.fetchActiveGuideState$().subscribe();
+      // wait until the request completes
+      await new Promise((resolve) => process.nextTick(resolve));
+      expect(httpClient.get).toHaveBeenCalledTimes(1);
+    });
+
     it(`re-sends the request if the subscription was unsubscribed before the request completed`, async () => {
       httpClient.get.mockImplementationOnce(() => {
         return new Promise((resolve) => setTimeout(resolve));

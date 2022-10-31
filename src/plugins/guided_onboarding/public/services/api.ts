@@ -49,7 +49,9 @@ export class ApiService implements GuidedOnboardingApi {
           this.isGuideStateLoading = false;
           // There should only be 1 active guide
           const hasState = response.state.length === 1;
-          this.onboardingGuideState$.next(hasState ? response.state[0] : undefined);
+          if (hasState) {
+            this.onboardingGuideState$.next(response.state[0]);
+          }
           observer.complete();
         })
         .catch((error) => {
