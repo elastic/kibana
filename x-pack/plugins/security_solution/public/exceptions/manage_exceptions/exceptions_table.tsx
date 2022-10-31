@@ -46,6 +46,7 @@ import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service
 import { ExceptionsListCard } from './exceptions_list_card';
 
 import { ImportExceptionListFlyout } from './import_exceptions_list_flyout';
+import { CreateSharedListFlyout } from './create_shared_exception_list';
 
 import { AddExceptionFlyout } from '../../detection_engine/rule_exceptions/components/add_exception_flyout';
 
@@ -359,6 +360,7 @@ export const ExceptionListsTable = React.memo(() => {
 
   const [isCreatePopoverOpen, setIsCreatePopoverOpen] = useState(false);
   const [displayAddExceptionItemFlyout, setDisplayAddExceptionItemFlyout] = useState(false);
+  const [displayCreateSharedListFlyout, setDisplayCreateSharedListFlyout] = useState(false);
 
   const onCreateButtonClick = () => setIsCreatePopoverOpen((isOpen) => !isOpen);
   const onCloseCreatePopover = () => {
@@ -387,18 +389,25 @@ export const ExceptionListsTable = React.memo(() => {
         <EuiFlexItem grow={false}>
           <EuiPopover
             data-test-subj="manageExceptionListCreateButton"
-            button={<EuiButton onClick={onCreateButtonClick}>{i18n.CREATE_BUTTON}</EuiButton>}
+            button={
+              <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
+                {i18n.CREATE_BUTTON}
+              </EuiButton>
+            }
             isOpen={isCreatePopoverOpen}
             closePopover={onCloseCreatePopover}
           >
             <EuiContextMenuPanel
               items={[
-                // <EuiContextMenuItem key={'createList'}
-                // onClick={() => {
-                //   onCloseCreateButtonPopover();
-                //   handleOpenCreateExceptionList()();
-                // }}
-                // />,
+                <EuiContextMenuItem
+                  key={'createList'}
+                  onClick={() => {
+                    onCloseCreatePopover();
+                    setDisplayCreateSharedListFlyout(true);
+                  }}
+                >
+                  {'create shared list'}
+                </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   key={'createItem'}
                   onClick={() => {
@@ -413,6 +422,10 @@ export const ExceptionListsTable = React.memo(() => {
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {displayCreateSharedListFlyout && (
+        <CreateSharedListFlyout handleCloseFlyout={() => setDisplayCreateSharedListFlyout(false)} />
+      )}
 
       {displayAddExceptionItemFlyout && (
         <AddExceptionFlyout
