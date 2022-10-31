@@ -163,18 +163,20 @@ export function ServerlessSummary({ serverlessId }: Props) {
           />
         </EuiFlexItem>
         {showVerticalRule && <VerticalRule />}
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            isLoading={isLoading}
-            title={`$${data?.estimatedCost}`}
-            titleSize="s"
-            description={i18n.translate(
-              'xpack.apm.serverlessMetrics.summary.estimatedCost',
-              { defaultMessage: 'Estimated costs avg.' }
-            )}
-            reverse
-          />
-        </EuiFlexItem>
+        {data?.estimatedCost && (
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              isLoading={isLoading}
+              title={`$${data.estimatedCost}`}
+              titleSize="s"
+              description={i18n.translate(
+                'xpack.apm.serverlessMetrics.summary.estimatedCost',
+                { defaultMessage: 'Estimated costs avg.' }
+              )}
+              reverse
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
