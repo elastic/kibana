@@ -66,6 +66,7 @@ function RangeValueInputUI(props: Props) {
   return (
     <div>
       <EuiFormControlLayoutDelimited
+        compressed={props.compressed}
         fullWidth={props.fullWidth}
         aria-label={props.intl.formatMessage({
           id: 'unifiedSearch.filter.filterEditor.rangeInputLabel',
