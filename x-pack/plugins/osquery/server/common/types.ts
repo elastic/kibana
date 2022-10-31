@@ -17,7 +17,6 @@ export interface IQueryPayload {
 export interface PackSavedObjectAttributes {
   name: string;
   description: string | undefined;
-  shards: Record<string, number>;
   queries: Array<{
     id: string;
     name: string;
@@ -34,6 +33,7 @@ export interface PackSavedObjectAttributes {
   updated_at: string;
   updated_by: string | undefined;
   policy_ids?: string[];
+  shards: Record<string, number>;
 }
 
 export type PackSavedObject = SavedObject<PackSavedObjectAttributes>;

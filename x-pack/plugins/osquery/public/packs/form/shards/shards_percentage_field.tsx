@@ -14,12 +14,14 @@ interface ShardsPercentageFieldComponent {
   index: number;
   control: ShardsFormReturn['control'];
   euiFieldProps?: Record<string, unknown>;
+  hideLabel?: boolean;
 }
 
 const ShardsPercentageFieldComponent = ({
   index,
   control,
   euiFieldProps,
+  hideLabel,
 }: ShardsPercentageFieldComponent) => {
   const {
     field: { onChange, value },
@@ -44,11 +46,11 @@ const ShardsPercentageFieldComponent = ({
   return (
     <EuiFormRow
       label={
-        index === 0
-          ? i18n.translate('xpack.osquery.pack.form.policyFieldLabel', {
+        hideLabel
+          ? ''
+          : i18n.translate('xpack.osquery.pack.form.policyFieldLabel', {
               defaultMessage: 'Percentage',
             })
-          : ''
       }
       error={error?.message}
       isInvalid={hasError}

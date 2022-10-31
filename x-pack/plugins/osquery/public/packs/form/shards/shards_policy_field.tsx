@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useController } from 'react-hook-form';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,9 +16,15 @@ interface ShardsPolicyFieldComponent {
   isLastItem: boolean;
   control: ShardsFormReturn['control'];
   euiFieldProps?: Record<string, unknown>;
+  hideLabel?: boolean;
 }
 
-const ShardsPolicyFieldComponent = ({ index, control, isLastItem }: ShardsPolicyFieldComponent) => {
+const ShardsPolicyFieldComponent = ({
+  index,
+  control,
+  isLastItem,
+  hideLabel,
+}: ShardsPolicyFieldComponent) => {
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
   const {
@@ -40,7 +46,6 @@ const ShardsPolicyFieldComponent = ({ index, control, isLastItem }: ShardsPolicy
           },
         }
       : {},
-    defaultValue: '',
   });
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);
@@ -89,11 +94,11 @@ const ShardsPolicyFieldComponent = ({ index, control, isLastItem }: ShardsPolicy
   return (
     <EuiFormRow
       label={
-        index === 0
-          ? i18n.translate('xpack.osquery.pack.form.policyFieldLabel', {
+        hideLabel
+          ? ''
+          : i18n.translate('xpack.osquery.pack.form.policyFieldLabel', {
               defaultMessage: 'Policy',
             })
-          : ''
       }
       error={error?.message}
       isInvalid={hasError}

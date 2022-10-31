@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { reduce } from 'lodash';
+import { omit, reduce } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -81,6 +81,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     ...payload,
     policy_ids: payload.policy_ids ?? [],
     queries: convertPackQueriesToSO(payload.queries),
+    shards: omit(payload.shards, '*') ?? {},
   });
 
   const hooksForm = useHookForm({
@@ -110,7 +111,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const getShards = useCallback(() => {
     if (packType === 'global') {
-      return { '*': 100 };
+      return { '*': 100, ...shards };
     }
 
     if (packType === 'shards') {

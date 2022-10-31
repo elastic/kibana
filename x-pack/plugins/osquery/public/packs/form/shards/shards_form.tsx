@@ -58,14 +58,19 @@ export const ShardsForm = ({
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
             <EuiFlexItem>
-              <ShardsPolicyField index={index} control={control} isLastItem={isLastItem} />
+              <ShardsPolicyField
+                index={index}
+                control={control}
+                isLastItem={isLastItem}
+                hideLabel={index !== 0}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={true}>
-              <ShardsPercentageField index={index} control={control} />
+              <ShardsPercentageField index={index} control={control} hideLabel={index !== 0} />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>

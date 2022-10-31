@@ -70,14 +70,6 @@ export const PackTypeSelectable = memo(
       [packType, handleChange]
     );
 
-    // Couldn't pass styles through StyleEuiCard, becasue 'color' conflicts with layout 'horizontal'
-    const getRadioStyle = useCallback(
-      (selected) => ({
-        ...(selected && { color: '#006BB4' }),
-      }),
-      []
-    );
-
     return (
       <EuiFlexItem>
         <EuiFormRow label="Type" fullWidth>
@@ -87,7 +79,6 @@ export const PackTypeSelectable = memo(
                 layout="horizontal"
                 title={
                   <EuiRadio
-                    style={getRadioStyle(policyCardSelectable.isSelected)}
                     id={'osquery_pack_type_policy'}
                     label={i18n.translate('xpack.osquery.pack.form.policyLabel', {
                       defaultMessage: 'Policy',
@@ -102,6 +93,7 @@ export const PackTypeSelectable = memo(
                   defaultMessage: 'Schedule pack for specific policy.',
                 })}
                 selectable={policyCardSelectable}
+                {...(packType === 'policy' && { color: 'primary' })}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -109,7 +101,6 @@ export const PackTypeSelectable = memo(
                 layout="horizontal"
                 title={
                   <EuiRadio
-                    style={getRadioStyle(globalCardSelectable.isSelected)}
                     id={'osquery_pack_type_global'}
                     label={i18n.translate('xpack.osquery.pack.form.globalLabel', {
                       defaultMessage: 'Global',
@@ -125,6 +116,7 @@ export const PackTypeSelectable = memo(
                 })}
                 selectable={globalCardSelectable}
                 isDisabled={isGlobalDisabled}
+                {...(packType === 'global' && { color: 'primary' })}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -132,7 +124,6 @@ export const PackTypeSelectable = memo(
                 layout="horizontal"
                 title={
                   <EuiRadio
-                    style={getRadioStyle(globalCardSelectable.isSelected)}
                     id={'osquery_pack_type_advanced'}
                     label={i18n.translate('xpack.osquery.pack.form.shardsDeploymentLabel', {
                       defaultMessage: 'Shards deployment',
@@ -147,6 +138,7 @@ export const PackTypeSelectable = memo(
                   defaultMessage: 'Specify shards for specific policies',
                 })}
                 selectable={advancedCardSelectable}
+                {...(packType === 'shards' && { color: 'primary' })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

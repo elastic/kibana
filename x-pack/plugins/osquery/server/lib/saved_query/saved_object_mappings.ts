@@ -202,6 +202,10 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
     version: {
       type: 'long',
     },
+    shards: {
+      type: 'object',
+      enabled: false,
+    },
     queries: {
       dynamic: false,
       properties: {
