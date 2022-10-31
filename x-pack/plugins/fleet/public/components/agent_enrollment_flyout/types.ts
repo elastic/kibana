@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentPolicy, FleetServerHost } from '../../types';
+import type { AgentPolicy } from '../../types';
 
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
 
@@ -19,7 +19,7 @@ export interface BaseProps {
    */
   agentPolicy?: AgentPolicy;
 
-  fleetServerHosts?: FleetServerHost[];
+  fleetServerHosts: string[];
 
   isFleetServerPolicySelected?: boolean;
 

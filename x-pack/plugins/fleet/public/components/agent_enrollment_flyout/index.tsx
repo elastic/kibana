@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -61,8 +61,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
 
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();
-  const fleetServerHosts =
-    fleetServerHostsRequest.data?.items?.filter((f) => true)?.[0]?.host_urls ?? [];
 
   const [selectedPolicyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
@@ -78,6 +76,17 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   } = useAgentEnrollmentFlyoutData();
 
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
+
+  const fleetServerHosts = useMemo(() => {
+    return (
+      fleetServerHostsRequest.data?.items.filter((item) =>
+        agentPolicyWithPackagePolicies?.fleet_server_host_id
+          ? item.id === agentPolicyWithPackagePolicies?.fleet_server_host_id
+          : item.is_default
+      )?.[0].host_urls ?? []
+    );
+  }, [agentPolicyWithPackagePolicies, fleetServerHostsRequest]);
+  console.log(fleetServerHosts);
 
   const selectedPolicy = agentPolicyWithPackagePolicies
     ? agentPolicyWithPackagePolicies
@@ -192,7 +201,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
           <Loading size="l" />
         ) : (
           <Instructions
-            fleetServerHosts={fleetServerHostsRequest.data?.items ?? []}
+            fleetServerHosts={fleetServerHosts}
             setSelectedPolicyId={setSelectedPolicyId}
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}
