@@ -21,6 +21,11 @@ import {
 } from '@kbn/maps-plugin/common';
 import uuid from 'uuid';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import { i18n } from '@kbn/i18n';
+import {
+  CLIENT_GEO_COUNTRY_ISO_CODE,
+  TRANSACTION_DURATION,
+} from '../../../../../../common/elasticsearch_fieldnames';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../common/data_view_constants';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
@@ -104,12 +109,17 @@ export async function getLayerList(maps?: MapsStartApi) {
         right: {
           type: SOURCE_TYPES.ES_TERM_SOURCE,
           id: FIELD_NAME,
-          term: 'client.geo.country_iso_code',
+          term: CLIENT_GEO_COUNTRY_ISO_CODE,
           metrics: [
             {
               type: AGG_TYPE.AVG,
-              field: 'transaction.duration.us',
-              label: 'Page load duration',
+              field: TRANSACTION_DURATION,
+              label: i18n.translate(
+                'xpack.apm.serviceOverview.embeddedMap.metric.label',
+                {
+                  defaultMessage: 'Page load duration',
+                }
+              ),
             },
           ],
           indexPatternId: APM_STATIC_DATA_VIEW_ID,
