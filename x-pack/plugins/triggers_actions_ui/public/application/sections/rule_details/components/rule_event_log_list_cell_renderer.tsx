@@ -68,7 +68,7 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
       return newPathname;
     }
     return ruleRoute;
-  }, [ruleId, ruleOnDifferentSpace, history, activeSpace, http.basePath, spaceIds]);
+  }, [ruleId, ruleOnDifferentSpace, history, activeSpace, http, spaceIds]);
 
   const onClickRuleName = useCallback(() => {
     if (!ruleId) return;

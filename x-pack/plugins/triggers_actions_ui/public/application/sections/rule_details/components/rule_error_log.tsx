@@ -150,6 +150,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
       });
       setActualTotalItemCount(result.totalErrors);
     } catch (e) {
+      console.log('ERROR', e);
       notifications.toasts.addDanger({
         title: API_FAILED_MESSAGE,
         text: e.body.message,
