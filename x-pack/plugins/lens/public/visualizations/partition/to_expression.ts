@@ -15,6 +15,7 @@ import type {
   PartitionLabelsExpressionFunctionDefinition,
   ValueFormats,
 } from '@kbn/expression-partition-vis-plugin/common';
+import { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
@@ -117,19 +118,12 @@ const generatePaletteAstArguments = (
 ): [Ast] =>
   palette
     ? [
-        {
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: 'theme',
-              arguments: {
-                variable: ['palette'],
-                default: [paletteService.get(palette.name).toExpression(palette.params)],
-              },
-            },
-          ],
-        },
+        buildExpression([
+          buildExpressionFunction<ExpressionFunctionTheme>('theme', {
+            variable: 'palette',
+            default: paletteService.get(palette.name).toExpression(palette.params),
+          }),
+        ]).toAst(),
       ]
     : [paletteService.get('default').toExpression()];
 
