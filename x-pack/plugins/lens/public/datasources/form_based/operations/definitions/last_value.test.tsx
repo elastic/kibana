@@ -327,7 +327,7 @@ describe('last_value', () => {
       ).toEqual({
         dataType: 'ip',
         isBucketed: false,
-        scale: 'ratio',
+        scale: 'ordinal',
       });
     });
 
