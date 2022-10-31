@@ -12,7 +12,7 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { Ecs } from '../../../../ecs';
 import type { CursorType, Inspect, Maybe, PaginationInputPaginated } from '../../../common';
 import type { TimelineRequestOptionsPaginated } from '../..';
-
+import type { Status } from '../../../../../public/container';
 export interface TimelineEdges {
   node: TimelineItem;
   cursor: CursorType;
@@ -45,4 +45,5 @@ export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsP
   fields: string[] | Array<{ field: string; include_unmapped: boolean }>;
   language: 'eql' | 'kuery' | 'lucene';
   runtimeMappings: MappingRuntimeFields;
+  filterStatus?: Status;
 }
