@@ -72,7 +72,7 @@ Action::    Whether to create or close an alert within Opsgenie. When using the 
 
 [float]
 [[opsgenie-action-create-alert-configuration]]
-===== Create alert configuration
+===== Configure the create alert action
 
 You can configure the create alert action through the form view or using a JSON editor.
 
