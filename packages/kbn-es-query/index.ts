@@ -22,7 +22,6 @@ export type {
   ExistsFilter,
   FieldFilter,
   Filter,
-  FilterItem,
   FilterCompareOptions,
   FilterMeta,
   LatLon,
@@ -109,6 +108,7 @@ export {
   extractTimeRange,
   convertRangeFilterToTimeRange,
   BooleanRelation,
+  CombinedFilter,
 } from './src/filters';
 
 export {
