@@ -54,16 +54,18 @@ export function getAggregatedCriticalPathRootNodes(params: {
 
     numNodes += mergedNodes.length;
 
+    mergedNodes.forEach((node) => {
+      node.children = mergeNodesWithSameOperationId(node.children);
+    });
+
     return mergedNodes;
   }
 
   function getNode(nodeId: string, depth: number): CriticalPathTreeNode {
     maxDepth = Math.max(maxDepth, depth);
 
-    const children = mergeNodesWithSameOperationId(
-      criticalPath.nodes[nodeId].map((childNodeId) =>
-        getNode(childNodeId, depth + 1)
-      )
+    const children = criticalPath.nodes[nodeId].map((childNodeId) =>
+      getNode(childNodeId, depth + 1)
     );
 
     const nodeCountExclusive = criticalPath.timeByNodeId[nodeId] || 0;
