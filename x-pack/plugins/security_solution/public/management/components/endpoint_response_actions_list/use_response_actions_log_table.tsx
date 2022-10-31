@@ -184,9 +184,7 @@ export const useResponseActionsLogTable = ({
             return OUTPUT_MESSAGES.hasFailed(command);
           }
 
-          if (!isGetFileCommand) {
-            return OUTPUT_MESSAGES.wasSuccessful(command);
-          } else {
+          if (isGetFileCommand) {
             return (
               <>
                 {OUTPUT_MESSAGES.wasSuccessful(command)}
@@ -198,6 +196,8 @@ export const useResponseActionsLogTable = ({
               </>
             );
           }
+
+          return OUTPUT_MESSAGES.wasSuccessful(command);
         };
 
         const outputList = [
