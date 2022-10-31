@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LogRecord, Logger, LogMeta } from '@kbn/logging';
+import { LogRecord, Logger, LogMeta, LogLevelId } from '@kbn/logging';
 import { GlobalContext, mergeGlobalContext } from './global_context';
 
 /** @internal */
@@ -63,6 +63,10 @@ export class LoggerAdapter implements Logger {
 
   public log(record: LogRecord) {
     this.logger.log({ ...record, meta: mergeGlobalContext(this.globalContext, record.meta) });
+  }
+
+  public isLevelEnabled(level: LogLevelId): boolean {
+    return this.logger.isLevelEnabled(level);
   }
 
   public get(...contextParts: string[]): Logger {

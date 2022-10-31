@@ -1,0 +1,324 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import datemath from '@kbn/datemath';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { schema } from '@kbn/config-schema';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_SEVERITY,
+} from '@kbn/rule-data-utils';
+import { compact } from 'lodash';
+import type { ESSearchResponse } from '@kbn/es-types';
+import { KibanaRequest } from '@kbn/core/server';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import {
+  ApmRuleType,
+  RULE_TYPES_CONFIG,
+  ANOMALY_ALERT_SEVERITY_TYPES,
+  formatAnomalyReason,
+} from '../../../../../common/rules/apm_rule_types';
+import { getSeverity } from '../../../../../common/anomaly_detection';
+import {
+  ApmMlDetectorType,
+  getApmMlDetectorIndex,
+} from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import {
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/elasticsearch_fieldnames';
+import {
+  getEnvironmentEsField,
+  getEnvironmentLabel,
+} from '../../../../../common/environment_filter_values';
+import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
+import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
+import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
+import { getMLJobs } from '../../../service_map/get_service_anomalies';
+import { apmActionVariables } from '../../action_variables';
+import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
+
+const paramsSchema = schema.object({
+  serviceName: schema.maybe(schema.string()),
+  transactionType: schema.maybe(schema.string()),
+  windowSize: schema.number(),
+  windowUnit: schema.string(),
+  environment: schema.string(),
+  anomalySeverityType: schema.oneOf([
+    schema.literal(ANOMALY_SEVERITY.CRITICAL),
+    schema.literal(ANOMALY_SEVERITY.MAJOR),
+    schema.literal(ANOMALY_SEVERITY.MINOR),
+    schema.literal(ANOMALY_SEVERITY.WARNING),
+  ]),
+});
+
+const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
+
+export function registerAnomalyRuleType({
+  logger,
+  ruleDataClient,
+  config$,
+  alerting,
+  ml,
+  basePath,
+}: RegisterRuleDependencies) {
+  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
+    logger,
+    ruleDataClient,
+  });
+
+  alerting.registerType(
+    createLifecycleRuleType({
+      id: ApmRuleType.Anomaly,
+      name: ruleTypeConfig.name,
+      actionGroups: ruleTypeConfig.actionGroups,
+      defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
+      validate: {
+        params: paramsSchema,
+      },
+      actionVariables: {
+        context: [
+          apmActionVariables.serviceName,
+          apmActionVariables.transactionType,
+          apmActionVariables.environment,
+          apmActionVariables.threshold,
+          apmActionVariables.triggerValue,
+          apmActionVariables.reason,
+          apmActionVariables.viewInAppUrl,
+        ],
+      },
+      producer: 'apm',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      executor: async ({ services, params }) => {
+        if (!ml) {
+          return {};
+        }
+
+        const ruleParams = params;
+        const request = {} as KibanaRequest;
+        const { mlAnomalySearch } = ml.mlSystemProvider(
+          request,
+          services.savedObjectsClient
+        );
+        const anomalyDetectors = ml.anomalyDetectorsProvider(
+          request,
+          services.savedObjectsClient
+        );
+
+        const mlJobs = await getMLJobs(
+          anomalyDetectors,
+          ruleParams.environment
+        );
+
+        const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
+          (option) => option.type === ruleParams.anomalySeverityType
+        );
+
+        if (!selectedOption) {
+          throw new Error(
+            `Anomaly alert severity type ${ruleParams.anomalySeverityType} is not supported.`
+          );
+        }
+
+        const threshold = selectedOption.threshold;
+
+        if (mlJobs.length === 0) {
+          return {};
+        }
+
+        // start time must be at least 30, does like this to support rules created before this change where default was 15
+        const startTime = Math.min(
+          datemath.parse('now-30m')!.valueOf(),
+          datemath
+            .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)
+            ?.valueOf() || 0
+        );
+
+        const jobIds = mlJobs.map((job) => job.jobId);
+        const anomalySearchParams = {
+          body: {
+            track_total_hits: false,
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  { term: { result_type: 'record' } },
+                  { terms: { job_id: jobIds } },
+                  { term: { is_interim: false } },
+                  {
+                    range: {
+                      timestamp: {
+                        gte: startTime,
+                        format: 'epoch_millis',
+                      },
+                    },
+                  },
+                  ...termQuery(
+                    'partition_field_value',
+                    ruleParams.serviceName,
+                    { queryEmptyString: false }
+                  ),
+                  ...termQuery('by_field_value', ruleParams.transactionType, {
+                    queryEmptyString: false,
+                  }),
+                  ...termQuery(
+                    'detector_index',
+                    getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
+                  ),
+                ] as QueryDslQueryContainer[],
+              },
+            },
+            aggs: {
+              anomaly_groups: {
+                multi_terms: {
+                  terms: [
+                    { field: 'partition_field_value' },
+                    { field: 'by_field_value' },
+                    { field: 'job_id' },
+                  ],
+                  size: 1000,
+                  order: { 'latest_score.record_score': 'desc' as const },
+                },
+                aggs: {
+                  latest_score: {
+                    top_metrics: {
+                      metrics: asMutableArray([
+                        { field: 'record_score' },
+                        { field: 'partition_field_value' },
+                        { field: 'by_field_value' },
+                        { field: 'job_id' },
+                        { field: 'timestamp' },
+                        { field: 'bucket_span' },
+                      ] as const),
+                      sort: {
+                        timestamp: 'desc' as const,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        const response: ESSearchResponse<unknown, typeof anomalySearchParams> =
+          (await mlAnomalySearch(anomalySearchParams, [])) as any;
+
+        const anomalies =
+          response.aggregations?.anomaly_groups.buckets
+            .map((bucket) => {
+              const latest = bucket.latest_score.top[0].metrics;
+
+              const job = mlJobs.find((j) => j.jobId === latest.job_id);
+
+              if (!job) {
+                logger.warn(
+                  `Could not find matching job for job id ${latest.job_id}`
+                );
+                return undefined;
+              }
+
+              return {
+                serviceName: latest.partition_field_value as string,
+                transactionType: latest.by_field_value as string,
+                environment: job.environment,
+                score: latest.record_score as number,
+                timestamp: Date.parse(latest.timestamp as string),
+                bucketSpan: latest.bucket_span as number,
+              };
+            })
+            .filter((anomaly) =>
+              anomaly ? anomaly.score >= threshold : false
+            ) ?? [];
+
+        for (const anomaly of compact(anomalies)) {
+          const {
+            serviceName,
+            environment,
+            transactionType,
+            score,
+            timestamp,
+            bucketSpan,
+          } = anomaly;
+
+          const eventSourceFields = await getServiceGroupFieldsForAnomaly({
+            config$,
+            scopedClusterClient: services.scopedClusterClient,
+            savedObjectsClient: services.savedObjectsClient,
+            serviceName,
+            environment,
+            transactionType,
+            timestamp,
+            bucketSpan,
+          });
+
+          const severityLevel = getSeverity(score);
+          const reasonMessage = formatAnomalyReason({
+            measured: score,
+            serviceName,
+            severityLevel,
+            windowSize: params.windowSize,
+            windowUnit: params.windowUnit,
+          });
+
+          const relativeViewInAppUrl = getAlertUrlTransaction(
+            serviceName,
+            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
+            transactionType
+          );
+
+          const viewInAppUrl = basePath.publicBaseUrl
+            ? new URL(
+                basePath.prepend(relativeViewInAppUrl),
+                basePath.publicBaseUrl
+              ).toString()
+            : relativeViewInAppUrl;
+          services
+            .alertWithLifecycle({
+              id: [
+                ApmRuleType.Anomaly,
+                serviceName,
+                environment,
+                transactionType,
+              ]
+                .filter((name) => name)
+                .join('_'),
+              fields: {
+                [SERVICE_NAME]: serviceName,
+                ...getEnvironmentEsField(environment),
+                [TRANSACTION_TYPE]: transactionType,
+                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+                [ALERT_SEVERITY]: severityLevel,
+                [ALERT_EVALUATION_VALUE]: score,
+                [ALERT_EVALUATION_THRESHOLD]: threshold,
+                [ALERT_REASON]: reasonMessage,
+                ...eventSourceFields,
+              },
+            })
+            .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
+              serviceName,
+              transactionType,
+              environment: getEnvironmentLabel(environment),
+              threshold: selectedOption?.label,
+              triggerValue: severityLevel,
+              reason: reasonMessage,
+              viewInAppUrl,
+            });
+        }
+
+        return {};
+      },
+    })
+  );
+}

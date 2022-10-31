@@ -20,7 +20,7 @@ jest.mock('rxjs', () => {
 });
 
 describe('MetadataService', () => {
-  jest.useFakeTimers();
+  jest.useFakeTimers('legacy');
 
   let metadataService: MetadataService;
 
