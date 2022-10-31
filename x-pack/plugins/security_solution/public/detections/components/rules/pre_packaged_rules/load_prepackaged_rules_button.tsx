@@ -10,6 +10,7 @@ import React from 'react';
 import { usePrePackagedRulesInstallationStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_installation_status';
 import { usePrePackagedRulesStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_status';
 import { usePrePackagedTimelinesInstallationStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_timelines_installation_status';
+import { INSTALL_PREBUILT_RULES_ANCHOR } from '../../../../detection_engine/rule_management_ui/components/guided_onboarding/rules_management_tour';
 import type {
   PrePackagedRuleInstallationStatus,
   PrePackagedTimelineInstallationStatus,
@@ -62,17 +63,23 @@ export const LoadPrePackagedRulesButton = ({
     prePackagedAssetsStatus !== 'someRuleUninstall';
 
   if (showInstallButton) {
+    // Without the outer div EuiStepTour crashes with Uncaught DOMException:
+    // Failed to execute 'removeChild' on 'Node': The node to be removed is not
+    // a child of this node.
     return (
-      <EuiButton
-        fill={fill}
-        iconType="indexOpen"
-        isLoading={isLoading}
-        isDisabled={isDisabled}
-        onClick={onClick}
-        data-test-subj={dataTestSubj}
-      >
-        {getLoadRulesOrTimelinesButtonTitle(prePackagedAssetsStatus, prePackagedTimelineStatus)}
-      </EuiButton>
+      <div>
+        <EuiButton
+          id={INSTALL_PREBUILT_RULES_ANCHOR}
+          fill={fill}
+          iconType="indexOpen"
+          isLoading={isLoading}
+          isDisabled={isDisabled}
+          onClick={onClick}
+          data-test-subj={dataTestSubj}
+        >
+          {getLoadRulesOrTimelinesButtonTitle(prePackagedAssetsStatus, prePackagedTimelineStatus)}
+        </EuiButton>
+      </div>
     );
   }
 
@@ -81,20 +88,26 @@ export const LoadPrePackagedRulesButton = ({
     prePackagedTimelineStatus === 'someTimelineUninstall';
 
   if (showUpdateButton) {
+    // Without the outer div EuiStepTour crashes with Uncaught DOMException:
+    // Failed to execute 'removeChild' on 'Node': The node to be removed is not
+    // a child of this node.
     return (
-      <EuiButton
-        fill={fill}
-        iconType="plusInCircle"
-        isLoading={isLoading}
-        isDisabled={isDisabled}
-        onClick={onClick}
-        data-test-subj={dataTestSubj}
-      >
-        {getMissingRulesOrTimelinesButtonTitle(
-          prePackagedRulesStatus?.rules_not_installed ?? 0,
-          prePackagedRulesStatus?.timelines_not_installed ?? 0
-        )}
-      </EuiButton>
+      <div>
+        <EuiButton
+          id={INSTALL_PREBUILT_RULES_ANCHOR}
+          fill={fill}
+          iconType="plusInCircle"
+          isLoading={isLoading}
+          isDisabled={isDisabled}
+          onClick={onClick}
+          data-test-subj={dataTestSubj}
+        >
+          {getMissingRulesOrTimelinesButtonTitle(
+            prePackagedRulesStatus?.rules_not_installed ?? 0,
+            prePackagedRulesStatus?.timelines_not_installed ?? 0
+          )}
+        </EuiButton>
+      </div>
     );
   }
 
