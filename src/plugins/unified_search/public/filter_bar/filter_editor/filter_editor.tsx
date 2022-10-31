@@ -115,7 +115,9 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
               <EuiToolTip
                 position="top"
                 content={
-                  shouldDissableToggle ? 'DSL temporarily not supported for multifilters' : null
+                  shouldDissableToggle
+                    ? '"Edit as questy DSL" operation is not supported for combined filters'
+                    : null
                 }
                 display="block"
               >
