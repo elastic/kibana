@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "exclude": ["cypress.config.ts"],
   "include": [
@@ -19,7 +18,7 @@
     // ECS and Osquery schema files
     "public/common/schemas/*/**.json",
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 
