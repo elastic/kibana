@@ -275,7 +275,7 @@ export const DiscoverGrid = ({
     if (onDataLoad && rows !== undefined && rows.length > 0) {
       onDataLoad();
     }
-  }, [rows]);
+  }, [rows, onDataLoad]);
 
   /**
    * Pagination
