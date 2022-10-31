@@ -8,6 +8,7 @@
 
 import React from 'react';
 import type { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiFieldText, EuiTextArea, EuiSpacer } from '@elastic/eui';
 
 import type { MetadataFormState } from './use_metadata_form';
@@ -16,8 +17,6 @@ import type { Services } from '../services';
 interface Props {
   form: MetadataFormState & {
     isSubmitted: boolean;
-    isValid: boolean;
-    getErrors: () => string[];
   };
   isReadonly: boolean;
   TagSelector?: Services['TagSelector'];
@@ -43,7 +42,9 @@ export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
       data-test-subj="metadataForm"
     >
       <EuiFormRow
-        label="Name"
+        label={i18n.translate('contentManagement.inspector.metadataForm.nameInputLabel', {
+          defaultMessage: 'Name',
+        })}
         error={title.errorMessage}
         isInvalid={!title.isChangingValue && !title.isValid}
         fullWidth
@@ -63,7 +64,9 @@ export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
       <EuiSpacer />
 
       <EuiFormRow
-        label="Description"
+        label={i18n.translate('contentManagement.inspector.metadataForm.descriptionInputLabel', {
+          defaultMessage: 'Description',
+        })}
         error={description.errorMessage}
         isInvalid={!description.isChangingValue && !description.isValid}
         fullWidth
