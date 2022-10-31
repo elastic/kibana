@@ -180,7 +180,7 @@ export interface FileJSON<Meta = unknown> {
   /**
    * User who created the file
    */
-  owner: FileMetadata['owner'];
+  owner?: FileMetadata['owner'];
   /**
    * File name.
    *
