@@ -39,7 +39,7 @@ const ViewSelect = styled(EuiSuperSelect)`
 
 const TopNContent = styled.div`
   margin-top: 4px;
-  margin-right: 5px;
+  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
 
   .euiPanel {
     border: none;
@@ -98,6 +98,7 @@ const TopNComponent: React.FC<Props> = ({
     () => (
       <ViewSelect
         data-test-subj="view-select"
+        disabled={options.length === 1}
         onChange={onViewSelected}
         options={options}
         valueOfSelected={view}
