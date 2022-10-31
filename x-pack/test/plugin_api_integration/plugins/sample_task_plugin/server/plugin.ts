@@ -6,7 +6,15 @@
  */
 
 import _ from 'lodash';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  IKibanaResponse,
+  KibanaResponseFactory,
+  KibanaRequest,
+  RequestHandlerContext,
+} from '@kbn/core/server';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
 import {
