@@ -10,7 +10,7 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { defaultLogViewsStaticConfig } from './defaults';
 import { ResolvedLogView, resolveLogView } from './resolved_log_view';
 import { LogViewAttributes } from './types';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 
 const dataViewMock = {
   id: 'log-view-data-view-mock',
@@ -59,6 +59,10 @@ export const createResolvedLogViewMockFromAttributes = (logViewAttributes: LogVi
     {
       get: async () => createStubDataView({ spec: {} }),
       getFieldsForWildcard: async () => [],
+      create: async (spec: DataViewSpec) =>
+        createStubDataView({
+          spec,
+        }),
     } as unknown as DataViewsContract,
     defaultLogViewsStaticConfig
   );
