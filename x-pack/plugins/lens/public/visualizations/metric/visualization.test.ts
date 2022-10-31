@@ -473,7 +473,6 @@ describe('metric visualization', () => {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "breakdownBy": Array [],
                   "inspectorTableId": Array [
                     "second",
                   ],
@@ -520,7 +519,6 @@ describe('metric visualization', () => {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "breakdownBy": Array [],
                   "inspectorTableId": Array [
                     "second",
                   ],

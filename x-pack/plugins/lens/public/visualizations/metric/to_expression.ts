@@ -6,11 +6,9 @@
  */
 
 import { CustomPaletteParams, CUSTOM_PALETTE, PaletteRegistry } from '@kbn/coloring';
-import {
-  EXPRESSION_METRIC_NAME,
-  EXPRESSION_METRIC_TRENDLINE_NAME,
-} from '@kbn/expression-metric-vis-plugin/public';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import { TrendlineExpressionFunctionDefinition } from '@kbn/expression-metric-vis-plugin/common';
+import { EXPRESSION_METRIC_NAME } from '@kbn/expression-metric-vis-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { Ast } from '@kbn/interpreter';
 import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import { CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
@@ -33,51 +31,47 @@ const getTrendlineExpression = (
   state: MetricVisualizationState,
   datasourceExpressionsByLayers: Record<string, Ast>
 ): Ast | undefined => {
-  if (!state.trendlineLayerId || !state.trendlineMetricAccessor || !state.trendlineTimeAccessor) {
+  const { trendlineLayerId, trendlineMetricAccessor, trendlineTimeAccessor } = state;
+  if (!trendlineLayerId || !trendlineMetricAccessor || !trendlineTimeAccessor) {
     return;
   }
 
-  const datasourceExpression = datasourceExpressionsByLayers[state.trendlineLayerId];
+  const datasourceExpression = datasourceExpressionsByLayers[trendlineLayerId];
 
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: EXPRESSION_METRIC_TRENDLINE_NAME,
-        arguments: {
-          metric: [state.trendlineMetricAccessor],
-          timeField: [state.trendlineTimeAccessor],
-          breakdownBy:
-            state.trendlineBreakdownByAccessor && !state.collapseFn
-              ? [state.trendlineBreakdownByAccessor]
-              : [],
-          inspectorTableId: [state.trendlineLayerId],
-          ...(datasourceExpression
-            ? {
-                table: [
-                  {
-                    ...datasourceExpression,
-                    chain: [
-                      ...datasourceExpression.chain,
-                      ...(state.collapseFn
-                        ? [
-                            buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
-                              by: [state.trendlineTimeAccessor],
-                              metric: [state.trendlineMetricAccessor],
-                              fn: [state.collapseFn],
-                            }).toAst(),
-                          ]
-                        : []),
-                    ],
-                  },
-                ],
-              }
-            : {}),
+  if (!datasourceExpression) {
+    return;
+  }
+
+  const metricTrendlineFn = buildExpressionFunction<TrendlineExpressionFunctionDefinition>(
+    'metricTrendline',
+    {
+      metric: trendlineMetricAccessor,
+      timeField: trendlineTimeAccessor,
+      breakdownBy:
+        state.trendlineBreakdownByAccessor && !state.collapseFn
+          ? state.trendlineBreakdownByAccessor
+          : undefined,
+      inspectorTableId: trendlineLayerId,
+      table: [
+        {
+          ...datasourceExpression,
+          chain: [
+            ...datasourceExpression.chain,
+            ...(state.collapseFn
+              ? [
+                  buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
+                    by: [trendlineTimeAccessor],
+                    metric: [trendlineMetricAccessor],
+                    fn: [state.collapseFn],
+                  }).toAst(),
+                ]
+              : []),
+          ],
         },
-      },
-    ],
-  };
+      ],
+    }
+  );
+  return buildExpression([metricTrendlineFn]).toAst();
 };
 
 export const toExpression = (
