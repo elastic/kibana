@@ -35,6 +35,10 @@ import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { getNewRule } from '../../objects/rule';
 import { QUERY_TAB_BUTTON } from '../../screens/timeline';
 import { closeTimeline } from '../../tasks/timeline';
+import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../tasks/risk_scores';
+
+const TEST_USER_ALERTS = 2;
+const SIEM_KIBANA_HOST_ALERTS = 2;
 
 describe('Entity Analytics Dashboard', () => {
   before(() => {
@@ -69,11 +73,11 @@ describe('Entity Analytics Dashboard', () => {
       esArchiverUnload('risk_users_no_data');
     });
 
-    it('shows no data detected propmpt for host risk score module', () => {
+    it('shows no data detected prompt for host risk score module', () => {
       cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
     });
 
-    it('shows no data detected propmpt for user risk score module', () => {
+    it('shows no data detected prompt for user risk score module', () => {
       cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
     });
   });
@@ -143,12 +147,12 @@ describe('Entity Analytics Dashboard', () => {
       });
 
       it('populates alerts column', () => {
-        cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', '2');
+        cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', SIEM_KIBANA_HOST_ALERTS);
       });
 
       it('opens timeline when alerts count is clicked', () => {
-        cy.get(HOSTS_TABLE_ALERT_CELL).first().click();
-        cy.get(QUERY_TAB_BUTTON).should('contain.text', 2);
+        clickOnFirstHostsAlerts();
+        cy.get(QUERY_TAB_BUTTON).should('contain.text', SIEM_KIBANA_HOST_ALERTS);
         closeTimeline();
       });
     });
@@ -197,12 +201,12 @@ describe('Entity Analytics Dashboard', () => {
       });
 
       it('populates alerts column', () => {
-        cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', '2');
+        cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', TEST_USER_ALERTS);
       });
 
       it('opens timeline when alerts count is clicked', () => {
-        cy.get(USERS_TABLE_ALERT_CELL).first().click();
-        cy.get(QUERY_TAB_BUTTON).should('contain.text', 2);
+        clickOnFirstUsersAlerts();
+        cy.get(QUERY_TAB_BUTTON).should('contain.text', TEST_USER_ALERTS);
         closeTimeline();
       });
     });
