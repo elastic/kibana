@@ -6,24 +6,40 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { GuideConfig } from '../../types';
 
 export const searchConfig: GuideConfig = {
-  title: 'Search my data',
-  description: `We'll help you build world-class search experiences with your data, using Elastic's out-of-the-box web crawler, connectors, and our robust APIs. Gain deep insights from the built-in search analytics and use that data to inform changes to relevance.`,
+  title: i18n.translate('guidedOnboarding.searchGuide.title', {
+    defaultMessage: 'Search my data',
+  }),
+  description: i18n.translate('guidedOnboarding.searchGuide.description', {
+    defaultMessage: `We'll help you build world-class search experiences with your data, using Elastic's out-of-the-box web crawler, connectors, and our robust APIs. Gain deep insights from the built-in search analytics and use that data to inform changes to relevance.`,
+  }),
   guideName: 'Enterprise Search',
   docs: {
-    text: 'Enterprise Search 101 Documentation',
+    text: i18n.translate('guidedOnboarding.searchGuide.docsLink', {
+      defaultMessage: 'Learn more about Elastic Enterprise Search',
+    }),
+    // TODO
     url: 'example.com',
   },
   steps: [
     {
       id: 'add_data',
-      title: 'Add data',
+      title: i18n.translate('guidedOnboarding.searchGuide.addDataStep.title', {
+        defaultMessage: 'Add data',
+      }),
       descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+        i18n.translate('guidedOnboarding.searchGuide.addDataStep.description1', {
+          defaultMessage: 'Select an ingestion method',
+        }),
+        i18n.translate('guidedOnboarding.searchGuide.addDataStep.description2', {
+          defaultMessage: 'Create a new Elasticsearch index',
+        }),
+        i18n.translate('guidedOnboarding.searchGuide.addDataStep.description3', {
+          defaultMessage: 'Configure your ingestion settings',
+        }),
       ],
       location: {
         appID: 'enterpriseSearch',
@@ -31,35 +47,27 @@ export const searchConfig: GuideConfig = {
       },
     },
     {
-      id: 'browse_docs',
-      title: 'Browse your documents',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
-      location: {
-        appID: 'guidedOnboardingExample',
-        path: 'stepTwo',
-      },
-      manualCompletion: {
-        title: 'Manual completion step title',
-        description:
-          'Mark the step complete by opening the panel and clicking the button "Mark done"',
-        readyToCompleteOnNavigation: true,
-      },
-    },
-    {
       id: 'search_experience',
-      title: 'Build a search experience',
+      title: i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.title', {
+        defaultMessage: 'Build a search experience',
+      }),
+      description: i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.description', {
+        defaultMessage: 'Take a tour of Elastic’s relevance refinement tools, including:',
+      }),
       descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+        i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item1', {
+          defaultMessage: 'Relevance and precision tuning',
+        }),
+        i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item2', {
+          defaultMessage: 'Adaptive relevance and curations',
+        }),
+        i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item3', {
+          defaultMessage: 'Synonym management',
+        }),
       ],
       location: {
-        appID: 'guidedOnboardingExample',
-        path: 'stepThree',
+        appID: 'enterpriseSearch',
+        path: '/search_experiences',
       },
     },
   ],

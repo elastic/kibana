@@ -54,7 +54,8 @@ export interface GuidedOnboardingApi {
 export interface StepConfig {
   id: GuideStepIds;
   title: string;
-  descriptionList: string[];
+  description?: string;
+  descriptionList?: string[];
   location?: {
     appID: string;
     path: string;
