@@ -20,6 +20,7 @@ import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import {
+  ExistenceFetchStatus,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
@@ -380,175 +381,16 @@ export function DiscoverSidebarComponent({
           </form>
         </EuiFlexItem>
         <EuiFlexItem>
-          {Boolean(fields) && (
-            <FieldListGrouped
-              fieldGroups={fieldGroups}
-              fieldsExistenceStatus={fieldsExistenceReader.getFieldsExistenceStatus(
-                selectedDataView.id!
-              )}
-              renderFieldItem={renderFieldItem}
-              fieldsExistInIndex={Boolean(fields?.length)}
-            />
-          )}
-          {/* <div */}
-          {/*  ref={(el) => {*/}
-          {/*    if (documents && el && !el.dataset.dynamicScroll) {*/}
-          {/*      el.dataset.dynamicScroll = 'true';*/}
-          {/*      setScrollContainer(el);*/}
-          {/*    }*/}
-          {/*  }}*/}
-          {/*  onScroll={throttle(lazyScroll, 100)}*/}
-          {/*  className="eui-yScroll"*/}
-          {/* > */}
-          {/*  {Array.isArray(fields) && fields.length > 0 && (*/}
-          {/*    <div>*/}
-          {/*      {selectedFields &&*/}
-          {/*      selectedFields.length > 0 &&*/}
-          {/*      selectedFields[0].displayName !== '_source' ? (*/}
-          {/*        <>*/}
-          {/*          <EuiAccordion*/}
-          {/*            id="dscSelectedFields"*/}
-          {/*            initialIsOpen={true}*/}
-          {/*            buttonContent={*/}
-          {/*              <EuiText size="xs" id="selected_fields">*/}
-          {/*                <strong>*/}
-          {/*                  <FormattedMessage*/}
-          {/*                    id="discover.fieldChooser.filter.selectedFieldsTitle"*/}
-          {/*                    defaultMessage="Selected fields"*/}
-          {/*                  />*/}
-          {/*                </strong>*/}
-          {/*              </EuiText>*/}
-          {/*            }*/}
-          {/*            extraAction={*/}
-          {/*              <EuiNotificationBadge color={filterChanged ? 'subdued' : 'accent'} size="m">*/}
-          {/*                {selectedFields.length}*/}
-          {/*              </EuiNotificationBadge>*/}
-          {/*            }*/}
-          {/*          >*/}
-          {/*            <EuiSpacer size="m" />*/}
-          {/*            <ul*/}
-          {/*              className="dscFieldList"*/}
-          {/*              aria-labelledby="selected_fields"*/}
-          {/*              data-test-subj={`fieldList-selected`}*/}
-          {/*            >*/}
-          {/*              {selectedFields.map((field: DataViewField) => {*/}
-          {/*                return (*/}
-          {/*                  <li key={`field${field.name}`} data-attr-field={field.name}>*/}
-          {/*                    <DiscoverField*/}
-          {/*                      alwaysShowActionButton={alwaysShowActionButtons}*/}
-          {/*                      field={field}*/}
-          {/*                      dataView={selectedDataView}*/}
-          {/*                      onAddField={onAddField}*/}
-          {/*                      onRemoveField={onRemoveField}*/}
-          {/*                      onAddFilter={onAddFilter}*/}
-          {/*                      documents$={documents$}*/}
-          {/*                      selected={true}*/}
-          {/*                      trackUiMetric={trackUiMetric}*/}
-          {/*                      multiFields={multiFields?.get(field.name)}*/}
-          {/*                      onEditField={editField}*/}
-          {/*                      onDeleteField={deleteField}*/}
-          {/*                      showFieldStats={showFieldStats}*/}
-          {/*                      contextualFields={columns}*/}
-          {/*                    />*/}
-          {/*                  </li>*/}
-          {/*                );*/}
-          {/*              })}*/}
-          {/*            </ul>*/}
-          {/*          </EuiAccordion>*/}
-          {/*          <EuiSpacer size="s" />{' '}*/}
-          {/*        </>*/}
-          {/*      ) : null}*/}
-          {/*      <EuiAccordion*/}
-          {/*        id="dscAvailableFields"*/}
-          {/*        initialIsOpen={true}*/}
-          {/*        buttonContent={*/}
-          {/*          <EuiText size="xs" id="available_fields">*/}
-          {/*            <strong id={DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields}>*/}
-          {/*              <FormattedMessage*/}
-          {/*                id="discover.fieldChooser.filter.availableFieldsTitle"*/}
-          {/*                defaultMessage="Available fields"*/}
-          {/*              />*/}
-          {/*            </strong>*/}
-          {/*          </EuiText>*/}
-          {/*        }*/}
-          {/*        extraAction={*/}
-          {/*          <EuiNotificationBadge size="m" color={filterChanged ? 'subdued' : 'accent'}>*/}
-          {/*            {restFields.length}*/}
-          {/*          </EuiNotificationBadge>*/}
-          {/*        }*/}
-          {/*      >*/}
-          {/*        <EuiSpacer size="s" />*/}
-          {/*        {!isPlainRecord && popularFields.length > 0 && (*/}
-          {/*          <>*/}
-          {/*            <EuiTitle size="xxxs" className="dscFieldListHeader">*/}
-          {/*              <h4 id="available_fields_popular">*/}
-          {/*                <FormattedMessage*/}
-          {/*                  id="discover.fieldChooser.filter.popularTitle"*/}
-          {/*                  defaultMessage="Popular"*/}
-          {/*                />*/}
-          {/*              </h4>*/}
-          {/*            </EuiTitle>*/}
-          {/*            <ul*/}
-          {/*              className="dscFieldList dscFieldList--popular"*/}
-          {/*              aria-labelledby="available_fields available_fields_popular"*/}
-          {/*              data-test-subj={`fieldList-popular`}*/}
-          {/*            >*/}
-          {/*              {popularFields.map((field: DataViewField) => {*/}
-          {/*                return (*/}
-          {/*                  <li key={`field${field.name}`} data-attr-field={field.name}>*/}
-          {/*                    <DiscoverField*/}
-          {/*                      alwaysShowActionButton={alwaysShowActionButtons}*/}
-          {/*                      field={field}*/}
-          {/*                      dataView={selectedDataView}*/}
-          {/*                      onAddField={onAddField}*/}
-          {/*                      onRemoveField={onRemoveField}*/}
-          {/*                      onAddFilter={onAddFilter}*/}
-          {/*                      documents$={documents$}*/}
-          {/*                      trackUiMetric={trackUiMetric}*/}
-          {/*                      multiFields={multiFields?.get(field.name)}*/}
-          {/*                      onEditField={editField}*/}
-          {/*                      onDeleteField={deleteField}*/}
-          {/*                      showFieldStats={showFieldStats}*/}
-          {/*                      contextualFields={columns}*/}
-          {/*                    />*/}
-          {/*                  </li>*/}
-          {/*                );*/}
-          {/*              })}*/}
-          {/*            </ul>*/}
-          {/*          </>*/}
-          {/*        )}*/}
-          {/*        <ul*/}
-          {/*          className="dscFieldList dscFieldList--unpopular"*/}
-          {/*          aria-labelledby="available_fields"*/}
-          {/*          data-test-subj={`fieldList-unpopular`}*/}
-          {/*          ref={availableFieldsContainer}*/}
-          {/*        >*/}
-          {/*          {getPaginated(restFields).map((field: DataViewField) => {*/}
-          {/*            return (*/}
-          {/*              <li key={`field${field.name}`} data-attr-field={field.name}>*/}
-          {/*                <DiscoverField*/}
-          {/*                  alwaysShowActionButton={alwaysShowActionButtons}*/}
-          {/*                  field={field}*/}
-          {/*                  dataView={selectedDataView}*/}
-          {/*                  onAddField={onAddField}*/}
-          {/*                  onRemoveField={onRemoveField}*/}
-          {/*                  onAddFilter={onAddFilter}*/}
-          {/*                  documents$={documents$}*/}
-          {/*                  trackUiMetric={trackUiMetric}*/}
-          {/*                  multiFields={multiFields?.get(field.name)}*/}
-          {/*                  onEditField={editField}*/}
-          {/*                  onDeleteField={deleteField}*/}
-          {/*                  showFieldStats={showFieldStats}*/}
-          {/*                  contextualFields={columns}*/}
-          {/*                />*/}
-          {/*              </li>*/}
-          {/*            );*/}
-          {/*          })}*/}
-          {/*        </ul>*/}
-          {/*      </EuiAccordion>*/}
-          {/*    </div>*/}
-          {/*  )}*/}
-          {/* </div >*/}
+          <FieldListGrouped
+            fieldGroups={fieldGroups}
+            fieldsExistenceStatus={
+              fields && selectedDataView?.id
+                ? fieldsExistenceReader.getFieldsExistenceStatus(selectedDataView.id)
+                : ExistenceFetchStatus.unknown
+            }
+            renderFieldItem={renderFieldItem}
+            fieldsExistInIndex={Boolean(fields?.length)}
+          />
         </EuiFlexItem>
         {!!editField && (
           <EuiFlexItem grow={false}>
