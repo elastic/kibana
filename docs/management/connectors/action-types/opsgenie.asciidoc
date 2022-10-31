@@ -40,7 +40,7 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 
 Config defines information for the connector type.
 
-`apiUrl`:: A string that corresponds to *URL*
+`apiUrl`:: A string that corresponds to *URL*.
 
 Secrets defines sensitive information for the connector type.
 
