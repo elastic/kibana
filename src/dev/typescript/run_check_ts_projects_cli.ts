@@ -10,6 +10,7 @@ import Path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
 import { asyncMapWithLimit } from '@kbn/std';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
 import globby from 'globby';
 
@@ -17,70 +18,62 @@ import { File } from '../file';
 import { PROJECTS } from './projects';
 import type { Project } from './project';
 
+class Stats {
+  counts = {
+    files: new Map<Project, number>(),
+    ignored: new Map<Project, number>(),
+    gitMatched: new Map<Project, number>(),
+  };
+
+  incr(proj: Project, metric: 'files' | 'ignored' | 'gitMatched', delta = 1) {
+    const cur = this.counts[metric].get(proj);
+    this.counts[metric].set(proj, (cur ?? 0) + delta);
+  }
+}
+
 export async function runCheckTsProjectsCli() {
   run(
     async ({ log }) => {
-      const filesAndProjects = await asyncMapWithLimit(PROJECTS, 5, async (proj) => {
+      const stats = new Stats();
+      let failed = false;
+
+      const pathsAndProjects = await asyncMapWithLimit(PROJECTS, 5, async (proj) => {
+        const paths = await globby(proj.getIncludePatterns(), {
+          ignore: proj.getExcludePatterns(),
+          cwd: proj.directory,
+          onlyFiles: true,
+          absolute: true,
+        });
+        stats.incr(proj, 'files', paths.length);
         return {
           proj,
-          files: (
-            await globby(proj.getIncludePatterns(), {
-              ignore: proj.getExcludePatterns(),
-              cwd: proj.directory,
-              onlyFiles: true,
-              absolute: true,
-            })
-          ).map((p) => new File(p)),
+          paths,
         };
       });
 
       const isInMultipleTsProjects = new Map<string, Set<Project>>();
       const pathsToProject = new Map<string, Project>();
-      for (const { proj, files } of filesAndProjects) {
-        for (const file of files) {
-          if (!pathsToProject.has(file.path)) {
-            pathsToProject.set(file.path, proj);
+      for (const { proj, paths } of pathsAndProjects) {
+        for (const path of paths) {
+          if (!pathsToProject.has(path)) {
+            pathsToProject.set(path, proj);
             continue;
           }
 
-          if (file.isTypescriptAmbient()) {
-            // allow ambient .d.ts files to be in multiple projects
+          if (path.endsWith('.d.ts')) {
+            stats.incr(proj, 'ignored');
             continue;
           }
 
           isInMultipleTsProjects.set(
-            file.path,
-            new Set([...(isInMultipleTsProjects.get(file.path) ?? []), proj])
+            path,
+            new Set([...(isInMultipleTsProjects.get(path) ?? []), proj])
           );
         }
       }
 
-      const isNotInTsProject: File[] = [];
-      for (const { abs } of await getRepoFiles()) {
-        const file = new File(abs);
-        if (!file.isTypescript() || file.isFixture()) {
-          continue;
-        }
-
-        if (!pathsToProject.has(file.getAbsolutePath())) {
-          isNotInTsProject.push(file);
-        }
-      }
-
-      if (!isNotInTsProject.length && !isInMultipleTsProjects.size) {
-        log.success('All ts files belong to a single ts project');
-        return;
-      }
-
-      if (isNotInTsProject.length) {
-        log.error(
-          `The following files do not belong to a tsconfig.json file, or that tsconfig.json file is not listed in src/dev/typescript/projects.ts\n${isNotInTsProject
-            .map((file) => ` - ${file.getRelativePath()}`)
-            .join('\n')}`
-        );
-      }
-
       if (isInMultipleTsProjects.size) {
+        failed = true;
         const details = Array.from(isInMultipleTsProjects)
           .map(
             ([path, projects]) =>
@@ -95,7 +88,44 @@ export async function runCheckTsProjectsCli() {
         );
       }
 
-      process.exit(1);
+      const isNotInTsProject: File[] = [];
+      for (const { abs } of await getRepoFiles()) {
+        const file = new File(abs);
+        if (!file.isTypescript() || file.isFixture()) {
+          continue;
+        }
+
+        const proj = pathsToProject.get(file.getAbsolutePath());
+        if (proj === undefined) {
+          isNotInTsProject.push(file);
+        } else {
+          stats.incr(proj, 'gitMatched');
+        }
+      }
+
+      if (isNotInTsProject.length) {
+        failed = true;
+        log.error(
+          `The following files do not belong to a tsconfig.json file, or that tsconfig.json file is not listed in src/dev/typescript/projects.ts\n${isNotInTsProject
+            .map((file) => ` - ${file.getRelativePath()}`)
+            .join('\n')}`
+        );
+      }
+
+      for (const [metric, counts] of Object.entries(stats.counts)) {
+        log.verbose('metric:', metric);
+        for (const [proj, count] of Array.from(counts).sort((a, b) =>
+          a[0].name.localeCompare(b[0].name)
+        )) {
+          log.verbose('  ', proj.name, count);
+        }
+      }
+
+      if (failed) {
+        throw createFailError('see above errors');
+      } else {
+        log.success('All ts files belong to a single ts project');
+      }
     },
     {
       description:
