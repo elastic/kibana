@@ -11,7 +11,6 @@ import { Store } from 'redux';
 import { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
-import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { ApmBase } from '@elastic/apm-rum';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
 import { HoverActionsConfig } from './components/hover_actions';
@@ -31,7 +30,6 @@ export interface TimelinesUIStart {
 export interface TimelinesStartPlugins {
   data: DataPublicPluginStart;
   cases: CasesUiStart;
-  triggersActionsUi: TriggersActionsStart;
   apm?: ApmBase;
 }
 
