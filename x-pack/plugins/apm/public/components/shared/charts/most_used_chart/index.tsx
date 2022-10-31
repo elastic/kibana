@@ -6,7 +6,6 @@
  */
 import React, { useMemo } from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
 import {
   CountIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -16,6 +15,7 @@ import {
 } from '@kbn/lens-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
 import { ApmPluginStartDeps } from '../../../../plugin';
 
 export enum MostUsedMetric {
@@ -30,13 +30,13 @@ export function MostUsedChart({
   end,
   filters,
   metric,
-  bucket_size = 5,
+  bucketSize = 5,
 }: {
   start: string;
   end: string;
   filters: QueryDslQueryContainer[];
   metric: MostUsedMetric;
-  bucket_size?: number;
+  bucketSize?: number;
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const {
@@ -48,9 +48,9 @@ export function MostUsedChart({
       getLensAttributes({
         filters,
         metric,
-        bucket_size,
+        bucketSize,
       }),
-    [filters, metric, bucket_size]
+    [filters, metric, bucketSize]
   );
 
   return (
@@ -71,11 +71,11 @@ export function MostUsedChart({
 
 export function getLensAttributes({
   metric,
-  bucket_size,
+  bucketSize,
   filters,
 }: {
   metric: MostUsedMetric;
-  bucket_size: number;
+  bucketSize: number;
   filters: QueryDslQueryContainer[];
 }): TypedLensByValueInput['attributes'] {
   const metricId = metric.replaceAll('.', '-');
@@ -85,14 +85,14 @@ export function getLensAttributes({
     columnOrder: ['termsColumn', 'countColumn'],
     columns: {
       termsColumn: {
-        label: `Top ${bucket_size} values of ${metric}`,
+        label: `Top ${bucketSize} values of ${metric}`,
         dataType: 'string',
         operationType: 'terms',
         scale: 'ordinal',
         sourceField: metric,
         isBucketed: true,
         params: {
-          size: bucket_size,
+          size: bucketSize,
           orderBy: {
             type: 'column',
             columnId: 'countColumn',
