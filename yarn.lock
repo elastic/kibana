@@ -1580,7 +1580,7 @@
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
   integrity sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==
 
-"@elastic/makelogs@^6.1.1":
+"@elastic/makelogs@^6.0.0":
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/@elastic/makelogs/-/makelogs-6.1.1.tgz#5bc173b16acdfd7844fd85c97824ddcffd67cfb3"
   integrity sha512-cmfXFQITwyT4SV+Ryerg/vVbGQ9E2BhYKQ9flG85Ba3blGVmOjkgv7TYQam6xAIvGXFGBBrcyqEwmuw7xZ5ZNQ==
