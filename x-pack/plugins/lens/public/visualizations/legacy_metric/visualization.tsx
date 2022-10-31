@@ -23,6 +23,7 @@ import {
   FontWeight,
   TextAlignment,
 } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
 import { getSuggestions } from './metric_suggestions';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
@@ -119,6 +120,10 @@ const toExpression = (
     sizeUnit: labelFont.sizeUnit,
   });
 
+  const visdimensionFn = buildExpressionFunction<ExpressionFunctionVisDimension>('visdimension', {
+    accessor: state.accessor,
+  });
+
   return {
     type: 'expression',
     chain: [
@@ -130,20 +135,7 @@ const toExpression = (
           labelPosition: [state?.titlePosition || DEFAULT_TITLE_POSITION],
           font: [buildExpression([fontFn]).toAst()],
           labelFont: [buildExpression([labelFontFn]).toAst()],
-          metric: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'visdimension',
-                  arguments: {
-                    accessor: [state.accessor],
-                  },
-                },
-              ],
-            },
-          ],
+          metric: [buildExpression([visdimensionFn]).toAst()],
           showLabels: [!attributes?.mode || attributes?.mode === 'full'],
           colorMode: !canColor ? [ColorMode.None] : [state?.colorMode || ColorMode.None],
           autoScale: [true],
