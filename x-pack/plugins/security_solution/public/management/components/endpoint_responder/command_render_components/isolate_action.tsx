@@ -8,7 +8,7 @@
 import { memo, useMemo } from 'react';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ActionRequestComponentProps } from '../types';
-import { useSendIsolateEndpointRequest } from '../../../hooks/endpoint/use_send_isolate_endpoint_request';
+import { useSendIsolateEndpointRequest } from '../../../hooks/response_actions/use_send_isolate_endpoint_request';
 
 export const IsolateActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {

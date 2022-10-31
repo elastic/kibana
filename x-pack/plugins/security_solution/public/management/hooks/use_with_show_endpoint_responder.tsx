@@ -7,15 +7,15 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
   ActionLogButton,
   getEndpointConsoleCommands,
   HeaderEndpointInfo,
   OfflineCallout,
-} from '../../components/endpoint_responder';
-import { useConsoleManager } from '../../components/console';
-import type { HostMetadata } from '../../../../common/endpoint/types';
+} from '../components/endpoint_responder';
+import { useConsoleManager } from '../components/console';
+import type { HostMetadata } from '../../../common/endpoint/types';
 
 type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
 

@@ -14,7 +14,7 @@ import type {
   GetProcessesActionOutputContent,
   ProcessesRequestBody,
 } from '../../../../../common/endpoint/types';
-import { useSendGetEndpointProcessesRequest } from '../../../hooks/endpoint/use_send_get_endpoint_processes_request';
+import { useSendGetEndpointProcessesRequest } from '../../../hooks/response_actions/use_send_get_endpoint_processes_request';
 import type { ActionRequestComponentProps } from '../types';
 
 // @ts-expect-error TS2769

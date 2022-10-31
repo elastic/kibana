@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSendGetFileRequest } from '../../../hooks/endpoint/use_send_get_file_request';
+import { useSendGetFileRequest } from '../../../hooks/response_actions/use_send_get_file_request';
 import type { ResponseActionGetFileRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ActionRequestComponentProps } from '../types';

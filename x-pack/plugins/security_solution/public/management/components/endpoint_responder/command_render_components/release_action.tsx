@@ -7,7 +7,7 @@
 
 import { memo, useMemo } from 'react';
 import type { ActionRequestComponentProps } from '../types';
-import { useSendReleaseEndpointRequest } from '../../../hooks/endpoint/use_send_release_endpoint_request';
+import { useSendReleaseEndpointRequest } from '../../../hooks/response_actions/use_send_release_endpoint_request';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 
 export const ReleaseActionResult = memo<ActionRequestComponentProps>(

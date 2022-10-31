@@ -11,7 +11,7 @@ import type {
   SuspendProcessActionOutputContent,
   KillOrSuspendProcessRequestBody,
 } from '../../../../../common/endpoint/types';
-import { useSendSuspendProcessRequest } from '../../../hooks/endpoint/use_send_suspend_process_endpoint_request';
+import { useSendSuspendProcessRequest } from '../../../hooks/response_actions/use_send_suspend_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 

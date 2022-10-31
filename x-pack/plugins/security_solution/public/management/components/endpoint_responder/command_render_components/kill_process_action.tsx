@@ -8,7 +8,7 @@
 import { memo, useMemo } from 'react';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
 import { parsedPidOrEntityIdParameter } from '../lib/utils';
-import { useSendKillProcessRequest } from '../../../hooks/endpoint/use_send_kill_process_endpoint_request';
+import { useSendKillProcessRequest } from '../../../hooks/response_actions/use_send_kill_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 

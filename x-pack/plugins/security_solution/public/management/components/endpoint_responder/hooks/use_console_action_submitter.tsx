@@ -15,7 +15,7 @@ import type { BaseActionRequestBody } from '../../../../../common/endpoint/schem
 import { ActionSuccess } from '../components/action_success';
 import { ActionError } from '../components/action_error';
 import { FormattedError } from '../../formatted_error';
-import { useGetActionDetails } from '../../../hooks/endpoint/use_get_action_details';
+import { useGetActionDetails } from '../../../hooks/response_actions/use_get_action_details';
 import { ACTION_DETAILS_REFRESH_INTERVAL } from '../lib/constants';
 import type {
   ActionDetails,

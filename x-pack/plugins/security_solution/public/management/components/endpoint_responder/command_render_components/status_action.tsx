@@ -13,7 +13,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { HostInfo, PendingActionsResponse } from '../../../../../common/endpoint/types';
 import type { EndpointCommandDefinitionMeta } from '../types';
 import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
-import { useGetEndpointPendingActionsSummary } from '../../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
+import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useGetEndpointDetails } from '../../../hooks';
 import type { CommandExecutionComponentProps } from '../../console/types';

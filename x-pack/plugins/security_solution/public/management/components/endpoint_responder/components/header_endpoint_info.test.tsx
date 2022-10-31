@@ -11,12 +11,12 @@ import type { HostInfo } from '../../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
-import { useGetEndpointPendingActionsSummary } from '../../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
+import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { mockEndpointDetailsApiResult } from '../../../pages/endpoint_hosts/store/mock_endpoint_result_list';
 import { HeaderEndpointInfo } from './header_endpoint_info';
 
 jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
-jest.mock('../../../hooks/endpoint/use_get_endpoint_pending_actions_summary');
+jest.mock('../../../hooks/response_actions/use_get_endpoint_pending_actions_summary');
 
 const getEndpointDetails = useGetEndpointDetails as jest.Mock;
 const getPendingActions = useGetEndpointPendingActionsSummary as jest.Mock;
