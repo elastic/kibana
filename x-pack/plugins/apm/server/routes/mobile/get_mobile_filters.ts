@@ -20,7 +20,10 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
+import {
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../../lib/helpers/transactions';
 
 type MobileFiltersTypes =
   | 'device'
@@ -64,6 +67,9 @@ export async function getMobileFilters({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
+            ...getDocumentTypeFilterForTransactions(
+              searchAggregatedTransactions
+            ),
           ],
         },
       },

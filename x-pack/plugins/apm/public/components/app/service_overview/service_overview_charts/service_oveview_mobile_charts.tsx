@@ -63,7 +63,6 @@ export function ServiceOverviewMobileCharts({
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <MobileFilters
-          serviceName={serviceName}
           start={start}
           end={end}
           environment={environment}

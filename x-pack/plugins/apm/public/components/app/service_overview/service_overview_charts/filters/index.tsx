@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Environment } from '../../../../../../common/environment_rt';
+import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { push } from '../../../../shared/links/url_helpers';
@@ -19,7 +20,6 @@ interface Props {
   end: string;
   environment: Environment;
   kuery: string;
-  serviceName: string;
   start: string;
   filters: Record<MobileFilter['key'], string | undefined>;
 }
@@ -33,11 +33,11 @@ export function MobileFilters({
   end,
   environment,
   kuery,
-  serviceName,
   start,
   filters,
 }: Props) {
   const history = useHistory();
+  const { serviceName } = useApmServiceContext();
   const { data = { mobileFilters: [] } } = useFetcher(
     (callApmApi) => {
       return callApmApi(
