@@ -504,7 +504,6 @@ export const DiscoverGrid = ({
     return (
       <div
         className="euiDataGrid__noResults"
-        data-render-complete={!isLoading}
         data-shared-item=""
         data-title={searchTitle}
         data-description={searchDescription}
@@ -541,7 +540,6 @@ export const DiscoverGrid = ({
       <span className="dscDiscoverGrid__inner">
         <div
           data-test-subj="discoverDocTable"
-          data-render-complete={!isLoading}
           data-shared-item=""
           data-title={searchTitle}
           data-description={searchDescription}
