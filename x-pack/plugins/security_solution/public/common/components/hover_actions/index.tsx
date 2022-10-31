@@ -12,12 +12,10 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
 import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
-import { useLocation } from 'react-router-dom';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 import { useHoverActionItems } from './use_hover_action_items';
-import { isAlertDetailsPage } from '../../../helpers';
 
 export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
   i18n.translate(
@@ -163,8 +161,6 @@ export const HoverActions: React.FC<Props> = React.memo(
       setIsActive((prev) => !prev);
       setIsOverflowPopoverOpen(!isOverflowPopoverOpen);
     }, [isOverflowPopoverOpen, setIsOverflowPopoverOpen]);
-
-    const { pathname } = useLocation();
     const handleHoverActionClicked = useCallback(() => {
       if (closeTopN) {
         closeTopN();
@@ -220,10 +216,11 @@ export const HoverActions: React.FC<Props> = React.memo(
 
     const isCaseView = scopeId === TimelineId.casePage;
     const isTimelineView = scopeId === TimelineId.active;
+    const isAlertDetailsView = scopeId === TimelineId.detectionsAlertDetailsPage;
 
     const hideFilters = useMemo(
-      () => isAlertDetailsPage(pathname) && !isTimelineView,
-      [isTimelineView, pathname]
+      () => isAlertDetailsView && !isTimelineView,
+      [isTimelineView, isAlertDetailsView]
     );
 
     const hiddenActionsCount = useMemo(() => {
