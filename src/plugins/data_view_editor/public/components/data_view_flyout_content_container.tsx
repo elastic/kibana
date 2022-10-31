@@ -9,6 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { DataViewSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
 import { DataViewEditorContext, DataViewEditorProps } from '../types';
@@ -70,7 +71,11 @@ const DataViewFlyoutContentContainer = ({
 
   const dataViewEditorService = new DataViewEditorService({
     services: { http, dataViews },
-    initialName: editData?.name,
+    initialValues: {
+      name: editData?.name,
+      type: editData?.type as INDEX_PATTERN_TYPE,
+      indexPattern: editData?.getIndexPattern(),
+    },
     requireTimestampField,
   });
 
@@ -80,7 +85,6 @@ const DataViewFlyoutContentContainer = ({
         onSave={onSaveClick}
         onCancel={onCancel}
         defaultTypeIsRollup={defaultTypeIsRollup}
-        requireTimestampField={requireTimestampField}
         editData={editData}
         showManagementLink={showManagementLink}
         allowAdHoc={allowAdHocDataView || false}

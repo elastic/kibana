@@ -26,7 +26,6 @@ import { schema } from '../form_schema';
 interface Props {
   options$: Subject<TimestampOption[]>;
   isLoadingOptions$: BehaviorSubject<boolean>;
-  isLoadingMatchedIndices$: BehaviorSubject<boolean>;
   matchedIndices$: Subject<MatchedIndicesSet>;
 }
 
@@ -71,15 +70,9 @@ const timestampFieldHelp = i18n.translate('indexPatternEditor.editor.form.timeFi
   defaultMessage: 'Select a timestamp field for use with the global time filter.',
 });
 
-export const TimestampField = ({
-  options$,
-  isLoadingOptions$,
-  isLoadingMatchedIndices$,
-  matchedIndices$,
-}: Props) => {
+export const TimestampField = ({ options$, isLoadingOptions$, matchedIndices$ }: Props) => {
   const options = useObservable<TimestampOption[]>(options$, []);
   const isLoadingOptions = useObservable<boolean>(isLoadingOptions$, false);
-  const isLoadingMatchedIndices = useObservable<boolean>(isLoadingMatchedIndices$, false);
   const hasMatchedIndices = !!useObservable(matchedIndices$, matchedIndiciesDefault)
     .exactMatchedIndices.length;
 
@@ -92,9 +85,7 @@ export const TimestampField = ({
   const selectTimestampHelp = options.length ? timestampFieldHelp : '';
 
   const timestampNoFieldsHelp =
-    options.length === 0 && !isLoadingMatchedIndices && !isLoadingOptions && hasMatchedIndices
-      ? noTimestampOptionText
-      : '';
+    options.length === 0 && !isLoadingOptions && hasMatchedIndices ? noTimestampOptionText : '';
 
   return (
     <UseField<EuiComboBoxOptionOption<string>> config={timestampConfig} path="timestampField">
@@ -106,7 +97,7 @@ export const TimestampField = ({
         }
 
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-        const isDisabled = !optionsAsComboBoxOptions.length;
+        const isDisabled = !optionsAsComboBoxOptions.length || isLoadingOptions;
         // if the value isn't in the list then don't use it.
         const valueInList = !!optionsAsComboBoxOptions.find(
           (option) => option.value === value.value

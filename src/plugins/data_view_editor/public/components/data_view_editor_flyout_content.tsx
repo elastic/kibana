@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback, useRef, useContext } from 'react';
+import React, { useEffect, useCallback, useContext } from 'react';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -17,8 +17,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
-import { BehaviorSubject, Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 
@@ -67,7 +65,6 @@ export interface Props {
    */
   onCancel: () => void;
   defaultTypeIsRollup?: boolean;
-  requireTimestampField?: boolean;
   editData?: DataView;
   showManagementLink?: boolean;
   allowAdHoc: boolean;
@@ -85,7 +82,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   onSave,
   onCancel,
   defaultTypeIsRollup,
-  requireTimestampField = false,
   editData,
   allowAdHoc,
   showManagementLink,
@@ -122,9 +118,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         return;
       }
 
-      // todo see if I can reduce getValue usage
       // todo export asObservable references instead of full subjects
-      const rollupIndicesCapabilities = dataViewEditorService.rollupIndicesCapabilities$.getValue();
 
       const indexPatternStub: DataViewSpec = {
         title: removeSpaces(formData.title),
@@ -158,10 +152,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     },
   });
 
-  const onChange = useCallback(() => {
-    newItem$.current.next(undefined);
-  }, []);
-
   // `useFormData` initially returns `undefined`,
   // we override `undefined` with real default values from `schema`
   // to get a stable reference to avoid hooks re-run and reduce number of excessive requests
@@ -173,54 +163,29 @@ const IndexPatternEditorFlyoutContentComponent = ({
     },
   ] = useFormData<FormInternal>({
     form,
-    onChange,
   });
 
   const isLoadingSources = useObservable(dataViewEditorService.isLoadingSources$, true);
 
-  const loadingMatchedIndices$ = useRef(new BehaviorSubject<boolean>(false));
-
-  const isLoadingDataViewNames$ = useRef(new BehaviorSubject<boolean>(true));
-  const existingDataViewNames$ = useRef(new BehaviorSubject<string[]>([]));
-  const isLoadingDataViewNames = useObservable(isLoadingDataViewNames$.current, true);
-  const newItem$ = useRef(new Subject());
+  const existingDataViewNames = useObservable(dataViewEditorService.dataViewNames$);
 
   const rollupIndicesCapabilities = useObservable(
     dataViewEditorService.rollupIndicesCapabilities$,
     {}
   );
 
-  // this shouldn't be needed
-  // const rollupIndex$ = useRef(new BehaviorSubject<string | undefined>(undefined));
-
-  // could this be moved to the service?
-  // initial loading of indicies and data view names
+  useEffect(() => {
+    dataViewEditorService.setIndexPattern(title);
+  }, [dataViewEditorService, title]);
 
   useEffect(() => {
-    let isCancelled = false;
-
-    // todo - see if this code can be removed
-    dataViewEditorService.dataViewNames.then((names) => {
-      if (isCancelled) return;
-      existingDataViewNames$.current.next(names);
-      isLoadingDataViewNames$.current.next(false);
-    });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [dataViewEditorService.dataViewNames]);
+    dataViewEditorService.setAllowHidden(allowHidden);
+  }, [dataViewEditorService, allowHidden]);
 
   useEffect(() => {
-    // run loadMAtchedIndices on initial load
-    // TODO THIS IS A BIT UNCLEAR
-    // this is firing too much
-    // ... should it load current matches?
-    // todo - set title, alowHidden, type on service and have it do the right thing
-    dataViewEditorService.update({ indexPattern: title, allowHidden, type });
-  }, [dataViewEditorService, type, title, allowHidden]);
+    dataViewEditorService.setType(type);
+  }, [dataViewEditorService, type]);
 
-  // part of service?
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
   const onTypeChange = useCallback(
@@ -235,7 +200,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
     [form]
   );
 
-  if (isLoadingSources || isLoadingDataViewNames) {
+  // console.log('*** isLoadingSources', );
+  if (isLoadingSources || !existingDataViewNames) {
     return <EuiLoadingSpinner size="xl" />;
   }
 
@@ -266,6 +232,15 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <></>
   );
 
+  // TODO find good format for this
+  const getErrors = () => {
+    const errors = form.getErrors();
+    if (form.isSubmitted && errors.length > 0) {
+      return <>{errors}</>;
+    }
+    return <></>;
+  };
+
   return (
     <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
       <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
@@ -284,12 +259,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
           </EuiLink>
         )}
         <Form form={form} className="indexPatternEditor__form">
+          {getErrors()}
           <UseField path="isAdHoc" />
           {indexPatternTypeSelect}
           <EuiSpacer size="l" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <NameField existingDataViewNames$={existingDataViewNames$.current} />
+              <NameField namesNotAllowed={existingDataViewNames || []} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
@@ -311,7 +287,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
               <TimestampField
                 options$={dataViewEditorService.timestampFieldOptions$}
                 isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
-                isLoadingMatchedIndices$={loadingMatchedIndices$.current}
                 matchedIndices$={dataViewEditorService.matchedIndices$}
               />
             </EuiFlexItem>
