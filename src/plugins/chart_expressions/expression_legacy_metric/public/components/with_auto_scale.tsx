@@ -120,7 +120,10 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
           ref={childrenRef}
           style={{
             transform: `scale(${scale || 0})`,
-            ...(parentDimensions.width && scale && autoScaleParams?.alignment !== 'center'
+            ...(parentDimensions.width &&
+            scale &&
+            autoScaleParams?.alignment &&
+            autoScaleParams?.alignment !== 'center'
               ? {
                   position: 'relative',
                   [autoScaleParams.alignment]: (1 - scale) * parentDimensions.width * scale * -1,
