@@ -17,10 +17,6 @@ import {
   getEventType,
   getPinOnClick,
 } from '../../../timelines/components/timeline/body/helpers';
-import { GuidedOnboardingTourStep } from '../../../../../common/components/guided_onboarding_tour/tour_step';
-import { isDetectionsAlertsTable } from '../../../../../common/components/top_n/helpers';
-import { useTourContext } from '../../../../../common/components/guided_onboarding_tour';
-import { SecurityStepId } from '../../../../../common/components/guided_onboarding_tour/tour_config';
 import { getScopedActions, isTimelineScope } from '../../../helpers';
 import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
@@ -40,6 +36,10 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
+import { useTourContext } from '../guided_onboarding_tour';
+import { SecurityStepId } from '../guided_onboarding_tour/tour_config';
+import { isDetectionsAlertsTable } from '../top_n/helpers';
+import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 
 /**
  * This is the effective width in pixels of an action button used with
