@@ -40,7 +40,7 @@ export interface InternalNodeServiceStart {
   roles: NodeRoles;
 }
 
-interface PrebootDeps {
+export interface PrebootDeps {
   loggingSystem: ILoggingSystem;
 }
 

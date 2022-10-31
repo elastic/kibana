@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 
 export type MockedLogger = jest.Mocked<Logger> & { context: string[] };
 
@@ -21,11 +21,13 @@ const createLoggerMock = (context: string[] = []) => {
     trace: jest.fn(),
     warn: jest.fn(),
     get: jest.fn(),
+    isLevelEnabled: jest.fn(),
   };
   mockLog.get.mockImplementation((...ctx) => ({
     ctx,
     ...mockLog,
   }));
+  mockLog.isLevelEnabled.mockReturnValue(true);
 
   return mockLog;
 };
