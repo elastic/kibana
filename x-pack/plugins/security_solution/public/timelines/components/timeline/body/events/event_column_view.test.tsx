@@ -61,6 +61,9 @@ jest.mock('../../../../../common/lib/kibana', () => {
         cases: mockCasesContract(),
       },
     }),
+    useNavigateTo: () => ({
+      navigateTo: jest.fn(),
+    }),
     useToasts: jest.fn().mockReturnValue({
       addError: jest.fn(),
       addSuccess: jest.fn(),

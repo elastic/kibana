@@ -318,6 +318,7 @@ export enum TimelineId {
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'timeline-test', // Reserved for testing purposes
+  detectionsAlertDetailsPage = 'detections-alert-details-page',
 }
 
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([

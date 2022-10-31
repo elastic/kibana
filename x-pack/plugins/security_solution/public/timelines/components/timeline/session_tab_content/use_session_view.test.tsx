@@ -67,12 +67,12 @@ jest.mock('../../../../common/lib/kibana', () => {
     }),
   };
 });
-const mockDetails = () => {};
+const mockOpenDetailFn = jest.fn();
 
 jest.mock('../../side_panel/hooks/use_detail_panel', () => {
   return {
     useDetailPanel: () => ({
-      openDetailsPanel: mockDetails,
+      openEventDetailsPanel: mockOpenDetailFn,
       handleOnDetailsPanelClosed: () => {},
       DetailsPanel: () => <div />,
       shouldShowDetailsPanel: false,
@@ -157,7 +157,7 @@ describe('useSessionView with active timeline and a session id and graph event i
     expect(kibana.services.sessionView.getSessionView).toHaveBeenCalledWith({
       height: 1000,
       sessionEntityId: 'test',
-      loadAlertDetails: mockDetails,
+      loadAlertDetails: mockOpenDetailFn,
       canAccessEndpointManagement: false,
     });
   });
@@ -237,7 +237,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       );
       expect(kibana.services.sessionView.getSessionView).toHaveBeenCalled();
 
-      expect(result.current).toHaveProperty('openDetailsPanel');
+      expect(result.current).toHaveProperty('openEventDetailsPanel');
       expect(result.current).toHaveProperty('shouldShowDetailsPanel');
       expect(result.current).toHaveProperty('SessionView');
       expect(result.current).toHaveProperty('DetailsPanel');

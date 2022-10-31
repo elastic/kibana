@@ -288,7 +288,7 @@ export const useSessionView = ({
       return SourcererScopeName.default;
     }
   }, [scopeId]);
-  const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
+  const { openEventDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
     isFlyoutView: !isActiveTimeline(scopeId),
     entityType,
     sourcererScope,
@@ -302,7 +302,7 @@ export const useSessionView = ({
     return sessionViewConfig !== null
       ? sessionView.getSessionView({
           ...sessionViewConfig,
-          loadAlertDetails: openDetailsPanel,
+          loadAlertDetails: openEventDetailsPanel,
           isFullScreen: fullScreen,
           height: heightMinusSearchBar,
           canAccessEndpointManagement,
@@ -312,13 +312,13 @@ export const useSessionView = ({
     height,
     sessionViewConfig,
     sessionView,
-    openDetailsPanel,
+    openEventDetailsPanel,
     fullScreen,
     canAccessEndpointManagement,
   ]);
 
   return {
-    openDetailsPanel,
+    openEventDetailsPanel,
     shouldShowDetailsPanel,
     SessionView: sessionViewComponent,
     DetailsPanel,
