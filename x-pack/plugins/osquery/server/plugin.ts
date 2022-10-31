@@ -142,17 +142,17 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             if (packagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
               await this.initialize(core, dataViewsService);
 
-              const foundPacks: SavedObjectsFindResponse<PackSavedObjectAttributes> =
+              const allPacks: SavedObjectsFindResponse<PackSavedObjectAttributes> =
                 await client.find({
+                  // TODO find a way to find only those with shards object in the attributes
                   type: packSavedObjectType,
-                  filter: `${packSavedObjectType}.attributes.is_global: true`,
                 });
 
-              if (foundPacks.saved_objects) {
+              if (allPacks.saved_objects) {
                 await updateGlobalPacksCreateCallback(
                   packagePolicy,
                   client,
-                  foundPacks,
+                  allPacks,
                   this.osqueryAppContextService,
                   esClient
                 );

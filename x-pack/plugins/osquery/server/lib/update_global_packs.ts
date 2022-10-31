@@ -13,16 +13,17 @@ import type {
 import { has, map, mapKeys, set, unset } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { produce } from 'immer';
+import produce from 'immer';
+import { packSavedObjectType } from '../../common/types';
 import type { OsqueryAppContextService } from './osquery_app_context_services';
 import type { PackSavedObjectAttributes } from '../common/types';
-import { packSavedObjectType } from '../../common/types';
 import { convertSOQueriesToPack } from '../routes/pack/utils';
+import type { PackSavedObject } from '../common/types';
 
 export const updateGlobalPacksCreateCallback = async (
   packagePolicy: PackagePolicy,
   packsClient: SavedObjectsClient,
-  foundPacks: SavedObjectsFindResponse<PackSavedObjectAttributes>,
+  allPacks: SavedObjectsFindResponse<PackSavedObjectAttributes>,
   osqueryContext: OsqueryAppContextService,
   esClient: ElasticsearchClient
 ) => {
@@ -37,8 +38,23 @@ export const updateGlobalPacksCreateCallback = async (
     ? mapKeys(await agentPolicyService?.getByIds(packsClient, list), 'id')
     : {};
 
+  const packsContainingShardForPolicy: PackSavedObject[] = [];
+  const policyShards: Record<string, number> = {};
+  allPacks.saved_objects.map((pack) => {
+    const shards = pack.attributes.shards;
+
+    return map(shards, (shard, shardName) => {
+      if (shardName === '*') {
+        packsContainingShardForPolicy.push(pack);
+      } else if (agentPolicies[packagePolicy.policy_id]?.name.startsWith(shardName)) {
+        packsContainingShardForPolicy.push(pack);
+        policyShards[pack.attributes.name] = shard;
+      }
+    });
+  });
+
   await Promise.all(
-    map(foundPacks.saved_objects, (pack) =>
+    map(packsContainingShardForPolicy, (pack) => {
       packsClient.update(
         packSavedObjectType,
         pack.id,
@@ -53,8 +69,8 @@ export const updateGlobalPacksCreateCallback = async (
             },
           ],
         }
-      )
-    )
+      );
+    })
   );
   await packagePolicyService?.update(
     packsClient,
@@ -66,8 +82,9 @@ export const updateGlobalPacksCreateCallback = async (
         set(draft, 'inputs[0].streams', []);
       }
 
-      map(foundPacks.saved_objects, (pack) => {
+      map(packsContainingShardForPolicy, (pack) => {
         set(draft, `inputs[0].config.osquery.value.packs.${pack.attributes.name}`, {
+          shard: policyShards[pack.attributes.name] ? policyShards[pack.attributes.name] : 100,
           queries: convertSOQueriesToPack(pack.attributes.queries, {
             removeMultiLines: true,
             removeResultType: true,
