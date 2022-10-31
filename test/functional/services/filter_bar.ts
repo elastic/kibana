@@ -17,7 +17,7 @@ export class FilterBarService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly config = this.ctx.getService('config');
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
-
+  private readonly browser = this.ctx.getService('browser');
   /**
    * Checks if specified filter exists
    *
@@ -155,9 +155,9 @@ export class FilterBarService extends FtrService {
           for (let j = 0; j < fieldValues.length; j++) {
             await paramFields[i].type(fieldValues[j]);
           }
+          await paramFields[i].type(this.browser.keys.TAB);
         }
       }
-
       await this.testSubjects.clickWhenNotDisabledWithoutRetry('saveFilter');
     });
     await this.header.awaitGlobalLoadingIndicatorHidden();

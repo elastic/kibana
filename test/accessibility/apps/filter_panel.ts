@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test on Edit filter as Query DSL panel', async () => {
+      await filterBar.clickEditFilter('OriginCityName', 'Rome');
       await testSubjects.click('editQueryDSL');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);
