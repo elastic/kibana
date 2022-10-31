@@ -41,15 +41,12 @@ export function OperatorInput<TParams = unknown>({
       fullWidth
       compressed
       isDisabled={!field}
-      placeholder={
-        field
-          ? i18n.translate('unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderSelect', {
-              defaultMessage: 'Select',
-            })
-          : i18n.translate('unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderWaiting', {
-              defaultMessage: 'Waiting',
-            })
-      }
+      placeholder={i18n.translate(
+        'unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderSelect',
+        {
+          defaultMessage: 'Select operator',
+        }
+      )}
       options={operators}
       selectedOptions={operator ? [operator] : []}
       getLabel={({ message }) => message}

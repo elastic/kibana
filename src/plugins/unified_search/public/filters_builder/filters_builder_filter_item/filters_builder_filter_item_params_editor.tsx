@@ -8,7 +8,8 @@
 
 import React, { useCallback } from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { EuiToolTip, EuiFormRow } from '@elastic/eui';
+import { EuiToolTip, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Operator } from '../../filter_bar/filter_editor';
 import {
   PhraseValueInput,
@@ -27,6 +28,22 @@ interface ParamsEditorProps<TParams = unknown> {
   field?: DataViewField;
   operator?: Operator;
 }
+
+const getPlaceholderText = (isFieldSelected: boolean, isOperatorSelected: boolean) => {
+  if (!isFieldSelected) {
+    return i18n.translate('unifiedSearch.filter.filtersBuilder.filterItemParamsPlaceholder', {
+      defaultMessage: 'Please select a field first ...',
+    });
+  }
+
+  if (!isOperatorSelected) {
+    return i18n.translate('unifiedSearch.filter.filtersBuilder.filterItemParamsPlaceholder', {
+      defaultMessage: 'Please select operator first ...',
+    });
+  }
+
+  return '';
+};
 
 export function ParamsEditor<TParams = unknown>({
   dataView,
@@ -101,17 +118,13 @@ export function ParamsEditor<TParams = unknown>({
       );
       break;
     default:
+      const placeholderText = getPlaceholderText(Boolean(field), Boolean(operator?.type));
       Component = (
-        <PhraseValueInput
-          disabled={!dataView || !operator}
-          indexPattern={dataView}
-          field={field!}
-          value={typeof params === 'string' ? params : undefined}
-          onChange={onParamsChange}
-          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          fullWidth
-          compressed
-          isInvalid={isInvalid}
+        <EuiFieldText
+          compressed={true}
+          disabled={true}
+          placeholder={placeholderText}
+          aria-label={placeholderText}
         />
       );
   }

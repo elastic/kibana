@@ -36,7 +36,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
       id={id}
       isDisabled={!dataView}
       placeholder={i18n.translate('unifiedSearch.filter.filtersBuilder.fieldSelectPlaceholder', {
-        defaultMessage: 'Select a field first',
+        defaultMessage: 'Select a field',
       })}
       options={fields}
       selectedOptions={field ? [field] : []}
