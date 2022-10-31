@@ -74,7 +74,7 @@ Action::    Whether to create or close an alert within Opsgenie. When using the 
 [[opsgenie-action-create-alert-configuration]]
 ===== Create alert configuration
 
-The create alert action can be configured using the form or a JSON editor.
+You can configure the create alert action through the form view or using a JSON editor.
 
 [float]
 [[opsgenie-action-create-alert-form-configuration]]
