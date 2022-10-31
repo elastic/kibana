@@ -98,6 +98,13 @@ export interface QueryParams {
   sortOrder: 'asc' | 'desc';
 }
 
+export interface ParsedUrlQueryParams {
+  page?: string;
+  perPage?: string;
+  sortField?: SortFieldCase;
+  sortOrder?: 'asc' | 'desc';
+}
+
 export interface UrlQueryParams {
   page?: number;
   perPage?: number;

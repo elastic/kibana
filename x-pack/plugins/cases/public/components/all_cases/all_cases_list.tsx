@@ -108,7 +108,10 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const sorting = useMemo(
       () => ({
-        sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
+        sort: {
+          field: queryParams.sortField ?? DEFAULT_QUERY_PARAMS.sortField,
+          direction: queryParams.sortOrder ?? DEFAULT_QUERY_PARAMS.sortOrder,
+        },
       }),
       [queryParams.sortField, queryParams.sortOrder]
     );

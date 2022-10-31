@@ -127,6 +127,7 @@ describe('AllCasesListGeneric', () => {
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
     mockKibana();
     moment.tz.setDefault('UTC');
+    window.localStorage.clear();
   });
 
   it('should render AllCasesList', async () => {
