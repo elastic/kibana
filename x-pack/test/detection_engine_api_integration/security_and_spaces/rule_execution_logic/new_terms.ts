@@ -355,25 +355,6 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['user-0', 'false']);
     });
 
-    it('should generate 1 alert for unique combination of terms, one if which is of a binary type', async () => {
-      const rule: NewTermsRuleCreateProps = {
-        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
-        index: ['new_terms'],
-        new_terms_fields: ['user.name', 'blob'],
-        from: '2020-10-19T05:00:04.000Z',
-        history_window_start: '2020-10-13T05:00:04.000Z',
-      };
-
-      const { previewId } = await previewRule({ supertest, rule });
-      const previewAlerts = await getPreviewAlerts({ es, previewId });
-
-      expect(previewAlerts.length).eql(1);
-      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql([
-        'user-0',
-        'bmV3IHRlcm1zIHRlc3Q=',
-      ]);
-    });
-
     it('should generate alerts for every term when history window is small', async () => {
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
