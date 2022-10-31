@@ -14,7 +14,6 @@ import {
   DEFAULT_FLEET_SERVER_HOST_ID,
   SO_SEARCH_LIMIT,
 } from '../constants';
-import { agentPolicyService } from './agent_policy';
 
 import type {
   SettingsSOAttributes,
@@ -24,6 +23,8 @@ import type {
   AgentPolicy,
 } from '../types';
 import { FleetServerHostUnauthorizedError } from '../errors';
+
+import { agentPolicyService } from './agent_policy';
 
 export async function createFleetServerHost(
   soClient: SavedObjectsClientContract,
