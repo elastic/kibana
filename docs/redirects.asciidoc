@@ -345,3 +345,7 @@ This content has moved. Refer to <<discover-view-surrounding-documents>>.
 
 This content has moved. Refer to <<string-field-formatters>>.
 
+[role="exclude",id="managing-alerts-and-actions"]
+== Alerts and Actions
+
+This page has been deleted. Refer to <<alerting-getting-started>>.
