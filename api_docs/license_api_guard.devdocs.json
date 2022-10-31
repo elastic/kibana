@@ -94,7 +94,13 @@
             "description": [],
             "signature": [
               "<Context extends ",
-              "RequestHandlerContext",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
               ", Params, Query, Body>(handler: ",
               {
                 "pluginId": "core",
@@ -104,15 +110,45 @@
                 "text": "RequestHandler"
               },
               "<Params, Query, Body, Context, any, ",
-              "KibanaResponseFactory",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
               ">) => (ctx: Context, request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<Params, Query, Body, any>, response: ",
-              "KibanaResponseFactory",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
               ") => ",
-              "IKibanaResponse",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
               "<any> | Promise<",
-              "IKibanaResponse",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
               "<any>>"
             ],
             "path": "x-pack/plugins/license_api_guard/server/license.ts",
@@ -135,7 +171,13 @@
                     "text": "RequestHandler"
                   },
                   "<Params, Query, Body, Context, any, ",
-                  "KibanaResponseFactory",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaResponseFactory",
+                    "text": "KibanaResponseFactory"
+                  },
                   ">"
                 ],
                 "path": "x-pack/plugins/license_api_guard/server/license.ts",
