@@ -93,6 +93,17 @@ describe('GuidedOnboarding ApiService', () => {
       expect(httpClient.get).toHaveBeenCalledTimes(2);
     });
 
+    it(`the second subscription gets the state broadcast to it`, (done) => {
+      // first subscription
+      apiService.fetchActiveGuideState$().subscribe();
+      // second subscription
+      anotherSubscription = apiService.fetchActiveGuideState$().subscribe((state) => {
+        if (state) {
+          done();
+        }
+      });
+    });
+
     it('broadcasts the updated state', async () => {
       await apiService.activateGuide(testGuide, testGuideStep1ActiveState);
 
