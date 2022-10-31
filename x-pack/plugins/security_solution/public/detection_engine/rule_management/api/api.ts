@@ -237,17 +237,16 @@ export async function performBulkAction(
 ): Promise<BulkActionResponse> {
   const params = {
     action: bulkActionDescriptor.type,
-    ...(bulkActionDescriptor.query ? { query: bulkActionDescriptor.query } : {}),
-    ...(bulkActionDescriptor.ids ? { ids: bulkActionDescriptor.ids } : {}),
-    ...(bulkActionDescriptor.type === BulkAction.edit
-      ? { edit: bulkActionDescriptor.editPayload }
-      : {}),
+    query: bulkActionDescriptor.query,
+    ids: bulkActionDescriptor.ids,
+    edit:
+      bulkActionDescriptor.type === BulkAction.edit ? bulkActionDescriptor.editPayload : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
     method: 'POST',
     body: JSON.stringify(params),
-    query: dryRun ? { dry_run: true } : {},
+    query: { dry_run: dryRun },
   });
 }
 
@@ -263,8 +262,8 @@ export type BulkExportResponse = Blob;
 export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExportResponse> {
   const params = {
     action: BulkAction.export,
-    ...(queryOrIds.query ? { query: queryOrIds.query } : {}),
-    ...(queryOrIds.ids ? { ids: queryOrIds.ids } : {}),
+    query: queryOrIds.query,
+    ids: queryOrIds.ids,
   };
 
   return KibanaServices.get().http.fetch<BulkExportResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
