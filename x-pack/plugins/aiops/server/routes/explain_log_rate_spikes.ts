@@ -242,7 +242,7 @@ export const defineExplainLogRateSpikesRoute = (
 
           // Don't use more than 10 here otherwise Kibana will emit an error
           // regarding a limit of abort signal listeners of more than 10.
-          const CHUNK_SIZE = 10;
+          const MAX_CONCURRENT_QUERIES = 10;
 
           const loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
 
@@ -306,7 +306,7 @@ export const defineExplainLogRateSpikesRoute = (
               pValuesQueue.kill();
               end();
             }
-          }, CHUNK_SIZE);
+          }, MAX_CONCURRENT_QUERIES);
 
           pValuesQueue.push(fieldCandidates);
           await pValuesQueue.drain();
@@ -646,7 +646,7 @@ export const defineExplainLogRateSpikesRoute = (
                       ])
                     );
                   }
-                }, CHUNK_SIZE);
+                }, MAX_CONCURRENT_QUERIES);
 
                 groupHistogramQueue.push(changePointGroups);
                 await groupHistogramQueue.drain();
@@ -751,7 +751,7 @@ export const defineExplainLogRateSpikesRoute = (
                   ])
                 );
               }
-            }, CHUNK_SIZE);
+            }, MAX_CONCURRENT_QUERIES);
 
             fieldValueHistogramQueue.push(changePoints);
             await fieldValueHistogramQueue.drain();
