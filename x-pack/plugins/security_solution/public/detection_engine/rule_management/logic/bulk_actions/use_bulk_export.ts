@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import type { UseAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { downloadBlob } from '../../../../common/utils/download_blob';
@@ -29,11 +29,11 @@ export function useBulkExport() {
       try {
         setLoadingRules?.({
           ids: queryOrIds.ids ?? [],
-          action: BulkAction.export,
+          action: BulkActionType.export,
         });
         return await mutateAsync(queryOrIds);
       } catch (error) {
-        showBulkErrorToast(toasts, BulkAction.export, error);
+        showBulkErrorToast(toasts, BulkActionType.export, error);
       } finally {
         setLoadingRules?.({ ids: [], action: null });
       }
@@ -60,8 +60,8 @@ export async function downloadExportedRules({
 }) {
   try {
     downloadBlob(response, `${i18n.EXPORT_FILENAME}.ndjson`);
-    showBulkSuccessToast(toasts, BulkAction.export, await getExportedRulesCounts(response));
+    showBulkSuccessToast(toasts, BulkActionType.export, await getExportedRulesCounts(response));
   } catch (error) {
-    showBulkErrorToast(toasts, BulkAction.export, error);
+    showBulkErrorToast(toasts, BulkActionType.export, error);
   }
 }

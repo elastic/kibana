@@ -8,7 +8,7 @@
 import type { UseMutateAsyncFunction } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 
-import type { BulkActionDescriptor, BulkActionResponse } from '../../../../rule_management/logic';
+import type { BulkAction, BulkActionResponse } from '../../../../rule_management/logic';
 import { performBulkAction } from '../../../../rule_management/logic';
 import { processDryRunResult } from './utils/dry_run_result';
 
@@ -19,7 +19,7 @@ const BULK_ACTIONS_DRY_RUN_QUERY_KEY = 'bulkActionsDryRun';
 export type ExecuteBulkActionsDryRun = UseMutateAsyncFunction<
   DryRunResult | undefined,
   unknown,
-  BulkActionDescriptor
+  BulkAction
 >;
 
 export type UseBulkActionsDryRun = () => {
@@ -32,7 +32,7 @@ export const useBulkActionsDryRun: UseBulkActionsDryRun = () => {
   const { data, mutateAsync, isLoading } = useMutation<
     DryRunResult | undefined,
     unknown,
-    BulkActionDescriptor
+    BulkAction
   >([BULK_ACTIONS_DRY_RUN_QUERY_KEY], async (bulkActionDescriptor) => {
     let result: BulkActionResponse;
 

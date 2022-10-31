@@ -29,7 +29,7 @@ import type { RulesReferencedByExceptionListsSchema } from '../../../../common/d
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
 
 import type { BulkActionEditPayload } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkAction } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 import type {
   RuleResponse,
@@ -214,14 +214,14 @@ export interface BulkActionResponse {
 }
 
 export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefined; ids: string[] };
-type PlainBulkActionDescriptor = {
-  type: Exclude<BulkAction, BulkAction.edit | BulkAction.export>;
+type PlainBulkAction = {
+  type: Exclude<BulkActionType, BulkActionType.edit | BulkActionType.export>;
 } & QueryOrIds;
-type EditBulkActionDescriptor = {
-  type: BulkAction.edit;
+type EditBulkAction = {
+  type: BulkActionType.edit;
   editPayload: BulkActionEditPayload[];
 } & QueryOrIds;
-export type BulkActionDescriptor = PlainBulkActionDescriptor | EditBulkActionDescriptor;
+export type BulkAction = PlainBulkAction | EditBulkAction;
 
 /**
  * Perform bulk action with rules selected by a filter query
@@ -232,7 +232,7 @@ export type BulkActionDescriptor = PlainBulkActionDescriptor | EditBulkActionDes
  * @throws An error if response is not OK
  */
 export async function performBulkAction(
-  bulkActionDescriptor: BulkActionDescriptor,
+  bulkActionDescriptor: BulkAction,
   dryRun?: boolean
 ): Promise<BulkActionResponse> {
   const params = {
@@ -240,7 +240,9 @@ export async function performBulkAction(
     query: bulkActionDescriptor.query,
     ids: bulkActionDescriptor.ids,
     edit:
-      bulkActionDescriptor.type === BulkAction.edit ? bulkActionDescriptor.editPayload : undefined,
+      bulkActionDescriptor.type === BulkActionType.edit
+        ? bulkActionDescriptor.editPayload
+        : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
@@ -261,7 +263,7 @@ export type BulkExportResponse = Blob;
  */
 export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExportResponse> {
   const params = {
-    action: BulkAction.export,
+    action: BulkActionType.export,
     query: queryOrIds.query,
     ids: queryOrIds.ids,
   };

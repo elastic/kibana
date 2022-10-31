@@ -8,7 +8,7 @@
 import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -67,7 +67,7 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
         const result = await executeBulkAction({
-          type: BulkAction.duplicate,
+          type: BulkActionType.duplicate,
           ids: [rule.id],
         });
         const createdRules = result?.attributes.results.created;
@@ -103,7 +103,7 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
         await executeBulkAction({
-          type: BulkAction.delete,
+          type: BulkActionType.delete,
           ids: [rule.id],
         });
       },

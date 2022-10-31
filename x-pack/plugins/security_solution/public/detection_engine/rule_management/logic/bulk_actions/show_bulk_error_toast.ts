@@ -7,12 +7,12 @@
 
 import type { HTTPError } from '../../../../../common/detection_engine/types';
 import type { UseAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { explainBulkError, summarizeBulkError } from './translations';
 
 export function showBulkErrorToast(
   toasts: UseAppToasts,
-  action: BulkAction,
+  action: BulkActionType,
   error: HTTPError
 ): void {
   toasts.addError(populateErrorStack(error), {

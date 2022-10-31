@@ -7,12 +7,12 @@
 
 import type { BulkActionSummary } from '..';
 import type { UseAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { explainBulkSuccess, summarizeBulkSuccess } from './translations';
 
 export function showBulkSuccessToast(
   toasts: UseAppToasts,
-  action: BulkAction,
+  action: BulkActionType,
   summary: BulkActionSummary
 ): void {
   toasts.addSuccess({

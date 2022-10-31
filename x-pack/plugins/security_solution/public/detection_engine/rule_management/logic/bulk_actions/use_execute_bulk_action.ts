@@ -9,13 +9,13 @@ import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useCallback } from 'react';
 import type { BulkActionResponse } from '..';
 import { APP_UI_ID } from '../../../../../common/constants';
-import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { SecurityPageName } from '../../../../app/types';
 import { getEditRuleUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
-import type { BulkActionDescriptor } from '../../api/api';
+import type { BulkAction } from '../../api/api';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
 import { showBulkErrorToast } from './show_bulk_error_toast';
 import { showBulkSuccessToast } from './show_bulk_success_toast';
@@ -41,7 +41,7 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
   const setLoadingRules = rulesTableContext?.actions.setLoadingRules;
 
   const executeBulkAction = useCallback(
-    async (bulkActionDescriptor: BulkActionDescriptor) => {
+    async (bulkActionDescriptor: BulkAction) => {
       try {
         setLoadingRules?.({
           ids:
@@ -70,15 +70,15 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
   return { executeBulkAction };
 };
 
-function sendTelemetry(action: BulkAction, response: BulkActionResponse): void {
-  if (action !== BulkAction.disable && action !== BulkAction.enable) {
+function sendTelemetry(action: BulkActionType, response: BulkActionResponse): void {
+  if (action !== BulkActionType.disable && action !== BulkActionType.enable) {
     return;
   }
 
   if (response.attributes.results.updated.some((rule) => rule.immutable)) {
     track(
       METRIC_TYPE.COUNT,
-      action === BulkAction.enable
+      action === BulkActionType.enable
         ? TELEMETRY_EVENT.SIEM_RULE_ENABLED
         : TELEMETRY_EVENT.SIEM_RULE_DISABLED
     );
@@ -87,7 +87,7 @@ function sendTelemetry(action: BulkAction, response: BulkActionResponse): void {
   if (response.attributes.results.updated.some((rule) => !rule.immutable)) {
     track(
       METRIC_TYPE.COUNT,
-      action === BulkAction.disable
+      action === BulkActionType.disable
         ? TELEMETRY_EVENT.CUSTOM_RULE_DISABLED
         : TELEMETRY_EVENT.CUSTOM_RULE_ENABLED
     );
@@ -96,13 +96,13 @@ function sendTelemetry(action: BulkAction, response: BulkActionResponse): void {
 
 function allRuleIdsForBulkAction(
   rulesTableContext: ReturnType<typeof useRulesTableContextOptional>,
-  bulkActionDescriptor: BulkActionDescriptor
+  bulkActionDescriptor: BulkAction
 ): string[] {
   const allRules = rulesTableContext?.state.isAllSelected ? rulesTableContext.state.rules : [];
   const processingRules =
-    bulkActionDescriptor.type === BulkAction.enable
+    bulkActionDescriptor.type === BulkActionType.enable
       ? allRules.filter((x) => !x.enabled)
-      : bulkActionDescriptor.type === BulkAction.disable
+      : bulkActionDescriptor.type === BulkActionType.disable
       ? allRules.filter((x) => x.enabled)
       : allRules;
 

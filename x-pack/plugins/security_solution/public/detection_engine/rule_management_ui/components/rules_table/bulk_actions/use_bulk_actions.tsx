@@ -14,7 +14,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
 import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import {
-  BulkAction,
+  BulkActionType,
   BulkActionEditType,
 } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
@@ -105,7 +105,7 @@ export const useBulkActions = ({
           : disabledRulesNoML.map(({ id }) => id);
 
         await executeBulkAction({
-          type: BulkAction.enable,
+          type: BulkActionType.enable,
           ...(isAllSelected ? { query: filterQuery } : { ids: ruleIds }),
         });
       };
@@ -117,7 +117,7 @@ export const useBulkActions = ({
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
 
         await executeBulkAction({
-          type: BulkAction.disable,
+          type: BulkActionType.disable,
           ...(isAllSelected ? { query: filterQuery } : { ids: enabledIds }),
         });
       };
@@ -127,7 +127,7 @@ export const useBulkActions = ({
         closePopover();
 
         await executeBulkAction({
-          type: BulkAction.duplicate,
+          type: BulkActionType.duplicate,
           ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
         clearRulesSelection();
@@ -146,7 +146,7 @@ export const useBulkActions = ({
         startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
 
         await executeBulkAction({
-          type: BulkAction.delete,
+          type: BulkActionType.delete,
           ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
       };
@@ -170,7 +170,7 @@ export const useBulkActions = ({
         // they can either cancel action or proceed with export of succeeded rules
         const hasActionBeenConfirmed = await showBulkActionConfirmation(
           transformExportDetailsToDryRunResult(details),
-          BulkAction.export
+          BulkActionType.export
         );
         if (hasActionBeenConfirmed === false) {
           return;
@@ -186,7 +186,7 @@ export const useBulkActions = ({
         closePopover();
 
         const dryRunResult = await executeBulkActionsDryRun({
-          type: BulkAction.edit,
+          type: BulkActionType.edit,
           ...(isAllSelected
             ? { query: convertRulesFilterToKQL(filterOptions) }
             : { ids: selectedRuleIds }),
@@ -196,7 +196,7 @@ export const useBulkActions = ({
         // User has cancelled edit action or there are no custom rules to proceed
         const hasActionBeenConfirmed = await showBulkActionConfirmation(
           dryRunResult,
-          BulkAction.edit
+          BulkActionType.edit
         );
         if (hasActionBeenConfirmed === false) {
           return;
@@ -247,7 +247,7 @@ export const useBulkActions = ({
         }, 5 * 1000);
 
         await executeBulkAction({
-          type: BulkAction.edit,
+          type: BulkActionType.edit,
           ...prepareSearchParams({
             ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
             dryRunResult,
