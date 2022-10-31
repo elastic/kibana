@@ -37,7 +37,6 @@ import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/
 import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
-import { useJourneySteps } from '../hooks/use_journey_steps';
 import { JourneyScreenshot } from '../../common/screenshot/journey_screenshot';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
