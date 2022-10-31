@@ -45,13 +45,13 @@ import {
   groupDuplicates,
 } from './queries/fetch_frequent_items';
 import type { ItemsetResult } from './queries/fetch_frequent_items';
+import { getHistogramQuery } from './queries/get_histogram_query';
 import {
   getFieldValuePairCounts,
   getSimpleHierarchicalTree,
   getSimpleHierarchicalTreeLeaves,
   markDuplicates,
 } from './queries/get_simple_hierarchical_tree';
-import { getQueryWithParams } from './queries/get_query_with_params';
 
 // 10s ping frequency to keep the stream alive.
 const PING_FREQUENCY = 10000;
@@ -323,35 +323,7 @@ export const defineExplainLogRateSpikesRoute = (
 
           let overallTimeSeries: NumericChartData | undefined;
 
-          function getHistogramQuery(filter: estypes.QueryDslQueryContainer[] = []) {
-            const histogramQuery = getQueryWithParams({
-              params: request.body,
-            });
-
-            if (Array.isArray(histogramQuery.bool.filter)) {
-              const existingFilter = histogramQuery.bool.filter.filter(
-                (d) => Object.keys(d)[0] !== 'range'
-              );
-
-              histogramQuery.bool.filter = [
-                ...existingFilter,
-                ...filter,
-                {
-                  range: {
-                    [request.body.timeFieldName]: {
-                      gte: request.body.start,
-                      lt: request.body.end,
-                      format: 'epoch_millis',
-                    },
-                  },
-                },
-              ];
-            }
-
-            return histogramQuery;
-          }
-
-          const overallHistogramQuery = getHistogramQuery();
+          const overallHistogramQuery = getHistogramQuery(request.body);
 
           try {
             overallTimeSeries = (
@@ -612,6 +584,7 @@ export const defineExplainLogRateSpikesRoute = (
                   await asyncForEach(changePointGroupsChunk, async (cpg) => {
                     if (overallTimeSeries !== undefined) {
                       const histogramQuery = getHistogramQuery(
+                        request.body,
                         cpg.group.map((d) => ({
                           term: { [d.fieldName]: d.fieldValue },
                         }))
@@ -705,7 +678,7 @@ export const defineExplainLogRateSpikesRoute = (
 
               await asyncForEach(changePointsChunk, async (cp) => {
                 if (overallTimeSeries !== undefined) {
-                  const histogramQuery = getHistogramQuery([
+                  const histogramQuery = getHistogramQuery(request.body, [
                     {
                       term: { [cp.fieldName]: cp.fieldValue },
                     },
