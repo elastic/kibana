@@ -33,13 +33,14 @@ describe('File kind HTTP API', () => {
       id: expect.any(String),
       created: expect.any(String),
       updated: expect.any(String),
-      owner: expect.any(String),
       name: 'myFile',
       fileKind,
       status: 'AWAITING_UPLOAD',
       mimeType: 'image/png',
       extension: 'png',
-      meta: {},
+      meta: {
+        owner: expect.any(String),
+      },
       alt: 'a picture of my dog',
     });
   });
@@ -81,7 +82,7 @@ describe('File kind HTTP API', () => {
     } = await request.get(root, `/api/files/files/${fileKind}/${id}`).expect(200);
     expect(file.name).toBe('acoolfilename');
 
-    const updatedFileAttrs: UpdatableFileMetadata = {
+    const updatedFileAttrs: UpdatableFileMetadata<{ something: string }> = {
       name: 'anothercoolfilename',
       alt: 'a picture of my cat',
       meta: {

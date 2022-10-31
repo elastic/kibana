@@ -34,9 +34,12 @@ export const handler: CreateHandler<Endpoint> = async ({ fileKind, files }, req,
     fileKind,
     name,
     alt,
-    meta,
+    meta: {
+      owner: security?.authc.getCurrentUser(req)?.username,
+      uid: security?.authc.getCurrentUser(req)?.username,
+      ...meta,
+    },
     mime: mimeType,
-    owner: security?.authc.getCurrentUser(req)?.username,
   });
   const body: Endpoint['output'] = {
     file: file.toJSON(),

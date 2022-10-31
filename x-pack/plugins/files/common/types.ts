@@ -64,17 +64,10 @@ export type BaseFileMetadata = {
    * ISO string representing the file creation date
    */
   created?: string;
-
   /**
    * Size of the file
    */
   size?: number;
-
-  /**
-   * The UID of the file owner
-   */
-  owner?: string;
-
   /**
    * Hash of the file's contents
    */
@@ -143,6 +136,23 @@ export type BaseFileMetadata = {
 };
 
 /**
+ * Metadata add by the files service.
+ */
+export interface FileSystemMetadata {
+  /**
+   * The human-friendly user name of the owner of the file
+   */
+  owner?: string;
+  /**
+   * The unique ID of the user who created the file, taken from the user profile
+   * ID.
+   *
+   * See https://www.elastic.co/guide/en/elasticsearch/reference/master/user-profile.html.
+   */
+  uid?: string;
+}
+
+/**
  * Extra metadata on a file object specific to Kibana implementation.
  */
 export type FileMetadata<Meta = unknown> = Required<
@@ -156,9 +166,10 @@ export type FileMetadata<Meta = unknown> = Required<
     FileKind: string;
 
     /**
-     * User-defined metadata
+     * User-defined metadata and some pre-defined system fields that can be used
+     * for searching and filtering.
      */
-    Meta?: Meta;
+    Meta?: Meta & FileSystemMetadata;
   };
 
 /**
@@ -177,10 +188,6 @@ export interface FileJSON<Meta = unknown> {
    * ISO string of when the file was updated
    */
   updated: FileMetadata['Updated'];
-  /**
-   * User who created the file
-   */
-  owner?: FileMetadata['owner'];
   /**
    * File name.
    *

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Pagination, UpdatableFileMetadata } from '../../common/types';
+import type { FileSystemMetadata, Pagination, UpdatableFileMetadata } from '../../common/types';
 
 /**
  * Arguments to create a new file.
@@ -20,17 +20,13 @@ export interface CreateFileArgs<Meta = unknown> {
    */
   fileKind: string;
   /**
-   * Username of the user who created the file.
-   */
-  owner?: string;
-  /**
    * Alternate text for accessibility and display purposes.
    */
   alt?: string;
   /**
    * Custom metadata like tags or identifiers for the file.
    */
-  meta?: Meta;
+  meta?: Meta & FileSystemMetadata;
   /**
    * The MIME type of the file.
    */

@@ -21,9 +21,6 @@ const properties: Properties = {
   Updated: {
     type: 'date',
   },
-  owner: {
-    type: 'keyword',
-  },
   name: {
     type: 'text',
   },
