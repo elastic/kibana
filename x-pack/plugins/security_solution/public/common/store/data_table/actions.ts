@@ -9,8 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import type { SessionViewConfig } from '../../../../common/types/session_view';
 import type { ExpandedDetailType } from '../../../../common/types/detail_panel';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
-import type { ColumnHeaderOptions } from '../../../../common/types';
-import type { SortColumnTable } from '../../components/data_table/types';
+import type { ColumnHeaderOptions, SortColumnTable } from '../../../../common/types';
 import type { InitialyzeTGridSettings, TGridPersistInput } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/data-table');

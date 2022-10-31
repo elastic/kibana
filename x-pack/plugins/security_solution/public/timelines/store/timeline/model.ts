@@ -7,6 +7,7 @@
 
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { ExpandedDetail, SessionViewConfig } from '../../../../common/types';
 import type {
   EqlOptionsSelected,
   TimelineNonEcsData,
@@ -21,12 +22,10 @@ import type {
   ColumnHeaderOptions,
   DataProvider,
   RowRendererId,
-  TimelineExpandedDetail,
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
-import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
 export type KqlMode = 'filter' | 'search';
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
@@ -105,7 +104,7 @@ export interface TimelineModel {
   loadingText?: string | React.ReactNode;
   queryFields: string[];
   /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
-  expandedDetail: TimelineExpandedDetail;
+  expandedDetail: ExpandedDetail;
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
   indexNames: string[];

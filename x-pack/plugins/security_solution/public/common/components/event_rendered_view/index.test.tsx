@@ -7,9 +7,76 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { eventRenderedProps, TestProviders } from '../../../mock';
+import type { StatefulEventRenderedViewProps } from '.';
 import { EventRenderedView } from '.';
-import { RowRendererId } from '../../../../common/types';
+import { Direction, RowRendererId, TableId } from '../../../../common/types';
+import type { Sort } from '../../../timelines/components/timeline/body/sort';
+import { mockBrowserFields } from '../../containers/source/mock';
+import { defaultHeaders, mockTimelineData, TestProviders } from '../../mock';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...originalModule,
+    useKibana: () => ({
+      services: {
+        triggersActionsUi: {
+          getFieldBrowser: jest.fn(),
+        },
+      },
+    }),
+  };
+});
+
+const mockSort: Sort[] = [
+  {
+    columnId: '@timestamp',
+    columnType: 'date',
+    esTypes: ['date'],
+    sortDirection: Direction.desc,
+  },
+];
+
+const eventRenderedProps: StatefulEventRenderedViewProps = {
+  events: mockTimelineData,
+  leadingControlColumns: [],
+  pageIndex: 0,
+  pageSize: 10,
+  pageSizeOptions: [10, 25, 50, 100],
+  rowRenderers: [],
+  tableId: TableId.alertsOnAlertsPage,
+  totalItemCount: 100,
+  hasAlertsCrud: true,
+  filterStatus: 'open',
+  filterQuery: '',
+  refetch: jest.fn(),
+  indexNames: [''],
+  loadPage: jest.fn(),
+  browserFields: mockBrowserFields,
+  disabledCellActions: [],
+  tabType: 'query',
+  onRuleChange: () => null,
+  isSelectAllChecked: false,
+  isLoading: false,
+  clearSelected: jest.fn() as unknown as StatefulEventRenderedViewProps['clearSelected'],
+  columnHeaders: defaultHeaders,
+  loadingEventIds: [],
+  selectedEventIds: {},
+  showCheckboxes: false,
+  setSelected: jest.fn() as unknown as StatefulEventRenderedViewProps['setSelected'],
+  sort: mockSort,
+  queryFields: [],
+};
 
 describe('event_rendered_view', () => {
   beforeEach(() => jest.clearAllMocks());

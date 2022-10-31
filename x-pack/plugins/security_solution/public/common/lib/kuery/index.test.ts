@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { convertToBuildEsQuery, escapeKuery } from '.';
+import { mockIndexPattern } from '../../mock';
 
 describe('Kuery escape', () => {
   it('should not remove white spaces quotes', () => {

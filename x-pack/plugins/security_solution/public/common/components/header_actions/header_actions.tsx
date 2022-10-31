@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiCheckbox, EuiToolTip, useDataGridColumnSorting } from
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
-import type { SortDirection } from '../../../../common/types';
+import type { HeaderActionProps, SortDirection } from '../../../../common/types';
 import { TimelineTabs, TimelineId } from '../../../../common/types';
 import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
 import { isActiveTimeline } from '../../../helpers';
@@ -20,7 +20,6 @@ import { timelineActions, timelineSelectors } from '../../../timelines/store/tim
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { useKibana } from '../../lib/kibana';
-import type { HeaderActionProps } from '../toolbar/bulk_actions/types';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
 import { EventsTh, EventsThContent } from '../../../timelines/components/timeline/styles';
 import { StatefulRowRenderersBrowser } from '../../../timelines/components/row_renderers_browser';

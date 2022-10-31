@@ -14,13 +14,12 @@ import type {
   DataExpandedDetail,
   DataExpandedDetailType,
 } from '../../../../common/types/detail_panel';
-import type { ColumnHeaderOptions } from '../../../../common/types';
+import type { ColumnHeaderOptions, SortColumnTable } from '../../../../common/types';
 import type { TableToggleDetailPanel } from './actions';
 import type { TGridPersistInput, TableById } from './types';
 import type { TGridModelSettings } from './model';
 
 import { getTGridManageDefaults, tGridDefaults } from './defaults';
-import type { SortColumnTable } from '../../components/data_table/types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 export type Maybe<T> = T | null;

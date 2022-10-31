@@ -11,6 +11,7 @@ import uuid from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
+import type { SessionViewConfig } from '../../../../common/types';
 import type { ExpandedDetail } from '../../../../common/types/detail_panel';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Sort } from '../../components/timeline/body/sort';
@@ -49,7 +50,6 @@ import {
 } from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
-import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 interface AddTimelineNoteParams {

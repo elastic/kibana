@@ -32,6 +32,7 @@ import type { BrowserFields, TimelineItem } from '../../../../common/search_stra
 import type {
   ColumnHeaderOptions,
   ControlColumnProps,
+  DataTableState,
   OnRowSelected,
   OnSelectAll,
   RowRenderer,
@@ -42,7 +43,6 @@ import { AlertCount } from '../toolbar/alert/styles';
 import { defaultUnit } from '../toolbar/alert';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import type { TGridModel } from '../../store/data_table/model';
-import type { TableState } from '../../store/data_table/types';
 import type { Refetch } from '../../store/data_table/inputs';
 import type { AlertWorkflowStatus } from '../../types';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
@@ -535,7 +535,7 @@ const makeMapStateToProps = () => {
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
   const getDataTable = dataTableSelectors.getTableByIdSelector();
   const mapStateToProps = (
-    state: TableState,
+    state: DataTableState,
     { tableId, hasAlertsCrud, browserFields }: EventRenderedViewProps
   ) => {
     const dataTable: TGridModel = getDataTable(state, tableId);

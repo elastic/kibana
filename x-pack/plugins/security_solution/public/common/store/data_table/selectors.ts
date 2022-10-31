@@ -7,12 +7,13 @@
 import { getOr } from 'lodash/fp';
 import { createSelector } from 'reselect';
 import { tGridDefaults, getTGridManageDefaults } from './defaults';
+import type { DataTableState, TableById, TGridModel } from './types';
 
-const selectTableById = (state: State): TableById => state.dataTable.tableById;
+const selectTableById = (state: DataTableState): TableById => state.dataTable.tableById;
 
 export const tableByIdSelector = createSelector(selectTableById, (tableById) => tableById);
 
-const selectTable = (state: State, tableId: string): TGridModel =>
+const selectTable = (state: DataTableState, tableId: string): TGridModel =>
   state.dataTable.tableById[tableId];
 
 export const getTableByIdSelector = () => createSelector(selectTable, (table) => table);
