@@ -22,13 +22,14 @@ import type {
   RuleReferences,
 } from '@kbn/securitysolution-exception-list-components';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { findRuleExceptionReferences } from '../../../../rule_management/api/api';
+import { findRuleExceptionReferences } from '../../rule_management/api/api';
 import type { AddExceptionItem, DeleteExceptionItem, EditExceptionItem, FetchItems } from './types';
-import type { ExceptionListWithRules } from '../types';
+
+// Some of the APIs here are already defined in Kbn packages, need to be refactored
 
 export const prepareFetchExceptionItemsParams = (
   exceptions: ListArray | null,
-  list: ExceptionListWithRules | null,
+  list: ExceptionListSchema | null,
   options?: GetExceptionItemProps
 ) => {
   const { pagination, search, filters } = options || {};
@@ -87,8 +88,6 @@ export const fetchListExceptionItems = async ({
       signal: abortCtrl.signal,
     });
 
-    // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
-    // for context around the temporary `id`
     const transformedData = data.map((item) => transformInput(item));
 
     return {

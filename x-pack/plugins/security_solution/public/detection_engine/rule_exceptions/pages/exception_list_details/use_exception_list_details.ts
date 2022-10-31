@@ -6,31 +6,39 @@
  */
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
-import { useExceptionListDetailsContext } from './context';
+import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
+import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import type { ExceptionListDetailsComponentProps } from './types';
 import { deleteList, exportList, updateList } from './api';
 import { checkIfListCannotBeEdited, mapListRulesToUIRules } from './utils';
 import * as i18n from './translations';
 
-export const useManageExceptionListDetails = ({
-  isReadOnly,
-  list,
-}: ExceptionListDetailsComponentProps) => {
+export const useExceptionListDetails = ({ list }: ExceptionListDetailsComponentProps) => {
+  const { name: listName, description: listDescription, list_id: listId, rules: allRules } = list;
+  const toasts = useToasts();
+  const { services } = useKibana();
+  const { http } = services;
+
   const [showManageRulesFlyout, setShowManageRulesFlyout] = useState(false);
   const [exportedList, setExportedList] = useState<Blob>();
   const [canUserEditList, setCanUserEditList] = useState(true);
-  const { name: listName, description: listDescription, list_id: listId, rules: allRules } = list;
   const linkedRules = useMemo(() => mapListRulesToUIRules(list.rules), [list.rules]);
-
-  const { toasts, viewerStatus, http, setIsReadOnly, handleErrorStatus } =
-    useExceptionListDetailsContext();
+  const [viewerStatus, setViewerStatus] = useState<ViewerStatus | string>('');
 
   useEffect(() => {
     if (checkIfListCannotBeEdited(list)) return setCanUserEditList(false);
+  }, [list, list.list_id]);
 
-    setIsReadOnly(isReadOnly);
-  }, [isReadOnly, list, list.list_id, setIsReadOnly]);
-
+  const handleErrorStatus = useCallback(
+    (error: Error, errorTitle?: string, errorDescription?: string) => {
+      toasts?.addError(error, {
+        title: errorTitle || i18n.EXCEPTION_ERROR_TITLE,
+        toastMessage: errorDescription || i18n.EXCEPTION_ERROR_DESCRIPTION,
+      });
+      setViewerStatus(ViewerStatus.ERROR);
+    },
+    [setViewerStatus, toasts]
+  );
   const onEditListDetails = useCallback(
     async (listDetails: ListDetails) => {
       try {

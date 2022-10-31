@@ -13,28 +13,24 @@ import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-typ
 
 import {
   SearchBar,
-  ExceptionItems,
   EmptyViewerState,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
-import { FormattedDate } from '../../../../../../common/components/formatted_date';
-import { getFormattedComments } from '../../../../utils/helpers';
-import { ListDetailsLinkAnchor } from '../../../../components/list_details_link_anchor';
-import { ExceptionsUtility } from '../../../../components/exceptions_utility';
 import { AddExceptionFlyout } from '../../../../components/add_exception_flyout';
 import { EditExceptionFlyout } from '../../../../components/edit_exception_flyout';
 import * as i18n from '../../translations';
 import type { ExceptionListWithRules } from '../../types';
-import { useManageListWithSearchComponent } from './use_manage_list_with_search';
+import { useListWithSearchComponent } from './use_list_with_search';
+import { ListExceptionItems } from '../../../../components/list_exception_items';
 
 interface ListWithSearchComponentProps {
   list: ExceptionListWithRules;
+  isReadOnly: boolean;
 }
 
-const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => {
+const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list, isReadOnly }) => {
   const {
     listName,
-    isReadOnly,
     exceptions,
     listType,
     lastUpdated,
@@ -46,6 +42,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
     showAddExceptionFlyout,
     showEditExceptionFlyout,
     exceptionToEdit,
+    exceptionViewerStatus,
     onSearch,
     onAddExceptionClick,
     onDeleteException,
@@ -53,13 +50,13 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
     onPaginationChange,
     handleCancelExceptionItemFlyout,
     handleConfirmExceptionFlyout,
-  } = useManageListWithSearchComponent(list);
+  } = useListWithSearchComponent(list);
 
   return (
     <>
       {showAddExceptionFlyout ? (
         <AddExceptionFlyout
-          rules={null} // which rule list.rules?
+          rules={null}
           isBulkAction={false}
           isEndpointItem={false}
           sharedListToAddTo={[list]}
@@ -101,8 +98,8 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
               isButtonFilled={false}
               buttonIconType="plusInCircle"
             />
-            <ExceptionItems
-              viewerStatus={viewerStatus as ViewerStatus}
+            <ListExceptionItems
+              viewerStatus={exceptionViewerStatus as ViewerStatus}
               listType={listType as ExceptionListTypeEnum}
               ruleReferences={ruleReferences}
               isReadOnly={isReadOnly}
@@ -111,21 +108,10 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
               emptyViewerBody={emptyViewerBody}
               pagination={pagination}
               lastUpdated={lastUpdated}
-              editActionLabel={i18n.EXCEPTION_ITEM_CARD_EDIT_LABEL}
-              deleteActionLabel={i18n.EXCEPTION_ITEM_CARD_DELETE_LABEL}
               onPaginationChange={onPaginationChange}
               onEditExceptionItem={onEditExceptionItem}
               onDeleteException={onDeleteException}
-              getFormattedComments={getFormattedComments}
-              securityLinkAnchorComponent={ListDetailsLinkAnchor}
-              formattedDateComponent={FormattedDate}
-              exceptionsUtilityComponent={() => (
-                <ExceptionsUtility
-                  exceptionsTitle={i18n.EXCEPTION_UTILITY_TITLE}
-                  pagination={pagination}
-                  lastUpdated={lastUpdated}
-                />
-              )}
+              onCreateExceptionListItem={onAddExceptionClick}
             />
           </>
         </EuiPanel>

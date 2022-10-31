@@ -63,26 +63,7 @@ export const EXCEPTION_ERROR_DESCRIPTION = i18n.translate(
       'There was an error loading the exception items. Contact your administrator for help.',
   }
 );
-export const EXCEPTION_UTILITY_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.list.utility.title',
-  {
-    defaultMessage: 'rule exceptions',
-  }
-);
 
-export const EXCEPTION_ITEM_CARD_EDIT_LABEL = i18n.translate(
-  'xpack.securitySolution.exceptions.list.exception.item.card.edit.label',
-  {
-    defaultMessage: 'Edit rule exception',
-  }
-);
-
-export const EXCEPTION_ITEM_CARD_DELETE_LABEL = i18n.translate(
-  'xpack.securitySolution.exceptions.list.exception.item.card.delete.label',
-  {
-    defaultMessage: 'Delete rule exception',
-  }
-);
 export const EXCEPTION_ITEM_DELETE_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.list.exception.item.card.exceptionItemDeleteSuccessTitle',
   {
