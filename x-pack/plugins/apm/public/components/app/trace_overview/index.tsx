@@ -44,6 +44,7 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
       traceId: '',
       transactionId: '',
       detailTab: TransactionTab.timeline,
+      showCriticalPath: false,
     },
   });
 
