@@ -515,7 +515,13 @@
               "// `body` can be null, but `validate` expects non-nullable types\n// if any validation is defined. Not having validation currently\n// means we don't get the payload. See\n// https://github.com/elastic/kibana/issues/50179"
             ],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<Readonly<{} & {}> | null>"
             ],
             "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
@@ -530,7 +536,13 @@
             "label": "params",
             "description": [],
             "signature": [
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<{}>"
             ],
             "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
@@ -545,7 +557,13 @@
             "label": "query",
             "description": [],
             "signature": [
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<{}>"
             ],
             "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
