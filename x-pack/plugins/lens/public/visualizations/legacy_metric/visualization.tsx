@@ -112,6 +112,13 @@ const toExpression = (
     sizeUnit: labelFont.sizeUnit,
   });
 
+  const labelFontFn = buildExpressionFunction<ExpressionFunctionFont>('font', {
+    align: (state?.textAlign || DEFAULT_TEXT_ALIGNMENT) as TextAlignment,
+    size: labelFont.size,
+    lHeight: labelFont.size * 1.5,
+    sizeUnit: labelFont.sizeUnit,
+  });
+
   return {
     type: 'expression',
     chain: [
@@ -122,23 +129,7 @@ const toExpression = (
         arguments: {
           labelPosition: [state?.titlePosition || DEFAULT_TITLE_POSITION],
           font: [buildExpression([fontFn]).toAst()],
-          labelFont: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'font',
-                  arguments: {
-                    align: [state?.textAlign || DEFAULT_TEXT_ALIGNMENT],
-                    size: [labelFont.size],
-                    lHeight: [labelFont.size * 1.5],
-                    sizeUnit: [labelFont.sizeUnit],
-                  },
-                },
-              ],
-            },
-          ],
+          labelFont: [buildExpression([labelFontFn]).toAst()],
           metric: [
             {
               type: 'expression',
