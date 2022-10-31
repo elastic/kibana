@@ -8,10 +8,8 @@ import { AsApiContract } from '@kbn/actions-plugin/common';
 import {
   RuleExecutionStatus,
   RuleMonitoring,
-  RuleMonitoringHistory,
-  RuleMonitoringCalculatedMetrics,
-  RuleMonitoringLastRun,
   Rule,
+  RuleLastRun,
   RuleAction,
   RuleType,
 } from '../../common';
@@ -27,16 +25,6 @@ type ApiRuleExecutionStatus = Omit<AsApiContract<RuleExecutionStatus>, 'last_exe
   last_execution_date: string;
 };
 
-interface ApiRuleMonitoring {
-  run: {
-    history: RuleMonitoringHistory[];
-    calculated_metrics: RuleMonitoringCalculatedMetrics;
-    last_run: Omit<RuleMonitoringLastRun, 'timestamp'> & {
-      timestamp: string;
-    };
-  };
-}
-
 function transformExecutionStatus(input: ApiRuleExecutionStatus): RuleExecutionStatus {
   const { last_execution_date: lastExecutionDate, last_duration: lastDuration, ...rest } = input;
   return {
@@ -46,15 +34,28 @@ function transformExecutionStatus(input: ApiRuleExecutionStatus): RuleExecutionS
   };
 }
 
-function transformMonitoring(input: ApiRuleMonitoring): RuleMonitoring {
+function transformMonitoring(input: RuleMonitoring): RuleMonitoring {
+  const { run } = input;
+  const { last_run: lastRun, ...rest } = run;
+  const { timestamp, ...restLastRun } = lastRun;
+
   return {
     run: {
-      ...input.run,
       last_run: {
-        ...input.run.last_run,
         timestamp: new Date(input.run.last_run.timestamp),
+        ...restLastRun,
       },
+      ...rest,
     },
+  };
+}
+
+function transformLastRun(input: AsApiContract<RuleLastRun>): RuleLastRun {
+  const { outcome_msg: outcomeMsg, alerts_count: alertsCount, ...rest } = input;
+  return {
+    outcomeMsg,
+    alertsCount,
+    ...rest,
   };
 }
 
@@ -68,7 +69,7 @@ export type ApiRule = Omit<
   | 'updated_at'
   | 'alert_type_id'
   | 'muted_instance_ids'
-  | 'monitoring'
+  | 'last_run'
 > & {
   execution_status: ApiRuleExecutionStatus;
   actions: Array<AsApiContract<RuleAction>>;
@@ -76,7 +77,7 @@ export type ApiRule = Omit<
   updated_at: string;
   rule_type_id: string;
   muted_alert_ids: string[];
-  monitoring?: ApiRuleMonitoring;
+  last_run?: AsApiContract<RuleLastRun>;
 };
 
 export function transformRule(input: ApiRule): Rule {
@@ -94,7 +95,8 @@ export function transformRule(input: ApiRule): Rule {
     scheduled_task_id: scheduledTaskId,
     execution_status: executionStatusAPI,
     actions: actionsAPI,
-    next__run: nextRun,
+    next_run: nextRun,
+    last_run: lastRun,
     monitoring: monitoring,
     ...rest
   } = input;
@@ -113,8 +115,9 @@ export function transformRule(input: ApiRule): Rule {
     executionStatus: transformExecutionStatus(executionStatusAPI),
     actions: actionsAPI ? actionsAPI.map((action) => transformAction(action)) : [],
     scheduledTaskId,
-    ...(nextRun ? { next_run: new Date(nextRun) } : {}),
+    ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
     ...(monitoring ? { monitoring: transformMonitoring(monitoring) } : {}),
+    ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
     ...rest,
   };
 }

@@ -65,6 +65,7 @@ import {
   RuleTaskState,
   AlertSummary,
   RuleExecutionStatusValues,
+  RuleLastRunOutcomeValues,
   RuleNotifyWhenType,
   RuleTypeParams,
   ResolvedSanitizedRule,
@@ -86,7 +87,7 @@ import {
   convertEsSortToEventLogSort,
   getDefaultRawRuleMonitoring,
   updateMonitoring,
-  monitoringFromRaw,
+  convertMonitoringFromRawAndVerify,
   getNextRunString,
 } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
@@ -152,6 +153,12 @@ export type InvalidateAPIKeyResult =
 
 export interface RuleAggregation {
   status: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+  outcome: {
     buckets: Array<{
       key: string;
       doc_count: number;
@@ -347,6 +354,7 @@ interface IndexType {
 
 export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
+  ruleLastRunOutcome: { [status: string]: number };
   ruleEnabledStatus?: { enabled: number; disabled: number };
   ruleMutedStatus?: { muted: number; unmuted: number };
   ruleSnoozedStatus?: { snoozed: number };
@@ -376,8 +384,8 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'executionStatus'
     | 'snoozeSchedule'
     | 'isSnoozedUntil'
-    | 'last_run'
-    | 'next_run'
+    | 'lastRun'
+    | 'nextRun'
     | 'running'
   > & { actions: NormalizedAlertAction[] };
   options?: {
@@ -1367,6 +1375,9 @@ export class RulesClient {
         status: {
           terms: { field: 'alert.attributes.executionStatus.status' },
         },
+        outcome: {
+          terms: { field: 'alert.attributes.lastRun.outcome' },
+        },
         enabled: {
           terms: { field: 'alert.attributes.enabled' },
         },
@@ -1397,6 +1408,7 @@ export class RulesClient {
       // Return a placeholder with all zeroes
       const placeholder: AggregateResult = {
         alertExecutionStatus: {},
+        ruleLastRunOutcome: {},
         ruleEnabledStatus: {
           enabled: 0,
           disabled: 0,
@@ -1421,8 +1433,18 @@ export class RulesClient {
       })
     );
 
+    const ruleLastRunOutcome = resp.aggregations.outcome.buckets.map(
+      ({ key, doc_count: docCount }) => ({
+        [key]: docCount,
+      })
+    );
+
     const ret: AggregateResult = {
       alertExecutionStatus: alertExecutionStatus.reduce(
+        (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
+        {}
+      ),
+      ruleLastRunOutcome: ruleLastRunOutcome.reduce(
         (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
         {}
       ),
@@ -1432,6 +1454,11 @@ export class RulesClient {
     for (const key of RuleExecutionStatusValues) {
       if (!ret.alertExecutionStatus.hasOwnProperty(key)) {
         ret.alertExecutionStatus[key] = 0;
+      }
+    }
+    for (const key of RuleLastRunOutcomeValues) {
+      if (!ret.ruleLastRunOutcome.hasOwnProperty(key)) {
+        ret.ruleLastRunOutcome[key] = 0;
       }
     }
 
@@ -2549,7 +2576,7 @@ export class RulesClient {
           }),
         }),
         running: false,
-        next_run: getNextRunString(schedule.interval),
+        nextRun: getNextRunString(schedule.interval),
         enabled: true,
         updatedBy: username,
         updatedAt: now.toISOString(),
@@ -3383,7 +3410,7 @@ export class RulesClient {
       params,
       executionStatus,
       monitoring,
-      next_run: nextRun,
+      nextRun,
       schedule,
       actions,
       snoozeSchedule,
@@ -3435,8 +3462,10 @@ export class RulesClient {
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
-      ...(monitoring ? { monitoring: monitoringFromRaw(this.logger, id, monitoring) } : {}),
-      ...(nextRun ? { next_run: new Date(nextRun) } : {}),
+      ...(monitoring
+        ? { monitoring: convertMonitoringFromRawAndVerify(this.logger, id, monitoring) }
+        : {}),
+      ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
     };
 
     return includeLegacyId

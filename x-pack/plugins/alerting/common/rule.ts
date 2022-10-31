@@ -79,6 +79,7 @@ export interface RuleAction {
 
 export interface RuleAggregations {
   alertExecutionStatus: { [status: string]: number };
+  ruleLastRunOutcome: { [status: string]: number };
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
   ruleSnoozedStatus: { snoozed: number };
@@ -88,12 +89,12 @@ export interface RuleAggregations {
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
   warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons;
-  outcome_msg?: string;
-  alerts_count: {
-    active: number;
-    new: number;
-    recovered: number;
-    ignored: number;
+  outcomeMsg?: string;
+  alertsCount: {
+    active?: number | null;
+    new?: number | null;
+    recovered?: number | null;
+    ignored?: number | null;
   };
 }
 
@@ -131,8 +132,8 @@ export interface Rule<Params extends RuleTypeParams = never> {
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   activeSnoozes?: string[];
   isSnoozedUntil?: Date | null;
-  last_run?: RuleLastRun | null;
-  next_run?: Date | null;
+  lastRun?: RuleLastRun | null;
+  nextRun?: Date | null;
   running: boolean;
 }
 
@@ -191,8 +192,8 @@ export interface ActionVariable {
 export interface RuleMonitoringHistory extends SavedObjectAttributes {
   success: boolean;
   timestamp: number;
-  outcome: RuleLastRunOutcomes;
   duration?: number;
+  outcome?: RuleLastRunOutcomes;
 }
 
 export interface RuleMonitoringCalculatedMetrics extends SavedObjectAttributes {
@@ -202,16 +203,18 @@ export interface RuleMonitoringCalculatedMetrics extends SavedObjectAttributes {
   success_ratio: number;
 }
 
+export interface RuleMonitoringLastRunMetrics {
+  duration: number;
+  total_search_duration_ms?: number | null;
+  total_indexing_duration_ms?: number | null;
+  total_alerts_detected?: number | null;
+  total_alerts_created?: number | null;
+  gap_duration_s?: number | null;
+}
+
 export interface RuleMonitoringLastRun {
   timestamp: Date;
-  metrics: {
-    duration?: number;
-    total_search_duration_ms?: number;
-    total_indexing_duration_ms?: number;
-    total_alerts_detected?: number;
-    total_alerts_created?: number;
-    gap_duration_s?: number;
-  };
+  metrics: RuleMonitoringLastRunMetrics;
 }
 
 export interface RuleMonitoring {

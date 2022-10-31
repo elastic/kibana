@@ -46,6 +46,8 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   snooze_schedule: snoozeSchedule,
   is_snoozed_until: isSnoozedUntil,
   active_snoozes: activeSnoozes,
+  last_run: lastRun,
+  next_run: nextRun,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -65,6 +67,8 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   scheduledTaskId,
   isSnoozedUntil,
   activeSnoozes,
+  ...(lastRun ? { lastRun } : {}),
+  ...(nextRun ? { nextRun } : {}),
   ...rest,
 });
 

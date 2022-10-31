@@ -12,34 +12,17 @@ import { ActionsCompletion } from '../../common';
 import {
   RuleLastRunOutcomeValues,
   RuleLastRunOutcomes,
-  RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
   RawRuleLastRun,
+  RuleLastRun,
 } from '../types';
 import { translations } from '../constants/translations';
 import { RuleRunMetrics } from './rule_run_metrics_store';
 
 export interface ILastRun {
-  lastRun: {
-    outcome: RuleLastRunOutcomes;
-    warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons;
-    outcome_msg?: string;
-    alerts_count: {
-      active: number;
-      new: number;
-      recovered: number;
-      ignored: number;
-    };
-  };
+  lastRun: RuleLastRun;
   metrics: RuleRunMetrics | null;
 }
-
-export const getInitialAlertsCount = () => ({
-  active: 0,
-  new: 0,
-  recovered: 0,
-  ignored: 0,
-});
 
 export const lastRunFromState = (stateWithMetrics: RuleTaskStateAndMetrics): ILastRun => {
   const { metrics } = stateWithMetrics;
@@ -62,7 +45,7 @@ export const lastRunFromState = (stateWithMetrics: RuleTaskStateAndMetrics): ILa
   return {
     lastRun: {
       outcome,
-      alerts_count: {
+      alertsCount: {
         active: metrics.numberOfActiveAlerts,
         new: metrics.numberOfNewAlerts,
         recovered: metrics.numberOfRecoveredAlerts,
@@ -79,26 +62,26 @@ export const lastRunFromError = (error: Error): ILastRun => {
   return {
     lastRun: {
       outcome: RuleLastRunOutcomeValues[2],
-      alerts_count: getInitialAlertsCount(),
       warning: getReasonFromError(error),
-      outcome_msg: getEsErrorMessage(error),
+      outcomeMsg: getEsErrorMessage(error),
+      alertsCount: {},
     },
     metrics: null,
   };
 };
 
 export const lastRunToRaw = (lastRun: ILastRun['lastRun']): RawRuleLastRun => {
-  const { warning, alerts_count: alertsCount, outcome_msg: outcomeMsg } = lastRun;
+  const { warning, alertsCount, outcomeMsg } = lastRun;
 
   return {
     ...lastRun,
-    alerts_count: {
+    alertsCount: {
       active: alertsCount.active || 0,
       new: alertsCount.new || 0,
       recovered: alertsCount.recovered || 0,
       ignored: alertsCount.ignored || 0,
     },
     warning: warning ?? null,
-    outcome_msg: outcomeMsg ?? null,
+    outcomeMsg: outcomeMsg ?? null,
   };
 };

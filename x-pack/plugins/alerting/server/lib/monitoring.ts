@@ -11,6 +11,15 @@ import { RuleMonitoring, RawRuleMonitoring } from '../types';
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { isOk, Result } from './result_type';
 
+export const INITIAL_METRICS = {
+  duration: 0,
+  total_search_duration_ms: null,
+  total_indexing_duration_ms: null,
+  total_alerts_detected: null,
+  total_alerts_created: null,
+  gap_duration_s: null,
+};
+
 export const getExecutionSuccessRatio = (ruleMonitoring: RuleMonitoring) => {
   const { history } = ruleMonitoring.run;
   return history.filter(({ success }) => success).length / history.length;
@@ -62,9 +71,7 @@ export const getRuleMonitoringTemplate = <T extends RuleMonitoring | RawRuleMoni
       },
       last_run: {
         timestamp,
-        metrics: {
-          duration: 0,
-        },
+        metrics: INITIAL_METRICS,
       },
     },
   };
@@ -78,6 +85,8 @@ export const getDefaultRawRuleMonitoring = (timestamp: string): RawRuleMonitorin
   return getRuleMonitoringTemplate<RawRuleMonitoring>(timestamp);
 };
 
+// Immutably updates the monitoring object with timestamp and duration.
+// Used when converting from and between raw monitoring object
 export const updateMonitoring = <T extends RuleMonitoring | RawRuleMonitoring>({
   monitoring,
   timestamp,
@@ -88,20 +97,19 @@ export const updateMonitoring = <T extends RuleMonitoring | RawRuleMonitoring>({
   duration: number;
 }) => {
   const { run } = monitoring;
-  const { last_run: lastRun } = run;
-  const { metrics = {} } = lastRun;
+  const { last_run: lastRun, ...rest } = run;
+  const { metrics = INITIAL_METRICS } = lastRun;
 
   return {
     run: {
-      ...run,
       last_run: {
-        ...lastRun,
         timestamp,
         metrics: {
           ...metrics,
           duration,
         },
       },
+      ...rest,
     },
   };
 };
@@ -114,7 +122,15 @@ export const monitoringToRaw = (monitoring: RuleMonitoring): RawRuleMonitoring =
   });
 };
 
-export const monitoringFromRaw = (
+export const monitoringFromRaw = (monitoring: RawRuleMonitoring): RuleMonitoring => {
+  return updateMonitoring<RuleMonitoring>({
+    monitoring,
+    timestamp: new Date(monitoring.run.last_run.timestamp),
+    duration: monitoring.run.last_run.metrics.duration || 0,
+  });
+};
+
+export const convertMonitoringFromRawAndVerify = (
   logger: Logger,
   ruleId: string,
   monitoring: RawRuleMonitoring

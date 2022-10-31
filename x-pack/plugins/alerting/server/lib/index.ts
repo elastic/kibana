@@ -25,17 +25,13 @@ export {
   ruleExecutionStatusToRaw,
   ruleExecutionStatusFromRaw,
 } from './rule_execution_status';
-export {
-  lastRunFromState,
-  lastRunFromError,
-  lastRunToRaw,
-  getInitialAlertsCount,
-} from './last_run_status';
+export { lastRunFromState, lastRunFromError, lastRunToRaw } from './last_run_status';
 export {
   getDefaultRawRuleMonitoring,
   updateMonitoring,
   monitoringToRaw,
   monitoringFromRaw,
+  convertMonitoringFromRawAndVerify,
 } from './monitoring';
 export { getNextRunDate, getNextRunString } from './next_run';
 export { processAlerts } from './process_alerts';

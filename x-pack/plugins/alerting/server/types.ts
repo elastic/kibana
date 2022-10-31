@@ -82,6 +82,7 @@ export interface RuleExecutorServices<
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
+  ruleMonitoringService: RuleMonitoringService;
 }
 
 export interface RuleExecutorOptions<
@@ -210,13 +211,13 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
 
 export interface RawRuleLastRun extends SavedObjectAttributes {
   outcome: RuleLastRunOutcomes;
-  warning: null | RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons;
-  outcome_msg: null | string;
-  alerts_count: {
-    active: number;
-    new: number;
-    recovered: number;
-    ignored: number;
+  warning: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
+  outcomeMsg: string | null;
+  alertsCount: {
+    active?: number | null;
+    new?: number | null;
+    recovered?: number | null;
+    ignored?: number | null;
   };
 }
 
@@ -265,8 +266,8 @@ export interface RawRule extends SavedObjectAttributes {
   monitoring?: RawRuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   isSnoozedUntil?: string | null;
-  last_run?: RawRuleLastRun | null;
-  next_run?: string | null;
+  lastRun?: RawRuleLastRun | null;
+  nextRun?: string | null;
   running: boolean;
 }
 
@@ -306,11 +307,11 @@ export interface RawRuleMonitoring extends SavedObjectAttributes {
       timestamp: string;
       metrics: {
         duration?: number;
-        total_search_duration_ms?: number;
-        total_indexing_duration_ms?: number;
-        total_alerts_detected?: number;
-        total_alerts_created?: number;
-        gap_duration_s?: number;
+        total_search_duration_ms?: number | null;
+        total_indexing_duration_ms?: number | null;
+        total_alerts_detected?: number | null;
+        total_alerts_created?: number | null;
+        gap_duration_s?: number | null;
       };
     };
   };
@@ -319,3 +320,11 @@ export interface RawRuleMonitoring extends SavedObjectAttributes {
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export interface RuleMonitoringService {
+  setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
+  setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
+  setLastRunMetricsTotalAlertDetected: (totalAlertDetected: number) => void;
+  setLastRunMetricsTotalAlertCreated: (totalAlertCreated: number) => void;
+  setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
+}
