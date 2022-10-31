@@ -288,13 +288,14 @@ export function LayerSettings(props: Props) {
             </ul>
           </p>
         </EuiCallOut>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
       </>
     ) : null;
   };
 
   return (
     <Fragment>
+      {renderLayerGroupInstructions()}
       <EuiPanel>
         <EuiTitle size="xs">
           <h5>
@@ -306,7 +307,6 @@ export function LayerSettings(props: Props) {
         </EuiTitle>
 
         <EuiSpacer size="m" />
-        {renderLayerGroupInstructions()}
         {renderLabel()}
         {renderZoomSliders()}
         {isLayerGroup(props.layer) ? null : (
