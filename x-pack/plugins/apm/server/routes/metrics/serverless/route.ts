@@ -6,13 +6,20 @@
  */
 
 import * as t from 'io-ts';
+import {
+  apmAWSLambdaPriceFactor,
+  apmAWSLambdaRequestCostPerMillion,
+} from '@kbn/observability-plugin/common';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServerlessAgentMetricsCharts } from './get_serverless_agent_metrics_chart';
 import { getServerlessActiveInstancesOverview } from './get_active_instances_overview';
 import { getServerlessFunctionsOverview } from './get_serverless_functions_overview';
-import { getServerlessSummary } from './get_serverless_summary';
+import {
+  AWSLambdaPriceFactor,
+  getServerlessSummary,
+} from './get_serverless_summary';
 import { getActiveInstancesTimeseries } from './get_active_instances_timeseries';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 
@@ -163,8 +170,25 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<Awaited<ReturnType<typeof getServerlessSummary>>> => {
-    const { params } = resources;
-    const apmEventClient = await getApmEventClient(resources);
+    const { params, context } = resources;
+    const {
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
+
+    const [
+      apmEventClient,
+      awsLambdaPriceFactor,
+      awsLambdaRequestCostPerMillion,
+    ] = await Promise.all([
+      getApmEventClient(resources),
+      uiSettingsClient
+        .get<string>(apmAWSLambdaPriceFactor)
+        .then(
+          (value): AWSLambdaPriceFactor =>
+            JSON.parse(value) as AWSLambdaPriceFactor
+        ),
+      uiSettingsClient.get<number>(apmAWSLambdaRequestCostPerMillion),
+    ]);
 
     const { serviceName } = params.path;
     const { environment, kuery, start, end, serverlessId } = params.query;
@@ -177,6 +201,8 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
       apmEventClient,
       serviceName,
       serverlessId,
+      awsLambdaPriceFactor,
+      awsLambdaRequestCostPerMillion,
     });
   },
 });
