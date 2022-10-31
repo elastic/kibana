@@ -290,6 +290,7 @@ export const GetPingsParamsType = t.intersection([
     excludedLocations: t.string,
     index: t.number,
     size: t.number,
+    pageIndex: t.number,
     locations: t.string,
     monitorId: t.string,
     sort: t.string,
