@@ -19,7 +19,7 @@ import type { BulkAction } from '../../api/api';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
 import { showBulkErrorToast } from './show_bulk_error_toast';
 import { showBulkSuccessToast } from './show_bulk_success_toast';
-import { useAllRuleIdsForBulkAction } from './useAllRuleIdsForBulkAction';
+import { useAllRuleIdsForBulkAction } from './use_all_rule_ids_for_bulk_action';
 
 export const goToRuleEditPage = (
   ruleId: string,

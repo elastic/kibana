@@ -17,7 +17,7 @@ import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation'
 import { showBulkErrorToast } from './show_bulk_error_toast';
 import { showBulkSuccessToast } from './show_bulk_success_toast';
 import type { QueryOrIds } from '../../api/api';
-import { useAllRuleIdsForBulkAction } from './useAllRuleIdsForBulkAction';
+import { useAllRuleIdsForBulkAction } from './use_all_rule_ids_for_bulk_action';
 
 export function useBulkExport() {
   const toasts = useAppToasts();
