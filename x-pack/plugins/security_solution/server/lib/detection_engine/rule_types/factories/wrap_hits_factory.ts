@@ -58,6 +58,7 @@ export const wrapHitsFactory =
             buildReasonMessage,
             indicesToQuery
           ),
+// alert UUID assigned here        
           [ALERT_UUID]: id,
         },
       };

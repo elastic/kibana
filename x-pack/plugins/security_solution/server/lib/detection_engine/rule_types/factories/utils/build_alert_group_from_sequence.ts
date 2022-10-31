@@ -80,6 +80,7 @@ export const buildAlertGroupFromSequence = (
       _index: '',
       _source: {
         ...block,
+// alert UUID assigned here        
         [ALERT_UUID]: buildingBlockIds[i],
       },
     })

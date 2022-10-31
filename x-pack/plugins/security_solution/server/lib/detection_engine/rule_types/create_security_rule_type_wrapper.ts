@@ -396,6 +396,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               if (completeRule.ruleConfig.throttle != null) {
                 // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
                 await scheduleThrottledNotificationActions({
+// alert created here                  
                   alertInstance: services.alertFactory.create(alertId),
                   throttle: completeRule.ruleConfig.throttle ?? '',
                   startedAt,
@@ -411,6 +412,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 });
               } else if (createdSignalsCount) {
                 const alertInstance = services.alertFactory.create(alertId);
+// alert created here                  
                 scheduleNotificationActions({
                   alertInstance,
                   signalsCount: createdSignalsCount,
@@ -475,6 +477,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
             if (actions.length && completeRule.ruleConfig.throttle != null) {
               await scheduleThrottledNotificationActions({
+// alert created here                  
                 alertInstance: services.alertFactory.create(alertId),
                 throttle: completeRule.ruleConfig.throttle ?? '',
                 startedAt,
