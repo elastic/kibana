@@ -8,22 +8,40 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { EuiFormRow, EuiFieldText, EuiTextArea, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiFieldText, EuiTextArea, EuiSpacer } from '@elastic/eui';
 
 import type { MetadataFormState } from './use_metadata_form';
 import type { Services } from '../services';
 
 interface Props {
-  form: MetadataFormState;
+  form: MetadataFormState & {
+    isSubmitted: boolean;
+    isValid: boolean;
+    getErrors: () => string[];
+  };
   isReadonly: boolean;
   TagSelector?: Services['TagSelector'];
 }
 
 export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
-  const { title, setTitle, description, setDescription, tags, setTags } = form;
+  const {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    tags,
+    setTags,
+    isSubmitted,
+    isValid,
+    getErrors,
+  } = form;
 
   return (
-    <div data-test-subj="metadataForm">
+    <EuiForm
+      isInvalid={isSubmitted && isValid === false}
+      error={getErrors()}
+      data-test-subj="metadataForm"
+    >
       <EuiFormRow
         label="Name"
         error={title.errorMessage}
@@ -68,6 +86,6 @@ export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
           <TagSelector initialSelection={tags.value} onTagsSelected={setTags} fullWidth />
         </>
       )}
-    </div>
+    </EuiForm>
   );
 };

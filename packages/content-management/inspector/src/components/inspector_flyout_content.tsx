@@ -87,7 +87,11 @@ export const InspectorFlyoutContent: FC<Props> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <MetadataForm form={form} isReadonly={isReadonly} TagSelector={TagSelector} />
+        <MetadataForm
+          form={{ ...form, isSubmitted }}
+          isReadonly={isReadonly}
+          TagSelector={TagSelector}
+        />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

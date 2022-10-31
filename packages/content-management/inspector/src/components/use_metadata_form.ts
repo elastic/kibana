@@ -7,6 +7,7 @@
  */
 
 import { useState, useCallback, useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import type { Item } from '../types';
 
@@ -25,8 +26,10 @@ interface Fields {
 
 const validators: { [key in keyof Fields]: ((value: unknown) => string | null) | null } = {
   title: (value) => {
-    if (value === 'balbi') {
-      return 'Oh yes :)';
+    if (typeof value === 'string' && value.trim() === '') {
+      return i18n.translate('contentManagement.inspector.metadataForm.nameIsEmptyError', {
+        defaultMessage: 'A name is required.',
+      });
     }
     return null;
   },
@@ -104,6 +107,12 @@ export const useMetadataForm = ({ item }: { item: Item }) => {
     return Object.values(fields).every((field: Field) => field.isValid);
   }, [fields]);
 
+  const getErrors = useCallback(() => {
+    return Object.values(fields)
+      .map(({ errorMessage }: Field) => errorMessage)
+      .filter(Boolean) as string[];
+  }, [fields]);
+
   const isValid = validate();
 
   return {
@@ -114,6 +123,7 @@ export const useMetadataForm = ({ item }: { item: Item }) => {
     tags: fields.tags,
     setTags,
     isValid,
+    getErrors,
   };
 };
 

@@ -16,6 +16,14 @@ import { InspectorFlyoutContent } from './inspector_flyout_content';
 import type { Props as InspectorFlyoutContentProps } from './inspector_flyout_content';
 
 describe('<InspectorFlyoutContent />', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   describe('metadata', () => {
     let testBed: TestBed;
 
@@ -99,6 +107,42 @@ describe('<InspectorFlyoutContent />', () => {
         description: 'newDescription',
         tags: ['id-1', 'id-2'],
       });
+    });
+
+    test('should validate that the form is valid', async () => {
+      const onSave = jest.fn();
+
+      await act(async () => {
+        testBed = await setup({ onSave, isReadonly: false });
+      });
+
+      const {
+        find,
+        component,
+        form: { setInputValue, getErrorsMessages },
+      } = testBed!;
+
+      await act(async () => {
+        setInputValue('metadataForm.nameInput', ''); // empty is not allowed
+      });
+
+      component.update();
+
+      await act(async () => {
+        find('saveButton').simulate('click');
+      });
+      component.update();
+      expect(onSave).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.advanceTimersByTime(500); // There is a 500ms delay to display input errors
+      });
+      component.update();
+
+      expect(getErrorsMessages()).toEqual(['A name is required.']);
+      const errorCallout = component.find('.euiForm__errors').at(0);
+      expect(errorCallout.text()).toContain('Please address the highlighted errors.');
+      expect(errorCallout.text()).toContain('A name is required.');
     });
 
     test('should update the tag selection', async () => {
