@@ -133,9 +133,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
             : i18n.translate('unifiedFieldList.useGroupedFields.availableFieldsLabel', {
                 defaultMessage: 'Available fields',
               }),
-        helpText: i18n.translate('unifiedFieldList.useGroupedFields.allFieldsLabelHelp', {
-          defaultMessage: 'Data view fields', // TODO: what text should be in here by default?
-        }),
         isAffectedByGlobalFilter: false,
         isAffectedByTimeFilter: true,
         // Show details on timeout but not failure
