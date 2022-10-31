@@ -178,6 +178,11 @@ export interface DiscoverGridProps {
    * Callback to execute on edit runtime field
    */
   onFieldEdited?: () => void;
+
+  /**
+   * Callback to execute when data is first loaded
+   */
+  onDataLoad?: () => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -215,6 +220,7 @@ export const DiscoverGrid = ({
   rowsPerPageState,
   onUpdateRowsPerPage,
   onFieldEdited,
+  onDataLoad,
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
@@ -263,6 +269,13 @@ export const DiscoverGrid = ({
     },
     [displayedRows, dataView, services]
   );
+
+  // Notify when rows are loaded
+  useEffect(() => {
+    if (onDataLoad && rows !== undefined && rows.length > 0) {
+      onDataLoad();
+    }
+  }, [rows]);
 
   /**
    * Pagination
@@ -504,7 +517,6 @@ export const DiscoverGrid = ({
     return (
       <div
         className="euiDataGrid__noResults"
-        data-render-complete={!isLoading}
         data-shared-item=""
         data-title={searchTitle}
         data-description={searchDescription}
@@ -541,7 +553,6 @@ export const DiscoverGrid = ({
       <span className="dscDiscoverGrid__inner">
         <div
           data-test-subj="discoverDocTable"
-          data-render-complete={!isLoading}
           data-shared-item=""
           data-title={searchTitle}
           data-description={searchDescription}

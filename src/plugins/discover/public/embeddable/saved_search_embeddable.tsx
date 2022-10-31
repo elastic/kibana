@@ -479,6 +479,7 @@ export class SavedSearchEmbeddable
     if (!this.searchProps) {
       throw new Error('Search props not defined');
     }
+    super.render(domNode as HTMLElement);
 
     this.node = domNode;
 
@@ -515,12 +516,25 @@ export class SavedSearchEmbeddable
         </I18nProvider>,
         domNode
       );
+      this.updateOutput({
+        ...this.getOutput(),
+        rendered: true,
+      });
       return;
     }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
     const props = {
       savedSearch: this.savedSearch,
-      searchProps,
+      searchProps: {
+        ...searchProps,
+        onDataLoad: () => {
+          this.renderComplete.dispatchComplete();
+          this.updateOutput({
+            ...this.getOutput(),
+            rendered: true,
+          });
+        },
+      },
       useLegacyTable,
     };
     if (searchProps.services) {
@@ -535,11 +549,6 @@ export class SavedSearchEmbeddable
         domNode
       );
     }
-
-    this.updateOutput({
-      ...this.getOutput(),
-      rendered: true,
-    });
   }
 
   private async load(searchProps: SearchProps, forceFetch = false) {
