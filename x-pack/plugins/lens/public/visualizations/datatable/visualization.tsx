@@ -406,8 +406,8 @@ export const getDatatableVisualization = ({
 
     const lensCollapseFns = columns
       .filter((c) => c.collapseFn)
-      .map((c) => {
-        const fn = buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
+      .map((c) =>
+        buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
           by: columns
             .filter(
               (col) =>
@@ -419,9 +419,8 @@ export const getDatatableVisualization = ({
             .filter((col) => !datasource!.getOperationForColumnId(col.columnId)?.isBucketed)
             .map((col) => col.columnId),
           fn: [c.collapseFn!],
-        });
-        return fn.toAst();
-      });
+        }).toAst()
+      );
 
     return {
       type: 'expression',
