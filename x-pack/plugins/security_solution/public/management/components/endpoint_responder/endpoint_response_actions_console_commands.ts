@@ -6,6 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type {
+  EndpointCapabilities,
+  ConsoleResponseActionCommands,
+} from '../../../../common/endpoint/service/response_actions/constants';
+import { GetFileActionResult } from './get_file_action';
 import type { Command, CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
@@ -14,12 +19,11 @@ import { SuspendProcessActionResult } from './suspend_process_action';
 import { EndpointStatusActionResult } from './status_action';
 import { GetProcessesActionResult } from './get_processes_action';
 import type { ParsedArgData } from '../console/service/parsed_command_input';
-import type { ImmutableArray } from '../../../../common/endpoint/types';
-import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../common/translations';
-import type {
-  ResponderCapabilities,
-  ResponderCommands,
-} from '../../../../common/endpoint/constants';
+import type { EndpointPrivileges, ImmutableArray } from '../../../../common/endpoint/types';
+import {
+  INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
+  UPGRADE_ENDPOINT_FOR_RESPONDER,
+} from '../../../common/translations';
 import { getCommandAboutInfo } from './get_command_about_info';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
@@ -45,25 +49,56 @@ const pidValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
-const commandToCapabilitiesMap = new Map<ResponderCommands, ResponderCapabilities>([
+const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, EndpointCapabilities>([
   ['isolate', 'isolation'],
   ['release', 'isolation'],
   ['kill-process', 'kill_process'],
   ['suspend-process', 'suspend_process'],
   ['processes', 'running_processes'],
+  ['get-file', 'get_file'],
 ]);
 
-const capabilitiesValidator = (command: Command): true | string => {
-  const endpointCapabilities: ResponderCapabilities[] = command.commandDefinition.meta.capabilities;
-  const responderCapability = commandToCapabilitiesMap.get(
-    command.commandDefinition.name as ResponderCommands
-  );
+const getRbacControl = ({
+  commandName,
+  privileges,
+}: {
+  commandName: ConsoleResponseActionCommands;
+  privileges: EndpointPrivileges;
+}): boolean => {
+  const commandToPrivilegeMap = new Map<ConsoleResponseActionCommands, boolean>([
+    ['isolate', privileges.canIsolateHost],
+    ['release', privileges.canUnIsolateHost],
+    ['kill-process', privileges.canKillProcess],
+    ['suspend-process', privileges.canSuspendProcess],
+    ['processes', privileges.canGetRunningProcesses],
+    ['get-file', privileges.canWriteFileOperations],
+  ]);
+  return commandToPrivilegeMap.get(commandName as ConsoleResponseActionCommands) ?? false;
+};
+
+const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {
+  const privileges = command.commandDefinition.meta.privileges;
+  const endpointCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
+  const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
+  const responderCapability = commandToCapabilitiesMap.get(commandName);
+  let errorMessage = '';
+  if (!responderCapability) {
+    errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
+  }
   if (responderCapability) {
-    if (endpointCapabilities.includes(responderCapability)) {
-      return true;
+    if (!endpointCapabilities.includes(responderCapability)) {
+      errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
     }
   }
-  return UPGRADE_ENDPOINT_FOR_RESPONDER;
+  if (getRbacControl({ commandName, privileges }) !== true) {
+    errorMessage = errorMessage.concat(INSUFFICIENT_PRIVILEGES_FOR_COMMAND);
+  }
+
+  if (errorMessage.length) {
+    return errorMessage;
+  }
+
+  return true;
 };
 
 const HELP_GROUPS = Object.freeze({
@@ -93,17 +128,20 @@ const COMMENT_ARG_ABOUT = i18n.translate(
 export const getEndpointResponseActionsConsoleCommands = ({
   endpointAgentId,
   endpointCapabilities,
+  endpointPrivileges,
 }: {
   endpointAgentId: string;
   endpointCapabilities: ImmutableArray<string>;
+  endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
-  const doesEndpointSupportCommand = (commandName: ResponderCommands) => {
+  const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     const responderCapability = commandToCapabilitiesMap.get(commandName);
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);
     }
     return false;
   };
+
   return [
     {
       name: 'isolate',
@@ -117,10 +155,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       meta: {
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
       exampleUsage: 'isolate --comment "isolate this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesValidator,
+      validate: capabilitiesAndPrivilegesValidator,
       args: {
         comment: {
           required: false,
@@ -132,6 +171,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 0,
       helpDisabled: doesEndpointSupportCommand('isolate') === false,
+      helpHidden: !getRbacControl({ commandName: 'isolate', privileges: endpointPrivileges }),
     },
     {
       name: 'release',
@@ -145,10 +185,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       meta: {
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
       exampleUsage: 'release --comment "release this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesValidator,
+      validate: capabilitiesAndPrivilegesValidator,
       args: {
         comment: {
           required: false,
@@ -160,6 +201,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 1,
       helpDisabled: doesEndpointSupportCommand('release') === false,
+      helpHidden: !getRbacControl({ commandName: 'release', privileges: endpointPrivileges }),
     },
     {
       name: 'kill-process',
@@ -176,10 +218,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       meta: {
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
       exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
-      validate: capabilitiesValidator,
+      validate: capabilitiesAndPrivilegesValidator,
       mustHaveArgs: true,
       args: {
         comment: {
@@ -213,6 +256,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 4,
       helpDisabled: doesEndpointSupportCommand('kill-process') === false,
+      helpHidden: !getRbacControl({ commandName: 'kill-process', privileges: endpointPrivileges }),
     },
     {
       name: 'suspend-process',
@@ -229,10 +273,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       meta: {
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
       exampleUsage: 'suspend-process --pid 123 --comment "suspend this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
-      validate: capabilitiesValidator,
+      validate: capabilitiesAndPrivilegesValidator,
       mustHaveArgs: true,
       args: {
         comment: {
@@ -269,6 +314,10 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 5,
       helpDisabled: doesEndpointSupportCommand('suspend-process') === false,
+      helpHidden: !getRbacControl({
+        commandName: 'suspend-process',
+        privileges: endpointPrivileges,
+      }),
     },
     {
       name: 'status',
@@ -298,10 +347,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       meta: {
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
       exampleUsage: 'processes --comment "get the processes"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesValidator,
+      validate: capabilitiesAndPrivilegesValidator,
       args: {
         comment: {
           required: false,
@@ -313,6 +363,54 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 3,
       helpDisabled: doesEndpointSupportCommand('processes') === false,
+      helpHidden: !getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }),
+    },
+    {
+      name: 'get-file',
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.getFile.about', {
+          defaultMessage: 'Retrieve a file from the host',
+        }),
+        isSupported: doesEndpointSupportCommand('processes'),
+      }),
+      RenderComponent: GetFileActionResult,
+      meta: {
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'get-file --path "/full/path/to/file.txt" --comment "Possible malware"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: capabilitiesAndPrivilegesValidator,
+      mustHaveArgs: true,
+      args: {
+        path: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.getFile.pathArgAbout',
+            {
+              defaultMessage: 'The full file path to be retrieved',
+            }
+          ),
+          validate: (argData) => {
+            return emptyArgumentValidator(argData);
+          },
+        },
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 6,
+      helpDisabled: !doesEndpointSupportCommand('get-file'),
+      helpHidden: !getRbacControl({
+        commandName: 'get-file',
+        privileges: endpointPrivileges,
+      }),
     },
   ];
 };

@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { Locations, LocationStatus, PrivateLocation } from '../../../../common/runtime_types';
+import {
+  DataStream,
+  Locations,
+  LocationStatus,
+  PrivateLocation,
+} from '../../../../common/runtime_types';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 
 describe('http normalizers', () => {
+  const testHash = 'ljlkj';
   describe('normalize push monitors', () => {
     const projectId = 'test-project-id';
     const locations: Locations = [
@@ -74,6 +81,7 @@ describe('http normalizers', () => {
         ssl: {
           supported_protocols: ['TLSv1.2', 'TLSv1.3'],
         },
+        hash: testHash,
       },
       {
         locations: ['localhost'],
@@ -104,6 +112,7 @@ describe('http normalizers', () => {
         },
         'service.name': 'test service',
         'ssl.supported_protocols': 'TLSv1.2,TLSv1.3',
+        hash: testHash,
       },
     ];
 
@@ -133,6 +142,7 @@ describe('http normalizers', () => {
             },
           ],
           normalizedFields: {
+            ...DEFAULT_FIELDS[DataStream.HTTP],
             __ui: {
               is_tls_enabled: false,
             },
@@ -182,12 +192,14 @@ describe('http normalizers', () => {
             'url.port': null,
             username: '',
             id: '',
+            hash: testHash,
           },
           unsupportedKeys: ['check.response.body', 'unsupportedKey.nestedUnsupportedKey'],
         },
         {
           errors: [],
           normalizedFields: {
+            ...DEFAULT_FIELDS[DataStream.HTTP],
             __ui: {
               is_tls_enabled: false,
             },
@@ -237,6 +249,7 @@ describe('http normalizers', () => {
             'url.port': null,
             username: '',
             id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
         },

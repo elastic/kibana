@@ -44,6 +44,11 @@ import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { getBundledPackages } from './epm/packages';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
+import { migrateSettingsToFleetServerHost } from './fleet_server_host';
+import {
+  ensurePreconfiguredFleetServerHosts,
+  getPreconfiguredFleetServerHostFromConfig,
+} from './preconfiguration/fleet_server_host';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -70,24 +75,32 @@ async function createSetupSideEffects(
 
   const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
     appContextService.getConfig() ?? {};
-
   const policies = policiesOrUndefined ?? [];
   let packages = packagesOrUndefined ?? [];
 
-  logger.debug('Setting up Fleet outputs');
+  logger.debug('Setting Fleet server config');
+  await migrateSettingsToFleetServerHost(soClient);
+  logger.debug('Setting up Fleet download source');
+  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
 
+  logger.debug('Setting up Fleet Sever Hosts');
+  await ensurePreconfiguredFleetServerHosts(
+    soClient,
+    getPreconfiguredFleetServerHostFromConfig(appContextService.getConfig())
+  );
+
+  logger.debug('Setting up Fleet outputs');
   await Promise.all([
     ensurePreconfiguredOutputs(
       soClient,
       esClient,
       getPreconfiguredOutputFromConfig(appContextService.getConfig())
     ),
+
     settingsService.settingsSetup(soClient),
   ]);
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
-
-  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
 
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
     logger.debug('Setting up Fleet Elasticsearch assets');

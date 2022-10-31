@@ -176,6 +176,10 @@ for use in their own application.
 |Index pattern fields formatters
 
 
+|{kib-repo}blob/{branch}/src/plugins/files/README.md[files]
+|File upload, download, sharing, and serving over HTTP implementation in Kibana.
+
+
 |{kib-repo}blob/{branch}/src/plugins/guided_onboarding/README.md[guidedOnboarding]
 |This plugin contains the code for the Guided Onboarding project. Guided onboarding consists of guides for Solutions (Enterprise Search, Observability, Security) that can be completed as a checklist of steps. The guides help users to ingest their data and to navigate to the correct Solutions pages.
 
@@ -311,6 +315,10 @@ In general this plugin provides:
 |This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
 
 
+|{kib-repo}blob/{branch}/src/plugins/unified_histogram/README.md[unifiedHistogram]
+|The unifiedHistogram plugin provides UI components to create a layout including a resizable histogram and a main display.
+
+
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
 |Contains all the components of Kibana's unified search experience. Specifically:
 
@@ -436,6 +444,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Integrates with FullStory in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_gain_sight/README.md[cloudGainsight]
+|Integrates with Gainsight in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_links/README.md[cloudLinks]
 |Adds all the links to the Elastic Cloud console.
 
@@ -481,10 +493,6 @@ activities.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/files/README.md[files]
-|File upload, download, sharing, and serving over HTTP implementation in Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]

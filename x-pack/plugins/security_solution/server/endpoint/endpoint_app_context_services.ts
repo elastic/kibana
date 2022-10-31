@@ -40,7 +40,11 @@ import type {
 } from './services/fleet/endpoint_fleet_services_factory';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
-import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
+import {
+  calculateEndpointAuthz,
+  calculatePermissionsFromPrivileges,
+  defaultEndpointPermissions,
+} from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
@@ -162,14 +166,27 @@ export class EndpointAppContextService {
 
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
-    const userRoles = this.startDependencies?.security.authc.getCurrentUser(request)?.roles ?? [];
-    const isEndpointRbacEnabled = this.experimentalFeatures.endpointRbacEnabled;
+    const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
+    const { endpointRbacEnabled, endpointRbacV1Enabled } = this.experimentalFeatures;
+
+    let endpointPermissions = defaultEndpointPermissions();
+    if (this.security) {
+      const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
+      const { privileges } = await checkPrivileges({
+        kibana: [
+          this.security.authz.actions.ui.get('siem', 'crud'),
+          this.security.authz.actions.ui.get('siem', 'show'),
+        ],
+      });
+      endpointPermissions = calculatePermissionsFromPrivileges(privileges.kibana);
+    }
 
     return calculateEndpointAuthz(
       this.getLicenseService(),
       fleetAuthz,
       userRoles,
-      isEndpointRbacEnabled
+      endpointRbacEnabled || endpointRbacV1Enabled,
+      endpointPermissions
     );
   }
 

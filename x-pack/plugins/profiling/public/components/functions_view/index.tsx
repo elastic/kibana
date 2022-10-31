@@ -42,28 +42,36 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
     services: { fetchTopNFunctions },
   } = useProfilingDependencies();
 
-  const state = useTimeRangeAsync(() => {
-    return fetchTopNFunctions({
-      timeFrom: new Date(timeRange.start).getTime() / 1000,
-      timeTo: new Date(timeRange.end).getTime() / 1000,
-      startIndex: 0,
-      endIndex: 1000,
-      kuery,
-    });
-  }, [timeRange.start, timeRange.end, kuery, fetchTopNFunctions]);
+  const state = useTimeRangeAsync(
+    ({ http }) => {
+      return fetchTopNFunctions({
+        http,
+        timeFrom: new Date(timeRange.start).getTime() / 1000,
+        timeTo: new Date(timeRange.end).getTime() / 1000,
+        startIndex: 0,
+        endIndex: 1000,
+        kuery,
+      });
+    },
+    [timeRange.start, timeRange.end, kuery, fetchTopNFunctions]
+  );
 
-  const comparisonState = useTimeRangeAsync(() => {
-    if (!comparisonTimeRange.start || !comparisonTimeRange.end) {
-      return undefined;
-    }
-    return fetchTopNFunctions({
-      timeFrom: new Date(comparisonTimeRange.start).getTime() / 1000,
-      timeTo: new Date(comparisonTimeRange.end).getTime() / 1000,
-      startIndex: 0,
-      endIndex: 1000,
-      kuery: comparisonKuery,
-    });
-  }, [comparisonTimeRange.start, comparisonTimeRange.end, comparisonKuery, fetchTopNFunctions]);
+  const comparisonState = useTimeRangeAsync(
+    ({ http }) => {
+      if (!comparisonTimeRange.start || !comparisonTimeRange.end) {
+        return undefined;
+      }
+      return fetchTopNFunctions({
+        http,
+        timeFrom: new Date(comparisonTimeRange.start).getTime() / 1000,
+        timeTo: new Date(comparisonTimeRange.end).getTime() / 1000,
+        startIndex: 0,
+        endIndex: 1000,
+        kuery: comparisonKuery,
+      });
+    },
+    [comparisonTimeRange.start, comparisonTimeRange.end, comparisonKuery, fetchTopNFunctions]
+  );
 
   const routePath = useProfilingRoutePath() as
     | '/functions'

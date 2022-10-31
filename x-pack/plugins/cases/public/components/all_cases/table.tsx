@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, MutableRefObject, useCallback } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiLoadingContent,
-  EuiTableSelectionType,
-  EuiBasicTable,
-  EuiBasicTableProps,
-  Pagination,
-} from '@elastic/eui';
+import type { FunctionComponent, MutableRefObject } from 'react';
+import React, { useCallback } from 'react';
+import type { EuiTableSelectionType, EuiBasicTableProps, Pagination } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingContent, EuiBasicTable } from '@elastic/eui';
 import classnames from 'classnames';
 import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
 import { LinkButton } from '../links';
-import { Cases, Case } from '../../../common/ui/types';
+import type { Cases, Case } from '../../../common/ui/types';
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -82,7 +77,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
       <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
     </Div>
   ) : (
-    <Div data-test-subj={isCasesLoading ? 'cases-table-loading' : null}>
+    <>
       <CasesTableUtilityBar
         isSelectorView={isSelectorView}
         totalCases={data.total ?? 0}
@@ -127,7 +122,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         sorting={sorting}
         hasActions={false}
       />
-    </Div>
+    </>
   );
 };
 CasesTable.displayName = 'CasesTable';

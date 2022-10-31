@@ -347,9 +347,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('resizable layout panels', () => {
       it('should allow resizing the layout panels', async () => {
         const resizeDistance = 100;
-        const topPanel = await testSubjects.find('dscResizablePanelTop');
-        const mainPanel = await testSubjects.find('dscResizablePanelMain');
-        const resizeButton = await testSubjects.find('dsc-resizable-button');
+        const topPanel = await testSubjects.find('unifiedHistogramResizablePanelTop');
+        const mainPanel = await testSubjects.find('unifiedHistogramResizablePanelMain');
+        const resizeButton = await testSubjects.find('unifiedHistogramResizableButton');
         const topPanelSize = (await topPanel.getPosition()).height;
         const mainPanelSize = (await mainPanel.getPosition()).height;
         await browser.dragAndDrop(
@@ -364,36 +364,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('URL state', () => {
-      const getCurrentDataViewId = (currentUrl: string) => {
-        const [indexSubstring] = currentUrl.match(/index:[^,]*/)!;
-        const dataViewId = indexSubstring.replace('index:', '');
-        return dataViewId;
-      };
-
       it('should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID', async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
         const originalUrl = await browser.getCurrentUrl();
-        const dataViewId = getCurrentDataViewId(originalUrl);
         const newUrl = originalUrl.replace(dataViewId, 'invalid-data-view-id');
         await browser.get(newUrl);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        expect(await browser.getCurrentUrl()).to.be(originalUrl);
-        expect(await testSubjects.exists('dscDataViewNotFoundShowDefaultWarning')).to.be(true);
+        await retry.try(async () => {
+          expect(await browser.getCurrentUrl()).to.be(originalUrl);
+          expect(await testSubjects.exists('dscDataViewNotFoundShowDefaultWarning')).to.be(true);
+        });
       });
 
       it('should show a warning and fall back to the current data view if the URL is updated to an invalid data view ID', async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         const originalHash = await browser.execute<[], string>('return window.location.hash');
-        const dataViewId = getCurrentDataViewId(originalHash);
+        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
         const newHash = originalHash.replace(dataViewId, 'invalid-data-view-id');
         await browser.execute(`window.location.hash = "${newHash}"`);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const currentHash = await browser.execute<[], string>('return window.location.hash');
-        expect(currentHash).to.be(originalHash);
-        expect(await testSubjects.exists('dscDataViewNotFoundShowSavedWarning')).to.be(true);
+        await retry.try(async () => {
+          const currentHash = await browser.execute<[], string>('return window.location.hash');
+          expect(currentHash).to.be(originalHash);
+          expect(await testSubjects.exists('dscDataViewNotFoundShowSavedWarning')).to.be(true);
+        });
       });
     });
   });

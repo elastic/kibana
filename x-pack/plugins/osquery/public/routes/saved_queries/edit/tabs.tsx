@@ -7,10 +7,8 @@
 
 import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { ReactElement } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
-import type { AddToTimelinePayload } from '../../../timelines/get_add_to_timeline';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 
@@ -21,8 +19,7 @@ interface ResultTabsProps {
   ecsMapping?: ECSMapping;
   failedAgentsCount?: number;
   endDate?: string;
-  addToTimeline?: (payload: AddToTimelinePayload) => ReactElement;
-  addToCase?: ({ actionId }: { actionId?: string }) => ReactElement;
+  liveQueryActionId?: string;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -32,8 +29,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   endDate,
   failedAgentsCount,
   startDate,
-  addToTimeline,
-  addToCase,
+  liveQueryActionId,
 }) => {
   const tabs = useMemo(
     () => [
@@ -47,8 +43,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             ecsMapping={ecsMapping}
             startDate={startDate}
             endDate={endDate}
-            addToTimeline={addToTimeline}
-            addToCase={addToCase}
+            liveQueryActionId={liveQueryActionId}
           />
         ),
       },
@@ -65,16 +60,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         ) : null,
       },
     ],
-    [
-      actionId,
-      agentIds,
-      ecsMapping,
-      startDate,
-      endDate,
-      addToTimeline,
-      addToCase,
-      failedAgentsCount,
-    ]
+    [actionId, agentIds, ecsMapping, startDate, endDate, liveQueryActionId, failedAgentsCount]
   );
 
   return (

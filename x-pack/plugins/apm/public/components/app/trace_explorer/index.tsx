@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   TraceSearchQuery,
   TraceSearchType,
 } from '../../../../common/trace_explorer';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ApmDatePicker } from '../../shared/date_picker/apm_date_picker';
 import { fromQuery, toQuery, push } from '../../shared/links/url_helpers';
@@ -37,6 +37,7 @@ export function TraceExplorer() {
       transactionId,
       waterfallItemId,
       detailTab,
+      showCriticalPath,
     },
   } = useApmParams('/traces/explorer');
 
@@ -54,7 +55,7 @@ export function TraceExplorer() {
     rangeTo,
   });
 
-  const { data: traceSamplesData, status: traceSamplesStatus } = useFetcher(
+  const { data, status, error } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/traces/find', {
         params: {
@@ -72,7 +73,7 @@ export function TraceExplorer() {
   );
 
   useEffect(() => {
-    const nextSample = traceSamplesData?.samples[0];
+    const nextSample = data?.traceSamples[0];
     const nextWaterfallItemId = '';
     history.replace({
       ...history.location,
@@ -83,18 +84,23 @@ export function TraceExplorer() {
         waterfallItemId: nextWaterfallItemId,
       }),
     });
-  }, [traceSamplesData, history]);
+  }, [data, history]);
 
-  const { waterfall, status: waterfallStatus } = useWaterfallFetcher({
+  const waterfallFetchResult = useWaterfallFetcher({
     traceId,
     transactionId,
     start,
     end,
   });
 
-  const isLoading =
-    traceSamplesStatus === FETCH_STATUS.LOADING ||
-    waterfallStatus === FETCH_STATUS.LOADING;
+  const traceSamplesFetchResult = useMemo(
+    () => ({
+      data,
+      status,
+      error,
+    }),
+    [data, status, error]
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -127,8 +133,10 @@ export function TraceExplorer() {
       </EuiFlexItem>
       <EuiFlexItem>
         <WaterfallWithSummary
+          waterfallFetchResult={waterfallFetchResult}
+          traceSamples={traceSamplesFetchResult.data?.traceSamples}
+          traceSamplesFetchStatus={traceSamplesFetchResult.status}
           environment={environment}
-          isLoading={isLoading}
           onSampleClick={(sample) => {
             push(history, {
               query: {
@@ -145,11 +153,20 @@ export function TraceExplorer() {
               },
             });
           }}
-          traceSamples={traceSamplesData?.samples ?? []}
-          waterfall={waterfall}
           detailTab={detailTab}
           waterfallItemId={waterfallItemId}
-          serviceName={waterfall.entryWaterfallTransaction?.doc.service.name}
+          serviceName={
+            waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc
+              .service.name
+          }
+          showCriticalPath={showCriticalPath}
+          onShowCriticalPathChange={(nextShowCriticalPath) => {
+            push(history, {
+              query: {
+                showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
+              },
+            });
+          }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

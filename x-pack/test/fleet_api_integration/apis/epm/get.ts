@@ -144,6 +144,18 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.name).to.equal('apache');
       await uninstallPackage(testPkgName, testPkgVersion);
     });
+    it('should return all fields for input only packages', async function () {
+      // input packages have to get their package info from the manifest directly
+      // not from the package registry. This is because they contain a field the registry
+      // does not support
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/integration_to_input/0.9.1`)
+        .expect(200);
+
+      const packageInfo = res.body.item;
+      expect(packageInfo.policy_templates.length).to.equal(1);
+      expect(packageInfo.policy_templates[0].vars).not.to.be(undefined);
+    });
     describe('Pkg verification', () => {
       it('should return validation error for unverified input only pkg', async function () {
         const res = await supertest.get(`/api/fleet/epm/packages/input_only/0.1.0`).expect(400);

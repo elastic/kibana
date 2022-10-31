@@ -45,6 +45,13 @@ export const TimeSeriesQuerySchema = schema.object(
   }
 );
 
+export const TimeSeriesConditionSchema = schema.object({
+  resultLimit: schema.number(),
+  conditionScript: schema.string({ minLength: 1 }),
+});
+
+export type TimeSeriesCondition = TypeOf<typeof TimeSeriesConditionSchema>;
+
 // using direct type not allowed, circular reference, so body is typed to unknown
 function validateBody(anyParams: unknown): string | undefined {
   // validate core query parts, return if it fails validation (returning string)

@@ -84,7 +84,13 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           {
             id: 'notifications',
             pathId: ML_PAGES.NOTIFICATIONS,
-            name: <NotificationsIndicator />,
+            name: disableLinks ? (
+              i18n.translate('xpack.ml.navMenu.notificationsTabLinkText', {
+                defaultMessage: 'Notifications',
+              })
+            ) : (
+              <NotificationsIndicator />
+            ),
             disabled: disableLinks,
             testSubj: 'mlMainTab notifications',
           },

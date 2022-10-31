@@ -6,12 +6,9 @@
  */
 
 import * as rt from 'io-ts';
+import { CaseStatuses } from '@kbn/cases-components';
 
-export enum CaseStatuses {
-  open = 'open',
-  'in-progress' = 'in-progress',
-  closed = 'closed',
-}
+export { CaseStatuses };
 
 export const CaseStatusRt = rt.union([
   rt.literal(CaseStatuses.open),
