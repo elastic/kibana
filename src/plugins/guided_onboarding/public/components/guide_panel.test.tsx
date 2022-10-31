@@ -235,6 +235,38 @@ describe('Guided setup', () => {
       expect(exists('onboarding--completeGuideButton--testGuide')).toBe(true);
     });
 
+    test('should not show the completed state when the last step is not marked as complete', async () => {
+      const { component, exists, find } = testBed;
+
+      const readyToCompleteGuideState: GuideState = {
+        guideId: 'search',
+        status: 'ready_to_complete',
+        isActive: true,
+        steps: [
+          {
+            id: 'add_data',
+            status: 'complete',
+          },
+          {
+            id: 'browse_docs',
+            status: 'complete',
+          },
+          {
+            id: 'search_experience',
+            status: 'ready_to_complete',
+          },
+        ],
+      };
+
+      await updateComponentWithState(component, readyToCompleteGuideState, true);
+
+      expect(find('guideTitle').text()).not.toContain('Well done');
+      expect(find('guideDescription').text()).not.toContain(
+        `You've completed the Elastic Enterprise Search guide`
+      );
+      expect(exists('useElasticButton')).toBe(false);
+    });
+
     describe('Steps', () => {
       const clickStepButton = async ({
         telemetryGuideId,
