@@ -18,6 +18,7 @@ import { TransactionsTable } from '../../../shared/transactions_table';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { MobileFilters } from './filters';
 
 interface Props {
   latencyChartHeight: number;
@@ -37,7 +38,16 @@ export function ServiceOverviewMobileCharts({
 
   const {
     query,
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      device,
+      osVersion,
+      appVersion,
+      netConnectionType,
+    },
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -51,6 +61,20 @@ export function ServiceOverviewMobileCharts({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <MobileFilters
+          start={start}
+          end={end}
+          environment={environment}
+          kuery={kuery}
+          filters={{
+            device,
+            osVersion,
+            appVersion,
+            netConnectionType,
+          }}
+        />
+      </EuiFlexItem>
       {fallbackToTransactions && (
         <EuiFlexItem>
           <AggregatedTransactionsBadge />
