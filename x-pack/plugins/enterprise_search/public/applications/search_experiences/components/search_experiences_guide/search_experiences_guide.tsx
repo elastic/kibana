@@ -108,61 +108,36 @@ export const SearchExperiencesGuide: React.FC = () => {
                 <EuiSpacer size="l" />
                 <EuiText grow={false}>
                   <ul>
-                    <li
-                      dangerouslySetInnerHTML={{
-                        __html: i18n.translate(
-                          'xpack.enterpriseSearch.searchExperiences.guide.features.1',
-                          {
-                            defaultMessage:
-                              '<strong>You know, for search</strong> &mdash; Elastic builds and maintains Search UI.',
-                          }
-                        ),
-                      }}
-                    />
-                    <li
-                      dangerouslySetInnerHTML={{
-                        __html: i18n.translate(
-                          'xpack.enterpriseSearch.searchExperiences.guide.features.2',
-                          {
-                            defaultMessage:
-                              '<strong>Speedy Implementation</strong> &mdash; Build a complete search experience with a few lines of code.',
-                          }
-                        ),
-                      }}
-                    />
-                    <li
-                      dangerouslySetInnerHTML={{
-                        __html: i18n.translate(
-                          'xpack.enterpriseSearch.searchExperiences.guide.features.3',
-                          {
-                            defaultMessage:
-                              '<strong>Customizable</strong> &mdash; Search UI is highly customizable, so you can build the perfect search experience for your users.',
-                          }
-                        ),
-                      }}
-                    />
-                    <li
-                      dangerouslySetInnerHTML={{
-                        __html: i18n.translate(
-                          'xpack.enterpriseSearch.searchExperiences.guide.features.4',
-                          {
-                            defaultMessage:
-                              '<strong>Smart URLs</strong> &mdash; Searches, paging, filtering, and more, are captured in the URL for direct result linking.',
-                          }
-                        ),
-                      }}
-                    />
-                    <li
-                      dangerouslySetInnerHTML={{
-                        __html: i18n.translate(
-                          'xpack.enterpriseSearch.searchExperiences.guide.features.5',
-                          {
-                            defaultMessage:
-                              '<strong>Flexible front-end</strong> &mdash; Not just for React. Use with any JavaScript library, even vanilla JavaScript.',
-                          }
-                        ),
-                      }}
-                    />
+                    <li>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.searchExperiences.guide.features.1"
+                        defaultMessage="You know, for search. Elastic builds and maintains Search UI."
+                      />
+                    </li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.searchExperiences.guide.features.2"
+                        defaultMessage="Build a complete search experience quickly with a few lines of code."
+                      />
+                    </li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.searchExperiences.guide.features.3"
+                        defaultMessage="Search UI is highly customizable, so you can build the perfect search experience for your users."
+                      />
+                    </li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.searchExperiences.guide.features.4"
+                        defaultMessage="Searches, paging, filtering, and more, are captured in the URL for direct result linking."
+                      />
+                    </li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.searchExperiences.guide.features.5"
+                        defaultMessage="Not just for React. Use with any JavaScript library, even vanilla JavaScript."
+                      />
+                    </li>
                   </ul>
                 </EuiText>
               </EuiFlexItem>
