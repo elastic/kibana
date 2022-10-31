@@ -7,9 +7,11 @@
  */
 
 import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
 
 export interface SetupDependencies {
   files: FilesSetup;
+  management: ManagementSetup;
 }
 export interface StartDependencies {
   files: FilesStart;

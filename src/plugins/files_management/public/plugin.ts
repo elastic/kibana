@@ -6,28 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { SetupDependencies, StartDependencies } from './types';
+import { AppMountParameters, CoreSetup, Plugin, AppNavLinkStatus } from '@kbn/core/public';
 import { PLUGIN_NAME } from '../common';
+import type { SetupDependencies, StartDependencies } from './types';
 
-export class FilesManagementPlugin implements Plugin {
-  public setup(core: CoreSetup, deps: SetupDependencies): void {
-    // Register an application into the side navigation menu
+export class FilesManagementPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
+  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
     core.application.register({
       id: 'filesManagement',
+      navLinkStatus: AppNavLinkStatus.hidden,
       title: PLUGIN_NAME,
       async mount(params: AppMountParameters) {
-        // Load application bundle
         const { renderApp } = await import('./application');
-        // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
-        // Render the application
-        return renderApp(coreStart, depsStart as StartDependencies, params);
+        return renderApp(coreStart, depsStart, params);
       },
     });
   }
 
-  public start(core: CoreStart) {}
-
-  public stop() {}
+  public start() {}
 }
