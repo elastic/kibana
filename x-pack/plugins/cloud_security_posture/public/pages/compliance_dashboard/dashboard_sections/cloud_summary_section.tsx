@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { PartitionElementEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
@@ -56,9 +56,50 @@ export const CloudSummarySection = ({
     navToFindings({ 'result.evaluation': RULE_FAILED });
   };
 
+  const stats = [
+    {
+      title: 'tit',
+      description: 'desc',
+    },
+    {
+      title: 'tit',
+      description: 'desc',
+    },
+    {
+      title: 'tit',
+      description: 'desc',
+      color: 'danger',
+    },
+  ];
+
   return (
     <EuiFlexGroup gutterSize="l" style={summarySectionWrapperStyle}>
-      <EuiFlexItem grow={dashboardColumnsGrow.first} />
+      <EuiFlexItem grow={dashboardColumnsGrow.first}>
+        <EuiFlexGroup direction="column">
+          {stats.map((stat) => (
+            <EuiFlexItem>
+              <EuiCard
+                title={''}
+                hasBorder
+                titleElement="h6"
+                onClick={() => {}}
+                paddingSize="s"
+                css={{
+                  '.euiCard__title': {
+                    height: 0,
+                  },
+                }}
+              >
+                <EuiStat
+                  description={stat.description}
+                  title={stat.title}
+                  titleColor={stat.color}
+                />
+              </EuiCard>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.second}>
         <ChartPanel
           title={i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
