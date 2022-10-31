@@ -44,6 +44,10 @@ import { alertingEsClient } from '../../alerting_es_client';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
+import {
+  getServiceGroupFields,
+  getServiceGroupFieldsAgg,
+} from '../get_service_group_fields';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -136,8 +140,12 @@ export function registerTransactionErrorRateRuleType({
                       ],
                     },
                   },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName),
-                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType),
+                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                    queryEmptyString: false,
+                  }),
+                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+                    queryEmptyString: false,
+                  }),
                   ...environmentQuery(ruleParams.environment),
                 ],
               },
@@ -153,13 +161,15 @@ export function registerTransactionErrorRateRuleType({
                     },
                     { field: TRANSACTION_TYPE },
                   ],
-                  size: 10000,
+                  size: 1000,
+                  order: { _count: 'desc' as const },
                 },
                 aggs: {
                   outcomes: {
                     terms: {
                       field: EVENT_OUTCOME,
                     },
+                    aggs: getServiceGroupFieldsAgg(),
                   },
                 },
               },
@@ -180,10 +190,10 @@ export function registerTransactionErrorRateRuleType({
         for (const bucket of response.aggregations.series.buckets) {
           const [serviceName, environment, transactionType] = bucket.key;
 
-          const failed =
-            bucket.outcomes.buckets.find(
-              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-            )?.doc_count ?? 0;
+          const failedOutcomeBucket = bucket.outcomes.buckets.find(
+            (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+          );
+          const failed = failedOutcomeBucket?.doc_count ?? 0;
           const succesful =
             bucket.outcomes.buckets.find(
               (outcomeBucket) => outcomeBucket.key === EventOutcome.success
@@ -196,13 +206,19 @@ export function registerTransactionErrorRateRuleType({
               environment,
               transactionType,
               errorRate,
+              sourceFields: getServiceGroupFields(failedOutcomeBucket),
             });
           }
         }
 
         results.forEach((result) => {
-          const { serviceName, environment, transactionType, errorRate } =
-            result;
+          const {
+            serviceName,
+            environment,
+            transactionType,
+            errorRate,
+            sourceFields,
+          } = result;
           const reasonMessage = formatTransactionErrorRateReason({
             threshold: ruleParams.threshold,
             measured: errorRate,
@@ -241,6 +257,7 @@ export function registerTransactionErrorRateRuleType({
                 [ALERT_EVALUATION_VALUE]: errorRate,
                 [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
                 [ALERT_REASON]: reasonMessage,
+                ...sourceFields,
               },
             })
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
