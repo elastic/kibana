@@ -107,7 +107,19 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       expect(casesByAlert.length).to.eql(1);
-      expect(casesByAlert).to.eql([{ id: case3.id, title: case3.title }]);
+      expect(casesByAlert).to.eql([
+        {
+          id: case3.id,
+          title: case3.title,
+          description: case3.description,
+          status: case3.status,
+          createdBy: case3.created_by,
+          totals: {
+            userComments: 0,
+            alerts: 1,
+          },
+        },
+      ]);
     });
   });
 };

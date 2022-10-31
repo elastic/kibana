@@ -24,8 +24,8 @@ export const RelatedCaseInfoRt = rt.type({
   title: rt.string,
   description: rt.string,
   status: CaseStatusRt,
-  totals: AttachmentTotalsRt,
   createdAt: rt.string,
+  totals: AttachmentTotalsRt,
 });
 
 export const CasesByAlertIdRt = rt.array(RelatedCaseInfoRt);
