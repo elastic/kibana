@@ -84,6 +84,12 @@ const addButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.addButt
 const updateButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.updateButtonLabel', {
   defaultMessage: 'Update filter',
 });
+const disableToggleModeTooltip = i18n.translate(
+  'unifiedSearch.filter.filterEditor.disableToggleModeTooltip',
+  {
+    defaultMessage: '"Edit as questy DSL" operation is not supported for combined filters',
+  }
+);
 
 class FilterEditorUI extends Component<FilterEditorProps, State> {
   constructor(props: FilterEditorProps) {
@@ -99,7 +105,8 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
   public render() {
     const { filters } = this.state;
-    const shouldDissableToggle = filters.length > 1 || isCombinedFilter(filters[0]);
+    const shouldDisableToggle =
+      Array.isArray(filters) && (filters.length > 1 || isCombinedFilter(filters[0]));
 
     return (
       <div>
@@ -110,17 +117,13 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="top"
-                content={
-                  shouldDissableToggle
-                    ? '"Edit as questy DSL" operation is not supported for combined filters'
-                    : null
-                }
+                content={shouldDisableToggle ? disableToggleModeTooltip : null}
                 display="block"
               >
                 <EuiButtonEmpty
                   size="xs"
                   data-test-subj="editQueryDSL"
-                  disabled={shouldDissableToggle}
+                  disabled={shouldDisableToggle}
                   onClick={this.toggleCustomEditor}
                 >
                   {this.state.isCustomEditorOpen ? (
