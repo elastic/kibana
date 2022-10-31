@@ -83,6 +83,7 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     navigateToUrl: () => undefined,
     TagList,
     itemHasTags: () => true,
+    getTagIdsFromReferences: () => [],
     ...params,
   };
 

@@ -21,6 +21,7 @@ export const getMockServices = (overrides?: Partial<Services>) => {
     navigateToUrl: () => undefined,
     TagList,
     itemHasTags: () => true,
+    getTagIdsFromReferences: () => [],
     ...overrides,
   };
 
