@@ -44,9 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns empty', () => {
-        expect(serverlessSummary).to.be.eql({
-          estimatedCost: 0,
-        });
+        expect(serverlessSummary).to.be.empty();
       });
     }
   );
@@ -59,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await generateData({ start, end, synthtraceEsClient });
     });
 
-    // after(() => synthtraceEsClient.clean());
+    after(() => synthtraceEsClient.clean());
 
     describe('Python service', () => {
       let serverlessSummary: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/summary'>;
