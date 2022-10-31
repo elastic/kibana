@@ -239,7 +239,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem grow={3}>
+                          <EuiFlexItem grow={2}>
                             <EuiFormRow>
                               <OperatorInput
                                 field={field}
