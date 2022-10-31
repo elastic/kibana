@@ -11,7 +11,7 @@ import {
   UPGRADE_HOST_RISK_SCORE_BUTTON,
   UPGRADE_USER_RISK_SCORE_BUTTON,
   UPGRADE_CANCELLATION_BUTTON,
-  UPGRADE_CONFIRMARION_MODAL,
+  UPGRADE_CONFIRMATION_MODAL,
   RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST,
 } from '../../screens/entity_analytics';
 import { deleteRiskScore, installLegacyRiskScoreModule } from '../../tasks/api_calls/risk_scores';
@@ -61,14 +61,14 @@ describe('Upgrade risk scores', () => {
 
   it('should show a confirmation modal for upgrading host risk score', () => {
     clickUpgradeRiskScore(RiskScoreEntity.host);
-    cy.get(UPGRADE_CONFIRMARION_MODAL(RiskScoreEntity.host)).should('exist');
+    cy.get(UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.host)).should('exist');
   });
 
   it('display a link to host risk score Elastic doc', () => {
     clickUpgradeRiskScore(RiskScoreEntity.host);
 
     cy.get(UPGRADE_CANCELLATION_BUTTON)
-      .get(`${UPGRADE_CONFIRMARION_MODAL(RiskScoreEntity.host)} a`)
+      .get(`${UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.host)} a`)
       .then((link) => {
         expect(link.prop('href')).to.eql(
           `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.host}-risk-score.html`
@@ -116,14 +116,14 @@ describe('Upgrade risk scores', () => {
 
   it('should show a confirmation modal for upgrading user risk score', () => {
     clickUpgradeRiskScore(RiskScoreEntity.user);
-    cy.get(UPGRADE_CONFIRMARION_MODAL(RiskScoreEntity.user)).should('exist');
+    cy.get(UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.user)).should('exist');
   });
 
   it('display a link to user risk score Elastic doc', () => {
     clickUpgradeRiskScore(RiskScoreEntity.user);
 
     cy.get(UPGRADE_CANCELLATION_BUTTON)
-      .get(`${UPGRADE_CONFIRMARION_MODAL(RiskScoreEntity.user)} a`)
+      .get(`${UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.user)} a`)
       .then((link) => {
         expect(link.prop('href')).to.eql(
           `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.user}-risk-score.html`
