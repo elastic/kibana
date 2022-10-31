@@ -137,6 +137,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           return policy_ids;
         }
 
+        // otherwise we get all policies available
         const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
           satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
         );
@@ -160,7 +161,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         map(shards, (shard, shardName) => {
           map(agentPoliciesNames, (agentPolicyName) => {
-            if (agentPolicyName.includes(shardName)) {
+            if (agentPolicyName.startsWith(shardName)) {
               foundMatchingPolicies.push(agentPoliciesNameMap[agentPolicyName]);
               policyShards[agentPoliciesNameMap[agentPolicyName].id] = shard;
             }
@@ -168,12 +169,14 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         });
       }
 
-      // We update policiesList only if we find any valid shards, otherwise it has all policies - which makes it global
-      if (shards && foundMatchingPolicies.length) {
+      // We check if any shards were passed - if not - we keep using the previous policiesList
+      if (shards && !isEmpty(shards)) {
         const ids = map(foundMatchingPolicies, 'id');
+        // check if global was enabled - then use all policies + filtered policies depending on shards config
         if (shards['*']) {
           policiesList = uniq([...policiesList, ...ids]);
         } else {
+          // use either the filtered policies depending on shards or no policies at all
           policiesList = ids;
         }
       }
@@ -200,7 +203,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       };
 
       const references = getUpdatedReferences();
-      // TODO find out where to put the shard
 
       await savedObjectsClient.update<PackSavedObjectAttributes>(
         packSavedObjectType,
@@ -339,18 +341,13 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     );
                   }
 
-                  // set(
-                  //   draft,
-                  //   'shard',
-                  //   policyShards[packagePolicy.policy_id]
-                  //     ? policyShards[packagePolicy.policy_id]
-                  //     : 100
-                  // );
-
                   set(
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
+                      shard: policyShards[packagePolicy.policy_id]
+                        ? policyShards[packagePolicy.policy_id]
+                        : 100,
                       queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
                         removeMultiLines: true,
                         removeResultType: true,
@@ -379,18 +376,14 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   if (!(draft.inputs.length && draft.inputs[0].streams.length)) {
                     set(draft, 'inputs[0].streams', []);
                   }
-                  // set(
-                  //   draft,
-                  //   'shard',
-                  //   policyShards[packagePolicy.policy_id]
-                  //     ? policyShards[packagePolicy.policy_id]
-                  //     : 100
-                  // );
 
                   set(
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
+                      shard: policyShards[packagePolicy.policy_id]
+                        ? policyShards[packagePolicy.policy_id]
+                        : 100,
                       queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
                         removeResultType: true,
                       }),
