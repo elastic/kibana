@@ -7,20 +7,20 @@
 
 import React, { memo, useEffect, useMemo, useCallback } from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
+import { v4 as uuidV4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { v4 as uuidV4 } from 'uuid';
-import type { HostInfo, PendingActionsResponse } from '../../../../common/endpoint/types';
-import type { EndpointCommandDefinitionMeta } from './types';
-import type { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
-import { useGetEndpointPendingActionsSummary } from '../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
-import { FormattedDate } from '../../../common/components/formatted_date';
-import { useGetEndpointDetails } from '../../hooks';
-import type { CommandExecutionComponentProps } from '../console/types';
-import { FormattedError } from '../formatted_error';
-import { ConsoleCodeBlock } from '../console/components/console_code_block';
-import { POLICY_STATUS_TO_TEXT } from '../../pages/endpoint_hosts/view/host_constants';
-import { getAgentStatusText } from '../../../common/components/endpoint/agent_status_text';
+import type { HostInfo, PendingActionsResponse } from '../../../../../common/endpoint/types';
+import type { EndpointCommandDefinitionMeta } from '../types';
+import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
+import { useGetEndpointPendingActionsSummary } from '../../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
+import { FormattedDate } from '../../../../common/components/formatted_date';
+import { useGetEndpointDetails } from '../../../hooks';
+import type { CommandExecutionComponentProps } from '../../console/types';
+import { FormattedError } from '../../formatted_error';
+import { ConsoleCodeBlock } from '../../console/components/console_code_block';
+import { POLICY_STATUS_TO_TEXT } from '../../../pages/endpoint_hosts/view/host_constants';
+import { getAgentStatusText } from '../../../../common/components/endpoint/agent_status_text';
 
 export const EndpointStatusActionResult = memo<
   CommandExecutionComponentProps<

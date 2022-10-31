@@ -12,11 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { BaseActionRequestBody } from '../../../../../common/endpoint/schema/actions';
-import { ActionSuccess } from '../action_success';
-import { ActionError } from '../action_error';
+import { ActionSuccess } from '../components/action_success';
+import { ActionError } from '../components/action_error';
 import { FormattedError } from '../../formatted_error';
 import { useGetActionDetails } from '../../../hooks/endpoint/use_get_action_details';
-import { ACTION_DETAILS_REFRESH_INTERVAL } from '../constants';
+import { ACTION_DETAILS_REFRESH_INTERVAL } from '../lib/constants';
 import type {
   ActionDetails,
   Immutable,

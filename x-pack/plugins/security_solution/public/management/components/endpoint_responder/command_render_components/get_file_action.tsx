@@ -7,11 +7,11 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSendGetFileRequest } from '../../hooks/endpoint/use_send_get_file_request';
-import type { ResponseActionGetFileRequestBody } from '../../../../common/endpoint/schema/actions';
-import { useConsoleActionSubmitter } from './hooks/use_console_action_submitter';
-import type { ActionRequestComponentProps } from './types';
-import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
+import { useSendGetFileRequest } from '../../../hooks/endpoint/use_send_get_file_request';
+import type { ResponseActionGetFileRequestBody } from '../../../../../common/endpoint/schema/actions';
+import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
+import type { ActionRequestComponentProps } from '../types';
+import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
 
 export const GetFileActionResult = memo<
   ActionRequestComponentProps<{

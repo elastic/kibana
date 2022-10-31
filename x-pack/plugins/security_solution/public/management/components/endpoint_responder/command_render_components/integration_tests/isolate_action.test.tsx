@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
-} from '../../console/components/console_manager/mocks';
+} from '../../../console/components/console_manager/mocks';
 import React from 'react';
-import { getEndpointResponseActionsConsoleCommands } from '../endpoint_response_actions_console_commands';
-import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
-import { enterConsoleCommand } from '../../console/mocks';
+import { getEndpointResponseActionsConsoleCommands } from '../../lib/console_commands_definition';
+import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
+import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
-import { getDeferred } from '../../../mocks/utils';
-import { getEndpointAuthzInitialState } from '../../../../../common/endpoint/service/authz';
-import type { EndpointCapabilities } from '../../../../../common/endpoint/service/response_actions/constants';
-import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
+import { getDeferred } from '../../../../mocks/utils';
+import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
+import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 describe('When using isolate action from response actions console', () => {
   let render: (

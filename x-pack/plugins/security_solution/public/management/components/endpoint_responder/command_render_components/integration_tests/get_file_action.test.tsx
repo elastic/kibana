@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { EndpointCapabilities } from '../../../../../common/endpoint/service/response_actions/constants';
-import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
-import type { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
+import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
-} from '../../console/components/console_manager/mocks';
-import { getEndpointResponseActionsConsoleCommands } from '..';
+} from '../../../console/components/console_manager/mocks';
+import { getEndpointResponseActionsConsoleCommands } from '../..';
 import React from 'react';
-import { enterConsoleCommand } from '../../console/mocks';
+import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
-import { GET_FILE_ROUTE } from '../../../../../common/endpoint/constants';
-import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
-import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
-import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../common/translations';
+import { GET_FILE_ROUTE } from '../../../../../../common/endpoint/constants';
+import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
+import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
+import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../../common/translations';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 
-jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../../common/components/user_privileges');
 
 describe('When using get-file action from response actions console', () => {
   let render: (
