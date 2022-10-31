@@ -36,7 +36,13 @@
             ],
             "signature": [
               "() => Readonly<Record<string, ",
-              "PublicUiSettingsParams",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.PublicUiSettingsParams",
+                "text": "PublicUiSettingsParams"
+              },
               ">>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
@@ -108,7 +114,13 @@
             ],
             "signature": [
               "<T = any>() => Promise<Record<string, ",
-              "UserProvidedValues",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UserProvidedValues",
+                "text": "UserProvidedValues"
+              },
               "<T>>>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
@@ -397,7 +409,13 @@
             ],
             "signature": [
               "(settings: Record<string, ",
-              "UiSettingsParams",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsParams",
+                "text": "UiSettingsParams"
+              },
               "<unknown>>) => void"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
@@ -413,7 +431,13 @@
                 "description": [],
                 "signature": [
                   "Record<string, ",
-                  "UiSettingsParams",
+                  {
+                    "pluginId": "@kbn/core-ui-settings-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                    "section": "def-common.UiSettingsParams",
+                    "text": "UiSettingsParams"
+                  },
                   "<unknown>>"
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
@@ -449,7 +473,13 @@
             ],
             "signature": [
               "(savedObjectsClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ") => ",
               {
                 "pluginId": "@kbn/core-ui-settings-server",
@@ -471,7 +501,13 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
                 "deprecated": false,
