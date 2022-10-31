@@ -8,12 +8,14 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import Fsp from 'fs/promises';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/utils';
 import { Jsonc } from '@kbn/bazel-packages';
 import { runBazel } from '@kbn/bazel-runner';
+import { asyncForEachWithLimit } from '@kbn/std';
 import { BazelPackage, discoverBazelPackages } from '@kbn/bazel-packages';
 
 import { PROJECTS } from './projects';
@@ -195,9 +197,24 @@ export async function runTypeCheckCli() {
       // cleanup
       if (flagsReader.boolean('cleanup')) {
         await cleanupRootRefsConfig();
-        for (const path of created) {
-          Fs.unlinkSync(path);
-        }
+
+        await asyncForEachWithLimit(created, 40, async (path) => {
+          await Fsp.unlink(path);
+        });
+
+        await asyncForEachWithLimit(bazelPackages, 40, async (pkg) => {
+          const targetTypesPaths = Path.resolve(
+            REPO_ROOT,
+            'bazel-bin',
+            pkg.normalizedRepoRelativeDir,
+            'target_type'
+          );
+
+          await Fsp.rm(targetTypesPaths, {
+            force: true,
+            recursive: true,
+          });
+        });
       }
 
       if (pluginBuildResult.failed) {
