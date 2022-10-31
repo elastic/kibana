@@ -31,8 +31,11 @@ export async function registerFleetUsageLogger(
           async run() {
             try {
               const usageData = await fetchUsage();
-              // TODO get log level and use debug or info based on that
-              appContextService.getLogger().info(`Feet Usage: ${JSON.stringify(usageData)}`);
+              if (appContextService.getLogger().isLevelEnabled('debug')) {
+                appContextService.getLogger().debug(`Feet Usage: ${JSON.stringify(usageData)}`);
+              } else {
+                appContextService.getLogger().info(`Feet Usage: ${JSON.stringify(usageData)}`);
+              }
             } catch (error) {
               appContextService
                 .getLogger()
@@ -48,13 +51,18 @@ export async function registerFleetUsageLogger(
 }
 
 export async function startFleetUsageLogger(taskManager: TaskManagerStartContract) {
+  const isDebugLogLevelEnabled = appContextService.getLogger().isLevelEnabled('debug');
+  const isInfoLogLevelEnabled = appContextService.getLogger().isLevelEnabled('info');
+  if (!isInfoLogLevelEnabled) {
+    return;
+  }
   // TODO get log level and schedule interval based on that
   appContextService.getLogger().info(`Task ${TASK_ID} scheduled with interval 5m`);
   await taskManager?.ensureScheduled({
     id: TASK_ID,
     taskType: TASK_TYPE,
     schedule: {
-      interval: '5m',
+      interval: isDebugLogLevelEnabled ? '5m' : '15m',
     },
     scope: ['fleet'],
     state: {},
