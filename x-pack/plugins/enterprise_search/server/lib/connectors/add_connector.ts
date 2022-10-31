@@ -7,9 +7,14 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
-import { CONNECTORS_VERSION } from '../..';
-import { ConnectorDocument, ConnectorStatus } from '../../../common/types/connectors';
+import { CONNECTORS_INDEX, CONNECTORS_VERSION } from '../..';
+import {
+  ConnectorDocument,
+  ConnectorStatus,
+  FilteringPolicy,
+  FilteringRuleRule,
+  FilteringValidationState,
+} from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 import {
   DefaultConnectorsPipelineMeta,
@@ -84,7 +89,7 @@ export const addConnector = async (
     connectorsIndicesMapping[`${CONNECTORS_INDEX}-v${CONNECTORS_VERSION}`]?.mappings?._meta
       ?.pipeline;
 
-  const currentTimestamp = new Date(Date.now()).toISOString();
+  const currentTimestamp = new Date().toISOString();
   const document: ConnectorDocument = {
     api_key_id: null,
     configuration: {},
@@ -104,15 +109,15 @@ export const addConnector = async (
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: 'include',
-              rule: 'regex',
+              policy: FilteringPolicy.INCLUDE,
+              rule: FilteringRuleRule.REGEX,
               updated_at: currentTimestamp,
               value: '.*',
             },
           ],
           validation: {
             errors: [],
-            state: 'valid',
+            state: FilteringValidationState.VALID,
           },
         },
         domain: 'DEFAULT',
@@ -128,15 +133,15 @@ export const addConnector = async (
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: 'include',
-              rule: 'regex',
+              policy: FilteringPolicy.INCLUDE,
+              rule: FilteringRuleRule.REGEX,
               updated_at: currentTimestamp,
               value: '.*',
             },
           ],
           validation: {
             errors: [],
-            state: 'valid',
+            state: FilteringValidationState.VALID,
           },
         },
       },
