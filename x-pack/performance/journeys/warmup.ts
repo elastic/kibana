@@ -43,16 +43,38 @@ export const journey = new Journey({
     await page.waitForSelector(subj('showSampleDataButton'));
   })
 
-  .step('Go to Dasboards', async ({ page, kbnUrl, log }) => {
-    log.debug('Loading eCommerce dashboard');
-    await page.goto(kbnUrl.get(`/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f`));
-    await waitForVisualizations(page, 12);
+  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/dashboards`));
+    await page.waitForSelector('#dashboardListingHeading');
+  })
+
+  .step('Go to Flights Dasboard', async ({ page, kbnUrl, log }) => {
     log.debug('Loading Flights dashboard');
-    await page.goto(kbnUrl.get(`/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d`));
+    await page.click(subj('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'));
+    log.debug('Loading eCommerce dashboard');
+    await waitForVisualizations(page, 16);
+  })
+
+  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/dashboards`));
+    await page.waitForSelector('#dashboardListingHeading');
+  })
+
+  .step('Go to eCommerce Dasboard', async ({ page, kbnUrl, log }) => {
+    log.debug('Loading eCommerce dashboard');
+    await page.click(subj('dashboardListingTitleLink-[eCommerce]-Revenue-Dashboard'));
     await waitForVisualizations(page, 14);
-    log.debug('Loading Logs dashboard');
-    await page.goto(kbnUrl.get(`/app/dashboards#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b`));
-    await waitForVisualizations(page, 11);
+  })
+
+  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/dashboards`));
+    await page.waitForSelector('#dashboardListingHeading');
+  })
+
+  .step('Go to Logs Dasboard', async ({ page, kbnUrl, log }) => {
+    log.debug('Loading logs dashboard');
+    await page.click(subj('dashboardListingTitleLink-[Logs]-Web-Traffic'));
+    await waitForVisualizations(page, 12);
   })
 
   .step('Go to Discover', async ({ page, kbnUrl, log }) => {
