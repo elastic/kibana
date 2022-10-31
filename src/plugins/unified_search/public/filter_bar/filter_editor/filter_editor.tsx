@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
@@ -102,10 +103,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
   public render() {
     const { filters } = this.state;
-
-    function shouldShowToggle() {
-      return filters.length === 1 && !isCombinedFilter(filters[0]);
-    }
+    const shouldDissableToggle = filters.length > 1 || isCombinedFilter(filters[0]);
 
     return (
       <div>
@@ -114,10 +112,17 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
             <EuiFlexItem>{this.props.mode === 'add' ? panelTitleAdd : panelTitleEdit}</EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
-              {shouldShowToggle() ? (
+              <EuiToolTip
+                position="top"
+                content={
+                  shouldDissableToggle ? 'DSL temporarily not supported for multifilters' : null
+                }
+                display="block"
+              >
                 <EuiButtonEmpty
                   size="xs"
                   data-test-subj="editQueryDSL"
+                  disabled={shouldDissableToggle}
                   onClick={this.toggleCustomEditor}
                 >
                   {this.state.isCustomEditorOpen ? (
@@ -132,7 +137,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
                     />
                   )}
                 </EuiButtonEmpty>
-              ) : null}
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
