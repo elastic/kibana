@@ -5,13 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import type { TestBed } from '@kbn/test-jest-helpers';
-import { WithServices, getMockServices } from '../__jest__';
-import type { Services } from '../services';
+import { getMockServices } from '../__jest__';
 import { InspectorFlyoutContent } from './inspector_flyout_content';
 import type { Props as InspectorFlyoutContentProps } from './inspector_flyout_content';
 
