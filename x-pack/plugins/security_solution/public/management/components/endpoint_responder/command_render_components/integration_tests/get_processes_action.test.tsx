@@ -12,7 +12,7 @@ import {
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../../../console/components/console_manager/mocks';
 import React from 'react';
-import { getEndpointResponseActionsConsoleCommands } from '../../lib/console_commands_definition';
+import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
 import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
@@ -42,7 +42,7 @@ describe('When using processes action from response actions console', () => {
             return {
               consoleProps: {
                 'data-test-subj': 'test',
-                commands: getEndpointResponseActionsConsoleCommands({
+                commands: getEndpointConsoleCommands({
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
                   endpointPrivileges: {

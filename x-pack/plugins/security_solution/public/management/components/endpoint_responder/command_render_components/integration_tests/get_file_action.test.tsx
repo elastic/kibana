@@ -14,7 +14,7 @@ import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../../../console/components/console_manager/mocks';
-import { getEndpointResponseActionsConsoleCommands } from '../..';
+import { getEndpointConsoleCommands } from '../..';
 import React from 'react';
 import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
@@ -50,7 +50,7 @@ describe('When using get-file action from response actions console', () => {
             return {
               consoleProps: {
                 'data-test-subj': 'test',
-                commands: getEndpointResponseActionsConsoleCommands({
+                commands: getEndpointConsoleCommands({
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
                   endpointPrivileges,

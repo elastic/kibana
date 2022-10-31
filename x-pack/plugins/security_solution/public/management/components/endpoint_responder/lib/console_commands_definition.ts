@@ -125,7 +125,7 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
-export const getEndpointResponseActionsConsoleCommands = ({
+export const getEndpointConsoleCommands = ({
   endpointAgentId,
   endpointCapabilities,
   endpointPrivileges,

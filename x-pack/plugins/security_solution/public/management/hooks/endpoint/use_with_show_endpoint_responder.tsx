@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import {
   ActionLogButton,
-  getEndpointResponseActionsConsoleCommands,
+  getEndpointConsoleCommands,
   HeaderEndpointInfo,
   OfflineCallout,
 } from '../../components/endpoint_responder';
@@ -48,7 +48,7 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
               endpoint: endpointMetadata,
             },
             consoleProps: {
-              commands: getEndpointResponseActionsConsoleCommands({
+              commands: getEndpointConsoleCommands({
                 endpointAgentId,
                 endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
                 endpointPrivileges,
