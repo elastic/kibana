@@ -180,11 +180,10 @@ interface MultiFieldsProps {
   multiFields: NonNullable<DiscoverFieldProps['multiFields']>;
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
-  isDocumentRecord: boolean;
 }
 
 const MultiFields: React.FC<MultiFieldsProps> = memo(
-  ({ multiFields, toggleDisplay, alwaysShowActionButton, isDocumentRecord }) => (
+  ({ multiFields, toggleDisplay, alwaysShowActionButton }) => (
     <React.Fragment>
       <EuiTitle size="xxxs">
         <h5>
@@ -200,7 +199,7 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
           className="dscSidebarItem dscSidebarItem--multi"
           isActive={false}
           dataTestSubj={`field-${entry.field.name}-showDetails`}
-          fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={entry.field} />}
+          fieldIcon={<DiscoverFieldTypeIcon field={entry.field} />}
           fieldAction={
             <ActionButton
               field={entry.field}
@@ -370,7 +369,7 @@ function DiscoverFieldComponent({
         size="s"
         className="dscSidebarItem"
         dataTestSubj={`field-${field.name}-showDetails`}
-        fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={field} />}
+        fieldIcon={<DiscoverFieldTypeIcon field={field} />}
         fieldAction={
           <ActionButton
             field={field}
@@ -391,7 +390,7 @@ function DiscoverFieldComponent({
       isActive={infoIsOpen}
       onClick={isDocumentRecord ? togglePopover : undefined}
       dataTestSubj={`field-${field.name}-showDetails`}
-      fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={field} />}
+      fieldIcon={<DiscoverFieldTypeIcon field={field} />}
       fieldAction={
         <ActionButton
           field={field}
@@ -456,7 +455,6 @@ function DiscoverFieldComponent({
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
               toggleDisplay={toggleDisplay}
-              isDocumentRecord={isDocumentRecord}
             />
           </>
         )}
