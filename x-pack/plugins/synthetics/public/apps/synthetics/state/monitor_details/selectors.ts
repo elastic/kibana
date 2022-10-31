@@ -17,10 +17,10 @@ export const selectSelectedLocationId = createSelector(
   (state) => state.selectedLocationId
 );
 
-export const selectLatestPing = createSelector(getState, (state) => state.pings?.[0] ?? null);
+export const selectLatestPing = createSelector(getState, (state) => state.pings.data[0] ?? null);
 
-export const selectPingsLoading = createSelector(getState, (state) => state.loading);
+export const selectPingsLoading = createSelector(getState, (state) => state.pings.loading);
 
-export const selectMonitorRecentPings = createSelector(getState, (state) => state.pings);
+export const selectMonitorPingsMetadata = createSelector(getState, (state) => state.pings);
 
 export const selectPingsError = createSelector(getState, (state) => state.error);

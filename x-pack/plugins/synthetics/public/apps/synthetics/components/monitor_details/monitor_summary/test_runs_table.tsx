@@ -31,27 +31,44 @@ import {
 import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
 
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
-import { selectPingsLoading, selectMonitorRecentPings, selectPingsError } from '../../../state';
+import { selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { JourneyStepScreenshotContainer } from '../../common/monitor_test_result/journey_step_screenshot_container';
 
 import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { useMonitorPings } from '../hooks/use_monitor_pings';
 import { useJourneySteps } from '../hooks/use_journey_steps';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
-export const LastTenTestRuns = () => {
+interface TestRunsTableProps {
+  from: string;
+  to: string;
+  paginable?: boolean;
+}
+
+export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps) => {
   const { basePath } = useSyntheticsSettingsContext();
+  const [page, setPage] = useState({ index: 0, size: 10 });
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const pings = useSelector(selectMonitorRecentPings);
+  const {
+    pings,
+    total,
+    loading: pingsLoading,
+  } = useMonitorPings({
+    from,
+    to,
+    pageSize: page.size,
+    pageIndex: page.index,
+  });
   const sortedPings = useMemo(() => {
     return sortPings(pings, sortField, sortDirection);
   }, [pings, sortField, sortDirection]);
-  const pingsLoading = useSelector(selectPingsLoading);
+
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();
 
@@ -64,7 +81,10 @@ export const LastTenTestRuns = () => {
     },
   };
 
-  const handleTableChange = ({ page, sort }: Criteria<Ping>) => {
+  const handleTableChange = ({ page: newPage, sort }: Criteria<Ping>) => {
+    if (newPage !== undefined) {
+      setPage(newPage);
+    }
     if (sort !== undefined) {
       setSortField(sort.field as SortableField);
       setSortDirection(sort.direction);
@@ -125,7 +145,7 @@ export const LastTenTestRuns = () => {
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h3>{pings?.length >= 10 ? LAST_10_TEST_RUNS : TEST_RUNS}</h3>
+            <h3>{paginable || pings?.length < 10 ? TEST_RUNS : LAST_10_TEST_RUNS}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={true} />
@@ -162,6 +182,16 @@ export const LastTenTestRuns = () => {
         tableLayout={'auto'}
         sorting={sorting}
         onChange={handleTableChange}
+        pagination={
+          paginable
+            ? {
+                pageIndex: page.index,
+                pageSize: page.size,
+                totalItemCount: total,
+                pageSizeOptions: [10, 20, 50], // TODO Confirm with Henry,
+              }
+            : undefined
+        }
       />
     </EuiPanel>
   );
