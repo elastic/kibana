@@ -449,6 +449,26 @@ describe('Enterprise Search Managed Indices', () => {
       );
       expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
     });
+
+    it('raises error if the pipeline is in use', async () => {
+      (deleteMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+        return Promise.reject({
+          message: ErrorCode.PIPELINE_IS_IN_USE,
+          pipelineName: 'my-other-index@ml-inference',
+        });
+      });
+
+      await mockRouter.callRoute({
+        params: { indexName, pipelineName },
+      });
+
+      expect(deleteMlInferencePipeline).toHaveBeenCalledWith(
+        indexName,
+        pipelineName,
+        mockClient.asCurrentUser
+      );
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('POST /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate', () => {

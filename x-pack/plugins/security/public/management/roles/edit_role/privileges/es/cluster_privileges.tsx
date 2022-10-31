@@ -16,16 +16,21 @@ interface Props {
   role: Role;
   builtinClusterPrivileges: string[];
   onChange: (privs: string[]) => void;
+  editable?: boolean;
 }
 
 export class ClusterPrivileges extends Component<Props, {}> {
+  static defaultProps: Partial<Props> = {
+    editable: true,
+  };
+
   public render() {
     const availableClusterPrivileges = this.getAvailableClusterPrivileges();
     return <EuiFlexGroup>{this.buildComboBox(availableClusterPrivileges)}</EuiFlexGroup>;
   }
 
   public buildComboBox = (items: string[]) => {
-    const role = this.props.role;
+    const { role, editable } = this.props;
 
     const options = items.map((i) => ({
       label: i,
@@ -41,7 +46,7 @@ export class ClusterPrivileges extends Component<Props, {}> {
           selectedOptions={selectedOptions}
           onChange={this.onClusterPrivilegesChange}
           onCreateOption={this.onCreateCustomPrivilege}
-          isDisabled={isRoleReadOnly(role)}
+          isDisabled={isRoleReadOnly(role) || !editable}
         />
       </EuiFlexItem>
     );
