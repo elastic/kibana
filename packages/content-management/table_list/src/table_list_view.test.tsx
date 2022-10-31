@@ -45,6 +45,7 @@ const requiredProps: TableListViewProps = {
   tableListTitle: 'test title',
   findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
   getDetailViewLink: () => 'http://elastic.co',
+  inspector: { enabled: false },
 };
 
 describe('TableListView', () => {
