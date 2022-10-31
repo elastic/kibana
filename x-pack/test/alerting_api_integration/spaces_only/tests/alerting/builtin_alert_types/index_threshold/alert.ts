@@ -37,8 +37,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 
-  // Failing: See https://github.com/elastic/kibana/issues/142335
-  describe.skip('rule', async () => {
+  describe('rule', async () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
