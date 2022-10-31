@@ -443,6 +443,7 @@ export class MapEmbeddable
    * @param {ContainerState} containerState
    */
   render(domNode: HTMLElement) {
+    super.render(domNode as HTMLElement);
     this._domNode = domNode;
     if (!this._isInitialized) {
       return;
@@ -776,6 +777,12 @@ export class MapEmbeddable
          * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
          * For more details please contact the maps team.
          */
+        const isRendered = !isLoading && firstLayerWithError === undefined;
+        if (isLoading) {
+          this.renderComplete.dispatchInProgress();
+        } else if (!isLoading && isRendered) {
+          this.renderComplete.dispatchComplete();
+        }
         this.updateOutput({
           ...output,
           loading: isLoading,
