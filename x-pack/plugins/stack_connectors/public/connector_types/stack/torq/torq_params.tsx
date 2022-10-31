@@ -38,6 +38,21 @@ const TorqParamsFields: React.FunctionComponent<ActionParamsProps<TorqActionPara
           editAction('body', '', index);
         }
       }}
+      euiCodeEditorProps={{
+        options: {
+          renderValidationDecorations: body && errors?.body?.length ? 'on' : 'off',
+          lineNumbers: 'on',
+          fontSize: 14,
+          minimap: {
+            enabled: false,
+          },
+          scrollBeyondLastLine: false,
+          folding: true,
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+          automaticLayout: true,
+        },
+      }}
     />
   );
 };
