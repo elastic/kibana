@@ -32,7 +32,13 @@
         ],
         "signature": [
           "(analytics: Pick<",
-          "AnalyticsClient",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.IAnalyticsClient",
+            "text": "IAnalyticsClient"
+          },
           ", \"registerEventType\">) => void"
         ],
         "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
@@ -50,7 +56,13 @@
             ],
             "signature": [
               "Pick<",
-              "AnalyticsClient",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.IAnalyticsClient",
+                "text": "IAnalyticsClient"
+              },
               ", \"registerEventType\">"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
@@ -73,7 +85,13 @@
         ],
         "signature": [
           "(analytics: Pick<",
-          "AnalyticsClient",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.IAnalyticsClient",
+            "text": "IAnalyticsClient"
+          },
           ", \"reportEvent\">, eventData: ",
           {
             "pluginId": "@kbn/ebt-tools",
@@ -99,7 +117,13 @@
             ],
             "signature": [
               "Pick<",
-              "AnalyticsClient",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.IAnalyticsClient",
+                "text": "IAnalyticsClient"
+              },
               ", \"reportEvent\">"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
