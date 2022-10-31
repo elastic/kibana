@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SetElasticsearchChrome } from '../../../shared/kibana_chrome';
+import { SetSearchExperiencesChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
@@ -28,7 +28,7 @@ describe('EnterpriseSearchSearchExperiencesPageTemplate', () => {
     );
 
     expect(wrapper.type()).toEqual(EnterpriseSearchPageTemplateWrapper);
-    expect(wrapper.prop('solutionNav')).toEqual({ name: 'Elasticsearch', items: [] });
+    expect(wrapper.prop('solutionNav')).toEqual({ name: 'Enterprise Search', items: [] });
     expect(wrapper.find('.hello').text()).toEqual('world');
   });
 
@@ -41,7 +41,7 @@ describe('EnterpriseSearchSearchExperiencesPageTemplate', () => {
         .find(EnterpriseSearchPageTemplateWrapper)
         .prop('setPageChrome') as any;
 
-      expect(setPageChrome.type).toEqual(SetElasticsearchChrome);
+      expect(setPageChrome.type).toEqual(SetSearchExperiencesChrome);
       expect(setPageChrome.props.trail).toEqual(['Some page']);
     });
   });
