@@ -30,14 +30,10 @@ import { BarChart } from '../../../../common/components/charts/barchart';
 import { usePreviewHistogram } from './use_preview_histogram';
 import { getAlertsPreviewDefaultModel } from '../../alerts_table/default_config';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { TableId } from '../../../../../common/types';
-import { APP_UI_ID, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
-import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
+import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { DetailsPanel } from '../../../../timelines/components/side_panel';
-import { PreviewRenderCellValue } from './preview_table_cell_renderer';
-import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import type { State } from '../../../../common/store';
@@ -203,9 +199,7 @@ export const PreviewHistogram = ({
       </Panel>
       <EuiSpacer />
       <FullScreenContainer $isFullScreen={globalFullScreen}>
-        <InspectButtonContainer>
-          
-        </InspectButtonContainer>
+        <InspectButtonContainer />
       </FullScreenContainer>
       <DetailsPanel
         browserFields={browserFields}
