@@ -210,10 +210,11 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           description: item.attributes.description,
           tags: getTagIdsFromReferences(item.references),
         },
+        entityName,
         ...inspector,
       });
     },
-    [openInspector, inspector, getTagIdsFromReferences]
+    [openInspector, inspector, getTagIdsFromReferences, entityName]
   );
 
   const tableColumns = useMemo(() => {

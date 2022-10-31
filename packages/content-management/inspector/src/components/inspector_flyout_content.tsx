@@ -41,6 +41,7 @@ const getI18nTexts = ({ entityName }: { entityName: string }) => ({
 
 export interface Props {
   item: Item;
+  entityName: string;
   isReadonly?: boolean;
   services: Pick<Services, 'TagSelector'>;
   onSave?: (args: { title: string; description?: string; tags: string[] }) => Promise<void>;
@@ -49,12 +50,13 @@ export interface Props {
 
 export const InspectorFlyoutContent: FC<Props> = ({
   item,
+  entityName,
   isReadonly = true,
   services: { TagSelector },
   onSave,
   onCancel,
 }) => {
-  const i18nTexts = getI18nTexts({ entityName: 'Dashboard' });
+  const i18nTexts = getI18nTexts({ entityName });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const form = useMetadataForm({ item });

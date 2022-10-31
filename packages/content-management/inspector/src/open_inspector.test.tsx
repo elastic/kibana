@@ -21,7 +21,7 @@ describe('useOpenInspector() hook', () => {
     return (
       <button
         onClick={() => {
-          openInspector({ item: savedObjectItem });
+          openInspector({ item: savedObjectItem, entityName: 'Foo' });
         }}
         data-test-subj="openInspectorButton"
       >

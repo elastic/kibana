@@ -35,8 +35,9 @@ describe('<InspectorFlyoutContent />', () => {
 
     const mockedServices = getMockServices();
 
-    const defaultProps = {
+    const defaultProps: InspectorFlyoutContentProps = {
       item: savedObjectItem,
+      entityName: 'foo',
       services: mockedServices,
       onCancel: jest.fn(),
     };
@@ -44,6 +45,14 @@ describe('<InspectorFlyoutContent />', () => {
     const setup = registerTestBed<string, InspectorFlyoutContentProps>(InspectorFlyoutContent, {
       memoryRouter: { wrapComponent: false },
       defaultProps,
+    });
+
+    test('should set the correct flyout title', async () => {
+      await act(async () => {
+        testBed = await setup();
+      });
+      const { find } = testBed!;
+      expect(find('flyoutTitle').text()).toBe('Inspector');
     });
 
     test('should render the form with the provided item', async () => {
@@ -69,12 +78,23 @@ describe('<InspectorFlyoutContent />', () => {
       // TODO: not render TagSelector on readOnly and add test for it
     });
 
+    test('should display the "Update" button when not readOnly', async () => {
+      await act(async () => {
+        testBed = await setup({ isReadonly: false });
+      });
+
+      const { find } = testBed!;
+
+      expect(find('saveButton').text()).toBe('Update foo');
+    });
+
     test('should send back the updated item to the onSave() handler', async () => {
       const onSave = jest.fn();
 
       await act(async () => {
         testBed = await setup({ onSave, isReadonly: false });
       });
+
       const {
         find,
         component,
