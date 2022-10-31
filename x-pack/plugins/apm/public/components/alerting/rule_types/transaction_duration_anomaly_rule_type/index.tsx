@@ -10,6 +10,7 @@ import { defaults, omit } from 'lodash';
 import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
@@ -61,7 +62,7 @@ export function TransactionDurationAnomalyRuleType(props: Props) {
     },
     {
       windowSize: 30,
-      windowUnit: 'm',
+      windowUnit: TIME_UNITS.MINUTE,
       anomalySeverityType: ANOMALY_SEVERITY.CRITICAL,
       environment: ENVIRONMENT_ALL.value,
     }
@@ -101,7 +102,7 @@ export function TransactionDurationAnomalyRuleType(props: Props) {
   return (
     <ApmRuleParamsContainer
       fields={fields}
-      defaults={params}
+      defaultParams={params}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}
     />

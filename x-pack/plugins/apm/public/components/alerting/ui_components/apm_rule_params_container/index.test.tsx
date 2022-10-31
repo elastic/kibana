@@ -19,7 +19,7 @@ describe('ApmRuleParamsContainer', () => {
     expect(() =>
       render(
         <ApmRuleParamsContainer
-          defaults={{}}
+          defaultParams={{}}
           fields={[null]}
           setRuleParams={() => {}}
           setRuleProperty={() => {}}
