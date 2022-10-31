@@ -77,6 +77,10 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
       </>
     ),
     footerAction,
+    initialFocus: () => {
+      console.log('eh?', document.querySelector(`[tour-step="nextButton"]`));
+      return document.querySelector(`[tour-step="nextButton"]`);
+    },
     // we would not have mounted this component if it was not open
     isStepOpen: true,
     // guided onboarding does not allow skipping tour through the steps
