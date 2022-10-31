@@ -13,6 +13,7 @@ import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
 import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
 import { getServiceNodes } from './get_service_nodes';
+import { metricsServerlessRouteRepository } from './serverless/route';
 
 const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -26,7 +27,6 @@ const metricsChartsRoute = createApmServerRoute({
       }),
       t.partial({
         serviceNodeName: t.string,
-        serviceRuntimeName: t.string,
       }),
       environmentRt,
       kueryRt,
@@ -45,15 +45,8 @@ const metricsChartsRoute = createApmServerRoute({
       getApmEventClient(resources),
     ]);
     const { serviceName } = params.path;
-    const {
-      agentName,
-      environment,
-      kuery,
-      serviceNodeName,
-      start,
-      end,
-      serviceRuntimeName,
-    } = params.query;
+    const { agentName, environment, kuery, serviceNodeName, start, end } =
+      params.query;
 
     const charts = await getMetricsChartDataByAgent({
       environment,
@@ -65,7 +58,6 @@ const metricsChartsRoute = createApmServerRoute({
       serviceNodeName,
       start,
       end,
-      serviceRuntimeName,
     });
 
     return { charts };
@@ -113,4 +105,5 @@ const serviceMetricsJvm = createApmServerRoute({
 export const metricsRouteRepository = {
   ...metricsChartsRoute,
   ...serviceMetricsJvm,
+  ...metricsServerlessRouteRepository,
 };

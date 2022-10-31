@@ -30,7 +30,13 @@
           "<",
           "InternalCoreUsageDataSetup",
           ", ",
-          "CoreUsageDataStart",
+          {
+            "pluginId": "@kbn/core-usage-data-server",
+            "scope": "server",
+            "docId": "kibKbnCoreUsageDataServerPluginApi",
+            "section": "def-server.CoreUsageDataStart",
+            "text": "CoreUsageDataStart"
+          },
           ">"
         ],
         "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
@@ -115,9 +121,21 @@
               "({ savedObjects, elasticsearch, exposedConfigsToUsage }: ",
               "StartDeps",
               ") => { getCoreUsageData: () => Promise<",
-              "CoreUsageData",
+              {
+                "pluginId": "@kbn/core-usage-data-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUsageDataServerPluginApi",
+                "section": "def-server.CoreUsageData",
+                "text": "CoreUsageData"
+              },
               ">; getConfigsUsageData: () => Promise<",
-              "ConfigUsageData",
+              {
+                "pluginId": "@kbn/core-usage-data-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUsageDataServerPluginApi",
+                "section": "def-server.ConfigUsageData",
+                "text": "ConfigUsageData"
+              },
               ">; }"
             ],
             "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
