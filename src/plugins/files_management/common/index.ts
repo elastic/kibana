@@ -10,5 +10,5 @@ import { i18n } from '@kbn/i18n';
 
 export const PLUGIN_ID = 'filesManagement';
 export const PLUGIN_NAME = i18n.translate('filesManagement.name', {
-  defaultMessage: 'filesManagement',
+  defaultMessage: 'Files',
 });
