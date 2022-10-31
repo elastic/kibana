@@ -387,8 +387,8 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
     params: Params;
-    throttle: string | null;
-    notifyWhen: RuleNotifyWhenType | null;
+    throttle?: string | null;
+    notifyWhen?: RuleNotifyWhenType | null;
   };
 }
 
@@ -1661,7 +1661,7 @@ export class RulesClient {
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
     let updatedObject: SavedObject<RawRule>;
     const createAttributes = this.updateMeta({
