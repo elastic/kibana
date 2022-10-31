@@ -33,11 +33,11 @@ export const useBulkActionsDryRun: UseBulkActionsDryRun = () => {
     DryRunResult | undefined,
     unknown,
     BulkAction
-  >([BULK_ACTIONS_DRY_RUN_QUERY_KEY], async (bulkActionDescriptor) => {
+  >([BULK_ACTIONS_DRY_RUN_QUERY_KEY], async (bulkAction) => {
     let result: BulkActionResponse;
 
     try {
-      result = await performBulkAction(bulkActionDescriptor, true);
+      result = await performBulkAction(bulkAction, true);
     } catch (err) {
       // if body doesn't have summary data, action failed altogether and no data available for dry run
       if ((err.body as BulkActionResponse)?.attributes?.summary?.total === undefined) {

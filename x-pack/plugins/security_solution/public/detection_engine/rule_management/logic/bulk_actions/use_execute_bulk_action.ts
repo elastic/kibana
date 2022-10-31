@@ -43,23 +43,23 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
   const setLoadingRules = rulesTableContext?.actions.setLoadingRules;
 
   const executeBulkAction = useCallback(
-    async (bulkActionDescriptor: BulkAction) => {
+    async (bulkAction: BulkAction) => {
       try {
         setLoadingRules?.({
-          ids: bulkActionDescriptor.ids ?? getAllRuleIdsForBulkAction(bulkActionDescriptor.type),
-          action: bulkActionDescriptor.type,
+          ids: bulkAction.ids ?? getAllRuleIdsForBulkAction(bulkAction.type),
+          action: bulkAction.type,
         });
 
-        const response = await mutateAsync(bulkActionDescriptor);
-        sendTelemetry(bulkActionDescriptor.type, response);
+        const response = await mutateAsync(bulkAction);
+        sendTelemetry(bulkAction.type, response);
 
         if (!options?.suppressSuccessToast) {
-          showBulkSuccessToast(toasts, bulkActionDescriptor.type, response.attributes.summary);
+          showBulkSuccessToast(toasts, bulkAction.type, response.attributes.summary);
         }
 
         return response;
       } catch (error) {
-        showBulkErrorToast(toasts, bulkActionDescriptor.type, error);
+        showBulkErrorToast(toasts, bulkAction.type, error);
       } finally {
         setLoadingRules?.({ ids: [], action: null });
       }

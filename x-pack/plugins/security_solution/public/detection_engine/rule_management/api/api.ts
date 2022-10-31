@@ -226,23 +226,20 @@ export type BulkAction = PlainBulkAction | EditBulkAction;
 /**
  * Perform bulk action with rules selected by a filter query
  *
- * @param bulkActionDescriptor bulk action descriptor which contains type, query or ids and edit fields
+ * @param bulkAction bulk action which contains type, query or ids and edit fields
  * @param dryRun enables dry run mode for bulk actions
  *
  * @throws An error if response is not OK
  */
 export async function performBulkAction(
-  bulkActionDescriptor: BulkAction,
+  bulkAction: BulkAction,
   dryRun?: boolean
 ): Promise<BulkActionResponse> {
   const params = {
-    action: bulkActionDescriptor.type,
-    query: bulkActionDescriptor.query,
-    ids: bulkActionDescriptor.ids,
-    edit:
-      bulkActionDescriptor.type === BulkActionType.edit
-        ? bulkActionDescriptor.editPayload
-        : undefined,
+    action: bulkAction.type,
+    query: bulkAction.query,
+    ids: bulkAction.ids,
+    edit: bulkAction.type === BulkActionType.edit ? bulkAction.editPayload : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {

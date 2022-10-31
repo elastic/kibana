@@ -27,7 +27,7 @@ export const useBulkActionMutation = (
   const updateRulesCache = useUpdateRulesCache();
 
   return useMutation<BulkActionResponse, Error, BulkAction>(
-    (bulkActionDescriptor: BulkAction) => performBulkAction(bulkActionDescriptor),
+    (bulkAction: BulkAction) => performBulkAction(bulkAction),
     {
       ...options,
       mutationKey: BULK_ACTION_MUTATION_KEY,

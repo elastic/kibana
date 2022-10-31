@@ -20,7 +20,7 @@ jest.mock('../../api/hooks/use_bulk_action_mutation');
 jest.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
 
 async function executeBulkAction(
-  bulkActionDescriptor: BulkAction,
+  bulkAction: BulkAction,
   options?: Parameters<typeof useExecuteBulkAction>[0]
 ): Promise<void> {
   const {
@@ -29,7 +29,7 @@ async function executeBulkAction(
     },
   } = renderHook(() => useExecuteBulkAction(options));
 
-  await executeBulkActionFn(bulkActionDescriptor);
+  await executeBulkActionFn(bulkAction);
 }
 
 describe('useExecuteBulkAction', () => {
@@ -60,14 +60,14 @@ describe('useExecuteBulkAction', () => {
   });
 
   it('executes bulk action', async () => {
-    const bulkActionDescriptor = {
+    const bulkAction = {
       type: BulkActionType.enable,
       query: 'some query',
     } as const;
 
-    await executeBulkAction(bulkActionDescriptor);
+    await executeBulkAction(bulkAction);
 
-    expect(mutateAsync).toHaveBeenCalledWith(bulkActionDescriptor);
+    expect(mutateAsync).toHaveBeenCalledWith(bulkAction);
   });
 
   describe('state handlers', () => {
