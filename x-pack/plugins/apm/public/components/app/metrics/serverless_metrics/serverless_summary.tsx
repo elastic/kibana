@@ -166,7 +166,7 @@ export function ServerlessSummary({ serverlessId }: Props) {
         <EuiFlexItem grow={false}>
           <EuiStat
             isLoading={isLoading}
-            title={`$${data?.estimedCost}`}
+            title={`$${data?.estimatedCost}`}
             titleSize="s"
             description={i18n.translate(
               'xpack.apm.serverlessMetrics.summary.estimatedCost',

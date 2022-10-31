@@ -52,7 +52,7 @@ export function calcComputeUsageGBSeconds({
   totalMemory?: number | null;
 }) {
   if (!isFiniteNumber(billedDuration) || !isFiniteNumber(totalMemory)) {
-    return 0;
+    return undefined;
   }
 
   const totalMemoryGB = totalMemory / GB;
@@ -76,19 +76,22 @@ export function calcEstimatedCost({
   awsLambdaRequestCostPerMillion?: number;
 }) {
   try {
-    if (
-      !awsLambdaPriceFactor ||
-      !architecture ||
-      !awsLambdaRequestCostPerMillion ||
-      !awsLambdaPriceFactor?.[architecture]
-    ) {
-      return 0;
-    }
-    const priceFactor = awsLambdaPriceFactor?.[architecture];
     const computeUsage = calcComputeUsageGBSeconds({
       billedDuration,
       totalMemory,
     });
+    if (
+      !awsLambdaPriceFactor ||
+      !architecture ||
+      !isFiniteNumber(awsLambdaRequestCostPerMillion) ||
+      !isFiniteNumber(awsLambdaPriceFactor?.[architecture]) ||
+      !isFiniteNumber(computeUsage)
+    ) {
+      return undefined;
+    }
+
+    const priceFactor = awsLambdaPriceFactor?.[architecture];
+
     const estimatedCost =
       computeUsage * priceFactor +
       transactionThroughput * (awsLambdaRequestCostPerMillion / 1000000);
@@ -96,6 +99,6 @@ export function calcEstimatedCost({
     // Rounds up the decimals
     return Math.ceil(estimatedCost * 100) / 100;
   } catch (e) {
-    return 0;
+    return undefined;
   }
 }

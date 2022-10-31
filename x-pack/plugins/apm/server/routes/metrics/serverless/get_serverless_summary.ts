@@ -29,7 +29,7 @@ export type AwsLambdaArchitecture = 'arm' | 'x86_64';
 
 export type AWSLambdaPriceFactor = Record<AwsLambdaArchitecture, number>;
 
-async function getTransactionThroughput({
+async function getServerlessTransactionThroughput({
   end,
   environment,
   kuery,
@@ -44,7 +44,6 @@ async function getTransactionThroughput({
   start: number;
   end: number;
   serverlessId?: string;
-  awsLambdaPriceFactor?: AWSLambdaPriceFactor;
   apmEventClient: APMEventClient;
 }) {
   const params = {
@@ -69,7 +68,7 @@ async function getTransactionThroughput({
   };
 
   const response = await apmEventClient.search(
-    'ger_transaction_throughout',
+    'get_serverless_transaction_throughout',
     params
   );
 
@@ -134,8 +133,8 @@ export async function getServerlessSummary({
   };
 
   const [response, transactionThroughput] = await Promise.all([
-    apmEventClient.search('ger_serverless_summary', params),
-    getTransactionThroughput({
+    apmEventClient.search('get_serverless_summary', params),
+    getServerlessTransactionThroughput({
       end,
       environment,
       kuery,
@@ -154,7 +153,7 @@ export async function getServerlessSummary({
     serverlessFunctionsTotal: response.aggregations?.totalFunctions?.value,
     serverlessDurationAvg: response.aggregations?.faasDurationAvg?.value,
     billedDurationAvg: response.aggregations?.faasBilledDurationAvg?.value,
-    estimedCost: calcEstimatedCost({
+    estimatedCost: calcEstimatedCost({
       awsLambdaPriceFactor,
       awsLambdaRequestCostPerMillion,
       architecture: (

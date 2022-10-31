@@ -49,7 +49,7 @@ const AWS_LAMBDA_PRICE_FACTOR = {
 };
 
 describe('calcEstimatedCost', () => {
-  it('returns 0 when price factor is not defined', () => {
+  it('returns undefined when price factor is not defined', () => {
     expect(
       calcEstimatedCost({
         totalMemory: 1,
@@ -57,10 +57,10 @@ describe('calcEstimatedCost', () => {
         transactionThroughput: 1,
         architecture: 'arm',
       })
-    ).toEqual(0);
+    ).toBeUndefined();
   });
 
-  it('returns 0 when architecture is not defined', () => {
+  it('returns undefined when architecture is not defined', () => {
     expect(
       calcEstimatedCost({
         totalMemory: 1,
@@ -68,20 +68,20 @@ describe('calcEstimatedCost', () => {
         transactionThroughput: 1,
         awsLambdaPriceFactor: AWS_LAMBDA_PRICE_FACTOR,
       })
-    ).toEqual(0);
+    ).toBeUndefined();
   });
 
-  it('returns 0 when compute usage is not defined', () => {
+  it('returns undefined when compute usage is not defined', () => {
     expect(
       calcEstimatedCost({
         transactionThroughput: 1,
         awsLambdaPriceFactor: AWS_LAMBDA_PRICE_FACTOR,
         architecture: 'arm',
       })
-    ).toEqual(0);
+    ).toBeUndefined();
   });
 
-  it('returns 0 when request cost per million is not defined', () => {
+  it('returns undefined when request cost per million is not defined', () => {
     expect(
       calcEstimatedCost({
         totalMemory: 1,
@@ -90,12 +90,12 @@ describe('calcEstimatedCost', () => {
         awsLambdaPriceFactor: AWS_LAMBDA_PRICE_FACTOR,
         architecture: 'arm',
       })
-    ).toEqual(0);
+    ).toBeUndefined();
   });
 
   describe('x86_64 architecture', () => {
     const architecture = 'x86_64';
-    it('returns correct cost when usage is less than 6 b gb-sec', () => {
+    it('returns correct cost', () => {
       expect(
         calcEstimatedCost({
           awsLambdaPriceFactor: AWS_LAMBDA_PRICE_FACTOR,
