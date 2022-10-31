@@ -15,7 +15,6 @@ import {
   maxSuggestions,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
-  enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
@@ -25,6 +24,8 @@ import {
   enableInfrastructureHostsView,
   enableServiceMetrics,
   enableAwsLambdaMetrics,
+  apmAWSLambdaPriceFactor,
+  apmAWSLambdaRequestCostPerMillion,
   enableCriticalPath,
 } from '../common/ui_settings_keys';
 
@@ -40,7 +41,7 @@ function feedbackLink({ href }: { href: string }) {
   )}</a>`;
 }
 
-type UiSettings = UiSettingsParams<boolean | number | string> & { showInLabs?: boolean };
+type UiSettings = UiSettingsParams<boolean | number | string | object> & { showInLabs?: boolean };
 
 /**
  * uiSettings definitions for Observability.
@@ -160,24 +161,6 @@ export const uiSettings: Record<string, UiSettings> = {
         }
       ),
     },
-    showInLabs: true,
-  },
-  [enableServiceGroups]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableServiceGroups', {
-      defaultMessage: 'Service groups feature',
-    }),
-    value: false,
-    description: i18n.translate('xpack.observability.enableServiceGroupsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the Service groups feature on APM UI. {feedbackLink}.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-service-groups' }),
-      },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
     showInLabs: true,
   },
   [enableServiceMetrics]: {
@@ -309,6 +292,29 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
+  },
+  [apmAWSLambdaPriceFactor]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmAWSLambdaPricePerGbSeconds', {
+      defaultMessage: 'AWS lambda price factor',
+    }),
+    type: 'json',
+    value: JSON.stringify({ x86_64: 0.0000166667, arm: 0.0000133334 }, null, 2),
+    description: i18n.translate('xpack.observability.apmAWSLambdaPricePerGbSecondsDescription', {
+      defaultMessage: 'Price per Gb-second.',
+    }),
+    schema: schema.object({
+      arm: schema.number(),
+      x86_64: schema.number(),
+    }),
+  },
+  [apmAWSLambdaRequestCostPerMillion]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmAWSLambdaRequestCostPerMillion', {
+      defaultMessage: 'AWS lambda price per 1M requests',
+    }),
+    value: 0.2,
+    schema: schema.number({ min: 0 }),
   },
   [enableCriticalPath]: {
     category: [observabilityFeatureId],
