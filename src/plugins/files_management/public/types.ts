@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 
-export interface FilesManagementPluginSetup {
-  getGreeting: () => string;
+export interface SetupDependencies {
+  files: FilesSetup;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FilesManagementPluginStart {}
-
-export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
+export interface StartDependencies {
+  files: FilesStart;
 }
