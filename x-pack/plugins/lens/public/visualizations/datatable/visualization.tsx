@@ -16,7 +16,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -28,12 +28,8 @@ import type {
 import { TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import type { LayerType } from '../../../common';
-import type {
-  DatatableColumnFunction,
-  DatatableExpressionFunction,
-} from '../../../common/expressions/datatable';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
-import {
+import type {
   ColumnState,
   SortingState,
   PagingState,
@@ -408,89 +404,106 @@ export const getDatatableVisualization = ({
 
     const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-    const notCollapseFns = columns.filter((c) => !c.collapseFn);
-
-    const columnFns = notCollapseFns.map((column) => {
-      const paletteParams = {
-        ...column.palette?.params,
-        // rewrite colors and stops as two distinct arguments
-        colors: (column.palette?.params?.stops || []).map(({ color }) => color),
-        stops:
-          column.palette?.params?.name === 'custom'
-            ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
-            : [],
-        reverse: false, // managed at UI level
-      };
-      const sortingHint = datasource!.getOperationForColumnId(column.columnId)!.sortingHint;
-
-      const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
-
-      const canColor = datasource!.getOperationForColumnId(column.columnId)?.dataType === 'number';
-
-      const datatableColumnFn = buildExpressionFunction<DatatableColumnFunction>(
-        'lens_datatable_column',
-        {
-          columnId: column.columnId,
-          hidden: column.hidden,
-          oneClickFilter: column.oneClickFilter,
-          width: column.width,
-          isTransposed: column.isTransposed,
-          transposable: !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
-          alignment: column.alignment,
-          colorMode: canColor && column.colorMode ? column.colorMode : 'none',
-          palette: paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams),
-          summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
-          summaryLabel: hasNoSummaryRow
-            ? undefined
-            : column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!),
-          sortingHint,
-        }
-      );
-
-      return datatableColumnFn;
-    });
-
-    const datatableFn = buildExpressionFunction<DatatableExpressionFunction>('lens_datatable', {
-      title: title || '',
-      description: description || '',
-      sortingColumnId: state.sorting?.columnId || '',
-      sortingDirection: state.sorting?.direction || 'none',
-      fitRowToContent: state.rowHeight === 'auto',
-      headerRowHeight: state.headerRowHeight ?? 'single',
-      rowHeightLines:
-        !state.rowHeight || state.rowHeight === 'single' ? 1 : state.rowHeightLines ?? 2,
-      headerRowHeightLines:
-        !state.headerRowHeight || state.headerRowHeight === 'single'
-          ? 1
-          : state.headerRowHeightLines ?? 2,
-      pageSize: state.paging?.enabled ? state.paging.size : undefined,
-      columns: columnFns.length ? buildExpression(columnFns) : [],
-    });
-
-    const collapseFnCols = columns.filter((c) => c.collapseFn);
-    const collapseFns = collapseFnCols.map((column) => {
-      const collapseFn = buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
-        by: columns
-          .filter(
-            (col) =>
-              col.columnId !== column.columnId &&
-              datasource!.getOperationForColumnId(col.columnId)?.isBucketed
-          )
-          .map((col) => col.columnId),
-        metric: columns
-          .filter((col) => !datasource!.getOperationForColumnId(col.columnId)?.isBucketed)
-          .map((col) => col.columnId),
-        fn: [column.collapseFn!],
+    const lensCollapseFns = columns
+      .filter((c) => c.collapseFn)
+      .map((c) => {
+        const fn = buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
+          by: columns
+            .filter(
+              (col) =>
+                col.columnId !== c.columnId &&
+                datasource!.getOperationForColumnId(col.columnId)?.isBucketed
+            )
+            .map((col) => col.columnId),
+          metric: columns
+            .filter((col) => !datasource!.getOperationForColumnId(col.columnId)?.isBucketed)
+            .map((col) => col.columnId),
+          fn: [c.collapseFn!],
+        });
+        return fn.toAst();
       });
-      return collapseFn;
-    });
 
     return {
       type: 'expression',
       chain: [
         ...(datasourceExpression?.chain ?? []),
-        ...collapseFns.map((fn) => fn.toAst()),
-        datatableFn.toAst(),
+        ...lensCollapseFns,
+        {
+          type: 'function',
+          function: 'lens_datatable',
+          arguments: {
+            title: [title || ''],
+            description: [description || ''],
+            columns: columns
+              .filter((c) => !c.collapseFn)
+              .map((column) => {
+                const paletteParams = {
+                  ...column.palette?.params,
+                  // rewrite colors and stops as two distinct arguments
+                  colors: (column.palette?.params?.stops || []).map(({ color }) => color),
+                  stops:
+                    column.palette?.params?.name === 'custom'
+                      ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
+                      : [],
+                  reverse: false, // managed at UI level
+                };
+                const sortingHint = datasource!.getOperationForColumnId(
+                  column.columnId
+                )!.sortingHint;
+
+                const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
+
+                const canColor =
+                  datasource!.getOperationForColumnId(column.columnId)?.dataType === 'number';
+
+                return {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'lens_datatable_column',
+                      arguments: {
+                        columnId: [column.columnId],
+                        hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
+                        oneClickFilter:
+                          typeof column.oneClickFilter === 'undefined'
+                            ? []
+                            : [column.oneClickFilter],
+                        width: typeof column.width === 'undefined' ? [] : [column.width],
+                        isTransposed:
+                          typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
+                        transposable: [
+                          !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
+                        ],
+                        alignment:
+                          typeof column.alignment === 'undefined' ? [] : [column.alignment],
+                        colorMode: [canColor && column.colorMode ? column.colorMode : 'none'],
+                        palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
+                        summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
+                        summaryLabel: hasNoSummaryRow
+                          ? []
+                          : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
+                        sortingHint: sortingHint ? [sortingHint] : [],
+                      },
+                    },
+                  ],
+                };
+              }),
+            sortingColumnId: [state.sorting?.columnId || ''],
+            sortingDirection: [state.sorting?.direction || 'none'],
+            fitRowToContent: [state.rowHeight === 'auto'],
+            headerRowHeight: [state.headerRowHeight ?? 'single'],
+            rowHeightLines: [
+              !state.rowHeight || state.rowHeight === 'single' ? 1 : state.rowHeightLines ?? 2,
+            ],
+            headerRowHeightLines: [
+              !state.headerRowHeight || state.headerRowHeight === 'single'
+                ? 1
+                : state.headerRowHeightLines ?? 2,
+            ],
+            pageSize: state.paging?.enabled ? [state.paging.size] : [],
+          },
+        },
       ],
     };
   },

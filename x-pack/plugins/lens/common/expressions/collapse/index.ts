@@ -70,3 +70,5 @@ export const collapse: CollapseExpressionFunction = {
     return collapseFn(...args);
   },
 };
+
+export { CollapseExpressionFunction };
