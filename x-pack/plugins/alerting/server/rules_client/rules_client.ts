@@ -3484,9 +3484,9 @@ export class RulesClient {
         throw Boom.badRequest(
           i18n.translate('xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams', {
             defaultMessage:
-              'Cannot mix and match per-action frequency params when notify_when and throttle are globally defined: {groups}',
+              'Cannot mix and match per-action frequency params when notify_when or throttle are globally defined: {groups}',
             values: {
-              groups: actionsWithFrequency.join(', '),
+              groups: actionsWithFrequency.map((a) => a.group).join(', '),
             },
           })
         );
@@ -3498,7 +3498,7 @@ export class RulesClient {
           i18n.translate('xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq', {
             defaultMessage: 'Actions missing frequency parameters: {groups}',
             values: {
-              groups: actionsWithoutFrequency.join(', '),
+              groups: actionsWithoutFrequency.map((a) => a.group).join(', '),
             },
           })
         );

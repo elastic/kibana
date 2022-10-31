@@ -2631,4 +2631,163 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
+
+  test('throws error when mixing and matching global and per-action frequency values', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: 'onActionGroupChange',
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Cannot mix and match per-action frequency params when notify_when or throttle are globally defined: default, default"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+
+    const data2 = getMockData({
+      notifyWhen: null,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data: data2 })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Cannot mix and match per-action frequency params when notify_when or throttle are globally defined: default"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when neither global frequency nor action frequency are defined', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Actions missing frequency parameters: default"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+
+    const data2 = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data: data2 })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Actions missing frequency parameters: default"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
 });

@@ -1652,6 +1652,176 @@ describe('update()', () => {
       expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
     });
 
+    test('throws error when mixing and matching global and per-action frequency values', async () => {
+      const alertId = uuid.v4();
+      const taskId = uuid.v4();
+
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: 'onActionGroupChange',
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+              {
+                group: 'default',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot mix and match per-action frequency params when notify_when or throttle are globally defined: default, default"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: null,
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+              {
+                group: 'default',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot mix and match per-action frequency params when notify_when or throttle are globally defined: default"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+    });
+
+    test('throws error when neither global frequency nor action frequency are defined', async () => {
+      const alertId = uuid.v4();
+      const taskId = uuid.v4();
+
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
+
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            notifyWhen: undefined,
+            throttle: undefined,
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+              {
+                group: 'default',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Actions missing frequency parameters: default"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            notifyWhen: undefined,
+            throttle: undefined,
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Actions missing frequency parameters: default"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+    });
+
     test('logs when update of schedule of an alerts underlying task fails', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
