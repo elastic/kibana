@@ -306,13 +306,6 @@ export class TaskRunner<
       searchSourceClient,
     });
 
-    if (this.ruleType.getSummarizedAlerts) {
-      // query based on time frame
-      this.ruleType.getSummarizedAlerts({ ruleId, start: new Date(), end: new Date(), spaceId });
-      // query previous run
-      this.ruleType.getSummarizedAlerts({ ruleId, executionUuid: '', spaceId });
-    }
-
     const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts } =
       await this.timer.runWithTimer(TaskRunnerTimerSpan.RuleTypeRun, async () => {
         for (const id in alertRawInstances) {

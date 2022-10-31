@@ -159,7 +159,7 @@ const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
 ) => {
   return {
     count: (response.hits.total as SearchTotalHits).value,
-    alerts: response.hits.hits,
+    alerts: response.hits.hits.map((r) => r._source),
   };
 };
 
