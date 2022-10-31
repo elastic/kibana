@@ -75,7 +75,7 @@ It will send a POST request to the Tines webhook action on every action executio
 === Tines Story Libary
 
 In order to simplify the integration with Elastic, Tines offers a set of pre-defined Elastic stories in the Story library.
-They can be found by search for "Elastic" in the Tines Story library:
+They can be found by searching for "Elastic" in the Tines Story library:
 
 [role="screenshot"]
 image::../images/tines_elastic_stories.png[Tines Elastic stories]
