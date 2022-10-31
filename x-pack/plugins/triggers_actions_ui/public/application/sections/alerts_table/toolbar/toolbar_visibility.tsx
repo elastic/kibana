@@ -81,7 +81,7 @@ export const getToolbarVisibility = ({
   columnIds: string[];
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
-  browserFields: any;
+  browserFields: BrowserFields;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibility = getDefaultVisibility({
