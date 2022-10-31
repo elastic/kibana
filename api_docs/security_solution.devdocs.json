@@ -18,7 +18,13 @@
             "text": "Plugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
           "<",
           {
             "pluginId": "securitySolution",
@@ -58,7 +64,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly guidedOnboarding: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -86,7 +92,13 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  "PluginInitializerContext",
+                  {
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
                   "<object>"
                 ],
                 "path": "x-pack/plugins/security_solution/public/plugin.tsx",
@@ -106,7 +118,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<",
               "StartPluginsDependencies",
               ", ",
@@ -134,7 +152,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<",
                   "StartPluginsDependencies",
                   ", ",
@@ -173,7 +197,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
               ", plugins: ",
               "StartPlugins",
               ") => {}"
@@ -190,7 +220,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "x-pack/plugins/security_solution/public/plugin.tsx",
                 "deprecated": false,
@@ -242,7 +278,13 @@
             ],
             "signature": [
               "(core: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
               ", plugins: ",
               "StartPlugins",
               ") => Promise<void>"
@@ -259,7 +301,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "x-pack/plugins/security_solution/public/plugin.tsx",
                 "deprecated": false,
@@ -1147,7 +1195,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
@@ -1390,7 +1444,13 @@
             "text": "Plugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "server",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-server.Plugin",
+            "text": "Plugin"
+          },
           "<",
           {
             "pluginId": "securitySolution",
@@ -1439,7 +1499,13 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "PluginInitializerContext",
+                  {
+                    "pluginId": "@kbn/core-plugins-server",
+                    "scope": "server",
+                    "docId": "kibKbnCorePluginsServerPluginApi",
+                    "section": "def-server.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
                   "<unknown>"
                 ],
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
@@ -1517,7 +1583,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
               ", plugins: ",
               "SecuritySolutionPluginStartDependencies",
               ") => ",
@@ -1541,7 +1613,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
                 "deprecated": false,
@@ -1607,7 +1685,13 @@
             "label": "core",
             "description": [],
             "signature": [
-              "CoreRequestHandlerContext"
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.CoreRequestHandlerContext",
+                "text": "CoreRequestHandlerContext"
+              }
             ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
@@ -1755,7 +1839,13 @@
             "description": [],
             "signature": [
               "(req: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => Promise<",
               {
                 "pluginId": "ruleRegistry",
@@ -1778,7 +1868,13 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/security_solution/server/types.ts",
@@ -1839,7 +1935,13 @@
             "description": [],
             "signature": [
               "(req: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => ",
               "EndpointScopedFleetServicesInterface"
             ],
@@ -1855,7 +1957,13 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/security_solution/server/types.ts",
@@ -1894,7 +2002,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }> & { experimentalFeatures: Readonly<{ tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; excludePoliciesInFilterEnabled: boolean; kubernetesEnabled: boolean; disableIsolationUIPendingStatuses: boolean; pendingActionResponsesWithAck: boolean; policyListEnabled: boolean; policyResponseInFleetEnabled: boolean; previewTelemetryUrlEnabled: boolean; responseActionsConsoleEnabled: boolean; insightsRelatedAlertsByProcessAncestry: boolean; extendedRuleExecutionLoggingEnabled: boolean; socTrendsEnabled: boolean; responseActionsEnabled: boolean; endpointRbacEnabled: boolean; }>; }"
+          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }> & { experimentalFeatures: Readonly<{ tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; excludePoliciesInFilterEnabled: boolean; kubernetesEnabled: boolean; disableIsolationUIPendingStatuses: boolean; pendingActionResponsesWithAck: boolean; policyListEnabled: boolean; policyResponseInFleetEnabled: boolean; previewTelemetryUrlEnabled: boolean; responseActionsConsoleEnabled: boolean; insightsRelatedAlertsByProcessAncestry: boolean; extendedRuleExecutionLoggingEnabled: boolean; socTrendsEnabled: boolean; responseActionsEnabled: boolean; endpointRbacEnabled: boolean; endpointRbacV1Enabled: boolean; guidedOnboarding: boolean; }>; }"
         ],
         "path": "x-pack/plugins/security_solution/server/config.ts",
         "deprecated": false,

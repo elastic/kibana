@@ -62,7 +62,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const browser = getService('browser');
 
-  describe('custom urls', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/143933
+  describe.skip('custom urls', function () {
     this.tags(['ml']);
 
     let testDashboardId: string | null = null;

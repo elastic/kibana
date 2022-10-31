@@ -53,7 +53,8 @@ export function MaybeViewTraceLink({
     query: { comparisonEnabled, offset },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/traces/explorer'
+    '/traces/explorer',
+    '/dependencies/operation'
   );
 
   const latencyAggregationType =
