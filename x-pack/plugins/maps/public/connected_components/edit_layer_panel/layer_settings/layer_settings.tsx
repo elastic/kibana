@@ -7,6 +7,7 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
+  EuiCallOut,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
@@ -242,6 +243,55 @@ export function LayerSettings(props: Props) {
     );
   };
 
+  const renderLayerGroupInstructions = () => {
+    return isLayerGroup(props.layer)
+      ? <>
+          <EuiCallOut
+            title={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupCalloutTitle', {
+              defaultMessage: 'Use drag and drop to populate layer group',
+            })}
+            iconType="layers"
+          >
+            <p>
+              {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddText', {
+                defaultMessage: 'To add a layer to the layer group:',
+              })}
+              <ul>
+                <li>
+                  {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToFront', {
+                    defaultMessage: 'Drag a layer over the layer group. This will add the layer to the top of the layer group.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToPosition', {
+                    defaultMessage: 'Drag a layer above a layer in the layer group.',
+                  })}
+                </li>
+              </ul>
+            </p>
+            <p>
+              {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupRemoveText', {
+                defaultMessage: 'To remove a layer from the layer group:',
+              })}
+              <ul>
+                <li>
+                  {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupRemoveAbove', {
+                    defaultMessage: 'Drag a layer above the layer group.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupRemoveBelow', {
+                    defaultMessage: 'Drag a layer below the last layer in the layer group.',
+                  })}
+                </li>
+              </ul>
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      : null;
+  };
+
   return (
     <Fragment>
       <EuiPanel>
@@ -255,6 +305,7 @@ export function LayerSettings(props: Props) {
         </EuiTitle>
 
         <EuiSpacer size="m" />
+        {renderLayerGroupInstructions()}
         {renderLabel()}
         {renderZoomSliders()}
         {isLayerGroup(props.layer) ? null : (
