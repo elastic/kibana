@@ -92,19 +92,19 @@ describe('addConnector lib function', () => {
           {
             active: {
               advanced_snippet: {
-                created_at: expect.anything(),
-                updated_at: expect.anything(),
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
                 value: {},
               },
               rules: [
                 {
-                  created_at: expect.anything(),
+                  created_at: expect.any(String),
                   field: '_',
                   id: 'DEFAULT',
                   order: 0,
                   policy: 'include',
                   rule: 'regex',
-                  updated_at: expect.anything(),
+                  updated_at: expect.any(String),
                   value: '.*',
                 },
               ],
@@ -116,19 +116,19 @@ describe('addConnector lib function', () => {
             domain: 'DEFAULT',
             draft: {
               advanced_snippet: {
-                created_at: expect.anything(),
-                updated_at: expect.anything(),
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
                 value: {},
               },
               rules: [
                 {
-                  created_at: expect.anything(),
+                  created_at: expect.any(String),
                   field: '_',
                   id: 'DEFAULT',
                   order: 0,
                   policy: 'include',
                   rule: 'regex',
-                  updated_at: expect.anything(),
+                  updated_at: expect.any(String),
                   value: '.*',
                 },
               ],
@@ -274,19 +274,19 @@ describe('addConnector lib function', () => {
           {
             active: {
               advanced_snippet: {
-                created_at: expect.anything(),
-                updated_at: expect.anything(),
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
                 value: {},
               },
               rules: [
                 {
-                  created_at: expect.anything(),
+                  created_at: expect.any(String),
                   field: '_',
                   id: 'DEFAULT',
                   order: 0,
                   policy: 'include',
                   rule: 'regex',
-                  updated_at: expect.anything(),
+                  updated_at: expect.any(String),
                   value: '.*',
                 },
               ],
@@ -298,19 +298,19 @@ describe('addConnector lib function', () => {
             domain: 'DEFAULT',
             draft: {
               advanced_snippet: {
-                created_at: expect.anything(),
-                updated_at: expect.anything(),
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
                 value: {},
               },
               rules: [
                 {
-                  created_at: expect.anything(),
+                  created_at: expect.any(String),
                   field: '_',
                   id: 'DEFAULT',
                   order: 0,
                   policy: 'include',
                   rule: 'regex',
-                  updated_at: expect.anything(),
+                  updated_at: expect.any(String),
                   value: '.*',
                 },
               ],
@@ -378,19 +378,19 @@ describe('addConnector lib function', () => {
           {
             active: {
               advanced_snippet: {
-                created_at: expect.anything(),
-                updated_at: expect.anything(),
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
                 value: {},
               },
               rules: [
                 {
-                  created_at: expect.anything(),
+                  created_at: expect.any(String),
                   field: '_',
                   id: 'DEFAULT',
                   order: 0,
                   policy: 'include',
                   rule: 'regex',
-                  updated_at: expect.anything(),
+                  updated_at: expect.any(String),
                   value: '.*',
                 },
               ],
@@ -402,19 +402,19 @@ describe('addConnector lib function', () => {
             domain: 'DEFAULT',
             draft: {
               advanced_snippet: {
-                created_at: expect.anything(),
-                updated_at: expect.anything(),
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
                 value: {},
               },
               rules: [
                 {
-                  created_at: expect.anything(),
+                  created_at: expect.any(String),
                   field: '_',
                   id: 'DEFAULT',
                   order: 0,
                   policy: 'include',
                   rule: 'regex',
-                  updated_at: expect.anything(),
+                  updated_at: expect.any(String),
                   value: '.*',
                 },
               ],

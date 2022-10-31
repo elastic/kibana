@@ -16,7 +16,6 @@ import {
 } from '../../../../common/types/connectors';
 import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
-const currentTimestamp = new Date().toISOString();
 export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     count: 1,
@@ -40,19 +39,19 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
         {
           active: {
             advanced_snippet: {
-              created_at: currentTimestamp,
-              updated_at: currentTimestamp,
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
               value: {},
             },
             rules: [
               {
-                created_at: currentTimestamp,
+                created_at: expect.any(String),
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
                 policy: FilteringPolicy.INCLUDE,
                 rule: FilteringRuleRule.REGEX,
-                updated_at: currentTimestamp,
+                updated_at: expect.any(String),
                 value: '.*',
               },
             ],
@@ -64,19 +63,19 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
           domain: 'DEFAULT',
           draft: {
             advanced_snippet: {
-              created_at: currentTimestamp,
-              updated_at: currentTimestamp,
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
               value: {},
             },
             rules: [
               {
-                created_at: currentTimestamp,
+                created_at: expect.any(String),
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
                 policy: FilteringPolicy.INCLUDE,
                 rule: FilteringRuleRule.REGEX,
-                updated_at: currentTimestamp,
+                updated_at: expect.any(String),
                 value: '.*',
               },
             ],
@@ -141,19 +140,19 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
         {
           active: {
             advanced_snippet: {
-              created_at: currentTimestamp,
-              updated_at: currentTimestamp,
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
               value: {},
             },
             rules: [
               {
-                created_at: currentTimestamp,
+                created_at: expect.any(String),
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
                 policy: FilteringPolicy.INCLUDE,
                 rule: FilteringRuleRule.REGEX,
-                updated_at: currentTimestamp,
+                updated_at: expect.any(String),
                 value: '.*',
               },
             ],
@@ -165,19 +164,19 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
           domain: 'DEFAULT',
           draft: {
             advanced_snippet: {
-              created_at: currentTimestamp,
-              updated_at: currentTimestamp,
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
               value: {},
             },
             rules: [
               {
-                created_at: currentTimestamp,
+                created_at: expect.any(String),
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
                 policy: FilteringPolicy.INCLUDE,
                 rule: FilteringRuleRule.REGEX,
-                updated_at: currentTimestamp,
+                updated_at: expect.any(String),
                 value: '.*',
               },
             ],

@@ -38,7 +38,7 @@ export const apiIndex: ApiViewIndex = {
     store: { size_in_bytes: '8024' },
   },
 };
-const currentTimestamp = new Date().toISOString();
+
 export const connectorIndex: ConnectorViewIndex = {
   connector: {
     api_key_id: null,
@@ -49,19 +49,19 @@ export const connectorIndex: ConnectorViewIndex = {
       {
         active: {
           advanced_snippet: {
-            created_at: currentTimestamp,
-            updated_at: currentTimestamp,
+            created_at: expect.any(String),
+            updated_at: expect.any(String),
             value: {},
           },
           rules: [
             {
-              created_at: currentTimestamp,
+              created_at: expect.any(String),
               field: '_',
               id: 'DEFAULT',
               order: 0,
               policy: FilteringPolicy.INCLUDE,
               rule: FilteringRuleRule.REGEX,
-              updated_at: currentTimestamp,
+              updated_at: expect.any(String),
               value: '.*',
             },
           ],
@@ -73,19 +73,19 @@ export const connectorIndex: ConnectorViewIndex = {
         domain: 'DEFAULT',
         draft: {
           advanced_snippet: {
-            created_at: currentTimestamp,
-            updated_at: currentTimestamp,
+            created_at: expect.any(String),
+            updated_at: expect.any(String),
             value: {},
           },
           rules: [
             {
-              created_at: currentTimestamp,
+              created_at: expect.any(String),
               field: '_',
               id: 'DEFAULT',
               order: 0,
               policy: FilteringPolicy.INCLUDE,
               rule: FilteringRuleRule.REGEX,
-              updated_at: currentTimestamp,
+              updated_at: expect.any(String),
               value: '.*',
             },
           ],
@@ -156,19 +156,19 @@ export const connectorCrawlerIndex: CrawlerViewIndex = {
       {
         active: {
           advanced_snippet: {
-            created_at: currentTimestamp,
-            updated_at: currentTimestamp,
+            created_at: expect.any(String),
+            updated_at: expect.any(String),
             value: {},
           },
           rules: [
             {
-              created_at: currentTimestamp,
+              created_at: expect.any(String),
               field: '_',
               id: 'DEFAULT',
               order: 0,
               policy: FilteringPolicy.INCLUDE,
               rule: FilteringRuleRule.REGEX,
-              updated_at: currentTimestamp,
+              updated_at: expect.any(String),
               value: '.*',
             },
           ],
@@ -180,19 +180,19 @@ export const connectorCrawlerIndex: CrawlerViewIndex = {
         domain: 'DEFAULT',
         draft: {
           advanced_snippet: {
-            created_at: currentTimestamp,
-            updated_at: currentTimestamp,
+            created_at: expect.any(String),
+            updated_at: expect.any(String),
             value: {},
           },
           rules: [
             {
-              created_at: currentTimestamp,
+              created_at: expect.any(String),
               field: '_',
               id: 'DEFAULT',
               order: 0,
               policy: FilteringPolicy.INCLUDE,
               rule: FilteringRuleRule.REGEX,
-              updated_at: currentTimestamp,
+              updated_at: expect.any(String),
               value: '.*',
             },
           ],
