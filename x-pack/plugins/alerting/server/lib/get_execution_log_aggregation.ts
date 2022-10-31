@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/core-saved-objects-api-server';
+import { KueryNode } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { flatMap, get, isEmpty } from 'lodash';
@@ -445,7 +445,7 @@ export function getExecutionLogAggregation({
 function buildDslFilterQuery(filter: IExecutionLogAggOptions['filter']) {
   try {
     const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
-    return filter ? toElasticsearchQuery(filterKueryNode) : undefined;
+    return filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
   }
