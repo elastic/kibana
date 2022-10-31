@@ -22,7 +22,7 @@ Object {
   ],
   "state": Object {
     "datasourceStates": Object {
-      "indexpattern": Object {
+      "formBased": Object {
         "layers": Object {
           "cea37c70-8f91-43bf-b9fe-72d8c049f6a3": Object {
             "columnOrder": Array [
@@ -111,36 +111,16 @@ Object {
         },
         "query": Object {
           "bool": Object {
-            "filter": Array [
+            "minimum_should_match": 1,
+            "should": Array [
               Object {
-                "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
-                          Object {
-                            "exists": Object {
-                              "field": "source.ip",
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
-                          Object {
-                            "exists": Object {
-                              "field": "destination.ip",
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                "exists": Object {
+                  "field": "source.ip",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "destination.ip",
                 },
               },
             ],

@@ -91,6 +91,7 @@ import type {
   AgentPolicyServiceInterface,
   PackageService,
 } from './services';
+import { FleetUsageSender } from './services';
 import {
   appContextService,
   licenseService,
@@ -100,7 +101,7 @@ import {
   AgentServiceImpl,
   PackageServiceImpl,
 } from './services';
-import { registerFleetUsageCollector } from './collectors/register';
+import { registerFleetUsageCollector, fetchUsage, fetchAgentsUsage } from './collectors/register';
 import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
@@ -109,6 +110,7 @@ import { setupFleet } from './services/setup';
 import { BulkActionsResolver } from './services/agents';
 import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
+import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -217,6 +219,7 @@ export class FleetPlugin
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
   private bulkActionsResolver?: BulkActionsResolver;
+  private fleetUsageSender?: FleetUsageSender;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -378,6 +381,15 @@ export class FleetPlugin
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
+    const fetch = async () => fetchUsage(core, config);
+    this.fleetUsageSender = new FleetUsageSender(
+      deps.taskManager,
+      core,
+      fetch,
+      this.kibanaVersion,
+      this.isProductionMode
+    );
+    registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
 
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
     // Allow read-only users access to endpoints necessary for Integrations UI
@@ -444,6 +456,8 @@ export class FleetPlugin
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
     this.bulkActionsResolver?.start(plugins.taskManager);
+    this.fleetUsageSender?.start(plugins.taskManager);
+    startFleetUsageLogger(plugins.taskManager);
 
     const logger = appContextService.getLogger();
 

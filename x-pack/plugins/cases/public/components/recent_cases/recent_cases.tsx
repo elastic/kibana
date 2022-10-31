@@ -15,7 +15,7 @@ import { CaseDetailsLink } from '../links';
 import { LoadingPlaceholders } from './loading_placeholders';
 import { NoCases } from './no_cases';
 import { MarkdownRenderer } from '../markdown_editor';
-import { FilterOptions } from '../../containers/types';
+import type { FilterOptions } from '../../containers/types';
 import { TruncatedText } from '../truncated_text';
 import { initialData as initialGetCasesData, useGetCases } from '../../containers/use_get_cases';
 import { useAvailableCasesOwners } from '../app/use_available_owners';

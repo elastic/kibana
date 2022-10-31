@@ -874,7 +874,7 @@ describe('rules_list component with items', () => {
 
   it('renders table of rules', async () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
     await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(mockedRulesData.length);

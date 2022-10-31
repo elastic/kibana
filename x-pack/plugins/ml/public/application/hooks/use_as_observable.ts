@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useEffect } from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, type Observable } from 'rxjs';
 
 /**
  * Provides an observable based on the input
@@ -25,5 +25,5 @@ export function useAsObservable<T>(value: T): Observable<T> {
     [subject, value]
   );
 
-  return subject.asObservable();
+  return useMemo(() => subject.asObservable(), [subject]);
 }

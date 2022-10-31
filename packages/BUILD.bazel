@@ -14,6 +14,7 @@ filegroup(
     "//packages/analytics/shippers/elastic_v3/common:build",
     "//packages/analytics/shippers/elastic_v3/server:build",
     "//packages/analytics/shippers/fullstory:build",
+    "//packages/analytics/shippers/gainsight:build",
     "//packages/content-management/table_list:build",
     "//packages/core/analytics/core-analytics-browser:build",
     "//packages/core/analytics/core-analytics-browser-internal:build",
@@ -104,6 +105,9 @@ filegroup(
     "//packages/core/lifecycle/core-lifecycle-browser:build",
     "//packages/core/lifecycle/core-lifecycle-browser-internal:build",
     "//packages/core/lifecycle/core-lifecycle-browser-mocks:build",
+    "//packages/core/lifecycle/core-lifecycle-server:build",
+    "//packages/core/lifecycle/core-lifecycle-server-internal:build",
+    "//packages/core/lifecycle/core-lifecycle-server-mocks:build",
     "//packages/core/logging/core-logging-server:build",
     "//packages/core/logging/core-logging-server-internal:build",
     "//packages/core/logging/core-logging-server-mocks:build",
@@ -127,6 +131,9 @@ filegroup(
     "//packages/core/plugins/core-plugins-browser:build",
     "//packages/core/plugins/core-plugins-browser-internal:build",
     "//packages/core/plugins/core-plugins-browser-mocks:build",
+    "//packages/core/plugins/core-plugins-server:build",
+    "//packages/core/plugins/core-plugins-server-internal:build",
+    "//packages/core/plugins/core-plugins-server-mocks:build",
     "//packages/core/preboot/core-preboot-server:build",
     "//packages/core/preboot/core-preboot-server-internal:build",
     "//packages/core/preboot/core-preboot-server-mocks:build",
@@ -161,6 +168,7 @@ filegroup(
     "//packages/core/test-helpers/core-test-helpers-deprecations-getters:build",
     "//packages/core/test-helpers/core-test-helpers-http-setup-browser:build",
     "//packages/core/test-helpers/core-test-helpers-so-type-serializer:build",
+    "//packages/core/test-helpers/core-test-helpers-test-utils:build",
     "//packages/core/theme/core-theme-browser:build",
     "//packages/core/theme/core-theme-browser-internal:build",
     "//packages/core/theme/core-theme-browser-mocks:build",
@@ -191,6 +199,7 @@ filegroup(
     "//packages/kbn-babel-preset:build",
     "//packages/kbn-bazel-packages:build",
     "//packages/kbn-bazel-runner:build",
+    "//packages/kbn-cases-components:build",
     "//packages/kbn-chart-icons:build",
     "//packages/kbn-ci-stats-core:build",
     "//packages/kbn-ci-stats-performance-metrics:build",
@@ -228,6 +237,7 @@ filegroup(
     "//packages/kbn-ftr-screenshot-filename:build",
     "//packages/kbn-generate:build",
     "//packages/kbn-get-repo-files:build",
+    "//packages/kbn-guided-onboarding:build",
     "//packages/kbn-handlebars:build",
     "//packages/kbn-hapi-mocks:build",
     "//packages/kbn-i18n:build",
@@ -238,6 +248,7 @@ filegroup(
     "//packages/kbn-jest-serializers:build",
     "//packages/kbn-journeys:build",
     "//packages/kbn-kibana-manifest-schema:build",
+    "//packages/kbn-language-documentation-popover:build",
     "//packages/kbn-logging:build",
     "//packages/kbn-logging-mocks:build",
     "//packages/kbn-managed-vscode-config:build",
@@ -314,6 +325,9 @@ filegroup(
     "//packages/shared-ux/link/redirect_app/impl:build",
     "//packages/shared-ux/link/redirect_app/mocks:build",
     "//packages/shared-ux/link/redirect_app/types:build",
+    "//packages/shared-ux/markdown/impl:build",
+    "//packages/shared-ux/markdown/mocks:build",
+    "//packages/shared-ux/markdown/types:build",
     "//packages/shared-ux/page/analytics_no_data/impl:build",
     "//packages/shared-ux/page/analytics_no_data/mocks:build",
     "//packages/shared-ux/page/analytics_no_data/types:build",
@@ -355,6 +369,7 @@ filegroup(
     "//packages/analytics/shippers/elastic_v3/common:build_types",
     "//packages/analytics/shippers/elastic_v3/server:build_types",
     "//packages/analytics/shippers/fullstory:build_types",
+    "//packages/analytics/shippers/gainsight:build_types",
     "//packages/content-management/table_list:build_types",
     "//packages/core/analytics/core-analytics-browser:build_types",
     "//packages/core/analytics/core-analytics-browser-internal:build_types",
@@ -445,6 +460,9 @@ filegroup(
     "//packages/core/lifecycle/core-lifecycle-browser:build_types",
     "//packages/core/lifecycle/core-lifecycle-browser-internal:build_types",
     "//packages/core/lifecycle/core-lifecycle-browser-mocks:build_types",
+    "//packages/core/lifecycle/core-lifecycle-server:build_types",
+    "//packages/core/lifecycle/core-lifecycle-server-internal:build_types",
+    "//packages/core/lifecycle/core-lifecycle-server-mocks:build_types",
     "//packages/core/logging/core-logging-server:build_types",
     "//packages/core/logging/core-logging-server-internal:build_types",
     "//packages/core/logging/core-logging-server-mocks:build_types",
@@ -468,6 +486,9 @@ filegroup(
     "//packages/core/plugins/core-plugins-browser:build_types",
     "//packages/core/plugins/core-plugins-browser-internal:build_types",
     "//packages/core/plugins/core-plugins-browser-mocks:build_types",
+    "//packages/core/plugins/core-plugins-server:build_types",
+    "//packages/core/plugins/core-plugins-server-internal:build_types",
+    "//packages/core/plugins/core-plugins-server-mocks:build_types",
     "//packages/core/preboot/core-preboot-server:build_types",
     "//packages/core/preboot/core-preboot-server-internal:build_types",
     "//packages/core/preboot/core-preboot-server-mocks:build_types",
@@ -502,6 +523,7 @@ filegroup(
     "//packages/core/test-helpers/core-test-helpers-deprecations-getters:build_types",
     "//packages/core/test-helpers/core-test-helpers-http-setup-browser:build_types",
     "//packages/core/test-helpers/core-test-helpers-so-type-serializer:build_types",
+    "//packages/core/test-helpers/core-test-helpers-test-utils:build_types",
     "//packages/core/theme/core-theme-browser:build_types",
     "//packages/core/theme/core-theme-browser-internal:build_types",
     "//packages/core/theme/core-theme-browser-mocks:build_types",
@@ -527,6 +549,7 @@ filegroup(
     "//packages/kbn-axe-config:build_types",
     "//packages/kbn-bazel-packages:build_types",
     "//packages/kbn-bazel-runner:build_types",
+    "//packages/kbn-cases-components:build_types",
     "//packages/kbn-chart-icons:build_types",
     "//packages/kbn-ci-stats-core:build_types",
     "//packages/kbn-ci-stats-performance-metrics:build_types",
@@ -559,6 +582,7 @@ filegroup(
     "//packages/kbn-ftr-screenshot-filename:build_types",
     "//packages/kbn-generate:build_types",
     "//packages/kbn-get-repo-files:build_types",
+    "//packages/kbn-guided-onboarding:build_types",
     "//packages/kbn-handlebars:build_types",
     "//packages/kbn-hapi-mocks:build_types",
     "//packages/kbn-i18n:build_types",
@@ -569,6 +593,7 @@ filegroup(
     "//packages/kbn-jest-serializers:build_types",
     "//packages/kbn-journeys:build_types",
     "//packages/kbn-kibana-manifest-schema:build_types",
+    "//packages/kbn-language-documentation-popover:build_types",
     "//packages/kbn-logging:build_types",
     "//packages/kbn-logging-mocks:build_types",
     "//packages/kbn-managed-vscode-config:build_types",
@@ -637,6 +662,9 @@ filegroup(
     "//packages/shared-ux/card/no_data/mocks:build_types",
     "//packages/shared-ux/link/redirect_app/impl:build_types",
     "//packages/shared-ux/link/redirect_app/mocks:build_types",
+    "//packages/shared-ux/markdown/impl:build_types",
+    "//packages/shared-ux/markdown/mocks:build_types",
+    "//packages/shared-ux/markdown/types:build_types",
     "//packages/shared-ux/page/analytics_no_data/impl:build_types",
     "//packages/shared-ux/page/analytics_no_data/mocks:build_types",
     "//packages/shared-ux/page/kibana_no_data/impl:build_types",
@@ -662,13 +690,18 @@ filegroup(
   ],
 )
 
-# Grouping target to call all underlying packages build
-# targets so we can build them all at once
-# It will auto build all declared code packages and types packages
+# Grouping target to call all underlying packages js builds
 filegroup(
   name = "build",
   srcs = [
-    ":build_pkg_code",
+    ":build_pkg_code"
+  ],
+)
+
+# Grouping target to call all underlying packages ts builds
+filegroup(
+  name = "build_types",
+  srcs = [
     ":build_pkg_types"
   ],
 )

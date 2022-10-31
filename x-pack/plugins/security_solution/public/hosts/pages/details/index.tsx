@@ -19,7 +19,8 @@ import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-
+import { tableDefaults } from '../../../common/store/data_table/defaults';
+import { dataTableSelectors } from '../../../common/store/data_table';
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -54,9 +55,7 @@ import { getHostDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../display';
-import { timelineSelectors } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../common/types/timeline';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { TableId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../common/components/page/manage_query';
@@ -65,15 +64,16 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
 import { useLicense } from '../../../common/hooks/use_license';
+import { ResponderActionButton } from '../../../detections/components/endpoint_responder/responder_action_button';
 
 const ES_HOST_FIELD = 'host.hostname';
 const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const dispatch = useDispatch();
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
+    (state) => (getTable(state, TableId.hostsPageEvents) ?? tableDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -81,7 +81,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
-  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -128,14 +128,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         buildEsQuery(
           indexPattern,
           [query],
-          [...hostDetailsPageFilters, ...filters],
+          [...hostDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
         ),
       ];
     } catch (e) {
       return [undefined, e];
     }
-  }, [filters, indexPattern, query, uiSettings, hostDetailsPageFilters]);
+  }, [globalFilters, indexPattern, query, uiSettings, hostDetailsPageFilters]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -188,6 +188,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   />
                 }
                 title={detailName}
+                rightSideItems={[
+                  hostOverview.endpoint?.fleetAgentId && (
+                    <ResponderActionButton endpointId={hostOverview.endpoint?.fleetAgentId} />
+                  ),
+                ]}
               />
 
               <AnomalyTableProvider
@@ -256,7 +261,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
               deleteQuery={deleteQuery}
-              pageFilters={hostDetailsPageFilters}
+              hostDetailsFilter={hostDetailsPageFilters}
               to={to}
               from={from}
               detailName={detailName}

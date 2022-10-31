@@ -18,8 +18,8 @@ import {
 } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
 import {
   Dimensions,
   Dimension,
@@ -30,31 +30,14 @@ import {
   ValueAxis,
   Scale,
   ChartMode,
-  InterpolationMode,
   ScaleType,
 } from './types';
 import { ChartType } from '../common';
 import { getSeriesParams } from './utils/get_series_params';
 import { getSafeId } from './utils/accessors';
-
-interface Bounds {
-  min?: string | number;
-  max?: string | number;
-}
+import { Bounds, getCurveType, getLineStyle, getMode, getYAxisPosition } from './utils/common';
 
 type YDimension = Omit<Dimension, 'accessor'> & { accessor: string };
-
-const getCurveType = (type?: InterpolationMode) => {
-  switch (type) {
-    case 'cardinal':
-      return 'CURVE_MONOTONE_X';
-    case 'step-after':
-      return 'CURVE_STEP_AFTER';
-    case 'linear':
-    default:
-      return 'LINEAR';
-  }
-};
 
 const prepareLengend = (params: VisParams, legendSize?: LegendSize) => {
   const legend = buildExpressionFunction('legendConfig', {
@@ -162,16 +145,6 @@ const prepareLayers = (
   return buildExpression([dataLayer]);
 };
 
-const getMode = (scale: Scale, bounds?: Bounds) => {
-  if (scale.defaultYExtents) {
-    return 'dataBounds';
-  }
-
-  if (scale.setYExtents || bounds) {
-    return 'custom';
-  }
-};
-
 const getLabelArgs = (data: CategoryAxis, isTimeChart?: boolean) => {
   return {
     truncate: data.labels.truncate,
@@ -213,18 +186,6 @@ function getScaleType(
   }
 
   return type;
-}
-
-function getYAxisPosition(position: Position) {
-  if (position === Position.Top) {
-    return Position.Right;
-  }
-
-  if (position === Position.Bottom) {
-    return Position.Left;
-  }
-
-  return position;
 }
 
 function getXAxisPosition(position: Position) {
@@ -272,16 +233,6 @@ const prepareYAxis = (data: ValueAxis, showGridLines?: boolean) => {
   });
 
   return buildExpression([yAxisConfig]);
-};
-
-const getLineStyle = (style: ThresholdLine['style']) => {
-  switch (style) {
-    case 'full':
-      return 'solid';
-    case 'dashed':
-    case 'dot-dashed':
-      return style;
-  }
 };
 
 const prepareReferenceLine = (thresholdLine: ThresholdLine, axisId: string) => {
@@ -483,6 +434,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnAccessor: dimensions.splitColumn?.map(prepareVisDimension),
     splitRowAccessor: dimensions.splitRow?.map(prepareVisDimension),
     valueLabels: vis.params.labels.show ? 'show' : 'hide',
+    valuesInLegend: vis.params.labels.show,
     singleTable: true,
   });
 

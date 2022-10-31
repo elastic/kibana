@@ -157,7 +157,6 @@ export const metricsVisDefinition: VisTypeDefinition<
     editor: TSVB_EDITOR_NAME,
   },
   options: {
-    showQueryBar: true,
     showFilterBar: true,
     showIndexSelection: false,
   },
@@ -172,15 +171,13 @@ export const metricsVisDefinition: VisTypeDefinition<
     return {
       canNavigateToLens: Boolean(
         vis?.params
-          ? await convertTSVBtoLensConfiguration(vis.params as Panel, timeFilter?.getAbsoluteTime())
+          ? await convertTSVBtoLensConfiguration(vis, timeFilter?.getAbsoluteTime())
           : null
       ),
     };
   },
   navigateToLens: async (vis, timeFilter) =>
-    vis?.params
-      ? await convertTSVBtoLensConfiguration(vis?.params as Panel, timeFilter?.getAbsoluteTime())
-      : null,
+    vis?.params ? await convertTSVBtoLensConfiguration(vis, timeFilter?.getAbsoluteTime()) : null,
 
   inspectorAdapters: () => ({
     requests: new RequestAdapter(),

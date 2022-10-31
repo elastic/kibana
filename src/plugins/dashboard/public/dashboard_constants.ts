@@ -46,6 +46,7 @@ export const defaultDashboardState: DashboardState = {
   options: {
     useMargins: true,
     syncColors: false,
+    syncCursor: true,
     syncTooltips: false,
     hidePanelTitles: false,
   },

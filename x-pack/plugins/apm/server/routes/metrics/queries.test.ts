@@ -22,9 +22,10 @@ describe('metrics queries', () => {
 
   const createTests = (serviceNodeName?: string) => {
     it('fetches cpu chart data', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams((setup, apmEventClient) =>
         getCPUChartData({
-          setup,
+          config: setup.config,
+          apmEventClient,
           serviceName: 'foo',
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
@@ -38,9 +39,10 @@ describe('metrics queries', () => {
     });
 
     it('fetches memory chart data', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams((setup, apmEventClient) =>
         getMemoryChartData({
-          setup,
+          config: setup.config,
+          apmEventClient,
           serviceName: 'foo',
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
@@ -54,9 +56,10 @@ describe('metrics queries', () => {
     });
 
     it('fetches heap memory chart data', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams((setup, apmEventClient) =>
         getHeapMemoryChart({
-          setup,
+          config: setup.config,
+          apmEventClient,
           serviceName: 'foo',
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
@@ -70,9 +73,10 @@ describe('metrics queries', () => {
     });
 
     it('fetches non heap memory chart data', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams((setup, apmEventClient) =>
         getNonHeapMemoryChart({
-          setup,
+          config: setup.config,
+          apmEventClient,
           serviceName: 'foo',
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
@@ -86,9 +90,10 @@ describe('metrics queries', () => {
     });
 
     it('fetches thread count chart data', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams((setup, apmEventClient) =>
         getThreadCountChart({
-          setup,
+          config: setup.config,
+          apmEventClient,
           serviceName: 'foo',
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,

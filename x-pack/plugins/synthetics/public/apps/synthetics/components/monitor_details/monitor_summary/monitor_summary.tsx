@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { MonitorErrorSparklines } from './monitor_error_sparklines';
+import { DurationSparklines } from './duration_sparklines';
 import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
 import { AvailabilityPanel } from './availability_panel';
@@ -24,17 +26,21 @@ import { DurationPanel } from './duration_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
 import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
-import { LastTenTestRuns } from './last_ten_test_runs';
+import { TestRunsTable } from './test_runs_table';
 import { MonitorErrorsCount } from './monitor_errors_count';
 
 export const MonitorSummary = () => {
   const { euiTheme } = useEuiTheme();
 
+  // TODO this range needs to be adjusted dynamically https://github.com/elastic/kibana/issues/143472
+  const from = 'now-30d/d';
+  const to = 'now';
+
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             <EuiTitle size="xs">
               <h3>{MONITOR_DETAILS_LABEL}</h3>
             </EuiTitle>
@@ -42,31 +48,35 @@ export const MonitorSummary = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel css={{ padding: euiTheme.size.s, height: 158 }}>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="s" css={{ height: 158 }}>
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{LAST_30DAYS_LABEL}</h3>
             </EuiTitle>
-            <EuiFlexGroup gutterSize="none">
+            <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <AvailabilityPanel />
+                <AvailabilityPanel from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <AvailabilitySparklines />
+                <AvailabilitySparklines from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <DurationPanel />
+                <DurationPanel from={from} to={to} />
               </EuiFlexItem>
-              <EuiFlexItem>{/* TODO: Add duration metric sparkline*/}</EuiFlexItem>
               <EuiFlexItem>
-                <MonitorErrorsCount />
+                <DurationSparklines from={from} to={to} />
               </EuiFlexItem>
-              <EuiFlexItem>{/* TODO: Add error sparkline*/}</EuiFlexItem>
+              <EuiFlexItem>
+                <MonitorErrorsCount from={from} to={to} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <MonitorErrorSparklines />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
-              <EuiPanel>
+              <EuiPanel hasShadow={false} hasBorder>
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
@@ -79,16 +89,16 @@ export const MonitorSummary = () => {
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <MonitorDurationTrend />
+                <MonitorDurationTrend from={from} to={to} />
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      {/* <EuiPanel style={{ height: 100 }}>/!* TODO: Add status panel*!/</EuiPanel> */}
       {/* <EuiSpacer size="l" /> */}
-      <EuiFlexGroup>
+      {/* <EuiPanel style={{ height: 100 }}>/!* TODO: Add status panel*!/</EuiPanel> */}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
           <LastTestRun />
         </EuiFlexItem>
@@ -96,8 +106,8 @@ export const MonitorSummary = () => {
           <StepDurationPanel />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <LastTenTestRuns />
+      <EuiSpacer size="m" />
+      <TestRunsTable paginable={false} from={from} to={to} />
     </>
   );
 };

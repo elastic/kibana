@@ -188,7 +188,7 @@ export function getVisitorBreakdownLensAttributes({
         [localDataView.id]: localDataView,
       },
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: dataLayer,
           },

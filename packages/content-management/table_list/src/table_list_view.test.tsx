@@ -11,8 +11,10 @@ import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import React, { useEffect } from 'react';
 import moment, { Moment } from 'moment';
 import { act } from 'react-dom/test-utils';
+import type { ReactWrapper } from 'enzyme';
 
 import { WithServices } from './__jest__';
+import { getTagList } from './mocks';
 import { TableListView, Props as TableListViewProps } from './table_list_view';
 
 const mockUseEffect = useEffect;
@@ -47,7 +49,7 @@ const requiredProps: TableListViewProps = {
 
 describe('TableListView', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {
@@ -304,6 +306,204 @@ describe('TableListView', () => {
 
       expect(firstRowTitle).toBe('Item 20elasticcloud');
       expect(lastRowTitle).toBe('Item 29elasticcloud');
+    });
+  });
+
+  describe('column sorting', () => {
+    const setupColumnSorting = registerTestBed<string, TableListViewProps>(
+      WithServices<TableListViewProps>(TableListView, { TagList: getTagList({ tags: null }) }),
+      {
+        defaultProps: { ...requiredProps },
+        memoryRouter: { wrapComponent: false },
+      }
+    );
+
+    const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
+    const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
+    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+    const yesterdayToString = new Date(yesterday.getTime()).toDateString();
+    const hits = [
+      {
+        id: '123',
+        updatedAt: twoDaysAgo, // first asc, last desc
+        attributes: {
+          title: 'z-foo', // first desc, last asc
+        },
+      },
+      {
+        id: '456',
+        updatedAt: yesterday, // first desc, last asc
+        attributes: {
+          title: 'a-foo', // first asc, last desc
+        },
+      },
+    ];
+
+    test('should initially sort by "Last updated" column', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['a-foo', yesterdayToString],
+        ['z-foo', twoDaysAgoToString],
+      ]);
+    });
+
+    test('filter select should have 4 options', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+      const { component, find } = testBed!;
+      component.update();
+
+      act(() => {
+        find('tableSortSelectBtn').simulate('click');
+      });
+      component.update();
+
+      const filterOptions = find('sortSelect').find('li');
+
+      expect(filterOptions.length).toBe(4);
+      expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
+        'Name A-Z ',
+        'Name Z-A ',
+        'Recently updated - Checked option. ',
+        'Least recently updated ',
+      ]);
+    });
+
+    test('filter select should change the sort order', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      const { component, table, find } = testBed!;
+      component.update();
+
+      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['a-foo', yesterdayToString],
+        ['z-foo', twoDaysAgoToString],
+      ]);
+
+      act(() => {
+        find('tableSortSelectBtn').simulate('click');
+      });
+      component.update();
+      const filterOptions = find('sortSelect').find('li');
+
+      // Click 'Name Z-A'
+      act(() => {
+        filterOptions.at(1).simulate('click');
+      });
+      component.update();
+
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      expect(tableCellsValues).toEqual([
+        ['z-foo', twoDaysAgoToString],
+        ['a-foo', yesterdayToString],
+      ]);
+    });
+
+    test('should update the select option when toggling the column header', async () => {
+      const getTableColumnSortButton = (testBed: TestBed, text: string) => {
+        const buttons = testBed.find('tableHeaderSortButton');
+        let wrapper: ReactWrapper | undefined;
+
+        buttons.forEach((_wrapper) => {
+          if (wrapper) {
+            return;
+          }
+
+          if (_wrapper.text().includes(text)) {
+            wrapper = _wrapper;
+          }
+        });
+        return wrapper;
+      };
+
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      const { component, table, find } = testBed!;
+      component.update();
+
+      act(() => {
+        find('tableSortSelectBtn').simulate('click');
+      });
+      component.update();
+      let filterOptions = find('sortSelect').find('li');
+      expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
+        'Name A-Z ',
+        'Name Z-A ',
+        'Recently updated - Checked option. ', // checked
+        'Least recently updated ',
+      ]);
+
+      const nameColumnHeaderButton = getTableColumnSortButton(testBed!, 'Name');
+      if (!nameColumnHeaderButton) {
+        throw new Error('Could not find table header button containing "Name".');
+      }
+
+      act(() => {
+        nameColumnHeaderButton.simulate('click');
+      });
+      component.update();
+      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['a-foo', yesterdayToString],
+        ['z-foo', twoDaysAgoToString],
+      ]);
+
+      act(() => {
+        nameColumnHeaderButton.simulate('click');
+      });
+      component.update();
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      expect(tableCellsValues).toEqual([
+        ['z-foo', twoDaysAgoToString],
+        ['a-foo', yesterdayToString],
+      ]);
+
+      act(() => {
+        find('tableSortSelectBtn').simulate('click');
+      });
+      component.update();
+      filterOptions = find('sortSelect').find('li');
+
+      expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
+        'Name A-Z ',
+        'Name Z-A - Checked option. ', // now this option is checked
+        'Recently updated ',
+        'Least recently updated ',
+      ]);
     });
   });
 });

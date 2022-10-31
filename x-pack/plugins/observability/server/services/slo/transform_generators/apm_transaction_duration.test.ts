@@ -12,7 +12,7 @@ const generator = new ApmTransactionDurationTransformGenerator();
 
 describe('APM Transaction Duration Transform Generator', () => {
   it('returns the correct transform params with every specified indicator params', async () => {
-    const anSLO = createSLO(createAPMTransactionDurationIndicator());
+    const anSLO = createSLO({ indicator: createAPMTransactionDurationIndicator() });
     const transform = generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot({
@@ -29,14 +29,14 @@ describe('APM Transaction Duration Transform Generator', () => {
   });
 
   it("does not include the query filter when params are '*'", async () => {
-    const anSLO = createSLO(
-      createAPMTransactionDurationIndicator({
+    const anSLO = createSLO({
+      indicator: createAPMTransactionDurationIndicator({
         environment: '*',
         service: '*',
         transaction_name: '*',
         transaction_type: '*',
-      })
-    );
+      }),
+    });
     const transform = generator.getTransformParams(anSLO);
 
     expect(transform.source.query).toMatchSnapshot();

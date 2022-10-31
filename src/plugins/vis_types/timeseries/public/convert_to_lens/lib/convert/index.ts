@@ -31,5 +31,6 @@ export { convertToDateHistogramColumn } from './date_histogram';
 export { convertToTermsColumn } from './terms';
 export { convertToCounterRateColumn } from './counter_rate';
 export { convertToStandartDeviationColumn } from './std_deviation';
+export { convertVarianceToFormulaColumn } from './variance';
 
 export * from './types';
