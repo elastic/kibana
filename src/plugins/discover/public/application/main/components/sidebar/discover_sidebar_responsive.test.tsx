@@ -24,14 +24,10 @@ import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
-import { coreMock } from '@kbn/core/public/mocks';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -69,17 +65,8 @@ jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   }),
 }));
 
-const dataServiceMock = dataPluginMock.createStartContract();
-const dataViews = dataViewPluginMocks.createStartContract();
-const core = coreMock.createStart();
-
 const mockServices = {
-  core,
-  history: () => ({
-    location: {
-      search: '',
-    },
-  }),
+  ...createDiscoverServicesMock(),
   capabilities: {
     visualize: {
       show: true,
@@ -88,36 +75,12 @@ const mockServices = {
       save: false,
     },
   },
-  uiSettings: core.uiSettings,
   docLinks: { links: { discover: { fieldTypeHelp: '' } } },
   dataViewEditor: {
     userPermissions: {
       editDataView: jest.fn(() => true),
     },
   },
-  data: {
-    ...dataServiceMock,
-    query: {
-      ...dataServiceMock.query,
-      timefilter: {
-        ...dataServiceMock.query.timefilter,
-        timefilter: {
-          ...dataServiceMock.query.timefilter.timefilter,
-          getAbsoluteTime: () => ({
-            from: '2021-08-31T22:00:00.000Z',
-            to: '2022-09-01T09:16:29.553Z',
-          }),
-          getTime: () => ({
-            from: 'now-15m',
-            to: 'now',
-          }),
-        },
-      },
-    },
-  },
-  dataViews,
-  fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  charts: chartPluginMock.createSetupContract(),
 } as unknown as DiscoverServices;
 
 const mockfieldCounts: Record<string, number> = {};
@@ -141,13 +104,8 @@ jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockImplementation(asy
   indexPatternTitle: 'test',
   existingFieldNames: Object.keys(mockCalcFieldCounts()),
 }));
-jest.spyOn(dataViews, 'get').mockImplementation(async (dataViewId) => {
+jest.spyOn(mockServices.dataViews, 'get').mockImplementation(async (dataViewId) => {
   return [stubLogstashDataView].find((dw) => dw.id === dataViewId)!;
-});
-jest.spyOn(core.uiSettings, 'get').mockImplementation((key: string) => {
-  if (key === 'fields:popularLimit') {
-    return 5;
-  }
 });
 
 function getCompProps(): DiscoverSidebarResponsiveProps {

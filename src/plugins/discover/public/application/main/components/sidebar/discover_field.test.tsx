@@ -12,10 +12,6 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DiscoverField, DiscoverFieldProps } from './discover_field';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -26,6 +22,7 @@ import { FetchStatus } from '../../../types';
 import { DataDocuments$ } from '../../hooks/use_saved_search';
 import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import * as DetailsUtil from './deprecated_stats/get_details';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 
 jest.spyOn(DetailsUtil, 'getDetails');
 
@@ -48,8 +45,6 @@ jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
     },
   }),
 }));
-
-const dataServiceMock = dataPluginMock.createStartContract();
 
 jest.mock('../../../../kibana_services', () => ({
   getUiActions: jest.fn(() => {
@@ -106,11 +101,7 @@ async function getComponent({
     contextualFields: [],
   };
   const services = {
-    history: () => ({
-      location: {
-        search: '',
-      },
-    }),
+    ...createDiscoverServicesMock(),
     capabilities: {
       visualize: {
         show: true,
@@ -126,25 +117,6 @@ async function getComponent({
         }
       },
     },
-    data: {
-      ...dataServiceMock,
-      query: {
-        ...dataServiceMock.query,
-        timefilter: {
-          ...dataServiceMock.query.timefilter,
-          timefilter: {
-            ...dataServiceMock.query.timefilter.timefilter,
-            getAbsoluteTime: () => ({
-              from: '2021-08-31T22:00:00.000Z',
-              to: '2022-09-01T09:16:29.553Z',
-            }),
-          },
-        },
-      },
-    },
-    dataViews: dataViewPluginMocks.createStartContract(),
-    fieldFormats: fieldFormatsServiceMock.createStartContract(),
-    charts: chartPluginMock.createSetupContract(),
   };
   const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
   appStateContainer.set({
