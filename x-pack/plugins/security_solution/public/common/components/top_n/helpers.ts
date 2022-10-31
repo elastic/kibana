@@ -66,6 +66,13 @@ export interface TopNOption {
   'data-test-subj': string;
 }
 
+/** the following scopes are detection alert tables */
+export const detectionAlertsTables: string[] = [
+  TableId.alertsOnAlertsPage,
+  TableId.alertsOnRuleDetailsPage,
+  TimelineId.casePage,
+];
+
 /** A (stable) array containing only the 'All events' option */
 export const allEvents: TopNOption[] = [
   {
@@ -118,8 +125,8 @@ export const getOptions = (activeTimelineEventsType?: TimelineEventsType): TopNO
 };
 
 /** returns true if the specified timelineId is a detections alert table */
-export const isDetectionsAlertsTable = (tableId: string | undefined): boolean =>
-  tableId === TableId.alertsOnAlertsPage || tableId === TableId.alertsOnRuleDetailsPage;
+export const isDetectionsAlertsTable = (scopeId: string | undefined): boolean =>
+  scopeId ? detectionAlertsTables.includes(scopeId) : false;
 
 /**
  * The following fields are used to filter alerts tables, (i.e. tables in the
