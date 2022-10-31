@@ -101,6 +101,20 @@ export const generateMockIndicator = (): Indicator => {
 };
 
 /**
+ * Used to create an Indicator with tlp marking
+ */
+export const generateMockIndicatorWithTlp = (): Indicator => {
+  const indicator = generateMockBaseIndicator();
+
+  indicator.fields['threat.indicator.type'] = ['type'];
+  indicator.fields['threat.indicator.ip'] = ['0.0.0.0'];
+  indicator.fields['threat.indicator.name'] = ['0.0.0.0'];
+  indicator.fields['threat.indicator.marking.tlp'] = ['RED'];
+
+  return indicator;
+};
+
+/**
  * Used to create a Url Indicator.
  */
 export const generateMockUrlIndicator = (): Indicator => {
