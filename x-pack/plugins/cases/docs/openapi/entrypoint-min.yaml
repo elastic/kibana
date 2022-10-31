@@ -15,8 +15,8 @@ servers:
   - url: 'http://localhost:5601'
     description: local
 paths:
-#  '/s/{spaceId}/api/cases':
-#    $ref: 'paths/s@{spaceid}@api@cases.yaml'
+  '/s/{spaceId}/api/cases':
+    $ref: 'paths/s@{spaceid}@api@cases.yaml'
 #  '/s/{spaceId}/api/cases/_find':
 #    $ref: 'paths/s@{spaceid}@api@cases@_find.yaml'
 #  '/s/{spaceId}/api/cases/alerts/{alertId}':

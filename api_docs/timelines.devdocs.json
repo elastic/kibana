@@ -305,7 +305,13 @@
         "description": [],
         "signature": [
           "(kueryExpression: string, indexPattern: ",
-          "DataViewBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
           ") => ",
           "QueryDslQueryContainer"
         ],
@@ -336,7 +342,13 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
-              "DataViewBase"
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
+              }
             ],
             "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
             "deprecated": false,
@@ -356,7 +368,13 @@
         "description": [],
         "signature": [
           "(kueryExpression: string, indexPattern?: ",
-          "DataViewBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
           " | undefined) => string"
         ],
         "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -386,7 +404,13 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
-              "DataViewBase",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -407,13 +431,37 @@
         "description": [],
         "signature": [
           "({ config, indexPattern, queries, filters, }: { config: ",
-          "EsQueryConfig",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryConfig",
+            "text": "EsQueryConfig"
+          },
           "; indexPattern: ",
-          "DataViewBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
           " | undefined; queries: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "[]; filters: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[]; }) => [string, undefined] | [undefined, Error]"
         ],
         "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -439,11 +487,29 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "KueryQueryOptions",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.KueryQueryOptions",
+                    "text": "KueryQueryOptions"
+                  },
                   " & ",
-                  "EsQueryFiltersConfig",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.EsQueryFiltersConfig",
+                    "text": "EsQueryFiltersConfig"
+                  },
                   " & { allowLeadingWildcards?: boolean | undefined; queryStringOptions?: ",
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   " | undefined; }"
                 ],
                 "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -458,7 +524,13 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "DataViewBase",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.DataViewBase",
+                    "text": "DataViewBase"
+                  },
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -473,7 +545,13 @@
                 "label": "queries",
                 "description": [],
                 "signature": [
-                  "Query",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  },
                   "[]"
                 ],
                 "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -488,7 +566,13 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "Filter",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
                   "[]"
                 ],
                 "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -499,6 +583,56 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.createTGrid",
+        "type": "Function",
+        "tags": [],
+        "label": "createTGrid",
+        "description": [],
+        "signature": [
+          "ActionCreator",
+          "<",
+          "TGridPersistInput",
+          ">"
+        ],
+        "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.createTGrid.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "payload",
+            "description": [],
+            "signature": [
+              "Payload"
+            ],
+            "path": "node_modules/typescript-fsa/lib/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.createTGrid.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "Meta",
+              " | undefined"
+            ],
+            "path": "node_modules/typescript-fsa/lib/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -840,81 +974,6 @@
             ]
           }
         ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-public.getManageTimelineById",
-        "type": "Function",
-        "tags": [],
-        "label": "getManageTimelineById",
-        "description": [],
-        "signature": [
-          "() => ((state: {}, params_0: string) => { dataViewId: string | null; documentType: string; defaultColumns: (Pick<",
-          "EuiDataGridColumn",
-          ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
-          "EuiDataGridColumn",
-          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
-          "TGridCellAction",
-          "[] | undefined; category?: string | undefined; columnHeaderType: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.ColumnHeaderType",
-            "text": "ColumnHeaderType"
-          },
-          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; isLoading: boolean; filterManager: ",
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-public.FilterManager",
-            "text": "FilterManager"
-          },
-          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; }) & ",
-          "OutputSelectorFields",
-          "<(args_0: ",
-          {
-            "pluginId": "timelines",
-            "scope": "public",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-public.TGridModel",
-            "text": "TGridModel"
-          },
-          ") => { dataViewId: string | null; documentType: string; defaultColumns: (Pick<",
-          "EuiDataGridColumn",
-          ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
-          "EuiDataGridColumn",
-          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
-          "TGridCellAction",
-          "[] | undefined; category?: string | undefined; columnHeaderType: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.ColumnHeaderType",
-            "text": "ColumnHeaderType"
-          },
-          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; isLoading: boolean; filterManager: ",
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-public.FilterManager",
-            "text": "FilterManager"
-          },
-          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; } & { clearCache: () => void; }> & { clearCache: () => void; }"
-        ],
-        "path": "x-pack/plugins/timelines/public/store/t_grid/selectors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1901,7 +1960,7 @@
         "tags": [],
         "label": "tGridReducer",
         "description": [
-          "The reducer for all timeline actions"
+          "The reducer for all data table actions"
         ],
         "signature": [
           "(state: ",
@@ -1909,16 +1968,16 @@
             "pluginId": "timelines",
             "scope": "public",
             "docId": "kibTimelinesPluginApi",
-            "section": "def-public.TimelineState",
-            "text": "TimelineState"
+            "section": "def-public.TableState",
+            "text": "TableState"
           },
           " | undefined, action: { type: any; }) => ",
           {
             "pluginId": "timelines",
             "scope": "public",
             "docId": "kibTimelinesPluginApi",
-            "section": "def-public.TimelineState",
-            "text": "TimelineState"
+            "section": "def-public.TableState",
+            "text": "TableState"
           }
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/reducer.ts",
@@ -1967,7 +2026,7 @@
         "signature": [
           "ActionCreator",
           "<",
-          "ToggleDetailPanel",
+          "TableToggleDetailPanel",
           ">"
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
@@ -2161,6 +2220,54 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-public.updateGraphEventId",
+        "type": "Function",
+        "tags": [],
+        "label": "updateGraphEventId",
+        "description": [],
+        "signature": [
+          "ActionCreator",
+          "<{ id: string; graphEventId: string; }>"
+        ],
+        "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.updateGraphEventId.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "payload",
+            "description": [],
+            "signature": [
+              "Payload"
+            ],
+            "path": "node_modules/typescript-fsa/lib/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.updateGraphEventId.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "Meta",
+              " | undefined"
+            ],
+            "path": "node_modules/typescript-fsa/lib/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-public.updateIsLoading",
         "type": "Function",
         "tags": [],
@@ -2305,6 +2412,56 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-public.updateSessionViewConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "updateSessionViewConfig",
+        "description": [],
+        "signature": [
+          "ActionCreator",
+          "<{ id: string; sessionViewConfig: ",
+          "SessionViewConfig",
+          " | null; }>"
+        ],
+        "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.updateSessionViewConfig.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "payload",
+            "description": [],
+            "signature": [
+              "Payload"
+            ],
+            "path": "node_modules/typescript-fsa/lib/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.updateSessionViewConfig.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "Meta",
+              " | undefined"
+            ],
+            "path": "node_modules/typescript-fsa/lib/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-public.updateSort",
         "type": "Function",
         "tags": [],
@@ -2313,7 +2470,7 @@
         "signature": [
           "ActionCreator",
           "<{ id: string; sort: ",
-          "SortColumnTimeline",
+          "SortColumnTable",
           "[]; }>"
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
@@ -2417,7 +2574,7 @@
         "label": "useBulkActionItems",
         "description": [],
         "signature": [
-          "({ eventIds, currentStatus, query, indexName, setEventsLoading, showAlertStatusActions, setEventsDeleted, onUpdateSuccess, onUpdateFailure, customBulkActions, timelineId, }: ",
+          "({ eventIds, currentStatus, query, indexName, setEventsLoading, showAlertStatusActions, setEventsDeleted, onUpdateSuccess, onUpdateFailure, customBulkActions, }: ",
           "BulkActionsProps",
           ") => JSX.Element[]"
         ],
@@ -2430,7 +2587,7 @@
             "id": "def-public.useBulkActionItems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  showAlertStatusActions = true,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  customBulkActions,\n  timelineId,\n}",
+            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  showAlertStatusActions = true,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  customBulkActions,\n}",
             "description": [],
             "signature": [
               "BulkActionsProps"
@@ -2552,6 +2709,93 @@
             "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.AddToTimelineButtonProps.timelineType",
+            "type": "string",
+            "tags": [],
+            "label": "timelineType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.TableById",
+        "type": "Interface",
+        "tags": [],
+        "label": "TableById",
+        "description": [
+          "A map of id to data table"
+        ],
+        "path": "x-pack/plugins/timelines/public/store/t_grid/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.TableById.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[id: string]: TGridModel",
+            "description": [],
+            "signature": [
+              "[id: string]:  ",
+              {
+                "pluginId": "timelines",
+                "scope": "public",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-public.TGridModel",
+                "text": "TGridModel"
+              }
+            ],
+            "path": "x-pack/plugins/timelines/public/store/t_grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.TableState",
+        "type": "Interface",
+        "tags": [],
+        "label": "TableState",
+        "description": [
+          "The state of all data tables is stored here"
+        ],
+        "path": "x-pack/plugins/timelines/public/store/t_grid/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.TableState.tableById",
+            "type": "Object",
+            "tags": [],
+            "label": "tableById",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "public",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-public.TableById",
+                "text": "TableById"
+              }
+            ],
+            "path": "x-pack/plugins/timelines/public/store/t_grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2585,7 +2829,7 @@
             "tags": [],
             "label": "columns",
             "description": [
-              "The columns displayed in the timeline"
+              "The columns displayed in the data table"
             ],
             "signature": [
               "(Pick<",
@@ -2603,47 +2847,14 @@
                 "text": "ColumnHeaderType"
               },
               "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-              "IFieldSubType",
-              " | undefined; type?: string | undefined; })[]"
-            ],
-            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-public.TGridModel.dataProviders",
-            "type": "Array",
-            "tags": [],
-            "label": "dataProviders",
-            "description": [
-              "The sources of the event data shown in the timeline"
-            ],
-            "signature": [
               {
-                "pluginId": "timelines",
+                "pluginId": "@kbn/es-query",
                 "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.DataProvider",
-                "text": "DataProvider"
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
               },
-              "[]"
-            ],
-            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-public.TGridModel.dateRange",
-            "type": "Object",
-            "tags": [],
-            "label": "dateRange",
-            "description": [
-              "Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map"
-            ],
-            "signature": [
-              "{ start: string; end: string; }"
+              " | undefined; type?: string | undefined; })[]"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
             "deprecated": false,
@@ -2688,11 +2899,11 @@
             "tags": [],
             "label": "expandedDetail",
             "description": [
-              "This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view"
+              "This holds the view information for the flyout when viewing data in a consuming view (i.e. hosts page) or the side panel in the primary data view"
             ],
             "signature": [
               "{ [x: string]: ",
-              "TimelineExpandedDetailType",
+              "DataExpandedDetailType",
               " | undefined; }"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
@@ -2707,7 +2918,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
@@ -2732,30 +2949,12 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-public.TGridModel.kqlQuery",
-            "type": "Object",
-            "tags": [],
-            "label": "kqlQuery",
-            "description": [
-              "the KQL query in the KQL bar"
-            ],
-            "signature": [
-              "{ filterQuery: ",
-              "SerializedFilterQuery",
-              " | null; }"
-            ],
-            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
             "id": "def-public.TGridModel.id",
             "type": "string",
             "tags": [],
             "label": "id",
             "description": [
-              "Uniquely identifies the timeline"
+              "Uniquely identifies the data table"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
             "deprecated": false,
@@ -2846,36 +3045,6 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-public.TGridModel.showCheckboxes",
-            "type": "boolean",
-            "tags": [],
-            "label": "showCheckboxes",
-            "description": [
-              "When true, shows checkboxes enabling selection. Selected events store in selectedEventIds"
-            ],
-            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-public.TGridModel.sort",
-            "type": "Array",
-            "tags": [],
-            "label": "sort",
-            "description": [
-              " Specifies which column the timeline is sorted on, and the direction (ascending / descending)"
-            ],
-            "signature": [
-              "SortColumnTimeline",
-              "[]"
-            ],
-            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
             "id": "def-public.TGridModel.selectedEventIds",
             "type": "Object",
             "tags": [],
@@ -2900,48 +3069,6 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-public.TGridModel.savedObjectId",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "savedObjectId",
-            "description": [],
-            "signature": [
-              "string | null"
-            ],
-            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-public.TGridModel.timelineType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "timelineType",
-            "description": [],
-            "signature": [
-              "\"default\" | \"template\""
-            ],
-            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-public.TGridModel.version",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "version",
-            "description": [],
-            "signature": [
-              "string | null"
-            ],
-            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
             "id": "def-public.TGridModel.initialized",
             "type": "CompoundType",
             "tags": [],
@@ -2953,34 +3080,35 @@
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-public.TimelineState",
-        "type": "Interface",
-        "tags": [],
-        "label": "TimelineState",
-        "description": [
-          "The state of all timelines is stored here"
-        ],
-        "path": "x-pack/plugins/timelines/public/store/t_grid/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
+          },
           {
             "parentPluginId": "timelines",
-            "id": "def-public.TimelineState.timelineById",
-            "type": "Object",
+            "id": "def-public.TGridModel.sessionViewConfig",
+            "type": "CompoundType",
             "tags": [],
-            "label": "timelineById",
+            "label": "sessionViewConfig",
             "description": [],
             "signature": [
-              "TimelineById"
+              "SessionViewConfig",
+              " | null"
             ],
-            "path": "x-pack/plugins/timelines/public/store/t_grid/types.ts",
+            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.TGridModel.updated",
+            "type": "number",
+            "tags": [],
+            "label": "updated",
+            "description": [
+              "updated saved object timestamp"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3157,8 +3285,8 @@
             "pluginId": "timelines",
             "scope": "public",
             "docId": "kibTimelinesPluginApi",
-            "section": "def-public.TimelineState",
-            "text": "TimelineState"
+            "section": "def-public.TableState",
+            "text": "TableState"
           }
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/index.ts",
@@ -3168,13 +3296,13 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-public.TGridModelForTimeline",
+        "id": "def-public.SubsetTGridModel",
         "type": "Type",
         "tags": [],
-        "label": "TGridModelForTimeline",
+        "label": "SubsetTGridModel",
         "description": [],
         "signature": [
-          "{ columns: (Pick<",
+          "{ readonly columns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
@@ -3189,20 +3317,24 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; id: string; title: string; filters?: ",
-          "Filter",
-          "[] | undefined; dataViewId: string | null; savedObjectId: string | null; sort: ",
-          "SortColumnTimeline",
-          "[]; version: string | null; filterManager?: ",
           {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-public.FilterManager",
-            "text": "FilterManager"
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubType",
+            "text": "IFieldSubType"
           },
-          " | undefined; dateRange: { start: string; end: string; }; defaultColumns: (Pick<",
+          " | undefined; type?: string | undefined; })[]; readonly title?: string | undefined; readonly filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; readonly dataViewId: string | null; readonly sort: ",
+          "SortColumnTable",
+          "[]; readonly defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
@@ -3217,22 +3349,16 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; isLoading: boolean; dataProviders: ",
           {
-            "pluginId": "timelines",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.DataProvider",
-            "text": "DataProvider"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubType",
+            "text": "IFieldSubType"
           },
-          "[]; deletedEventIds: string[]; documentType: string; excludedRowRendererIds: ",
-          "RowRendererId",
-          "[]; expandedDetail: Partial<Record<string, ",
-          "TimelineExpandedDetailType",
-          ">>; footerText?: React.ReactNode; graphEventId?: string | undefined; kqlQuery: { filterQuery: ",
-          "SerializedFilterQuery",
-          " | null; }; queryFields: string[]; indexNames: string[]; isSelectAllChecked: boolean; itemsPerPage: number; itemsPerPageOptions: number[]; loadingEventIds: string[]; loadingText?: React.ReactNode; selectAll: boolean; showCheckboxes: boolean; selectedEventIds: Record<string, ",
+          " | undefined; type?: string | undefined; })[]; readonly isLoading: boolean; readonly queryFields: string[]; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly expandedDetail: Partial<Record<string, ",
+          "DataExpandedDetailType",
+          ">>; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPage: number; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -3240,7 +3366,9 @@
             "section": "def-common.TimelineNonEcsData",
             "text": "TimelineNonEcsData"
           },
-          "[]>; unit?: ((n: number) => React.ReactNode) | undefined; }"
+          "[]>; readonly sessionViewConfig: ",
+          "SessionViewConfig",
+          " | null; }"
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
         "deprecated": false,
@@ -3255,7 +3383,7 @@
         "label": "TGridType",
         "description": [],
         "signature": [
-          "\"standalone\" | \"embedded\""
+          "\"embedded\""
         ],
         "path": "x-pack/plugins/timelines/public/types.ts",
         "deprecated": false,
@@ -3283,13 +3411,13 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-public.TimelineContext",
+        "id": "def-public.TableContext",
         "type": "Object",
         "tags": [],
-        "label": "TimelineContext",
+        "label": "TableContext",
         "description": [],
         "signature": [
-          "React.Context<{ timelineId: string | null; }>"
+          "React.Context<{ tableId: string | null; }>"
         ],
         "path": "x-pack/plugins/timelines/public/components/t_grid/shared/index.tsx",
         "deprecated": false,
@@ -3333,15 +3461,7 @@
           "label": "getTGrid",
           "description": [],
           "signature": [
-            "<T extends ",
-            {
-              "pluginId": "timelines",
-              "scope": "public",
-              "docId": "kibTimelinesPluginApi",
-              "section": "def-public.TGridType",
-              "text": "TGridType"
-            },
-            " = \"embedded\">(props: ",
+            "<T extends \"embedded\" = \"embedded\">(props: ",
             "GetTGridProps",
             "<T>) => React.ReactElement<",
             "GetTGridProps",
@@ -3376,6 +3496,22 @@
           "type": "Function",
           "tags": [],
           "label": "getTGridReducer",
+          "description": [],
+          "signature": [
+            "() => any"
+          ],
+          "path": "x-pack/plugins/timelines/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "timelines",
+          "id": "def-public.TimelinesUIStart.getTimelineReducer",
+          "type": "Function",
+          "tags": [],
+          "label": "getTimelineReducer",
           "description": [],
           "signature": [
             "() => any"
@@ -3981,13 +4117,12 @@
           {
             "parentPluginId": "timelines",
             "id": "def-common.ActionProps.tabType",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "tabType",
             "description": [],
             "signature": [
-              "TimelineTabs",
-              " | undefined"
+              "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
@@ -4200,7 +4335,13 @@
             "label": "subType",
             "description": [],
             "signature": [
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
@@ -4391,7 +4532,13 @@
                         "text": "ColumnHeaderType"
                       },
                       "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-                      "IFieldSubType",
+                      {
+                        "pluginId": "@kbn/es-query",
+                        "scope": "common",
+                        "docId": "kibKbnEsQueryPluginApi",
+                        "section": "def-common.IFieldSubType",
+                        "text": "IFieldSubType"
+                      },
                       " | undefined; type?: string | undefined; }"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
@@ -5067,7 +5214,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "SortColumnTimeline",
+              "SortColumnTable",
               "[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
@@ -5077,13 +5224,10 @@
           {
             "parentPluginId": "timelines",
             "id": "def-common.HeaderActionProps.tabType",
-            "type": "Enum",
+            "type": "string",
             "tags": [],
             "label": "tabType",
             "description": [],
-            "signature": [
-              "TimelineTabs"
-            ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5599,9 +5743,9 @@
             "label": "renderRow",
             "description": [],
             "signature": [
-              "({ contextId, data, isDraggable, timelineId, }: { contextId?: string | undefined; data: ",
+              "({ contextId, data, isDraggable, scopeId, }: { contextId?: string | undefined; data: ",
               "Ecs",
-              "; isDraggable: boolean; timelineId: string; }) => React.ReactNode"
+              "; isDraggable: boolean; scopeId: string; }) => React.ReactNode"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
             "deprecated": false,
@@ -5612,7 +5756,7 @@
                 "id": "def-common.RowRenderer.renderRow.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    contextId,\n    data,\n    isDraggable,\n    timelineId,\n  }",
+                "label": "{\n    contextId,\n    data,\n    isDraggable,\n    scopeId,\n  }",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                 "deprecated": false,
@@ -5659,10 +5803,10 @@
                   },
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.RowRenderer.renderRow.$1.timelineId",
+                    "id": "def-common.RowRenderer.renderRow.$1.scopeId",
                     "type": "string",
                     "tags": [],
-                    "label": "timelineId",
+                    "label": "scopeId",
                     "description": [],
                     "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                     "deprecated": false,
@@ -6016,7 +6160,13 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
@@ -6362,7 +6512,13 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
@@ -6971,18 +7127,6 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-common.TimelineId",
-        "type": "Enum",
-        "tags": [],
-        "label": "TimelineId",
-        "description": [],
-        "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
         "id": "def-common.TimelineType",
         "type": "Enum",
         "tags": [],
@@ -7086,7 +7230,13 @@
           "[]; ecsData?: ",
           "Ecs",
           " | undefined; eventId: string; globalFilters?: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[] | undefined; header: ",
           {
             "pluginId": "timelines",
@@ -7103,7 +7253,7 @@
             "section": "def-common.RowRenderer",
             "text": "RowRenderer"
           },
-          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; timelineId: string; truncate?: boolean | undefined; }"
+          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": false,
@@ -7133,7 +7283,13 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubType",
+            "text": "IFieldSubType"
+          },
           " | undefined; type?: string | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",

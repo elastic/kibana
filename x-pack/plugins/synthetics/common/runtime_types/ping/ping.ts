@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { ErrorStateCodec } from './error_state';
 import { DateRangeType } from '../common';
 import { SyntheticsDataType } from './synthetics';
 
@@ -232,6 +233,7 @@ export const PingType = t.intersection([
       name: t.string,
     }),
     config_id: t.string,
+    state: ErrorStateCodec,
     data_stream: t.interface({
       namespace: t.string,
       type: t.string,
@@ -287,6 +289,7 @@ export const GetPingsParamsType = t.intersection([
     excludedLocations: t.string,
     index: t.number,
     size: t.number,
+    pageIndex: t.number,
     locations: t.string,
     monitorId: t.string,
     sort: t.string,

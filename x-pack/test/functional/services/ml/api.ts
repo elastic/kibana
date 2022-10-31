@@ -1008,6 +1008,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Filter deleted.');
     },
 
+    async assertModelMemoryLimitForJob(jobId: string, expectedMml: string) {
+      const {
+        body: {
+          jobs: [job],
+        },
+      } = await this.getAnomalyDetectionJob(jobId);
+      const mml = job.analysis_limits.model_memory_limit;
+      expect(mml).to.eql(
+        expectedMml,
+        `Expected model memory limit to be  ${expectedMml}, got  ${mml}`
+      );
+    },
+
     async waitForFilterToExist(filterId: string, errorMsg?: string) {
       await retry.waitForWithTimeout(`'${filterId}' to exist`, 5 * 1000, async () => {
         if (await this.getFilter(filterId, 200)) {
