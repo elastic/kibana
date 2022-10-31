@@ -36,8 +36,10 @@ interface FilesExampleAppDeps {
 type ListResponse = FilesClientResponses<MyImageMetadata>['list'];
 
 export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) => {
-  const { data, isLoading, error, refetch } = useQuery<ListResponse>(['files'], () =>
-    files.example.list()
+  const { data, isLoading, error, refetch } = useQuery<ListResponse>(
+    ['files'],
+    () => files.example.list(),
+    { refetchOnWindowFocus: false }
   );
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showFilePickerModal, setShowFilePickerModal] = useState(false);
@@ -167,6 +169,11 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
       {showFilePickerModal && (
         <MyFilePicker
           onClose={() => setShowFilePickerModal(false)}
+          onUpload={() => {
+            notifications.toasts.addSuccess({
+              title: 'Uploaded files',
+            });
+          }}
           onDone={(ids) => {
             notifications.toasts.addSuccess({
               title: 'Selected files!',

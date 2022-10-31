@@ -1,10 +1,10 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
+    "allowJs": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
   },
   "exclude": ["cypress.config.ts"],
   "include": [
@@ -19,15 +19,16 @@
     "cypress.config.ts",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
     { "path": "../licensing/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },
-    {"path":  "../../../src/plugins/guided_onboarding/tsconfig.json"},
+    { "path":  "../../../src/plugins/guided_onboarding/tsconfig.json" },
 
     // optionalPlugins from ./kibana.json
     { "path": "../security/tsconfig.json" },

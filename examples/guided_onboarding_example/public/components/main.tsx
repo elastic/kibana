@@ -259,6 +259,7 @@ export const Main = (props: MainProps) => {
                   { value: 'observability', text: 'observability' },
                   { value: 'security', text: 'security' },
                   { value: 'search', text: 'search' },
+                  { value: 'testGuide', text: 'test guide' },
                 ]}
                 value={selectedGuide}
                 onChange={(e) => {
@@ -294,7 +295,7 @@ export const Main = (props: MainProps) => {
           <h3>
             <FormattedMessage
               id="guidedOnboardingExample.main.examplePages.title"
-              defaultMessage="Example pages"
+              defaultMessage="Example pages for test guide"
             />
           </h3>
         </EuiText>
@@ -313,6 +314,14 @@ export const Main = (props: MainProps) => {
               <FormattedMessage
                 id="guidedOnboardingExample.main.examplePages.stepTwo.link"
                 defaultMessage="Step 2"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={() => history.push('stepThree')}>
+              <FormattedMessage
+                id="guidedOnboardingExample.main.examplePages.stepThree.link"
+                defaultMessage="Step 3"
               />
             </EuiButton>
           </EuiFlexItem>

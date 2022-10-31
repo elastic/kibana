@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { FunctionComponent } from 'react';
 import numeral from '@elastic/numeral';
 import useObservable from 'react-use/lib/useObservable';
@@ -26,8 +26,8 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
   const { kind, state, client } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const displayImage = isImage({ type: file.mimeType });
-
-  const isSelected = useObservable(state.watchFileSelected$(file.id), false);
+  const isSelected$ = useMemo(() => state.watchFileSelected$(file.id), [file.id, state]);
+  const isSelected = useObservable(isSelected$, false);
 
   const imageHeight = `calc(${euiTheme.size.xxxl} * 2)`;
   return (
@@ -58,11 +58,6 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
               `}
               meta={file.meta as FileImageMetadata}
               src={client.getDownloadHref({ id: file.id, fileKind: kind })}
-              // There is an issue where the intersection observer does not fire reliably.
-              // I'm not sure if this is becuause of the image being in a modal
-              // The result is that the image does not always get loaded.
-              // TODO: Investigate this behaviour further
-              lazy={false}
             />
           ) : (
             <div
