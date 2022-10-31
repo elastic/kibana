@@ -14,7 +14,6 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiText,
-  EuiLink,
   EuiButton,
   EuiButtonEmpty,
   EuiImage,
@@ -28,13 +27,17 @@ import searchExperiencesIllustration from '../../../../assets/images/search_expe
 
 import { SetSearchExperiencesChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchSearchExperiencesPageTemplate } from '../layout';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const SearchExperiencesGuide: React.FC = () => {
   return (
     <EnterpriseSearchSearchExperiencesPageTemplate
       restrictWidth
       pageHeader={{
-        pageTitle: 'Build a search experience with Search UI',
+        pageTitle: i18n.translate('xpack.enterpriseSearch.searchExperiences.guide.pageTitle', {
+          defaultMessage: 'Build a search experience with Search UI',
+        }),
       }}
     >
       <SetPageChrome />
@@ -54,13 +57,10 @@ export const SearchExperiencesGuide: React.FC = () => {
                 <EuiSpacer size="l" />
                 <EuiText grow={false}>
                   <p>
-                    <EuiLink href={SEARCH_EXPERIENCES_PLUGIN.GITHUB_URL} target="_blank">
-                      <strong>Search UI</strong>
-                    </EuiLink>{' '}
-                    is a JavaScript library for implementing world-class search experiences without
-                    reinventing the wheel. It works out of the box with Elasticsearch, App Search,
-                    and Workplace Search, so you can focus on building the best experience for your
-                    users, customers, and employees.
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.searchExperiences.guide.description"
+                      defaultMessage="Search UI is a JavaScript library for implementing world-class search experiences without reinventing the wheel. It works out of the box with Elasticsearch, App Search, and Workplace Search, so you can focus on building the best experience for your users, customers, and employees."
+                    />
                   </p>
                 </EuiText>
               </EuiFlexItem>
@@ -75,7 +75,10 @@ export const SearchExperiencesGuide: React.FC = () => {
                       iconType={'popout'}
                       iconSide="right"
                     >
-                      Visit the Search UI documentation
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.searchExperiences.guide.documentationLink"
+                        defaultMessage="Visit the Search UI documentation"
+                      />
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -85,38 +88,81 @@ export const SearchExperiencesGuide: React.FC = () => {
                       iconType={'popout'}
                       iconSide="right"
                     >
-                      Search UI on Github
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.searchExperiences.guide.githubLink"
+                        defaultMessage="Search UI on Github"
+                      />
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiTitle>
-                  <h2>Features</h2>
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.searchExperiences.guide.featuresTitle"
+                      defaultMessage="Features"
+                    />
+                  </h2>
                 </EuiTitle>
                 <EuiSpacer size="l" />
                 <EuiText grow={false}>
                   <ul>
-                    <li>
-                      <strong>You know, for search</strong> &mdash; Elastic builds and maintains
-                      Search UI.
-                    </li>
-                    <li>
-                      <strong>Speedy Implementation</strong> &mdash; Build a complete search
-                      experience with a few lines of code.
-                    </li>
-                    <li>
-                      <strong>Customizable</strong> &mdash; Tune the components, markup, styles, and
-                      behaviors to your liking.
-                    </li>
-                    <li>
-                      <strong>Smart URLs</strong> &mdash; Searches, paging, filtering, and more, are
-                      captured in the URL for direct result linking.
-                    </li>
-                    <li>
-                      <strong>Flexible front-end</strong> &mdash; Not just for React. Use with any
-                      JavaScript library, even vanilla JavaScript.
-                    </li>
+                    <li
+                      dangerouslySetInnerHTML={{
+                        __html: i18n.translate(
+                          'xpack.enterpriseSearch.searchExperiences.guide.features.1',
+                          {
+                            defaultMessage:
+                              '<strong>You know, for search</strong> &mdash; Elastic builds and maintains Search UI.',
+                          }
+                        ),
+                      }}
+                    />
+                    <li
+                      dangerouslySetInnerHTML={{
+                        __html: i18n.translate(
+                          'xpack.enterpriseSearch.searchExperiences.guide.features.2',
+                          {
+                            defaultMessage:
+                              '<strong>Speedy Implementation</strong> &mdash; Build a complete search experience with a few lines of code.',
+                          }
+                        ),
+                      }}
+                    />
+                    <li
+                      dangerouslySetInnerHTML={{
+                        __html: i18n.translate(
+                          'xpack.enterpriseSearch.searchExperiences.guide.features.3',
+                          {
+                            defaultMessage:
+                              '<strong>Customizable</strong> &mdash; Search UI is highly customizable, so you can build the perfect search experience for your users.',
+                          }
+                        ),
+                      }}
+                    />
+                    <li
+                      dangerouslySetInnerHTML={{
+                        __html: i18n.translate(
+                          'xpack.enterpriseSearch.searchExperiences.guide.features.4',
+                          {
+                            defaultMessage:
+                              '<strong>Smart URLs</strong> &mdash; Searches, paging, filtering, and more, are captured in the URL for direct result linking.',
+                          }
+                        ),
+                      }}
+                    />
+                    <li
+                      dangerouslySetInnerHTML={{
+                        __html: i18n.translate(
+                          'xpack.enterpriseSearch.searchExperiences.guide.features.5',
+                          {
+                            defaultMessage:
+                              '<strong>Flexible front-end</strong> &mdash; Not just for React. Use with any JavaScript library, even vanilla JavaScript.',
+                          }
+                        ),
+                      }}
+                    />
                   </ul>
                 </EuiText>
               </EuiFlexItem>
@@ -133,7 +179,12 @@ export const SearchExperiencesGuide: React.FC = () => {
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xxl" />
         <EuiTitle>
-          <h2>Get started quickly with a tutorial</h2>
+          <h2>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.searchExperiences.guide.tutorialsTitle"
+              defaultMessage="Get started quickly with a tutorial"
+            />
+          </h2>
         </EuiTitle>
         <EuiSpacer size="xl" />
         <EuiFlexGroup responsive>
@@ -141,7 +192,12 @@ export const SearchExperiencesGuide: React.FC = () => {
             <EuiCard
               icon={<EuiIcon size="xl" type="logoElasticsearch" />}
               title="Elasticsearch"
-              description="Build a search experience with Elasticsearch and Search UI."
+              description={i18n.translate(
+                'xpack.enterpriseSearch.searchExperiences.guide.tutorials.elasticsearch.description',
+                {
+                  defaultMessage: 'Build a search experience with Elasticsearch and Search UI.',
+                }
+              )}
               href={SEARCH_EXPERIENCES_PLUGIN.ELASTICSEARCH_TUTORIAL_URL}
               target="_blank"
             />
@@ -150,7 +206,12 @@ export const SearchExperiencesGuide: React.FC = () => {
             <EuiCard
               icon={<EuiIcon size="xl" type="logoAppSearch" />}
               title="App Search"
-              description="Build a search experience with App Search and Search UI."
+              description={i18n.translate(
+                'xpack.enterpriseSearch.searchExperiences.guide.tutorials.appSearch.description',
+                {
+                  defaultMessage: 'Build a search experience with App Search and Search UI.',
+                }
+              )}
               href={SEARCH_EXPERIENCES_PLUGIN.APP_SEARCH_TUTORIAL_URL}
               target="_blank"
             />
@@ -159,7 +220,12 @@ export const SearchExperiencesGuide: React.FC = () => {
             <EuiCard
               icon={<EuiIcon size="xl" type="logoWorkplaceSearch" />}
               title="Workplace Search"
-              description="Build a search experience with Workplace Search and Search UI."
+              description={i18n.translate(
+                'xpack.enterpriseSearch.searchExperiences.guide.tutorials.workplaceSearch.description',
+                {
+                  defaultMessage: 'Build a search experience with Workplace Search and Search UI.',
+                }
+              )}
               href={SEARCH_EXPERIENCES_PLUGIN.WORKPLACE_SEARCH_TUTORIAL_URL}
               target="_blank"
             />
