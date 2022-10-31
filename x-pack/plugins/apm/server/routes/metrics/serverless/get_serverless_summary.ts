@@ -22,7 +22,6 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { MetricRaw } from '../../../../typings/es_schemas/raw/metric_raw';
 import { calcEstimatedCost, calcMemoryUsedRate } from './helper';
 
 export type AwsLambdaArchitecture = 'arm' | 'x86_64';
@@ -122,9 +121,8 @@ export async function getServerlessSummary({
         avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
         avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
         sample: {
-          top_hits: {
-            size: 1,
-            _source: [HOST_ARCHITECTURE],
+          top_metrics: {
+            metrics: [{ field: HOST_ARCHITECTURE }],
             sort: [{ '@timestamp': { order: 'desc' as const } }],
           },
         },
@@ -156,11 +154,9 @@ export async function getServerlessSummary({
     estimatedCost: calcEstimatedCost({
       awsLambdaPriceFactor,
       awsLambdaRequestCostPerMillion,
-      architecture: (
-        response.aggregations?.sample?.hits?.hits?.[0]?._source as
-          | MetricRaw
-          | undefined
-      )?.host?.architecture as AwsLambdaArchitecture,
+      architecture: response.aggregations?.sample?.top?.[0]?.metrics?.[
+        HOST_ARCHITECTURE
+      ] as AwsLambdaArchitecture | undefined,
       transactionThroughput,
       billedDuration: response.aggregations?.faasBilledDurationAvg.value,
       totalMemory: response.aggregations?.avgTotalMemory.value,
