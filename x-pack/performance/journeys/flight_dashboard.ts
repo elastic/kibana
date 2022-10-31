@@ -6,18 +6,20 @@
  */
 
 import { Journey } from '@kbn/journeys';
-
-import { ToastsService } from '../services/toasts';
-import { waitForChrome, waitForVisualizations } from '../utils';
+import { subj } from '@kbn/test-subj-selector';
+import { waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
-  esArchives: ['x-pack/performance/es_archives/flights'],
+  esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
   kbnArchives: ['x-pack/performance/kbn_archives/flights_no_map_dashboard'],
-  extendContext: ({ page, log }) => ({
-    toasts: new ToastsService(log, page),
-  }),
-}).step('Go to Flights Dashboard', async ({ kbnUrl, page }) => {
-  await page.goto(kbnUrl.get(`/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d`));
-  await waitForChrome(page);
-  await waitForVisualizations(page, 13);
-});
+})
+
+  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/dashboards`));
+    await page.waitForSelector('#dashboardListingHeading');
+  })
+
+  .step('Go to Flights Dashboard', async ({ page }) => {
+    await page.click(subj('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'));
+    await waitForVisualizations(page, 13);
+  });

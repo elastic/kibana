@@ -90,9 +90,9 @@
          "pause": true,
          "value": 0
       },
-      "timeFrom": "2022-10-15T22:00:00.000Z",
+      "timeTo": "2022-10-25T20:00:00.000Z",
+      "timeFrom": "2022-10-18T20:00:00.000Z",
       "timeRestore": true,
-      "timeTo": "2022-10-27T09:00:00.000Z",
       "title": "[eCommerce] Map Only",
       "version": 1
    },

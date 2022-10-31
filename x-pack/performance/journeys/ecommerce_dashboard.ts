@@ -6,15 +6,20 @@
  */
 
 import { Journey } from '@kbn/journeys';
-
-import { waitForChrome, waitForVisualizations } from '../utils';
+import { subj } from '@kbn/test-subj-selector';
+import { waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
-  esArchives: ['x-pack/performance/es_archives/ecommerce'],
+  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
   kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_no_map_dashboard'],
-}).step('Go to Ecommerce Dashboard', async ({ page, kbnUrl }) => {
-  await page.goto(kbnUrl.get(`/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f`));
+})
 
-  await waitForChrome(page);
-  await waitForVisualizations(page, 12);
-});
+  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/dashboards`));
+    await page.waitForSelector('#dashboardListingHeading');
+  })
+
+  .step('Go to Ecommerce Dashboard', async ({ page }) => {
+    await page.click(subj('dashboardListingTitleLink-[eCommerce]-Revenue-Dashboard'));
+    await waitForVisualizations(page, 12);
+  });
