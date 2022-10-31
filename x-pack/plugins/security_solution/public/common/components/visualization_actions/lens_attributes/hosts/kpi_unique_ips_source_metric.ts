@@ -37,6 +37,7 @@ export const kpiUniqueIpsSourceMetricLensAttributes: LensAttributes = {
       accessor: 'd9a6eb6b-8b78-439e-98e7-a718f8ffbebe',
       layerId: '8be0156b-d423-4a39-adf1-f54d4c9f2e69',
       layerType: 'data',
+      textAlign: 'center',
     },
   },
   title: '[Host] Unique IPs - source metric',
