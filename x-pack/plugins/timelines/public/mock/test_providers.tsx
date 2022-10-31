@@ -10,12 +10,13 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import { createStore, Store } from 'redux';
+import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { createKibanaContextProviderMock, createStartServicesMock } from './kibana_react.mock';
-import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
+import { timelineReducer } from '../store/timeline/reducer';
 
 interface Props {
   children: React.ReactNode;
@@ -34,17 +35,16 @@ const state: State = {
   },
 };
 
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock(),
-});
 window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
-const { storage } = createSecuritySolutionStorageMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, storage),
+  store = configureStore({
+    preloadedState: state,
+    reducer: timelineReducer,
+  }),
 }) => (
   <I18nProvider>
     <MockKibanaContextProvider>

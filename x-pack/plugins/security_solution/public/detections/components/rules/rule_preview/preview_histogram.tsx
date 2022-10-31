@@ -12,11 +12,11 @@ import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useDispatch, useSelector } from 'react-redux';
 import type { DataViewBase } from '@kbn/es-query';
-import type { SortColumnTable } from '@kbn/timelines-plugin/common/types';
+import { StatefulEventsViewer } from '../../../../common/components/events_viewer';
+import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { dataTableActions } from '../../../../common/store/data_table';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { getHistogramConfig, isNoisy } from './helpers';
@@ -30,12 +30,14 @@ import { BarChart } from '../../../../common/components/charts/barchart';
 import { usePreviewHistogram } from './use_preview_histogram';
 import { getAlertsPreviewDefaultModel } from '../../alerts_table/default_config';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import type { SortColumnTable } from '../../../../../common/types';
 import { TableId } from '../../../../../common/types';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { DetailsPanel } from '../../../../timelines/components/side_panel';
+import { PreviewRenderCellValue } from './preview_table_cell_renderer';
+import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { InspectButtonContainer } from '../../../../common/components/inspect';
 import type { State } from '../../../../common/store';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -75,7 +77,6 @@ export const PreviewHistogram = ({
 }: PreviewHistogramProps) => {
   const dispatch = useDispatch();
   const { setQuery, isInitializing } = useGlobalTime();
-  const { timelines: timelinesUi } = useKibana().services;
   const startDate = useMemo(
     () => timeframeOptions.timeframeStart.toISOString(),
     [timeframeOptions]
@@ -199,7 +200,17 @@ export const PreviewHistogram = ({
       </Panel>
       <EuiSpacer />
       <FullScreenContainer $isFullScreen={globalFullScreen}>
-        <InspectButtonContainer />
+        <StatefulEventsViewer
+          pageFilters={{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }}
+          defaultModel={getAlertsPreviewDefaultModel(license)}
+          end={endDate}
+          entityType={'events'}
+          tableId={TableId.rulePreview}
+          leadingControlColumns={getPreviewTableControlColumn(1.5)}
+          renderCellValue={PreviewRenderCellValue}
+          rowRenderers={defaultRowRenderers}
+          start={startDate}
+        />
       </FullScreenContainer>
       <DetailsPanel
         browserFields={browserFields}
