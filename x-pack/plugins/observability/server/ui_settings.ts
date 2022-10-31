@@ -15,7 +15,6 @@ import {
   maxSuggestions,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
-  enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
@@ -27,6 +26,7 @@ import {
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  enableCriticalPath,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -163,24 +163,6 @@ export const uiSettings: Record<string, UiSettings> = {
     },
     showInLabs: true,
   },
-  [enableServiceGroups]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableServiceGroups', {
-      defaultMessage: 'Service groups feature',
-    }),
-    value: false,
-    description: i18n.translate('xpack.observability.enableServiceGroupsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the Service groups feature on APM UI. {feedbackLink}.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-service-groups' }),
-      },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-    showInLabs: true,
-  },
   [enableServiceMetrics]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
@@ -199,13 +181,13 @@ export const uiSettings: Record<string, UiSettings> = {
   [apmServiceInventoryOptimizedSorting]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
-      defaultMessage: 'Optimize APM Service Inventory page load performance',
+      defaultMessage: 'Optimize services list load performance in APM',
     }),
     description: i18n.translate(
       'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
       {
         defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory page sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
+          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
         values: {
           technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
           feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-apm-page-performance' }),
@@ -333,5 +315,22 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.2,
     schema: schema.number({ min: 0 }),
+  },
+  [enableCriticalPath]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableCriticalPath', {
+      defaultMessage: 'Critical path',
+    }),
+    description: i18n.translate('xpack.observability.enableCriticalPathDescription', {
+      defaultMessage: '{technicalPreviewLabel} Optionally display the critical path of a trace.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
   },
 };
