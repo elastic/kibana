@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -43,7 +43,22 @@ type GetTableColumns = (
 const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuery';
 
 export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableProps) => {
-  const { openHostInTimeline } = useNavigateToTimeline();
+  const { openTimelineWithFilters } = useNavigateToTimeline();
+
+  const openHostInTimeline = useCallback(
+    ({ hostName, severity }: { hostName: string; severity?: string }) => {
+      const hostNameFilter = { field: 'host.name', value: hostName };
+      const severityFilter = severity
+        ? { field: 'kibana.alert.severity', value: severity }
+        : undefined;
+
+      openTimelineWithFilters(
+        severityFilter ? [[hostNameFilter, severityFilter]] : [[hostNameFilter]]
+      );
+    },
+    [openTimelineWithFilters]
+  );
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(
     DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID
   );
