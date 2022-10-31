@@ -161,4 +161,4 @@ export const INDEX = '_index';
 
 // Mobile
 export const DEVICE_MODEL_IDENTIFIER = 'device.model.identifier';
-export const NETWORK_HOST_CONNECTION_TYPE = 'network.host.connection.type';
+export const NETWORK_CONNECTION_TYPE = 'network.connection.type';
