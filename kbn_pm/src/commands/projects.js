@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/typescript/convert_all_to_composite');
+const { PROJECTS } = require('../../../src/dev/typescript/projects');
+module.exports = { PROJECTS };
