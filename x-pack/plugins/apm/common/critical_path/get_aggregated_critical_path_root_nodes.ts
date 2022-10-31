@@ -25,11 +25,35 @@ export function getAggregatedCriticalPathRootNodes(params: {
 
   const { criticalPath } = params;
 
+  function mergeNodesWithSameOperationId(
+    nodes: CriticalPathTreeNode[]
+  ): CriticalPathTreeNode[] {
+    const nodesByOperationId: Record<string, CriticalPathTreeNode> = {};
+    return nodes.reduce<CriticalPathTreeNode[]>((prev, node, index, array) => {
+      const nodeId = node.nodeId;
+      const operationId = criticalPath.operationIdByNodeId[nodeId];
+      if (nodesByOperationId[operationId]) {
+        const prevNode = nodesByOperationId[operationId];
+        prevNode.children.push(...node.children);
+        prevNode.countExclusive += node.countExclusive;
+        prevNode.countInclusive += node.countInclusive;
+        return prev;
+      }
+
+      nodesByOperationId[operationId] = node;
+
+      prev.push(node);
+      return prev;
+    }, []);
+  }
+
   function getNode(nodeId: string, depth: number): CriticalPathTreeNode {
     maxDepth = Math.max(maxDepth, depth);
 
-    const children = criticalPath.nodes[nodeId].map((childNodeId) =>
-      getNode(childNodeId, depth + 1)
+    const children = mergeNodesWithSameOperationId(
+      criticalPath.nodes[nodeId].map((childNodeId) =>
+        getNode(childNodeId, depth + 1)
+      )
     );
     const nodeCountExclusive = criticalPath.timeByNodeId[nodeId] || 0;
     const nodeCountInclusive =
@@ -43,7 +67,9 @@ export function getAggregatedCriticalPathRootNodes(params: {
     };
   }
 
-  const rootNodes = criticalPath.rootNodes.map((nodeId) => getNode(nodeId, 1));
+  const rootNodes = mergeNodesWithSameOperationId(
+    criticalPath.rootNodes.map((nodeId) => getNode(nodeId, 1))
+  );
 
   return {
     rootNodes,

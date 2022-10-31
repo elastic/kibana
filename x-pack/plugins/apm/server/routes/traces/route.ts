@@ -232,6 +232,7 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
       apmEventClient,
       serviceName,
       transactionName,
+      logger: resources.logger,
     });
   },
 });

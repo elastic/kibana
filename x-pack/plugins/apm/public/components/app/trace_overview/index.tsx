@@ -101,7 +101,10 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
                     )}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <TechnicalPreviewBadge icon="beaker" />
+                    <TechnicalPreviewBadge
+                      icon="beaker"
+                      style={{ verticalAlign: 'middle' }}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ),

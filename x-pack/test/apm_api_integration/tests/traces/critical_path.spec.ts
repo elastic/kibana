@@ -34,13 +34,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   // format tree in somewhat concise format for easier testing
   function formatTree(nodes: HydratedNode[]): FormattedNode[] {
-    return nodes.map((node) => {
-      const name =
-        node.metadata?.['processor.event'] === 'transaction'
-          ? node.metadata['transaction.name']
-          : node.metadata?.['span.name'] || 'root';
-      return { name, value: node.countExclusive, children: formatTree(node.children) };
-    });
+    return sortBy(
+      nodes.map((node) => {
+        const name =
+          node.metadata?.['processor.event'] === 'transaction'
+            ? node.metadata['transaction.name']
+            : node.metadata?.['span.name'] || 'root';
+        return { name, value: node.countExclusive, children: formatTree(node.children) };
+      }),
+      (node) => node.name
+    );
   }
 
   async function fetchAndBuildCriticalPathTree(
@@ -223,6 +226,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                         .transaction('downstream')
                         .timestamp(timestamp + 50)
                         .duration(400)
+                        .children(
+                          downstream
+                            .span('from upstreamA', 'custom')
+                            .timestamp(timestamp + 100)
+                            .duration(300)
+                        )
                     )
                 ),
               upstreamB
@@ -239,6 +248,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                         .transaction('downstream')
                         .timestamp(timestamp + 50)
                         .duration(400)
+                        .children(
+                          downstream
+                            .span('from upstreamB', 'custom')
+                            .timestamp(timestamp + 100)
+                            .duration(300)
+                        )
                     )
                 ),
             ];
@@ -257,7 +272,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         transactionName: 'downstream',
       });
 
-      expect(sortBy(formatTree(unfilteredRootNodes), 'name')).eql([
+      expect(formatTree(unfilteredRootNodes)).eql([
         {
           name: 'GET /upstreamA',
           value: 0,
@@ -268,8 +283,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               children: [
                 {
                   name: 'downstream',
-                  value: 400 * 1000 * rate,
-                  children: [],
+                  value: 100 * 1000 * rate,
+                  children: [
+                    {
+                      name: 'from upstreamA',
+                      value: 300 * 1000 * rate,
+                      children: [],
+                    },
+                  ],
                 },
               ],
             },
@@ -285,8 +306,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               children: [
                 {
                   name: 'downstream',
-                  value: 400 * 1000 * rate,
-                  children: [],
+                  value: 100 * 1000 * rate,
+                  children: [
+                    {
+                      name: 'from upstreamB',
+                      value: 300 * 1000 * rate,
+                      children: [],
+                    },
+                  ],
                 },
               ],
             },
@@ -297,8 +324,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(formatTree(filteredRootNodes)).eql([
         {
           name: 'downstream',
-          value: 2 * 400 * 1000 * rate,
-          children: [],
+          value: 2 * 100 * 1000 * rate,
+          children: [
+            {
+              name: 'from upstreamA',
+              value: 300 * 1000 * rate,
+              children: [],
+            },
+            {
+              name: 'from upstreamB',
+              value: 300 * 1000 * rate,
+              children: [],
+            },
+          ],
         },
       ]);
     });

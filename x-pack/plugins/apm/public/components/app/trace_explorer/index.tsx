@@ -20,6 +20,7 @@ import { TraceExplorerSamplesFetcherContextProvider } from '../../../hooks/use_t
 import { APIClientRequestParamsOf } from '../../../services/rest/create_call_apm_api';
 import { ApmDatePicker } from '../../shared/date_picker/apm_date_picker';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 import { TraceSearchBox } from './trace_search_box';
 
@@ -128,9 +129,20 @@ export function TraceExplorer({ children }: { children: React.ReactElement }) {
               })}
               isSelected={routePath === '/traces/explorer/critical_path'}
             >
-              {i18n.translate('xpack.apm.traceExplorer.criticalPathTab', {
-                defaultMessage: 'Aggregated critical path',
-              })}
+              <EuiFlexGroup direction="row" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  {i18n.translate('xpack.apm.traceExplorer.criticalPathTab', {
+                    defaultMessage: 'Aggregated critical path',
+                  })}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <TechnicalPreviewBadge
+                    icon="beaker"
+                    size="s"
+                    style={{ verticalAlign: 'middle' }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiTab>
           </EuiTabs>
         </EuiFlexItem>

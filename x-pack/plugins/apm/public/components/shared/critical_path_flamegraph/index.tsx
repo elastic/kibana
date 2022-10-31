@@ -18,7 +18,7 @@ import { css } from '@emotion/css';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { uniqueId } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   AGENT_NAME,
@@ -145,6 +145,13 @@ export function CriticalPathFlamegraph(
   const transactionName =
     'transactionName' in props ? props.transactionName : null;
 
+  // Use a reference to time range, to not invalidate the API fetch
+  // we only care for traceIds, start/end are there to limit the search
+  // request to a certain time range. It shouldn't affect the actual results
+  // of the search.
+  const timerange = useRef({ start, end });
+  timerange.current = { start, end };
+
   const {
     data: { criticalPath } = { criticalPath: null },
     status: criticalPathFetchStatus,
@@ -157,8 +164,8 @@ export function CriticalPathFlamegraph(
       return callApmApi('POST /internal/apm/traces/aggregated_critical_path', {
         params: {
           body: {
-            start,
-            end,
+            start: timerange.current.start,
+            end: timerange.current.end,
             traceIds,
             serviceName,
             transactionName,
@@ -166,7 +173,7 @@ export function CriticalPathFlamegraph(
         },
       });
     },
-    [start, end, traceIds, serviceName, transactionName]
+    [timerange, traceIds, serviceName, transactionName]
   );
 
   const chartTheme = useChartTheme();

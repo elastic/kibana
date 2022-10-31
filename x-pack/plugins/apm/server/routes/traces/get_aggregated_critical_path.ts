@@ -7,6 +7,7 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { Logger } from '@kbn/logging';
 import {
   AGENT_NAME,
   PROCESSOR_EVENT,
@@ -59,6 +60,7 @@ export async function getAggregatedCriticalPath({
   apmEventClient,
   serviceName,
   transactionName,
+  logger,
 }: {
   traceIds: string[];
   start: number;
@@ -66,15 +68,17 @@ export async function getAggregatedCriticalPath({
   apmEventClient: APMEventClient;
   serviceName: string | null;
   transactionName: string | null;
+  logger: Logger;
 }): Promise<{ criticalPath: CriticalPathResponse | null }> {
+  const now = Date.now();
+
   const response = await apmEventClient.search('get_aggregated_critical_path', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
-      size: 10,
-      docvalue_fields: ['trace.id'],
-      track_total_hits: true,
+      size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [
@@ -128,7 +132,7 @@ export async function getAggregatedCriticalPath({
                   operationMetadata.put('transaction.type', doc['transaction.type'].value);
                   duration = doc['transaction.duration.us'].value;
                 }
-                
+                 
                 String operationId = toHash(operationMetadata);
                 
                 def map = [
@@ -239,7 +243,7 @@ export async function getAggregatedCriticalPath({
                 
                 def nodeId = toHash(path);
       
-                def childNodes = [];
+                def childNodes = context.nodes[nodeId] != null ? context.nodes[nodeId] : [];
                 
                 context.nodes[nodeId] = childNodes;
                 
@@ -343,13 +347,24 @@ export async function getAggregatedCriticalPath({
                 transaction.offset = 0;
                 setOffsetAndSkew(context, transaction, null, transaction.timestamp);
                 
-                def path = [ transaction.operationId ];
+                def path = [];
+                def parent = transaction;
+                while (parent != null) {
+                  path.add(parent.operationId);
+                  if (parent.parentId == null) {
+                    break;
+                  }
+                  parent = context.processedEvents[parent.parentId];
+                }
+
+                Collections.reverse(path);
+
                 def nodeId = toHash(path);
                 
                 scan(context, transaction, 0, transaction.duration, path);
                 
                 if (!rootNodes.contains(nodeId)) {
-                  rootNodes.add(nodeId);  
+                  rootNodes.add(nodeId);
                 }
                 
               }
@@ -367,6 +382,10 @@ export async function getAggregatedCriticalPath({
       },
     },
   });
+
+  logger.debug(
+    `Retrieved critical path in ${Date.now() - now}ms, took: ${response.took}ms`
+  );
 
   if (!response.aggregations) {
     return {
