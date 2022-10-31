@@ -77,7 +77,7 @@ export const AddMLInferencePipelineModal: React.FC<AddMLInferencePipelineModalPr
   );
 };
 
-const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClose }) => {
+export const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClose }) => {
   const { ingestionMethod } = useValues(IndexViewLogic);
   const {
     createErrors,
@@ -125,7 +125,7 @@ const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClo
   );
 };
 
-const ModalSteps: React.FC = () => {
+export const ModalSteps: React.FC = () => {
   const {
     addInferencePipelineModal: { step },
     isPipelineDataValid,
@@ -183,10 +183,9 @@ const ModalSteps: React.FC = () => {
   return <EuiStepsHorizontal steps={navSteps} />;
 };
 
-const ModalFooter: React.FC<AddMLInferencePipelineModalProps & { ingestionMethod: string }> = ({
-  ingestionMethod,
-  onClose,
-}) => {
+export const ModalFooter: React.FC<
+  AddMLInferencePipelineModalProps & { ingestionMethod: string }
+> = ({ ingestionMethod, onClose }) => {
   const { addInferencePipelineModal: modal, isPipelineDataValid } = useValues(MLInferenceLogic);
   const { attachPipeline, createPipeline, setAddInferencePipelineStep } =
     useActions(MLInferenceLogic);
