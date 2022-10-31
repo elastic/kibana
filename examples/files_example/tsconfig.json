@@ -12,7 +12,7 @@
     "../../typings/**/*"
   ],
   "exclude": [],
-  "references": [
+  "kbn_references": [
     { "path": "../../src/core/tsconfig.json" },
     { "path": "../developer_examples/tsconfig.json" },
     { "path": "../../src/plugins/files/tsconfig.json" },

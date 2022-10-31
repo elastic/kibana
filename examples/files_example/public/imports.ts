@@ -7,12 +7,12 @@
  */
 
 export {
-  FilesClient,
-  FilesSetup,
-  FilesStart,
+  type FilesClient,
+  type FilesSetup,
+  type FilesStart,
   UploadFile,
   FilesContext,
-  ScopedFilesClient,
+  type ScopedFilesClient,
   FilePicker,
   Image,
 } from '@kbn/files-plugin/public';
