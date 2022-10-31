@@ -6,8 +6,7 @@
  */
 
 import type { EuiDataGridColumn } from '@elastic/eui';
-import type { ColumnHeaderOptions } from '../../../../common/types';
-import type { SortColumnTable } from '../../components/data_table/types';
+import type { ColumnHeaderOptions, SortColumnTable } from '../../../../common/types';
 import type { TGridModel, TGridModelSettings } from './model';
 
 /** The state of all timelines is stored here */

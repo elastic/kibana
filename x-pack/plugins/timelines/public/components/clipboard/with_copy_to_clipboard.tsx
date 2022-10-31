@@ -20,26 +20,36 @@ import { Clipboard } from './clipboard';
 export const WithCopyToClipboard = React.memo<{
   isHoverAction?: boolean;
   keyboardShortcut?: string;
+  showTooltip?: boolean;
   text: string;
   titleSummary?: string;
-}>(({ isHoverAction, keyboardShortcut = '', text, titleSummary }) => (
-  <EuiToolTip
-    content={
-      <TooltipWithKeyboardShortcut
-        additionalScreenReaderOnlyContext={text}
-        content={COPY_TO_CLIPBOARD}
-        shortcut={keyboardShortcut}
-        showShortcut={keyboardShortcut !== ''}
+}>(({ isHoverAction, keyboardShortcut = '', showTooltip = true, text, titleSummary }) => {
+  return showTooltip ? (
+    <EuiToolTip
+      content={
+        <TooltipWithKeyboardShortcut
+          additionalScreenReaderOnlyContext={text}
+          content={COPY_TO_CLIPBOARD}
+          shortcut={keyboardShortcut}
+          showShortcut={keyboardShortcut !== ''}
+        />
+      }
+    >
+      <Clipboard
+        content={text}
+        isHoverAction={isHoverAction}
+        titleSummary={titleSummary}
+        toastLifeTimeMs={800}
       />
-    }
-  >
+    </EuiToolTip>
+  ) : (
     <Clipboard
       content={text}
       isHoverAction={isHoverAction}
       titleSummary={titleSummary}
       toastLifeTimeMs={800}
     />
-  </EuiToolTip>
-));
+  );
+});
 
 WithCopyToClipboard.displayName = 'WithCopyToClipboard';

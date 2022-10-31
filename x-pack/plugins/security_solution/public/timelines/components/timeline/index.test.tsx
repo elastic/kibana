@@ -33,7 +33,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { createStore } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useGetUserCasesPermissions } from '../../../common/lib/kibana';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),

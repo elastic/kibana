@@ -19,7 +19,7 @@ import { SeverityBadge } from '../../../../detections/components/rules/severity_
 import type { State } from '../../../store';
 import { createStore } from '../../../store';
 import { TimelineId } from '../../../../../common/types';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../store/data_table/reducer';
 
 const state: State = {
   ...mockGlobalState,

@@ -17,7 +17,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useSignalHelpers } from './use_signal_helpers';
 import type { State } from '../../store';
 import { createStore } from '../../store';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../store/data_table/reducer';
 
 describe('useSignalHelpers', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (

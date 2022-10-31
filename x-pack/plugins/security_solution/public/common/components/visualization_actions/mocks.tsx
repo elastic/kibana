@@ -7,7 +7,6 @@
 import React from 'react';
 import { cloneDeep } from 'lodash/fp';
 
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import {
   TestProviders,
   mockGlobalState,
@@ -17,6 +16,7 @@ import {
 } from '../../mock';
 import type { State } from '../../store';
 import { createStore } from '../../store';
+import { tGridReducer } from '../../store/data_table/reducer';
 
 export const queryFromSearchBar = {
   query: 'host.name: *',

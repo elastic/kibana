@@ -26,7 +26,7 @@ import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
 import type { NarrowDateRange } from '../../../common/components/ml/types';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 describe('IP Overview Component', () => {
   const state: State = mockGlobalState;

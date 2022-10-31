@@ -26,7 +26,7 @@ import { networkModel } from '../../store';
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 

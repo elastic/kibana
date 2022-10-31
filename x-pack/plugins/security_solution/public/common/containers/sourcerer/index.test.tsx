@@ -37,7 +37,7 @@ import { postSourcererDataView } from './api';
 import * as source from '../source/use_data_view';
 import { sourcererActions } from '../../store/sourcerer';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../store/data_table/reducer';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,

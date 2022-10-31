@@ -24,7 +24,7 @@ import { HostsTableType } from '../../store/model';
 import { HostsTable } from '.';
 import { mockData } from './mock';
 import { render } from '@testing-library/react';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 

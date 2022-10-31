@@ -19,7 +19,7 @@ import { createStore } from '../../store/store';
 
 import { ErrorToastDispatcher } from '.';
 import type { State } from '../../store/types';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../store/data_table/reducer';
 
 describe('Error Toast Dispatcher', () => {
   const state: State = mockGlobalState;

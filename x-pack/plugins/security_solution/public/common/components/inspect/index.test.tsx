@@ -23,7 +23,7 @@ import { upsertQuery } from '../../store/inputs/helpers';
 import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { InputsModelId } from '../../store/inputs/constants';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../store/data_table/reducer';
 
 jest.mock('./modal', () => ({
   ModalInspectQuery: jest.fn(() => <div data-test-subj="mocker-modal" />),

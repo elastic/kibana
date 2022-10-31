@@ -28,7 +28,7 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../common/store/data_table/reducer';
 
 jest.mock('../../common/containers/sourcerer');
 

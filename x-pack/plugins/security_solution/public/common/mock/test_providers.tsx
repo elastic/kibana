@@ -18,7 +18,6 @@ import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
 import { createStore } from '../store';
@@ -32,6 +31,7 @@ import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 import { CASES_FEATURE_ID } from '../../../common/constants';
 import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
+import { tGridReducer } from '../store/data_table/reducer';
 
 const state: State = mockGlobalState;
 

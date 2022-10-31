@@ -19,7 +19,7 @@ import '../../../common/mock/match_media';
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import { NetworkKpiComponent } from '.';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 describe('NetworkKpiComponent', () => {
   const state: State = mockGlobalState;

@@ -23,7 +23,7 @@ import {
 import { mockTheme, mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 

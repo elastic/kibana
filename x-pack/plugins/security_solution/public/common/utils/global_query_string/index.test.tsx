@@ -26,7 +26,7 @@ import {
 import { createStore } from '../../store';
 import type { LinkInfo } from '../../links';
 import { SecurityPageName } from '../../../app/types';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../store/data_table/reducer';
 
 const mockDispatch = jest.fn();
 

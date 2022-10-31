@@ -24,7 +24,7 @@ import { createStore } from '../../store';
 import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { InputsModelId } from '../../store/inputs/constants';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../store/data_table/reducer';
 
 jest.mock('../../lib/kibana');
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;

@@ -8,8 +8,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
-
 import '../../../../common/mock/match_media';
 import {
   createSecuritySolutionStorageMock,
@@ -29,6 +27,7 @@ import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../common/mock/router';
 
 import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { tGridReducer } from '../../../../common/store/data_table/reducer';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

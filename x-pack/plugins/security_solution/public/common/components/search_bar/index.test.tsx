@@ -21,7 +21,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { createStore } from '../../store';
 import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../store/data_table/reducer';
 
 const mockSetAppFilters = jest.fn();
 const mockFilterManager = new FilterManager(coreMock.createStart().uiSettings);

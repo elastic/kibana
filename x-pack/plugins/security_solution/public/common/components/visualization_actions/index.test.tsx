@@ -25,7 +25,8 @@ import { CASES_FEATURE_ID } from '../../../../common/constants';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { allCasesCapabilities, allCasesPermissions } from '../../../cases_test_utils';
 import { InputsModelId } from '../../store/inputs/constants';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../store/data_table/reducer';
+
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return {

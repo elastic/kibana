@@ -24,7 +24,6 @@ import type {
 } from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -42,6 +41,7 @@ import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { getDeepLinks } from '../../../app/deep_links';
 import { fleetGetPackageListHttpMock } from '../../../management/mocks';
+import { tGridReducer } from '../../store/data_table/reducer';
 
 const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
 

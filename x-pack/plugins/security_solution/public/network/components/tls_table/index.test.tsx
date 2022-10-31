@@ -24,7 +24,7 @@ import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 

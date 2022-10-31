@@ -24,7 +24,7 @@ import { useNetworkOverview } from '../../containers/overview_network';
 import { SecurityPageName } from '../../../app/types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { render } from '@testing-library/react';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/components/link_to');
 const mockNavigateToApp = jest.fn();

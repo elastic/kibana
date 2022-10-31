@@ -28,7 +28,7 @@ import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers'
 import { TimelineId, TimelineType } from '../../../../common/types';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../store/data_table/reducer';
 
 const mockDispatch = jest.fn();
 

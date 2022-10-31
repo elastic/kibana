@@ -25,7 +25,7 @@ import { networkModel } from '../../store';
 
 import { NetworkHttpTable } from '.';
 import { mockData } from './mock';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');

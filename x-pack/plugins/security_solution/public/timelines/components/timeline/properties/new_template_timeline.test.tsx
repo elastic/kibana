@@ -20,7 +20,7 @@ import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { NewTemplateTimeline } from './new_template_timeline';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../../common/store/data_table/reducer';
 
 jest.mock('../../../../common/lib/kibana', () => {
   return {

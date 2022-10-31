@@ -27,7 +27,7 @@ import { networkModel } from '../../store';
 
 import { NetworkTopCountriesTable } from '.';
 import { mockData } from './mock';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 

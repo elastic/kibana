@@ -25,7 +25,7 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 

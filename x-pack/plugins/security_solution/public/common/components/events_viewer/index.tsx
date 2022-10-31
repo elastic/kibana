@@ -396,33 +396,35 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                     gutterSize="none"
                   >
                     <ScrollableFlexItem grow={1}>
-                      <StatefulDataTableComponent
-                        activePage={pageInfo.activePage}
-                        browserFields={browserFields}
-                        data={nonDeletedEvents}
-                        disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
-                        id={tableId}
-                        indexNames={selectedPatterns}
-                        itemsPerPageOptions={itemsPerPageOptions}
-                        loadPage={loadPage}
-                        pageSize={pageInfo.querySize}
-                        refetch={refetch}
-                        renderCellValue={renderCellValue}
-                        rowRenderers={rowRenderers}
-                        tabType={'query'}
-                        totalItems={totalCountMinusDeleted}
-                        bulkActions={bulkActions}
-                        fieldBrowserOptions={fieldBrowserOptions}
-                        defaultCellActions={defaultCellActions}
-                        filterQuery={filterQuery}
-                        hasAlertsCrud={hasAlertsCrud}
-                        showCheckboxes={showCheckboxes}
-                        unit={unit}
-                        filters={filters}
-                        filterStatus={currentFilter}
-                        onRuleChange={onRuleChange}
-                        leadingControlColumns={leadingControlColumns}
-                      />
+                      {tableView === 'gridView' && (
+                        <StatefulDataTableComponent
+                          activePage={pageInfo.activePage}
+                          browserFields={browserFields}
+                          data={nonDeletedEvents}
+                          disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
+                          id={tableId}
+                          indexNames={selectedPatterns}
+                          itemsPerPageOptions={itemsPerPageOptions}
+                          loadPage={loadPage}
+                          pageSize={pageInfo.querySize}
+                          refetch={refetch}
+                          renderCellValue={renderCellValue}
+                          rowRenderers={rowRenderers}
+                          tabType={'query'}
+                          totalItems={totalCountMinusDeleted}
+                          bulkActions={bulkActions}
+                          fieldBrowserOptions={fieldBrowserOptions}
+                          defaultCellActions={defaultCellActions}
+                          filterQuery={filterQuery}
+                          hasAlertsCrud={hasAlertsCrud}
+                          showCheckboxes={showCheckboxes}
+                          unit={unit}
+                          filters={filters}
+                          filterStatus={currentFilter}
+                          onRuleChange={onRuleChange}
+                          leadingControlColumns={leadingControlColumns}
+                        />
+                      )}
                       {tableView === 'eventRenderedView' && (
                         <StatefulEventRenderedView
                           events={events}

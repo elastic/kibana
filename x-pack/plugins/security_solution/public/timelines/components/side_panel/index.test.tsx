@@ -19,12 +19,12 @@ import {
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import { DetailsPanel } from '.';
-import type { TimelineExpandedDetail } from '../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
+import type { ExpandedDetail } from '../../../../common/types';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
@@ -58,7 +58,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const hostExpandedDetail: TimelineExpandedDetail = {
+  const hostExpandedDetail: ExpandedDetail = {
     [TimelineTabs.query]: {
       panelView: 'hostDetail',
       params: {
@@ -67,7 +67,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const networkExpandedDetail: TimelineExpandedDetail = {
+  const networkExpandedDetail: ExpandedDetail = {
     [TimelineTabs.query]: {
       panelView: 'networkDetail',
       params: {
@@ -77,7 +77,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const eventExpandedDetail: TimelineExpandedDetail = {
+  const eventExpandedDetail: ExpandedDetail = {
     [TimelineTabs.query]: {
       panelView: 'eventDetail',
       params: {
@@ -87,7 +87,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const eventPinnedExpandedDetail: TimelineExpandedDetail = {
+  const eventPinnedExpandedDetail: ExpandedDetail = {
     [TimelineTabs.pinned]: {
       panelView: 'eventDetail',
       params: {
@@ -131,7 +131,7 @@ describe('Details Panel Component', () => {
 
     test('it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set', () => {
       state.timeline.timelineById[TimelineId.test].expandedDetail =
-        dataLessExpandedDetail as TimelineExpandedDetail; // Casting as the dataless doesn't meet the actual type requirements
+        dataLessExpandedDetail as ExpandedDetail; // Casting as the dataless doesn't meet the actual type requirements
       const wrapper = mount(
         <TestProviders store={store}>
           <DetailsPanel {...mockProps} />

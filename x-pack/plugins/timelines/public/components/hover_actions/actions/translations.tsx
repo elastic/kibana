@@ -18,7 +18,7 @@ export const ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE = (fieldOrValue: string, isTi
   });
 
 export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.dragAndDrop.copyToClipboardTooltip',
+  'xpack.timelines.dragAndDrop.copyToClipboardTooltip',
   {
     defaultMessage: 'Copy to Clipboard',
   }

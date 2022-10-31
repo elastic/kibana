@@ -19,7 +19,7 @@ import type { State } from '../../../../store';
 import { createStore } from '../../../../store';
 import * as i18n from './translations';
 import { useChartSettingsPopoverConfiguration } from '.';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../../store/data_table/reducer';
 
 const mockHandleClick = jest.fn();
 

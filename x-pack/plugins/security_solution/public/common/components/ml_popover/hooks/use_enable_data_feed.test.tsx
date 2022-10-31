@@ -18,7 +18,7 @@ import { createStore } from '../../../store';
 import type { State } from '../../../store';
 
 import type { SecurityJob } from '../types';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../store/data_table/reducer';
 
 const state: State = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();

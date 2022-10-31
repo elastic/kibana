@@ -26,7 +26,7 @@ import { mockHistory, Router } from '../../../common/mock/router';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
