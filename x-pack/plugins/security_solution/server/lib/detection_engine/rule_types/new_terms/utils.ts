@@ -9,7 +9,7 @@ import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-const AGG_FIELD_NAME = 'new_terms_values';
+export const AGG_FIELD_NAME = 'new_terms_values';
 const DELIMITER = '_';
 
 export const parseDateString = ({
@@ -57,9 +57,9 @@ export const validateHistoryWindowStart = ({
  * For multiple new terms fields and buckets, value equals to concatenated base64 encoded bucket names
  * @returns for buckets('host-0', 'test'), resulted value equals to: 'aG9zdC0w_dGVzdA=='
  */
-export const retrieveValuesFromBuckets = (
+export const transformBucketsToValues = (
   newTermsFields: string[],
-  buckets: Array<{ key: Record<string, string | number | null> }>
+  buckets: estypes.AggregationsCompositeBucket[]
 ): Array<string | number> => {
   // if new terms include only one field we don't use runtime mappings and don't stich fields buckets together
   if (newTermsFields.length === 1) {
@@ -133,10 +133,10 @@ const decodeBucketKey = (bucketKey: string): string[] => {
 };
 
 /**
- * decodes bucket key and returns fields as array
+ * decodes matched values(bucket keys) from terms aggregation and returns fields as array
  * @returns 'aG9zdC0w_dGVzdA==' bucket key will result in ['host-0', 'test']
  */
-export const prepareNewTerms = (newTermsFields: string[], bucketKey: string | number) => {
+export const decodeMatchedValues = (newTermsFields: string[], bucketKey: string | number) => {
   // if newTermsFields has length greater than 1, bucketKey can't be number, so casting is safe here
   const values = newTermsFields.length === 1 ? [bucketKey] : decodeBucketKey(bucketKey as string);
 

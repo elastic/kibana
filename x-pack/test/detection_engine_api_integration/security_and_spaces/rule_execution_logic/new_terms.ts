@@ -79,6 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(alerts.hits.hits.length).eql(1);
       expect(removeRandomValuedProperties(alerts.hits.hits[0]._source)).eql({
         'kibana.alert.new_terms': ['zeek-newyork-sha-aa8df15'],
+        'kibana.alert.new_terms_fields_values': ['host.name: zeek-newyork-sha-aa8df15'],
         'kibana.alert.rule.category': 'New Terms Rule',
         'kibana.alert.rule.consumer': 'siem',
         'kibana.alert.rule.name': 'Query with a rule id',

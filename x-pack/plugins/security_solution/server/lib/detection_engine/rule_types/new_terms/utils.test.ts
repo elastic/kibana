@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { parseDateString, validateHistoryWindowStart } from './utils';
+import {
+  parseDateString,
+  validateHistoryWindowStart,
+  transformBucketsToValues,
+  getAggregationField,
+  prepareNewTermsFieldsValues,
+  decodeMatchedValues,
+  AGG_FIELD_NAME,
+} from './utils';
 
 describe('new terms utils', () => {
   describe('parseDateString', () => {
@@ -62,6 +70,88 @@ describe('new terms utils', () => {
       expect(() => validateHistoryWindowStart({ historyWindowStart, from })).toThrowError(
         `History window size is smaller than rule interval + additional lookback, 'historyWindowStart' must be earlier than 'from'`
       );
+    });
+  });
+
+  describe('transformBucketsToValues', () => {
+    it('should return correct value for a single new terms field', () => {
+      expect(
+        transformBucketsToValues(
+          ['source.host'],
+          [
+            {
+              key: {
+                'source.host': 'host-0',
+              },
+              doc_count: 1,
+            },
+            {
+              key: {
+                'source.host': 'host-1',
+              },
+              doc_count: 3,
+            },
+          ]
+        )
+      ).toEqual(['host-0', 'host-1']);
+    });
+
+    it('should return correct value for multiple new terms fields', () => {
+      expect(
+        transformBucketsToValues(
+          ['source.host', 'source.ip'],
+          [
+            {
+              key: {
+                'source.host': 'host-0',
+                'source.ip': '127.0.0.1',
+              },
+              doc_count: 1,
+            },
+            {
+              key: {
+                'source.host': 'host-1',
+                'source.ip': '127.0.0.1',
+              },
+              doc_count: 1,
+            },
+          ]
+        )
+      ).toEqual(['aG9zdC0w_MTI3LjAuMC4x', 'aG9zdC0x_MTI3LjAuMC4x']);
+    });
+  });
+
+  describe('getAggregationField', () => {
+    it('should return correct value for a single new terms field', () => {
+      expect(getAggregationField(['source.ip'])).toBe('source.ip');
+    });
+    it('should return correct value for multiple new terms fields', () => {
+      expect(getAggregationField(['source.host', 'source.ip'])).toBe(AGG_FIELD_NAME);
+    });
+  });
+
+  describe('decodeMatchedValues', () => {
+    it('should return correct value for a single new terms field', () => {
+      expect(decodeMatchedValues(['source.ip'], '127.0.0.1')).toEqual(['127.0.0.1']);
+    });
+    it('should return correct value for multiple new terms fields', () => {
+      expect(decodeMatchedValues(['source.host', 'source.ip'], 'aG9zdC0w_MTI3LjAuMC4x')).toEqual([
+        'host-0',
+        '127.0.0.1',
+      ]);
+    });
+  });
+
+  describe('prepareNewTermsFieldsValues', () => {
+    it('should return correct value for a single new terms field', () => {
+      expect(prepareNewTermsFieldsValues(['source.ip'], ['127.0.0.1'])).toEqual([
+        'source.ip: 127.0.0.1',
+      ]);
+    });
+    it('should return correct value for multiple new terms fields', () => {
+      expect(
+        prepareNewTermsFieldsValues(['source.host', 'source.ip'], ['host-0', '127.0.0.1'])
+      ).toEqual(['source.host: host-0', 'source.ip: 127.0.0.1']);
     });
   });
 });

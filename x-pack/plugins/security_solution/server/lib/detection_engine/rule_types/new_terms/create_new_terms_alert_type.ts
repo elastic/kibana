@@ -30,10 +30,10 @@ import { validateIndexPatterns } from '../utils';
 import {
   parseDateString,
   validateHistoryWindowStart,
-  retrieveValuesFromBuckets,
+  transformBucketsToValues,
   getNewTermsRuntimeMappings,
   getAggregationField,
-  prepareNewTerms,
+  decodeMatchedValues,
   prepareNewTermsFieldsValues,
 } from './utils';
 import {
@@ -194,7 +194,7 @@ export const createNewTermsAlertType = (
           break;
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
-        const includeValues = retrieveValuesFromBuckets(params.newTermsFields, bucketsForField);
+        const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
         // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
         // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
         // response correspond to each new term.
@@ -282,7 +282,7 @@ export const createNewTermsAlertType = (
 
           const eventsAndTerms: EventsAndTerms[] =
             docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => {
-              const newTerms = prepareNewTerms(params.newTermsFields, bucket.key);
+              const newTerms = decodeMatchedValues(params.newTermsFields, bucket.key);
               return {
                 event: bucket.docs.hits.hits[0],
                 newTerms,
