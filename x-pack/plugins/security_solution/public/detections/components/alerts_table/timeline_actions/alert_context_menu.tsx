@@ -55,7 +55,6 @@ interface AlertContextMenuProps {
   scopeId: string;
 }
 
-
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
   ariaLabel = i18n.MORE_ACTIONS,
   ariaRowindex,
