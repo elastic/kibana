@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ErrorCode } from '../../common/types/error_codes';
+
 export interface ElasticsearchResponseError {
   meta?: {
     body?: {
@@ -28,3 +30,6 @@ export const isResourceNotFoundException = (error: ElasticsearchResponseError) =
 
 export const isUnauthorizedException = (error: ElasticsearchResponseError) =>
   error.meta?.statusCode === 403;
+
+export const isPipelineIsInUseException = (error: Error) =>
+  error.message === ErrorCode.PIPELINE_IS_IN_USE;

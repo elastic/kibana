@@ -1,6 +1,6 @@
 {
   "extends": "../../shared/cypress/tsconfig.json",
-  "references": [{ "path": "../../shared/cypress/tsconfig.json" }],
+  "kbn_references": [{ "path": "../../shared/cypress/tsconfig.json" }],
   "compilerOptions": { "outDir": "../../../../target/cypress/types/workplace_search" },
   "include": ["./**/*"]
 }
