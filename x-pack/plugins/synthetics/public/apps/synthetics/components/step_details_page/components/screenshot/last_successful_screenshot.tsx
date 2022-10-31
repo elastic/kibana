@@ -39,6 +39,7 @@ export const LastSuccessfulScreenshot = ({ step }: { step: JourneyStep }) => {
         allStepsLoaded={true}
         stepLabels={[]}
         retryFetchOnRevisit={false}
+        asThumbnail={false}
       />
       <EuiSpacer size="xs" />
     </>
