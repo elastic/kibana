@@ -42,6 +42,7 @@ export const wrapThrottledAlerts = ({
   indicesToQuery,
   buildReasonMessage,
   groupByFields,
+  alertTimestampOverride,
 }: {
   throttleBuckets: ThrottleBuckets[];
   spaceId: string | null | undefined;
@@ -50,6 +51,7 @@ export const wrapThrottledAlerts = ({
   indicesToQuery: string[];
   buildReasonMessage: BuildReasonMessage;
   groupByFields: string[];
+  alertTimestampOverride: Date | undefined;
 }): Array<WrappedFieldsLatest<ThrottledFieldsLatest>> => {
   return throttleBuckets.map((bucket) => {
     const id = objectHash([
@@ -69,7 +71,8 @@ export const wrapThrottledAlerts = ({
       [],
       true,
       buildReasonMessage,
-      indicesToQuery
+      indicesToQuery,
+      alertTimestampOverride
     );
     return {
       _id: id,

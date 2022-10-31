@@ -65,7 +65,7 @@ export const createSavedQueryAlertType = (
     async executor(execOptions) {
       const { runOpts, services, spaceId, state } = execOptions;
 
-      const result = await queryExecutor({
+      return queryExecutor({
         runOpts,
         experimentalFeatures,
         eventsTelemetry,
@@ -76,7 +76,6 @@ export const createSavedQueryAlertType = (
         osqueryCreateAction,
         licensing,
       });
-      return { ...result, state };
     },
   };
 };

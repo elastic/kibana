@@ -407,9 +407,7 @@ export const previewRulesRoute = async (
             );
             break;
           case 'new_terms':
-            const newTermsAlertType = previewRuleTypeWrapper(
-              createNewTermsAlertType(ruleOptions, true)
-            );
+            const newTermsAlertType = previewRuleTypeWrapper(createNewTermsAlertType(ruleOptions));
             await runExecutors(
               newTermsAlertType.executor,
               newTermsAlertType.id,

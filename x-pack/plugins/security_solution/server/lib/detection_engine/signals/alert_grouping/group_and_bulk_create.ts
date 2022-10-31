@@ -171,6 +171,7 @@ export const groupAndBulkCreate = async ({
         indicesToQuery: runOpts.inputIndex,
         buildReasonMessage,
         groupByFields,
+        alertTimestampOverride: runOpts.alertTimestampOverride,
       });
 
       const bulkCreateResult = await runOpts.bulkCreate(wrappedAlerts);

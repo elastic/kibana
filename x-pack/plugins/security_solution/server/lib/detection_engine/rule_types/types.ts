@@ -76,6 +76,7 @@ export interface RunOpts<TParams extends RuleParams> {
   aggregatableTimestampField: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
+  alertTimestampOverride: Date | undefined;
 }
 
 export type SecurityAlertType<

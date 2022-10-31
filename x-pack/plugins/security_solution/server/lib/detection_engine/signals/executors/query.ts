@@ -73,23 +73,26 @@ export const queryExecutor = async ({
             bucketHistory,
             groupByFields: ruleParams.alertGrouping.groupBy,
           })
-        : await searchAfterAndBulkCreate({
-            tuple: runOpts.tuple,
-            exceptionsList: runOpts.unprocessedExceptions,
-            services,
-            listClient: runOpts.listClient,
-            ruleExecutionLogger: runOpts.ruleExecutionLogger,
-            eventsTelemetry,
-            inputIndexPattern: runOpts.inputIndex,
-            pageSize: runOpts.searchAfterSize,
-            filter: esFilter,
-            buildReasonMessage: buildReasonMessageForQueryAlert,
-            bulkCreate: runOpts.bulkCreate,
-            wrapHits: runOpts.wrapHits,
-            runtimeMappings: runOpts.runtimeMappings,
-            primaryTimestamp: runOpts.primaryTimestamp,
-            secondaryTimestamp: runOpts.secondaryTimestamp,
-          });
+        : {
+            ...(await searchAfterAndBulkCreate({
+              tuple: runOpts.tuple,
+              exceptionsList: runOpts.unprocessedExceptions,
+              services,
+              listClient: runOpts.listClient,
+              ruleExecutionLogger: runOpts.ruleExecutionLogger,
+              eventsTelemetry,
+              inputIndexPattern: runOpts.inputIndex,
+              pageSize: runOpts.searchAfterSize,
+              filter: esFilter,
+              buildReasonMessage: buildReasonMessageForQueryAlert,
+              bulkCreate: runOpts.bulkCreate,
+              wrapHits: runOpts.wrapHits,
+              runtimeMappings: runOpts.runtimeMappings,
+              primaryTimestamp: runOpts.primaryTimestamp,
+              secondaryTimestamp: runOpts.secondaryTimestamp,
+            })),
+            state: {},
+          };
 
     const license = await firstValueFrom(licensing.license$);
     const hasGoldLicense = license.hasAtLeast('gold');
