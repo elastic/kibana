@@ -77,7 +77,11 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (
+    metricType: UiCounterMetricType,
+    eventName: string | string[],
+    count?: number
+  ) => void;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
   http: HttpStart;

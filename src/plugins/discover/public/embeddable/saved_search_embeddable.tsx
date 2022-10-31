@@ -34,6 +34,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
@@ -60,6 +61,7 @@ import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
 import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
 import { fetchSql } from '../application/main/utils/fetch_sql';
+import { ADHOC_DATA_VIEW_CLICK_EVENT } from '../constants';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -299,6 +301,11 @@ export class SavedSearchEmbeddable
       return;
     }
     const sort = this.getSort(this.savedSearch.sort, dataView);
+
+    if (!dataView.isPersisted()) {
+      // one used adhoc data view
+      this.services.trackUiMetric?.(METRIC_TYPE.CLICK, ADHOC_DATA_VIEW_CLICK_EVENT, 1);
+    }
 
     const props: SearchProps = {
       columns: this.savedSearch.columns,

@@ -44,7 +44,8 @@ export function useDiscoverState({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   dataViewList: DataViewListItem[];
 }) {
-  const { uiSettings, data, filterManager, dataViews, toastNotifications } = services;
+  const { uiSettings, data, filterManager, dataViews, toastNotifications, trackUiMetric } =
+    services;
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const { timefilter } = data.query.timefilter;
 
@@ -132,6 +133,7 @@ export function useDiscoverState({
     dataViews,
     toastNotifications,
     filterManager,
+    trackUiMetric,
   });
 
   /**
