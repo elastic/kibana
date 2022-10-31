@@ -6,15 +6,7 @@
  */
 
 import _ from 'lodash';
-import {
-  Plugin,
-  CoreSetup,
-  CoreStart,
-  IKibanaResponse,
-  KibanaResponseFactory,
-  KibanaRequest,
-  RequestHandlerContext,
-} from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
 import {
@@ -278,28 +270,6 @@ export class SampleTaskManagerFixturePlugin
       },
     });
     initRoutes(core.http.createRouter(), this.taskManagerStart, taskTestingEvents);
-
-    const router = core.http.createRouter();
-    router.get(
-      {
-        path: '/api/registered_tasks',
-        validate: {},
-      },
-      async (
-        context: RequestHandlerContext,
-        req: KibanaRequest<any, any, any, any>,
-        res: KibanaResponseFactory
-      ): Promise<IKibanaResponse<any>> => {
-        try {
-          const tm = await this.taskManagerStart;
-          return res.ok({
-            body: tm.getRegisteredTypes(),
-          });
-        } catch (err) {
-          return res.badRequest({ body: err });
-        }
-      }
-    );
   }
 
   public start(core: CoreStart, { taskManager }: SampleTaskManagerFixtureStartDeps) {
