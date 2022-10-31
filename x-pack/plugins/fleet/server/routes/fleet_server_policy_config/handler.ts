@@ -104,12 +104,21 @@ export const putFleetServerPolicyHandler: RequestHandler<
   undefined,
   TypeOf<typeof PutFleetServerHostRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
+    const coreContext = await await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const soClient = coreContext.savedObjects.client;
+
     const item = await updateFleetServerHost(soClient, request.params.itemId, request.body);
     const body = {
       item,
     };
+
+    if (item.is_default) {
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    } else {
+      await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(soClient, esClient, item.id);
+    }
 
     return response.ok({ body });
   } catch (error) {

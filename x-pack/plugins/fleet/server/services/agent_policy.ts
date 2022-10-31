@@ -990,6 +990,38 @@ class AgentPolicyService {
 
     return res;
   }
+
+  public async bumpAllAgentPoliciesForFleetServerHosts(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    fleetServerHostId: string,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      fields: ['revision', 'fleet_server_host_id'],
+      searchFields: ['fleet_server_host_id'],
+      search: escapeSearchQueryPhrase(fleetServerHostId),
+      perPage: SO_SEARCH_LIMIT,
+    });
+    const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
+      policy.attributes = {
+        ...policy.attributes,
+        revision: policy.attributes.revision + 1,
+        updated_at: new Date().toISOString(),
+        updated_by: options?.user ? options.user.username : 'system',
+      };
+      return policy;
+    });
+    const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+    await pMap(
+      currentPolicies.saved_objects,
+      (policy) => this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id),
+      { concurrency: 50 }
+    );
+
+    return res;
+  }
 }
 
 export const agentPolicyService = new AgentPolicyService();
