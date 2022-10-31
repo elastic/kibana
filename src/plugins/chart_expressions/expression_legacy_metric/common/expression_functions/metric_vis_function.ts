@@ -185,7 +185,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visType,
         visConfig: {
           metric: {
-            ...(args?.metricAlignment ? { alignment: args?.metricAlignment } : {}),
+            ...(args.metricAlignment ? { alignment: args.metricAlignment } : {}),
             palette: args.palette?.params,
             percentageMode: args.percentageMode,
             metricColorMode: args.colorMode,

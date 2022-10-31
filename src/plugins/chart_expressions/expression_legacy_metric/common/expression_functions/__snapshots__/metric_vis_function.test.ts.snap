@@ -41,6 +41,7 @@ Object {
         ],
       },
       "metric": Object {
+        "alignment": "left",
         "autoScale": undefined,
         "colorFullBackground": false,
         "labels": Object {
