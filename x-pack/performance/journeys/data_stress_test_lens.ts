@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { subj } from '@kbn/test-subj-selector';
 import { Journey } from '@kbn/journeys';
 import { waitForVisualizations } from '../utils';
 
@@ -15,11 +14,6 @@ export const journey = new Journey({
 })
   .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaServer }) => {
     await kibanaServer.uiSettings.update({ 'histogram:maxBars': 100 });
-    await page.goto(kbnUrl.get(`/app/dashboards`));
-    await page.waitForSelector('#dashboardListingHeading');
-  })
-
-  .step('Go to dashboard', async ({ page }) => {
-    await page.click(subj('dashboardListingTitleLink-Stresstest'));
+    await page.goto(kbnUrl.get(`/app/dashboards#/view/92b143a0-2e9c-11ed-b1b6-a504560b392c`));
     await waitForVisualizations(page, 1);
   });
