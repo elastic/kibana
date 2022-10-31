@@ -245,12 +245,17 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         // Proceed to 'DONE' and start serving traffic.
-        // Because WAIT_FOR_MIGRATION_COMPLETION can only be used by 
+        // Because WAIT_FOR_MIGRATION_COMPLETION can only be used by
         // background-task nodes on Cloud, we can be confident that this node
         // has exactly the same plugins enabled as the node that finished the
         // migration. So we won't need to transform any old documents or update
         // the mappings.
         controlState: 'DONE',
+        // Source is a none because we didn't do any migration from a source
+        // index
+        sourceIndex: Option.none,
+        targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+        versionIndexReadyActions: Option.none,
       };
     } else {
       // When getAliases returns a left 'multiple_indices_per_alias' error or

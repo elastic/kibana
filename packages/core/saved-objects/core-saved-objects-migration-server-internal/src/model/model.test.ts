@@ -790,6 +790,171 @@ describe('migrations v2 model', () => {
       });
     });
 
+    describe('WAIT_FOR_MIGRATION_COMPLETION', () => {
+      const waitForMState: State = {
+        ...baseState,
+        controlState: 'WAIT_FOR_MIGRATION_COMPLETION',
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.11.0',
+        versionIndex: '.kibana_7.11.0_001',
+      };
+
+      test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when .kibana points to an index with an invalid version', () => {
+        // If users tamper with our index version naming scheme we can no
+        // longer accurately detect a newer version. Older Kibana versions
+        // will have indices like `.kibana_10` and users might choose an
+        // invalid name when restoring from a snapshot. So we try to be
+        // lenient and assume it's an older index and perform a migration.
+        // If the tampered index belonged to a newer version the migration
+        // will fail when we start transforming documents.
+        const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
+          '.kibana_7.invalid.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.12.0': {},
+            },
+            mappings: { properties: {} },
+            settings: {},
+          },
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana_7.11.0': {} },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+        });
+        const newState = model(waitForMState, res) as WaitForYellowSourceState;
+
+        expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
+        expect(newState.retryDelay).toBe(2000);
+      });
+      test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a v2 migrations index (>= 7.11.0)', () => {
+        const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
+            mappings: { properties: {} },
+            settings: {},
+          },
+          '.kibana_3': {
+            aliases: {},
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+        });
+        const newState = model(
+          {
+            ...waitForMState,
+            ...{
+              kibanaVersion: '7.12.0',
+              versionAlias: '.kibana_7.12.0',
+              versionIndex: '.kibana_7.12.0_001',
+            },
+          },
+          res
+        ) as WaitForYellowSourceState;
+
+        expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
+        expect(newState.retryDelay).toEqual(2000);
+      });
+      test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a v1 migrations index (>= 6.5 < 7.11.0)', () => {
+        const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
+          '.kibana_3': {
+            aliases: {
+              '.kibana': {},
+            },
+            mappings: { properties: {} },
+            settings: {},
+          },
+        });
+        const newState = model(waitForMState, res) as WaitForYellowSourceState;
+
+        expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
+        expect(newState.retryDelay).toEqual(2000);
+      });
+      test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
+        const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
+          '.kibana': {
+            aliases: {},
+            mappings: { properties: {} },
+            settings: {},
+          },
+        });
+        const newState = model(waitForMState, res);
+
+        expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
+        expect(newState.retryDelay).toEqual(2000);
+      });
+      test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a custom kibana.index name (>= 6.5 < 7.11.0)', () => {
+        const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
+          'my-saved-objects_3': {
+            aliases: {
+              'my-saved-objects': {},
+            },
+            mappings: { properties: {} },
+            settings: {},
+          },
+        });
+        const newState = model(
+          {
+            ...waitForMState,
+            currentAlias: 'my-saved-objects',
+            versionAlias: 'my-saved-objects_7.11.0',
+            versionIndex: 'my-saved-objects_7.11.0_001',
+          },
+          res
+        ) as WaitForYellowSourceState;
+
+        expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
+        expect(newState.retryDelay).toEqual(2000);
+      });
+      test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a custom kibana.index v2 migrations index (>= 7.11.0)', () => {
+        const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
+          'my-saved-objects_7.11.0': {
+            aliases: {
+              'my-saved-objects': {},
+            },
+            mappings: { properties: {} },
+            settings: {},
+          },
+        });
+        const newState = model(
+          {
+            ...waitForMState,
+            kibanaVersion: '7.12.0',
+            currentAlias: 'my-saved-objects',
+            versionAlias: 'my-saved-objects_7.12.0',
+            versionIndex: 'my-saved-objects_7.12.0_001',
+          },
+          res
+        ) as WaitForYellowSourceState;
+
+        expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
+        expect(newState.retryDelay).toEqual(2000);
+      });
+      test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when no indices/aliases exist', () => {
+        const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({});
+        const newState = model(waitForMState, res);
+
+        expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
+        expect(newState.retryDelay).toEqual(2000);
+      });
+
+      it('WAIT_FOR_MIGRATION_COMPLETION -> DONE when another instance finished the migration', () => {
+        const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
+          '.kibana_7.11.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.11.0': {},
+            },
+            mappings: { properties: {} },
+            settings: {},
+          },
+        });
+        const newState = model(waitForMState, res);
+
+        expect(newState.controlState).toEqual('DONE');
+      });
+    });
+
     describe('LEGACY_SET_WRITE_BLOCK', () => {
       const legacySetWriteBlockState: LegacySetWriteBlockState = {
         ...baseState,
