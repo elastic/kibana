@@ -59,7 +59,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "AnalyticsServiceSetup",
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-common.AnalyticsServiceSetup",
+                "text": "AnalyticsServiceSetup"
+              },
               ">"
             ],
             "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
@@ -77,7 +83,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "AnalyticsServiceStart",
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-common.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              },
               ">"
             ],
             "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",

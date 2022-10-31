@@ -36,6 +36,7 @@ export const kpiTotalUsersMetricLensAttributes: LensAttributes = {
       accessor: '3e51b035-872c-4b44-824b-fe069c222e91',
       layerId: '416b6fad-1923-4f6a-a2df-b223bb287e30',
       layerType: 'data',
+      textAlign: 'center',
     },
   },
   title: '[User] Users - metric',
