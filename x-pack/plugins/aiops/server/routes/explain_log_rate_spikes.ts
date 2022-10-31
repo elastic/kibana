@@ -337,7 +337,8 @@ export const defineExplainLogRateSpikesRoute = (
                 // samplerShardSize
                 -1,
                 undefined,
-                abortSignal
+                abortSignal,
+                sampleProbability
               )) as [NumericChartData]
             )[0];
           } catch (e) {
@@ -609,7 +610,8 @@ export const defineExplainLogRateSpikesRoute = (
                           // samplerShardSize
                           -1,
                           undefined,
-                          abortSignal
+                          abortSignal,
+                          sampleProbability
                         )) as [NumericChartData]
                       )[0];
                     } catch (e) {
@@ -704,7 +706,8 @@ export const defineExplainLogRateSpikesRoute = (
                       // samplerShardSize
                       -1,
                       undefined,
-                      abortSignal
+                      abortSignal,
+                      sampleProbability
                     )) as [NumericChartData]
                   )[0];
                 } catch (e) {
