@@ -90,8 +90,9 @@ Array [
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner emotion-euiLoadingSpinner-m-euiButtonDisplayContent__spinner"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
             role="progressbar"
+            style="border-color: #07c currentcolor currentcolor currentcolor;"
           />
           Turn on monitoring
         </span>

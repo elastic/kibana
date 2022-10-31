@@ -38,7 +38,6 @@ exports[`Intro component renders correctly 1`] = `
                 class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="emotion-euiButtonDisplayContent__icon-m"
                   color="inherit"
                   data-euiicon-type="eye"
                 />
@@ -58,7 +57,6 @@ exports[`Intro component renders correctly 1`] = `
                 class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="emotion-euiButtonDisplayContent__icon-m"
                   color="inherit"
                   data-euiicon-type="trash"
                 />

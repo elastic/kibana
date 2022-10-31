@@ -187,14 +187,13 @@ Array [
             type="button"
           >
             <span
-              class="emotion-euiButtonDisplayContent-right"
+              class="emotion-euiButtonDisplayContent"
             >
+              Download CSV
               <span
-                class="emotion-euiButtonDisplayContent__icon-m"
                 color="inherit"
                 data-euiicon-type="arrowDown"
               />
-              Download CSV
             </span>
           </button>
         </div>
@@ -528,14 +527,13 @@ Array [
             type="button"
           >
             <span
-              class="emotion-euiButtonDisplayContent-right"
+              class="emotion-euiButtonDisplayContent"
             >
+              Download CSV
               <span
-                class="emotion-euiButtonDisplayContent__icon-m"
                 color="inherit"
                 data-euiicon-type="arrowDown"
               />
-              Download CSV
             </span>
           </button>
         </div>

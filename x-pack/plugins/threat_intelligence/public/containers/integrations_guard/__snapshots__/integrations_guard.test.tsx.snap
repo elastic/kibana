@@ -82,7 +82,6 @@ exports[`IntegrationsGuard should render empty page when no indicators are found
               class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="emotion-euiButtonDisplayContent__icon-m"
                 color="inherit"
                 data-euiicon-type="plusInCircle"
               />

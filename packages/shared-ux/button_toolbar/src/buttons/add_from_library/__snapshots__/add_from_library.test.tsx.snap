@@ -7,10 +7,9 @@ exports[`<ToolbarButton /> is rendered 1`] = `
   type="button"
 >
   <span
-    class="emotion-euiButtonDisplayContent-left"
+    class="emotion-euiButtonDisplayContent"
   >
     <span
-      class="emotion-euiButtonDisplayContent__icon-m"
       color="inherit"
       data-euiicon-type="folderOpen"
     />

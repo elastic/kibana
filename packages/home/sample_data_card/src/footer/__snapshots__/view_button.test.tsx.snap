@@ -15,18 +15,17 @@ exports[`should render popover when appLinks is not empty 1`] = `
       type="button"
     >
       <span
-        class="emotion-euiButtonDisplayContent-right"
+        class="emotion-euiButtonDisplayContent"
       >
-        <span
-          class="emotion-euiButtonDisplayContent__icon-m"
-          color="inherit"
-          data-euiicon-type="arrowDown"
-        />
         <span
           class="eui-textTruncate"
         >
           View data
         </span>
+        <span
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
       </span>
     </button>
   </div>
@@ -48,18 +47,17 @@ exports[`should render popover with ordered appLinks 1`] = `
       type="button"
     >
       <span
-        class="emotion-euiButtonDisplayContent-right"
+        class="emotion-euiButtonDisplayContent"
       >
-        <span
-          class="emotion-euiButtonDisplayContent__icon-m"
-          color="inherit"
-          data-euiicon-type="arrowDown"
-        />
         <span
           class="eui-textTruncate"
         >
           View data
         </span>
+        <span
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
       </span>
     </button>
   </div>
