@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       const connectorName = `server-log-connector`;
-      serverLogConnectorId = await createServerLogConnector(connectorName);
+      ({ id: serverLogConnectorId } = await createServerLogConnector(connectorName));
     });
 
     after(async () => {
