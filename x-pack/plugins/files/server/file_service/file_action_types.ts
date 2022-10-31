@@ -22,7 +22,7 @@ export interface CreateFileArgs<Meta = unknown> {
   /**
    * Username of the user who created the file.
    */
-  createdBy?: string;
+  owner?: string;
   /**
    * Alternate text for accessibility and display purposes.
    */

@@ -21,6 +21,9 @@ const properties: Properties = {
   Updated: {
     type: 'date',
   },
+  owner: {
+    type: 'keyword',
+  },
   name: {
     type: 'text',
   },
@@ -40,9 +43,6 @@ const properties: Properties = {
     type: 'flattened',
   },
   FileKind: {
-    type: 'keyword',
-  },
-  CreatedBy: {
     type: 'keyword',
   },
 };

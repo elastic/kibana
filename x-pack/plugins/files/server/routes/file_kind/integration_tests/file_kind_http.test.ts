@@ -33,7 +33,7 @@ describe('File kind HTTP API', () => {
       id: expect.any(String),
       created: expect.any(String),
       updated: expect.any(String),
-      createdBy: expect.any(String),
+      owner: expect.any(String),
       name: 'myFile',
       fileKind,
       status: 'AWAITING_UPLOAD',

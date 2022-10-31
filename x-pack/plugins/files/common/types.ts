@@ -71,6 +71,11 @@ export type BaseFileMetadata = {
   size?: number;
 
   /**
+   * The UID of the file owner
+   */
+  owner?: string;
+
+  /**
    * Hash of the file's contents
    */
   hash?: {
@@ -115,11 +120,6 @@ export type BaseFileMetadata = {
    * in human-friendly language
    */
   Alt?: string;
-
-  /**
-   * ISO string representing when the file was last updated
-   */
-  CreatedBy?: string;
 
   /**
    * ISO string representing when the file was last updated
@@ -180,7 +180,7 @@ export interface FileJSON<Meta = unknown> {
   /**
    * User who created the file
    */
-  createdBy: FileMetadata['CreatedBy'];
+  owner: FileMetadata['owner'];
   /**
    * File name.
    *
