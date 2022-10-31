@@ -112,7 +112,7 @@ image:images/lens_anatomyOfABarChart_8.6.png[Horizontal bar chart with callouts 
 | *Bar* Increases from a common baseline where the height corresponds to the categorical data along the vertical axis. In a vertical bar chart, appears along the horizontal access.
 
 | *5*
-| *Baseline* The common base value for each bar, which is always zero. 
+| *Baseline* The common base value for each bar, which is always zero. You can display bars above and below the baseline. 
 
 | *6*
 | *Horizontal axis* The axis that represents the categorical data that appear as a set of incremental ticks to guide analysis. In a vertical bar chart, represents the scale of a measured value.
