@@ -68,7 +68,6 @@ export class ListControl extends Control<PhraseFilterManager> {
   private getSettings: () => Promise<InputControlSettings>;
   private timefilter: TimefilterContract;
   private searchSource: DataPublicPluginStart['search']['searchSource'];
-  private isDarkMode: boolean;
 
   abortController?: AbortController;
   lastAncestorValues: any;
@@ -87,7 +86,6 @@ export class ListControl extends Control<PhraseFilterManager> {
     this.getSettings = deps.getSettings;
     this.timefilter = deps.data.query.timefilter.timefilter;
     this.searchSource = searchSource;
-    this.isDarkMode = deps.core.uiSettings.get('theme:darkMode');
   }
 
   fetch = async (query?: string) => {
