@@ -10,5 +10,5 @@
   "server": true,
   "ui": true,
   "requiredBundles": ["kibanaReact"],
-  "optionalPlugins": []
+  "optionalPlugins": ["cloud"]
 }
