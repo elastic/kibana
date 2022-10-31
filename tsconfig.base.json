@@ -820,6 +820,8 @@
       "@kbn/expressions-plugin/*": ["src/plugins/expressions/*"],
       "@kbn/field-formats-plugin": ["src/plugins/field_formats"],
       "@kbn/field-formats-plugin/*": ["src/plugins/field_formats/*"],
+      "@kbn/files-management-plugin": ["src/plugins/files_management"],
+      "@kbn/files-management-plugin/*": ["src/plugins/files_management/*"],
       "@kbn/files-plugin": ["src/plugins/files"],
       "@kbn/files-plugin/*": ["src/plugins/files/*"],
       "@kbn/guided-onboarding-plugin": ["src/plugins/guided_onboarding"],
