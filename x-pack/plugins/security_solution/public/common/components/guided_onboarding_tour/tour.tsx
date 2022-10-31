@@ -11,7 +11,6 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
 import { useLocation } from 'react-router-dom';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { isDetectionsPath } from '../../../helpers';
 import { useKibana } from '../../lib/kibana';
 import { securityTourConfig, SecurityStepId } from './tour_config';
@@ -112,9 +111,8 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
 
 export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   const { pathname } = useLocation();
-  const isTourEnabled = useIsExperimentalFeatureEnabled('guidedOnboarding');
 
-  if (isDetectionsPath(pathname) && isTourEnabled) {
+  if (isDetectionsPath(pathname)) {
     return <RealTourContextProvider>{children}</RealTourContextProvider>;
   }
 
