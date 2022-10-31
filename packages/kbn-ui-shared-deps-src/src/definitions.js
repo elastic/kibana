@@ -74,11 +74,14 @@ const externals = {
    */
   tslib: '__kbnSharedDeps__.TsLib',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
+  '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
   '@kbn/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
   'rison-node': '__kbnSharedDeps__.RisonNode',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
+  '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
+  '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

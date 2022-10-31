@@ -42,6 +42,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-analytics",
   "//packages/kbn-babel-preset",
   "//packages/kbn-datemath",
+  "//packages/kbn-es-query",
   "//packages/kbn-flot-charts",
   "//packages/kbn-i18n",
   "//packages/kbn-i18n-react",
