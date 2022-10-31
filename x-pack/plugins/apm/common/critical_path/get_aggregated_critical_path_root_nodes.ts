@@ -20,31 +20,41 @@ export function getAggregatedCriticalPathRootNodes(params: {
 }): {
   rootNodes: CriticalPathTreeNode[];
   maxDepth: number;
+  numNodes: number;
 } {
   let maxDepth = 20; // min max depth
 
   const { criticalPath } = params;
 
+  let numNodes = 0;
+
   function mergeNodesWithSameOperationId(
     nodes: CriticalPathTreeNode[]
   ): CriticalPathTreeNode[] {
     const nodesByOperationId: Record<string, CriticalPathTreeNode> = {};
-    return nodes.reduce<CriticalPathTreeNode[]>((prev, node, index, array) => {
-      const nodeId = node.nodeId;
-      const operationId = criticalPath.operationIdByNodeId[nodeId];
-      if (nodesByOperationId[operationId]) {
-        const prevNode = nodesByOperationId[operationId];
-        prevNode.children.push(...node.children);
-        prevNode.countExclusive += node.countExclusive;
-        prevNode.countInclusive += node.countInclusive;
+    const mergedNodes = nodes.reduce<CriticalPathTreeNode[]>(
+      (prev, node, index, array) => {
+        const nodeId = node.nodeId;
+        const operationId = criticalPath.operationIdByNodeId[nodeId];
+        if (nodesByOperationId[operationId]) {
+          const prevNode = nodesByOperationId[operationId];
+          prevNode.children.push(...node.children);
+          prevNode.countExclusive += node.countExclusive;
+          prevNode.countInclusive += node.countInclusive;
+          return prev;
+        }
+
+        nodesByOperationId[operationId] = node;
+
+        prev.push(node);
         return prev;
-      }
+      },
+      []
+    );
 
-      nodesByOperationId[operationId] = node;
+    numNodes += mergedNodes.length;
 
-      prev.push(node);
-      return prev;
-    }, []);
+    return mergedNodes;
   }
 
   function getNode(nodeId: string, depth: number): CriticalPathTreeNode {
@@ -55,6 +65,7 @@ export function getAggregatedCriticalPathRootNodes(params: {
         getNode(childNodeId, depth + 1)
       )
     );
+
     const nodeCountExclusive = criticalPath.timeByNodeId[nodeId] || 0;
     const nodeCountInclusive =
       sumBy(children, (child) => child.countInclusive) + nodeCountExclusive;
@@ -74,5 +85,6 @@ export function getAggregatedCriticalPathRootNodes(params: {
   return {
     rootNodes,
     maxDepth,
+    numNodes,
   };
 }

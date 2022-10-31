@@ -32,7 +32,11 @@ export function criticalPathToFlamegraph(
 
   const { criticalPath, colors } = params;
 
-  const totalSize = Object.keys(criticalPath.nodes).length + 1;
+  const { rootNodes, maxDepth, numNodes } =
+    getAggregatedCriticalPathRootNodes(params);
+
+  // include the root node
+  const totalSize = numNodes + 1;
 
   const operationId = new Array<string>(totalSize);
   const countInclusive = new Float64Array(totalSize);
@@ -65,8 +69,6 @@ export function criticalPathToFlamegraph(
       Math.abs(seedrandom(identifier).int32()) % availableColors.length;
     return availableColors[idx];
   });
-
-  const { rootNodes, maxDepth } = getAggregatedCriticalPathRootNodes(params);
 
   function addNodeToFlamegraph(
     node: CriticalPathTreeNode,
