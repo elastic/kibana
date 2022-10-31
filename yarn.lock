@@ -10807,7 +10807,7 @@ container-info@^1.0.1:
   resolved "https://registry.yarnpkg.com/container-info/-/container-info-1.0.1.tgz#6b383cb5e197c8d921e88983388facb04124b56b"
   integrity sha512-wk/+uJvPHOFG+JSwQS+fw6H6yw3Oyc8Kw9L4O2MN817uA90OqJ59nlZbbLPqDudsjJ7Tetee3pwExdKpd2ahjQ==
 
-content-disposition@0.5.4, content-disposition@^0.5.4:
+content-disposition@0.5.4:
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/content-disposition/-/content-disposition-0.5.4.tgz#8b82b4efac82512a02bb0b1dcec9d2c5e8eb5bfe"
   integrity sha512-FveZTNuGw04cxlAiWbzi6zTAL/lhehaWbTtgluJh4/E95DqMwTmha3KZN1aAWA8cFIhHzMZUvLevkw5Rqk+tSQ==
