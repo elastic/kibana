@@ -27,6 +27,10 @@ import { KueryBar } from '../../../shared/kuery_bar';
 import { ServiceListPreview } from './service_list_preview';
 import type { StagedServiceGroup } from './save_modal';
 import { getDateRange } from '../../../../context/url_params_context/helpers';
+import {
+  validateServiceGroupKuery,
+  isSupportedField,
+} from '../../../../../common/service_groups';
 
 const CentralizedContainer = styled.div`
   display: flex;
@@ -38,13 +42,6 @@ const CentralizedContainer = styled.div`
 const MAX_CONTAINER_HEIGHT = 600;
 const MODAL_HEADER_HEIGHT = 180;
 const MODAL_FOOTER_HEIGHT = 80;
-
-const suggestedFieldsWhitelist = [
-  'agent.name',
-  'service.name',
-  'service.language.name',
-  'service.environment',
-];
 
 const Container = styled.div`
   width: 600px;
@@ -70,6 +67,9 @@ export function SelectServices({
 }: Props) {
   const [kuery, setKuery] = useState(serviceGroup?.kuery || '');
   const [stagedKuery, setStagedKuery] = useState(serviceGroup?.kuery || '');
+  const [kueryValidationMessage, setKueryValidationMessage] = useState<
+    string | undefined
+  >();
 
   useEffect(() => {
     if (isEdit) {
@@ -77,6 +77,14 @@ export function SelectServices({
       setStagedKuery(serviceGroup.kuery);
     }
   }, [isEdit, serviceGroup.kuery]);
+
+  useEffect(() => {
+    if (!stagedKuery) {
+      return;
+    }
+    const { message } = validateServiceGroupKuery(stagedKuery);
+    setKueryValidationMessage(message);
+  }, [stagedKuery]);
 
   const { start, end } = useMemo(
     () =>
@@ -122,6 +130,11 @@ export function SelectServices({
               }
             )}
           </EuiText>
+          {kueryValidationMessage && (
+            <EuiText color="danger" size="s">
+              {kueryValidationMessage}
+            </EuiText>
+          )}
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
               <KueryBar
@@ -144,10 +157,7 @@ export function SelectServices({
                       },
                     } = querySuggestion;
 
-                    return (
-                      fieldName.startsWith('label') ||
-                      suggestedFieldsWhitelist.includes(fieldName)
-                    );
+                    return isSupportedField(fieldName);
                   }
                   return true;
                 }}
