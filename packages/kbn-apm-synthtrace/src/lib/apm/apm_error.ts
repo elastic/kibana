@@ -27,4 +27,10 @@ export class ApmError extends Serializable<ApmFields> {
     );
     return [data];
   }
+
+  timestamp(value: number) {
+    const ret = super.timestamp(value);
+    this.fields['timestamp.us'] = value * 1000;
+    return ret;
+  }
 }
