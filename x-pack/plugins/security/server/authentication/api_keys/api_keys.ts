@@ -152,7 +152,7 @@ export interface ValidateAPIKeyParams {
   /**
    * Generated API Key (secret)
    */
-  api_key;
+  api_key: string;
 }
 
 /**
