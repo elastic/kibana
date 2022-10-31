@@ -16,9 +16,9 @@ export type StaticPage =
   | 'enrollment_tokens'
   | 'data_streams'
   | 'settings'
-  | 'settings_edit_fleet_server_hosts'
   | 'settings_create_outputs'
   | 'settings_create_download_sources'
+  | 'settings_create_fleet_server_hosts'
   | 'debug';
 
 export type DynamicPage =
@@ -43,7 +43,8 @@ export type DynamicPage =
   | 'agent_details_logs'
   | 'agent_details_diagnostics'
   | 'settings_edit_outputs'
-  | 'settings_edit_download_sources';
+  | 'settings_edit_download_sources'
+  | 'settings_edit_fleet_server_hosts';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -71,7 +72,8 @@ export const FLEET_ROUTING_PATHS = {
   enrollment_tokens: '/enrollment-tokens',
   data_streams: '/data-streams',
   settings: '/settings',
-  settings_edit_fleet_server_hosts: '/settings/edit-fleet-server-hosts',
+  settings_create_fleet_server_hosts: '/settings/create-fleet-server-hosts',
+  settings_edit_fleet_server_hosts: '/settings/fleet-server-hosts/:itemId',
   settings_create_outputs: '/settings/create-outputs',
   settings_edit_outputs: '/settings/outputs/:outputId',
   settings_create_download_sources: '/settings/create-download-sources',
@@ -203,9 +205,13 @@ export const pagePathGetters: {
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
   settings: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings],
-  settings_edit_fleet_server_hosts: () => [
+  settings_edit_fleet_server_hosts: ({ itemId }) => [
     FLEET_BASE_PATH,
-    FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts,
+    FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts.replace(':itemId', itemId.toString()),
+  ],
+  settings_create_fleet_server_hosts: () => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts,
   ],
   settings_edit_outputs: ({ outputId }) => [
     FLEET_BASE_PATH,
