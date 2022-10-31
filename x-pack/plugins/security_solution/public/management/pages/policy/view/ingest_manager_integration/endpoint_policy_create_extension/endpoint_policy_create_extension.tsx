@@ -338,11 +338,22 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               helpText={
                 <HelpTextWithPadding>
                   <FormattedMessage
-                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeComprehensiveInfo"
-                    defaultMessage="Monitors and collects process data from all executions, including those launched by daemon processes, like {nginx} or {postgres}"
+                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeAllEventsInfo"
+                    defaultMessage="Monitors and collects data from all system executions, including those launched by daemon processes, such as {nginx}, {postgres} and {cron}. {recommendation}"
                     values={{
                       nginx: <EuiCode>{'nginx'}</EuiCode>,
                       postgres: <EuiCode>{'postgres'}</EuiCode>,
+                      cron: <EuiCode>{'cron'}</EuiCode>,
+                      recommendation: (
+                        <em>
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeAllEventsInfoRecommendation"
+                              defaultMessage="Recommended for Cloud Workload Protection, auditing and forensics use cases."
+                            />
+                          </strong>
+                        </em>
+                      ),
                     }}
                   />
                 </HelpTextWithPadding>
@@ -357,10 +368,20 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 <HelpTextWithPadding>
                   <FormattedMessage
                     id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeInteractiveOnlyInfo"
-                    defaultMessage="Monitors and collects session data from interactive sessions, like {ssh} or {telnet}"
+                    defaultMessage="Captures live system interactions initiated by users through programs like {ssh} or {telnet}. {recommendation}"
                     values={{
                       ssh: <EuiCode>{'ssh'}</EuiCode>,
                       telnet: <EuiCode>{'telnet'}</EuiCode>,
+                      recommendation: (
+                        <em>
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeInteractiveOnlyInfoRecommendation"
+                              defaultMessage="Recommended for auditing and forensic use cases."
+                            />
+                          </strong>
+                        </em>
+                      ),
                     }}
                   />
                 </HelpTextWithPadding>

@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/core/server';
 import {
   CoreQueryParamsSchemaProperties,
   TimeSeriesQuery,
@@ -23,7 +22,6 @@ export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';
 
 export function getRuleType(
-  logger: Logger,
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
 ): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
@@ -136,7 +134,7 @@ export function getRuleType(
   async function executor(
     options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
-    const { alertId: ruleId, name, services, params } = options;
+    const { alertId: ruleId, name, services, params, logger } = options;
     const { alertFactory, scopedClusterClient } = services;
 
     const alertLimit = alertFactory.alertLimit.getValue();
@@ -169,6 +167,7 @@ export function getRuleType(
       timeWindowSize: params.timeWindowSize,
       timeWindowUnit: params.timeWindowUnit,
       interval: undefined,
+      filterKuery: params.filterKuery,
     };
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
     const result = await (

@@ -148,9 +148,7 @@ export class ApmSynthtraceApmClient {
 
       const destination = (e.context.destination = e.context.destination ?? {});
       const destinationService = (destination.service = destination.service ?? { resource: '' });
-      set('span.destination.service.name', destinationService, (c, v) => (c.name = v));
       set('span.destination.service.resource', destinationService, (c, v) => (c.resource = v));
-      set('span.destination.service.type', destinationService, (c, v) => (c.type = v));
     }
     if (e.kind === 'transaction') {
       set('transaction.name', e, (c, v) => (c.name = v));

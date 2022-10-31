@@ -12,8 +12,8 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useActions } from './use_actions';
 import { basicCase } from '../../containers/mock';
 import * as api from '../../containers/api';
+import type { AppMockRenderer } from '../../common/mock';
 import {
-  AppMockRenderer,
   createAppMockRenderer,
   noDeleteCasesPermissions,
   onlyDeleteCasesPermission,

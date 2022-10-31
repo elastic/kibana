@@ -16,6 +16,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
   Visualization,
@@ -29,7 +30,6 @@ import type { LayerType } from '../../../common';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
 import type { ColumnState, SortingState, PagingState } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
-import type { IndexPatternLayer } from '../../indexpattern_datasource/types';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
@@ -41,16 +41,6 @@ export interface DatatableVisualizationState {
   rowHeightLines?: number;
   headerRowHeightLines?: number;
   paging?: PagingState;
-}
-
-interface DatatableDatasourceState {
-  [prop: string]: unknown;
-  layers: IndexPatternLayer[];
-}
-
-export interface DatatableSuggestion extends Suggestion {
-  datasourceState: DatatableDatasourceState;
-  visualizationState: DatatableVisualizationState;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -605,15 +595,17 @@ export const getDatatableVisualization = ({
     }
   },
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
-    const allSuggestions = suggestions as DatatableSuggestion[];
-    return {
+    const allSuggestions = suggestions as Array<
+      Suggestion<DatatableVisualizationState, FormBasedPersistedState>
+    >;
+    const suggestion: Suggestion<DatatableVisualizationState, FormBasedPersistedState> = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
         layers: allSuggestions.reduce(
           (acc, s) => ({
             ...acc,
-            ...s.datasourceState.layers,
+            ...s.datasourceState?.layers,
           }),
           {}
         ),
@@ -623,6 +615,7 @@ export const getDatatableVisualization = ({
         ...context.configuration,
       },
     };
+    return suggestion;
   },
 });
 

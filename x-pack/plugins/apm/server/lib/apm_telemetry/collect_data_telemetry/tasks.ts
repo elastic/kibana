@@ -17,7 +17,7 @@ import {
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
   MAX_NUMBER_OF_SERVICE_GROUPS,
 } from '../../../../common/service_groups';
-import { getKueryFields } from '../../helpers/get_kuery_fields';
+import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -148,6 +148,7 @@ export const tasks: TelemetryTask[] = [
         await search({
           index: indices.transaction,
           body: {
+            timeout,
             query: {
               bool: {
                 filter: [
@@ -355,6 +356,7 @@ export const tasks: TelemetryTask[] = [
       const response = await search({
         index: [indices.transaction],
         body: {
+          timeout,
           query: {
             bool: {
               filter: [{ range: { '@timestamp': { gte: 'now-1d' } } }],
@@ -1032,8 +1034,9 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'cardinality',
-    executor: async ({ search }) => {
+    executor: async ({ indices, search }) => {
       const allAgentsCardinalityResponse = await search({
+        index: [indices.transaction],
         body: {
           size: 0,
           timeout,
@@ -1058,6 +1061,7 @@ export const tasks: TelemetryTask[] = [
       });
 
       const rumAgentCardinalityResponse = await search({
+        index: [indices.transaction],
         body: {
           size: 0,
           timeout,
@@ -1159,13 +1163,16 @@ export const tasks: TelemetryTask[] = [
     name: 'per_service',
     executor: async ({ indices, search }) => {
       const response = await search({
-        index: [indices.metric],
+        index: [indices.transaction],
         body: {
           size: 0,
           timeout,
           query: {
             bool: {
-              filter: [{ range: { '@timestamp': { gte: 'now-1h' } } }],
+              filter: [
+                { range: { '@timestamp': { gte: 'now-1h' } } },
+                { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+              ],
             },
           },
           aggs: {

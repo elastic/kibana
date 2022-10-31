@@ -68,12 +68,15 @@ export const getConfiguration = (
     buckets,
   }: {
     metrics: string[];
-    buckets: string[];
+    buckets: {
+      all: string[];
+      customBuckets: Record<string, string>;
+    };
   }
 ): PartitionVisConfiguration => {
   return {
     shape: vis.params.isDonut ? 'donut' : 'pie',
-    layers: getLayers(layerId, vis, metrics, buckets),
+    layers: getLayers(layerId, vis, metrics, buckets.all),
     palette: vis.params.palette,
   };
 };

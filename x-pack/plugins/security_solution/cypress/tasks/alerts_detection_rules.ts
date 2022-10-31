@@ -9,7 +9,6 @@ import { duplicatedRuleName } from '../objects/rule';
 import {
   BULK_ACTIONS_BTN,
   COLLAPSED_ACTION_BTN,
-  CREATE_NEW_RULE_BTN,
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
   DELETE_RULE_BULK_BTN,
@@ -19,7 +18,6 @@ import {
   RULES_TABLE_REFRESH_INDICATOR,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
   PAGINATION_POPOVER_BTN,
-  RELOAD_PREBUILT_RULES_BTN,
   RULE_CHECKBOX,
   RULE_NAME,
   RULE_SWITCH,
@@ -164,10 +162,6 @@ export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click({ force: true });
 };
 
-export const goToCreateNewRule = () => {
-  cy.get(CREATE_NEW_RULE_BTN).click({ force: true });
-};
-
 export const goToRuleDetails = () => {
   cy.get(RULE_NAME).first().click({ force: true });
 };
@@ -199,7 +193,7 @@ export const openIntegrationsPopover = () => {
 };
 
 export const reloadDeletedRules = () => {
-  cy.get(RELOAD_PREBUILT_RULES_BTN).click({ force: true });
+  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click({ force: true });
 };
 
 /**
@@ -348,13 +342,13 @@ export const importRules = (rulesFile: string) => {
   cy.get(INPUT_FILE).should('not.exist');
 };
 
-export const selectOverwriteRulesImport = () => {
+const selectOverwriteRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX)
     .pipe(($el) => $el.trigger('click'))
     .should('be.checked');
 };
 
-export const selectOverwriteExceptionsRulesImport = () => {
+const selectOverwriteExceptionsRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX)
     .pipe(($el) => $el.trigger('click'))
     .should('be.checked');

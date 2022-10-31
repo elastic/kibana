@@ -44,10 +44,12 @@ export interface ReduxDispatchProps {
 }
 
 export interface OwnProps {
+  depth: number;
   layer: ILayer;
   dragHandleProps?: DraggableProvidedDragHandleProps;
   isDragging?: boolean;
   isDraggingOver?: boolean;
+  isCombineLayer?: boolean;
 }
 
 type Props = ReduxStateProps & ReduxDispatchProps & OwnProps;
@@ -226,7 +228,7 @@ export class TOCEntry extends Component<Props, State> {
   }
 
   _renderDetailsToggle() {
-    if (!this.state.hasLegendDetails) {
+    if (this.props.isDragging || !this.state.hasLegendDetails) {
       return null;
     }
 
@@ -313,14 +315,19 @@ export class TOCEntry extends Component<Props, State> {
     const classes = classNames('mapTocEntry', {
       'mapTocEntry-isDragging': this.props.isDragging,
       'mapTocEntry-isDraggingOver': this.props.isDraggingOver,
+      'mapTocEntry-isCombineLayer': this.props.isCombineLayer,
       'mapTocEntry-isSelected':
         this.props.layer.isPreviewLayer() ||
         (this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId()),
       'mapTocEntry-isInEditingMode': this.props.isFeatureEditorOpenForLayer,
     });
 
+    const depthStyle =
+      this.props.depth > 0 ? { paddingLeft: `${8 + this.props.depth * 24}px` } : {};
+
     return (
       <div
+        style={depthStyle}
         className={classes}
         id={this.props.layer.getId()}
         data-layerid={this.props.layer.getId()}

@@ -125,10 +125,6 @@ export const MITRE_ATTACK_ADD_TECHNIQUE_BUTTON = '[data-test-subj="addMitreAttac
 
 export const MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackSubtechnique"]';
 
-export const PREVIEW_HEADER_SUBTITLE = '[data-test-subj="header-panel-subtitle"]';
-
-export const QUERY_PREVIEW_BUTTON = '[data-test-subj="queryPreviewButton"]';
-
 export const REFERENCE_URLS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] input';
 

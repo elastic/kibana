@@ -48,11 +48,14 @@ import {
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-import { Error, Loading, HeaderReleaseBadge } from '../../../../components';
+import {
+  Error,
+  Loading,
+  HeaderReleaseBadge,
+  WithGuidedOnboardingTour,
+} from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
-
-import { WithGuidedOnboardingTour } from './components/with_guided_onboarding_tour';
 
 import { useIsFirstTimeAgentUser } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
@@ -121,6 +124,7 @@ export function Detail() {
   const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
     ExperimentalFeaturesService.get();
   const agentPolicyIdFromContext = getAgentPolicyId();
+  const isOverviewPage = panel === 'overview';
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -362,7 +366,8 @@ export function Detail() {
                   <WithGuidedOnboardingTour
                     packageKey={pkgkey}
                     tourType={'addIntegrationButton'}
-                    isGuidedOnboardingActive={isGuidedOnboardingActive}
+                    isTourVisible={isOverviewPage && isGuidedOnboardingActive}
+                    tourOffset={10}
                   >
                     <AddIntegrationButton
                       userCanInstallPackages={userCanInstallPackages}
@@ -401,10 +406,11 @@ export function Detail() {
       packageInfo,
       updateAvailable,
       isInstalled,
+      pkgkey,
+      isOverviewPage,
       isGuidedOnboardingActive,
       userCanInstallPackages,
       getHref,
-      pkgkey,
       integration,
       agentPolicyIdFromContext,
       missingSecurityConfiguration,

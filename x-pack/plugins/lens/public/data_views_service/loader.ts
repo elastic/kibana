@@ -12,7 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { loadFieldExisting } from '@kbn/unified-field-list-plugin/public';
 import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
-import { documentField } from '../indexpattern_datasource/document_field';
+import { documentField } from '../datasources/form_based/document_field';
 import { DateRange } from '../../common';
 import { DataViewsState } from '../state_management';
 

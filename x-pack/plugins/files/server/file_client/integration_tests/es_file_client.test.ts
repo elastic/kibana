@@ -106,7 +106,7 @@ describe('ES-index-backed file client', () => {
     await file3.uploadContent(Readable.from(['test']));
 
     {
-      const results = await fileClient.find({
+      const { files: results } = await fileClient.find({
         status: ['READY'],
         meta: { test: '3' },
       });
@@ -121,7 +121,7 @@ describe('ES-index-backed file client', () => {
     }
 
     {
-      const results = await fileClient.find({
+      const { files: results } = await fileClient.find({
         status: ['READY', 'AWAITING_UPLOAD'],
       });
 
@@ -178,10 +178,10 @@ describe('ES-index-backed file client', () => {
       },
     });
 
-    const list = await fileClient.list();
+    const { files } = await fileClient.find();
 
-    expect(list).toHaveLength(1);
-    expect(list[0].toJSON()).toEqual(
+    expect(files).toHaveLength(1);
+    expect(files[0].toJSON()).toEqual(
       expect.objectContaining({
         id: '123',
         fileKind: 'none',

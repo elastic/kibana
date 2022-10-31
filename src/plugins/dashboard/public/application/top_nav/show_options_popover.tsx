@@ -31,6 +31,8 @@ export interface ShowOptionsPopoverProps {
   onUseMarginsChange: (useMargins: boolean) => void;
   syncColors: boolean;
   onSyncColorsChange: (syncColors: boolean) => void;
+  syncCursor: boolean;
+  onSyncCursorChange: (syncCursor: boolean) => void;
   syncTooltips: boolean;
   onSyncTooltipsChange: (syncTooltips: boolean) => void;
   hidePanelTitles: boolean;
@@ -45,6 +47,8 @@ export function showOptionsPopover({
   onHidePanelTitlesChange,
   syncColors,
   onSyncColorsChange,
+  syncCursor,
+  onSyncCursorChange,
   syncTooltips,
   onSyncTooltipsChange,
 }: ShowOptionsPopoverProps) {
@@ -78,6 +82,8 @@ export function showOptionsPopover({
             onHidePanelTitlesChange={onHidePanelTitlesChange}
             syncColors={syncColors}
             onSyncColorsChange={onSyncColorsChange}
+            syncCursor={syncCursor}
+            onSyncCursorChange={onSyncCursorChange}
             syncTooltips={syncTooltips}
             onSyncTooltipsChange={onSyncTooltipsChange}
           />

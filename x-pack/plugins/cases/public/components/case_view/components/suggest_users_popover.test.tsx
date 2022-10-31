@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { SuggestUsersPopoverProps, SuggestUsersPopover } from './suggest_users_popover';
+import type { SuggestUsersPopoverProps } from './suggest_users_popover';
+import { SuggestUsersPopover } from './suggest_users_popover';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { AssigneeWithProfile } from '../../user_profiles/types';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { AssigneeWithProfile } from '../../user_profiles/types';
 
 jest.mock('../../../containers/user_profiles/api');
 
@@ -34,7 +36,7 @@ describe('SuggestUsersPopover', () => {
     };
   });
 
-  it('calls onUsersChange when 1 user is selected', async () => {
+  it.skip('calls onUsersChange when 1 user is selected', async () => {
     const onUsersChange = jest.fn();
     const props = { ...defaultProps, onUsersChange };
     appMockRender.render(<SuggestUsersPopover {...props} />);
@@ -180,7 +182,7 @@ describe('SuggestUsersPopover', () => {
     expect(screen.getByText('1 assigned')).toBeInTheDocument();
   });
 
-  it('shows the 1 assigned total after clicking on a user', async () => {
+  it.skip('shows the 1 assigned total after clicking on a user', async () => {
     appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
 
     await waitForEuiPopoverOpen();
