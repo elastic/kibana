@@ -223,6 +223,11 @@ type EditBulkAction = {
 } & QueryOrIds;
 export type BulkAction = PlainBulkAction | EditBulkAction;
 
+interface PerformBulkActionProps {
+  bulkAction: BulkAction;
+  dryRun?: boolean;
+}
+
 /**
  * Perform bulk action with rules selected by a filter query
  *
@@ -231,10 +236,10 @@ export type BulkAction = PlainBulkAction | EditBulkAction;
  *
  * @throws An error if response is not OK
  */
-export async function performBulkAction(
-  bulkAction: BulkAction,
-  dryRun?: boolean
-): Promise<BulkActionResponse> {
+export async function performBulkAction({
+  bulkAction,
+  dryRun = false,
+}: PerformBulkActionProps): Promise<BulkActionResponse> {
   const params = {
     action: bulkAction.type,
     query: bulkAction.query,

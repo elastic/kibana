@@ -715,7 +715,7 @@ describe('Detections Rules API', () => {
     });
 
     test('passes a query', async () => {
-      await performBulkAction({ type: BulkActionType.enable, query: 'some query' });
+      await performBulkAction({ bulkAction: { type: BulkActionType.enable, query: 'some query' } });
 
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
         method: 'POST',
@@ -723,12 +723,16 @@ describe('Detections Rules API', () => {
           action: 'enable',
           query: 'some query',
         }),
-        query: {},
+        query: {
+          dry_run: false,
+        },
       });
     });
 
     test('passes ids', async () => {
-      await performBulkAction({ type: BulkActionType.disable, ids: ['ruleId1', 'ruleId2'] });
+      await performBulkAction({
+        bulkAction: { type: BulkActionType.disable, ids: ['ruleId1', 'ruleId2'] },
+      });
 
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
         method: 'POST',
@@ -736,17 +740,21 @@ describe('Detections Rules API', () => {
           action: 'disable',
           ids: ['ruleId1', 'ruleId2'],
         }),
-        query: {},
+        query: {
+          dry_run: false,
+        },
       });
     });
 
     test('passes edit payload', async () => {
       await performBulkAction({
-        type: BulkActionType.edit,
-        ids: ['ruleId1'],
-        editPayload: [
-          { type: BulkActionEditType.add_index_patterns, value: ['some-index-pattern'] },
-        ],
+        bulkAction: {
+          type: BulkActionType.edit,
+          ids: ['ruleId1'],
+          editPayload: [
+            { type: BulkActionEditType.add_index_patterns, value: ['some-index-pattern'] },
+          ],
+        },
       });
 
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
@@ -756,12 +764,17 @@ describe('Detections Rules API', () => {
           ids: ['ruleId1'],
           edit: [{ type: 'add_index_patterns', value: ['some-index-pattern'] }],
         }),
-        query: {},
+        query: {
+          dry_run: false,
+        },
       });
     });
 
     test('executes dry run', async () => {
-      await performBulkAction({ type: BulkActionType.disable, query: 'some query' }, true);
+      await performBulkAction({
+        bulkAction: { type: BulkActionType.disable, query: 'some query' },
+        dryRun: true,
+      });
 
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
         method: 'POST',
@@ -775,8 +788,10 @@ describe('Detections Rules API', () => {
 
     test('returns result', async () => {
       const result = await performBulkAction({
-        type: BulkActionType.disable,
-        query: 'some query',
+        bulkAction: {
+          type: BulkActionType.disable,
+          query: 'some query',
+        },
       });
 
       expect(result).toBe(fetchMockResult);
