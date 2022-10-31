@@ -8,9 +8,9 @@
     "typings/**/*",
 
     "src/cli/**/*",
+    "src/cli_health_gateway/**/*",
     "src/cli_setup/**/*",
     "src/cli_plugin/**/*",
-    "src/cli_health_gateway/**/*",
     "src/dev/**/*",
     "src/fixtures/**/*",
 
