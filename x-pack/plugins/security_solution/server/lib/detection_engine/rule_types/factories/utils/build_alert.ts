@@ -136,6 +136,7 @@ export const buildAlert = (
   spaceId: string | null | undefined,
   reason: string,
   indicesToQuery: string[],
+  alertTimestampOverride: Date | undefined,
   overrides?: {
     nameOverride: string;
     severityOverride: string;
@@ -179,7 +180,7 @@ export const buildAlert = (
   });
 
   return {
-    [TIMESTAMP]: new Date().toISOString(),
+    [TIMESTAMP]: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),
     [SPACE_IDS]: spaceId != null ? [spaceId] : [],
     [EVENT_KIND]: 'signal',
     [ALERT_ORIGINAL_TIME]: originalTime?.toISOString(),
