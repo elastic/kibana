@@ -14,7 +14,7 @@ import {
 import {
   DEVICE_MODEL_IDENTIFIER,
   HOST_OS_VERSION,
-  NETWORK_HOST_CONNECTION_TYPE,
+  NETWORK_CONNECTION_TYPE,
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../common/elasticsearch_fieldnames';
@@ -94,7 +94,7 @@ export async function getMobileFilters({
         },
         netConnectionTypes: {
           terms: {
-            field: NETWORK_HOST_CONNECTION_TYPE,
+            field: NETWORK_CONNECTION_TYPE,
             size: 10,
           },
         },
