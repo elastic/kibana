@@ -26,7 +26,7 @@ export interface DeleteArgs {
 /**
  * Args to create a file
  */
-export interface CreateArgs {
+export interface CreateArgs<Meta = unknown> {
   /**
    * Unique file ID
    */
@@ -34,7 +34,7 @@ export interface CreateArgs {
   /**
    * The file's metadata
    */
-  metadata: Omit<CreateFileArgs, 'fileKind'>;
+  metadata: Omit<CreateFileArgs<Meta>, 'fileKind'>;
 }
 
 /**
@@ -70,7 +70,7 @@ export interface FileClient {
    *
    * @param arg - Arg to create a file.
    * */
-  create<M = unknown>(arg: CreateArgs): Promise<File<M>>;
+  create<M = unknown>(arg: CreateArgs<M>): Promise<File<M>>;
 
   /**
    * See {@link FileMetadataClient.get}

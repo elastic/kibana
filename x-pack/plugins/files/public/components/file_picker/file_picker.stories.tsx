@@ -7,7 +7,7 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import type { FileJSON } from '../../../common';
+import type { FileJSON, FileImageMetadata } from '../../../common';
 import { FilesClient, FilesClientResponses } from '../../types';
 import { register } from '../stories_shared';
 import { base64dLogo } from '../image/image.constants.stories';
@@ -56,7 +56,7 @@ export const Empty = Template.bind({});
 
 const d = new Date();
 let id = 0;
-function createFileJSON(file?: Partial<FileJSON>): FileJSON {
+function createFileJSON(file?: Partial<FileJSON<FileImageMetadata>>): FileJSON<FileImageMetadata> {
   return {
     alt: '',
     created: d.toISOString(),
