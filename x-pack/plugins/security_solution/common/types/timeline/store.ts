@@ -6,7 +6,8 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { ColumnHeaderOptions, ColumnId, RowRendererId, TimelineTypeLiteral } from '.';
+import type { ColumnHeaderOptions, RowRendererId, TimelineTypeLiteral } from '.';
+import type { ColumnId } from '../../data_table/columns';
 
 import type { Direction } from '../../search_strategy';
 import type { ExpandedDetail } from '../detail_panel';

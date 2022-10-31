@@ -24,9 +24,8 @@ import {
   ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 
-import type { TGridModel } from '@kbn/timelines-plugin/public';
-
 import { lastValueFrom } from 'rxjs';
+import type { TGridModel } from '../../../common/store/data_table/types';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,

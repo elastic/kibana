@@ -33,6 +33,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
         triggersActionsUi: {
           getFieldBrowser: jest.fn(),
         },
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+        },
       },
     }),
   };

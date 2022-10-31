@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ColumnHeaderOptions, ColumnHeaderType } from '../../../../common/types';
+import type { ColumnHeaderType } from '../../../../common/data_table/columns';
+import type { ColumnHeaderOptions } from '../../../../common/types';
 import { Direction } from '../../../../common/types';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
@@ -86,6 +87,7 @@ export const tableDefaults: SubsetTGridModel = {
   sessionViewConfig: null,
   columns: defaultHeaders,
   queryFields: [],
+  title: '',
 };
 
 export const tGridDefaults: SubsetTGridModel = {
@@ -114,6 +116,7 @@ export const tGridDefaults: SubsetTGridModel = {
   graphEventId: '',
   sessionViewConfig: null,
   queryFields: [],
+  title: '',
 };
 
 export const getTGridManageDefaults = (id: string) => ({

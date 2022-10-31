@@ -14,7 +14,7 @@ import { useBulkActionItems } from './use_bulk_action_items';
 import { dataTableActions, dataTableSelectors } from '../../../store/data_table';
 import type { TGridModel } from '../../../store/data_table/model';
 import type { AlertWorkflowStatus, Refetch } from '../../../types';
-import type { TableState } from '../../../store/data_table/types';
+import type { DataTableState } from '../../../store/data_table/types';
 import type {
   CustomBulkActionProp,
   OnUpdateAlertStatusError,
@@ -148,7 +148,7 @@ AlertBulkActionsComponent.displayName = 'AlertBulkActionsComponent';
 
 const makeMapStateToProps = () => {
   const getTGrid = dataTableSelectors.getTableByIdSelector();
-  const mapStateToProps = (state: TableState, { id }: OwnProps) => {
+  const mapStateToProps = (state: DataTableState, { id }: OwnProps) => {
     const dataTable: TGridModel = getTGrid(state, id);
     const { selectedEventIds, isSelectAllChecked } = dataTable;
 

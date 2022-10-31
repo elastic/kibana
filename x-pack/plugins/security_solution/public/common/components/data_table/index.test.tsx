@@ -335,7 +335,7 @@ describe('DataTable', () => {
 
     expect(mockDispatch).toBeCalledWith({
       payload: { columnId: '@timestamp', id: 'timeline-test' },
-      type: 'x-pack/timelines/t-grid/REMOVE_COLUMN',
+      type: 'x-pack/security_solution/data-table/REMOVE_COLUMN',
     });
   });
 
@@ -353,7 +353,7 @@ describe('DataTable', () => {
 
     expect(mockDispatch).toBeCalledWith({
       payload: { columnId: '@timestamp', id: 'timeline-test', width: NaN },
-      type: 'x-pack/timelines/t-grid/UPDATE_COLUMN_WIDTH',
+      type: 'x-pack/security_solution/data-table/UPDATE_COLUMN_WIDTH',
     });
   });
 });
