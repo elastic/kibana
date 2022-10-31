@@ -18,7 +18,6 @@ export {
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
-  enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
