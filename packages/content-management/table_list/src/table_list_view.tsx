@@ -73,7 +73,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   editItem?(item: T): void;
-  inspector: InspectorConfig;
+  inspector?: InspectorConfig;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -122,7 +122,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   getDetailViewLink,
   onClickTitle,
   id = 'userContent',
-  inspector,
+  inspector = { enabled: false },
   children,
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
