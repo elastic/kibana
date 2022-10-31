@@ -11,6 +11,8 @@ import { bulkEnableRulesRoute } from './bulk_enable_rules';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
+import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
+import { verifyApiAccess } from '../lib/license_api_access';
 
 const rulesClient = rulesClientMock.create();
 
@@ -54,5 +56,71 @@ describe('bulkEnableRulesRoute', () => {
     expect(rulesClient.bulkEnableRules.mock.calls[0]).toEqual([bulkEnableRequest]);
 
     expect(res.ok).toHaveBeenCalled();
+  });
+
+  it('ensures the license allows bulk enabling rules', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    rulesClient.bulkEnableRules.mockResolvedValueOnce(bulkEnableResult);
+
+    bulkEnableRulesRoute({ router, licenseState });
+
+    const [, handler] = router.patch.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        body: bulkEnableRequest,
+      }
+    );
+
+    await handler(context, req, res);
+
+    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('ensures the license check prevents bulk enabling rules', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+      throw new Error('Failure');
+    });
+
+    bulkEnableRulesRoute({ router, licenseState });
+
+    const [, handler] = router.patch.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        body: bulkEnableRequest,
+      }
+    );
+
+    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+  });
+
+  it('ensures the rule type gets validated for the license', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    bulkEnableRulesRoute({ router, licenseState });
+
+    const [, handler] = router.patch.mock.calls[0];
+
+    rulesClient.bulkEnableRules.mockRejectedValue(
+      new RuleTypeDisabledError('Fail', 'license_invalid')
+    );
+
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
+      'ok',
+      'forbidden',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 });
