@@ -78,7 +78,7 @@ export const ShardsForm = ({
                 {isLastItem && currentPolicyName ? (
                   <EuiButtonIcon
                     aria-label={i18n.translate(
-                      'xpack.osquery.pack.form.deleteshardsRowButtonAriaLabel',
+                      'xpack.osquery.pack.form.addShardsRowButtonAriaLabel',
                       {
                         defaultMessage: 'Add new row',
                       }
@@ -90,9 +90,9 @@ export const ShardsForm = ({
                 ) : (
                   <EuiButtonIcon
                     aria-label={i18n.translate(
-                      'xpack.osquery.pack.form.deleteshardsRowButtonAriaLabel',
+                      'xpack.osquery.pack.form.deleteShardsRowButtonAriaLabel',
                       {
-                        defaultMessage: 'Delete ECS mapping row',
+                        defaultMessage: 'Delete shards row',
                       }
                     )}
                     iconType="trash"
