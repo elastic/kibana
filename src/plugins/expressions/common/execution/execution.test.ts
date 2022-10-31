@@ -426,6 +426,41 @@ describe('Execution', () => {
         });
       });
     });
+
+    test('supports opting out of partial results', () => {
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const arg = cold('     -a-b-c|', { a, b, c });
+        const expected = '     ------(c|)';
+        const spyFn = jest.fn((value) => value);
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => arg,
+        });
+        executor.registerFunction({
+          name: 'spy',
+          args: {},
+          help: '',
+          fn: (input) => spyFn(input),
+        });
+
+        const result = executor.run('observable | spy', null, { partial: false });
+
+        expectObservable(result).toBe(expected, {
+          c: { result: c, partial: false },
+        });
+
+        flush();
+
+        expect(spyFn).toHaveBeenCalledTimes(1);
+        expect(spyFn).toHaveBeenCalledWith(c);
+      });
+    });
   });
 
   describe('when function throws', () => {
@@ -816,6 +851,47 @@ describe('Execution', () => {
         expect(spyFn).toHaveBeenCalledTimes(2);
         expect(spyFn).toHaveBeenNthCalledWith(1, null, { arg: a });
         expect(spyFn).toHaveBeenNthCalledWith(2, null, { arg: d });
+      });
+    });
+
+    test('supports opting out of partial results in sub-expression', async () => {
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const observable$ = cold('abc|', { a, b, c });
+        const expected = '        ---(c|)';
+        const spyFn = jest.fn((input, { arg }) => arg);
+
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => observable$,
+        });
+        executor.registerFunction({
+          name: 'spy',
+          args: {
+            arg: {
+              help: '',
+              types: ['number'],
+            },
+          },
+          help: '',
+          fn: (input, args) => spyFn(input, args),
+        });
+
+        const result = executor.run('spy arg={observable}', null, { partial: false });
+
+        expectObservable(result).toBe(expected, {
+          c: { partial: false, result: c },
+        });
+
+        flush();
+
+        expect(spyFn).toHaveBeenCalledTimes(1);
+        expect(spyFn).toHaveBeenCalledWith(null, { arg: c });
       });
     });
   });

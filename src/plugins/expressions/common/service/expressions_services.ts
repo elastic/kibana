@@ -161,6 +161,12 @@ export interface ExpressionExecutionParams {
   executionContext?: KibanaExecutionContext;
 
   namespace?: string;
+
+  /**
+   * Toggles the partial results support.
+   * @default true
+   */
+  partial?: boolean;
 }
 
 /**
