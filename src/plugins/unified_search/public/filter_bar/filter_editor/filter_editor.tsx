@@ -87,7 +87,7 @@ const updateButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.upda
 const disableToggleModeTooltip = i18n.translate(
   'unifiedSearch.filter.filterEditor.disableToggleModeTooltip',
   {
-    defaultMessage: '"Edit as questy DSL" operation is not supported for combined filters',
+    defaultMessage: '"Edit as Query DSL" operation is not supported for combined filters',
   }
 );
 
