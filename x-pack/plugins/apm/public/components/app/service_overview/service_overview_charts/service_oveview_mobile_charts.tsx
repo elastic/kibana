@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   EuiFlexGroup,
   EuiTitle,
@@ -42,6 +43,15 @@ interface Props {
   isSingleColumn: boolean;
 }
 
+// NOTE: kqlQuery does the same
+function kueryToEsQuery(kuery: string) {
+  if (!kuery) {
+    return [];
+  }
+  const ast = fromKueryExpression(kuery);
+  return [toElasticsearchQuery(ast)];
+}
+
 export function ServiceOverviewMobileCharts({
   latencyChartHeight,
   rowDirection,
@@ -70,8 +80,9 @@ export function ServiceOverviewMobileCharts({
       ...termQueryClient(SERVICE_NAME, serviceName),
       ...termQueryClient(TRANSACTION_TYPE, transactionType),
       ...environmentQuery(environment),
+      ...kueryToEsQuery(kuery),
     ];
-  }, [environment, transactionType, serviceName]);
+  }, [environment, transactionType, serviceName, kuery]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
