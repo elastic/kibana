@@ -8,7 +8,7 @@
 
 import React, { useCallback } from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiToolTip, EuiFormRow } from '@elastic/eui';
 import type { Operator } from '../../filter_bar/filter_editor';
 import {
   PhraseValueInput,
@@ -71,6 +71,7 @@ export function ParamsEditor<TParams = unknown>({
           onChange={onParamsChange}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           fullWidth
+          isInvalid={isInvalid}
         />
       );
       break;
@@ -110,13 +111,16 @@ export function ParamsEditor<TParams = unknown>({
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           fullWidth
           compressed
+          isInvalid={isInvalid}
         />
       );
   }
 
   return (
-    <EuiFormRow fullWidth isInvalid={isInvalid} error={errorMessage}>
-      {Component}
+    <EuiFormRow fullWidth isInvalid={isInvalid}>
+      <EuiToolTip position="bottom" content={errorMessage ?? null} display="block">
+        {Component}
+      </EuiToolTip>
     </EuiFormRow>
   );
 }
