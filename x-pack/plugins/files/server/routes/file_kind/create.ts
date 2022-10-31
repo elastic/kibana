@@ -36,7 +36,7 @@ export const handler: CreateHandler<Endpoint> = async ({ fileKind, files }, req,
     alt,
     meta: {
       owner: security?.authc.getCurrentUser(req)?.username,
-      uid: security?.authc.getCurrentUser(req)?.username,
+      uid: security?.authc.getCurrentUser(req)?.profile_uid,
       ...meta,
     },
     mime: mimeType,

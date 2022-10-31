@@ -141,6 +141,8 @@ export type BaseFileMetadata = {
 export interface FileSystemMetadata {
   /**
    * The human-friendly user name of the owner of the file
+   *
+   * @note this field cannot be used to uniquely ID a user. See {@link FileSystemMetadata['uid']}.
    */
   owner?: string;
   /**
