@@ -14,7 +14,13 @@
           "(theme$?: ",
           "Observable",
           "<",
-          "CoreTheme",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          },
           ">) => () => ",
           {
             "pluginId": "expressions",
@@ -47,7 +53,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
@@ -68,7 +80,13 @@
         "description": [],
         "signature": [
           "(core: ",
-          "CoreSetup",
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreSetup",
+            "text": "CoreSetup"
+          },
           "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
@@ -99,7 +117,13 @@
             "label": "core",
             "description": [],
             "signature": [
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>"
             ],
             "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
@@ -168,7 +192,7 @@
         "label": "metricFunction",
         "description": [],
         "signature": [
-          "() => { name: \"metric\"; aliases: never[]; type: \"render\"; inputTypes: (\"number\" | \"null\" | \"string\")[]; help: string; args: { label: { types: \"string\"[]; aliases: string[]; help: string; default: string; }; labelFont: { types: \"style\"[]; help: string; default: string; }; metricFont: { types: \"style\"[]; help: string; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: string; }; }; fn: (input: ",
+          "() => { name: \"metric\"; aliases: never[]; type: \"render\"; inputTypes: (\"number\" | \"null\" | \"string\")[]; help: any; args: { label: { types: \"string\"[]; aliases: string[]; help: any; default: string; }; labelFont: { types: \"style\"[]; help: any; default: string; }; metricFont: { types: \"style\"[]; help: any; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: any; }; }; fn: (input: ",
           {
             "pluginId": "expressionMetric",
             "scope": "common",
@@ -506,7 +530,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/expression_metric/common/types/expression_functions.ts",

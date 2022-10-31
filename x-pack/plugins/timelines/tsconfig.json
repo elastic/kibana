@@ -5,7 +5,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "common/**/*",
@@ -16,7 +15,7 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
