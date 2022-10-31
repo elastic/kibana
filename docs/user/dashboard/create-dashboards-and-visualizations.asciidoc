@@ -69,6 +69,8 @@ All columns that belong to the same layer pane group are sorted in the table.
 [[create-bar-visualizations]]
 ==== Create bar visualizations
 
+When you add the *Break-down-by* field, use five or less colors. Use the *Other* category to group the smallest values in a single color.
+
 [discrete]
 [[create-goal-and-single-value-visualizations]]
 ==== Create goal and single value visualizations

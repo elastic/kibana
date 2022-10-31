@@ -63,11 +63,13 @@ Alternative visualizations:
 [[supported-visualizations-bar]]
 === Bar
 
-Bar charts, or bar graphs, display data in rectangular bars, where the height and length from the common baseline are proportional to the values the bars represent. You can display bar charts vertically or horizontally, and if you have many fields, you can use stacked or grouped bar charts. Use bar charts to visually compare the differences between categorical data, such as logs, host names, or days of the week, and are the best option for when you want to be able to detect small changes in the values across categories.
+Bar charts, or bar graphs, display data in rectangular bars, where the height and length from the common baseline are proportional to the values the bars represent. You can display bar charts vertically or horizontally, and if you have many fields, you can use stacked bar charts. 
 
-[image]
+In vertical bar charts, categories appear along the horizontal axis. In horizontal bar charts, categories appear along the vertical axis. 
 
-Supported bar charts:
+Stacked bar charts show how a larger category is divided into subcategories, where each subcategory is displayed in a different color. Depending on the data, the largest and most important, or least variable subcategories are displayed along the baseline.
+
+{kib} supports the following bar charts:
 
 * Bar horizontal
 * Bar horizontal percentage
@@ -76,46 +78,7 @@ Supported bar charts:
 * Bar vertical percentage
 * Bar vertical stacked
 
-[image]
-
-[cols=2*]
-|===
-
-| *1*
-| *Axis tick label* [Description]
-
-| *2*
-| *Vertical axis* The quantitive axis that represents the scale of a measured value, which is represented by the height of the bars, and displays a set of incremental ticks to guide analysis. In a vertical bar chart, represents categorical data.
-
-| *3*
-| *Grid line* [Description]
-
-| *4*
-| *Bar* Increases from a common baseline where the height corresponds to the categorical data along the vertical axis. In a vertical bar chart, appears along the horizontal access.
-
-| *5*
-| *Baseline* [Description]
-
-| *5*
-| *Horizontal axis* The axis that represents the categorical data that appear as a set of incremental ticks to guide analysis. In a vertical bar chart, represents the scale of a measured value.
-
-| *5*
-| *Tick* A visually aligned, and labeled, category that appears along the corresponding axis.
-|===
-
-[discrete]
-[[supported-visualizations-bar-chart-best-practices]]
-==== Bar chart best practices
-
-Use horizontal bar charts to display long labels, such as IDs and host names. Use vertical bar charts to display a large number of categories. 
-
-[image]
-
-Depending on the amount of intervals and interval size, you can display the bars as discrete ordinal categories, or a continuous histogram. For example, when you want to represent the months of the year, or a six hour time range with one minute intervals. When you display the bars as a continuous histogram, the discrete categories decrease in importance, and are better displayed without boundaries to represent continuity. 
-
-To display hierarchy, apply different colors to the sub categories. For example, to compare the monthly memory usage between two services, apply different colors to the services.
-
-Add bar charts to your dashboard to answer the following types of questions:
+Use bar charts to visually compare the differences between categorical data, such as logs, host names, or days of the week, and for when you want to visually detect small changes in the values across categories. For example, add bar charts to your dashboard to answer the following types of questions:
 
 * Which are the most frequent response types across my hosts?
 * What are the top five hosts that produce the most error logs?
@@ -125,14 +88,76 @@ Add bar charts to your dashboard to answer the following types of questions:
 * How many hourly logs were ingested last week?
 
 [discrete]
+[[components-of-a-bar-chart]]
+==== Components of a bar chart
+
+All bar charts include the same set of components for visualizing your data. 
+
+[role="screenshot"]
+image:images/lens_anatomyOfABarChart_8.6.png[Horizontal bar chart with callouts for each bar chart part]
++
+[cols=2*]
+|===
+
+| *1*
+| *Grid line* A visual indicator of the bar value. 
+
+| *2*
+| *Axis tick label* The labeled category or measurement that appears along the corresponding axis.
+
+| *3*
+| *Vertical axis* The quantitive axis that represents the scale of a measured value, which is represented by the height of the bars, and displays a set of incremental ticks to guide analysis. In a vertical bar chart, represents categorical data.
+
+| *4*
+| *Bar* Increases from a common baseline where the height corresponds to the categorical data along the vertical axis. In a vertical bar chart, appears along the horizontal access.
+
+| *5*
+| *Baseline* The common base value for each bar, which is always zero. 
+
+| *6*
+| *Horizontal axis* The axis that represents the categorical data that appear as a set of incremental ticks to guide analysis. In a vertical bar chart, represents the scale of a measured value.
+
+| *7*
+| *Tick* A visually aligned and labeled category or measurement that appears along the corresponding axis.
+|===
+
+[discrete]
+[[supported-visualizations-bar-chart-best-practices]]
+==== Bar chart best practices
+
+To create bar charts that best display your data, review the best practices. 
+
+To display long labels, such as IDs and host names, use horizontal bar charts.
++
+[role="screenshot"]
+image:images/lens_horizontalBarChartBestPractices_8.6.0.png[Horizontal bar chart of the top five values of the request.keyword field]
+
+To display a large number of categories or measurements, use vertical bar charts. Make sure to avoid reducing the size of the bars so the bars are easily readable. Before you reduce the bar size, consider increasing the chart size.
++
+[role="screenshot"]
+image:images/lens_verticalBarChartBestPractices_8.6.0.png[Vertical bar chart of the percentage of visits compared to bytes]
+
+To display multiple data sets that show hierarchy, use a stacked bar chart and apply different colors to the sub categories. Make sure that you use five or less colors.  
++
+[role="screenshot"]
+image:images/lens_stackedBarChartBestPractices_8.6.0.png[Stacked bar chart of the number of items sold by order date]
+
+When you create time-based bar charts, use proportions that best display the trends and changes in values over time. 
++
+[role="screenshot"]
+image:images/lens_proportionsBestPractices_8.6.0.png[Three bar charts that display the same data, but with different proportions]
+
+//TODO:When you display percentages, avoid negative values. 
+
+[discrete]
 [[supported-visualizations-bar-chart-alternatives]]
 ==== Alternative bar chart visualizations
 
-* *Histogram?*
+Consider the alertnative bar chart visualizations for best displaying your data. 
 
 * *Line* Use line charts when your data contains discrete, but ordinal, categories or intervals. For example, time ranges or age groups. Line charts are a better way to help you understand the trends across the set of ordinal categories, instead of only comparing the trends.
 
-* *Pie chart* Use pie charts to display the data divided into categories, where the sum of the categories represents the whole. For example, the total number of logs divided by possible log types. Pie charts are a better way to help you understand how each category contributes to the whole.
+* *Pie* Use pie charts to display the data divided into categories, where the sum of the categories represents the whole. For example, the total number of logs divided by possible log types. Pie charts are a better way to help you understand how each category contributes to the whole.
 
 [discrete]
 [[supported-visualizations-goal-and-single-value]]
