@@ -6,7 +6,10 @@
  */
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { ALERT_NEW_TERMS } from '../../../../../../common/field_maps/field_names';
+import {
+  ALERT_NEW_TERMS,
+  ALERT_NEW_TERMS_FIELDS_VALUES,
+} from '../../../../../../common/field_maps/field_names';
 import { getCompleteRuleMock, getNewTermsRuleParams } from '../../../rule_schema/mocks';
 import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
@@ -17,7 +20,9 @@ describe('wrapNewTermsAlerts', () => {
     const doc = sampleDocNoSortIdWithTimestamp(docId);
     const completeRule = getCompleteRuleMock(getNewTermsRuleParams());
     const alerts = wrapNewTermsAlerts({
-      eventsAndTerms: [{ event: doc, newTerms: ['127.0.0.1'] }],
+      eventsAndTerms: [
+        { event: doc, newTerms: ['127.0.0.1'], newTermsFieldsValues: ['host.ip: 127.0.0.1'] },
+      ],
       spaceId: 'default',
       mergeStrategy: 'missingFields',
       completeRule,
@@ -28,13 +33,16 @@ describe('wrapNewTermsAlerts', () => {
     expect(alerts[0]._id).toEqual('a36d9fe6fe4b2f65058fb1a487733275f811af58');
     expect(alerts[0]._source[ALERT_UUID]).toEqual('a36d9fe6fe4b2f65058fb1a487733275f811af58');
     expect(alerts[0]._source[ALERT_NEW_TERMS]).toEqual(['127.0.0.1']);
+    expect(alerts[0]._source[ALERT_NEW_TERMS_FIELDS_VALUES]).toEqual(['host.ip: 127.0.0.1']);
   });
 
   test('should create an alert with a different _id if the space is different', () => {
     const doc = sampleDocNoSortIdWithTimestamp(docId);
     const completeRule = getCompleteRuleMock(getNewTermsRuleParams());
     const alerts = wrapNewTermsAlerts({
-      eventsAndTerms: [{ event: doc, newTerms: ['127.0.0.1'] }],
+      eventsAndTerms: [
+        { event: doc, newTerms: ['127.0.0.1'], newTermsFieldsValues: ['host.ip: 127.0.0.1'] },
+      ],
       spaceId: 'otherSpace',
       mergeStrategy: 'missingFields',
       completeRule,
@@ -45,13 +53,16 @@ describe('wrapNewTermsAlerts', () => {
     expect(alerts[0]._id).toEqual('f7877a31b1cc83373dbc9ba5939ebfab1db66545');
     expect(alerts[0]._source[ALERT_UUID]).toEqual('f7877a31b1cc83373dbc9ba5939ebfab1db66545');
     expect(alerts[0]._source[ALERT_NEW_TERMS]).toEqual(['127.0.0.1']);
+    expect(alerts[0]._source[ALERT_NEW_TERMS_FIELDS_VALUES]).toEqual(['host.ip: 127.0.0.1']);
   });
 
   test('should create an alert with a different _id if the newTerms array is different', () => {
     const doc = sampleDocNoSortIdWithTimestamp(docId);
     const completeRule = getCompleteRuleMock(getNewTermsRuleParams());
     const alerts = wrapNewTermsAlerts({
-      eventsAndTerms: [{ event: doc, newTerms: ['127.0.0.2'] }],
+      eventsAndTerms: [
+        { event: doc, newTerms: ['127.0.0.2'], newTermsFieldsValues: ['host.ip: 127.0.0.2'] },
+      ],
       spaceId: 'otherSpace',
       mergeStrategy: 'missingFields',
       completeRule,
@@ -62,13 +73,20 @@ describe('wrapNewTermsAlerts', () => {
     expect(alerts[0]._id).toEqual('75e5a507a4bc48bcd983820c7fd2d9621ff4e2ea');
     expect(alerts[0]._source[ALERT_UUID]).toEqual('75e5a507a4bc48bcd983820c7fd2d9621ff4e2ea');
     expect(alerts[0]._source[ALERT_NEW_TERMS]).toEqual(['127.0.0.2']);
+    expect(alerts[0]._source[ALERT_NEW_TERMS_FIELDS_VALUES]).toEqual(['host.ip: 127.0.0.2']);
   });
 
   test('should create an alert with a different _id if the newTerms array contains multiple terms', () => {
     const doc = sampleDocNoSortIdWithTimestamp(docId);
     const completeRule = getCompleteRuleMock(getNewTermsRuleParams());
     const alerts = wrapNewTermsAlerts({
-      eventsAndTerms: [{ event: doc, newTerms: ['127.0.0.1', '127.0.0.2'] }],
+      eventsAndTerms: [
+        {
+          event: doc,
+          newTerms: ['127.0.0.1', 'host-0'],
+          newTermsFieldsValues: ['host.ip: 127.0.0.1', 'host.name: host-0'],
+        },
+      ],
       spaceId: 'otherSpace',
       mergeStrategy: 'missingFields',
       completeRule,
@@ -76,8 +94,12 @@ describe('wrapNewTermsAlerts', () => {
       alertTimestampOverride: undefined,
     });
 
-    expect(alerts[0]._id).toEqual('86a216cfa4884767d9bb26d2b8db911cb4aa85ce');
-    expect(alerts[0]._source[ALERT_UUID]).toEqual('86a216cfa4884767d9bb26d2b8db911cb4aa85ce');
-    expect(alerts[0]._source[ALERT_NEW_TERMS]).toEqual(['127.0.0.1', '127.0.0.2']);
+    expect(alerts[0]._id).toEqual('d2e9f981f173ef54904e36ba09802e42788bc2a9');
+    expect(alerts[0]._source[ALERT_UUID]).toEqual('d2e9f981f173ef54904e36ba09802e42788bc2a9');
+    expect(alerts[0]._source[ALERT_NEW_TERMS]).toEqual(['127.0.0.1', 'host-0']);
+    expect(alerts[0]._source[ALERT_NEW_TERMS_FIELDS_VALUES]).toEqual([
+      'host.ip: 127.0.0.1',
+      'host.name: host-0',
+    ]);
   });
 });
