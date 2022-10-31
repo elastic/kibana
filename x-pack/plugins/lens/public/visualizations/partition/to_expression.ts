@@ -5,17 +5,24 @@
  * 2.0.
  */
 
-import type { Ast, AstFunction } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type {
   LabelPositions,
+  MosaicVisExpressionFunctionDefinition,
   PartitionLabelsExpressionFunctionDefinition,
+  PieVisExpressionFunctionDefinition,
+  TreemapVisExpressionFunctionDefinition,
   ValueFormats,
+  LegendDisplay as PartitionVisLegendDisplay,
+  WaffleVisExpressionFunctionDefinition,
 } from '@kbn/expression-partition-vis-plugin/common';
 import { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
+import type { CollapseExpressionFunction } from '../../../common/expressions';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
@@ -51,15 +58,6 @@ type GenerateExpressionAstFunction = (
   paletteService: PaletteRegistry
 ) => Ast | null;
 
-type GenerateExpressionAstArguments = (
-  state: PieVisualizationState,
-  attributes: Attributes,
-  operations: OperationColumnId[],
-  layer: PieLayerState,
-  datasourceLayers: DatasourceLayers,
-  paletteService: PaletteRegistry
-) => Ast['chain'][number]['arguments'];
-
 type GenerateLabelsAstArguments = (
   state: PieVisualizationState,
   attributes: Attributes,
@@ -81,8 +79,7 @@ export const getSortedGroups = (
 };
 
 const prepareDimension = (accessor: string) => {
-  const visdimension = buildExpressionFunction('visdimension', { accessor });
-  return buildExpression([visdimension]).toAst();
+  return buildExpressionFunction<ExpressionFunctionVisDimension>('visdimension', { accessor });
 };
 
 const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (state, attributes, layer) => {
@@ -127,122 +124,99 @@ const generatePaletteAstArguments = (
       ]
     : [paletteService.get('default').toExpression()];
 
-const generateCommonArguments: GenerateExpressionAstArguments = (
-  state,
-  attributes,
-  operations,
-  layer,
-  datasourceLayers,
-  paletteService
+const generateCommonArguments = (
+  state: PieVisualizationState,
+  attributes: Attributes,
+  operations: OperationColumnId[],
+  layer: PieLayerState,
+  datasourceLayers: DatasourceLayers,
+  paletteService: PaletteRegistry
 ) => {
   return {
     labels: generateCommonLabelsAstArgs(state, attributes, layer),
-    buckets: operations
-      .filter(({ columnId }) => !isCollapsed(columnId, layer))
-      .map(({ columnId }) => columnId)
-      .map(prepareDimension),
-    metric: layer.metric ? [prepareDimension(layer.metric)] : [],
-    legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
-    legendPosition: [layer.legendPosition || Position.Right],
-    maxLegendLines: [layer.legendMaxLines ?? 1],
-    legendSize: layer.legendSize ? [layer.legendSize] : [],
-    nestedLegend: [!!layer.nestedLegend],
-    truncateLegend: [
+    buckets: buildExpression(
+      operations
+        .filter(({ columnId }) => !isCollapsed(columnId, layer))
+        .map(({ columnId }) => columnId)
+        .map(prepareDimension)
+    ).toAst(),
+    metric: layer.metric ? buildExpression([prepareDimension(layer.metric)]).toAst() : [],
+    legendDisplay: (attributes.isPreview
+      ? LegendDisplay.HIDE
+      : layer.legendDisplay) as PartitionVisLegendDisplay,
+    legendPosition: layer.legendPosition || Position.Right,
+    maxLegendLines: layer.legendMaxLines ?? 1,
+    legendSize: layer.legendSize,
+    nestedLegend: !!layer.nestedLegend,
+    truncateLegend:
       layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
-    ],
     palette: generatePaletteAstArguments(paletteService, state.palette),
+    addTooltip: false,
   };
 };
 
-const generatePieVisAst: GenerateExpressionAstFunction = (...rest) => ({
-  type: 'expression',
-  chain: [
-    {
-      type: 'function',
-      function: 'pieVis',
-      arguments: {
-        ...generateCommonArguments(...rest),
-        respectSourceOrder: [false],
-        startFromSecondLargestSlice: [true],
-      },
-    },
-  ],
-});
+const generatePieVisAst: GenerateExpressionAstFunction = (...rest) =>
+  buildExpression([
+    buildExpressionFunction<PieVisExpressionFunctionDefinition>('pieVis', {
+      ...generateCommonArguments(...rest),
+      respectSourceOrder: false,
+      startFromSecondLargestSlice: true,
+      isDonut: false,
+    }),
+  ]).toAst();
 
 const generateDonutVisAst: GenerateExpressionAstFunction = (...rest) => {
   const [, , , layer] = rest;
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'pieVis',
-        arguments: {
-          ...generateCommonArguments(...rest),
-          respectSourceOrder: [false],
-          isDonut: [true],
-          startFromSecondLargestSlice: [true],
-          emptySizeRatio: [layer.emptySizeRatio ?? EmptySizeRatios.SMALL],
-        },
-      },
-    ],
-  };
+
+  return buildExpression([
+    buildExpressionFunction<PieVisExpressionFunctionDefinition>('pieVis', {
+      ...generateCommonArguments(...rest),
+      respectSourceOrder: false,
+      isDonut: true,
+      startFromSecondLargestSlice: true,
+      emptySizeRatio: layer.emptySizeRatio ?? EmptySizeRatios.SMALL,
+    }),
+  ]).toAst();
 };
 
 const generateTreemapVisAst: GenerateExpressionAstFunction = (...rest) => {
   const [, , , layer] = rest;
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'treemapVis',
-        arguments: {
-          ...generateCommonArguments(...rest),
-          nestedLegend: [!!layer.nestedLegend],
-        },
-      },
-    ],
-  };
+
+  return buildExpression([
+    buildExpressionFunction<TreemapVisExpressionFunctionDefinition>('treemapVis', {
+      ...generateCommonArguments(...rest),
+      nestedLegend: !!layer.nestedLegend,
+    }),
+  ]).toAst();
 };
 
-const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => ({
-  type: 'expression',
-  chain: [
-    {
-      type: 'function',
-      function: 'mosaicVis',
-      arguments: {
-        ...generateCommonArguments(...rest),
-        // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
-        buckets: rest[2]
+const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) =>
+  buildExpression([
+    buildExpressionFunction<MosaicVisExpressionFunctionDefinition>('mosaicVis', {
+      ...generateCommonArguments(...rest),
+      // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
+      buckets: buildExpression(
+        rest[2]
           .filter(({ columnId }) => !isCollapsed(columnId, rest[3]))
           .reverse()
           .map((o) => o.columnId)
-          .map(prepareDimension),
-      },
-    },
-  ],
-});
+          .map(prepareDimension)
+      ).toAst(),
+    }),
+  ]).toAst();
 
 const generateWaffleVisAst: GenerateExpressionAstFunction = (...rest) => {
   const { buckets, nestedLegend, ...args } = generateCommonArguments(...rest);
   const [state, attributes, , layer] = rest;
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'waffleVis',
-        arguments: {
-          ...args,
-          bucket: buckets,
-          labels: generateWaffleLabelsAstArguments(state, attributes, layer),
-          showValuesInLegend: [shouldShowValuesInLegend(layer, state.shape)],
-        },
-      },
-    ],
-  };
+
+  return buildExpression([
+    buildExpressionFunction<WaffleVisExpressionFunctionDefinition>('waffleVis', {
+      ...args,
+      bucket: buckets,
+      labels: generateWaffleLabelsAstArguments(state, attributes, layer),
+      showValuesInLegend: shouldShowValuesInLegend(layer, state.shape),
+    }),
+  ]).toAst();
 };
 
 const generateExprAst: GenerateExpressionAstFunction = (state, ...restArgs) =>
@@ -300,15 +274,11 @@ function expressionHelper(
       ...groups
         .filter((columnId) => layer.collapseFns?.[columnId])
         .map((columnId) => {
-          return {
-            type: 'function',
-            function: 'lens_collapse',
-            arguments: {
-              by: groups.filter((chk) => chk !== columnId),
-              metric: [layer.metric],
-              fn: [layer.collapseFns![columnId]!],
-            },
-          } as AstFunction;
+          return buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
+            by: groups.filter((chk) => chk !== columnId),
+            metric: layer.metric ? [layer.metric] : [],
+            fn: [layer.collapseFns![columnId]!],
+          }).toAst();
         }),
       ...(visualizationAst ? visualizationAst.chain : []),
     ],
