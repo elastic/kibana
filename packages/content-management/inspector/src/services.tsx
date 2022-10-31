@@ -13,7 +13,7 @@ import type { EuiComboBoxProps } from '@elastic/eui';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 
-type TagSelectorProps = EuiComboBoxProps<unknown> & {
+export type TagSelectorProps = EuiComboBoxProps<unknown> & {
   initialSelection: string[];
   onTagsSelected: (ids: string[]) => void;
 };
