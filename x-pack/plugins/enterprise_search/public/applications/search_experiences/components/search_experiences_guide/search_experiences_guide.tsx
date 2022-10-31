@@ -22,13 +22,15 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { SEARCH_EXPERIENCES_PLUGIN } from '../../../../../common/constants';
 import searchExperiencesIllustration from '../../../../assets/images/search_experiences.svg';
 
 import { SetSearchExperiencesChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchSearchExperiencesPageTemplate } from '../layout';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 export const SearchExperiencesGuide: React.FC = () => {
   return (
