@@ -35,7 +35,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "PublicMethodsOf",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
               "<",
               "OverlayService",
               ">>"
@@ -55,9 +61,21 @@
             "description": [],
             "signature": [
               "() => ",
-              "DeeplyMockedKeys",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-server.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
+              },
               "<",
-              "OverlayStart",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-common.OverlayStart",
+                "text": "OverlayStart"
+              },
               ">"
             ],
             "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
