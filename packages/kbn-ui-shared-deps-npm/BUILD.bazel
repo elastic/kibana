@@ -8,7 +8,6 @@ PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-npm"
 
 SOURCE_FILES = glob(
   [
-    "**/*.ts",
     "**/*.js",
   ],
   exclude = [
@@ -129,7 +128,6 @@ ts_project(
   deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   tsconfig = ":tsconfig",
@@ -161,6 +159,14 @@ js_library(
   visibility = ["//visibility:public"],
 )
 
+js_library(
+  name = "npm_module_types",
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets", ":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
 pkg_npm(
   name = "npm_module",
   deps = [":" + PKG_DIRNAME],
@@ -174,19 +180,8 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
+pkg_npm(
   name = "build_types",
-  srcs = [
-    ":npm_module_types",
-  ],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

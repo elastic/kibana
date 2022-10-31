@@ -184,6 +184,7 @@ export const serviceDetail = {
                 t.type({
                   transactionName: t.string,
                   comparisonEnabled: toBooleanRt,
+                  showCriticalPath: toBooleanRt,
                 }),
                 t.partial({
                   traceId: t.string,
@@ -192,6 +193,11 @@ export const serviceDetail = {
                 offsetRt,
               ]),
             }),
+            defaults: {
+              query: {
+                showCriticalPath: '',
+              },
+            },
           },
           '/services/{serviceName}/transactions': {
             element: <TransactionOverview />,
