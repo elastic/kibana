@@ -27,6 +27,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
     dataViews: DataViewsContract;
   };
   fieldsExistenceReader?: ExistingFieldsReader;
+  isAffectedByGlobalFilter?: boolean;
   popularFieldsLimit?: number;
   sortedSelectedFields?: T[];
   onOverrideFieldGroupDetails?: (
@@ -46,6 +47,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   allFields,
   services,
   fieldsExistenceReader,
+  isAffectedByGlobalFilter = false,
   popularFieldsLimit,
   sortedSelectedFields,
   onOverrideFieldGroupDetails,
@@ -54,6 +56,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onFilterField,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const [dataView, setDataView] = useState<DataView | null>(null);
+  const isAffectedByTimeFilter = Boolean(dataView?.timeFieldName);
   const fieldsExistenceInfoUnavailable: boolean = dataViewId
     ? fieldsExistenceReader?.isFieldsExistenceInfoUnavailable(dataViewId) ?? false
     : true;
@@ -127,8 +130,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         title: i18n.translate('unifiedFieldList.useGroupedFields.selectedFieldsLabel', {
           defaultMessage: 'Selected fields',
         }),
-        isAffectedByGlobalFilter: false,
-        isAffectedByTimeFilter: false,
+        isAffectedByGlobalFilter,
+        isAffectedByTimeFilter,
         hideDetails: false,
         hideIfEmpty: true,
       },
@@ -140,8 +143,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         title: i18n.translate('unifiedFieldList.useGroupedFields.popularFieldsLabel', {
           defaultMessage: 'Popular fields',
         }),
-        isAffectedByGlobalFilter: false,
-        isAffectedByTimeFilter: true,
+        isAffectedByGlobalFilter,
+        isAffectedByTimeFilter,
         hideDetails: false,
         hideIfEmpty: true,
       },
@@ -158,8 +161,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
             : i18n.translate('unifiedFieldList.useGroupedFields.availableFieldsLabel', {
                 defaultMessage: 'Available fields',
               }),
-        isAffectedByGlobalFilter: false,
-        isAffectedByTimeFilter: true,
+        isAffectedByGlobalFilter,
+        isAffectedByTimeFilter,
         // Show details on timeout but not failure
         // hideDetails: fieldsExistenceInfoUnavailable && !existenceFetchTimeout, // TODO: is this check still necessary?
         hideDetails: fieldsExistenceInfoUnavailable,
@@ -245,6 +248,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     dataViewId,
     hasFieldDataHandler,
     fieldsExistenceInfoUnavailable,
+    isAffectedByGlobalFilter,
+    isAffectedByTimeFilter,
     popularFieldsLimit,
     sortedSelectedFields,
   ]);

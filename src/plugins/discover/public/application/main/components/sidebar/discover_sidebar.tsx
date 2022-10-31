@@ -33,7 +33,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
-import { shouldShowField, getSelectedFields } from './lib/group_fields';
+import { getSelectedFields, shouldShowField } from './lib/group_fields';
 import { doesFieldMatchFilters, FieldFilterState, setFieldFilterProp } from './lib/field_filter';
 import { getDataViewFieldList } from './lib/get_data_view_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
@@ -124,6 +124,7 @@ export function DiscoverSidebarComponent({
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
   const query = useAppStateSelector((state) => state.query);
+  const isGlobalFilterApplied = useAppStateSelector((state) => Boolean(state.filters?.length));
 
   useEffect(() => {
     if (documents) {
@@ -257,6 +258,17 @@ export function DiscoverSidebarComponent({
       },
       [useNewFieldsApi]
     );
+  const onOverrideFieldGroupDetails: GroupedFieldsParams<DataViewField>['onOverrideFieldGroupDetails'] =
+    useCallback((groupName) => {
+      if (groupName === FieldsGroupNames.AvailableFields) {
+        return {
+          helpText: i18n.translate('discover.fieldChooser.availableFieldsTooltip', {
+            defaultMessage:
+              'Your query returned values for these fields. Click + to add an available field to the data table.',
+          }),
+        };
+      }
+    }, []);
   const fieldsExistenceReader = useExistingFieldsReader();
   const { fieldGroups } = useGroupedFields({
     dataViewId: isPlainRecord || !selectedDataView?.id ? null : selectedDataView.id, // TODO: check whether we need Empty fields for text-based query
@@ -264,11 +276,13 @@ export function DiscoverSidebarComponent({
     allFields: fields || EMPTY_FIELD_LIST,
     popularFieldsLimit: isPlainRecord ? 0 : popularFieldsLimit,
     sortedSelectedFields: selectedFields,
+    isAffectedByGlobalFilter: isGlobalFilterApplied,
     services: {
       dataViews,
     },
     onFilterField,
     onSupportedFieldFilter,
+    onOverrideFieldGroupDetails,
   });
 
   // TODO: hide meta fields on Discover for text-based queries
