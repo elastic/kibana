@@ -22,7 +22,7 @@ describe('<InspectorFlyoutContent />', () => {
     const savedObjectItem: InspectorFlyoutContentProps['item'] = {
       title: 'Foo',
       description: 'Some description',
-      tags: ['tag-1', 'tag-2'],
+      tags: ['id-1', 'id-2'],
     };
 
     const mockedServices = getMockServices();
@@ -57,6 +57,8 @@ describe('<InspectorFlyoutContent />', () => {
       expect(find('metadataForm.nameInput').props().readOnly).toBe(true);
       expect(find('metadataForm.descriptionInput').props().readOnly).toBe(true);
       expect(exists('saveButton')).toBe(false);
+
+      // TODO: not render TagSelector on readOnly and add test for it
     });
 
     test('should send back the updated item to the onSave() handler', async () => {
@@ -78,7 +80,7 @@ describe('<InspectorFlyoutContent />', () => {
       expect(onSave).toHaveBeenCalledWith({
         title: 'Foo',
         description: 'Some description',
-        tags: ['tag-1', 'tag-2'],
+        tags: ['id-1', 'id-2'],
       });
 
       await act(async () => {
@@ -95,7 +97,52 @@ describe('<InspectorFlyoutContent />', () => {
       expect(onSave).toHaveBeenCalledWith({
         title: 'newTitle',
         description: 'newDescription',
-        tags: ['tag-1', 'tag-2'],
+        tags: ['id-1', 'id-2'],
+      });
+    });
+
+    test('should update the tag selection', async () => {
+      const onSave = jest.fn();
+
+      await act(async () => {
+        testBed = await setup({ onSave, isReadonly: false });
+      });
+      const { find, component } = testBed!;
+
+      await act(async () => {
+        find('tagList.tag-id-1').simulate('click');
+        find('tagList.tag-id-2').simulate('click');
+      });
+
+      component.update();
+
+      await act(async () => {
+        find('saveButton').simulate('click');
+      });
+
+      const lastArgs = onSave.mock.calls[onSave.mock.calls.length - 1][0];
+
+      expect(lastArgs).toEqual({
+        title: 'Foo',
+        description: 'Some description',
+        tags: [], // No more tags selected
+      });
+
+      await act(async () => {
+        find('tagList.tag-id-3').simulate('click');
+        find('tagList.tag-id-4').simulate('click');
+      });
+
+      component.update();
+
+      await act(async () => {
+        find('saveButton').simulate('click');
+      });
+
+      expect(onSave).toHaveBeenCalledWith({
+        title: 'Foo',
+        description: 'Some description',
+        tags: ['id-3', 'id-4'], // New selection
       });
     });
   });
