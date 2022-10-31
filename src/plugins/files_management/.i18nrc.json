@@ -1,0 +1,7 @@
+{
+  "prefix": "filesManagement",
+  "paths": {
+    "filesManagement": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
