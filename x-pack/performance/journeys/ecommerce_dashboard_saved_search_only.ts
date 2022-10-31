@@ -20,4 +20,5 @@ export const journey = new Journey({
 
   .step('Go to Ecommerce Dashboard with Saved Search', async ({ page }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-Saved-Search-Dashboard'));
+    await waitForVisualizations(page, 1);
   });
