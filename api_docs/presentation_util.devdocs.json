@@ -676,7 +676,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">) => any"
         ],
         "path": "src/plugins/presentation_util/common/lib/test_helpers/function_wrapper.ts",
@@ -2026,7 +2032,13 @@
             "label": "coreStart",
             "description": [],
             "signature": [
-              "CoreStart"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              }
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
             "deprecated": false,
@@ -2056,7 +2068,13 @@
             "signature": [
               "BehaviorSubject",
               "<",
-              "AppUpdater",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppUpdater",
+                "text": "AppUpdater"
+              },
               "> | undefined"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
@@ -2071,7 +2089,13 @@
             "label": "initContext",
             "description": [],
             "signature": [
-              "PluginInitializerContext",
+              {
+                "pluginId": "@kbn/core-plugins-browser",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsBrowserPluginApi",
+                "section": "def-common.PluginInitializerContext",
+                "text": "PluginInitializerContext"
+              },
               "<object> | undefined"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
@@ -2179,7 +2203,13 @@
             "description": [],
             "signature": [
               "(query: string, fields: string[]) => Promise<",
-              "SimpleSavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
               "<",
               "PartialDashboardAttributes",
               ">[]>"
@@ -2230,7 +2260,13 @@
             "description": [],
             "signature": [
               "(title: string) => Promise<",
-              "SimpleSavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
               "<",
               "PartialDashboardAttributes",
               ">[]>"
@@ -3332,7 +3368,13 @@
         "signature": [
           "Observable",
           "<",
-          "CoreTheme",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          },
           ">"
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/default_theme.ts",
@@ -4179,10 +4221,13 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DEFER_BELOW_FOLD.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4190,10 +4235,13 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DEFER_BELOW_FOLD.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4284,10 +4332,13 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DASHBOARD_CONTROLS.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4295,10 +4346,13 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DASHBOARD_CONTROLS.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4389,10 +4443,13 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.BY_VALUE_EMBEDDABLE.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4400,10 +4457,13 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.BY_VALUE_EMBEDDABLE.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
