@@ -178,11 +178,6 @@ export interface DiscoverGridProps {
    * Callback to execute on edit runtime field
    */
   onFieldEdited?: () => void;
-
-  /**
-   * Callback to execute when data is first loaded
-   */
-  onDataLoad?: () => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -220,7 +215,6 @@ export const DiscoverGrid = ({
   rowsPerPageState,
   onUpdateRowsPerPage,
   onFieldEdited,
-  onDataLoad,
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
@@ -269,13 +263,6 @@ export const DiscoverGrid = ({
     },
     [displayedRows, dataView, services]
   );
-
-  // Notify when rows are loaded
-  useEffect(() => {
-    if (onDataLoad && rows !== undefined && rows.length > 0) {
-      onDataLoad();
-    }
-  }, [rows, onDataLoad]);
 
   /**
    * Pagination

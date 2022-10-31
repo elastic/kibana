@@ -525,16 +525,7 @@ export class SavedSearchEmbeddable
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
     const props = {
       savedSearch: this.savedSearch,
-      searchProps: {
-        ...searchProps,
-        onDataLoad: () => {
-          this.renderComplete.dispatchComplete();
-          this.updateOutput({
-            ...this.getOutput(),
-            rendered: true,
-          });
-        },
-      },
+      searchProps,
       useLegacyTable,
     };
     if (searchProps.services) {
@@ -548,6 +539,14 @@ export class SavedSearchEmbeddable
         </I18nProvider>,
         domNode
       );
+
+      if (props.searchProps.rows && props.searchProps.rows.length) {
+        this.renderComplete.dispatchComplete();
+        this.updateOutput({
+          ...this.getOutput(),
+          rendered: true,
+        });
+      }
     }
   }
 
