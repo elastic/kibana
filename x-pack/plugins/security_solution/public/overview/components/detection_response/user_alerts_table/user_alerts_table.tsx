@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -43,7 +43,21 @@ type GetTableColumns = (
 const DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID = 'vulnerableUsersBySeverityQuery';
 
 export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableProps) => {
-  const { openUserInTimeline } = useNavigateToTimeline();
+  const { openTimelineWithFilters } = useNavigateToTimeline();
+
+  const openUserInTimeline = useCallback(
+    ({ userName, severity }: { userName: string; severity?: string }) => {
+      const userNameFilter = { field: 'user.name', value: userName };
+      const severityFilter = severity
+        ? { field: 'kibana.alert.severity', value: severity }
+        : undefined;
+
+      openTimelineWithFilters(
+        severityFilter ? [[userNameFilter, severityFilter]] : [[userNameFilter]]
+      );
+    },
+    [openTimelineWithFilters]
+  );
   const { toggleStatus, setToggleStatus } = useQueryToggle(
     DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID
   );

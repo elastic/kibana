@@ -114,7 +114,14 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
     skip: !toggleStatus,
   });
 
-  const { openRuleInTimeline } = useNavigateToTimeline();
+  const { openTimelineWithFilters } = useNavigateToTimeline();
+
+  const openRuleInTimeline = useCallback(
+    (ruleName: string) => {
+      openTimelineWithFilters([[{ field: 'kibana.alert.rule.name', value: ruleName }]]);
+    },
+    [openTimelineWithFilters]
+  );
 
   const navigateToAlerts = useCallback(() => {
     navigateTo({ deepLinkId: SecurityPageName.alerts });

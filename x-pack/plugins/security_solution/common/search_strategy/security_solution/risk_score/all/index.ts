@@ -51,6 +51,7 @@ export interface HostRiskScore {
     risk: RiskStats;
   };
   alertsCount?: number;
+  oldestAlertTimestamp?: string;
 }
 
 export interface UserRiskScore {
@@ -60,6 +61,7 @@ export interface UserRiskScore {
     risk: RiskStats;
   };
   alertsCount?: number;
+  oldestAlertTimestamp?: string;
 }
 
 export interface RuleRisk {

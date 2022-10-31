@@ -41,6 +41,7 @@ import { Panel } from '../../../../common/components/panel';
 import * as commonI18n from '../common/translations';
 import { usersActions } from '../../../../users/store';
 import { useNavigateToTimeline } from '../../detection_response/hooks/use_navigate_to_timeline';
+import type { TimeRange } from '../../../../common/store/inputs/model';
 
 const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
@@ -91,17 +92,27 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     [dispatch, riskEntity]
   );
 
-  const { openHostInTimeline, openUserInTimeline } = useNavigateToTimeline();
+  const { openTimelineWithFilters } = useNavigateToTimeline();
 
   const openEntityInTimeline = useCallback(
-    (entityName: string) => {
-      if (riskEntity === RiskScoreEntity.host) {
-        openHostInTimeline({ hostName: entityName });
-      } else if (riskEntity === RiskScoreEntity.user) {
-        openUserInTimeline({ userName: entityName });
-      }
+    (entityName: string, oldestAlertTimestamp?: string) => {
+      const timeRange: TimeRange | undefined = oldestAlertTimestamp
+        ? {
+            kind: 'relative',
+            from: oldestAlertTimestamp ?? '',
+            fromStr: oldestAlertTimestamp ?? '',
+            to: new Date().toISOString(),
+            toStr: 'now',
+          }
+        : undefined;
+
+      const filter = {
+        field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+        value: entityName,
+      };
+      openTimelineWithFilters([[filter]], timeRange);
     },
-    [riskEntity, openHostInTimeline, openUserInTimeline]
+    [riskEntity, openTimelineWithFilters]
   );
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(entity.tableQueryId);
