@@ -83,5 +83,6 @@ export type SubsetTGridModel = Readonly<
     | 'graphEventId'
     | 'sessionViewConfig'
     | 'queryFields'
+    | 'title'
   >
 >;
