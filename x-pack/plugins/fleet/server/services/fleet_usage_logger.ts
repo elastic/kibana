@@ -32,9 +32,9 @@ export async function registerFleetUsageLogger(
             try {
               const usageData = await fetchUsage();
               if (appContextService.getLogger().isLevelEnabled('debug')) {
-                appContextService.getLogger().debug(`Feet Usage: ${JSON.stringify(usageData)}`);
+                appContextService.getLogger().debug(`Fleet Usage: ${JSON.stringify(usageData)}`);
               } else {
-                appContextService.getLogger().info(`Feet Usage: ${JSON.stringify(usageData)}`);
+                appContextService.getLogger().info(`Fleet Usage: ${JSON.stringify(usageData)}`);
               }
             } catch (error) {
               appContextService
@@ -56,7 +56,6 @@ export async function startFleetUsageLogger(taskManager: TaskManagerStartContrac
   if (!isInfoLogLevelEnabled) {
     return;
   }
-  // TODO get log level and schedule interval based on that
   appContextService.getLogger().info(`Task ${TASK_ID} scheduled with interval 5m`);
   await taskManager?.ensureScheduled({
     id: TASK_ID,
