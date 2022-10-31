@@ -16,7 +16,7 @@ export const layerGroupWizardConfig: LayerWizard = {
   order: 10,
   categories: [],
   description: i18n.translate('xpack.maps.layerGroupWizard.description', {
-    defaultMessage: 'Organize layers into hierarchies',
+    defaultMessage: 'Organize related layers in a hierarchy',
   }),
   icon: 'layers',
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
