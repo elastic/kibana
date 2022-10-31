@@ -173,7 +173,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               },
               dispatch,
             } = this.reduxEmbeddableTools;
-            // console.log('NEW SELECTIONS:', newSelectedOptions);
 
             if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
               dispatch(clearValidAndInvalidSelections({}));
@@ -198,7 +197,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               );
             }
             const newFilters = await this.buildFilter();
-            // console.log('new filter 1:', newFilters);
             dispatch(publishFilters(newFilters));
           }
         )

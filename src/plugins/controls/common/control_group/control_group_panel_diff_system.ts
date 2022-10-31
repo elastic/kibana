@@ -33,31 +33,31 @@ export const ControlPanelDiffSystems: {
 
       const {
         exclude: excludeA,
-        existsSelected: existsSelectedA,
+        hideExists: hideExistsA,
+        hideExclude: hideExcludeA,
         selectedOptions: selectedA,
         singleSelect: singleSelectA,
-        hideExclude: hideExcludeA,
-        hideExists: hideExistsA,
+        existsSelected: existsSelectedA,
         runPastTimeout: runPastTimeoutA,
         ...inputA
       }: Partial<OptionsListEmbeddableInput> = initialInput.explicitInput;
       const {
         exclude: excludeB,
-        existsSelected: existsSelectedB,
+        hideExists: hideExistsB,
+        hideExclude: hideExcludeB,
         selectedOptions: selectedB,
         singleSelect: singleSelectB,
-        hideExclude: hideExcludeB,
-        hideExists: hideExistsB,
+        existsSelected: existsSelectedB,
         runPastTimeout: runPastTimeoutB,
         ...inputB
       }: Partial<OptionsListEmbeddableInput> = newInput.explicitInput;
 
       return (
         Boolean(excludeA) === Boolean(excludeB) &&
-        Boolean(existsSelectedA) === Boolean(existsSelectedB) &&
-        Boolean(singleSelectA) === Boolean(singleSelectB) &&
-        Boolean(hideExcludeA) === Boolean(hideExcludeB) &&
         Boolean(hideExistsA) === Boolean(hideExistsB) &&
+        Boolean(hideExcludeA) === Boolean(hideExcludeB) &&
+        Boolean(singleSelectA) === Boolean(singleSelectB) &&
+        Boolean(existsSelectedA) === Boolean(existsSelectedB) &&
         Boolean(runPastTimeoutA) === Boolean(runPastTimeoutB) &&
         isEqual(selectedA ?? [], selectedB ?? []) &&
         deepEqual(inputA, inputB)
