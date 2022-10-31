@@ -152,8 +152,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const resultQuery = useMemo<Query>(() => {
     return (
       requestParamsFromUrl.query ?? {
-        query: savedSearchQuery?.searchString,
-        language: savedSearchQuery?.queryLanguage,
+        query: savedSearchQuery?.searchString ?? '',
+        language: savedSearchQuery?.queryLanguage ?? 'kuery',
       }
     );
   }, [savedSearchQuery, requestParamsFromUrl.query]);

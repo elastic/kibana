@@ -206,11 +206,15 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
 
   return (
     <EmbeddableComponent
-      id="changePointChart"
+      id={`changePointChart_${annotation.group_field}`}
       style={{ height: 350 }}
       timeRange={timeRange}
       attributes={attributes}
       renderMode={'view'}
+      executionContext={{
+        type: 'aiops_change_point_detection_chart',
+        name: 'Change point detection',
+      }}
     />
   );
 });
