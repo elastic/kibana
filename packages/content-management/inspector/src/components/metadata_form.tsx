@@ -23,7 +23,7 @@ export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
   const { title, setTitle, description, setDescription, tags, setTags } = form;
 
   return (
-    <>
+    <div data-test-subj="metadataForm">
       <EuiFormRow
         label="Name"
         error={title.errorMessage}
@@ -37,7 +37,7 @@ export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
             setTitle(e.target.value);
           }}
           fullWidth
-          data-test-subj="input"
+          data-test-subj="nameInput"
           readOnly={isReadonly}
         />
       </EuiFormRow>
@@ -57,7 +57,7 @@ export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
             setDescription(e.target.value);
           }}
           fullWidth
-          data-test-subj="input"
+          data-test-subj="descriptionInput"
           readOnly={isReadonly}
         />
       </EuiFormRow>
@@ -68,6 +68,6 @@ export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
           <TagSelector initialSelection={tags.value} onTagsSelected={setTags} fullWidth />
         </>
       )}
-    </>
+    </div>
   );
 };

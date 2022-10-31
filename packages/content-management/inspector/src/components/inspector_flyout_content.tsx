@@ -109,7 +109,7 @@ export const InspectorFlyoutContent: FC<Props> = ({
                 <EuiButton
                   color="primary"
                   onClick={onClickSave}
-                  data-test-subj="fieldSaveButton"
+                  data-test-subj="saveButton"
                   fill
                   disabled={isSubmitted && !form.isValid}
                   isLoading={isSubmitting}
