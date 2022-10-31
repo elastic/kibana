@@ -8,11 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { IndicatorFieldValue } from '.';
-import {
-  generateMockIndicator,
-  generateMockIndicatorWithTlp,
-} from '../../../../../common/types';
-import { EMPTY_VALUE } from '../../../../../common/constants';
+import { generateMockIndicator, generateMockIndicatorWithTlp } from '../../types';
+import { EMPTY_VALUE } from '../../../../common/constants';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 
 const mockIndicator = generateMockIndicator();
