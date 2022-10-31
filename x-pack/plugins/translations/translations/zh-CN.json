@@ -4971,7 +4971,6 @@
     "unifiedSearch.filter.filterEditor.addFilterPopupTitle": "添加筛选",
     "unifiedSearch.filter.filterEditor.cancelButtonLabel": "取消",
     "unifiedSearch.filter.filterEditor.createCustomLabelInputLabel": "定制标签",
-    "unifiedSearch.filter.filterEditor.createCustomLabelSwitchLabel": "创建定制标签？",
     "unifiedSearch.filter.filterEditor.dateViewSelectLabel": "数据视图",
     "unifiedSearch.filter.filterEditor.doesNotExistOperatorOptionLabel": "不存在",
     "unifiedSearch.filter.filterEditor.editFilterPopupTitle": "编辑筛选",

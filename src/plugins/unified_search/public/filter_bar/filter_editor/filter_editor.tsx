@@ -17,8 +17,6 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiSwitch,
-  EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -67,7 +65,6 @@ export interface FilterEditorProps {
 
 interface State {
   selectedIndexPattern?: DataView;
-  useCustomLabel: boolean;
   customLabel: string | null;
   queryDsl: string;
   isCustomEditorOpen: boolean;
@@ -93,7 +90,6 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     super(props);
     this.state = {
       selectedIndexPattern: this.getIndexPatternFromFilter(),
-      useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias || '',
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
@@ -152,37 +148,23 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
               ? this.renderCustomEditor()
               : this.renderFiltersBuilderEditor()}
 
-            <EuiSpacer size="m" />
+            <EuiSpacer size="l" />
 
-            <EuiSwitch
-              id="filterEditorCustomLabelSwitch"
-              data-test-subj="createCustomLabel"
-              label={this.props.intl.formatMessage({
-                id: 'unifiedSearch.filter.filterEditor.createCustomLabelSwitchLabel',
-                defaultMessage: 'Create custom label?',
+            <EuiFieldText
+              value={`${this.state.customLabel}`}
+              onChange={this.onCustomLabelChange}
+              prepend={i18n.translate('unifiedSearch.filter.filterEditor.customLabel', {
+                defaultMessage: 'Custom label',
               })}
-              checked={this.state.useCustomLabel}
-              onChange={this.onCustomLabelSwitchChange}
+              placeholder={i18n.translate(
+                'unifiedSearch.filter.filterEditor.customLabelPlaceholder',
+                {
+                  defaultMessage: 'Add a custom label here',
+                }
+              )}
+              compressed
+              fullWidth
             />
-
-            {this.state.useCustomLabel && (
-              <div>
-                <EuiSpacer size="m" />
-                <EuiFormRow
-                  label={this.props.intl.formatMessage({
-                    id: 'unifiedSearch.filter.filterEditor.createCustomLabelInputLabel',
-                    defaultMessage: 'Custom label',
-                  })}
-                  fullWidth
-                >
-                  <EuiFieldText
-                    value={`${this.state.customLabel}`}
-                    onChange={this.onCustomLabelChange}
-                    fullWidth
-                  />
-                </EuiFormRow>
-              </div>
-            )}
           </div>
 
           <EuiPopoverFooter paddingSize="s">
@@ -367,12 +349,6 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     this.setState({ selectedIndexPattern, filters });
   };
 
-  private onCustomLabelSwitchChange = (event: EuiSwitchEvent) => {
-    const useCustomLabel = event.target.checked;
-    const customLabel = event.target.checked ? '' : null;
-    this.setState({ useCustomLabel, customLabel });
-  };
-
   private onCustomLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const customLabel = event.target.value;
     this.setState({ customLabel });
@@ -385,7 +361,6 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
   private onSubmit = () => {
     const {
       selectedIndexPattern: indexPattern,
-      useCustomLabel,
       customLabel,
       isCustomEditorOpen,
       queryDsl,
@@ -395,7 +370,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     if (!$state || !$state.store) {
       return; // typescript validation
     }
-    const alias = useCustomLabel ? customLabel : null;
+    const alias = customLabel || null;
     const { index, disabled = false, negate = false } = this.props.filter.meta;
 
     if (isCustomEditorOpen) {

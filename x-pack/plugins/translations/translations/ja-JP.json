@@ -4965,7 +4965,6 @@
     "unifiedSearch.filter.filterEditor.addFilterPopupTitle": "フィルターを追加します",
     "unifiedSearch.filter.filterEditor.cancelButtonLabel": "キャンセル",
     "unifiedSearch.filter.filterEditor.createCustomLabelInputLabel": "カスタムラベル",
-    "unifiedSearch.filter.filterEditor.createCustomLabelSwitchLabel": "カスタムラベルを作成しますか？",
     "unifiedSearch.filter.filterEditor.dateViewSelectLabel": "データビュー",
     "unifiedSearch.filter.filterEditor.doesNotExistOperatorOptionLabel": "存在しない",
     "unifiedSearch.filter.filterEditor.editFilterPopupTitle": "フィルターを編集",

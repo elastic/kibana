@@ -31,13 +31,13 @@ interface ParamsEditorProps<TParams = unknown> {
 
 const getPlaceholderText = (isFieldSelected: boolean, isOperatorSelected: boolean) => {
   if (!isFieldSelected) {
-    return i18n.translate('unifiedSearch.filter.filtersBuilder.filterItemParamsPlaceholder', {
+    return i18n.translate('unifiedSearch.filter.filtersBuilder.selectFieldPlaceholder', {
       defaultMessage: 'Please select a field first ...',
     });
   }
 
   if (!isOperatorSelected) {
-    return i18n.translate('unifiedSearch.filter.filtersBuilder.filterItemParamsPlaceholder', {
+    return i18n.translate('unifiedSearch.filter.filtersBuilder.selectOperatorPlaceholder', {
       defaultMessage: 'Please select operator first ...',
     });
   }

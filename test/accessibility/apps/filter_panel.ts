@@ -27,12 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.addFilter('OriginCityName', 'is', 'Rome');
     });
 
-    it('a11y test on filter panel with custom label', async () => {
-      await filterBar.clickEditFilter('OriginCityName', 'Rome');
-      await testSubjects.click('createCustomLabel');
-      await a11y.testAppSnapshot();
-    });
-
     it('a11y test on Edit filter as Query DSL panel', async () => {
       await testSubjects.click('editQueryDSL');
       await a11y.testAppSnapshot();
