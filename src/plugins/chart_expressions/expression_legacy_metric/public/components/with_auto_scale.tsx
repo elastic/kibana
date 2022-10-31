@@ -18,10 +18,9 @@ import React, {
 import { throttle } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';
 import { autoScaleWrapperStyle } from './with_auto_scale.styles';
-import { MetricAlignment } from '../../common/types';
 
 interface AutoScaleParams {
-  alignment?: MetricAlignment;
+  alignment?: 'left' | 'center';
   minScale?: number;
   containerStyles: CSSProperties;
 }

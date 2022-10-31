@@ -19,6 +19,7 @@ import { VisParams, visType, LabelPositionType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
 export interface MetricArguments {
+  metricAlignment: 'left' | 'center';
   percentageMode: boolean;
   colorMode: ColorMode;
   showLabels: boolean;
