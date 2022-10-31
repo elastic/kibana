@@ -20,8 +20,13 @@ async function printLines(stream, prefix) {
     crlfDelay: Infinity,
   });
 
+  let prevLine = null;
   for await (const line of int) {
+    if (prevLine === line) {
+      continue;
+    }
     console.log(prefix ? `${prefix} ${line}` : line);
+    prevLine = line;
   }
 }
 
