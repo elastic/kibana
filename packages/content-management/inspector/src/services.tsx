@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useMemo } from 'react';
 import type { FC, ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { EuiComboBoxProps } from '@elastic/eui';
@@ -29,6 +29,7 @@ export interface SavedObjectsReference {
  */
 export interface Services {
   openFlyout(node: ReactNode, options?: OverlayFlyoutOpenOptions): OverlayRef;
+  TagList?: FC<{ references: SavedObjectsReference[] }>;
   TagSelector?: React.FC<TagSelectorProps>;
 }
 
@@ -73,6 +74,12 @@ export interface TableListViewKibanaDependencies {
   savedObjectsTagging?: {
     ui: {
       components: {
+        TagList: React.FC<{
+          object: {
+            references: SavedObjectsReference[];
+          };
+          onClick?: (tag: { name: string; description: string; color: string }) => void;
+        }>;
         SavedObjectSaveModalTagSelector: React.FC<TagSelectorProps>;
       };
     };
@@ -89,6 +96,18 @@ export const InspectorKibanaProvider: FC<TableListViewKibanaDependencies> = ({
   const { core, toMountPoint, savedObjectsTagging } = services;
   const { openFlyout: coreOpenFlyout } = core.overlays;
 
+  const TagList = useMemo(() => {
+    const Comp: Services['TagList'] = ({ references }) => {
+      if (!savedObjectsTagging?.ui.components.TagList) {
+        return null;
+      }
+      const PluginTagList = savedObjectsTagging.ui.components.TagList;
+      return <PluginTagList object={{ references }} />;
+    };
+
+    return Comp;
+  }, [savedObjectsTagging?.ui.components.TagList]);
+
   const openFlyout = useCallback(
     (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
       return coreOpenFlyout(toMountPoint(node), options);
@@ -99,6 +118,7 @@ export const InspectorKibanaProvider: FC<TableListViewKibanaDependencies> = ({
   return (
     <InspectorProvider
       openFlyout={openFlyout}
+      TagList={TagList}
       TagSelector={savedObjectsTagging?.ui.components.SavedObjectSaveModalTagSelector}
     >
       {children}

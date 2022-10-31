@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsReference } from './services';
+
 export interface Item {
   title: string;
   description?: string;
-  tags: string[];
+  tags: SavedObjectsReference[];
 }

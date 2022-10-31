@@ -45,7 +45,11 @@ export const useMetadataForm = ({ item }: { item: Item }) => {
   const [fields, setFields] = useState<Fields>({
     title: { value: item.title, isValid: true, isChangingValue: false },
     description: { value: item.description ?? '', isValid: true, isChangingValue: false },
-    tags: { value: item.tags ?? [], isValid: true, isChangingValue: false },
+    tags: {
+      value: item.tags ? item.tags.map(({ id }) => id) : [],
+      isValid: true,
+      isChangingValue: false,
+    },
   });
 
   const setFieldValue = useCallback<SetFieldValueGetter>(

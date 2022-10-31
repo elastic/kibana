@@ -28,7 +28,10 @@ describe('<InspectorFlyoutContent />', () => {
     const savedObjectItem: InspectorFlyoutContentProps['item'] = {
       title: 'Foo',
       description: 'Some description',
-      tags: ['id-1', 'id-2'],
+      tags: [
+        { id: 'id-1', name: 'tag1', type: 'tag' },
+        { id: 'id-2', name: 'tag2', type: 'tag' },
+      ],
     };
 
     const mockedServices = getMockServices();

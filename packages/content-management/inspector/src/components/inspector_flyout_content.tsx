@@ -43,7 +43,7 @@ export interface Props {
   item: Item;
   entityName: string;
   isReadonly?: boolean;
-  services: Pick<Services, 'TagSelector'>;
+  services: Pick<Services, 'TagSelector' | 'TagList'>;
   onSave?: (args: { title: string; description?: string; tags: string[] }) => Promise<void>;
   onCancel: () => void;
 }
@@ -52,7 +52,7 @@ export const InspectorFlyoutContent: FC<Props> = ({
   item,
   entityName,
   isReadonly = true,
-  services: { TagSelector },
+  services: { TagSelector, TagList },
   onSave,
   onCancel,
 }) => {
@@ -92,6 +92,8 @@ export const InspectorFlyoutContent: FC<Props> = ({
         <MetadataForm
           form={{ ...form, isSubmitted }}
           isReadonly={isReadonly}
+          tagsReferences={item.tags}
+          TagList={TagList}
           TagSelector={TagSelector}
         />
       </EuiFlyoutBody>

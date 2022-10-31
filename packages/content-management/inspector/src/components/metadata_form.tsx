@@ -12,17 +12,25 @@ import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiFieldText, EuiTextArea, EuiSpacer } from '@elastic/eui';
 
 import type { MetadataFormState } from './use_metadata_form';
-import type { Services } from '../services';
+import type { SavedObjectsReference, Services } from '../services';
 
 interface Props {
   form: MetadataFormState & {
     isSubmitted: boolean;
   };
   isReadonly: boolean;
+  tagsReferences: SavedObjectsReference[];
+  TagList?: Services['TagList'];
   TagSelector?: Services['TagSelector'];
 }
 
-export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
+export const MetadataForm: FC<Props> = ({
+  form,
+  tagsReferences,
+  TagList,
+  TagSelector,
+  isReadonly,
+}) => {
   const {
     title,
     setTitle,
@@ -83,7 +91,14 @@ export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
         />
       </EuiFormRow>
 
-      {TagSelector !== undefined && (
+      {TagList && isReadonly === true && (
+        <>
+          <EuiSpacer />
+          <TagList references={tagsReferences} />
+        </>
+      )}
+
+      {TagSelector !== undefined && isReadonly === false && (
         <>
           <EuiSpacer />
           <TagSelector initialSelection={tags.value} onTagsSelected={setTags} fullWidth />

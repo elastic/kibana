@@ -204,11 +204,15 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
   const inspectItem = useCallback(
     (item: T) => {
+      const tags = getTagIdsFromReferences(item.references).map((_id) => {
+        return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
+      });
+
       openInspector({
         item: {
           title: item.attributes.title,
           description: item.attributes.description,
-          tags: getTagIdsFromReferences(item.references),
+          tags,
         },
         entityName,
         ...inspector,
