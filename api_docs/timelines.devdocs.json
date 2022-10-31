@@ -305,7 +305,13 @@
         "description": [],
         "signature": [
           "(kueryExpression: string, indexPattern: ",
-          "DataViewBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
           ") => ",
           "QueryDslQueryContainer"
         ],
@@ -336,7 +342,13 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
-              "DataViewBase"
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
+              }
             ],
             "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
             "deprecated": false,
@@ -356,7 +368,13 @@
         "description": [],
         "signature": [
           "(kueryExpression: string, indexPattern?: ",
-          "DataViewBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
           " | undefined) => string"
         ],
         "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -386,7 +404,13 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
-              "DataViewBase",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -407,13 +431,37 @@
         "description": [],
         "signature": [
           "({ config, indexPattern, queries, filters, }: { config: ",
-          "EsQueryConfig",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryConfig",
+            "text": "EsQueryConfig"
+          },
           "; indexPattern: ",
-          "DataViewBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
           " | undefined; queries: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "[]; filters: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[]; }) => [string, undefined] | [undefined, Error]"
         ],
         "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -439,11 +487,29 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "KueryQueryOptions",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.KueryQueryOptions",
+                    "text": "KueryQueryOptions"
+                  },
                   " & ",
-                  "EsQueryFiltersConfig",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.EsQueryFiltersConfig",
+                    "text": "EsQueryFiltersConfig"
+                  },
                   " & { allowLeadingWildcards?: boolean | undefined; queryStringOptions?: ",
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   " | undefined; }"
                 ],
                 "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -458,7 +524,13 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "DataViewBase",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.DataViewBase",
+                    "text": "DataViewBase"
+                  },
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -473,7 +545,13 @@
                 "label": "queries",
                 "description": [],
                 "signature": [
-                  "Query",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  },
                   "[]"
                 ],
                 "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -488,7 +566,13 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "Filter",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
                   "[]"
                 ],
                 "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
@@ -2490,7 +2574,7 @@
         "label": "useBulkActionItems",
         "description": [],
         "signature": [
-          "({ eventIds, currentStatus, query, indexName, setEventsLoading, showAlertStatusActions, setEventsDeleted, onUpdateSuccess, onUpdateFailure, customBulkActions, scopeId, }: ",
+          "({ eventIds, currentStatus, query, indexName, setEventsLoading, showAlertStatusActions, setEventsDeleted, onUpdateSuccess, onUpdateFailure, customBulkActions, }: ",
           "BulkActionsProps",
           ") => JSX.Element[]"
         ],
@@ -2503,7 +2587,7 @@
             "id": "def-public.useBulkActionItems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  showAlertStatusActions = true,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  customBulkActions,\n  scopeId,\n}",
+            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  showAlertStatusActions = true,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  customBulkActions,\n}",
             "description": [],
             "signature": [
               "BulkActionsProps"
@@ -2763,7 +2847,13 @@
                 "text": "ColumnHeaderType"
               },
               "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined; type?: string | undefined; })[]"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
@@ -2828,7 +2918,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
@@ -3221,9 +3317,21 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; readonly filters?: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubType",
+            "text": "IFieldSubType"
+          },
+          " | undefined; type?: string | undefined; })[]; readonly title?: string | undefined; readonly filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[] | undefined; readonly dataViewId: string | null; readonly sort: ",
           "SortColumnTable",
           "[]; readonly defaultColumns: (Pick<",
@@ -3241,7 +3349,13 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubType",
+            "text": "IFieldSubType"
+          },
           " | undefined; type?: string | undefined; })[]; readonly isLoading: boolean; readonly queryFields: string[]; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly expandedDetail: Partial<Record<string, ",
           "DataExpandedDetailType",
           ">>; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPage: number; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
@@ -3269,7 +3383,7 @@
         "label": "TGridType",
         "description": [],
         "signature": [
-          "\"standalone\" | \"embedded\""
+          "\"embedded\""
         ],
         "path": "x-pack/plugins/timelines/public/types.ts",
         "deprecated": false,
@@ -3347,15 +3461,7 @@
           "label": "getTGrid",
           "description": [],
           "signature": [
-            "<T extends ",
-            {
-              "pluginId": "timelines",
-              "scope": "public",
-              "docId": "kibTimelinesPluginApi",
-              "section": "def-public.TGridType",
-              "text": "TGridType"
-            },
-            " = \"embedded\">(props: ",
+            "<T extends \"embedded\" = \"embedded\">(props: ",
             "GetTGridProps",
             "<T>) => React.ReactElement<",
             "GetTGridProps",
@@ -4229,7 +4335,13 @@
             "label": "subType",
             "description": [],
             "signature": [
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
@@ -4420,7 +4532,13 @@
                         "text": "ColumnHeaderType"
                       },
                       "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-                      "IFieldSubType",
+                      {
+                        "pluginId": "@kbn/es-query",
+                        "scope": "common",
+                        "docId": "kibKbnEsQueryPluginApi",
+                        "section": "def-common.IFieldSubType",
+                        "text": "IFieldSubType"
+                      },
                       " | undefined; type?: string | undefined; }"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
@@ -6042,7 +6160,13 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
@@ -6388,7 +6512,13 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
@@ -7100,7 +7230,13 @@
           "[]; ecsData?: ",
           "Ecs",
           " | undefined; eventId: string; globalFilters?: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[] | undefined; header: ",
           {
             "pluginId": "timelines",
@@ -7147,7 +7283,13 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubType",
+            "text": "IFieldSubType"
+          },
           " | undefined; type?: string | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",

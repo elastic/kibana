@@ -9,7 +9,8 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GuideState } from '../../common/types';
+import type { GuideState } from '@kbn/guided-onboarding';
+
 import { getStepConfig } from '../services/helpers';
 import { GuideButtonPopover } from './guide_button_popover';
 

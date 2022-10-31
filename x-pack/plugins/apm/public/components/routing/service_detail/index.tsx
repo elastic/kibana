@@ -149,6 +149,10 @@ export const serviceDetail = {
             pageSize: toNumberRt,
             sortField: t.string,
             sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+            device: t.string,
+            osVersion: t.string,
+            appVersion: t.string,
+            netConnectionType: t.string,
           }),
         }),
       },
@@ -180,6 +184,7 @@ export const serviceDetail = {
                 t.type({
                   transactionName: t.string,
                   comparisonEnabled: toBooleanRt,
+                  showCriticalPath: toBooleanRt,
                 }),
                 t.partial({
                   traceId: t.string,
@@ -188,6 +193,11 @@ export const serviceDetail = {
                 offsetRt,
               ]),
             }),
+            defaults: {
+              query: {
+                showCriticalPath: '',
+              },
+            },
           },
           '/services/{serviceName}/transactions': {
             element: <TransactionOverview />,

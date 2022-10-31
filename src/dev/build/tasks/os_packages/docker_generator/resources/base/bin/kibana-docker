@@ -44,6 +44,7 @@ kibana_vars=(
     data.search.asyncSearch.waitForCompletion
     data.search.asyncSearch.keepAlive
     data.search.asyncSearch.batchedReduceSize
+    data.search.asyncSearch.pollInterval
     data.search.sessions.defaultExpiration
     data.search.sessions.enabled
     data.search.sessions.maxUpdateRetries

@@ -600,6 +600,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.waitForVisualization();
     },
 
+    async dragRangeInput(testId: string, steps: number = 1, direction: 'left' | 'right' = 'right') {
+      const inputEl = await testSubjects.find(testId);
+      await inputEl.focus();
+      const browserKey = direction === 'left' ? browser.keys.LEFT : browser.keys.RIGHT;
+      while (steps--) {
+        await browser.pressKeys(browserKey);
+      }
+    },
+
+    async getRangeInputValue(testId: string) {
+      return (await testSubjects.find(testId)).getAttribute('value');
+    },
+
     async isTopLevelAggregation() {
       return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
     },
@@ -797,6 +810,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async changeAxisSide(newSide: string) {
       await testSubjects.click(`lnsXY_axisSide_groups_${newSide}`);
+    },
+
+    async getSelectedAxisSide() {
+      const axisSideGroups = await find.allByCssSelector(
+        `[data-test-subj^="lnsXY_axisSide_groups_"]`
+      );
+      for (const axisSideGroup of axisSideGroups) {
+        const input = await axisSideGroup.findByTagName('input');
+        const isSelected = await input.isSelected();
+        if (isSelected) {
+          return axisSideGroup?.getVisibleText();
+        }
+      }
     },
 
     /** Counts the visible warnings in the config panel */
@@ -1104,6 +1130,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
+    async openLayerContextMenu(index: number = 0) {
+      await testSubjects.click(`lnsLayerSplitButton--${index}`);
+    },
+
     async toggleColumnVisibility(dimension: string, no = 1) {
       await this.openDimensionEditor(dimension);
       const id = 'lns-table-column-hidden';
@@ -1199,14 +1229,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const tiles = await this.getMetricTiles();
       const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
 
-      const metricData = [];
+      const metricDataPromises = [];
       for (const tile of tiles) {
-        metricData.push({
-          ...(await this.getMetricDatum(tile)),
-          showingBar,
-        });
+        metricDataPromises.push(this.getMetricDatum(tile));
       }
-      return metricData;
+      const metricData = await Promise.all(metricDataPromises);
+      return metricData.map((d) => ({ ...d, showingBar }));
     },
 
     /**
@@ -1305,9 +1333,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('indexPattern-add-field');
     },
 
-    async createAdHocDataView(name: string) {
+    async createAdHocDataView(name: string, hasTimeField?: boolean) {
       await testSubjects.click('lns-dataView-switch-link');
-      await PageObjects.unifiedSearch.createNewDataView(name, true);
+      await PageObjects.unifiedSearch.createNewDataView(name, true, hasTimeField);
     },
 
     async switchToTextBasedLanguage(language: string) {
@@ -1607,6 +1635,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           return { stop: await stop.getAttribute('value'), color: colors[index] };
         })
       );
+    },
+
+    async findFieldIdsByType(
+      type: 'string' | 'number' | 'date' | 'geo_point' | 'ip_range',
+      group: 'available' | 'empty' | 'meta' = 'available'
+    ) {
+      const groupCapitalized = `${group[0].toUpperCase()}${group.slice(1).toLowerCase()}`;
+      const allFieldsForType = await find.allByCssSelector(
+        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .lnsFieldItem--${type}`
+      );
+      // map to testSubjId
+      return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));
     },
   });
 }

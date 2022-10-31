@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FailedTestsCount } from './failed_tests_count';
 import { useGetUrlParams } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
@@ -34,7 +35,14 @@ export const MonitorErrors = () => {
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{OVERVIEW_LABEL}</h3>
             </EuiTitle>
-            <MonitorErrorsCount time={{ to: dateRangeEnd, from: dateRangeStart }} />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <MonitorErrorsCount to={dateRangeEnd} from={dateRangeStart} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <FailedTestsCount to={dateRangeEnd} from={dateRangeStart} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={3}>

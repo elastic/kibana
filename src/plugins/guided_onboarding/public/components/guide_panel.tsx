@@ -27,11 +27,10 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ApplicationStart } from '@kbn/core/public';
+import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
-import type { GuideState, GuideStep as GuideStepStatus } from '../../common/types';
 import type { GuideConfig, StepConfig } from '../types';
 
 import type { ApiService } from '../services/api';
@@ -74,18 +73,19 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const handleStepButtonClick = async (step: GuideStepStatus, stepConfig: StepConfig) => {
     if (guideState) {
       const { id, status } = step;
+
       if (status === 'ready_to_complete') {
         return await api.completeGuideStep(guideState?.guideId, id);
       }
 
-      if (status === 'active') {
-        await api.startGuideStep(guideState!.guideId, id);
-      }
       if (status === 'active' || status === 'in_progress') {
+        await api.startGuideStep(guideState!.guideId, id);
+
         if (stepConfig.location) {
           await application.navigateToApp(stepConfig.location.appID, {
             path: stepConfig.location.path,
           });
+
           if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
             await api.completeGuideStep(guideState.guideId, id);
           }
@@ -140,20 +140,8 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   // TODO handle loading, error state
   // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
   if (!guideConfig) {
-    return (
-      <EuiButton
-        onClick={toggleGuide}
-        color="success"
-        fill
-        isDisabled={true}
-        size="s"
-        data-test-subj="disabledGuideButton"
-      >
-        {i18n.translate('guidedOnboarding.disabledGuidedSetupButtonLabel', {
-          defaultMessage: 'Setup guide',
-        })}
-      </EuiButton>
-    );
+    // TODO button show/hide logic https://github.com/elastic/kibana/issues/141129
+    return null;
   }
 
   const stepsCompleted = getProgress(guideState);
@@ -301,56 +289,58 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           </EuiFlyoutBody>
 
           <EuiFlyoutFooter css={styles.flyoutOverrides.flyoutFooter}>
-            <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiButtonEmpty onClick={openQuitGuideModal} data-test-subj="quitGuideButton">
-                  {i18n.translate('guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel', {
-                    defaultMessage: 'Quit setup guide',
+            <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="questionInCircle"
+                  iconSide="right"
+                  href="https://cloud.elastic.co/support "
+                  target="_blank"
+                  css={styles.flyoutOverrides.flyoutFooterLink}
+                  iconSize="m"
+                >
+                  {i18n.translate('guidedOnboarding.dropdownPanel.footer.support', {
+                    defaultMessage: 'Need help?',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiText color="subdued" textAlign="center">
-                  <FormattedMessage
-                    id="guidedOnboarding.dropdownPanel.footer.feedbackDescription"
-                    defaultMessage="How's onboarding? We’d love your {feedbackLink}"
-                    values={{
-                      feedbackLink: (
-                        <EuiLink
-                          href="https://www.elastic.co/kibana/feedback"
-                          target="_blank"
-                          external
-                        >
-                          {i18n.translate('guidedOnboarding.dropdownPanel.footer.feedbackLabel', {
-                            defaultMessage: 'feedback',
-                          })}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color={euiTheme.colors.disabled}>
+                  |
                 </EuiText>
               </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiText color="subdued" textAlign="center">
-                  <FormattedMessage
-                    id="guidedOnboarding.dropdownPanel.footer.supportDescription"
-                    defaultMessage="Other questions? We're {helpLink}"
-                    values={{
-                      helpLink: (
-                        <EuiLink href="https://cloud.elastic.co/support " target="_blank" external>
-                          {i18n.translate(
-                            'guidedOnboarding.dropdownPanel.footer.helpTextDescription',
-                            {
-                              defaultMessage: 'here to help',
-                            }
-                          )}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="faceHappy"
+                  iconSide="right"
+                  href="https://www.elastic.co/kibana/feedback"
+                  target="_blank"
+                  css={styles.flyoutOverrides.flyoutFooterLink}
+                  iconSize="s"
+                >
+                  {i18n.translate('guidedOnboarding.dropdownPanel.footer.feedback', {
+                    defaultMessage: 'Give feedback',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color={euiTheme.colors.disabled}>
+                  |
                 </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="exit"
+                  iconSide="right"
+                  onClick={openQuitGuideModal}
+                  data-test-subj="quitGuideButton"
+                  css={styles.flyoutOverrides.flyoutFooterLink}
+                  iconSize="s"
+                >
+                  {i18n.translate('guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel', {
+                    defaultMessage: 'Quit guide',
+                  })}
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>
