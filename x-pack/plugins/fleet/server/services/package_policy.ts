@@ -706,35 +706,37 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const { statuses } = await soClient.bulkDelete(
-      idsToDelete.map((id) => ({ id, type: SAVED_OBJECT_TYPE }))
-    );
+    if (idsToDelete.length > 0) {
+      const { statuses } = await soClient.bulkDelete(
+        idsToDelete.map((id) => ({ id, type: SAVED_OBJECT_TYPE }))
+      );
 
-    statuses.forEach(({ id, success, error }) => {
-      const packagePolicy = packagePolicies.find((p) => p.id === id);
-      if (success && packagePolicy) {
-        result.push({
-          id,
-          name: packagePolicy.name,
-          success: true,
-          package: {
-            name: packagePolicy.package?.name || '',
-            title: packagePolicy.package?.title || '',
-            version: packagePolicy.package?.version || '',
-          },
-          policy_id: packagePolicy.policy_id,
-        });
-      } else if (!success && error) {
-        result.push({
-          id,
-          success: false,
-          statusCode: error.statusCode,
-          body: {
-            message: error.message,
-          },
-        });
-      }
-    });
+      statuses.forEach(({ id, success, error }) => {
+        const packagePolicy = packagePolicies.find((p) => p.id === id);
+        if (success && packagePolicy) {
+          result.push({
+            id,
+            name: packagePolicy.name,
+            success: true,
+            package: {
+              name: packagePolicy.package?.name || '',
+              title: packagePolicy.package?.title || '',
+              version: packagePolicy.package?.version || '',
+            },
+            policy_id: packagePolicy.policy_id,
+          });
+        } else if (!success && error) {
+          result.push({
+            id,
+            success: false,
+            statusCode: error.statusCode,
+            body: {
+              message: error.message,
+            },
+          });
+        }
+      });
+    }
 
     if (!options?.skipUnassignFromAgentPolicies) {
       const uniquePolicyIdsR = [

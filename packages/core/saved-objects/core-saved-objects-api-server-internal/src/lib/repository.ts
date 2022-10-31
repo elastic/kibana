@@ -1128,11 +1128,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
     const namespace = this.getCurrentNamespace(options.namespace);
     const expectedBulkGetResults = this.presortObjectsByNamespaceType(objects);
+    if (expectedBulkGetResults.length === 0) {
+      return { statuses: [] };
+    }
+
     const multiNamespaceDocsResponse = await this.preflightCheckForBulkDelete({
       expectedBulkGetResults,
       namespace,
     });
-    const bulkDeleteParams: BulkDeleteParams[] = [];
 
     // First round of filtering (Left: object doesn't exist/doesn't exist in namespace, Right: good to proceed)
     const expectedBulkDeleteMultiNamespaceDocsResults =
@@ -1198,7 +1201,8 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       return { statuses: [...savedObjects] };
     }
 
-    // bulk up the bulkDeleteParams
+    // Create the bulkDeleteParams
+    const bulkDeleteParams: BulkDeleteParams[] = [];
     validObjects.map((expectedResult) => {
       bulkDeleteParams.push({
         delete: {
