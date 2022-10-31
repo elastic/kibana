@@ -51,6 +51,12 @@ export const validateHistoryWindowStart = ({
   }
 };
 
+/**
+ * Takes a list of buckets and creates value from them to be used in 'include' clause of terms aggregation.
+ * For a single new terms field, value equals to bucket name
+ * For multiple new terms fields and buckets, value equals to concatenated base64 encoded bucket names
+ * @returns for buckets('host-0', 'test'), resulted value equals to: 'aG9zdC0w_dGVzdA=='
+ */
 export const retrieveValuesFromBuckets = (
   newTermsFields: string[],
   buckets: Array<{ key: Record<string, string | number | null> }>
@@ -72,11 +78,6 @@ export const retrieveValuesFromBuckets = (
   );
 };
 
-/**
- * creates runtime field
- * @param newTermsFields
- * @returns
- */
 export const getNewTermsRuntimeMappings = (
   newTermsFields: string[]
 ): undefined | { [AGG_FIELD_NAME]: estypes.MappingRuntimeField } => {
@@ -111,6 +112,10 @@ export const getNewTermsRuntimeMappings = (
   };
 };
 
+/**
+ * For a single new terms field, aggregation field equals to new terms field
+ * For multiple new terms fields, aggregation field equals to defined AGG_FIELD_NAME, which is runtime field
+ */
 export const getAggregationField = (newTermsFields: string[]): string => {
   // if new terms include only one field we don't use runtime mappings and don't stich fields buckets together
   if (newTermsFields.length === 1) {
@@ -129,19 +134,18 @@ const decodeBucketKey = (bucketKey: string): string[] => {
 
 /**
  * decodes bucket key and returns fields as array
+ * @returns 'aG9zdC0w_dGVzdA==' bucket key will result in ['host-0', 'test']
  */
 export const prepareNewTerms = (newTermsFields: string[], bucketKey: string | number) => {
   // if newTermsFields has length greater than 1, bucketKey can't be number, so casting is safe here
   const values = newTermsFields.length === 1 ? [bucketKey] : decodeBucketKey(bucketKey as string);
 
   return values;
-  //  return newTermsFields.map((field, i) => [field, values[i]].join(': '));
 };
 
 /**
  * returns new term fields and values in following format
- * @example
- * [ 'field1: new_value1', 'field2: new_value2']
+ * @returns fields(['field1', 'field2'] and values(['new_value1', 'new_value2']) will result in ['field1: new_value1', 'field2: new_value2']
  */
 export const prepareNewTermsFieldsValues = (
   newTermsFields: string[],
