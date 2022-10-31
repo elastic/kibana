@@ -47,7 +47,6 @@ const MetricEmbeddableComponent = ({
                     lensAttributes={field.lensAttributes}
                     timerange={timerange}
                     inspectTitle={inspectTitle}
-                    metricAlignment={!field.icon && !field.description ? 'left' : 'center'}
                   />
                 </p>
               )}
