@@ -49,10 +49,6 @@ export const convertTSVBtoLensConfiguration = async (
   timeRange?: TimeRange,
   clearAdHocDataViews: boolean = false
 ) => {
-  // Disables the option for not supported charts, for the string mode and for series with annotations
-  if (!vis.params.use_kibana_indexes) {
-    return null;
-  }
   // Disables if model is invalid
   if (vis.params.isModelInvalid) {
     return null;
