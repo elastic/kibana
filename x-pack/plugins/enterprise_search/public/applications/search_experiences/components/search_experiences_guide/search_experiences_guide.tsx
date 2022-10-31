@@ -26,7 +26,7 @@ import {
 import { SEARCH_EXPERIENCES_PLUGIN } from '../../../../../common/constants';
 import searchExperiencesIllustration from '../../../../assets/images/search_experiences.svg';
 
-import { SetElasticsearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetSearchExperiencesChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchSearchExperiencesPageTemplate } from '../layout';
 
 export const SearchExperiencesGuide: React.FC = () => {
@@ -98,7 +98,8 @@ export const SearchExperiencesGuide: React.FC = () => {
                 <EuiText grow={false}>
                   <ul>
                     <li>
-                      <strong>You know, for search</strong> &mdash; Built and maintained by Elastic.
+                      <strong>You know, for search</strong> &mdash; Elastic builds and maintains
+                      Search UI.
                     </li>
                     <li>
                       <strong>Speedy Implementation</strong> &mdash; Build a complete search
