@@ -6,12 +6,27 @@
  */
 
 import { TOAST_CLOSE_BTN, CONFIRM_MODAL } from '../screens/navigation';
-import { SETTINGS_SAVE_BTN, SETTINGS_OUTPUTS } from '../screens/fleet';
+import {
+  SETTINGS_SAVE_BTN,
+  SETTINGS_OUTPUTS,
+  SETTINGS_FLEET_SERVER_HOSTS,
+  FLEET_SERVER_HOST_FLYOUT,
+} from '../screens/fleet';
 
 describe('Edit settings', () => {
   beforeEach(() => {
-    cy.intercept('/api/fleet/settings', {
-      item: { id: 'fleet-default-settings', fleet_server_hosts: [] },
+    cy.intercept('/api/fleet/fleet_server_hosts', {
+      items: [
+        {
+          id: 'fleet-default-settings',
+          name: 'Host',
+          host_urls: ['https://localhost:8220'],
+          is_default: true,
+        },
+      ],
+      page: 1,
+      perPage: 10000,
+      total: 0,
     });
     cy.intercept('/api/fleet/outputs', {
       items: [
@@ -29,22 +44,23 @@ describe('Edit settings', () => {
     cy.getBySel(TOAST_CLOSE_BTN).click();
   });
 
-  it('should update Fleet server hosts', () => {
-    cy.getBySel(SETTINGS_OUTPUTS.EDIT_HOSTS_BTN).click();
-    cy.get('[placeholder="Specify host URL"').type('https://localhost:8220');
+  it('should allow to update Fleet server hosts', () => {
+    cy.getBySel(SETTINGS_FLEET_SERVER_HOSTS.ADD_BUTTON).click();
+    cy.getBySel(FLEET_SERVER_HOST_FLYOUT.NAME_INPUT).type('Host edited');
+    cy.getBySel(FLEET_SERVER_HOST_FLYOUT.DEFAULT_SWITCH).click();
+    cy.get('[placeholder="Specify host URL"').type('https://localhost:8221');
 
-    cy.intercept('/api/fleet/settings', {
-      item: { id: 'fleet-default-settings', fleet_server_hosts: ['https://localhost:8220'] },
-    });
-    cy.intercept('PUT', '/api/fleet/settings', {
-      fleet_server_hosts: ['https://localhost:8220'],
-    }).as('updateSettings');
+    cy.intercept('POST', '/api/fleet/fleet_server_hosts', {
+      name: 'Host edited',
+      host_urls: ['https://localhost:8221'],
+      is_default: true,
+    }).as('updateFleetServerHosts');
 
     cy.getBySel(SETTINGS_SAVE_BTN).click();
     cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
-    cy.wait('@updateSettings').then((interception) => {
-      expect(interception.request.body.fleet_server_hosts[0]).to.equal('https://localhost:8220');
+    cy.wait('@updateFleetServerHosts').then((interception) => {
+      expect(interception.request.body.host_urls[0]).to.equal('https://localhost:8221');
     });
   });
 
