@@ -468,6 +468,8 @@
       "@kbn/handlebars/*": ["packages/kbn-handlebars/*"],
       "@kbn/hapi-mocks": ["packages/kbn-hapi-mocks"],
       "@kbn/hapi-mocks/*": ["packages/kbn-hapi-mocks/*"],
+      "@kbn/health-gateway-server": ["packages/kbn-health-gateway-server"],
+      "@kbn/health-gateway-server/*": ["packages/kbn-health-gateway-server/*"],
       "@kbn/i18n": ["packages/kbn-i18n"],
       "@kbn/i18n/*": ["packages/kbn-i18n/*"],
       "@kbn/i18n-react": ["packages/kbn-i18n-react"],
