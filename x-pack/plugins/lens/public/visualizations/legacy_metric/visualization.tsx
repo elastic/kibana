@@ -24,6 +24,7 @@ import {
   TextAlignment,
 } from '@kbn/expressions-plugin/common';
 import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
+import { MetricVisExpressionFunctionDefinition } from '@kbn/expression-legacy-metric-vis-plugin/common';
 import { getSuggestions } from './metric_suggestions';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
@@ -124,29 +125,28 @@ const toExpression = (
     accessor: state.accessor,
   });
 
+  const legacyMetricVisFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>(
+    'legacyMetricVis',
+    {
+      labelPosition: state?.titlePosition || DEFAULT_TITLE_POSITION,
+      font: buildExpression([fontFn]),
+      labelFont: buildExpression([labelFontFn]),
+      metric: buildExpression([visdimensionFn]),
+      showLabels: !attributes?.mode || attributes?.mode === 'full',
+      colorMode: !canColor ? ColorMode.None : state?.colorMode || ColorMode.None,
+      autoScale: true,
+      colorFullBackground: true,
+      palette:
+        state?.colorMode && state?.colorMode !== ColorMode.None
+          ? paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)
+          : undefined,
+      percentageMode: false,
+    }
+  );
+
   return {
     type: 'expression',
-    chain: [
-      ...(datasourceExpression?.chain ?? []),
-      {
-        type: 'function',
-        function: 'legacyMetricVis',
-        arguments: {
-          labelPosition: [state?.titlePosition || DEFAULT_TITLE_POSITION],
-          font: [buildExpression([fontFn]).toAst()],
-          labelFont: [buildExpression([labelFontFn]).toAst()],
-          metric: [buildExpression([visdimensionFn]).toAst()],
-          showLabels: [!attributes?.mode || attributes?.mode === 'full'],
-          colorMode: !canColor ? [ColorMode.None] : [state?.colorMode || ColorMode.None],
-          autoScale: [true],
-          colorFullBackground: [true],
-          palette:
-            state?.colorMode && state?.colorMode !== ColorMode.None
-              ? [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)]
-              : [],
-        },
-      },
-    ],
+    chain: [...(datasourceExpression?.chain ?? []), legacyMetricVisFn.toAst()],
   };
 };
 
