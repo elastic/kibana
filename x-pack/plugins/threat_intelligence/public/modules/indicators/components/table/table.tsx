@@ -18,7 +18,10 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import {
+  EuiDataGridColumn,
+  EuiDataGridRowHeightsOptions,
+} from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { CellActions, cellPopoverRendererFactory, cellRendererFactory } from './components';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
@@ -161,6 +164,10 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
       );
     }
 
+    const rowHeightsOptions: EuiDataGridRowHeightsOptions = {
+      defaultHeight: 'auto',
+    };
+
     if (!indicatorCount) {
       return <EmptyState />;
     }
@@ -194,6 +201,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
           sorting={sorting}
           columnVisibility={columnVisibility}
           columns={mappedColumns}
+          rowHeightsOptions={rowHeightsOptions}
         />
       </>
     );
