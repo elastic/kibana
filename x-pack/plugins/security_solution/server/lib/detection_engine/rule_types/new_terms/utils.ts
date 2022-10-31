@@ -128,9 +128,7 @@ const decodeBucketKey = (bucketKey: string): string[] => {
 };
 
 /**
- * returns new term fields and values in following format
- * @example
- * [ 'field1: new_value1', 'field2: new_value2']
+ * decodes bucket key and returns fields as array
  */
 export const prepareNewTerms = (newTermsFields: string[], bucketKey: string | number) => {
   // if newTermsFields has length greater than 1, bucketKey can't be number, so casting is safe here
@@ -138,4 +136,16 @@ export const prepareNewTerms = (newTermsFields: string[], bucketKey: string | nu
 
   return values;
   //  return newTermsFields.map((field, i) => [field, values[i]].join(': '));
+};
+
+/**
+ * returns new term fields and values in following format
+ * @example
+ * [ 'field1: new_value1', 'field2: new_value2']
+ */
+export const prepareNewTermsFieldsValues = (
+  newTermsFields: string[],
+  newTermsValues: Array<string | number>
+) => {
+  return newTermsFields.map((field, i) => [field, newTermsValues[i]].join(': '));
 };

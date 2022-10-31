@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
@@ -16,6 +15,7 @@ import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../../signals/single_search_after';
 import { getFilter } from '../../signals/get_filter';
 import { wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
+import type { EventsAndTerms } from '../factories/utils/wrap_new_terms_alerts';
 import type {
   DocFetchAggResult,
   RecentTermsAggResult,
@@ -26,7 +26,6 @@ import {
   buildRecentTermsAgg,
   buildNewTermsAgg,
 } from './build_new_terms_aggregation';
-import type { SignalSource } from '../../signals/types';
 import { validateIndexPatterns } from '../utils';
 import {
   parseDateString,
@@ -35,6 +34,7 @@ import {
   getNewTermsRuntimeMappings,
   getAggregationField,
   prepareNewTerms,
+  prepareNewTermsFieldsValues,
 } from './utils';
 import {
   addToSearchAfterReturn,
@@ -280,13 +280,15 @@ export const createNewTermsAlertType = (
             throw new Error('Aggregations were missing on document fetch search result');
           }
 
-          const eventsAndTerms: Array<{
-            event: estypes.SearchHit<SignalSource>;
-            newTerms: Array<string | number | null>;
-          }> = docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => ({
-            event: bucket.docs.hits.hits[0],
-            newTerms: prepareNewTerms(params.newTermsFields, bucket.key),
-          }));
+          const eventsAndTerms: EventsAndTerms[] =
+            docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => {
+              const newTerms = prepareNewTerms(params.newTermsFields, bucket.key);
+              return {
+                event: bucket.docs.hits.hits[0],
+                newTerms,
+                newTermsFieldsValues: prepareNewTermsFieldsValues(params.newTermsFields, newTerms),
+              };
+            });
 
           const alertTimestampOverride = isPreview ? startedAt : undefined;
           const wrappedAlerts = wrapNewTermsAlerts({
