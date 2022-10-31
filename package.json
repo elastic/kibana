@@ -473,7 +473,7 @@
     "compare-versions": "3.5.1",
     "constate": "^3.3.2",
     "copy-to-clipboard": "^3.0.8",
-    "core-js": "^3.25.5",
+    "core-js": "^3.26.0",
     "cronstrue": "^1.51.0",
     "cuid": "^2.1.8",
     "cytoscape": "^3.10.0",
