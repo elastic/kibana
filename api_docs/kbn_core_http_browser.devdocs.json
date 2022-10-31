@@ -201,7 +201,13 @@
             "label": "context",
             "description": [],
             "signature": [
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               " | undefined"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
@@ -427,7 +433,13 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              "MaybePromise",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.MaybePromise",
+                "text": "MaybePromise"
+              },
               "<Partial<",
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -518,7 +530,13 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              "MaybePromise",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.MaybePromise",
+                "text": "MaybePromise"
+              },
               "<Partial<",
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -609,7 +627,13 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              "MaybePromise",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.MaybePromise",
+                "text": "MaybePromise"
+              },
               "<",
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -701,7 +725,13 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              "MaybePromise",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.MaybePromise",
+                "text": "MaybePromise"
+              },
               "<",
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -804,7 +834,13 @@
                 "text": "HttpHeadersInit"
               },
               " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               " | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
@@ -1175,7 +1211,13 @@
                 "text": "HttpHeadersInit"
               },
               " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               " | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
@@ -1973,7 +2015,24 @@
             "deprecated": true,
             "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
             "trackAdoption": false,
-            "references": []
+            "references": [
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-browser-internal",
+                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-browser-internal",
+                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
@@ -1991,7 +2050,16 @@
             "deprecated": true,
             "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
             "trackAdoption": false,
-            "references": []
+            "references": [
+              {
+                "plugin": "@kbn/core-http-browser-internal",
+                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-browser-internal",
+                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
