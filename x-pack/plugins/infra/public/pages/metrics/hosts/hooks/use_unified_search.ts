@@ -49,6 +49,9 @@ export const useUnifiedSearch = () => {
     to: toTS,
   };
 
+  const queryToString = (query?: Query) =>
+    typeof query?.query !== 'string' ? JSON.stringify(query?.query) : query?.query;
+
   const handleSelectedTimeRangeChange = useCallback(
     (selectedTime: { startTime: string; endTime: string; isInvalid: boolean }) => {
       if (selectedTime.isInvalid) {
@@ -80,9 +83,10 @@ export const useUnifiedSearch = () => {
       });
 
       if (query) {
-        const queryAsString =
-          typeof query.query !== 'string' ? JSON.stringify(query.query) : query.query;
-        applyFilterQuery({ language: query.language, expression: queryAsString });
+        applyFilterQuery({
+          language: query.language,
+          expression: queryToString(query),
+        });
       }
 
       queryString.setQuery({ ...queryString.getQuery(), ...query });
@@ -104,8 +108,15 @@ export const useUnifiedSearch = () => {
       const globalFilters = filterManager.getGlobalFilters();
       filterManager.setFilters([...savedQueryFilters, ...globalFilters]);
       applyFilters(filterManager.getFilters());
+      const savedQuery = newSavedQuery.attributes.query;
+      if (savedQuery) {
+        applyFilterQuery({
+          language: savedQuery.language,
+          expression: queryToString(savedQuery),
+        });
+      }
     },
-    [applyFilters, filterManager]
+    [applyFilterQuery, applyFilters, filterManager]
   );
 
   const clearSavedQUery = useCallback(() => {
