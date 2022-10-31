@@ -3135,9 +3135,21 @@
         " & ",
         "ResultsServiceProvider",
         " & { alertingServiceProvider(savedObjectsClient: ",
-        "SavedObjectsClientContract",
+        {
+          "pluginId": "@kbn/core-saved-objects-api-server",
+          "scope": "server",
+          "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+          "section": "def-server.SavedObjectsClientContract",
+          "text": "SavedObjectsClientContract"
+        },
         ", request: ",
-        "KibanaRequest",
+        {
+          "pluginId": "@kbn/core-http-server",
+          "scope": "server",
+          "docId": "kibKbnCoreHttpServerPluginApi",
+          "section": "def-server.KibanaRequest",
+          "text": "KibanaRequest"
+        },
         "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>) => Promise<{ context: ",
         "AnomalyDetectionAlertContext",
         "; name: string; isHealthy: boolean; } | undefined>; }; } & ",

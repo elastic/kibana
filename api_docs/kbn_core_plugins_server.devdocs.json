@@ -37,7 +37,20 @@
         "deprecated": true,
         "removeBy": "8.8.0",
         "trackAdoption": false,
-        "references": [],
+        "references": [
+          {
+            "plugin": "@kbn/core-plugins-server-internal",
+            "path": "packages/core/plugins/core-plugins-server-internal/src/plugin.ts"
+          },
+          {
+            "plugin": "@kbn/core-plugins-server-internal",
+            "path": "packages/core/plugins/core-plugins-server-internal/src/plugin.ts"
+          },
+          {
+            "plugin": "core",
+            "path": "src/core/server/index.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server",
@@ -48,7 +61,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>, plugins: TPluginsSetup) => TSetup | Promise<TSetup>"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
@@ -63,7 +82,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<object, unknown>"
                 ],
                 "path": "packages/core/plugins/core-plugins-server/src/types.ts",
@@ -98,7 +123,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
               ", plugins: TPluginsStart) => TStart | Promise<TStart>"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
@@ -113,7 +144,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "packages/core/plugins/core-plugins-server/src/types.ts",
                 "deprecated": false,
@@ -189,7 +226,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>, plugins: TPluginsSetup) => TSetup"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
@@ -204,7 +247,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<object, unknown>"
                 ],
                 "path": "packages/core/plugins/core-plugins-server/src/types.ts",
@@ -239,7 +288,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
               ", plugins: TPluginsStart) => TStart"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
@@ -254,7 +309,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "packages/core/plugins/core-plugins-server/src/types.ts",
                 "deprecated": false,
@@ -331,7 +392,13 @@
               "\nProvider for the {@link ConfigDeprecation} to apply to the plugin configuration."
             ],
             "signature": [
-              "ConfigDeprecationProvider",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecationProvider",
+                "text": "ConfigDeprecationProvider"
+              },
               " | undefined"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
@@ -371,7 +438,13 @@
               "\nSchema to use to validate the plugin configuration.\n\n{@link PluginConfigSchema}"
             ],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<T>"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
@@ -450,9 +523,21 @@
             "description": [],
             "signature": [
               "{ mode: ",
-              "EnvironmentMode",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.EnvironmentMode",
+                "text": "EnvironmentMode"
+              },
               "; packageInfo: Readonly<",
-              "PackageInfo",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.PackageInfo",
+                "text": "PackageInfo"
+              },
               ">; instanceUuid: string; configs: readonly string[]; }"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
@@ -469,7 +554,13 @@
               "\nAccess the configuration for this particular Kibana node.\nCan be used to determine which `roles` the current process was started with.\n"
             ],
             "signature": [
-              "NodeInfo"
+              {
+                "pluginId": "@kbn/core-node-server",
+                "scope": "server",
+                "docId": "kibKbnCoreNodeServerPluginApi",
+                "section": "def-server.NodeInfo",
+                "text": "NodeInfo"
+              }
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
@@ -485,7 +576,13 @@
               "\n{@link LoggerFactory | logger factory} instance already bound to the plugin's logging context\n"
             ],
             "signature": [
-              "LoggerFactory"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LoggerFactory",
+                "text": "LoggerFactory"
+              }
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
@@ -503,19 +600,59 @@
             "signature": [
               "{ legacy: { globalConfig$: ",
               "Observable",
-              "<Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
-              "ByteSizeValue",
+              "<Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
               ") => boolean; isLessThan: (other: ",
-              "ByteSizeValue",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
               ") => boolean; isEqualTo: (other: ",
-              "ByteSizeValue",
-              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ByteSizeValueUnit | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
-              "ByteSizeValue",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
+              "ByteSizeValueUnit",
+              " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
               ") => boolean; isLessThan: (other: ",
-              "ByteSizeValue",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
               ") => boolean; isEqualTo: (other: ",
-              "ByteSizeValue",
-              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ByteSizeValueUnit | undefined) => string; }>; }>; }>; }; create: <T = ConfigSchema>() => ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
+              "ByteSizeValueUnit",
+              " | undefined) => string; }>; }>; }>; }; create: <T = ConfigSchema>() => ",
               "Observable",
               "<T>; get: <T = ConfigSchema>() => T; }"
             ],
@@ -588,7 +725,13 @@
               "\nType of the plugin, defaults to `standard`."
             ],
             "signature": [
-              "PluginType"
+              {
+                "pluginId": "@kbn/core-base-common",
+                "scope": "server",
+                "docId": "kibKbnCoreBaseCommonPluginApi",
+                "section": "def-server.PluginType",
+                "text": "PluginType"
+              }
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
@@ -701,7 +844,32 @@
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": true,
             "trackAdoption": false,
-            "references": []
+            "references": [
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
@@ -800,7 +968,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CorePreboot",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CorePreboot",
+                "text": "CorePreboot"
+              },
               ", plugins: TPluginsSetup) => TSetup"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
@@ -815,7 +989,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CorePreboot"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CorePreboot",
+                    "text": "CorePreboot"
+                  }
                 ],
                 "path": "packages/core/plugins/core-plugins-server/src/types.ts",
                 "deprecated": false,
@@ -922,7 +1102,13 @@
           "\nDedicated type for plugin configuration schema.\n"
         ],
         "signature": [
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
           "<T>"
         ],
         "path": "packages/core/plugins/core-plugins-server/src/types.ts",
@@ -1011,13 +1197,33 @@
         "label": "SharedGlobalConfig",
         "description": [],
         "signature": [
-          "{ readonly elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
-          "ByteSizeValue",
+          "{ readonly elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
           ") => boolean; isLessThan: (other: ",
-          "ByteSizeValue",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
           ") => boolean; isEqualTo: (other: ",
-          "ByteSizeValue",
-          ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ByteSizeValueUnit | undefined) => string; }>; }>; }"
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
+          "ByteSizeValueUnit",
+          " | undefined) => string; }>; }>; }"
         ],
         "path": "packages/core/plugins/core-plugins-server/src/types.ts",
         "deprecated": false,
