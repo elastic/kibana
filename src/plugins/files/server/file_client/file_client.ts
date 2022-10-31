@@ -11,8 +11,10 @@ import { Readable } from 'stream';
 import mimeType from 'mime';
 import cuid from 'cuid';
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
 import type {
   File,
   FileJSON,
@@ -34,6 +36,11 @@ import { createAuditEvent } from '../audit_events';
 import type { FileClient, CreateArgs, DeleteArgs, P1, ShareArgs } from './types';
 import { serializeJSON, toJSON } from '../file/to_json';
 import { createDefaultFileAttributes } from './utils';
+import {
+  PerfArgs,
+  withReportPerformanceMetric,
+  FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
+} from '../performance';
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 
@@ -44,6 +51,7 @@ export function createFileClient({
   internalFileShareService,
   logger,
   metadataClient,
+  analytics,
 }: {
   fileKindDescriptor: FileKind;
   metadataClient: FileMetadataClient;
@@ -51,6 +59,7 @@ export function createFileClient({
   internalFileShareService: undefined | InternalFileShareService;
   auditLogger: undefined | AuditLogger;
   logger: Logger;
+  analytics: AnalyticsServiceStart;
 }) {
   return new FileClientImpl(
     fileKindDescriptor,
@@ -58,6 +67,7 @@ export function createFileClient({
     blobStorageClient,
     internalFileShareService,
     auditLogger,
+    analytics,
     logger
   );
 }
@@ -80,6 +90,7 @@ export class FileClientImpl implements FileClient {
     private readonly blobStorageClient: BlobStorageClient,
     private readonly internalFileShareService: undefined | InternalFileShareService,
     auditLogger: undefined | AuditLogger,
+    private readonly analytics: AnalyticsServiceStart,
     private readonly logger: Logger
   ) {
     this.logAuditEvent = (e) => {
@@ -216,13 +227,26 @@ export class FileClientImpl implements FileClient {
         enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity),
       ],
       id,
+      analytics: this.analytics,
     });
   };
 
-  public download: BlobStorageClient['download'] = (args) => {
+  public download: BlobStorageClient['download'] = async (args) => {
     this.incrementUsageCounter('DOWNLOAD');
     try {
-      return this.blobStorageClient.download(args);
+      const perf: PerfArgs = {
+        analytics: this.analytics,
+        eventData: {
+          eventName: FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
+          key1: 'size',
+          value1: args.size,
+          meta: {
+            id: args.id,
+          },
+        },
+      };
+
+      return withReportPerformanceMetric(perf, () => this.blobStorageClient.download(args));
     } catch (e) {
       this.incrementUsageCounter('DOWNLOAD_ERROR');
       throw e;

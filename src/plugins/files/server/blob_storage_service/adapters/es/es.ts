@@ -9,7 +9,7 @@
 import assert from 'assert';
 import { once } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Semaphore } from '@kbn/std';
 import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
@@ -91,7 +91,11 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
 
   public async upload(
     src: Readable,
-    { transforms, id }: { transforms?: Transform[]; id?: string } = {}
+    {
+      transforms,
+      id,
+      analytics,
+    }: { transforms?: Transform[]; id?: string; analytics?: AnalyticsServiceStart } = {}
   ): Promise<{ id: string; size: number }> {
     await this.createIndexIfNotExists();
 

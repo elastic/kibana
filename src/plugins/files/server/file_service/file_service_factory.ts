@@ -15,6 +15,7 @@ import {
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import { File, FileJSON, FileMetadata } from '../../common';
 import { fileObjectType, fileShareObjectType, hiddenTypes } from '../saved_objects';
 import { BlobStorageService } from '../blob_storage_service';
@@ -56,6 +57,7 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
     private readonly blobStorageService: BlobStorageService,
     private readonly security: undefined | SecurityPluginSetup,
     private readonly fileKindRegistry: FileKindsRegistry,
+    private readonly analytics: AnalyticsServiceStart,
     private readonly logger: Logger
   ) {}
 
@@ -83,6 +85,7 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
       internalFileShareService,
       auditLogger,
       this.fileKindRegistry,
+      this.analytics,
       this.logger
     );
 

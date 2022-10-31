@@ -82,7 +82,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
   }
 
   public start(coreStart: CoreStart): FilesStart {
-    const { savedObjects } = coreStart;
+    const { savedObjects, analytics } = coreStart;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const blobStorageService = new BlobStorageService(
       esClient,
@@ -93,6 +93,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
       blobStorageService,
       this.securitySetup,
       getFileKindsRegistry(),
+      analytics,
       this.logger.get('files-service')
     );
 
