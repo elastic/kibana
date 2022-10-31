@@ -9,12 +9,11 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function EsDeleteAllIndicesProvider({ getService }: FtrProviderContext) {
-  const es = getService('es');
   const log = getService('log');
 
-  async function deleteConcreteIndices(indices: string[]) {
+  async function deleteConcreteIndices(indices: string[], esNode: any) {
     try {
-      await es.indices.delete({
+      await esNode.indices.delete({
         index: indices,
         ignore_unavailable: true,
       });
@@ -23,7 +22,8 @@ export function EsDeleteAllIndicesProvider({ getService }: FtrProviderContext) {
     }
   }
 
-  return async (patterns: string | string[]) => {
+  return async (patterns: string | string[], remote: boolean = false) => {
+    const esNode = remote ? getService('remoteEs' as 'es') : getService('es');
     for (const pattern of [patterns].flat()) {
       for (let attempt = 1; ; attempt++) {
         if (attempt > 5) {
@@ -31,7 +31,7 @@ export function EsDeleteAllIndicesProvider({ getService }: FtrProviderContext) {
         }
 
         // resolve pattern to concrete index names
-        const resp = await es.indices.getAlias(
+        const resp = await esNode.indices.getAlias(
           {
             index: pattern,
           },
@@ -55,7 +55,7 @@ export function EsDeleteAllIndicesProvider({ getService }: FtrProviderContext) {
         );
 
         // delete the concrete indexes we found and try again until this pattern resolves to no indexes
-        await deleteConcreteIndices(indices);
+        await deleteConcreteIndices(indices, esNode);
       }
     }
   };
