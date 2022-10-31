@@ -83,4 +83,4 @@ const encodeUrlState = HostsFiltersRT.encode;
 const decodeUrlState = (value: unknown) =>
   pipe(HostsFiltersRT.decode(value), fold(constant([]), identity));
 
-export const [HostFilterProvider, useHostFiltersContext] = createContainer(useHostFilters);
+export const [HostFiltersProvider, useHostFiltersContext] = createContainer(useHostFilters);

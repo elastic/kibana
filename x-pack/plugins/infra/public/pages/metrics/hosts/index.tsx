@@ -20,7 +20,7 @@ import { fullHeightContentStyles } from '../../../page_template.styles';
 import { UnifiedSearchProvider } from './hooks/use_unified_search';
 import { HostContainer } from './components/hosts_container';
 import { HostsQueryProvider } from './hooks/use_host_query';
-import { HostFilterProvider } from './hooks/use_host_filters';
+import { HostFiltersProvider } from './hooks/use_host_filters';
 
 export const HostsPage = () => {
   const {
@@ -58,13 +58,13 @@ export const HostsPage = () => {
               }}
             >
               <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
-                <HostFilterProvider>
+                <HostFiltersProvider>
                   <HostsQueryProvider>
                     <UnifiedSearchProvider>
                       <HostContainer />
                     </UnifiedSearchProvider>
                   </HostsQueryProvider>
-                </HostFilterProvider>
+                </HostFiltersProvider>
               </MetricsDataViewProvider>
             </MetricsPageTemplate>
           </div>
