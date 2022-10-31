@@ -342,7 +342,7 @@ export default ({ getService }: FtrProviderContext): void => {
             title: case1.title,
             description: case1.description,
             status: case1.status,
-            createdBy: case1.created_at,
+            createdAt: case1.created_at,
             totals: {
               userComments: 0,
               alerts: 1,
@@ -392,7 +392,7 @@ export default ({ getService }: FtrProviderContext): void => {
             title: case1.title,
             description: case1.description,
             status: case1.status,
-            createdBy: case1.created_at,
+            createdAt: case1.created_at,
             totals: {
               userComments: 0,
               alerts: 1,
