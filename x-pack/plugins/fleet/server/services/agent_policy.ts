@@ -545,6 +545,41 @@ class AgentPolicyService {
     }
   }
 
+  /**
+   * Remove a Fleet Server from all agent policies that are using it, to use the default one instead.
+   */
+  public async removeFleetServerHostFromAll(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    fleetServerHostId: string
+  ) {
+    const agentPolicies = (
+      await soClient.find<AgentPolicySOAttributes>({
+        type: SAVED_OBJECT_TYPE,
+        fields: ['revision', 'fleet_server_host_id'],
+        searchFields: ['fleet_server_host_id'],
+        search: escapeSearchQueryPhrase(fleetServerHostId),
+        perPage: SO_SEARCH_LIMIT,
+      })
+    ).saved_objects.map((so) => ({
+      id: so.id,
+      ...so.attributes,
+    }));
+
+    if (agentPolicies.length > 0) {
+      await pMap(
+        agentPolicies,
+        (agentPolicy) =>
+          this.update(soClient, esClient, agentPolicy.id, {
+            fleet_server_host_id: null,
+          }),
+        {
+          concurrency: 50,
+        }
+      );
+    }
+  }
+
   public async bumpAllAgentPoliciesForOutput(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,

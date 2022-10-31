@@ -78,9 +78,11 @@ export const getFleetServerPolicyHandler: RequestHandler<
 export const deleteFleetServerPolicyHandler: RequestHandler<
   TypeOf<typeof GetOneFleetServerHostRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    await deleteFleetServerHost(soClient, request.params.itemId);
+    const coreContext = await context.core;
+    const soClient = coreContext.savedObjects.client;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    await deleteFleetServerHost(soClient, esClient, request.params.itemId);
     const body = {
       id: request.params.itemId,
     };

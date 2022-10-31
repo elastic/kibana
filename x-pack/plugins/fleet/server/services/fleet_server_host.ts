@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { normalizeHostsForAgents } from '../../common/services';
 import {
@@ -14,6 +14,7 @@ import {
   DEFAULT_FLEET_SERVER_HOST_ID,
   SO_SEARCH_LIMIT,
 } from '../constants';
+import { agentPolicyService } from './agent_policy';
 
 import type {
   SettingsSOAttributes,
@@ -91,6 +92,7 @@ export async function listFleetServerHosts(soClient: SavedObjectsClientContract)
 
 export async function deleteFleetServerHost(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   id: string,
   options?: { fromPreconfiguration?: boolean }
 ) {
@@ -107,6 +109,8 @@ export async function deleteFleetServerHost(
       `Default Fleet Server hosts ${id} cannot be deleted.`
     );
   }
+
+  await agentPolicyService.removeFleetServerHostFromAll(soClient, esClient, id);
 
   return await soClient.delete(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id);
 }
