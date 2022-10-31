@@ -9,7 +9,6 @@
 import React, { ReactNode } from 'react';
 import { EuiCard, EuiText, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GuideId } from '../../types';
 
 type UseCaseConstants = {
   [key in UseCase]: {
@@ -53,7 +52,7 @@ const constants: UseCaseConstants = {
 export type UseCase = 'search' | 'observability' | 'security';
 
 export interface UseCaseCardProps {
-  useCase: GuideId;
+  useCase: UseCase;
   title: string;
   description: string;
   footer: ReactNode;
