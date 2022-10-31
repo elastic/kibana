@@ -17,10 +17,12 @@ import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation'
 import { showBulkErrorToast } from './show_bulk_error_toast';
 import { showBulkSuccessToast } from './show_bulk_success_toast';
 import type { QueryOrIds } from '../../api/api';
+import { useAllRuleIdsForBulkAction } from './useAllRuleIdsForBulkAction';
 
 export function useBulkExport() {
   const toasts = useAppToasts();
   const { mutateAsync } = useBulkExportMutation();
+  const getAllRuleIdsForBulkAction = useAllRuleIdsForBulkAction();
   const rulesTableContext = useRulesTableContextOptional();
   const setLoadingRules = rulesTableContext?.actions.setLoadingRules;
 
@@ -28,7 +30,7 @@ export function useBulkExport() {
     async (queryOrIds: QueryOrIds) => {
       try {
         setLoadingRules?.({
-          ids: queryOrIds.ids ?? [],
+          ids: queryOrIds.ids ?? getAllRuleIdsForBulkAction(BulkActionType.export),
           action: BulkActionType.export,
         });
         return await mutateAsync(queryOrIds);
@@ -38,7 +40,7 @@ export function useBulkExport() {
         setLoadingRules?.({ ids: [], action: null });
       }
     },
-    [setLoadingRules, mutateAsync, toasts]
+    [getAllRuleIdsForBulkAction, setLoadingRules, mutateAsync, toasts]
   );
 
   return { bulkExport };

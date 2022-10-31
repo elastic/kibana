@@ -19,6 +19,7 @@ import type { BulkAction } from '../../api/api';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
 import { showBulkErrorToast } from './show_bulk_error_toast';
 import { showBulkSuccessToast } from './show_bulk_success_toast';
+import { useAllRuleIdsForBulkAction } from './useAllRuleIdsForBulkAction';
 
 export const goToRuleEditPage = (
   ruleId: string,
@@ -37,6 +38,7 @@ interface UseExecuteBulkActionOptions {
 export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
   const toasts = useAppToasts();
   const { mutateAsync } = useBulkActionMutation();
+  const getAllRuleIdsForBulkAction = useAllRuleIdsForBulkAction();
   const rulesTableContext = useRulesTableContextOptional();
   const setLoadingRules = rulesTableContext?.actions.setLoadingRules;
 
@@ -44,9 +46,7 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
     async (bulkActionDescriptor: BulkAction) => {
       try {
         setLoadingRules?.({
-          ids:
-            bulkActionDescriptor.ids ??
-            allRuleIdsForBulkAction(rulesTableContext, bulkActionDescriptor),
+          ids: bulkActionDescriptor.ids ?? getAllRuleIdsForBulkAction(bulkActionDescriptor.type),
           action: bulkActionDescriptor.type,
         });
 
@@ -64,7 +64,13 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
         setLoadingRules?.({ ids: [], action: null });
       }
     },
-    [options?.suppressSuccessToast, rulesTableContext, setLoadingRules, mutateAsync, toasts]
+    [
+      options?.suppressSuccessToast,
+      getAllRuleIdsForBulkAction,
+      setLoadingRules,
+      mutateAsync,
+      toasts,
+    ]
   );
 
   return { executeBulkAction };
@@ -92,19 +98,4 @@ function sendTelemetry(action: BulkActionType, response: BulkActionResponse): vo
         : TELEMETRY_EVENT.CUSTOM_RULE_ENABLED
     );
   }
-}
-
-function allRuleIdsForBulkAction(
-  rulesTableContext: ReturnType<typeof useRulesTableContextOptional>,
-  bulkActionDescriptor: BulkAction
-): string[] {
-  const allRules = rulesTableContext?.state.isAllSelected ? rulesTableContext.state.rules : [];
-  const processingRules =
-    bulkActionDescriptor.type === BulkActionType.enable
-      ? allRules.filter((x) => !x.enabled)
-      : bulkActionDescriptor.type === BulkActionType.disable
-      ? allRules.filter((x) => x.enabled)
-      : allRules;
-
-  return processingRules.map((r) => r.id);
 }

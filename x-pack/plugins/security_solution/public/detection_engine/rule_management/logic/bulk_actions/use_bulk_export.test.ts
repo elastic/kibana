@@ -81,6 +81,9 @@ describe('useBulkExport', () => {
         actions: {
           setLoadingRules,
         },
+        state: {
+          isAllSelected: false,
+        },
       });
     });
 
