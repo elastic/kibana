@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Ast, AstFunction } from '@kbn/interpreter';
+import { Ast } from '@kbn/interpreter';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
@@ -16,6 +16,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -28,7 +29,12 @@ import { TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import type { LayerType } from '../../../common';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
-import type { ColumnState, SortingState, PagingState } from '../../../common/expressions';
+import type {
+  ColumnState,
+  SortingState,
+  PagingState,
+  CollapseExpressionFunction,
+} from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 
 export interface DatatableVisualizationState {
@@ -398,31 +404,30 @@ export const getDatatableVisualization = ({
 
     const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
+    const lensCollapseFns = columns
+      .filter((c) => c.collapseFn)
+      .map((c) => {
+        const fn = buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
+          by: columns
+            .filter(
+              (col) =>
+                col.columnId !== c.columnId &&
+                datasource!.getOperationForColumnId(col.columnId)?.isBucketed
+            )
+            .map((col) => col.columnId),
+          metric: columns
+            .filter((col) => !datasource!.getOperationForColumnId(col.columnId)?.isBucketed)
+            .map((col) => col.columnId),
+          fn: [c.collapseFn!],
+        });
+        return fn.toAst();
+      });
+
     return {
       type: 'expression',
       chain: [
         ...(datasourceExpression?.chain ?? []),
-        ...columns
-          .filter((c) => c.collapseFn)
-          .map((c) => {
-            return {
-              type: 'function',
-              function: 'lens_collapse',
-              arguments: {
-                by: columns
-                  .filter(
-                    (col) =>
-                      col.columnId !== c.columnId &&
-                      datasource!.getOperationForColumnId(col.columnId)?.isBucketed
-                  )
-                  .map((col) => col.columnId),
-                metric: columns
-                  .filter((col) => !datasource!.getOperationForColumnId(col.columnId)?.isBucketed)
-                  .map((col) => col.columnId),
-                fn: [c.collapseFn!],
-              },
-            } as AstFunction;
-          }),
+        ...lensCollapseFns,
         {
           type: 'function',
           function: 'lens_datatable',
