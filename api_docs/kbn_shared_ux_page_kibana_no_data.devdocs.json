@@ -156,7 +156,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-kibana-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/kibana_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -179,7 +179,7 @@
           " & ",
           "NoDataViewsPromptServices"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-kibana-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/kibana_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

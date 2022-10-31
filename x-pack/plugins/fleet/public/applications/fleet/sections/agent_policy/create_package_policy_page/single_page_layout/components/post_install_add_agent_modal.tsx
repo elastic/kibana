@@ -51,7 +51,7 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
           <p>
             <FormattedMessage
               id="xpack.fleet.agentPolicy.postInstallAddAgentModalDescription"
-              defaultMessage="To complete this integration, add {elasticAgent} to your hosts to collect data and send it to Elastic Stack"
+              defaultMessage="To complete this integration, add {elasticAgent} to your hosts to collect data and send it to Elastic Stack."
               values={{
                 elasticAgent: <strong>Elastic Agent</strong>,
               }}
