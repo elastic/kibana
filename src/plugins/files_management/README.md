@@ -1,9 +1,4 @@
-# filesManagement
+# Files management
 
-A Kibana plugin
+Minimal interface for admins to manage files in Kibana.
 
----
-
-## Development
-
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions setting up your development environment.
