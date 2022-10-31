@@ -7,7 +7,10 @@
 
 import uuid from 'uuid';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { ResponseActionStatus } from '../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionsApiCommandNames,
+  ResponseActionStatus,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 export const getActionListMock = async ({
@@ -49,6 +52,7 @@ export const getActionListMock = async ({
     const actionDetails: ActionListApiResponse['data'] = actionIds.map((actionId) => {
       return endpointActionGenerator.generateActionDetails({
         agents: [id],
+        command: (commands?.[0] ?? 'isolate') as ResponseActionsApiCommandNames,
         id: actionId,
         isCompleted,
         isExpired,
