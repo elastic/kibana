@@ -12,6 +12,7 @@ import { checkIsStalePing } from '../../utils/monitor_test_result/check_pings';
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import {
+  getMonitorLastRunAction,
   getMonitorRecentPingsAction,
   setMonitorDetailsLocationAction,
   getMonitorAction,
@@ -23,6 +24,10 @@ export interface MonitorDetailsState {
     data: Ping[];
     loading: boolean;
   };
+  lastRun: {
+    data?: Ping;
+    loading: boolean;
+  };
   syntheticsMonitorLoading: boolean;
   syntheticsMonitor: EncryptedSyntheticsSavedMonitor | null;
   error: IHttpSerializedFetchError | null;
@@ -31,6 +36,7 @@ export interface MonitorDetailsState {
 
 const initialState: MonitorDetailsState = {
   pings: { total: 0, data: [], loading: false },
+  lastRun: { loading: false },
   syntheticsMonitor: null,
   syntheticsMonitorLoading: false,
   error: null,
@@ -42,7 +48,17 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(setMonitorDetailsLocationAction, (state, action) => {
       state.selectedLocationId = action.payload;
     })
-
+    .addCase(getMonitorLastRunAction.get, (state, action) => {
+      state.lastRun.loading = true;
+      if (checkIsStalePing(action.payload.monitorId, state.lastRun.data)) {
+        state.lastRun.data = undefined;
+      }
+    })
+    .addCase(getMonitorLastRunAction.success, (state, action) => {
+      state.lastRun.loading = false;
+      state.lastRun.data = action.payload.pings[0];
+    })
+    .addCase(getMonitorLastRunAction.fail, (state, action) => {})
     .addCase(getMonitorRecentPingsAction.get, (state, action) => {
       state.pings.loading = true;
       state.pings.data = state.pings.data.filter(
