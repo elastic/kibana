@@ -18,7 +18,13 @@
             "text": "Plugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
           "<",
           {
             "pluginId": "actions",
@@ -55,7 +61,13 @@
                 "label": "ctx",
                 "description": [],
                 "signature": [
-                  "PluginInitializerContext",
+                  {
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
                   "<",
                   "Config",
                   ">"
@@ -527,7 +539,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
@@ -772,6 +790,102 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.UnsecuredActionsClient",
+        "type": "Class",
+        "tags": [],
+        "label": "UnsecuredActionsClient",
+        "description": [],
+        "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.UnsecuredActionsClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.UnsecuredActionsClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "UnsecuredActionsClientOpts"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.UnsecuredActionsClient.bulkEnqueueExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkEnqueueExecution",
+            "description": [],
+            "signature": [
+              "(requesterId: string, actionsToExecute: ",
+              "ExecuteOptions",
+              "[]) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.UnsecuredActionsClient.bulkEnqueueExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "requesterId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.UnsecuredActionsClient.bulkEnqueueExecution.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "actionsToExecute",
+                "description": [],
+                "signature": [
+                  "ExecuteOptions",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -784,7 +898,13 @@
         "description": [],
         "signature": [
           "(source: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>) => ",
           "HttpRequestExecutionSource"
         ],
@@ -800,7 +920,13 @@
             "label": "source",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
@@ -821,7 +947,13 @@
         "description": [],
         "signature": [
           "(source: Omit<",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           ", \"name\">) => ",
           "SavedObjectExecutionSource"
         ],
@@ -838,7 +970,13 @@
             "description": [],
             "signature": [
               "Omit<",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               ", \"name\">"
             ],
             "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
@@ -1391,6 +1529,26 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ActionTypeExecutorOptions.isEphemeral",
             "type": "CompoundType",
             "tags": [],
@@ -1476,6 +1634,70 @@
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.IUnsecuredActionsClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "IUnsecuredActionsClient",
+        "description": [],
+        "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.IUnsecuredActionsClient.bulkEnqueueExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkEnqueueExecution",
+            "description": [],
+            "signature": [
+              "(requesterId: string, actionsToExecute: ",
+              "ExecuteOptions",
+              "[]) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.IUnsecuredActionsClient.bulkEnqueueExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "requesterId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.IUnsecuredActionsClient.bulkEnqueueExecution.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "actionsToExecute",
+                "description": [],
+                "signature": [
+                  "ExecuteOptions",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1599,7 +1821,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
@@ -2120,9 +2348,21 @@
           "description": [],
           "signature": [
             "(request: ",
-            "KibanaRequest",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
             "<unknown, unknown, unknown, any>) => Promise<",
-            "PublicMethodsOf",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "server",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-server.PublicMethodsOf",
+              "text": "PublicMethodsOf"
+            },
             "<",
             {
               "pluginId": "actions",
@@ -2145,7 +2385,13 @@
               "label": "request",
               "description": [],
               "signature": [
-                "KibanaRequest",
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
@@ -2165,9 +2411,21 @@
           "description": [],
           "signature": [
             "(request: ",
-            "KibanaRequest",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
             "<unknown, unknown, unknown, any>) => ",
-            "PublicMethodsOf",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "server",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-server.PublicMethodsOf",
+              "text": "PublicMethodsOf"
+            },
             "<",
             {
               "pluginId": "actions",
@@ -2190,7 +2448,13 @@
               "label": "request",
               "description": [],
               "signature": [
-                "KibanaRequest",
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
@@ -2225,6 +2489,29 @@
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginStartContract.getUnsecuredActionsClient",
+          "type": "Function",
+          "tags": [],
+          "label": "getUnsecuredActionsClient",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.IUnsecuredActionsClient",
+              "text": "IUnsecuredActionsClient"
+            }
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "actions",
@@ -3447,10 +3734,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.AlertingConnectorFeature.name",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "name",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3458,10 +3748,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.AlertingConnectorFeature.compatibility",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "compatibility",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3494,10 +3787,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.CasesConnectorFeature.name",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "name",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3505,10 +3801,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.CasesConnectorFeature.compatibility",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "compatibility",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3556,10 +3855,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.SecuritySolutionFeature.name",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "name",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3567,10 +3869,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.SecuritySolutionFeature.compatibility",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "compatibility",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3603,10 +3908,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.UptimeConnectorFeature.name",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "name",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3614,10 +3922,13 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.UptimeConnectorFeature.compatibility",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "compatibility",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false

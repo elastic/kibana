@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiDataGridColumn, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
-import { useInspector } from '../../../../../hooks/use_inspector';
+import { useInspector } from '../../../../../hooks';
 import { IndicatorsFieldBrowser } from '../components';
 
 const INSPECT_BUTTON_TEST_ID = 'tiIndicatorsGridInspect';

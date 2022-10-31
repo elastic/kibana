@@ -76,6 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
+  // Failing: See https://github.com/elastic/kibana/issues/142148
   describe.skip('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;

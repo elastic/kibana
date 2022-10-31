@@ -8,7 +8,7 @@
 import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
 import { ruleRegistryBrowserFieldsMapper } from '@kbn/triggers-actions-ui-plugin/public';
 import { useMemo, VFC } from 'react';
-import { useKibana } from '../../../../../../hooks/use_kibana';
+import { useKibana } from '../../../../../../hooks';
 
 export interface IndicatorsFieldBrowserProps {
   browserFields: Readonly<Record<string, Partial<BrowserField>>>;

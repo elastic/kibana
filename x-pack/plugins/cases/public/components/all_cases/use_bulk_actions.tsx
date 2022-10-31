@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { Case } from '../../containers/types';
+import type { Case } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { useSeverityAction } from '../actions/severity/use_severity_action';
 import { useStatusAction } from '../actions/status/use_status_action';

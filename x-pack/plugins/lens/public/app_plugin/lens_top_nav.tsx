@@ -927,7 +927,6 @@ export const LensTopNavMenu = ({
       }
       textBasedLanguageModeErrors={textBasedLanguageModeErrors}
       onTextBasedSavedAndExit={onTextBasedSavedAndExit}
-      showQueryBar={true}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}

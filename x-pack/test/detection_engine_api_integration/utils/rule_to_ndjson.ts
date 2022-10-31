@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * Given a rule this will convert it to an ndjson buffer which is useful for
  * testing upload features.
  * @param rule The rule to convert to ndjson
  */
-export const ruleToNdjson = (rule: CreateRulesSchema): Buffer => {
+export const ruleToNdjson = (rule: RuleCreateProps): Buffer => {
   const stringified = JSON.stringify(rule);
   return Buffer.from(`${stringified}\n`);
 };

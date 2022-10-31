@@ -16,7 +16,7 @@ import {
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getBuckets({
   environment,
@@ -24,7 +24,7 @@ export async function getBuckets({
   serviceName,
   groupId,
   bucketSize,
-  setup,
+  apmEventClient,
   start,
   end,
 }: {
@@ -33,12 +33,10 @@ export async function getBuckets({
   serviceName: string;
   groupId?: string;
   bucketSize: number;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   const params = {
     apm: {
       events: [ProcessorEvent.error],

@@ -10,7 +10,7 @@ import { pipe } from 'lodash/fp';
 import { Logger } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { MappingProperty, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { FilesMetrics, FileMetadata, Pagination } from '../../../../common';
 import type { FindFileArgs } from '../../../file_service';
 import type {
@@ -19,10 +19,9 @@ import type {
   FileMetadataClient,
   GetArg,
   GetUsageMetricsArgs,
-  ListArg,
   UpdateArgs,
 } from '../file_metadata_client';
-import { filterArgsToKuery, filterDeletedFiles } from './query_filters';
+import { filterArgsToKuery } from './query_filters';
 import { fileObjectType } from '../../../saved_objects/file';
 
 const filterArgsToESQuery = pipe(filterArgsToKuery, toElasticsearchQuery);
@@ -114,25 +113,12 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
 
   private attrPrefix: keyof FileDocument = 'file';
 
-  async list({ page, perPage }: ListArg = {}): Promise<Array<FileDescriptor<M>>> {
+  async find({ page, perPage, ...filterArgs }: FindFileArgs = {}): Promise<{
+    total: number;
+    files: Array<FileDescriptor<unknown>>;
+  }> {
     const result = await this.esClient.search<FileDocument<M>>({
-      index: this.index,
-      expand_wildcards: 'hidden',
-      query: toElasticsearchQuery(filterDeletedFiles({ attrPrefix: this.attrPrefix })),
-      ...this.paginationToES({ page, perPage }),
-      sort: 'file.created',
-    });
-
-    return result.hits.hits.map((hit) => {
-      return {
-        id: hit._id,
-        metadata: hit._source?.file!,
-      };
-    });
-  }
-
-  async find({ page, perPage, ...filterArgs }: FindFileArgs): Promise<Array<FileDescriptor<M>>> {
-    const result = await this.esClient.search<FileDocument<M>>({
+      track_total_hits: true,
       index: this.index,
       expand_wildcards: 'hidden',
       query: filterArgsToESQuery({ ...filterArgs, attrPrefix: this.attrPrefix }),
@@ -140,7 +126,10 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
       sort: 'file.created',
     });
 
-    return result.hits.hits.map((r) => ({ id: r._id, metadata: r._source?.file! }));
+    return {
+      total: (result.hits.total as SearchTotalHits).value,
+      files: result.hits.hits.map((r) => ({ id: r._id, metadata: r._source?.file! })),
+    };
   }
 
   async getUsageMetrics(arg: GetUsageMetricsArgs): Promise<FilesMetrics> {

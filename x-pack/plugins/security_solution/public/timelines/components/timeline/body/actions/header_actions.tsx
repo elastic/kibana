@@ -13,6 +13,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { ruleRegistryBrowserFieldsMapper } from '@kbn/triggers-actions-ui-plugin/public';
+import { isActiveTimeline } from '../../../../../helpers';
 import type { HeaderActionProps, SortDirection } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
@@ -87,7 +88,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const dispatch = useDispatch();
 
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
 
   const toggleFullScreen = useCallback(() => {
@@ -105,8 +106,13 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   ]);
 
   const fullScreen = useMemo(
-    () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
-    [globalFullScreen, timelineId, timelineFullScreen]
+    () =>
+      isFullScreen({
+        globalFullScreen,
+        isActiveTimelines: isActiveTimeline(timelineId),
+        timelineFullScreen,
+      }),
+    [globalFullScreen, timelineFullScreen, timelineId]
   );
   const handleSelectAllChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,7 +243,11 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
           <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
             <EuiButtonIcon
               aria-label={
-                isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
+                isFullScreen({
+                  globalFullScreen,
+                  isActiveTimelines: isActiveTimeline(timelineId),
+                  timelineFullScreen,
+                })
                   ? EXIT_FULL_SCREEN
                   : i18n.FULL_SCREEN
               }
@@ -246,7 +256,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
               data-test-subj={
                 // a full screen button gets created for timeline and for the host page
                 // this sets the data-test-subj for each case so that tests can differentiate between them
-                timelineId === TimelineId.active ? 'full-screen-active' : 'full-screen'
+                isActiveTimeline(timelineId) ? 'full-screen-active' : 'full-screen'
               }
               iconType="fullScreen"
               onClick={toggleFullScreen}

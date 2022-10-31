@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { WrapSequences } from '../../signals/types';
 import { buildAlertGroupFromSequence } from './utils/build_alert_group_from_sequence';
 import type { ConfigType } from '../../../../config';
-import type { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../rule_schema';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -24,6 +24,7 @@ export const wrapSequencesFactory =
     mergeStrategy,
     spaceId,
     indicesToQuery,
+    alertTimestampOverride,
   }: {
     logger: Logger;
     completeRule: CompleteRule<RuleParams>;
@@ -31,6 +32,7 @@ export const wrapSequencesFactory =
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
     indicesToQuery: string[];
+    alertTimestampOverride: Date | undefined;
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(
@@ -43,7 +45,8 @@ export const wrapSequencesFactory =
           mergeStrategy,
           spaceId,
           buildReasonMessage,
-          indicesToQuery
+          indicesToQuery,
+          alertTimestampOverride
         ),
       ],
       []

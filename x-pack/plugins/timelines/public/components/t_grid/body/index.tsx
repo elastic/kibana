@@ -50,9 +50,7 @@ import {
   ControlColumnProps,
   RowRenderer,
   AlertStatus,
-  SortColumnTimeline,
-  TimelineId,
-  TimelineTabs,
+  SortColumnTable,
   SetEventsLoading,
   SetEventsDeleted,
 } from '../../../../common/types/timeline';
@@ -74,7 +72,7 @@ import type { Refetch } from '../../../store/t_grid/inputs';
 import { Ecs } from '../../../../common/ecs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulEventContext } from '../../stateful_event_context';
-import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
+import { tGridActions, TGridModel, tGridSelectors, TableState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
 import * as i18n from './translations';
@@ -119,7 +117,7 @@ interface OwnProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   tableView: ViewSelection;
-  tabType: TimelineTabs;
+  tabType: string;
   totalItems: number;
   trailingControlColumns?: ControlColumnProps[];
   unit?: (total: number) => React.ReactNode;
@@ -136,11 +134,6 @@ interface OwnProps {
 }
 
 const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
-
-export const hasAdditionalActions = (id: TimelineId): boolean =>
-  [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
-    id
-  );
 
 const ES_LIMIT_COUNT = 9999;
 
@@ -192,13 +185,13 @@ const transformControlColumns = ({
   onRuleChange?: () => void;
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   showCheckboxes: boolean;
-  tabType: TimelineTabs;
+  tabType: string;
   timelineId: string;
   isSelectAllChecked: boolean;
   browserFields: BrowserFields;
   onSelectPage: OnSelectAll;
   pageSize: number;
-  sort: SortColumnTimeline[];
+  sort: SortColumnTable[];
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
@@ -288,7 +281,7 @@ const transformControlColumns = ({
             setCellProps={setCellProps}
             showCheckboxes={showCheckboxes}
             tabType={tabType}
-            timelineId={timelineId}
+            tableId={timelineId}
             width={width}
             setEventsLoading={setEventsLoading}
             setEventsDeleted={setEventsDeleted}
@@ -355,7 +348,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
     const dispatch = useDispatch();
-    const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
+    const getManageTimeline = useMemo(() => tGridSelectors.getManageDataTableById(), []);
     const { queryFields, selectAll, defaultColumns } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
@@ -757,7 +750,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               ecsData: data.map((row) => row.ecs),
               header: columnHeaders.find((h) => h.id === header.id),
               pageSize,
-              timelineId: id,
+              scopeId: id,
               closeCellPopover: dataGridRef.current?.closeCellPopover,
             });
           return {
@@ -846,7 +839,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           colIndex,
           rowRenderers,
           setCellProps,
-          timelineId: id,
+          scopeId: id,
           truncate: isDetails ? false : true,
         }) as React.ReactElement;
       };
@@ -946,25 +939,20 @@ const makeMapStateToProps = () => {
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
   const getTGrid = tGridSelectors.getTGridByIdSelector();
-  const mapStateToProps = (
-    state: TimelineState,
-    { browserFields, id, hasAlertsCrud }: OwnProps
-  ) => {
-    const timeline: TGridModel = getTGrid(state, id);
+  const mapStateToProps = (state: TableState, { browserFields, id, hasAlertsCrud }: OwnProps) => {
+    const dataTable: TGridModel = getTGrid(state, id);
     const {
       columns,
-      excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,
       selectedEventIds,
       showCheckboxes,
       sort,
       isLoading,
-    } = timeline;
+    } = dataTable;
 
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
-      excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,
       isLoading,

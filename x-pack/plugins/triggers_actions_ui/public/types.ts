@@ -13,7 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType, EuiFlyoutSize } from '@elastic/eui';
+import type { IconType, EuiFlyoutSize, RecursivePartial } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
@@ -207,8 +207,8 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     ComponentType<ActionConnectorFieldsProps>
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
-  defaultActionParams?: Partial<ActionParams>;
-  defaultRecoveredActionParams?: Partial<ActionParams>;
+  defaultActionParams?: RecursivePartial<ActionParams>;
+  defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
 }

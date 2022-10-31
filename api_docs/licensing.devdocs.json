@@ -576,7 +576,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -585,6 +589,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -963,7 +975,13 @@
             "text": "RequestHandler"
           },
           "<P, Q, B, Context, any, ",
-          "KibanaResponseFactory",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
           ">) => ",
           {
             "pluginId": "core",
@@ -973,7 +991,13 @@
             "text": "RequestHandler"
           },
           "<P, Q, B, Context, any, ",
-          "KibanaResponseFactory",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
           ">"
         ],
         "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
@@ -1017,7 +1041,13 @@
                 "text": "RequestHandler"
               },
               "<P, Q, B, Context, any, ",
-              "KibanaResponseFactory",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
               ">"
             ],
             "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
@@ -1841,7 +1871,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1850,6 +1884,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -2304,7 +2346,13 @@
           ],
           "signature": [
             "(clusterClient: ",
-            "IClusterClient",
+            {
+              "pluginId": "@kbn/core-elasticsearch-server",
+              "scope": "server",
+              "docId": "kibKbnCoreElasticsearchServerPluginApi",
+              "section": "def-server.IClusterClient",
+              "text": "IClusterClient"
+            },
             ", pollingFrequency: number) => { license$: ",
             "Observable",
             "<",
@@ -2325,7 +2373,13 @@
               "label": "clusterClient",
               "description": [],
               "signature": [
-                "IClusterClient"
+                {
+                  "pluginId": "@kbn/core-elasticsearch-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                  "section": "def-server.IClusterClient",
+                  "text": "IClusterClient"
+                }
               ],
               "path": "x-pack/plugins/licensing/server/types.ts",
               "deprecated": false,

@@ -6,16 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiSuperSelect,
-  EuiSuperSelectOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-} from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiSuperSelect, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { Status } from '@kbn/cases-components';
 import { allCaseStatus, statuses } from '../status';
-import { CaseStatusWithAllStatus, StatusAll } from '../../../common/ui/types';
+import type { CaseStatusWithAllStatus } from '../../../common/ui/types';
+import { StatusAll } from '../../../common/ui/types';
 
 interface Props {
   stats: Record<CaseStatusWithAllStatus, number | null>;
