@@ -102,7 +102,6 @@ export interface LensUnwrapResult {
   metaInfo?: LensUnwrapMetaInfo;
 }
 
-type MetricAlignment = 'left' | 'center';
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
@@ -113,7 +112,6 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
-  metricAlignment?: MetricAlignment;
   noPadding?: boolean;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
