@@ -6,54 +6,68 @@
  * Side Public License, v 1.
  */
 
-import { resolve, relative } from 'path';
-
-import execa from 'execa';
+import Path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
-import { REPO_ROOT } from '@kbn/utils';
+import { asyncMapWithLimit } from '@kbn/std';
+import { getRepoFiles } from '@kbn/get-repo-files';
+import globby from 'globby';
 
 import { File } from '../file';
 import { PROJECTS } from './projects';
+import type { Project } from './project';
 
 export async function runCheckTsProjectsCli() {
   run(
     async ({ log }) => {
-      const { stdout: files } = await execa('git', ['ls-tree', '--name-only', '-r', 'HEAD'], {
-        cwd: REPO_ROOT,
+      const filesAndProjects = await asyncMapWithLimit(PROJECTS, 5, async (proj) => {
+        return {
+          proj,
+          files: (
+            await globby(proj.getIncludePatterns(), {
+              ignore: proj.getExcludePatterns(),
+              cwd: proj.directory,
+              onlyFiles: true,
+              absolute: true,
+            })
+          ).map((p) => new File(p)),
+        };
       });
 
-      const isNotInTsProject: File[] = [];
-      const isInMultipleTsProjects: string[] = [];
+      const isInMultipleTsProjects = new Map<string, Set<Project>>();
+      const pathsToProject = new Map<string, Project>();
+      for (const { proj, files } of filesAndProjects) {
+        for (const file of files) {
+          if (!pathsToProject.has(file.path)) {
+            pathsToProject.set(file.path, proj);
+            continue;
+          }
 
-      for (const lineRaw of files.split('\n')) {
-        const line = lineRaw.trim();
+          if (file.isTypescriptAmbient()) {
+            // allow ambient .d.ts files to be in multiple projects
+            continue;
+          }
 
-        if (!line) {
-          continue;
-        }
-
-        const file = new File(resolve(REPO_ROOT, line));
-        if (!file.isTypescript() || file.isFixture()) {
-          continue;
-        }
-
-        log.verbose('Checking %s', file.getAbsolutePath());
-
-        const projects = PROJECTS.filter((p) => p.isAbsolutePathSelected(file.getAbsolutePath()));
-        if (projects.length === 0) {
-          isNotInTsProject.push(file);
-        }
-        if (projects.length > 1 && !file.isTypescriptAmbient()) {
-          isInMultipleTsProjects.push(
-            ` - ${file.getRelativePath()}:\n${projects
-              .map((p) => `   - ${relative(process.cwd(), p.tsConfigPath)}`)
-              .join('\n')}`
+          isInMultipleTsProjects.set(
+            file.path,
+            new Set([...(isInMultipleTsProjects.get(file.path) ?? []), proj])
           );
         }
       }
 
-      if (!isNotInTsProject.length && !isInMultipleTsProjects.length) {
+      const isNotInTsProject: File[] = [];
+      for (const { abs } of await getRepoFiles()) {
+        const file = new File(abs);
+        if (!file.isTypescript() || file.isFixture()) {
+          continue;
+        }
+
+        if (!pathsToProject.has(file.getAbsolutePath())) {
+          isNotInTsProject.push(file);
+        }
+      }
+
+      if (!isNotInTsProject.length && !isInMultipleTsProjects.size) {
         log.success('All ts files belong to a single ts project');
         return;
       }
@@ -66,8 +80,16 @@ export async function runCheckTsProjectsCli() {
         );
       }
 
-      if (isInMultipleTsProjects.length) {
-        const details = isInMultipleTsProjects.join('\n');
+      if (isInMultipleTsProjects.size) {
+        const details = Array.from(isInMultipleTsProjects)
+          .map(
+            ([path, projects]) =>
+              ` - ${Path.relative(process.cwd(), path)}:\n${Array.from(projects)
+                .map((p) => `   - ${Path.relative(process.cwd(), p.tsConfigPath)}`)
+                .join('\n')}`
+          )
+          .join('\n');
+
         log.error(
           `The following files belong to multiple tsconfig.json files listed in src/dev/typescript/projects.ts\n${details}`
         );
