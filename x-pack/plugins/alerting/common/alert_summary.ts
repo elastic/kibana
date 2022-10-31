@@ -29,7 +29,6 @@ export interface AlertSummary {
   errorMessages: Array<{ date: string; message: string }>;
   alerts: Record<string, AlertStatus>;
   executionDuration: ExecutionDuration;
-  flapping: boolean;
 }
 
 export interface AlertStatus {
@@ -37,4 +36,5 @@ export interface AlertStatus {
   muted: boolean;
   actionGroupId?: string;
   activeStartDate?: string;
+  flapping: boolean;
 }

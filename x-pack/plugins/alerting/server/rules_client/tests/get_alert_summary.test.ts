@@ -128,7 +128,7 @@ describe('getAlertSummary()', () => {
       .advanceTime(10000)
       .addExecute()
       .addRecoveredAlert('alert-previously-active')
-      .addActiveAlert('alert-currently-active', 'action group A')
+      .addActiveAlert('alert-currently-active', 'action group A', true)
       .getEvents();
     const eventsResult = {
       ...AlertSummaryFindEventsResult,
@@ -157,18 +157,21 @@ describe('getAlertSummary()', () => {
           "alert-currently-active": Object {
             "actionGroupId": "action group A",
             "activeStartDate": "2019-02-12T21:01:22.479Z",
+            "flapping": true,
             "muted": false,
             "status": "Active",
           },
           "alert-muted-no-activity": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": true,
             "status": "OK",
           },
           "alert-previously-active": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "OK",
           },
@@ -176,7 +179,6 @@ describe('getAlertSummary()', () => {
         "consumer": "rule-consumer",
         "enabled": true,
         "errorMessages": Array [],
-        "flapping": false,
         "id": "1",
         "lastRun": "2019-02-12T21:01:32.479Z",
         "muteAll": false,

@@ -167,13 +167,13 @@ function mockRuleSummary(overloads: Partial<any> = {}): any {
       foo: {
         status: 'OK',
         muted: false,
+        flapping: false,
       },
     },
     executionDuration: {
       average: 0,
       valuesWithTimestamp: {},
     },
-    flapping: false,
   };
   return summary;
 }

@@ -40,7 +40,6 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       average: 0,
       valuesWithTimestamp: {},
     },
-    flapping: false,
   };
 
   const alerts = new Map<string, AlertStatus>();
@@ -52,8 +51,6 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
   for (const event of events.reverse()) {
     const timeStamp = event?.['@timestamp'];
     if (timeStamp === undefined) continue;
-
-    alertSummary.flapping = event?.kibana?.alert?.flapping || false;
 
     const provider = event?.event?.provider;
     if (provider !== EVENT_LOG_PROVIDER) continue;
@@ -83,6 +80,11 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     if (alertId === undefined) continue;
 
     const status = getAlertStatus(alerts, alertId);
+
+    if (event?.kibana?.alerting?.flapping) {
+      status.flapping = true;
+    }
+
     switch (action) {
       case EVENT_LOG_ACTIONS.newInstance:
         status.activeStartDate = timeStamp;
@@ -155,6 +157,7 @@ function getAlertStatus(alerts: Map<string, AlertStatus>, alertId: string): Aler
     muted: false,
     actionGroupId: undefined,
     activeStartDate: undefined,
+    flapping: false,
   };
   alerts.set(alertId, status);
   return status;

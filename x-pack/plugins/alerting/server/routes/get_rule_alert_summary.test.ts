@@ -46,7 +46,6 @@ describe('getRuleAlertSummaryRoute', () => {
         '19 Nov 2021 @ 19:19:17': 5,
       },
     },
-    flapping: false,
   };
 
   it('gets rule alert summary', async () => {

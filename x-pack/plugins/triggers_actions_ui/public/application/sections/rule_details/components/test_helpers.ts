@@ -101,13 +101,13 @@ export function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSumma
         status: 'OK',
         muted: false,
         actionGroupId: 'testActionGroup',
+        flapping: false,
       },
     },
     executionDuration: {
       average: 100,
       valuesWithTimestamp: {},
     },
-    flapping: false,
   };
   return { ...summary, ...overloads };
 }

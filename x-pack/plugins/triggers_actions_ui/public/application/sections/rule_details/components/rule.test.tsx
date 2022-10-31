@@ -72,11 +72,13 @@ describe('rules', () => {
           status: 'OK',
           muted: false,
           actionGroupId: 'default',
+          flapping: false,
         },
         second_rule: {
           status: 'Active',
           muted: false,
           actionGroupId: 'action group id unknown',
+          flapping: false,
         },
       },
     });
@@ -134,10 +136,12 @@ describe('rules', () => {
       ['us-central']: {
         status: 'OK',
         muted: false,
+        flapping: false,
       },
       ['us-east']: {
         status: 'OK',
         muted: false,
+        flapping: false,
       },
     };
 
@@ -169,8 +173,8 @@ describe('rules', () => {
       mutedInstanceIds: ['us-west', 'us-east'],
     });
     const ruleType = mockRuleType();
-    const ruleUsWest: AlertStatus = { status: 'OK', muted: false };
-    const ruleUsEast: AlertStatus = { status: 'OK', muted: false };
+    const ruleUsWest: AlertStatus = { status: 'OK', muted: false, flapping: false };
+    const ruleUsEast: AlertStatus = { status: 'OK', muted: false, flapping: false };
 
     const wrapper = mountWithIntl(
       <RuleComponent
@@ -183,10 +187,12 @@ describe('rules', () => {
             'us-west': {
               status: 'OK',
               muted: false,
+              flapping: false,
             },
             'us-east': {
               status: 'OK',
               muted: false,
+              flapping: false,
             },
           },
         })}
@@ -219,6 +225,7 @@ describe('alertToListItem', () => {
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'testing',
+      flapping: false,
     };
 
     expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
@@ -238,6 +245,7 @@ describe('alertToListItem', () => {
       status: 'Active',
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
+      flapping: false,
     };
 
     expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
@@ -258,6 +266,7 @@ describe('alertToListItem', () => {
       muted: true,
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'default',
+      flapping: false,
     };
 
     expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
@@ -276,6 +285,7 @@ describe('alertToListItem', () => {
       status: 'Active',
       muted: false,
       actionGroupId: 'default',
+      flapping: false,
     };
 
     expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
@@ -294,6 +304,7 @@ describe('alertToListItem', () => {
       status: 'OK',
       muted: true,
       actionGroupId: 'default',
+      flapping: false,
     };
     expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
       alert: 'id',
@@ -389,11 +400,13 @@ describe('tabbed content', () => {
           status: 'OK',
           muted: false,
           actionGroupId: 'default',
+          flapping: false,
         },
         second_rule: {
           status: 'Active',
           muted: false,
           actionGroupId: 'action group id unknown',
+          flapping: false,
         },
       },
     });
@@ -473,13 +486,13 @@ function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSummary {
         status: 'OK',
         muted: false,
         actionGroupId: 'testActionGroup',
+        flapping: false,
       },
     },
     executionDuration: {
       average: 0,
       valuesWithTimestamp: {},
     },
-    flapping: false,
   };
   return { ...summary, ...overloads };
 }

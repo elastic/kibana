@@ -38,7 +38,6 @@ describe('alertSummaryFromEventLog', () => {
           "average": 0,
           "valuesWithTimestamp": Object {},
         },
-        "flapping": false,
         "id": "rule-123",
         "lastRun": undefined,
         "muteAll": false,
@@ -85,7 +84,6 @@ describe('alertSummaryFromEventLog', () => {
           "average": 0,
           "valuesWithTimestamp": Object {},
         },
-        "flapping": false,
         "id": "rule-456",
         "lastRun": undefined,
         "muteAll": true,
@@ -124,12 +122,14 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": true,
             "status": "OK",
           },
           "alert-2": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": true,
             "status": "OK",
           },
@@ -234,6 +234,7 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "OK",
           },
@@ -274,6 +275,7 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "OK",
           },
@@ -313,6 +315,7 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "OK",
           },
@@ -353,6 +356,7 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": "action group A",
             "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "flapping": false,
             "muted": false,
             "status": "Active",
           },
@@ -393,6 +397,7 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "flapping": false,
             "muted": false,
             "status": "Active",
           },
@@ -433,6 +438,7 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": "action group B",
             "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "flapping": false,
             "muted": false,
             "status": "Active",
           },
@@ -471,6 +477,7 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": "action group A",
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "Active",
           },
@@ -513,12 +520,14 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": "action group A",
             "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "flapping": false,
             "muted": true,
             "status": "Active",
           },
           "alert-2": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": true,
             "status": "OK",
           },
@@ -568,17 +577,56 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": "action group B",
             "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "flapping": false,
             "muted": false,
             "status": "Active",
           },
           "alert-2": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "OK",
           },
         },
         "lastRun": "2020-06-18T00:00:30.000Z",
+        "status": "Active",
+      }
+    `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
+  });
+
+  test('rule with currently active alert, flapping', async () => {
+    const rule = createRule({});
+    const eventsFactory = new EventsFactory();
+    const events = eventsFactory
+      .addExecute()
+      .addActiveAlert('alert-1', 'action group A', true)
+      .getEvents();
+
+    const executionEvents = eventsFactory.getEvents();
+
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
+      events,
+      executionEvents,
+      dateStart,
+      dateEnd,
+    });
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
+      Object {
+        "alerts": Object {
+          "alert-1": Object {
+            "actionGroupId": "action group A",
+            "activeStartDate": undefined,
+            "flapping": true,
+            "muted": false,
+            "status": "Active",
+          },
+        },
+        "lastRun": "2020-06-18T00:00:00.000Z",
         "status": "Active",
       }
     `);
@@ -644,10 +692,14 @@ export class EventsFactory {
     return this;
   }
 
-  addActiveAlert(alertId: string, actionGroupId: string | undefined): EventsFactory {
+  addActiveAlert(
+    alertId: string,
+    actionGroupId: string | undefined,
+    flapping = false
+  ): EventsFactory {
     const kibanaAlerting = actionGroupId
-      ? { instance_id: alertId, action_group_id: actionGroupId }
-      : { instance_id: alertId };
+      ? { instance_id: alertId, action_group_id: actionGroupId, flapping }
+      : { instance_id: alertId, flapping };
     this.events.push({
       '@timestamp': this.date,
       event: {

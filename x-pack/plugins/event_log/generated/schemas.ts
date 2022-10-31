@@ -116,11 +116,11 @@ export const EventSchema = schema.maybe(
             action_subgroup: ecsString(),
             status: ecsString(),
             outcome: ecsString(),
+            flapping: ecsBoolean(),
           })
         ),
         alert: schema.maybe(
           schema.object({
-            flapping: ecsBoolean(),
             rule: schema.maybe(
               schema.object({
                 consumer: ecsString(),
