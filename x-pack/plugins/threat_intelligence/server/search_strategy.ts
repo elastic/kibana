@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ENHANCED_ES_SEARCH_STRATEGY, IEsSearchRequest } from '@kbn/data-plugin/common';
+import {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  IEsSearchRequest,
+  ISearchRequestParams,
+} from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
 import { map } from 'rxjs/operators';
 import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../common/constants';
@@ -84,7 +88,7 @@ export const threatIntelligenceSearchStrategyProvider = (data: PluginStart): ISe
         ...request.params,
         runtime_mappings: runtimeMappings,
         ...(isBarchartRequest(request) ? getAggregationsQuery(request) : {}),
-      };
+      } as unknown as ISearchRequestParams;
 
       return es.search({ ...request, params: dsl }, options, deps).pipe(
         map((response) => {

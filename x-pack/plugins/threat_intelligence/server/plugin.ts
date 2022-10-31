@@ -11,7 +11,7 @@ import {
   IThreatIntelligencePlugin,
   ThreatIntelligencePluginCoreSetupDependencies,
   ThreatIntelligencePluginSetupDependencies,
-} from './plugin_contract';
+} from './types';
 import { threatIntelligenceSearchStrategyProvider } from './search_strategy';
 
 export class ThreatIntelligencePlugin implements IThreatIntelligencePlugin {

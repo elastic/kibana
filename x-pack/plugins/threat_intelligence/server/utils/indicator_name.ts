@@ -6,7 +6,7 @@
  */
 
 import dedent from 'dedent';
-import { RawIndicatorFieldId } from '../../common/types';
+import { RawIndicatorFieldId } from '../../common/types/indicator';
 
 /**
  * Mapping connects one ore more types to field values that should be used to generate threat.indicator.name field.
