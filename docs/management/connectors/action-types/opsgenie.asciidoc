@@ -15,7 +15,7 @@ Opsgenie connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 URL::     The Opsgenie URL: https://api.opsgenie.com. For the EU instance of Opsgenie use: https://api.eu.opsgenie.com. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-API Key::   The Opsgenie API authentication key for HTTP Basic authentication. https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/[How to generate an Opsgenie API key].
+API Key::   The Opsgenie API authentication key for HTTP Basic authentication. Refer to https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/[How to generate an Opsgenie API key] for more information.
 
 [float]
 [[opgenie-connector-networking-configuration]]
