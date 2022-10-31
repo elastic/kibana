@@ -1057,7 +1057,13 @@
             "label": "continuity",
             "description": [],
             "signature": [
-              "PaletteContinuity",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteContinuity",
+                "text": "PaletteContinuity"
+              },
               " | undefined"
             ],
             "path": "src/plugins/charts/common/expressions/palette/types.ts",
@@ -1161,7 +1167,13 @@
             "label": "continuity",
             "description": [],
             "signature": [
-              "PaletteContinuity",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteContinuity",
+                "text": "PaletteContinuity"
+              },
               " | undefined"
             ],
             "path": "src/plugins/charts/common/expressions/palette/types.ts",
@@ -1478,10 +1490,13 @@
       {
         "parentPluginId": "charts",
         "id": "def-public.defaultCountLabel",
-        "type": "string",
+        "type": "Any",
         "tags": [],
         "label": "defaultCountLabel",
         "description": [],
+        "signature": [
+          "any"
+        ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1802,10 +1817,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Blues.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1861,10 +1879,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Greens.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1920,10 +1941,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Greys.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1979,10 +2003,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Reds.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2038,10 +2065,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.YellowToRed.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2097,10 +2127,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.GreenToRed.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2199,7 +2232,13 @@
           "description": [],
           "signature": [
             "{ getPalettes: () => Promise<",
-            "PaletteRegistry",
+            {
+              "pluginId": "@kbn/coloring",
+              "scope": "common",
+              "docId": "kibKbnColoringPluginApi",
+              "section": "def-common.PaletteRegistry",
+              "text": "PaletteRegistry"
+            },
             ">; }"
           ],
           "path": "src/plugins/charts/public/plugin.ts",
@@ -2354,7 +2393,13 @@
             "label": "continuity",
             "description": [],
             "signature": [
-              "PaletteContinuity",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteContinuity",
+                "text": "PaletteContinuity"
+              },
               " | undefined"
             ],
             "path": "src/plugins/charts/common/expressions/palette/types.ts",
@@ -2458,7 +2503,13 @@
             "label": "continuity",
             "description": [],
             "signature": [
-              "PaletteContinuity",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteContinuity",
+                "text": "PaletteContinuity"
+              },
               " | undefined"
             ],
             "path": "src/plugins/charts/common/expressions/palette/types.ts",
@@ -2626,7 +2677,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/charts/common/expressions/palette/system_palette.ts",
@@ -2877,7 +2934,13 @@
             "label": "continuity",
             "description": [],
             "signature": [
-              "PaletteContinuity",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteContinuity",
+                "text": "PaletteContinuity"
+              },
               " | undefined"
             ],
             "path": "src/plugins/charts/common/expressions/palette/types.ts",
@@ -2981,7 +3044,13 @@
             "label": "continuity",
             "description": [],
             "signature": [
-              "PaletteContinuity",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteContinuity",
+                "text": "PaletteContinuity"
+              },
               " | undefined"
             ],
             "path": "src/plugins/charts/common/expressions/palette/types.ts",
@@ -3313,10 +3382,13 @@
       {
         "parentPluginId": "charts",
         "id": "def-common.defaultCountLabel",
-        "type": "string",
+        "type": "Any",
         "tags": [],
         "label": "defaultCountLabel",
         "description": [],
+        "signature": [
+          "any"
+        ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3650,10 +3722,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.Blues.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3709,10 +3784,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.Greens.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3768,10 +3846,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.Greys.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3827,10 +3908,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.Reds.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3886,10 +3970,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.YellowToRed.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3945,10 +4032,13 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.GreenToRed.label",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "label",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
