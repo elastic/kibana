@@ -15,7 +15,7 @@ Opsgenie connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 URL::     The Opsgenie URL: https://api.opsgenie.com. For the EU instance of Opsgenie use: https://api.eu.opsgenie.com. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-API Key::   The Opsgenie API authentication key for HTTP Basic authentication. https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/[How to generate an Opsgenie API key].
+API Key::   The Opsgenie API authentication key for HTTP Basic authentication. Refer to https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/[How to generate an Opsgenie API key] for more information.
 
 [float]
 [[opgenie-connector-networking-configuration]]
@@ -40,7 +40,7 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 
 Config defines information for the connector type.
 
-`apiUrl`:: A string that corresponds to *URL*
+`apiUrl`:: A string that corresponds to *URL*.
 
 Secrets defines sensitive information for the connector type.
 
@@ -64,17 +64,17 @@ image::management/connectors/images/opsgenie-params-test.png[Opsgenie params tes
 [[opsgenie-action-configuration]]
 ==== Action configuration
 
-The Opsgenie connector supports two types of actions: Creating and Closing alerts. The properties supported for each action are different because Opsgenie defines different properties for each operation.
+The Opsgenie connector supports two types of actions: Create Alert and Close Alert. The properties supported for each action are different because Opsgenie defines different properties for each operation.
 
-When testing the Opsgenie connector, choose the appropriate action from the selector. Switching the action will show a different form allowing the specific properties for that type of action to be configured.
+When testing the Opsgenie connector, choose the appropriate action from the selector. Each action has different properties that can be configured.
 
 Action::    Whether to create or close an alert within Opsgenie. When using the Opsgenie connector for a rule action, the Action selector is hidden and automatically set to the appropriate value. If the action is run when a rule fires, it will create an alert within Opsgenie. If the action is run when a rule recovers, it will close an alert within Opsgenie.
 
 [float]
 [[opsgenie-action-create-alert-configuration]]
-===== Create alert configuration
+===== Configure the create alert action
 
-The create alert action can be configured using the form or a JSON editor.
+You can configure the create alert action through the form view or using a JSON editor.
 
 [float]
 [[opsgenie-action-create-alert-form-configuration]]
