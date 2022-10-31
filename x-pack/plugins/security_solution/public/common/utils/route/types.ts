@@ -13,6 +13,7 @@ import type { TimelineType } from '../../../../common/types/timeline';
 
 import type { HostsTableType } from '../../../hosts/store/model';
 import type { NetworkRouteType } from '../../../network/pages/navigation/types';
+import type { AlertDetailRouteType } from '../../../detections/pages/alert_details/types';
 import type { AdministrationSubTab as AdministrationType } from '../../../management/types';
 import type { FlowTarget } from '../../../../common/search_strategy';
 import type { UsersTableType } from '../../../users/store/model';
@@ -21,6 +22,7 @@ import type { SecurityPageName } from '../../../app/types';
 export type SiemRouteType =
   | HostsTableType
   | NetworkRouteType
+  | AlertDetailRouteType
   | TimelineType
   | AdministrationType
   | UsersTableType;
@@ -45,6 +47,10 @@ export interface UsersRouteSpyState extends RouteSpyState {
 
 export interface NetworkRouteSpyState extends RouteSpyState {
   tabName: NetworkRouteType | undefined;
+}
+
+export interface AlertDetailRouteSpyState extends RouteSpyState {
+  tabName: AlertDetailRouteType | undefined;
 }
 
 export interface AdministrationRouteSpyState extends RouteSpyState {

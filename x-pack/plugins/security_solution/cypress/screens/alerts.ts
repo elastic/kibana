@@ -71,6 +71,9 @@ export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
 export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
 
+export const OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN =
+  '[data-test-subj="open-alert-details-page-menu-item"]';
+
 export const PROCESS_NAME_COLUMN = '[data-test-subj="dataGridHeaderCell-process.name"]';
 export const PROCESS_NAME = '[data-test-subj="formatted-field-process.name"]';
 
@@ -102,6 +105,8 @@ export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu
 export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user\\.name]';
 
 export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-case-action"]';
+
+export const ATTACH_TO_NEW_CASE_BUTTON = '[data-test-subj="add-to-new-case-action"]';
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
 
