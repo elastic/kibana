@@ -19,8 +19,6 @@ export interface BaseProps {
    */
   agentPolicy?: AgentPolicy;
 
-  fleetServerHosts: string[];
-
   isFleetServerPolicySelected?: boolean;
 
   isK8s?: K8sMode;
@@ -51,4 +49,5 @@ export interface InstructionProps extends BaseProps {
   setSelectionType: (type: SelectionType) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId: (key?: string) => void;
+  fleetServerHosts: string[];
 }
