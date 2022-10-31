@@ -9,22 +9,28 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiRadio,
   EuiText,
   EuiTitle,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { ValuesType } from 'utility-types';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { asMillisecondDuration } from '../../../../common/utils/formatters';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { FetcherResult, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { ITableColumn, ManagedTable } from '../../shared/managed_table';
+import { push } from '../../shared/links/url_helpers';
+import {
+  ITableColumn,
+  ManagedTable,
+  SortFunction,
+} from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/service_link';
 import { TimestampTooltip } from '../../shared/timestamp_tooltip';
 
@@ -32,15 +38,23 @@ type DependencySpan = ValuesType<
   APIReturnType<'GET /internal/apm/dependencies/operations/spans'>['spans']
 >;
 
-export function DependencyOperationDetailTraceList() {
+export function DependencyOperationDetailTraceList({
+  spanFetch,
+  sortFn,
+}: {
+  spanFetch: FetcherResult<
+    APIReturnType<'GET /internal/apm/dependencies/operations/spans'>
+  >;
+  sortFn: SortFunction<DependencySpan>;
+}) {
   const router = useApmRouter();
+
+  const history = useHistory();
 
   const theme = useTheme();
 
   const {
     query: {
-      dependencyName,
-      spanName,
       comparisonEnabled,
       environment,
       offset,
@@ -49,8 +63,11 @@ export function DependencyOperationDetailTraceList() {
       refreshInterval,
       refreshPaused,
       kuery,
-      sampleRangeFrom,
-      sampleRangeTo,
+      sortField = '@timestamp',
+      sortDirection = 'desc',
+      pageSize = 10,
+      page = 1,
+      spanId,
     },
   } = useApmParams('/dependencies/operation');
 
@@ -84,6 +101,7 @@ export function DependencyOperationDetailTraceList() {
             traceId,
             transactionId,
             transactionType,
+            showCriticalPath: false,
           },
         })
       : router.link('/link-to/trace/{traceId}', {
@@ -99,9 +117,24 @@ export function DependencyOperationDetailTraceList() {
     return href;
   }
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
   const columns: Array<ITableColumn<DependencySpan>> = [
+    {
+      name: '',
+      field: 'spanId',
+      render: (_, { spanId: itemSpanId }) => {
+        return (
+          <EuiRadio
+            id={itemSpanId}
+            onChange={(value) => {
+              push(history, {
+                query: { spanId: value ? itemSpanId : '' },
+              });
+            }}
+            checked={itemSpanId === spanId}
+          />
+        );
+      },
+    },
     {
       name: i18n.translate(
         'xpack.apm.dependencyOperationDetailTraceListOutcomeColumn',
@@ -119,38 +152,6 @@ export function DependencyOperationDetailTraceList() {
         }
 
         return <EuiBadge color={color}>{outcome}</EuiBadge>;
-      },
-    },
-    {
-      name: i18n.translate(
-        'xpack.apm.dependencyOperationDetailTraceListTraceIdColumn',
-        { defaultMessage: 'Trace' }
-      ),
-      field: 'traceId',
-      truncateText: true,
-      render: (
-        _,
-        {
-          serviceName,
-          traceId,
-          transactionId,
-          transactionName,
-          transactionType,
-        }
-      ) => {
-        const href = getTraceLink({
-          serviceName,
-          traceId,
-          transactionId,
-          transactionType,
-          transactionName,
-        });
-
-        return (
-          <EuiLink href={href} style={{ whiteSpace: 'nowrap' }}>
-            {traceId.substr(0, 6)}
-          </EuiLink>
-        );
       },
     },
     {
@@ -190,6 +191,7 @@ export function DependencyOperationDetailTraceList() {
       ),
       field: 'transactionName',
       truncateText: true,
+      width: '60%',
       render: (
         _,
         {
@@ -239,35 +241,6 @@ export function DependencyOperationDetailTraceList() {
     },
   ];
 
-  const { data = { spans: [] }, status } = useFetcher(
-    (callApmApi) => {
-      return callApmApi('GET /internal/apm/dependencies/operations/spans', {
-        params: {
-          query: {
-            dependencyName,
-            spanName,
-            start,
-            end,
-            environment,
-            kuery,
-            sampleRangeFrom,
-            sampleRangeTo,
-          },
-        },
-      });
-    },
-    [
-      dependencyName,
-      spanName,
-      start,
-      end,
-      environment,
-      kuery,
-      sampleRangeFrom,
-      sampleRangeTo,
-    ]
-  );
-
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -281,15 +254,18 @@ export function DependencyOperationDetailTraceList() {
       </EuiFlexItem>
       <EuiFlexItem>
         <ManagedTable
+          tableLayout="auto"
           columns={columns}
-          items={data?.spans}
-          initialSortField="@timestamp"
-          initialSortDirection="desc"
-          initialPageSize={10}
+          items={spanFetch.data?.spans || []}
+          initialSortField={sortField}
+          initialSortDirection={sortDirection}
+          initialPageSize={pageSize}
+          initialPageIndex={page}
           isLoading={
-            status === FETCH_STATUS.LOADING ||
-            status === FETCH_STATUS.NOT_INITIATED
+            spanFetch.status === FETCH_STATUS.LOADING ||
+            spanFetch.status === FETCH_STATUS.NOT_INITIATED
           }
+          sortFn={sortFn}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

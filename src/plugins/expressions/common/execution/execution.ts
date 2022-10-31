@@ -352,20 +352,30 @@ export class Execution<
         // actually have `then` or `subscribe` methods which would be treated as a `Promise`
         // or an `Observable` accordingly.
         return this.resolveArgs(fn, currentInput, fnArgs).pipe(
-          tap((args) => this.execution.params.debug && Object.assign(head.debug, { args })),
-          switchMap((args) => this.invokeFunction(fn, currentInput, args)),
-          switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
-          tap((output) => this.execution.params.debug && Object.assign(head.debug, { output })),
-          switchMap((output) => this.invokeChain<ChainOutput>(tail, output)),
-          catchError((rawError) => {
-            const error = createError(rawError);
-            error.error.message = `[${fnName}] > ${error.error.message}`;
+          switchMap((resolvedArgs) => {
+            const args$ = isExpressionValueError(resolvedArgs)
+              ? throwError(resolvedArgs.error)
+              : of(resolvedArgs);
 
-            if (this.execution.params.debug) {
-              Object.assign(head.debug, { error, rawError, success: false });
-            }
+            return args$.pipe(
+              tap((args) => this.execution.params.debug && Object.assign(head.debug, { args })),
+              switchMap((args) => this.invokeFunction(fn, currentInput, args)),
+              switchMap((output) =>
+                getType(output) === 'error' ? throwError(output) : of(output)
+              ),
+              tap((output) => this.execution.params.debug && Object.assign(head.debug, { output })),
+              switchMap((output) => this.invokeChain<ChainOutput>(tail, output)),
+              catchError((rawError) => {
+                const error = createError(rawError);
+                error.error.message = `[${fnName}] > ${error.error.message}`;
 
-            return of(error);
+                if (this.execution.params.debug) {
+                  Object.assign(head.debug, { error, rawError, success: false });
+                }
+
+                return of(error);
+              })
+            );
           }),
           finalize(() => {
             if (this.execution.params.debug) {
@@ -449,7 +459,10 @@ export class Execution<
       }
     }
 
-    throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
+    throw createError({
+      name: 'invalid value',
+      message: `Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`,
+    });
   }
 
   validate<Type = unknown>(value: Type, argDef: ExpressionFunctionParameter<Type>): void {
@@ -459,7 +472,10 @@ export class Execution<
       }': '${argDef.options.join("', '")}'`;
 
       if (argDef.strict) {
-        throw new Error(message);
+        throw createError({
+          message,
+          name: 'invalid argument',
+        });
       }
 
       this.logger?.warn(message);
@@ -471,7 +487,7 @@ export class Execution<
     fnDef: Fn,
     input: unknown,
     argAsts: Record<string, ExpressionAstArgument[]>
-  ): Observable<Record<string, unknown>> {
+  ): Observable<Record<string, unknown> | ExpressionValueError> {
     return defer(() => {
       const { args: argDefs } = fnDef;
 
@@ -481,7 +497,10 @@ export class Execution<
         (acc, argAst, argName) => {
           const argDef = getByAlias(argDefs, argName);
           if (!argDef) {
-            throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
+            throw createError({
+              name: 'unknown argument',
+              message: `Unknown argument '${argName}' passed to function '${fnDef.name}'`,
+            });
           }
           if (argDef.deprecated && !acc[argDef.name]) {
             this.logger?.warn(`Argument '${argName}' is deprecated in function '${fnDef.name}'`);
@@ -502,7 +521,10 @@ export class Execution<
           continue;
         }
 
-        throw new Error(`${fnDef.name} requires the "${name}" argument`);
+        throw createError({
+          name: 'missing argument',
+          message: `${fnDef.name} requires the "${name}" argument`,
+        });
       }
 
       // Create the functions to resolve the argument ASTs into values
@@ -513,14 +535,17 @@ export class Execution<
             (subInput = input) =>
               this.interpret(item, subInput).pipe(
                 pluck('result'),
-                map((output) => {
+                switchMap((output) => {
                   if (isExpressionValueError(output)) {
-                    throw output.error;
+                    return of(output);
                   }
 
-                  return this.cast(output, argDefs[argName].types);
-                }),
-                tap((value) => this.validate(value, argDefs[argName]))
+                  return of(output).pipe(
+                    map((value) => this.cast(value, argDefs[argName].types)),
+                    tap((value) => this.validate(value, argDefs[argName])),
+                    catchError((error) => of(error))
+                  );
+                })
               )
         )
       );
@@ -531,7 +556,7 @@ export class Execution<
         return from([{}]);
       }
 
-      const resolvedArgValuesObservable = combineLatest(
+      return combineLatest(
         argNames.map((argName) => {
           const interpretFns = resolveArgFns[argName];
 
@@ -542,23 +567,25 @@ export class Execution<
           }
 
           return argDefs[argName].resolve
-            ? combineLatest(interpretFns.map((fn) => fn()))
+            ? combineLatest(interpretFns.map((fn) => fn())).pipe(
+                map((values) => values.find(isExpressionValueError) ?? values)
+              )
             : of(interpretFns);
         })
-      );
-
-      return resolvedArgValuesObservable.pipe(
-        map((resolvedArgValues) =>
-          mapValues(
-            // Return an object here because the arguments themselves might actually have a 'then'
-            // function which would be treated as a promise
-            zipObject(argNames, resolvedArgValues),
-            // Just return the last unless the argument definition allows multiple
-            (argValues, argName) => (argDefs[argName].multi ? argValues : last(argValues))
-          )
+      ).pipe(
+        map(
+          (values) =>
+            values.find(isExpressionValueError) ??
+            mapValues(
+              // Return an object here because the arguments themselves might actually have a 'then'
+              // function which would be treated as a promise
+              zipObject(argNames, values as unknown[][]),
+              // Just return the last unless the argument definition allows multiple
+              (argValues, argName) => (argDefs[argName].multi ? argValues : last(argValues))
+            )
         )
       );
-    });
+    }).pipe(catchError((error) => of(error)));
   }
 
   interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>> {

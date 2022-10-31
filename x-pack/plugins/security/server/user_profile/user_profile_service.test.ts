@@ -25,7 +25,7 @@ import { userProfileMock } from '../../common/model/user_profile.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { securityMock } from '../mocks';
 import { sessionMock } from '../session_management/session.mock';
-import { UserProfileService } from './user_profile_service';
+import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';
 
 const logger = loggingSystemMock.createLogger();
 describe('UserProfileService', () => {
@@ -245,7 +245,7 @@ describe('UserProfileService', () => {
       } as unknown as SecurityGetUserProfileResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.getCurrent({ request: mockRequest, dataPath: '*' })).resolves
+      await expect(startContract.getCurrent({ request: mockRequest, dataPath: 'one,two' })).resolves
         .toMatchInlineSnapshot(`
               Object {
                 "data": Object {
@@ -277,7 +277,7 @@ describe('UserProfileService', () => {
         mockStartParams.clusterClient.asInternalUser.security.getUserProfile
       ).toHaveBeenCalledWith({
         uid: 'UID',
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
       });
     });
   });
@@ -405,7 +405,7 @@ describe('UserProfileService', () => {
     });
 
     it('retries activation if initially fails with 409 error', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
 
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 409, body: 'some message' })
@@ -449,7 +449,7 @@ describe('UserProfileService', () => {
     });
 
     it('fails if activation max retries exceeded', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
 
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 409, body: 'some message' })
@@ -556,8 +556,8 @@ describe('UserProfileService', () => {
       } as unknown as SecurityGetUserProfileResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.bulkGet({ uids: new Set(['UID-1']), dataPath: '*' })).resolves
-        .toMatchInlineSnapshot(`
+      await expect(startContract.bulkGet({ uids: new Set(['UID-1']), dataPath: 'one,two' }))
+        .resolves.toMatchInlineSnapshot(`
               Array [
                 Object {
                   "data": Object {
@@ -580,7 +580,7 @@ describe('UserProfileService', () => {
         mockStartParams.clusterClient.asInternalUser.security.getUserProfile
       ).toHaveBeenCalledWith({
         uid: 'UID-1',
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
       });
     });
 
@@ -683,7 +683,7 @@ describe('UserProfileService', () => {
       } as unknown as SecuritySuggestUserProfilesResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.suggest({ name: 'some', dataPath: '*' })).resolves
+      await expect(startContract.suggest({ name: 'some', dataPath: 'one,two' })).resolves
         .toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -708,7 +708,44 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({
         name: 'some',
         size: 10,
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
+      });
+      expect(mockAuthz.checkUserProfilesPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('should request data if uid hints are specified', async () => {
+      mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles.mockResolvedValue({
+        profiles: [
+          userProfileMock.createWithSecurity({
+            uid: 'UID-1',
+          }),
+        ],
+      } as unknown as SecuritySuggestUserProfilesResponse);
+
+      const startContract = userProfileService.start(mockStartParams);
+      await expect(startContract.suggest({ hint: { uids: ['UID-1'] } })).resolves
+        .toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "data": Object {},
+                  "enabled": true,
+                  "uid": "UID-1",
+                  "user": Object {
+                    "email": "some@email",
+                    "full_name": undefined,
+                    "username": "some-username",
+                  },
+                },
+              ]
+            `);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
+      ).toHaveBeenCalledWith({
+        size: 10,
+        hint: { uids: ['UID-1'] },
       });
       expect(mockAuthz.checkUserProfilesPrivileges).not.toHaveBeenCalled();
     });
@@ -779,7 +816,6 @@ describe('UserProfileService', () => {
       const mockAtSpacePrivilegeCheck = { atSpace: jest.fn() };
       mockAtSpacePrivilegeCheck.atSpace.mockResolvedValue({
         hasPrivilegeUids: ['UID-0', 'UID-1', 'UID-8'],
-        errorUids: [],
       });
       mockAuthz.checkUserProfilesPrivileges.mockReturnValue(mockAtSpacePrivilegeCheck);
 
@@ -788,7 +824,7 @@ describe('UserProfileService', () => {
         startContract.suggest({
           name: 'some',
           size: 3,
-          dataPath: '*',
+          dataPath: 'one,two',
           requiredPrivileges: {
             spaceId: 'some-space',
             privileges: { kibana: ['privilege-1', 'privilege-2'] },
@@ -842,7 +878,7 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({
         name: 'some',
         size: 10,
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
       });
 
       expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledTimes(1);
@@ -874,15 +910,12 @@ describe('UserProfileService', () => {
       mockAtSpacePrivilegeCheck.atSpace
         .mockResolvedValueOnce({
           hasPrivilegeUids: ['UID-0'],
-          errorUids: [],
         })
         .mockResolvedValueOnce({
           hasPrivilegeUids: ['UID-20'],
-          errorUids: [],
         })
         .mockResolvedValueOnce({
           hasPrivilegeUids: [],
-          errorUids: [],
         });
       mockAuthz.checkUserProfilesPrivileges.mockReturnValue(mockAtSpacePrivilegeCheck);
 
@@ -891,7 +924,7 @@ describe('UserProfileService', () => {
         startContract.suggest({
           name: 'some',
           size: 11,
-          dataPath: '*',
+          dataPath: 'one,two',
           requiredPrivileges: {
             spaceId: 'some-space',
             privileges: { kibana: ['privilege-1', 'privilege-2'] },
@@ -933,7 +966,7 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({
         name: 'some',
         size: 22,
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
       });
 
       expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledTimes(3);
@@ -983,7 +1016,6 @@ describe('UserProfileService', () => {
       const mockAtSpacePrivilegeCheck = { atSpace: jest.fn() };
       mockAtSpacePrivilegeCheck.atSpace.mockResolvedValue({
         hasPrivilegeUids: ['UID-0', 'UID-1', 'UID-8'],
-        errorUids: [],
       });
       mockAuthz.checkUserProfilesPrivileges.mockReturnValue(mockAtSpacePrivilegeCheck);
 
@@ -992,7 +1024,7 @@ describe('UserProfileService', () => {
         startContract.suggest({
           name: 'some',
           size: 2,
-          dataPath: '*',
+          dataPath: 'one,two',
           requiredPrivileges: {
             spaceId: 'some-space',
             privileges: { kibana: ['privilege-1', 'privilege-2'] },
@@ -1034,7 +1066,7 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({
         name: 'some',
         size: 10,
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
       });
 
       expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledTimes(1);
@@ -1047,5 +1079,124 @@ describe('UserProfileService', () => {
         kibana: ['privilege-1', 'privilege-2'],
       });
     });
+
+    it('properly handles privileges checks and logs errors when errors with reasons are returned from the privilege check', async () => {
+      // In this test we'd like to simulate the following case:
+      // 1. User requests 2 results with privileges check
+      // 2. Kibana will fetch 10 (min batch) results
+      // 3. Only UID-0, UID-1 and UID-8 profiles will have necessary privileges
+      mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles.mockResolvedValue({
+        profiles: Array.from({ length: 10 }).map((_, index) =>
+          userProfileMock.createWithSecurity({
+            uid: `UID-${index}`,
+            data: { some: 'data', kibana: { some: `kibana-data-${index}` } },
+          })
+        ),
+      } as unknown as SecuritySuggestUserProfilesResponse);
+
+      const mockAtSpacePrivilegeCheck = { atSpace: jest.fn() };
+
+      mockAtSpacePrivilegeCheck.atSpace.mockResolvedValue({
+        hasPrivilegeUids: ['UID-0', 'UID-1', 'UID-8'],
+        errors: {
+          count: 2,
+          details: {
+            'UID-3': { type: 'some type 3', reason: 'some reason 3' },
+            'UID-4': { type: 'some type 4', reason: 'some reason 4' },
+          },
+        },
+      });
+
+      mockAuthz.checkUserProfilesPrivileges.mockReturnValue(mockAtSpacePrivilegeCheck);
+
+      const startContract = userProfileService.start(mockStartParams);
+
+      await expect(
+        startContract.suggest({
+          name: 'some',
+          size: 2,
+          dataPath: 'one,two',
+          requiredPrivileges: {
+            spaceId: 'some-space',
+            privileges: { kibana: ['privilege-1', 'privilege-2'] },
+          },
+        })
+      ).resolves.toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "data": Object {
+                    "some": "kibana-data-0",
+                  },
+                  "enabled": true,
+                  "uid": "UID-0",
+                  "user": Object {
+                    "email": "some@email",
+                    "full_name": undefined,
+                    "username": "some-username",
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "some": "kibana-data-1",
+                  },
+                  "enabled": true,
+                  "uid": "UID-1",
+                  "user": Object {
+                    "email": "some@email",
+                    "full_name": undefined,
+                    "username": "some-username",
+                  },
+                },
+              ]
+            `);
+
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
+      ).toHaveBeenCalledTimes(1);
+
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
+      ).toHaveBeenCalledWith({
+        name: 'some',
+        size: 10,
+        data: 'kibana.one,kibana.two',
+      });
+
+      expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledTimes(1);
+
+      expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledWith(
+        new Set(Array.from({ length: 10 }).map((_, index) => `UID-${index}`))
+      );
+
+      expect(mockAtSpacePrivilegeCheck.atSpace).toHaveBeenCalledTimes(1);
+
+      expect(mockAtSpacePrivilegeCheck.atSpace).toHaveBeenCalledWith('some-space', {
+        kibana: ['privilege-1', 'privilege-2'],
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Privileges check API failed for UID UID-3 because some reason 3.'
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Privileges check API failed for UID UID-4 because some reason 4.'
+      );
+    });
+  });
+});
+
+describe('prefixCommaSeparatedValues', () => {
+  it('should prefix each value', () => {
+    expect(prefixCommaSeparatedValues('one,two,three', '_')).toBe('_.one,_.two,_.three');
+  });
+
+  it('should trim whitespace', () => {
+    expect(prefixCommaSeparatedValues('one , two,  three   ', '_')).toBe('_.one,_.two,_.three');
+  });
+
+  it('should ignore empty values', () => {
+    expect(prefixCommaSeparatedValues('', '_')).toBe('');
+    expect(prefixCommaSeparatedValues(' ', '_')).toBe('');
+    expect(prefixCommaSeparatedValues(' ,, ', '_')).toBe('');
   });
 });

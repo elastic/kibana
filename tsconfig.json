@@ -1,23 +1,27 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "allowJs": true,
     "outDir": "target/root_types"
   },
   "include": [
     "kibana.d.ts",
     "typings/**/*",
 
+    "package.json",
     "src/cli/**/*",
     "src/cli_health_gateway/**/*",
     "src/cli_setup/**/*",
     "src/cli_plugin/**/*",
+    "src/cli_keystore/**/*",
+    "src/setup_node_env/**/*",
     "src/dev/**/*",
     "src/fixtures/**/*",
 
     "x-pack/tasks/**/*",
   ],
   "exclude": [],
-  "references": [
+  "kbn_references": [
     { "path": "./src/core/tsconfig.json" },
     { "path": "./src/plugins/usage_collection/tsconfig.json" },
     { "path": "./src/plugins/interactive_setup/tsconfig.json" },

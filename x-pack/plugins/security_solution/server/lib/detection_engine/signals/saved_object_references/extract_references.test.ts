@@ -6,12 +6,13 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { extractReferences } from './extract_references';
-import type { RuleParams } from '../../schemas/rule_schemas';
 import {
   EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
+
+import type { RuleParams } from '../../rule_schema';
+import { extractReferences } from './extract_references';
 import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils/constants';
 
 describe('extract_references', () => {
