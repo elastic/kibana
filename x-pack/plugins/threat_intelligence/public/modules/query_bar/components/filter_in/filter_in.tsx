@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { useFilterInOut } from '../../hooks';
 import { FilterIn } from '../../utils';
-import { Indicator } from '../../../indicators';
+import { Indicator } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
 
 const ICON_TYPE = 'plusInCircle';

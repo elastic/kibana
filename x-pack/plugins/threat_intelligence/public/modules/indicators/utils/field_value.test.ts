@@ -6,7 +6,10 @@
  */
 
 import { fieldAndValueValid, getIndicatorFieldAndValue } from './field_value';
-import { generateMockFileIndicator, generateMockUrlIndicator } from '../types';
+import {
+  generateMockFileIndicator,
+  generateMockUrlIndicator,
+} from '../../../../common/types/indicator';
 import { EMPTY_VALUE } from '../../../common/constants';
 
 describe('field_value', () => {

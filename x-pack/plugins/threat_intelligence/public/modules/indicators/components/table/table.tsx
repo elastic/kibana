@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { CellActions, cellPopoverRendererFactory, cellRendererFactory } from './components';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
-import { Indicator, RawIndicatorFieldId } from '../../types';
+import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { EmptyState } from '../../../../components/empty_state';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from './contexts';
 import { IndicatorsFlyout } from '../flyout';

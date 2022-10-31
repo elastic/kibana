@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from './display_name';
+import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from './indicator_name';
 
 export const getRuntimeMappings = () =>
   ({

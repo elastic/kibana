@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './indicator';
+import { PluginInitializerContext } from '@kbn/core/server';
+import { ThreatIntelligencePlugin } from './plugin';
+
+export const plugin = (context: PluginInitializerContext) => {
+  return new ThreatIntelligencePlugin(context);
+};

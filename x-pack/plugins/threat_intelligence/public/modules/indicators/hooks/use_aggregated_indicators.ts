@@ -10,7 +10,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useState } from 'react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { useInspector, useKibana } from '../../../hooks';
-import { RawIndicatorFieldId } from '../types';
+import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { useSourcererDataView } from '.';
 import {
   ChartSeries,

@@ -7,7 +7,11 @@
 
 import { EMPTY_VALUE } from '../../../common/constants';
 import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import { generateMockIndicator, generateMockUrlIndicator, Indicator } from '../../indicators';
+import {
+  generateMockIndicator,
+  generateMockUrlIndicator,
+  Indicator,
+} from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../common/mocks/test_providers';
 import { useAddToTimeline, UseAddToTimelineValue } from '.';
 

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export * from './display_name';
 export * from './field_value';
 export * from './get_field_schema';
 export * from './get_indicator_query_params';
-export * from './get_runtime_mappings';
 export * from './search';
 export * from './unwrap_value';

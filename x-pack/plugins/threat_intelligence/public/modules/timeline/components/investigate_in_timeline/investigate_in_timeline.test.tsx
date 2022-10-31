@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { generateMockIndicator, generateMockUrlIndicator, Indicator } from '../../../indicators';
+import {
+  generateMockIndicator,
+  generateMockUrlIndicator,
+  Indicator,
+} from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { InvestigateInTimelineButton, InvestigateInTimelineButtonIcon } from '.';
 import { EMPTY_VALUE } from '../../../../common/constants';
