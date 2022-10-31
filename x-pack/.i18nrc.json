@@ -20,7 +20,6 @@
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "plugins/enterprise_search",
     "xpack.features": "plugins/features",
-    "xpack.files": "plugins/files",
     "xpack.dataVisualizer": "plugins/data_visualizer",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.globalSearch": ["plugins/global_search"],
