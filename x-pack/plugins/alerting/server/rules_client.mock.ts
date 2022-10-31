@@ -37,6 +37,7 @@ const createRulesClientMock = () => {
     getSpaceId: jest.fn(),
     bulkEdit: jest.fn(),
     bulkDeleteRules: jest.fn(),
+    bulkEnableRules: jest.fn(),
     snooze: jest.fn(),
     unsnooze: jest.fn(),
     calculateIsSnoozedUntil: jest.fn(),
