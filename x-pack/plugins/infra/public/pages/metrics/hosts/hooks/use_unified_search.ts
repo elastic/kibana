@@ -6,7 +6,7 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import { useCallback, useReducer } from 'react';
+import { useCallback } from 'react';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import DateMath from '@kbn/datemath';
 import type { SavedQuery } from '@kbn/data-plugin/public';
@@ -20,8 +20,6 @@ import { useHostFiltersContext } from './use_host_filters';
 const DEFAULT_FROM_MINUTES_VALUE = 15;
 
 export const useUnifiedSearch = () => {
-  const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
-
   const { metricsDataView } = useMetricsDataViewContext();
   const { services } = useKibana<InfraClientStartDeps>();
   const {
@@ -83,14 +81,11 @@ export const useUnifiedSearch = () => {
 
       if (query) {
         const queryAsString =
-          typeof query.query !== 'string' ? JSON.stringify(query.query) : query.query; // TODO Check the query object
+          typeof query.query !== 'string' ? JSON.stringify(query.query) : query.query;
         applyFilterQuery({ language: query.language, expression: queryAsString });
       }
 
       queryString.setQuery({ ...queryString.getQuery(), ...query });
-      // Unified search holds the all state, we need to force the hook to rerender so that it can return the most recent values
-      // This can be removed once we get the state from the URL
-      forceUpdate();
     },
     [
       setTime,
