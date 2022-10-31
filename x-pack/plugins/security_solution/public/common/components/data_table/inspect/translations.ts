@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INSPECT = i18n.translate('xpack.timelines.inspectDescription', {
+export const INSPECT = i18n.translate('xpack.securitySolution.inspectDescription', {
   defaultMessage: 'Inspect',
 });
 
-export const CLOSE = i18n.translate('xpack.timelines.inspect.modal.closeTitle', {
+export const CLOSE = i18n.translate('xpack.securitySolution.inspect.modal.closeTitle', {
   defaultMessage: 'Close',
 });
 
@@ -21,12 +21,15 @@ export const SOMETHING_WENT_WRONG = i18n.translate(
     defaultMessage: 'Sorry about that, something went wrong.',
   }
 );
-export const INDEX_PATTERN = i18n.translate('xpack.timelines.inspect.modal.indexPatternLabel', {
-  defaultMessage: 'Index pattern',
-});
+export const INDEX_PATTERN = i18n.translate(
+  'xpack.securitySolution.inspect.modal.indexPatternLabel',
+  {
+    defaultMessage: 'Index pattern',
+  }
+);
 
 export const INDEX_PATTERN_DESC = i18n.translate(
-  'xpack.timelines.inspect.modal.indexPatternDescription',
+  'xpack.securitySolution.inspect.modal.indexPatternDescription',
   {
     defaultMessage:
       'The index pattern that connected to the Elasticsearch indices. These indices can be configured in Kibana > Advanced Settings.',

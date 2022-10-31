@@ -24,6 +24,7 @@ export type {
   QueryMatch,
   RowRenderer,
   TimelineType,
+  ColumnHeaderOptions,
 } from './types';
 
 export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType } from './types';

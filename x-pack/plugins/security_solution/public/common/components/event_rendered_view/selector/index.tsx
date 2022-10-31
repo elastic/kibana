@@ -25,12 +25,12 @@ const ContainerEuiSelectable = styled.div`
   }
 `;
 
-const gridView = i18n.translate('xpack.timelines.alerts.summaryView.gridView.label', {
+const gridView = i18n.translate('xpack.securitySolution.selector.summaryView.gridView.label', {
   defaultMessage: 'Grid view',
 });
 
 const eventRenderedView = i18n.translate(
-  'xpack.timelines.alerts.summaryView.eventRendererView.label',
+  'xpack.securitySolution.selector.summaryView.eventRendererView.label',
   {
     defaultMessage: 'Event rendered view',
   }
@@ -84,10 +84,13 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
         checked: (viewSelected === 'gridView' ? 'on' : undefined) as EuiSelectableOption['checked'],
         meta: [
           {
-            text: i18n.translate('xpack.timelines.alerts.summaryView.options.default.description', {
-              defaultMessage:
-                'View as tabular data with the ability to group and sort by specific fields',
-            }),
+            text: i18n.translate(
+              'xpack.securitySolution.selector.summaryView.options.default.description',
+              {
+                defaultMessage:
+                  'View as tabular data with the ability to group and sort by specific fields',
+              }
+            ),
           },
         ],
       },
@@ -100,7 +103,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
         meta: [
           {
             text: i18n.translate(
-              'xpack.timelines.alerts.summaryView.options.summaryView.description',
+              'xpack.securitySolution.selector.summaryView.options.summaryView.description',
               {
                 defaultMessage: 'View a rendering of the event flow for each alert',
               }

@@ -15,7 +15,7 @@ export const CHECKBOX_FOR_ROW = ({
   columnValues: string;
   checked: boolean;
 }) =>
-  i18n.translate('xpack.timelines.timeline.body.actions.checkboxForRowAriaLabel', {
+  i18n.translate('xpack.securitySolution.controlColumns.checkboxForRowAriaLabel', {
     values: { ariaRowindex, checked, columnValues },
     defaultMessage:
       '{checked, select, false {unchecked} true {checked}} checkbox for the alert or event in row {ariaRowindex}, with columns {columnValues}',

@@ -58,7 +58,7 @@ import { checkBoxControlColumn, transformControlColumns } from '../control_colum
 import { getPageRowIndex } from './pagination';
 import type { ControlColumnProps } from '../../../../common/types';
 
-const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.timelines.tgrid.body.ariaLabel', {
+const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.securitySolution.dataTable.ariaLabel', {
   defaultMessage: 'Alerts',
 });
 

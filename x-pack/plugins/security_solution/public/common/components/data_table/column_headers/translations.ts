@@ -7,40 +7,43 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CATEGORY = i18n.translate('xpack.timelines.timeline.categoryTooltip', {
+export const CATEGORY = i18n.translate('xpack.securitySolution.columnHeaders.categoryTooltip', {
   defaultMessage: 'Category',
 });
 
-export const DESCRIPTION = i18n.translate('xpack.timelines.timeline.descriptionTooltip', {
-  defaultMessage: 'Description',
-});
+export const DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.columnHeaders.descriptionTooltip',
+  {
+    defaultMessage: 'Description',
+  }
+);
 
-export const FIELD = i18n.translate('xpack.timelines.timeline.fieldTooltip', {
+export const FIELD = i18n.translate('xpack.securitySolution.columnHeaders.fieldTooltip', {
   defaultMessage: 'Field',
 });
 
-export const FULL_SCREEN = i18n.translate('xpack.timelines.timeline.fullScreenButton', {
+export const FULL_SCREEN = i18n.translate('xpack.securitySolution.columnHeaders.fullScreenButton', {
   defaultMessage: 'Full screen',
 });
 
-export const SORT_AZ = i18n.translate('xpack.timelines.timeline.sortAZLabel', {
+export const SORT_AZ = i18n.translate('xpack.securitySolution.columnHeaders.sortAZLabel', {
   defaultMessage: 'Sort A-Z',
 });
 
-export const SORT_FIELDS = i18n.translate('xpack.timelines.timeline.sortFieldsButton', {
+export const SORT_FIELDS = i18n.translate('xpack.securitySolution.columnHeaders.sortFieldsButton', {
   defaultMessage: 'Sort fields',
 });
 
-export const SORT_ZA = i18n.translate('xpack.timelines.timeline.sortZALabel', {
+export const SORT_ZA = i18n.translate('xpack.securitySolution.columnHeaders.sortZALabel', {
   defaultMessage: 'Sort Z-A',
 });
 
-export const TYPE = i18n.translate('xpack.timelines.timeline.typeTooltip', {
+export const TYPE = i18n.translate('xpack.securitySolution.columnHeaders.typeTooltip', {
   defaultMessage: 'Type',
 });
 
 export const REMOVE_COLUMN = i18n.translate(
-  'xpack.timelines.timeline.flyout.pane.removeColumnButtonLabel',
+  'xpack.securitySolution.columnHeaders.flyout.pane.removeColumnButtonLabel',
   {
     defaultMessage: 'Remove column',
   }

@@ -420,7 +420,7 @@ const EventRenderedViewComponent = ({
       },
       {
         field: 'ecs.timestamp',
-        name: i18n.translate('xpack.timelines.alerts.EventRenderedView.timestamp.column', {
+        name: i18n.translate('xpack.securitySolution.EventRenderedView.timestamp.column', {
           defaultMessage: 'Timestamp',
         }),
         truncateText: false,
@@ -432,7 +432,7 @@ const EventRenderedViewComponent = ({
       },
       {
         field: `ecs.${ALERT_RULE_NAME}`,
-        name: i18n.translate('xpack.timelines.alerts.EventRenderedView.rule.column', {
+        name: i18n.translate('xpack.securitySolution.EventRenderedView.rule.column', {
           defaultMessage: 'Rule',
         }),
         truncateText: false,
@@ -445,7 +445,7 @@ const EventRenderedViewComponent = ({
       },
       {
         field: 'eventSummary',
-        name: i18n.translate('xpack.timelines.alerts.EventRenderedView.eventSummary.column', {
+        name: i18n.translate('xpack.securitySolution.EventRenderedView.eventSummary.column', {
           defaultMessage: 'Event Summary',
         }),
         truncateText: false,
