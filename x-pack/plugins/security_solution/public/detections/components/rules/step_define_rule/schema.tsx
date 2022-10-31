@@ -585,7 +585,7 @@ export const schema: FormSchema<DefineStepRule> = {
             i18n.translate(
               'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsMin',
               {
-                defaultMessage: 'Number of fields must be 1.',
+                defaultMessage: 'A minimum of one field is required.',
               }
             )
           )(...args);
@@ -605,7 +605,7 @@ export const schema: FormSchema<DefineStepRule> = {
             message: i18n.translate(
               'xpack.securitySolution.detectionEngine.validations.stepDefineRule.newTermsFieldsMax',
               {
-                defaultMessage: 'Number of fields must not be greater than 3.',
+                defaultMessage: 'Number of fields must be 3 or less.',
               }
             ),
           })(...args);
