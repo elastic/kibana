@@ -73,8 +73,6 @@ export function ServiceOverviewMobileCharts({
     ];
   }, [environment, transactionType, serviceName]);
 
-  console.log('mostUsedChartFilters', mostUsedChartFilters);
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {fallbackToTransactions && (
