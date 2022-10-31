@@ -379,7 +379,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
-      exampleUsage: 'get-file path "/full/path/to/file.txt" --comment "Possible malware"',
+      exampleUsage: 'get-file --path "/full/path/to/file.txt" --comment "Possible malware"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator,
       mustHaveArgs: true,
