@@ -53,8 +53,6 @@ import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 
-import { getSettings } from '../../settings';
-
 import { formatVerificationResultForSO } from './package_verification';
 
 import { getInstallation, getInstallationObject } from '.';
@@ -63,6 +61,7 @@ import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackages } from './bundled_packages';
+import { getPrereleaseFromSettings } from './get_prerelease_setting';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -112,15 +111,8 @@ export async function ensureInstalledPackage(options: {
     spaceId = DEFAULT_SPACE_ID,
   } = options;
 
-  let prerelease: boolean = false;
-  try {
-    // check prerelease setting to enable installing latest GA version, even if there is a newer prerelease version
-    ({ prerelease_integrations_enabled: prerelease } = await getSettings(savedObjectsClient));
-  } catch (err) {
-    appContextService
-      .getLogger()
-      .warn('Error while trying to load prerelease flag from settings, defaulting to false', err);
-  }
+  // check prerelease setting to enable installing latest GA version, even if there is a newer prerelease version
+  const prerelease = await getPrereleaseFromSettings(savedObjectsClient);
 
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion
@@ -310,15 +302,8 @@ async function installPackageFromRegistry({
       installType,
     });
 
-    let prerelease: boolean = false;
-    try {
-      // check prerelease setting to enable installing latest GA version, even if there is a newer prerelease version
-      ({ prerelease_integrations_enabled: prerelease } = await getSettings(savedObjectsClient));
-    } catch (err) {
-      appContextService
-        .getLogger()
-        .warn('Error while trying to load prerelease flag from settings, defaulting to false', err);
-    }
+    // check prerelease setting to enable installing latest GA version, even if there is a newer prerelease version
+    const prerelease = await getPrereleaseFromSettings(savedObjectsClient);
 
     // get latest package version and requested version in parallel for performance
     const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([

@@ -29,9 +29,9 @@ import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
-import { getSettings } from '../../settings';
 
 import { createInstallableFrom } from '.';
+import { getPrereleaseFromSettings } from './get_prerelease_setting';
 
 export type { SearchParams } from '../registry';
 export { getFile } from '../registry';
@@ -145,13 +145,7 @@ export async function getPackageInfo({
 }): Promise<PackageInfo> {
   // if prerelease param not defined, query from settings
   if (prerelease === undefined) {
-    try {
-      ({ prerelease_integrations_enabled: prerelease } = await getSettings(savedObjectsClient));
-    } catch (err) {
-      appContextService
-        .getLogger()
-        .warn('Error while trying to load prerelease flag from settings, defaulting to false', err);
-    }
+    prerelease = await getPrereleaseFromSettings(savedObjectsClient);
   }
 
   const [savedObject, latestPackage] = await Promise.all([
