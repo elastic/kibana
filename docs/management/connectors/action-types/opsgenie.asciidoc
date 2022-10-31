@@ -64,7 +64,7 @@ image::management/connectors/images/opsgenie-params-test.png[Opsgenie params tes
 [[opsgenie-action-configuration]]
 ==== Action configuration
 
-The Opsgenie connector supports two types of actions: Creating and Closing alerts. The properties supported for each action are different because Opsgenie defines different properties for each operation.
+The Opsgenie connector supports two types of actions: Create Alert and Close Alert. The properties supported for each action are different because Opsgenie defines different properties for each operation.
 
 When testing the Opsgenie connector, choose the appropriate action from the selector. Switching the action will show a different form allowing the specific properties for that type of action to be configured.
 
