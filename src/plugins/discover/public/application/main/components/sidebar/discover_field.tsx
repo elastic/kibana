@@ -9,7 +9,14 @@
 import './discover_field.scss';
 
 import React, { useState, useCallback, memo, useMemo } from 'react';
-import { EuiButtonIcon, EuiToolTip, EuiTitle, EuiIcon, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiTitle,
+  EuiIcon,
+  EuiSpacer,
+  EuiHighlight,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
@@ -65,24 +72,31 @@ const DiscoverFieldTypeIcon: React.FC<{ field: DataViewField }> = memo(({ field 
   );
 });
 
-const FieldName: React.FC<{ field: DataViewField }> = memo(({ field }) => {
-  const title =
-    field.displayName !== field.name
-      ? i18n.translate('discover.field.title', {
-          defaultMessage: '{fieldName} ({fieldDisplayName})',
-          values: {
-            fieldName: field.name,
-            fieldDisplayName: field.displayName,
-          },
-        })
-      : field.displayName;
+const FieldName: React.FC<{ field: DataViewField; highlight?: string }> = memo(
+  ({ field, highlight }) => {
+    const title =
+      field.displayName !== field.name
+        ? i18n.translate('discover.field.title', {
+            defaultMessage: '{fieldName} ({fieldDisplayName})',
+            values: {
+              fieldName: field.name,
+              fieldDisplayName: field.displayName,
+            },
+          })
+        : field.displayName;
 
-  return (
-    <span data-test-subj={`field-${field.name}`} title={title} className="dscSidebarField__name">
-      {wrapOnDot(field.displayName)}
-    </span>
-  );
-});
+    return (
+      <EuiHighlight
+        search={wrapOnDot(highlight)}
+        data-test-subj={`field-${field.name}`}
+        title={title}
+        className="dscSidebarField__name"
+      >
+        {wrapOnDot(field.displayName)}
+      </EuiHighlight>
+    );
+  }
+);
 
 interface ActionButtonProps {
   field: DataViewField;
@@ -266,12 +280,18 @@ export interface DiscoverFieldProps {
    * Columns
    */
   contextualFields: string[];
+
+  /**
+   * Search by field name
+   */
+  highlight?: string;
 }
 
 function DiscoverFieldComponent({
   documents$,
   alwaysShowActionButton = false,
   field,
+  highlight,
   dataView,
   onAddField,
   onRemoveField,
@@ -380,7 +400,7 @@ function DiscoverFieldComponent({
           toggleDisplay={toggleDisplay}
         />
       }
-      fieldName={<FieldName field={field} />}
+      fieldName={<FieldName field={field} highlight={highlight} />}
       fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
     />
   );

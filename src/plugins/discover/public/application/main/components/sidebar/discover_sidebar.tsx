@@ -303,6 +303,7 @@ export function DiscoverSidebarComponent({
         <DiscoverField
           alwaysShowActionButton={alwaysShowActionButtons}
           field={field}
+          highlight={fieldFilter.name}
           dataView={selectedDataView!}
           onAddField={onAddField}
           onRemoveField={onRemoveField}
@@ -332,6 +333,7 @@ export function DiscoverSidebarComponent({
       showFieldStats,
       columns,
       selectedFields,
+      fieldFilter.name,
     ]
   );
 
