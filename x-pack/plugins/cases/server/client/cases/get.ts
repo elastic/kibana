@@ -135,7 +135,7 @@ export const getCasesByAlertID = async (
         description: caseInfo.attributes.description,
         status: caseInfo.attributes.status,
         createdAt: caseInfo.attributes.created_at,
-        totals: getCommentTotatlsForCaseId(caseInfo.id, commentStats),
+        totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
       }))
     );
   } catch (error) {
@@ -149,7 +149,7 @@ export const getCasesByAlertID = async (
   }
 };
 
-const getCommentTotatlsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) =>
+const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) =>
   stats.get(id) ?? { alerts: 0, userComments: 0 };
 
 /**
