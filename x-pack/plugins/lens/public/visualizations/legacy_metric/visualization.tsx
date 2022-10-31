@@ -16,6 +16,13 @@ import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionFunctionFont,
+  FontWeight,
+  TextAlignment,
+} from '@kbn/expressions-plugin/common';
 import { getSuggestions } from './metric_suggestions';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
@@ -97,6 +104,14 @@ const toExpression = (
   };
   const metricFontSize = labelToMetricFontSizeMap[state?.size || DEFAULT_TITLE_SIZE];
 
+  const fontFn = buildExpressionFunction<ExpressionFunctionFont>('font', {
+    align: (state?.textAlign || DEFAULT_TEXT_ALIGNMENT) as TextAlignment,
+    size: metricFontSize,
+    weight: '600' as FontWeight,
+    lHeight: metricFontSize * 1.5,
+    sizeUnit: labelFont.sizeUnit,
+  });
+
   return {
     type: 'expression',
     chain: [
@@ -106,24 +121,7 @@ const toExpression = (
         function: 'legacyMetricVis',
         arguments: {
           labelPosition: [state?.titlePosition || DEFAULT_TITLE_POSITION],
-          font: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'font',
-                  arguments: {
-                    align: [state?.textAlign || DEFAULT_TEXT_ALIGNMENT],
-                    size: [metricFontSize],
-                    weight: ['600'],
-                    lHeight: [metricFontSize * 1.5],
-                    sizeUnit: [labelFont.sizeUnit],
-                  },
-                },
-              ],
-            },
-          ],
+          font: [buildExpression([fontFn]).toAst()],
           labelFont: [
             {
               type: 'expression',
