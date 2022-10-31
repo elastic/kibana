@@ -5,5 +5,6 @@
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "browser": "./target_web/index.js",
   "main": "./target_node/index.js",
-  "private": true
+  "private": true,
+  "types": "./target_types/index.d.ts"
 }
