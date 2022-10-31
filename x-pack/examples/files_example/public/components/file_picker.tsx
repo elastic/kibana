@@ -14,9 +14,18 @@ import { FilePicker } from '../imports';
 
 interface Props {
   onClose: () => void;
+  onUpload: (ids: string[]) => void;
   onDone: (ids: string[]) => void;
 }
 
-export const MyFilePicker: FunctionComponent<Props> = ({ onClose, onDone }) => {
-  return <FilePicker kind={exampleFileKind.id} onClose={onClose} onDone={onDone} />;
+export const MyFilePicker: FunctionComponent<Props> = ({ onClose, onDone, onUpload }) => {
+  return (
+    <FilePicker
+      kind={exampleFileKind.id}
+      onClose={onClose}
+      onDone={onDone}
+      onUpload={(n) => onUpload(n.map(({ id }) => id))}
+      pageSize={50}
+    />
+  );
 };

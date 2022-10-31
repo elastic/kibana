@@ -436,6 +436,7 @@ export const QueryBarTopRow = React.memo(
             size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
             color={props.isDirty ? 'success' : 'primary'}
             fill={props.isDirty}
+            needsUpdate={props.isDirty}
             data-test-subj="querySubmitButton"
             // @ts-expect-error Need to fix expecting `children` in EUI
             toolTipProps={{
