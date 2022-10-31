@@ -62,7 +62,7 @@ export class DetectionsTestService extends FtrService {
     };
   }
 
-  private async ensureEndpointRuleAlertsIndexExists() {
+  private async ensureEndpointRuleAlertsIndexExists(): Promise<void> {
     const indexMappings = getAlertsIndexMappings().value;
 
     if (indexMappings.mappings?._meta?.kibana.version) {
@@ -140,7 +140,7 @@ export class DetectionsTestService extends FtrService {
   }
 
   /**
-   * Waits for alerts to have been loaded by calling continuously calling the alerts api until data shows up
+   * Waits for alerts to have been loaded by continuously calling the alerts api until data shows up
    * @param query
    * @param timeoutMs
    */
@@ -206,7 +206,7 @@ export class DetectionsTestService extends FtrService {
       alerts: indexedAlerts,
       cleanup: async (): Promise<void> => {
         if (indexedAlerts.length) {
-          this.log.info(`cleaning up loaded endpoint rule alerts`);
+          this.log.info('cleaning up loaded endpoint rule alerts');
 
           await esClient.bulk({
             body: indexedAlerts.map((indexedDoc) => {
