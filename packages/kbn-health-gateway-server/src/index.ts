@@ -14,7 +14,7 @@ import {
 } from '@kbn/core-logging-server-internal';
 import { getConfigService } from './config';
 import { config as kibanaConfig, KibanaService } from './kibana';
-import { config as serverConfig, Server } from './server';
+import { config as serverConfig, Server, ServerStart } from './server';
 
 export async function bootstrap() {
   const loggingSystem = new LoggingSystem();
@@ -31,11 +31,24 @@ export async function bootstrap() {
   await loggingSystem.upgrade(configService.atPathSync<LoggingConfigType>('logging'));
   const log = logger.get('root');
 
-  const server = new Server({ config: configService, logger });
-  const serverStart = await server.start();
+  let server: Server;
+  let serverStart: ServerStart;
+  try {
+    server = new Server({ config: configService, logger });
+    serverStart = await server.start();
+  } catch (e) {
+    log.error(`Failed to start Server: ${e}`);
+    process.exit(1);
+  }
 
-  const kibanaService = new KibanaService({ config: configService, logger });
-  await kibanaService.start({ server: serverStart });
+  let kibanaService: KibanaService;
+  try {
+    kibanaService = new KibanaService({ config: configService, logger });
+    await kibanaService.start({ server: serverStart });
+  } catch (e) {
+    log.error(`Failed to start Kibana service: ${e}`);
+    process.exit(1);
+  }
 
   const attemptGracefulShutdown = async (exitCode: number = 0) => {
     await server.stop();

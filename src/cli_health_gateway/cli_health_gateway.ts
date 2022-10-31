@@ -10,7 +10,7 @@ import { Command } from 'commander';
 import { kibanaPackageJson } from '@kbn/utils';
 import { bootstrap } from '@kbn/health-gateway-server';
 
-const program = new Command('bin/health-gateway');
+const program = new Command('bin/kibana-health-gateway');
 
 program
   .version(kibanaPackageJson.version)

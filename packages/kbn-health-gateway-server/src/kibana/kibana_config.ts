@@ -16,7 +16,6 @@ const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 const configSchema = schema.object({
   hosts: schema.arrayOf(hostURISchema, {
     minSize: 1,
-    defaultValue: ['http://localhost:5601'],
   }),
   requestTimeout: schema.duration({ defaultValue: '30s' }),
   ssl: schema.object({

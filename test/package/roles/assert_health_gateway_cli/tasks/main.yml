@@ -1,7 +1,7 @@
 - name: "--help"
   become: true
   command:
-    cmd: /usr/share/kibana/bin/health-gateway --help
+    cmd: /usr/share/kibana/bin/kibana-health-gateway --help
   register: health_gateway_help
 
 - debug:

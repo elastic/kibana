@@ -63,21 +63,22 @@ async function fetchKibanaStatuses({
   );
 
   return requests.map((r, i) => {
-    if (r.status === 'fulfilled') {
-      return r.value;
-    } else {
-      const message = `Unable to retrieve status from [${kibanaConfig.hosts[i]}]: ${JSON.stringify(
-        r
-      )}`;
-      log.error(message);
-      throw new Error(message);
+    if (r.status === 'rejected') {
+      log.error(`Unable to retrieve status from [${kibanaConfig.hosts[i]}]`);
     }
+    return r;
   });
 }
 
-function mergeStatusResponses(responses: Response[]) {
-  // For now we're being super naïve and returning the highest status code
-  const statusCode = responses.reduce((acc, cur) => (cur.status > acc ? cur.status : acc), 0);
+function mergeStatusResponses(
+  responses: Array<PromiseFulfilledResult<Response> | PromiseRejectedResult>
+) {
+  let statusCode = 200;
+  for (const response of responses) {
+    if (response.status === 'rejected') {
+      statusCode = 503;
+    }
+  }
 
   return {
     body: {}, // Need to determine what response body, if any, we want to include
@@ -112,6 +113,7 @@ function generateAgentConfig(sslConfig: KibanaConfig['ssl']) {
 }
 
 function configureFetch(kibanaConfig: KibanaConfig) {
+  const agent = new https.Agent(generateAgentConfig(kibanaConfig.ssl));
   return async (path: string) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(
@@ -119,7 +121,7 @@ function configureFetch(kibanaConfig: KibanaConfig) {
       kibanaConfig.requestTimeout.asMilliseconds()
     );
     const fetchOptions: RequestInit = {
-      agent: new https.Agent(generateAgentConfig(kibanaConfig.ssl)),
+      agent,
       signal: controller.signal,
     };
     try {

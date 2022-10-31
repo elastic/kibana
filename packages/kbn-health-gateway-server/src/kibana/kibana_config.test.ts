@@ -11,7 +11,9 @@ import { config } from './kibana_config';
 describe('kibana config', () => {
   test('has defaults for config', () => {
     const configSchema = config.schema;
-    const obj = {};
+    const obj = {
+      hosts: ['http://localhost:5601'],
+    };
     expect(configSchema.validate(obj)).toMatchInlineSnapshot(`
       Object {
         "hosts": Array [
@@ -51,15 +53,22 @@ describe('kibana config', () => {
         certificateAuthorities: ['/beep/boop'],
         verificationMode: 'certificate',
       };
-      expect(configSchema.validate({ ssl: valid })).toEqual(
-        expect.objectContaining({ ssl: valid })
-      );
+      expect(
+        configSchema.validate({
+          hosts: ['http://localhost:5601'],
+          ssl: valid,
+        })
+      ).toEqual(expect.objectContaining({ ssl: valid }));
     });
 
     test('throws if invalid ssl config', () => {
       const configSchema = config.schema;
-      const invalid = { verificationMode: 'nope' };
-      expect(() => configSchema.validate({ ssl: invalid })).toThrowErrorMatchingInlineSnapshot(`
+      const hosts = ['http://localhost:5601'];
+      const invalid = {
+        verificationMode: 'nope',
+      };
+      expect(() => configSchema.validate({ hosts, ssl: invalid }))
+        .toThrowErrorMatchingInlineSnapshot(`
         "[ssl.verificationMode]: types that failed validation:
         - [ssl.verificationMode.0]: expected value to equal [none]
         - [ssl.verificationMode.1]: expected value to equal [certificate]
