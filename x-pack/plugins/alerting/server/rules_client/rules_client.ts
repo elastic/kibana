@@ -568,7 +568,8 @@ export class RulesClient {
       throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
-    const usesGlobalFreqParams = Boolean(data.notifyWhen && data.throttle);
+    const usesGlobalFreqParams =
+      typeof data.notifyWhen !== 'undefined' && typeof data.throttle !== 'undefined';
     await this.validateActions(ruleType, data.actions, usesGlobalFreqParams);
 
     // Throw error if schedule interval is less than the minimum and we are enforcing it
@@ -1631,7 +1632,8 @@ export class RulesClient {
 
     // Validate
     const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
-    const usesGlobalFreqParams = Boolean(data.notifyWhen && data.throttle);
+    const usesGlobalFreqParams =
+      typeof data.notifyWhen !== 'undefined' && typeof data.throttle !== 'undefined';
     await this.validateActions(ruleType, data.actions, usesGlobalFreqParams);
 
     // Throw error if schedule interval is less than the minimum and we are enforcing it
@@ -2154,7 +2156,8 @@ export class RulesClient {
               switch (operation.field) {
                 case 'actions':
                   const usesGlobalFreqParams = Boolean(
-                    attributes.notifyWhen && attributes.throttle
+                    typeof attributes.notifyWhen !== 'undefined' &&
+                      typeof attributes.throttle !== 'undefined'
                   );
                   await this.validateActions(ruleType, operation.value, usesGlobalFreqParams);
                   ruleActions = applyBulkEditOperation(operation, ruleActions);
