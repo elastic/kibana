@@ -7,23 +7,16 @@
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { isEqual } from 'lodash';
-import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useSelector } from 'react-redux';
-import { Ping, MonitorOverviewItem } from '../../../../common/runtime_types';
-import {
-  EXCLUDE_RUN_ONCE_FILTER,
-  getTimeSpanFilter,
-  SUMMARY_FILTER,
-} from '../../../../common/constants/client_defaults';
-import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
+import { MonitorOverviewItem } from '../../../../common/runtime_types';
 import { selectOverviewState } from '../state/overview';
-import { useSyntheticsRefreshContext } from '../contexts';
 import { useLocationNames } from './use_location_names';
 
 export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
   const {
     pageState: { sortOrder },
-    data: { allMonitorIds, monitors },
+    data: { monitors },
+    status,
   } = useSelector(selectOverviewState);
   const [monitorsSortedByStatus, setMonitorsSortedByStatus] = useState<
     Record<string, MonitorOverviewItem[]>
@@ -31,78 +24,19 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
   const downMonitors = useRef<Record<string, string[]> | null>(null);
   const currentMonitors = useRef<MonitorOverviewItem[] | null>(monitors);
   const locationNames = useLocationNames();
-  const { lastRefresh } = useSyntheticsRefreshContext();
-
-  const { data, loading } = useEsSearch(
-    {
-      index: shouldUpdate ? SYNTHETICS_INDEX_PATTERN : '',
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              SUMMARY_FILTER,
-              EXCLUDE_RUN_ONCE_FILTER,
-              getTimeSpanFilter(),
-              {
-                terms: {
-                  config_id: allMonitorIds,
-                },
-              },
-            ],
-          },
-        },
-        sort: [{ 'monitor.name': 'desc' }],
-        aggs: {
-          ids: {
-            terms: {
-              field: 'monitor.id',
-              size: 5000,
-            },
-            aggs: {
-              locations: {
-                terms: {
-                  field: 'observer.geo.name',
-                  missing: UNNAMED_LOCATION,
-                  size: 1000,
-                  order: { _key: 'asc' },
-                },
-                aggs: {
-                  summary: {
-                    top_hits: {
-                      size: 1,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    [lastRefresh, allMonitorIds, shouldUpdate, currentMonitors.current],
-    { name: 'getMonitorStatusByLocation' }
-  );
 
   useEffect(() => {
-    if (loading) {
+    if (!status) {
       return;
     }
+    const { downConfigs } = status;
     const downMonitorMap: Record<string, string[]> = {};
-    (data.aggregations?.ids?.buckets || []).forEach((idBucket) => {
-      idBucket.locations.buckets.forEach((location) => {
-        const ping = location.summary.hits.hits[0]._source as Ping;
-        if ((!ping?.summary?.down || 0) > 0) {
-          return;
-        }
-        const configId = ping.config_id!;
-        const locationName = ping?.observer?.geo?.name;
-        if (downMonitorMap[configId]) {
-          downMonitorMap[configId].push(locationName!);
-        } else {
-          downMonitorMap[configId] = [locationName!];
-        }
-      });
+    downConfigs.forEach(({ location, configId }) => {
+      if (downMonitorMap[configId]) {
+        downMonitorMap[configId].push(location);
+      } else {
+        downMonitorMap[configId] = [location];
+      }
     });
 
     if (
@@ -133,7 +67,7 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
         disabled: orderedDisabledMonitors,
       });
     }
-  }, [data, monitors, locationNames, downMonitors, loading]);
+  }, [monitors, locationNames, downMonitors, status]);
 
   return useMemo(() => {
     const upAndDownMonitors =

@@ -15,7 +15,7 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { getMonitors } from '../common';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { ConfigKey, OverviewStatus } from '../../../common/runtime_types';
+import { ConfigKey, OverviewStatus, OverviewStatusMetaData } from '../../../common/runtime_types';
 
 /**
  * Helper function that converts a monitor's schedule to a value to use to generate
@@ -36,7 +36,7 @@ export async function queryMonitorStatus(
   maxLocations: number,
   maxPeriod: number,
   ids: Array<string | undefined>
-): Promise<Pick<OverviewStatus, 'up' | 'down'>> {
+): Promise<Omit<OverviewStatus, 'disabledCount'>> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
   const pageCount = Math.ceil(ids.length / idSize);
   const promises: Array<Promise<any>> = [];
@@ -107,20 +107,35 @@ export async function queryMonitorStatus(
   }
   let up = 0;
   let down = 0;
+  const upConfigs: OverviewStatusMetaData[] = [];
+  const downConfigs: OverviewStatusMetaData[] = [];
   for await (const response of promises) {
     response.aggregations?.id.buckets.forEach(({ location }: { key: string; location: any }) => {
       location.buckets.forEach(({ status }: { key: string; status: any }) => {
         const downCount = status.hits.hits[0]._source.summary.down;
         const upCount = status.hits.hits[0]._source.summary.up;
+        const configId = status.hits.hits[0]._source.config_id;
+        const heartbeatId = status.hits.hits[0]._source.monitor.id;
+        const locationName = status.hits.hits[0]._source.observer.geo.name;
         if (upCount > 0) {
           up += 1;
+          upConfigs.push({
+            configId,
+            heartbeatId,
+            location: locationName,
+          });
         } else if (downCount > 0) {
           down += 1;
+          downConfigs.push({
+            configId,
+            heartbeatId,
+            location: locationName,
+          });
         }
       });
     });
   }
-  return { up, down };
+  return { up, down, upConfigs, downConfigs };
 }
 
 /**
@@ -169,7 +184,7 @@ export async function getStatus(
     });
   } while (monitors.saved_objects.length === monitors.per_page);
 
-  const { up, down } = await queryMonitorStatus(
+  const { up, down, upConfigs, downConfigs } = await queryMonitorStatus(
     uptimeEsClient,
     maxLocations,
     maxPeriod,
@@ -180,6 +195,8 @@ export async function getStatus(
     disabledCount,
     up,
     down,
+    upConfigs,
+    downConfigs,
   };
 }
 

@@ -702,7 +702,7 @@
     "@cypress/snapshot": "^2.1.7",
     "@cypress/webpack-preprocessor": "^5.12.2",
     "@elastic/eslint-plugin-eui": "0.0.2",
-    "@elastic/makelogs": "^6.0.0",
+    "@elastic/makelogs": "^6.1.1",
     "@elastic/synthetics": "^1.0.0-beta.23",
     "@emotion/babel-preset-css-prop": "^11.10.0",
     "@emotion/jest": "^11.10.0",

@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { ConfigKey, MonitorOverviewItem } from '../../../common/runtime_types';
+import { ConfigKey, MonitorOverviewItem, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -113,41 +113,38 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
     const { sortField, sortOrder } = request.query;
-    const { saved_objects: monitors } = await getMonitors(
-      {
-        perPage: 1000,
-        // monitors are sorted by status on the client side via useMonitorsSortedByStatus
-        sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
-        sortOrder,
-        page: 1,
-      },
-      syntheticsMonitorClient.syntheticsService,
-      savedObjectsClient
-    );
+    const finder = savedObjectsClient.createPointInTimeFinder<SyntheticsMonitor>({
+      type: syntheticsMonitorType,
+      sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
+      sortOrder,
+      perPage: 500,
+    });
 
     const allMonitorIds: string[] = [];
     let total = 0;
     const allMonitors: MonitorOverviewItem[] = [];
 
-    monitors.forEach((monitor) => {
+    for await (const result of finder.find()) {
       /* collect all monitor ids for use
        * in filtering overview requests */
-      const id = monitor.id;
-      allMonitorIds.push(id);
+      result.saved_objects.forEach((monitor) => {
+        const id = monitor.id;
+        allMonitorIds.push(id);
 
-      /* for reach location, add a config item */
-      const locations = monitor.attributes[ConfigKey.LOCATIONS];
-      locations.forEach((location) => {
-        const config = {
-          id,
-          name: monitor.attributes[ConfigKey.NAME],
-          location,
-          isEnabled: monitor.attributes[ConfigKey.ENABLED],
-        };
-        allMonitors.push(config);
-        total++;
+        /* for reach location, add a config item */
+        const locations = monitor.attributes[ConfigKey.LOCATIONS];
+        locations.forEach((location) => {
+          const config = {
+            id,
+            name: monitor.attributes[ConfigKey.NAME],
+            location,
+            isEnabled: monitor.attributes[ConfigKey.ENABLED],
+          };
+          allMonitors.push(config);
+          total++;
+        });
       });
-    });
+    }
 
     return {
       monitors: allMonitors,

@@ -8,7 +8,6 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useMonitorsSortedByStatus } from './use_monitors_sorted_by_status';
 import { WrappedHelper } from '../utils/testing';
-import * as searchHooks from '@kbn/observability-plugin/public/hooks/use_es_search';
 
 describe('useMonitorsSortedByStatus', () => {
   const location1 = {
@@ -23,55 +22,6 @@ describe('useMonitorsSortedByStatus', () => {
     id: 'us_east',
     label: 'US East',
     isServiceManaged: true,
-  };
-
-  const getMockHits = () => {
-    const hits = [];
-    for (let i = 1; i <= 3; i++) {
-      hits.push({
-        locations: {
-          buckets: [
-            {
-              summary: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        summary: {
-                          down: 1,
-                          up: 0,
-                        },
-                        observer: {
-                          geo: {
-                            name: location1.label,
-                          },
-                        },
-                        config_id: `test-monitor-${i}`,
-                      },
-                    },
-                    {
-                      _source: {
-                        summary: {
-                          down: 0,
-                          up: 1,
-                        },
-                        observer: {
-                          geo: {
-                            name: location2.label,
-                          },
-                        },
-                        config_id: `test-monitor-${i}`,
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          ],
-        },
-      });
-    }
-    return hits;
   };
 
   beforeEach(() => {
@@ -98,6 +48,42 @@ describe('useMonitorsSortedByStatus', () => {
               perPage: 10,
               sortOrder,
               sortField: 'name.keyword',
+            },
+            status: {
+              upConfigs: [
+                {
+                  configId: 'test-monitor-1',
+                  heartbeatId: 'test-monitor-1',
+                  location: location2.label,
+                },
+                {
+                  configId: 'test-monitor-2',
+                  heartbeatId: 'test-monitor-2',
+                  location: location2.label,
+                },
+                {
+                  configId: 'test-monitor-2',
+                  heartbeatId: 'test-monitor-2',
+                  location: location2.label,
+                },
+              ],
+              downConfigs: [
+                {
+                  configId: 'test-monitor-1',
+                  heartbeatId: 'test-monitor-1',
+                  location: location1.label,
+                },
+                {
+                  configId: 'test-monitor-2',
+                  heartbeatId: 'test-monitor-2',
+                  location: location1.label,
+                },
+                {
+                  configId: 'test-monitor-2',
+                  heartbeatId: 'test-monitor-2',
+                  location: location1.label,
+                },
+              ],
             },
             data: {
               total: 0,
@@ -153,13 +139,6 @@ describe('useMonitorsSortedByStatus', () => {
   };
 
   it('returns monitors down first when sort order is asc', () => {
-    jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { aggregations: { ids: { buckets: getMockHits() } } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading: false,
-    });
-
     const { result } = renderHook(() => useMonitorsSortedByStatus(true), {
       wrapper: WrapperWithState,
     });
@@ -211,13 +190,6 @@ describe('useMonitorsSortedByStatus', () => {
   });
 
   it('returns monitors up first when sort order is desc', () => {
-    jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { aggregations: { ids: { buckets: getMockHits() } } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading: false,
-    });
-
     const { result } = renderHook(() => useMonitorsSortedByStatus(true), {
       wrapper: ({ children }: { children: React.ReactElement }) => (
         <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
