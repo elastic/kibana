@@ -41,6 +41,7 @@ import * as babel from '@babel/core';
 import { addHook } from 'pirates';
 import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/utils';
 import sourceMapSupport from 'source-map-support';
+import { readHashOfPackageMap } from '@kbn/synthetic-package-map';
 
 import { Cache } from './cache';
 
@@ -83,6 +84,7 @@ function getBabelOptions(path: string) {
  */
 function determineCachePrefix() {
   const json = JSON.stringify({
+    synthPkgMapHash: readHashOfPackageMap(),
     babelVersion: babel.version,
     // get a config for a fake js, ts, and tsx file to make sure we
     // capture conditional config portions based on the file extension
