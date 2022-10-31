@@ -540,7 +540,11 @@ export class SavedSearchEmbeddable
         domNode
       );
 
-      if (props.searchProps.rows && props.searchProps.rows.length) {
+      if (
+        this.searchProps!.isLoading === false &&
+        props.searchProps.rows &&
+        props.searchProps.rows.length
+      ) {
         this.renderComplete.dispatchComplete();
         this.updateOutput({
           ...this.getOutput(),
