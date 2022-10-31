@@ -4,16 +4,18 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
+    "declarationMap": true
   },
   "include": [
     "common/**/*",
     "public/**/*",
+    "server/**/*",
     "scripts/**/*",
     "public/**/*.json",
+    "server/**/*.json",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../timelines/tsconfig.json" },
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
