@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EmbeddedMap } from './embedded_map';
 
@@ -16,16 +16,10 @@ export function LatencyMap() {
       <EuiTitle size="xs">
         <h3>
           {i18n.translate('xpack.apm.serviceOverview.embeddedMap.title', {
-            defaultMessage: 'Geographic regions',
+            defaultMessage: 'Average latency per country',
           })}
         </h3>
       </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s">
-        {i18n.translate('xpack.apm.serviceOverview.embeddedMap.description', {
-          defaultMessage: 'Map showing the average latency based on country.',
-        })}
-      </EuiText>
       <EuiSpacer size="s" />
       <EmbeddedMap />
     </>

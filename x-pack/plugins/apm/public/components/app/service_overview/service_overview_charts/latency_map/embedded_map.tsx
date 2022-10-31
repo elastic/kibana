@@ -22,6 +22,7 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { EuiText } from '@elastic/eui';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLayerList } from './get_layer_list';
 import { useMapFilters } from './use_map_filters';
@@ -34,6 +35,7 @@ export function EmbeddedMapComponent() {
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const [error, setError] = useState<boolean>();
 
   const mapFilters = useMapFilters();
 
@@ -44,16 +46,11 @@ export function EmbeddedMapComponent() {
   const embeddableRoot: React.RefObject<HTMLDivElement> =
     useRef<HTMLDivElement>(null);
 
-  const { embeddable: embeddablePlugin, maps } =
-    useKibana<ApmPluginStartDeps>().services;
-
-  if (!embeddablePlugin) {
-    throw new Error('Embeddable plugin not found');
-  }
-
-  if (!embeddablePlugin) {
-    throw new Error('Maps plugin not found');
-  }
+  const {
+    embeddable: embeddablePlugin,
+    maps,
+    notifications,
+  } = useKibana<ApmPluginStartDeps>().services;
 
   useEffect(() => {
     async function setupEmbeddable() {
@@ -63,12 +60,29 @@ export function EmbeddedMapComponent() {
             MapEmbeddableOutput,
             MapEmbeddable
           >
-        | undefined = embeddablePlugin.getEmbeddableFactory(
+        | undefined = embeddablePlugin?.getEmbeddableFactory(
         MAP_SAVED_OBJECT_TYPE
       );
 
       if (!factory) {
-        throw new Error('Map embeddable not found.');
+        setError(true);
+        notifications?.toasts.addDanger({
+          title: i18n.translate(
+            'xpack.apm.serviceOverview.embeddedMap.error.toastTitle',
+            {
+              defaultMessage: 'An error occurred when adding map embeddable',
+            }
+          ),
+          text: i18n.translate(
+            'xpack.apm.serviceOverview.embeddedMap.error.toastDescription',
+            {
+              defaultMessage: `Embeddable factory with id "{embeddableFactoryId}" was not found.`,
+              values: {
+                embeddableFactoryId: MAP_SAVED_OBJECT_TYPE,
+              },
+            }
+          ),
+        });
       }
 
       const input: MapEmbeddableInput = {
@@ -94,7 +108,7 @@ export function EmbeddedMapComponent() {
         hideFilterActions: true,
       };
 
-      const embeddableObject = await factory.create(input);
+      const embeddableObject = await factory?.create(input);
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
         const layerList = await getLayerList(maps);
         await embeddableObject.setLayerList(layerList);
@@ -132,18 +146,31 @@ export function EmbeddedMapComponent() {
   }, [start, end, kuery, mapFilters, embeddable]);
 
   return (
-    <div
-      data-test-subj="serviceOverviewEmbeddedMap"
-      css={css`
-        width: 100%;
-        height: 400px;
-        display: flex;
-        flex: 1 1 100%;
-        z-index: 1;
-        min-height: 0;
-      `}
-      ref={embeddableRoot}
-    />
+    <>
+      {error && (
+        <EuiText size="s">
+          <p>
+            {i18n.translate('xpack.apm.serviceOverview.embeddedMap.error', {
+              defaultMessage: 'Could not load map',
+            })}
+          </p>
+        </EuiText>
+      )}
+      {!error && (
+        <div
+          data-test-subj="serviceOverviewEmbeddedMap"
+          css={css`
+            width: 100%;
+            height: 400px;
+            display: flex;
+            flex: 1 1 100%;
+            z-index: 1;
+            min-height: 0;
+          `}
+          ref={embeddableRoot}
+        />
+      )}
+    </>
   );
 }
 
