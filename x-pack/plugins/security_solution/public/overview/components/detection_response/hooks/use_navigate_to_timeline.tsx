@@ -24,6 +24,11 @@ export interface Filter {
   value: string;
 }
 
+interface NavigateToTimelineOptions {
+  timeRange?: TimeRange;
+  onlyAlerts?: boolean;
+}
+
 export const useNavigateToTimeline = () => {
   const dispatch = useDispatch();
 
@@ -41,9 +46,9 @@ export const useNavigateToTimeline = () => {
   });
 
   const navigateToTimeline = useCallback(
-    (dataProviders: DataProvider[], timeRange?: TimeRange) => {
+    (dataProviders: DataProvider[], options?: NavigateToTimelineOptions) => {
       // Reset the current timeline
-      clearTimeline({ timeRange });
+      clearTimeline({ timeRange: options?.timeRange });
       // Update the timeline's providers to match the current prevalence field query
       dispatch(
         updateProviders({
@@ -56,11 +61,13 @@ export const useNavigateToTimeline = () => {
         sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
           selectedDataViewId: defaultDataView.id,
-          selectedPatterns: [signalIndexName || ''],
+          selectedPatterns: options?.onlyAlerts
+            ? [signalIndexName || '']
+            : defaultDataView.patternList,
         })
       );
     },
-    [clearTimeline, defaultDataView.id, dispatch, signalIndexName]
+    [clearTimeline, defaultDataView.id, defaultDataView.patternList, dispatch, signalIndexName]
   );
 
   /** *
@@ -72,7 +79,7 @@ export const useNavigateToTimeline = () => {
    * @param timeRange Defines the timeline time range field and removes the time range lock
    */
   const openTimelineWithFilters = useCallback(
-    (filters: Array<[...Filter[]]>, timeRange?: TimeRange) => {
+    (filters: Array<[...Filter[]]>, options?: NavigateToTimelineOptions) => {
       const dataProviders = [];
 
       for (const orFilterGroup of filters) {
@@ -87,7 +94,7 @@ export const useNavigateToTimeline = () => {
           dataProviders.push(dataProvider);
         }
       }
-      navigateToTimeline(dataProviders, timeRange);
+      navigateToTimeline(dataProviders, options);
     },
     [navigateToTimeline]
   );

@@ -53,7 +53,8 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
         : undefined;
 
       openTimelineWithFilters(
-        severityFilter ? [[hostNameFilter, severityFilter]] : [[hostNameFilter]]
+        severityFilter ? [[hostNameFilter, severityFilter]] : [[hostNameFilter]],
+        { onlyAlerts: true }
       );
     },
     [openTimelineWithFilters]

@@ -106,11 +106,17 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           }
         : undefined;
 
-      const filter = {
-        field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
-        value: entityName,
-      };
-      openTimelineWithFilters([[filter]], timeRange);
+      const filters = [
+        {
+          field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+          value: entityName,
+        },
+        {
+          field: 'event.kind',
+          value: 'signal',
+        },
+      ];
+      openTimelineWithFilters([filters], { timeRange });
     },
     [riskEntity, openTimelineWithFilters]
   );

@@ -118,7 +118,9 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
 
   const openRuleInTimeline = useCallback(
     (ruleName: string) => {
-      openTimelineWithFilters([[{ field: 'kibana.alert.rule.name', value: ruleName }]]);
+      openTimelineWithFilters([[{ field: 'kibana.alert.rule.name', value: ruleName }]], {
+        onlyAlerts: true,
+      });
     },
     [openTimelineWithFilters]
   );

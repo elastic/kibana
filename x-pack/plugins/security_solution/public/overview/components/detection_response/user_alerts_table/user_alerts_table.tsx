@@ -53,7 +53,8 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
         : undefined;
 
       openTimelineWithFilters(
-        severityFilter ? [[userNameFilter, severityFilter]] : [[userNameFilter]]
+        severityFilter ? [[userNameFilter, severityFilter]] : [[userNameFilter]],
+        { onlyAlerts: true }
       );
     },
     [openTimelineWithFilters]

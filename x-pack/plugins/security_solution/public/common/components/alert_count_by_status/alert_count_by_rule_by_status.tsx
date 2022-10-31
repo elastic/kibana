@@ -96,7 +96,7 @@ export const AlertCountByRuleByStatus = React.memo(
             },
           ]);
         }
-        openTimelineWithFilters(timelineFilters);
+        openTimelineWithFilters(timelineFilters, { onlyAlerts: true });
       });
     }, [entityFilter, field, openTimelineWithFilters, selectedStatusesByField]);
 
