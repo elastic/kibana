@@ -369,7 +369,7 @@ function DiscoverFieldComponent({
       size="s"
       className="dscSidebarItem"
       isActive={infoIsOpen}
-      onClick={togglePopover}
+      onClick={isDocumentRecord ? togglePopover : undefined}
       dataTestSubj={`field-${field.name}-showDetails`}
       fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={field} />}
       fieldAction={
