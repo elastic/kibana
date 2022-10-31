@@ -570,8 +570,6 @@ describe('gauge', () => {
               ticksPosition: ['auto'],
               labelMajorMode: ['auto'],
               labelMinor: ['Subtitle'],
-              labelMajor: [],
-              palette: [],
               shape: ['horizontalBullet'],
             },
           },
