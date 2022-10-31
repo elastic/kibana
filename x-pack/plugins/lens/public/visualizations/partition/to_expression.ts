@@ -10,6 +10,11 @@ import { Position } from '@elastic/charts';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import type {
+  LabelPositions,
+  PartitionLabelsExpressionFunctionDefinition,
+  ValueFormats,
+} from '@kbn/expression-partition-vis-plugin/common';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
@@ -80,24 +85,19 @@ const prepareDimension = (accessor: string) => {
 };
 
 const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (state, attributes, layer) => {
-  const show = [!attributes.isPreview && layer.categoryDisplay !== CategoryDisplay.HIDE];
-  const position = layer.categoryDisplay !== CategoryDisplay.HIDE ? [layer.categoryDisplay] : [];
-  const values = [layer.numberDisplay !== NumberDisplay.HIDDEN];
-  const valuesFormat = layer.numberDisplay !== NumberDisplay.HIDDEN ? [layer.numberDisplay] : [];
-  const percentDecimals = [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS];
+  const show = !attributes.isPreview && layer.categoryDisplay !== CategoryDisplay.HIDE;
+  const position =
+    layer.categoryDisplay !== CategoryDisplay.HIDE ? (layer.categoryDisplay as LabelPositions) : [];
+  const values = layer.numberDisplay !== NumberDisplay.HIDDEN;
+  const valuesFormat =
+    layer.numberDisplay !== NumberDisplay.HIDDEN ? (layer.numberDisplay as ValueFormats) : [];
+  const percentDecimals = layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS;
+  const partitionLabelsFn = buildExpressionFunction<PartitionLabelsExpressionFunctionDefinition>(
+    'partitionLabels',
+    { show, position, values, valuesFormat, percentDecimals }
+  );
 
-  return [
-    {
-      type: 'expression',
-      chain: [
-        {
-          type: 'function',
-          function: 'partitionLabels',
-          arguments: { show, position, values, valuesFormat, percentDecimals },
-        },
-      ],
-    },
-  ];
+  return [buildExpression([partitionLabelsFn]).toAst()];
 };
 
 const generateWaffleLabelsAstArguments: GenerateLabelsAstArguments = (...args) => {
