@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useCallback, useState } from 'react';
 import { merge, of } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, DataViewBase, Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import createContainer from 'constate';
-import { useCallback, useState } from 'react';
 import { useKibanaQuerySettings } from '../../../utils/use_kibana_query_settings';
 import { BuiltEsQuery } from '../log_stream';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';

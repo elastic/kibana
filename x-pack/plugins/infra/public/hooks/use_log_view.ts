@@ -6,7 +6,7 @@
  */
 
 import createContainer from 'constate';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { HttpHandler } from '@kbn/core/public';
 import { LogView, LogViewAttributes, LogViewStatus, ResolvedLogView } from '../../common/log_views';
 import type { ILogViewsClient } from '../services/log_views';
@@ -63,10 +63,6 @@ export const useLogView = ({
     [logViews]
   );
 
-  const derivedDataView = useMemo(() => {
-    return resolvedLogView?.dataViewReference;
-  }, [resolvedLogView]);
-
   const isLoadingLogView = loadLogViewRequest.state === 'pending';
   const isResolvingLogView = resolveLogViewRequest.state === 'pending';
   const isLoadingLogViewStatus = loadLogViewStatusRequest.state === 'pending';
@@ -120,7 +116,7 @@ export const useLogView = ({
   return {
     logViewId,
     isUninitialized,
-    derivedDataView,
+    derivedDataView: resolvedLogView?.dataViewReference,
 
     // Failure states
     hasFailedLoading,
