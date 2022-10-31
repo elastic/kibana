@@ -39,6 +39,7 @@ import { snoozeRuleRoute } from './snooze_rule';
 import { unsnoozeRuleRoute } from './unsnooze_rule';
 import { runSoonRoute } from './run_soon';
 import { bulkDeleteRulesRoute } from './bulk_delete_rules';
+import { bulkEnableRulesRoute } from './bulk_enable_rules';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -78,6 +79,7 @@ export function defineRoutes(opts: RouteOptions) {
   updateRuleApiKeyRoute(router, licenseState);
   bulkEditInternalRulesRoute(router, licenseState);
   bulkDeleteRulesRoute({ router, licenseState });
+  bulkEnableRulesRoute({ router, licenseState });
   snoozeRuleRoute(router, licenseState);
   unsnoozeRuleRoute(router, licenseState);
   runSoonRoute(router, licenseState);

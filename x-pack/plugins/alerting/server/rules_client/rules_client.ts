@@ -1775,8 +1775,8 @@ export class RulesClient {
         RuleAuditAction: RuleAuditAction.DELETE,
       },
       ENABLE: {
-        WriteOperation: WriteOperations.BulkDelete,
-        RuleAuditAction: RuleAuditAction.DELETE,
+        WriteOperation: WriteOperations.BulkEnable,
+        RuleAuditAction: RuleAuditAction.ENABLE,
       },
     };
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
@@ -1793,6 +1793,7 @@ export class RulesClient {
             terms: [
               { field: 'alert.attributes.alertTypeId' },
               { field: 'alert.attributes.consumer' },
+              // { field: 'alert.attributes.actions' },
             ],
           },
         },
@@ -1801,14 +1802,14 @@ export class RulesClient {
 
     if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
       throw Boom.badRequest(
-        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk delete`
+        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk ${action.toLocaleLowerCase()}`
       );
     }
 
     const buckets = aggregations?.alertTypeId.buckets;
 
     if (buckets === undefined || buckets?.length === 0) {
-      throw Boom.badRequest('No rules found for bulk delete');
+      throw Boom.badRequest(`No rules found for bulk ${action.toLocaleLowerCase()}`);
     }
 
     await pMap(
@@ -1823,7 +1824,7 @@ export class RulesClient {
             entity: AlertingAuthorizationEntity.Rule,
           });
           if (action === 'ENABLE') {
-            if (actions.length) {
+            if (actions?.length) {
               await this.actionsAuthorization.ensureAuthorized('execute');
             }
           }
