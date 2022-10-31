@@ -43,7 +43,7 @@ then view the results.
 and you'll get suggestions for agents by name, ID, platform, and policy.
 . Specify the query or pack to run:
 ** *Query*: Select a saved query or enter a new one in the text box. After you enter the query, you can expand the **Advanced** section to view or set <<osquery-map-fields,mapped ECS fields>> included in the results from the live query. Mapping ECS fields is optional.
-** *Pack*: Select from query packs that have been loaded and activated. After you select a pack, all of the queries in the pack are displayed.
+** *Pack*: Select from available query packs. After you select a pack, all of the queries in the pack are displayed.
 +
 TIP: Refer to <<osquery-prebuilt-packs,prebuilt packs>> to learn about using and managing Elastic prebuilt packs.
 +
@@ -173,13 +173,14 @@ For information about the prebuilt packs that are available, refer to <<prebuilt
 [[load-prebuilt-packs]]
 ==== Load and activate prebuilt Elastic packs
 
+Follow these steps to load and turn on new or updated prebuilt packs:
+
 . Go to *Packs*, and then click *Load Elastic prebuilt packs*.
+. For each pack that you want to activate and schedule:
+
+* Turn on the *Active* toggle to ensure the pack runs continuously.
 +
-NOTE: This option is only available if new or updated prebuilt packs are available.
-
-. For each pack that you want to schedule:
-
-* Enable the option to make the pack *Active*.
+NOTE: You must manually run inactive packs.
 
 * Click the pack name, then *Edit*.
 

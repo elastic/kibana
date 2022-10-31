@@ -47,8 +47,6 @@
 /x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
 /x-pack/test/api_integration/apis/lens/ @elastic/kibana-vis-editors
 /test/functional/apps/visualize/ @elastic/kibana-vis-editors
-/src/plugins/unified_field_list/ @elastic/kibana-vis-editors
-/test/api_integration/apis/unified_field_list/ @elastic/kibana-vis-editors
 
 # Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-services
@@ -784,6 +782,9 @@ packages/core/integrations/core-integrations-browser-mocks @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-browser @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-browser-internal @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-browser-mocks @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-server @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-server-internal @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-server-mocks @elastic/kibana-core
 packages/core/logging/core-logging-server @elastic/kibana-core
 packages/core/logging/core-logging-server-internal @elastic/kibana-core
 packages/core/logging/core-logging-server-mocks @elastic/kibana-core
@@ -807,6 +808,9 @@ packages/core/plugins/core-plugins-base-server-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-browser @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-mocks @elastic/kibana-core
+packages/core/plugins/core-plugins-server @elastic/kibana-core
+packages/core/plugins/core-plugins-server-internal @elastic/kibana-core
+packages/core/plugins/core-plugins-server-mocks @elastic/kibana-core
 packages/core/preboot/core-preboot-server @elastic/kibana-core
 packages/core/preboot/core-preboot-server-internal @elastic/kibana-core
 packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core
