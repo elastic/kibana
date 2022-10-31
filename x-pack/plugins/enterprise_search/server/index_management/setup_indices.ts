@@ -160,7 +160,7 @@ const indices: IndexDefinition[] = [
     mappings: {
       _meta: {
         pipeline: defaultConnectorsPipelineMeta,
-        version: '1',
+        version: 1,
       },
       properties: connectorMappingsProperties,
     },
