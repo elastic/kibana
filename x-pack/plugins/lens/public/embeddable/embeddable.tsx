@@ -659,6 +659,7 @@ export class Embeddable
     this.renderComplete.dispatchInProgress();
 
     const input = this.getInput();
+
     render(
       <KibanaThemeProvider theme$={this.deps.theme.theme$}>
         <ExpressionWrapper
@@ -670,7 +671,6 @@ export class Embeddable
           variables={{
             embeddableTitle: this.getTitle(),
             ...(input.palette ? { theme: { palette: input.palette } } : {}),
-            metricAlignment: input.metricAlignment,
           }}
           searchSessionId={this.externalSearchContext.searchSessionId}
           handleEvent={this.handleEvent}
