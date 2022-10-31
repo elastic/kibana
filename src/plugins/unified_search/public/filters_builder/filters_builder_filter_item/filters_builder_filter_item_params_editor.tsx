@@ -61,6 +61,18 @@ export function ParamsEditor<TParams = unknown>({
   switch (operator?.type) {
     case 'exists':
       return null;
+    case 'phrase':
+      Component = (
+        <PhraseValueInput
+          compressed
+          indexPattern={dataView}
+          field={field!}
+          value={typeof params === 'string' ? params : undefined}
+          onChange={onParamsChange}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          fullWidth
+        />
+      );
     case 'phrases':
       Component = (
         <PhrasesValuesInput
