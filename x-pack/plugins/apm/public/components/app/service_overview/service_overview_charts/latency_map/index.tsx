@@ -8,9 +8,10 @@
 import React from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
 import { EmbeddedMap } from './embedded_map';
 
-export function LatencyMap() {
+export function LatencyMap({ filters }: { filters: Filter[] }) {
   return (
     <>
       <EuiTitle size="xs">
@@ -21,7 +22,7 @@ export function LatencyMap() {
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EmbeddedMap />
+      <EmbeddedMap filters={filters} />
     </>
   );
 }

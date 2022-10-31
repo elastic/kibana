@@ -23,21 +23,19 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
+import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLayerList } from './get_layer_list';
-import { useMapFilters } from './use_map_filters';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 
-export function EmbeddedMapComponent() {
+export function EmbeddedMapComponent({ filters }: { filters: Filter[] }) {
   const {
     query: { rangeFrom, rangeTo, kuery },
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const [error, setError] = useState<boolean>();
-
-  const mapFilters = useMapFilters();
 
   const [embeddable, setEmbeddable] = useState<
     MapEmbeddable | ErrorEmbeddable | undefined
@@ -94,7 +92,7 @@ export function EmbeddedMapComponent() {
             defaultMessage: 'Latency by country',
           }
         ),
-        filters: mapFilters,
+        filters,
         viewMode: ViewMode.VIEW,
         isLayerTOCOpen: false,
         query: {
@@ -132,7 +130,7 @@ export function EmbeddedMapComponent() {
   useEffect(() => {
     if (embeddable) {
       embeddable.updateInput({
-        filters: mapFilters,
+        filters,
         query: {
           query: kuery,
           language: 'kuery',
@@ -143,7 +141,7 @@ export function EmbeddedMapComponent() {
         },
       });
     }
-  }, [start, end, kuery, mapFilters, embeddable]);
+  }, [start, end, kuery, filters, embeddable]);
 
   return (
     <>
