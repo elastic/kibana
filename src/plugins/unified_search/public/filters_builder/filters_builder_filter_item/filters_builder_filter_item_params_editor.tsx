@@ -73,6 +73,7 @@ export function ParamsEditor<TParams = unknown>({
           fullWidth
         />
       );
+      break;
     case 'phrases':
       Component = (
         <PhrasesValuesInput

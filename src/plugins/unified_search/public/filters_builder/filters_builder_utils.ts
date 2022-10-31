@@ -343,7 +343,6 @@ function updateWithIsOperator(
   };
 }
 
-// @todo: not for merge, just testing the CI
 function updateWithRangeOperator(
   filter: Filter,
   operator: Operator,
