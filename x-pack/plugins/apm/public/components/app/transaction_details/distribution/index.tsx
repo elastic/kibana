@@ -21,7 +21,7 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DurationDistributionChartWithScrubber } from '../../../shared/charts/duration_distribution_chart_with_scrubber';
 import { HeightRetainer } from '../../../shared/height_retainer';
-import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
+import { fromQuery, push, toQuery } from '../../../shared/links/url_helpers';
 import { TransactionTab } from '../waterfall_with_summary/transaction_tabs';
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
 import { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
@@ -43,7 +43,7 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, showCriticalPath },
   } = useApmParams('/services/{serviceName}/transactions/view');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -119,6 +119,14 @@ export function TransactionDistribution({
           waterfallFetchResult={waterfallFetchResult}
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
           traceSamples={traceSamplesFetchResult.data?.traceSamples}
+          showCriticalPath={showCriticalPath}
+          onShowCriticalPathChange={(nextShowCriticalPath) => {
+            push(history, {
+              query: {
+                showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
+              },
+            });
+          }}
         />
       </div>
     </HeightRetainer>
