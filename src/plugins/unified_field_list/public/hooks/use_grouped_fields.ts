@@ -75,6 +75,13 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     // if field existence information changed, reload the data view too
   }, [dataViewId, services.dataViews, setDataView, hasFieldDataHandler]);
 
+  // important when switching from a known dataViewId to no data view (like in text-based queries)
+  useEffect(() => {
+    if (dataView && !dataViewId) {
+      setDataView(null);
+    }
+  }, [dataView, setDataView, dataViewId]);
+
   const unfilteredFieldGroups: FieldListGroups<T> = useMemo(() => {
     const containsData = (field: T) => {
       if (!dataViewId || !dataView) {
