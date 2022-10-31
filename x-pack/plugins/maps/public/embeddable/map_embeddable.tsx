@@ -780,6 +780,8 @@ export class MapEmbeddable
         const isRendered = !isLoading && firstLayerWithError === undefined;
         if (isLoading) {
           this.renderComplete.dispatchInProgress();
+        } else if (firstLayerWithError) {
+          this.renderComplete.dispatchError();
         } else if (!isLoading && isRendered) {
           this.renderComplete.dispatchComplete();
         }
