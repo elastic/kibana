@@ -415,3 +415,8 @@ This page has been deleted. Refer to <<document-explorer>>.
 == Advanced Osquery
 
 This page has been deleted. Refer to <<osquery>>.
+
+[role="exclude",id="managing-alerts-and-actions"]
+== Alerts and Actions
+
+This page has been deleted. Refer to <<alerting-getting-started>>.
