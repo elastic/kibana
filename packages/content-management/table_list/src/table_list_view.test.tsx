@@ -45,7 +45,6 @@ const requiredProps: TableListViewProps = {
   tableListTitle: 'test title',
   findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
   getDetailViewLink: () => 'http://elastic.co',
-  inspector: { enabled: false },
 };
 
 describe('TableListView', () => {
@@ -505,6 +504,53 @@ describe('TableListView', () => {
         'Recently updated ',
         'Least recently updated ',
       ]);
+    });
+  });
+
+  describe('inspector', () => {
+    const setupInspector = registerTestBed<string, TableListViewProps>(
+      WithServices<TableListViewProps>(TableListView),
+      {
+        defaultProps: { ...requiredProps },
+        memoryRouter: { wrapComponent: false },
+      }
+    );
+
+    const hits = [
+      {
+        id: '123',
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)),
+        attributes: {
+          title: 'Item 1',
+          description: 'Item 1 description',
+        },
+      },
+      {
+        id: '456',
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)),
+        attributes: {
+          title: 'Item 2',
+          description: 'Item 2 description',
+        },
+      },
+    ];
+
+    test('should have an "inpect" button if the inspector is enabled', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupInspector({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          inspector: { enabled: true },
+        });
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      expect(tableCellsValues[0][2]).toBe('Inspect Item 1');
+      expect(tableCellsValues[1][2]).toBe('Inspect Item 2');
     });
   });
 });
