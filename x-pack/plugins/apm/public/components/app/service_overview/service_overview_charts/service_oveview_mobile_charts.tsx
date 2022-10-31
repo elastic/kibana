@@ -200,7 +200,7 @@ export function ServiceOverviewMobileCharts({
                       <EuiTitle size="xs">
                         <h2>
                           {i18n.translate(
-                            'xpack.apm.serviceOverview.mostUsedVersion',
+                            'xpack.apm.serviceOverview.mostUsedNCT',
                             {
                               defaultMessage: 'Most used NCT',
                             }
