@@ -16,7 +16,6 @@ import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
 import { EntityType } from '@kbn/timelines-plugin/common';
-import { TableId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
@@ -25,6 +24,7 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
+import { TableId } from '../../../../common/types';
 
 jest.mock('../../lib/kibana');
 

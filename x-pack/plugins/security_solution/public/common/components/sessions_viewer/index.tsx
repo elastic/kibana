@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { EVENT_ACTION } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { ENTRY_SESSION_ENTITY_ID_PROPERTY, EventAction } from '@kbn/session-view-plugin/public';
+import { TableId } from '../../../../common/types';
 import type { SessionsComponentsProps } from './types';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import { StatefulEventsViewer } from '../events_viewer';
@@ -20,7 +21,6 @@ import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../hooks/use_license';
-import { TableId } from '../../../../common/types/timeline';
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 import { dataTableActions } from '../../store/data_table';
 

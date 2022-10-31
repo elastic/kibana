@@ -7,7 +7,7 @@
 
 import type { Filter } from '@kbn/es-query';
 
-import { TableId, TimelineId } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import {
   alertEvents,
   allEvents,
@@ -20,6 +20,7 @@ import {
   shouldIgnoreAlertFilters,
 } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { TableId } from '../../../../common/types';
 
 /** the following scopes are detection alert tables */
 const detectionAlertsTables = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];

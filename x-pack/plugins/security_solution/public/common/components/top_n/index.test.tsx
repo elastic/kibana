@@ -24,8 +24,9 @@ import { createStore } from '../../store';
 
 import type { Props } from './top_n';
 import { StatefulTopN } from '.';
-import { TableId, TimelineId } from '../../../../common/types/timeline';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { TimelineId } from '../../../../common/types/timeline';
+import { tGridReducer } from '../../store/data_table/reducer';
+import { TableId } from '../../../../common/types';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');

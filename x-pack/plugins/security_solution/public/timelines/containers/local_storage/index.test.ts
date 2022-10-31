@@ -16,10 +16,10 @@ import {
   addTableInStorage,
 } from '.';
 
-import { TableId } from '../../../../common/types/timeline';
 import { mockTGridModel, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import type { TGridModel } from '../../../common/store/data_table/model';
+import { TableId } from '../../../../common/types';
 
 jest.mock('../../../common/lib/kibana');
 

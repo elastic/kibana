@@ -42,13 +42,6 @@ export {
   stopPropagationAndPreventDefault,
 } from '../common/utils/accessibility';
 
-export {
-  convertKueryToElasticSearchQuery,
-  convertToBuildEsQuery,
-  escapeKuery,
-  escapeQueryValue,
-} from './components/utils/keury';
-
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {

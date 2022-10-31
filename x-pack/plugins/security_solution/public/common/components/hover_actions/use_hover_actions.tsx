@@ -7,13 +7,13 @@
 
 import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
 import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
-import { TableContext } from '@kbn/timelines-plugin/public';
 import { TimelineContext } from '../../../timelines/components/timeline';
 import { HoverActions } from '.';
 
 import type { DataProvider } from '../../../../common/types';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';
 import { getDraggableId } from '../drag_and_drop/helpers';
+import { TableContext } from '../events_viewer/shared';
 
 const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
   const links = draggableElement?.querySelectorAll('.euiLink') ?? [];

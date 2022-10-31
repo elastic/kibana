@@ -7,9 +7,9 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ColumnHeaderOptions, TableIdLiteral } from '../../../../common/types';
 import type { DataTablesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
-import type { ColumnHeaderOptions, TableIdLiteral } from '../../../../common/types/timeline';
 import type { TGridModel } from '../../../common/store/data_table/model';
 
 export const LOCAL_STORAGE_TABLE_KEY = 'securityDataTable';

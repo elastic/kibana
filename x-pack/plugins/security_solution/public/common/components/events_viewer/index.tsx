@@ -16,7 +16,7 @@ import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type { DataTableCellAction } from '../../../../common/data_table/columns';
-import type { ControlColumnProps } from '../../../../common/types';
+import type { ControlColumnProps, TableId } from '../../../../common/types';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
@@ -54,7 +54,6 @@ import { getDefaultViewSelection, resolverIsShowing, getCombinedFilterQuery } fr
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../event_rendered_view/helpers';
 import { useTimelineEvents } from './use_timelines_events';
 import { TableContext, TGridEmpty, TGridLoading } from './shared';
-import type { TableId } from '../../store/data_table/types';
 import { InspectButton } from '../data_table/inspect';
 import { StatefulDataTableComponent } from '../data_table';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';

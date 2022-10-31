@@ -197,38 +197,7 @@ export const PreviewHistogram = ({
       <EuiSpacer />
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
-          {timelinesUi.getTGrid<'embedded'>({
-            appId: APP_UI_ID,
-            browserFields,
-            columns,
-            deletedEventIds,
-            disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            // Fix for https://github.com/elastic/kibana/issues/135511, until we start writing proper
-            // simulated @timestamp values to the preview alerts. The preview alerts will have @timestamp values
-            // close to the server's `now` time, but the client clock could be out of sync with the server. So we
-            // avoid computing static dates for this time range filter and instead pass in a small relative time window.
-            end: 'now+5m',
-            start: 'now-5m',
-            entityType: 'events',
-            filters: [],
-            globalFullScreen,
-            hasAlertsCrud: false,
-            id: TableId.rulePreview,
-            indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
-            indexPattern: selectedIndexPattern,
-            isLive: false,
-            isLoadingIndexPattern,
-            itemsPerPage,
-            itemsPerPageOptions,
-            query: { query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' },
-            renderCellValue: PreviewRenderCellValue,
-            rowRenderers: defaultRowRenderers,
-            runtimeMappings,
-            setQuery: () => {},
-            sort,
-            type: 'embedded',
-            leadingControlColumns: getPreviewTableControlColumn(1.5),
-          })}
+          
         </InspectButtonContainer>
       </FullScreenContainer>
       <DetailsPanel

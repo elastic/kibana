@@ -11,6 +11,8 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { combineQueries } from '../../../common/lib/kuery';
+import type { AlertWorkflowStatus } from '../../../common/types';
 import type { TableIdLiteral } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
@@ -27,7 +29,6 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { combineQueries } from '../../../common/lib/kuery';
 import { getColumns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { AdditionalFiltersAction } from './additional_filters_action';
 import {
@@ -195,7 +196,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   return (
     <StatefulEventsViewer
       additionalFilters={additionalFiltersComponent}
-      currentFilter={filterGroup}
+      currentFilter={filterGroup as AlertWorkflowStatus}
       defaultCellActions={defaultCellActions}
       defaultModel={getAlertsDefaultModel(license)}
       end={to}

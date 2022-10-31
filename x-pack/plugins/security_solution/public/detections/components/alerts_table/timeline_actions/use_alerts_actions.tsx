@@ -8,7 +8,8 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useBulkActionItems } from '@kbn/timelines-plugin/public';
+import type { AlertWorkflowStatus } from '../../../../common/types';
+import { useBulkActionItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import { getScopedActions } from '../../../../helpers';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -61,7 +62,7 @@ export const useAlertsActions = ({
 
   const actionItems = useBulkActionItems({
     eventIds: [eventId],
-    currentStatus: alertStatus,
+    currentStatus: alertStatus as AlertWorkflowStatus,
     indexName,
     setEventsLoading,
     setEventsDeleted,
