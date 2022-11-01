@@ -22,6 +22,7 @@ import {
   isThreatMatchRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
+import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import type { FieldValueQueryBar } from '../query_bar';
 import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
@@ -601,7 +602,7 @@ export const schema: FormSchema<DefineStepRule> = {
             return;
           }
           return fieldValidators.maxLengthField({
-            length: 3,
+            length: MAX_NUMBER_OF_NEW_TERMS_FIELDS,
             message: i18n.translate(
               'xpack.securitySolution.detectionEngine.validations.stepDefineRule.newTermsFieldsMax',
               {
