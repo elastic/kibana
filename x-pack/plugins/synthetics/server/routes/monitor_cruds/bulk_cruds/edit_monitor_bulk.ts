@@ -106,7 +106,7 @@ export const syncEditedMonitorBulk = async ({
         formatTelemetryUpdateEvent(
           editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
           previousMonitor,
-          server.kibanaVersion,
+          server.stackVersion,
           Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
           errors
         )
