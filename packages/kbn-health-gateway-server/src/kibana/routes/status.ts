@@ -51,20 +51,20 @@ async function fetchKibanaStatuses({
   const requests = await Promise.allSettled(
     kibanaConfig.hosts.map(async (host) => {
       log.debug(`Fetching response from ${host}${KIBANA_STATUS_ROUTE}`);
-      const response = await fetch(`${host}${KIBANA_STATUS_ROUTE}`);
-      const responseJson = await response.json();
-      log.info(
-        `Got response from ${host}${KIBANA_STATUS_ROUTE}: ${JSON.stringify(
-          responseJson.status.overall
-        )}`
-      );
+      const response = fetch(`${host}${KIBANA_STATUS_ROUTE}`).then((res) => res.json());
       return response;
     })
   );
 
   return requests.map((r, i) => {
     if (r.status === 'rejected') {
-      log.error(`Unable to retrieve status from [${kibanaConfig.hosts[i]}]`);
+      log.error(`Unable to retrieve status from ${kibanaConfig.hosts[i]}${KIBANA_STATUS_ROUTE}`);
+    } else {
+      log.info(
+        `Got response from ${kibanaConfig.hosts[i]}${KIBANA_STATUS_ROUTE}: ${JSON.stringify(
+          r.value.status?.overall ? r.value.status.overall : r.value
+        )}`
+      );
     }
     return r;
   });
