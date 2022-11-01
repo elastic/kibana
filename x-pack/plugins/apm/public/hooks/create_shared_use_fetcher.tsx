@@ -50,16 +50,7 @@ export function createSharedUseFetcher<TEndpoint extends APIEndpoint>(
         [params]
       );
 
-      const memoizedResult = useMemo(() => {
-        return {
-          data: result.data,
-          error: result.error,
-          status: result.status,
-          refetch: result.refetch,
-        };
-      }, [result.data, result.error, result.status, result.refetch]) as unknown;
-
-      return memoizedResult as ReturnType<
+      return result as ReturnType<
         SharedUseFetcher<TEndpoint>['useFetcherResult']
       >;
     },
