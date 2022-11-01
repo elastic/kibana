@@ -21,6 +21,16 @@ export interface QueryParams {
   dateEnd: string;
 }
 
+export const fetchMonitorLastRun = async ({
+  monitorId,
+  locationId,
+}: {
+  monitorId: string;
+  locationId: string;
+}): Promise<PingsResponse> => {
+  return fetchMonitorRecentPings({ monitorId, locationId, size: 1 });
+};
+
 export const fetchMonitorRecentPings = async ({
   monitorId,
   locationId,
