@@ -92,7 +92,7 @@ export async function queryMonitorStatus(
                       },
                     ],
                     _source: {
-                      includes: ['@timestamp', 'summary'],
+                      includes: ['@timestamp', 'summary', 'monitor', 'observer', 'config_id'],
                     },
                   },
                 },
@@ -116,7 +116,7 @@ export async function queryMonitorStatus(
         const upCount = status.hits.hits[0]._source.summary.up;
         const configId = status.hits.hits[0]._source.config_id;
         const heartbeatId = status.hits.hits[0]._source.monitor.id;
-        const locationName = status.hits.hits[0]._source.observer.geo.name;
+        const locationName = status.hits.hits[0]._source.observer?.geo?.name;
         if (upCount > 0) {
           up += 1;
           upConfigs.push({

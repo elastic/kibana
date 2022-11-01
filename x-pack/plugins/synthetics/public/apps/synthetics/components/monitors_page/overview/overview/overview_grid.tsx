@@ -50,7 +50,7 @@ export const OverviewGrid = () => {
   const intersectionRef = useRef(null);
   const intersection = useIntersection(intersectionRef, {
     root: null,
-    rootMargin: '0px 640px', // Height of 4 rows of monitors, minus the gutters
+    rootMargin: '640px', // Height of 4 rows of monitors, minus the gutters
     threshold: 0.1,
   });
   const hasIntersected = intersection && intersection.intersectionRatio > 0;

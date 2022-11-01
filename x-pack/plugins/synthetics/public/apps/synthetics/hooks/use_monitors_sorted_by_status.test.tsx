@@ -62,8 +62,8 @@ describe('useMonitorsSortedByStatus', () => {
                   location: location2.label,
                 },
                 {
-                  configId: 'test-monitor-2',
-                  heartbeatId: 'test-monitor-2',
+                  configId: 'test-monitor-3',
+                  heartbeatId: 'test-monitor-3',
                   location: location2.label,
                 },
               ],
@@ -79,8 +79,8 @@ describe('useMonitorsSortedByStatus', () => {
                   location: location1.label,
                 },
                 {
-                  configId: 'test-monitor-2',
-                  heartbeatId: 'test-monitor-2',
+                  configId: 'test-monitor-3',
+                  heartbeatId: 'test-monitor-3',
                   location: location1.label,
                 },
               ],
