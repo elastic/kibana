@@ -20,6 +20,8 @@ import {
   ALERT_SEVERITY,
   KIBANA_NAMESPACE,
 } from '@kbn/rule-data-utils';
+import type { SearchHit } from '../../../../../../../common/search_strategy';
+import type { Ecs } from '../../../../../../../common/ecs';
 import { TimelineId } from '../../../../../../../common/types';
 import { SeverityBadge } from '../../../../../components/rules/severity_badge';
 import { getEnrichedFieldInfo } from '../../../../../../common/components/event_details/helpers';
@@ -32,7 +34,7 @@ import {
   RULE_PANEL_TITLE,
   SEVERITY_TITLE,
 } from '../translation';
-import { getMitreTitleAndDescription } from '../get_mitre_threat_component';
+import { getMitreComponentParts } from '../../../../../mitre/get_mitre_threat_component';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import { SummaryPanel } from '../wrappers';
 import { RulePanelActions, RULE_PANEL_ACTIONS_CLASS } from './rule_panel_actions';
@@ -41,6 +43,7 @@ export interface RulePanelProps {
   data: TimelineEventsDetailsItem[];
   id: string;
   browserFields: SelectedDataView['browserFields'];
+  searchHit?: SearchHit;
 }
 
 const threatTacticContainerStyles = css`
@@ -70,9 +73,9 @@ const RuleSection: React.FC<RuleSectionProps> = ({
   </EuiFlexItem>
 );
 
-export const RulePanel = React.memo(({ data, id, browserFields }: RulePanelProps) => {
+export const RulePanel = React.memo(({ data, id, searchHit, browserFields }: RulePanelProps) => {
   const ruleUuid = useMemo(() => getTimelineEventData(ALERT_RULE_UUID, data), [data]);
-  const threatDetails = useMemo(() => getMitreTitleAndDescription(data), [data]);
+  const threatDetails = useMemo(() => getMitreComponentParts(searchHit), [searchHit]);
   const alertRiskScore = useMemo(() => getTimelineEventData(ALERT_RISK_SCORE, data), [data]);
   const alertSeverity = useMemo(
     () => getTimelineEventData(ALERT_SEVERITY, data) as Severity,

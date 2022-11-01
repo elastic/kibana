@@ -39,7 +39,6 @@ export const useOpenAlertDetailsAction = ({ ruleId, closePopover, alertId }: Pro
     alertDetailsActionItems.push(
       <EuiContextMenuItem
         key="open-alert-details-item"
-        icon="popout"
         data-test-subj="open-alert-details-page-menu-item"
         onClick={onClick}
       >

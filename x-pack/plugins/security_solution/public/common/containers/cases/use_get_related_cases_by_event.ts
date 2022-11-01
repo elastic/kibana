@@ -6,11 +6,22 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
+import type { CaseStatuses } from '@kbn/cases-plugin/common';
 import { useKibana, useToasts } from '../../lib/kibana';
 import { CASES_ERROR_TOAST } from '../../components/event_details/insights/translations';
 import { APP_ID } from '../../../../common/constants';
 
-type RelatedCases = Array<{ id: string; title: string }>;
+export type RelatedCases = Array<{
+  id: string;
+  title: string;
+  description: string;
+  status: CaseStatuses;
+  createdAt: string;
+  totals: {
+    alerts: number;
+    userComments: number;
+  };
+}>;
 
 export const useGetRelatedCasesByEvent = (eventId: string) => {
   const {
