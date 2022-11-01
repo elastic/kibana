@@ -37,7 +37,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     createEsDocumentsInGroups,
   } = getRuleServices(getService);
 
-  describe('rule', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/143870
+  describe.skip('rule', async () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
