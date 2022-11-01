@@ -106,9 +106,7 @@ describe('migration with waitForCompletion=true', () => {
 
         expect(
           records.find((rec) =>
-            rec.message.startsWith(
-              `[.kibana] WAIT_FOR_MIGRATION_COMPLETION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT`
-            )
+            rec.message.startsWith(`[.kibana] WAIT_FOR_MIGRATION_COMPLETION -> DONE`)
           )
         ).toBeDefined();
 

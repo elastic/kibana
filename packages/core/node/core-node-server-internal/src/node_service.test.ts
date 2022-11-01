@@ -124,7 +124,7 @@ describe('NodeService', () => {
 
       service = new NodeService(coreContext);
       await service.preboot({ loggingSystem: logger });
-      const { roles } = await service.start();
+      const { roles } = service.start();
 
       expect(roles.backgroundTasks).toBe(true);
       expect(roles.ui).toBe(true);
@@ -136,7 +136,7 @@ describe('NodeService', () => {
 
       service = new NodeService(coreContext);
       await service.preboot({ loggingSystem: logger });
-      const { roles } = await service.start();
+      const { roles } = service.start();
 
       expect(roles.backgroundTasks).toBe(true);
       expect(roles.ui).toBe(false);
@@ -148,7 +148,7 @@ describe('NodeService', () => {
 
       service = new NodeService(coreContext);
       await service.preboot({ loggingSystem: logger });
-      const { roles } = await service.start();
+      const { roles } = service.start();
 
       expect(roles.backgroundTasks).toBe(false);
       expect(roles.ui).toBe(true);
@@ -160,7 +160,7 @@ describe('NodeService', () => {
 
       service = new NodeService(coreContext);
       await service.preboot({ loggingSystem: logger });
-      const { roles } = await service.start();
+      const { roles } = service.start();
 
       expect(roles.backgroundTasks).toBe(true);
       expect(roles.ui).toBe(true);
@@ -170,7 +170,7 @@ describe('NodeService', () => {
       coreContext = mockCoreContext.create({ logger, configService });
 
       service = new NodeService(coreContext);
-      expect(service.start()).rejects.toThrowErrorMatchingInlineSnapshot(
+      expect(() => service.start()).toThrowErrorMatchingInlineSnapshot(
         `"NodeService#start() can only be called after NodeService#preboot()"`
       );
     });
