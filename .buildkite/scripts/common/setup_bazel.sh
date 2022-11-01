@@ -43,6 +43,6 @@ EOF
 fi
 
 if [[ "$BAZEL_CACHE_MODE" != @(gcs|populate-local-gcs|none|) ]]; then
-  echo "invalid value for BAZEL_CACHE_MODE received ($BAZEL_CACHE_MODE), expected one of [gcs,populate-local-gcs|buildbuddy,none]"
+  echo "invalid value for BAZEL_CACHE_MODE received ($BAZEL_CACHE_MODE), expected one of [gcs,populate-local-gcs|none]"
   exit 1
 fi
