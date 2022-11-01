@@ -9,8 +9,8 @@ import React, { memo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useGetEndpointDetails } from '../../hooks';
-import { HostStatus } from '../../../../common/endpoint/types';
+import { useGetEndpointDetails } from '../../../hooks';
+import { HostStatus } from '../../../../../common/endpoint/types';
 
 interface OfflineCalloutProps {
   endpointId: string;
