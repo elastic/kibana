@@ -27,12 +27,7 @@ import {
 } from '../shared_imports';
 import { AppDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
-import {
-  EsDeprecations,
-  EsDeprecationLogs,
-  KibanaDeprecations,
-  Overview,
-} from './components';
+import { EsDeprecations, EsDeprecationLogs, KibanaDeprecations, Overview } from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
