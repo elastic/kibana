@@ -10,7 +10,6 @@ import {
   validateHistoryWindowStart,
   transformBucketsToValues,
   getAggregationField,
-  prepareNewTermsFieldsValues,
   decodeMatchedValues,
   AGG_FIELD_NAME,
 } from './utils';
@@ -139,19 +138,6 @@ describe('new terms utils', () => {
         'host-0',
         '127.0.0.1',
       ]);
-    });
-  });
-
-  describe('prepareNewTermsFieldsValues', () => {
-    it('should return correct value for a single new terms field', () => {
-      expect(prepareNewTermsFieldsValues(['source.ip'], ['127.0.0.1'])).toEqual([
-        'source.ip: 127.0.0.1',
-      ]);
-    });
-    it('should return correct value for multiple new terms fields', () => {
-      expect(
-        prepareNewTermsFieldsValues(['source.host', 'source.ip'], ['host-0', '127.0.0.1'])
-      ).toEqual(['source.host: host-0', 'source.ip: 127.0.0.1']);
     });
   });
 });

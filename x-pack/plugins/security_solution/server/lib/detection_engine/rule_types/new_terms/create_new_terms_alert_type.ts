@@ -34,7 +34,6 @@ import {
   getNewTermsRuntimeMappings,
   getAggregationField,
   decodeMatchedValues,
-  prepareNewTermsFieldsValues,
 } from './utils';
 import {
   addToSearchAfterReturn,
@@ -286,7 +285,6 @@ export const createNewTermsAlertType = (
               return {
                 event: bucket.docs.hits.hits[0],
                 newTerms,
-                newTermsFieldsValues: prepareNewTermsFieldsValues(params.newTermsFields, newTerms),
               };
             });
 

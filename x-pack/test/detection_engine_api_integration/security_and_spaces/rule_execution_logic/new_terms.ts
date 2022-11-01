@@ -79,7 +79,6 @@ export default ({ getService }: FtrProviderContext) => {
       expect(alerts.hits.hits.length).eql(1);
       expect(removeRandomValuedProperties(alerts.hits.hits[0]._source)).eql({
         'kibana.alert.new_terms': ['zeek-newyork-sha-aa8df15'],
-        'kibana.alert.new_terms_fields_values': ['host.name: zeek-newyork-sha-aa8df15'],
         'kibana.alert.rule.category': 'New Terms Rule',
         'kibana.alert.rule.consumer': 'siem',
         'kibana.alert.rule.name': 'Query with a rule id',
@@ -228,31 +227,6 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
       expect(previewAlertsOrderedByHostIp[2]._source?.['kibana.alert.new_terms']).eql([
         'fe80::24ce:f7ff:fede:a571',
-      ]);
-    });
-
-    it('should generate combined property that combines new terms fields and values', async () => {
-      const rule: NewTermsRuleCreateProps = {
-        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
-        new_terms_fields: ['host.name', 'host.ip'],
-        from: '2019-02-19T20:42:00.000Z',
-        history_window_start: '2019-01-19T20:42:00.000Z',
-      };
-
-      const { previewId } = await previewRule({ supertest, rule });
-      const previewAlerts = await getPreviewAlerts({ es, previewId });
-
-      expect(previewAlerts.length).eql(3);
-
-      const newTermsFieldsValues = orderBy(
-        previewAlerts.map((item) => item._source?.['kibana.alert.new_terms_fields_values']),
-        ['0', '1']
-      );
-
-      expect(newTermsFieldsValues).eql([
-        ['host.name: zeek-newyork-sha-aa8df15', 'host.ip: 10.10.0.6'],
-        ['host.name: zeek-newyork-sha-aa8df15', 'host.ip: 157.230.208.30'],
-        ['host.name: zeek-newyork-sha-aa8df15', 'host.ip: fe80::24ce:f7ff:fede:a571'],
       ]);
     });
 

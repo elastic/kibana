@@ -116,7 +116,7 @@ export const ALERTS_HEADERS_THRESHOLD_CARDINALITY = i18n.translate(
   }
 );
 
-export const ALERTS_HEADERS_NEW_TERMS_FIELDS_VALUES = i18n.translate(
+export const ALERTS_HEADERS_NEW_TERMS = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.newTermsFieldsValues',
   {
     defaultMessage: 'New Terms',

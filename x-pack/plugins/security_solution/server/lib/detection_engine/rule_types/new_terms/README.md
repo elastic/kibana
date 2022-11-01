@@ -21,12 +21,6 @@ Phase 3: Any new terms from phase 2 are processed and the first document to cont
 New terms alerts have following fields: 
 - `kibana.alert.new_terms`. This field contains the detected term that caused the alert. A single source document may have multiple new terms if the source document contains an array of values in the specified field. In that case, multiple alerts will be generated from the single source document - one for each new value.
 
-- `kibana.alert.new_terms_fields_values`. It contains the detected new term and corresponding field, combined in one string and split by colons. For example:
-```JSON
-...
-"kibana.alert.new_terms_fields_values": ["host.name: host-0", "host.ip: 127.0.01"],
-...
-```
 
 ## Timestamp override and fallback
 

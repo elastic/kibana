@@ -142,14 +142,3 @@ export const decodeMatchedValues = (newTermsFields: string[], bucketKey: string 
 
   return values;
 };
-
-/**
- * returns new term fields and values in following format
- * @returns fields(['field1', 'field2'] and values(['new_value1', 'new_value2']) will result in ['field1: new_value1', 'field2: new_value2']
- */
-export const prepareNewTermsFieldsValues = (
-  newTermsFields: string[],
-  newTermsValues: Array<string | number>
-) => {
-  return newTermsFields.map((field, i) => [field, newTermsValues[i]].join(': '));
-};

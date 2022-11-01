@@ -13,10 +13,7 @@ import type {
   NewTermsFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../../common/detection_engine/schemas/alerts';
-import {
-  ALERT_NEW_TERMS,
-  ALERT_NEW_TERMS_FIELDS_VALUES,
-} from '../../../../../../common/field_maps/field_names';
+import { ALERT_NEW_TERMS } from '../../../../../../common/field_maps/field_names';
 import type { ConfigType } from '../../../../../config';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../../../signals/reason_formatters';
@@ -26,7 +23,6 @@ import { buildBulkBody } from './build_bulk_body';
 export interface EventsAndTerms {
   event: estypes.SearchHit<SignalSource>;
   newTerms: Array<string | number | null>;
-  newTermsFieldsValues: string[];
 }
 
 export const wrapNewTermsAlerts = ({
@@ -69,7 +65,6 @@ export const wrapNewTermsAlerts = ({
       _source: {
         ...baseAlert,
         [ALERT_NEW_TERMS]: eventAndTerms.newTerms,
-        [ALERT_NEW_TERMS_FIELDS_VALUES]: eventAndTerms.newTermsFieldsValues,
         [ALERT_UUID]: id,
       },
     };
