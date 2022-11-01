@@ -36,7 +36,7 @@ describe('Embedded Map', () => {
       >
         <MockApmPluginContextWrapper>
           <KibanaContextProvider services={{ embeddable: mockEmbeddable }}>
-            <EmbeddedMap />
+            <EmbeddedMap filters={[]} />
           </KibanaContextProvider>
         </MockApmPluginContextWrapper>
       </MemoryRouter>

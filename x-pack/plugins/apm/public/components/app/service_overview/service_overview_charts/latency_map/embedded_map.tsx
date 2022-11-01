@@ -17,7 +17,6 @@ import {
   ErrorEmbeddable,
   ViewMode,
   isErrorEmbeddable,
-  EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
@@ -29,7 +28,7 @@ import { getLayerList } from './get_layer_list';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 
-export function EmbeddedMapComponent({ filters }: { filters: Filter[] }) {
+function EmbeddedMapComponent({ filters }: { filters: Filter[] }) {
   const {
     query: { rangeFrom, rangeTo, kuery },
   } = useApmParams('/services/{serviceName}/overview');
@@ -52,15 +51,11 @@ export function EmbeddedMapComponent({ filters }: { filters: Filter[] }) {
 
   useEffect(() => {
     async function setupEmbeddable() {
-      const factory:
-        | EmbeddableFactory<
-            MapEmbeddableInput,
-            MapEmbeddableOutput,
-            MapEmbeddable
-          >
-        | undefined = embeddablePlugin?.getEmbeddableFactory(
-        MAP_SAVED_OBJECT_TYPE
-      );
+      const factory = embeddablePlugin?.getEmbeddableFactory<
+        MapEmbeddableInput,
+        MapEmbeddableOutput,
+        MapEmbeddable
+      >(MAP_SAVED_OBJECT_TYPE);
 
       if (!factory) {
         setError(true);
@@ -81,6 +76,7 @@ export function EmbeddedMapComponent({ filters }: { filters: Filter[] }) {
             }
           ),
         });
+        return;
       }
 
       const input: MapEmbeddableInput = {
@@ -106,7 +102,7 @@ export function EmbeddedMapComponent({ filters }: { filters: Filter[] }) {
         hideFilterActions: true,
       };
 
-      const embeddableObject = await factory?.create(input);
+      const embeddableObject = await factory.create(input);
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
         const layerList = await getLayerList(maps);
         await embeddableObject.setLayerList(layerList);
