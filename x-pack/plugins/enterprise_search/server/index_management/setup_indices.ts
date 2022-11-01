@@ -28,15 +28,88 @@ interface IndexDefinition {
 }
 
 const connectorMappingsProperties: Record<string, MappingProperty> = {
-  api_key_id: {
-    type: 'keyword',
-  },
-  configuration: {
-    type: 'object',
-  },
+  api_key_id: { type: 'keyword' },
+  configuration: { type: 'object' },
+  description: { type: 'text' },
   error: { type: 'keyword' },
+  filtering: {
+    properties: {
+      active: {
+        properties: {
+          advanced_snippet: {
+            properties: {
+              created_at: { type: 'date' },
+              updated_at: { type: 'date' },
+              value: { type: 'object' },
+            },
+          },
+          rules: {
+            properties: {
+              created_at: { type: 'date' },
+              field: { type: 'keyword' },
+              id: { type: 'keyword' },
+              order: { type: 'short' },
+              policy: { type: 'keyword' },
+              rule: { type: 'keyword' },
+              updated_at: { type: 'date' },
+              value: { type: 'keyword' },
+            },
+          },
+          validation: {
+            properties: {
+              errors: {
+                properties: {
+                  ids: { type: 'keyword' },
+                  messages: { type: 'text' },
+                },
+              },
+              state: { type: 'keyword' },
+            },
+          },
+        },
+      },
+      domain: { type: 'keyword' },
+      draft: {
+        properties: {
+          advanced_snippet: {
+            properties: {
+              created_at: { type: 'date' },
+              updated_at: { type: 'date' },
+              value: { type: 'object' },
+            },
+          },
+          rules: {
+            properties: {
+              created_at: { type: 'date' },
+              field: { type: 'keyword' },
+              id: { type: 'keyword' },
+              order: { type: 'short' },
+              policy: { type: 'keyword' },
+              rule: { type: 'keyword' },
+              updated_at: { type: 'date' },
+              value: { type: 'keyword' },
+            },
+          },
+          validation: {
+            properties: {
+              errors: {
+                properties: {
+                  ids: { type: 'keyword' },
+                  messages: { type: 'text' },
+                },
+              },
+              state: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    },
+  },
   index_name: { type: 'keyword' },
+  is_native: { type: 'boolean' },
   language: { type: 'keyword' },
+  last_deleted_document_count: { type: 'long' },
+  last_indexed_document_count: { type: 'long' },
   last_seen: { type: 'date' },
   last_sync_error: { type: 'keyword' },
   last_sync_status: { type: 'keyword' },
@@ -87,7 +160,7 @@ const indices: IndexDefinition[] = [
     mappings: {
       _meta: {
         pipeline: defaultConnectorsPipelineMeta,
-        version: '1',
+        version: 1,
       },
       properties: connectorMappingsProperties,
     },
@@ -98,23 +171,46 @@ const indices: IndexDefinition[] = [
     aliases: ['.elastic-connectors-sync-jobs'],
     mappings: {
       _meta: {
-        version: '1',
+        version: 1,
       },
       properties: {
         completed_at: { type: 'date' },
-        connector: { properties: connectorMappingsProperties },
-        connector_id: {
-          type: 'keyword',
-        },
+        connector_id: { type: 'keyword' },
         created_at: { type: 'date' },
         deleted_document_count: { type: 'integer' },
-        error: {
-          type: 'keyword',
+        error: { type: 'keyword' },
+        filtering: {
+          properties: {
+            advanced_snippet: {
+              properties: {
+                created_at: { type: 'date' },
+                updated_at: { type: 'date' },
+                value: { type: 'object' },
+              },
+            },
+            domain: { type: 'keyword' },
+            rules: {
+              properties: {
+                created_at: { type: 'date' },
+                field: { type: 'keyword' },
+                id: { type: 'keyword' },
+                order: { type: 'short' },
+                policy: { type: 'keyword' },
+                rule: { type: 'keyword' },
+                updated_at: { type: 'date' },
+                value: { type: 'keyword' },
+              },
+            },
+            warnings: {
+              properties: {
+                ids: { type: 'keyword' },
+                messages: { type: 'text' },
+              },
+            },
+          },
         },
         indexed_document_count: { type: 'integer' },
-        status: {
-          type: 'keyword',
-        },
+        status: { type: 'keyword' },
         worker_hostname: { type: 'keyword' },
       },
     },
