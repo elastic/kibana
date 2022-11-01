@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useMemo } from 'react';
-import { CaseAssignees } from '../../../common/api';
-import { CurrentUserProfile } from '../../components/types';
+import type { CaseAssignees } from '../../../common/api';
+import type { CurrentUserProfile } from '../../components/types';
 import { bringCurrentUserToFrontAndSort } from '../../components/user_profiles/sort';
-import { Assignee, AssigneeWithProfile } from '../../components/user_profiles/types';
+import type { Assignee, AssigneeWithProfile } from '../../components/user_profiles/types';
 
 interface PartitionedAssignees {
   usersWithProfiles: UserProfileWithAvatar[];

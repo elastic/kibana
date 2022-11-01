@@ -4,21 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreStart, HttpFetchQuery } from '@kbn/core/public';
+import { HttpFetchQuery } from '@kbn/core/public';
 import { getRoutePaths } from '../common';
 import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
 import { TopNResponse } from '../common/topn';
+import { AutoAbortedHttpService } from './hooks/use_async';
 
 export interface Services {
   fetchTopN: (params: {
+    http: AutoAbortedHttpService;
     type: string;
     timeFrom: number;
     timeTo: number;
     kuery: string;
   }) => Promise<TopNResponse>;
   fetchTopNFunctions: (params: {
+    http: AutoAbortedHttpService;
     timeFrom: number;
     timeTo: number;
     startIndex: number;
@@ -26,42 +28,31 @@ export interface Services {
     kuery: string;
   }) => Promise<TopNFunctions>;
   fetchElasticFlamechart: (params: {
+    http: AutoAbortedHttpService;
     timeFrom: number;
     timeTo: number;
     kuery: string;
   }) => Promise<ElasticFlameGraph>;
 }
 
-export function getServices(core: CoreStart): Services {
+export function getServices(): Services {
   const paths = getRoutePaths();
 
   return {
-    fetchTopN: async ({ type, timeFrom, timeTo, kuery }) => {
+    fetchTopN: async ({ http, type, timeFrom, timeTo, kuery }) => {
       try {
         const query: HttpFetchQuery = {
           timeFrom,
           timeTo,
           kuery,
         };
-        return await core.http.get(`${paths.TopN}/${type}`, { query });
+        return await http.get(`${paths.TopN}/${type}`, { query });
       } catch (e) {
         return e;
       }
     },
 
-    fetchTopNFunctions: async ({
-      timeFrom,
-      timeTo,
-      startIndex,
-      endIndex,
-      kuery,
-    }: {
-      timeFrom: number;
-      timeTo: number;
-      startIndex: number;
-      endIndex: number;
-      kuery: string;
-    }) => {
+    fetchTopNFunctions: async ({ http, timeFrom, timeTo, startIndex, endIndex, kuery }) => {
       try {
         const query: HttpFetchQuery = {
           timeFrom,
@@ -70,28 +61,20 @@ export function getServices(core: CoreStart): Services {
           endIndex,
           kuery,
         };
-        return await core.http.get(paths.TopNFunctions, { query });
+        return await http.get(paths.TopNFunctions, { query });
       } catch (e) {
         return e;
       }
     },
 
-    fetchElasticFlamechart: async ({
-      timeFrom,
-      timeTo,
-      kuery,
-    }: {
-      timeFrom: number;
-      timeTo: number;
-      kuery: string;
-    }) => {
+    fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery }) => {
       try {
         const query: HttpFetchQuery = {
           timeFrom,
           timeTo,
           kuery,
         };
-        const baseFlamegraph: BaseFlameGraph = await core.http.get(paths.Flamechart, { query });
+        const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
         return createFlameGraph(baseFlamegraph);
       } catch (e) {
         return e;

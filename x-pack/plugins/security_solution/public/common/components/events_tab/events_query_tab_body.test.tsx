@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TimelineId } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
 import { HostsType } from '../../../hosts/store/model';
 import { TestProviders } from '../../mock';
 import type { EventsQueryTabBodyComponentProps } from './events_query_tab_body';
@@ -76,10 +76,11 @@ describe('EventsQueryTabBody', () => {
   const commonProps: EventsQueryTabBodyComponentProps = {
     indexNames: ['test-index'],
     setQuery: jest.fn(),
-    timelineId: TimelineId.test,
+    tableId: TableId.test,
     type: HostsType.page,
     endDate: new Date('2000').toISOString(),
     startDate: new Date('2000').toISOString(),
+    additionalFilters: [],
   };
 
   beforeEach(() => {

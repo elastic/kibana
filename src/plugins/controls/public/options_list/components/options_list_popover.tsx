@@ -22,24 +22,39 @@ import {
   EuiBadge,
   EuiIcon,
   EuiTitle,
+  EuiPopoverFooter,
+  EuiButtonGroup,
+  useEuiBackgroundColor,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { optionsListReducers } from '../options_list_reducers';
-import { OptionsListStrings } from './options_list_strings';
 import { OptionsListReduxState } from '../types';
+import { OptionsListStrings } from './options_list_strings';
 
 export interface OptionsListPopoverProps {
   width: number;
   updateSearchString: (newSearchString: string) => void;
 }
 
+const aggregationToggleButtons = [
+  {
+    id: 'optionsList__includeResults',
+    label: OptionsListStrings.popover.getIncludeLabel(),
+  },
+  {
+    id: 'optionsList__excludeResults',
+    label: OptionsListStrings.popover.getExcludeLabel(),
+  },
+];
+
 export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { selectOption, deselectOption, clearSelections, replaceSelection },
+    actions: { selectOption, deselectOption, clearSelections, replaceSelection, setExclude },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
 
   const dispatch = useEmbeddableDispatch();
@@ -52,8 +67,10 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const field = select((state) => state.componentState.field);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
+  const hideExclude = select((state) => state.explicitInput.hideExclude);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const title = select((state) => state.explicitInput.title);
+  const exclude = select((state) => state.explicitInput.exclude);
 
   const loading = select((state) => state.output.loading);
 
@@ -65,6 +82,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   );
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const euiBackgroundColor = useEuiBackgroundColor('subdued');
 
   return (
     <>
@@ -77,14 +95,16 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
               direction="row"
               justifyContent="spaceBetween"
               alignItems="center"
+              responsive={false}
             >
               <EuiFlexItem>
                 <EuiFieldSearch
+                  isInvalid={!searchString.valid}
                   compressed
                   disabled={showOnlySelected}
                   fullWidth
                   onChange={(event) => updateSearchString(event.target.value)}
-                  value={searchString}
+                  value={searchString.value}
                   data-test-subj="optionsList-control-search-input"
                   placeholder={
                     totalCardinality
@@ -247,6 +267,25 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
           </>
         )}
       </div>
+      {!hideExclude && (
+        <EuiPopoverFooter
+          paddingSize="s"
+          css={css`
+            background-color: ${euiBackgroundColor};
+          `}
+        >
+          <EuiButtonGroup
+            legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
+            options={aggregationToggleButtons}
+            idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
+            onChange={(optionId) =>
+              dispatch(setExclude(optionId === 'optionsList__excludeResults'))
+            }
+            buttonSize="compressed"
+            data-test-subj="optionsList__includeExcludeButtonGroup"
+          />
+        </EuiPopoverFooter>
+      )}
     </>
   );
 };

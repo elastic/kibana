@@ -16,7 +16,9 @@ import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/color
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import type { OperationMetadata, Visualization } from '../../types';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
+import type { OperationMetadata, Suggestion, Visualization } from '../../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
 import {
@@ -32,7 +34,7 @@ import {
 import { HeatmapToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
-import { layerTypes } from '../../../common';
+import { FormBasedPersistedState } from '../..';
 
 const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Magnitude',
@@ -146,7 +148,7 @@ export const getHeatmapVisualization = ({
     return (
       state || {
         layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         title: 'Empty Heatmap chart',
         ...getInitialState(),
       }
@@ -289,7 +291,7 @@ export const getHeatmapVisualization = ({
   getSupportedLayers() {
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.heatmap.addLayer', {
           defaultMessage: 'Visualization',
         }),
@@ -524,5 +526,29 @@ export const getHeatmapVisualization = ({
           />,
         ]
       : undefined;
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as Array<
+      Suggestion<HeatmapVisualizationState, FormBasedPersistedState>
+    >;
+    const suggestion: Suggestion<HeatmapVisualizationState, FormBasedPersistedState> = {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState?.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...(context.configuration as HeatmapConfiguration),
+      },
+    };
+    return suggestion;
   },
 });

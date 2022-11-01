@@ -12,56 +12,81 @@ import {
   EuiPagination,
   EuiSpacer,
   EuiTitle,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
-import type { TraceSample } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import { TransactionTab, TransactionTabs } from './transaction_tabs';
-import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { Environment } from '../../../../../common/environment_rt';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { WaterfallFetchResult } from '../use_waterfall_fetcher';
 
-interface Props {
-  waterfall: IWaterfall;
-  isLoading: boolean;
-  traceSamples: TraceSample[];
+interface Props<TSample extends {}> {
+  waterfallFetchResult: WaterfallFetchResult;
+  traceSamples?: TSample[];
+  traceSamplesFetchStatus: FETCH_STATUS;
   environment: Environment;
-  onSampleClick: (sample: { transactionId: string; traceId: string }) => void;
-  onTabClick: (tab: string) => void;
+  onSampleClick: (sample: TSample) => void;
+  onTabClick: (tab: TransactionTab) => void;
   serviceName?: string;
   waterfallItemId?: string;
   detailTab?: TransactionTab;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
+  selectedSample?: TSample | null;
 }
 
-export function WaterfallWithSummary({
-  waterfall,
-  isLoading,
+export function WaterfallWithSummary<TSample extends {}>({
+  waterfallFetchResult,
   traceSamples,
+  traceSamplesFetchStatus,
   environment,
   onSampleClick,
   onTabClick,
   serviceName,
   waterfallItemId,
   detailTab,
-}: Props) {
+  showCriticalPath,
+  onShowCriticalPathChange,
+  selectedSample,
+}: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
+  const isControlled = selectedSample !== undefined;
+
+  const isLoading =
+    waterfallFetchResult.status === FETCH_STATUS.LOADING ||
+    traceSamplesFetchStatus === FETCH_STATUS.LOADING;
+  const isSucceded =
+    waterfallFetchResult.status === FETCH_STATUS.SUCCESS &&
+    traceSamplesFetchStatus === FETCH_STATUS.SUCCESS;
+
   useEffect(() => {
-    setSampleActivePage(0);
-  }, [traceSamples]);
+    if (!isControlled) {
+      setSampleActivePage(0);
+    }
+  }, [traceSamples, isControlled]);
 
   const goToSample = (index: number) => {
-    setSampleActivePage(index);
-    const sample = traceSamples[index];
+    const sample = traceSamples![index];
+    if (!isControlled) {
+      setSampleActivePage(index);
+    }
     onSampleClick(sample);
   };
 
-  const { entryWaterfallTransaction } = waterfall;
+  const samplePageIndex = isControlled
+    ? selectedSample
+      ? traceSamples?.indexOf(selectedSample)
+      : 0
+    : sampleActivePage;
 
-  if ((!entryWaterfallTransaction || traceSamples.length === 0) && !isLoading) {
+  const { entryWaterfallTransaction } = waterfallFetchResult.waterfall;
+
+  if (!entryWaterfallTransaction && traceSamples?.length === 0 && isSucceded) {
     return (
       <EuiEmptyPrompt
         title={
@@ -91,10 +116,10 @@ export function WaterfallWithSummary({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          {traceSamples.length > 0 && (
+          {!!traceSamples?.length && (
             <EuiPagination
               pageCount={traceSamples.length}
-              activePage={sampleActivePage}
+              activePage={samplePageIndex}
               onPageClick={goToSample}
               compressed
             />
@@ -112,7 +137,7 @@ export function WaterfallWithSummary({
               <MaybeViewTraceLink
                 isLoading={isLoading}
                 transaction={entryTransaction}
-                waterfall={waterfall}
+                waterfall={waterfallFetchResult.waterfall}
                 environment={environment}
               />
             </EuiFlexItem>
@@ -123,25 +148,36 @@ export function WaterfallWithSummary({
       <EuiSpacer size="s" />
 
       {isLoading || !entryTransaction ? (
-        <LoadingStatePrompt />
-      ) : (
         <>
-          <TransactionSummary
-            errorCount={waterfall.apiResponse.errorDocs.length}
-            totalDuration={waterfall.rootTransaction?.transaction.duration.us}
-            transaction={entryTransaction}
-          />
           <EuiSpacer size="s" />
-          <TransactionTabs
-            transaction={entryTransaction}
-            detailTab={detailTab}
-            serviceName={serviceName}
-            waterfallItemId={waterfallItemId}
-            onTabClick={onTabClick}
-            waterfall={waterfall}
-          />
+          <EuiLoadingContent lines={1} data-test-sub="loading-content" />
         </>
+      ) : (
+        <TransactionSummary
+          errorCount={
+            waterfallFetchResult.waterfall.apiResponse.errorDocs.length
+          }
+          totalDuration={
+            waterfallFetchResult.waterfall.rootTransaction?.transaction.duration
+              .us
+          }
+          transaction={entryTransaction}
+        />
       )}
+
+      <EuiSpacer size="s" />
+
+      <TransactionTabs
+        transaction={entryTransaction}
+        detailTab={detailTab}
+        serviceName={serviceName}
+        waterfallItemId={waterfallItemId}
+        onTabClick={onTabClick}
+        waterfall={waterfallFetchResult.waterfall}
+        isLoading={isLoading}
+        showCriticalPath={showCriticalPath}
+        onShowCriticalPathChange={onShowCriticalPathChange}
+      />
     </>
   );
 }

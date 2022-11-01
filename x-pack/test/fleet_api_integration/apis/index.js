@@ -58,5 +58,8 @@ export default function ({ loadTestFile, getService }) {
 
     // Integrations
     loadTestFile(require.resolve('./integrations'));
+
+    // Fleet server hosts
+    loadTestFile(require.resolve('./fleet_server_hosts/crud'));
   });
 }

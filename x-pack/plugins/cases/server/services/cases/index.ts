@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
@@ -19,14 +19,15 @@ import {
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { nodeBuilder, KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import {
+import type {
   GetCaseIdsByAlertIdAggs,
   CaseResponse,
   CasesFindRequest,
@@ -34,9 +35,9 @@ import {
   User,
   CaseAttributes,
   CaseStatuses,
-  caseStatuses,
 } from '../../../common/api';
-import { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import { caseStatuses } from '../../../common/api';
+import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
@@ -49,11 +50,11 @@ import {
   transformBulkResponseToExternalModel,
   transformFindResponseToExternalModel,
 } from './transform';
-import { ESCaseAttributes } from './types';
-import { AttachmentService } from '../attachments';
-import { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
+import type { ESCaseAttributes } from './types';
+import type { AttachmentService } from '../attachments';
+import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError } from '../../common/error';
-import { IndexRefresh } from '../types';
+import type { IndexRefresh } from '../types';
 
 interface GetCaseIdsByAlertIdArgs {
   alertId: string;

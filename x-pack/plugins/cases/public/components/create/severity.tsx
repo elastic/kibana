@@ -7,8 +7,12 @@
 
 import { EuiFormRow } from '@elastic/eui';
 import React, { memo } from 'react';
+import {
+  UseField,
+  useFormContext,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CaseSeverity } from '../../../common/api';
-import { UseField, useFormContext, useFormData } from '../../common/shared_imports';
 import { SeveritySelector } from '../severity/selector';
 import { SEVERITY_TITLE } from '../severity/translations';
 

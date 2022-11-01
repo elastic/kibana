@@ -30,8 +30,6 @@ const findClamp = (a, min, max) => {
  * clamp([1, 9], 3, [4, 5]) // returns [clamp([1, 3, 4]), clamp([9, 3, 5])] = [3, 5]
  */
 
-module.exports = { clamp };
-
 function clamp(a, min, max) {
   if (max === null)
     throw new Error("Missing maximum value. You may want to use the 'min' function instead");
@@ -73,3 +71,5 @@ function clamp(a, min, max) {
 
   return findClamp(a, min, max);
 }
+
+module.exports = { clamp };

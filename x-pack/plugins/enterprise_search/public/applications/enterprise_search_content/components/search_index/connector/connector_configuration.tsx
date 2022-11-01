@@ -18,7 +18,6 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiCodeBlock,
-  EuiHorizontalRule,
   EuiCallOut,
   EuiButton,
 } from '@elastic/eui';
@@ -179,7 +178,24 @@ export const ConnectorConfiguration: React.FC = () => {
                           }
                         )}
                       </EuiText>
-                      <EuiHorizontalRule />
+                    </>
+                  ),
+                  status:
+                    !indexData.connector.status ||
+                    indexData.connector.status === ConnectorStatus.CREATED
+                      ? 'incomplete'
+                      : 'complete',
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
+                    {
+                      defaultMessage: 'Deploy a connector',
+                    }
+                  ),
+                  titleSize: 'xs',
+                },
+                {
+                  children: (
+                    <ConnectorConfigurationConfig>
                       {!indexData.connector.status ||
                       indexData.connector.status === ConnectorStatus.CREATED ? (
                         <EuiCallOut
@@ -200,6 +216,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           )}
                           <EuiSpacer size="s" />
                           <EuiButton
+                            data-telemetry-id="entSearchContent-connector-configuration-recheckNow"
                             iconType="refresh"
                             onClick={() => recheckIndex()}
                             isLoading={recheckIndexLoading}
@@ -226,23 +243,8 @@ export const ConnectorConfiguration: React.FC = () => {
                           )}
                         />
                       )}
-                    </>
+                    </ConnectorConfigurationConfig>
                   ),
-                  status:
-                    !indexData.connector.status ||
-                    indexData.connector.status === ConnectorStatus.CREATED
-                      ? 'incomplete'
-                      : 'complete',
-                  title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
-                    {
-                      defaultMessage: 'Deploy a connector',
-                    }
-                  ),
-                  titleSize: 'xs',
-                },
-                {
-                  children: <ConnectorConfigurationConfig />,
                   status:
                     indexData.connector.status === ConnectorStatus.CONNECTED
                       ? 'complete'
@@ -273,6 +275,7 @@ export const ConnectorConfiguration: React.FC = () => {
                         <EuiFlexGroup>
                           <EuiFlexItem grow={false}>
                             <EuiButtonTo
+                              data-telemetry-id="entSearchContent-connector-configuration-setScheduleAndSync"
                               to={`${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
                                 indexName,
                                 tabId: SearchIndexTabId.SCHEDULING,

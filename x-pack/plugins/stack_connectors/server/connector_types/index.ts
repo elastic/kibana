@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import {
   getEmailConnectorType,
@@ -16,6 +15,7 @@ import {
   getSlackConnectorType,
   getTeamsConnectorType,
   getWebhookConnectorType,
+  getOpsgenieConnectorType,
   getXmattersConnectorType,
 } from './stack';
 import {
@@ -26,7 +26,6 @@ import {
   getServiceNowSIRConnectorType,
   getSwimlaneConnectorType,
 } from './cases';
-
 export type {
   EmailActionParams,
   IndexActionParams,
@@ -64,26 +63,25 @@ export {
 
 export function registerConnectorTypes({
   actions,
-  logger,
   publicBaseUrl,
 }: {
   actions: ActionsPluginSetupContract;
-  logger: Logger;
   publicBaseUrl?: string;
 }) {
-  actions.registerType(getEmailConnectorType({ logger, publicBaseUrl }));
-  actions.registerType(getIndexConnectorType({ logger }));
-  actions.registerType(getPagerDutyConnectorType({ logger }));
-  actions.registerType(getSwimlaneConnectorType({ logger }));
-  actions.registerType(getServerLogConnectorType({ logger }));
-  actions.registerType(getSlackConnectorType({ logger }));
-  actions.registerType(getWebhookConnectorType({ logger }));
-  actions.registerType(getCasesWebhookConnectorType({ logger }));
-  actions.registerType(getXmattersConnectorType({ logger }));
-  actions.registerType(getServiceNowITSMConnectorType({ logger }));
-  actions.registerType(getServiceNowSIRConnectorType({ logger }));
-  actions.registerType(getServiceNowITOMConnectorType({ logger }));
-  actions.registerType(getJiraConnectorType({ logger }));
-  actions.registerType(getResilientConnectorType({ logger }));
-  actions.registerType(getTeamsConnectorType({ logger }));
+  actions.registerType(getEmailConnectorType({ publicBaseUrl }));
+  actions.registerType(getIndexConnectorType());
+  actions.registerType(getPagerDutyConnectorType());
+  actions.registerType(getSwimlaneConnectorType());
+  actions.registerType(getServerLogConnectorType());
+  actions.registerType(getSlackConnectorType({}));
+  actions.registerType(getWebhookConnectorType());
+  actions.registerType(getCasesWebhookConnectorType());
+  actions.registerType(getXmattersConnectorType());
+  actions.registerType(getServiceNowITSMConnectorType());
+  actions.registerType(getServiceNowSIRConnectorType());
+  actions.registerType(getServiceNowITOMConnectorType());
+  actions.registerType(getJiraConnectorType());
+  actions.registerType(getResilientConnectorType());
+  actions.registerType(getTeamsConnectorType());
+  actions.registerSubActionConnectorType(getOpsgenieConnectorType());
 }
