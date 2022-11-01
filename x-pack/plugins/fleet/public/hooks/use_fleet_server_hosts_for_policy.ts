@@ -6,7 +6,9 @@
  */
 
 import { useMemo } from 'react';
+
 import type { AgentPolicy } from '../types';
+
 import { useGetFleetServerHosts } from './use_request';
 
 /**
