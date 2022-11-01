@@ -49,7 +49,9 @@ export const App: FunctionComponent = () => {
       initialPageSize={50}
       listingLimit={1000}
       tableListTitle="Files"
+      // TODO: Handle click
       onClickTitle={() => {}}
+      // TODO: Handle delete
       deleteItems={async () => {}}
       asManagementSection
     />
