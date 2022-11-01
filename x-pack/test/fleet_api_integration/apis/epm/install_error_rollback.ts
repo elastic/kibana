@@ -30,7 +30,9 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   const getPackageInfo = async (pkg: string, version: string) => {
-    return await supertest.get(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
+    return await supertest
+      .get(`/api/fleet/epm/packages/${pkg}/${version}?prerelease=true`)
+      .set('kbn-xsrf', 'xxxx');
   };
 
   describe('package installation error handling and rollback', async () => {

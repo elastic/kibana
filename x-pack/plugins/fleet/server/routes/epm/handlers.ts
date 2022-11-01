@@ -37,6 +37,7 @@ import type {
   GetStatsRequestSchema,
   FleetRequestHandler,
   UpdatePackageRequestSchema,
+  GetLimitedPackagesRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -105,10 +106,17 @@ export const getListHandler: FleetRequestHandler<
   }
 };
 
-export const getLimitedListHandler: FleetRequestHandler = async (context, request, response) => {
+export const getLimitedListHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetLimitedPackagesRequestSchema.query>,
+  undefined
+> = async (context, request, response) => {
   try {
     const savedObjectsClient = (await context.fleet).epm.internalSoClient;
-    const res = await getLimitedPackages({ savedObjectsClient });
+    const res = await getLimitedPackages({
+      savedObjectsClient,
+      prerelease: request.query.prerelease,
+    });
     const body: GetLimitedPackagesResponse = {
       items: res,
       response: res,
@@ -310,7 +318,7 @@ const bulkInstallServiceResponseToHttpEntry = (
 
 export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.query>,
   TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -323,6 +331,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     esClient,
     packagesToInstall: request.body.packages,
     spaceId,
+    prerelease: request.query.prerelease,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {

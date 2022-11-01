@@ -31,6 +31,7 @@ export async function bulkInstallPackages({
   esClient,
   spaceId,
   force,
+  prerelease,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
 
@@ -40,7 +41,7 @@ export async function bulkInstallPackages({
         return Promise.resolve(pkg);
       }
 
-      return Registry.fetchFindLatestPackageOrThrow(pkg);
+      return Registry.fetchFindLatestPackageOrThrow(pkg, { prerelease });
     })
   );
 

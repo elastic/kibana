@@ -24,6 +24,12 @@ export const GetPackagesRequestSchema = {
   }),
 };
 
+export const GetLimitedPackagesRequestSchema = {
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
+};
+
 export const GetFileRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
@@ -103,6 +109,9 @@ export const InstallPackageFromRegistryRequestSchemaDeprecated = {
 };
 
 export const BulkUpgradePackagesFromRegistryRequestSchema = {
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
   body: schema.object({
     packages: schema.arrayOf(schema.string(), { minSize: 1 }),
   }),

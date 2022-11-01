@@ -93,11 +93,12 @@ export async function getPackages(
 // Get package names for packages which cannot have more than one package policy on an agent policy
 export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
+  prerelease?: boolean;
 }): Promise<string[]> {
-  const { savedObjectsClient } = options;
+  const { savedObjectsClient, prerelease } = options;
   const allPackages = await getPackages({
     savedObjectsClient,
-    prerelease: true,
+    prerelease,
   });
   const installedPackages = allPackages.filter(
     (pkg) => pkg.status === installationStatuses.Installed
