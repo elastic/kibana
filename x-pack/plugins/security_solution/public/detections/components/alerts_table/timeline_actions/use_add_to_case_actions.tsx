@@ -11,6 +11,7 @@ import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding_tour/tour_step';
 import {
+  AlertsCasesTourSteps,
   sampleCase,
   SecurityStepId,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
@@ -92,7 +93,11 @@ export const useAddToCaseActions = ({
     onMenuItemClick();
     createCaseFlyout.open({
       attachments: caseAttachments,
-      ...(isTourShown(SecurityStepId.alertsCases) && activeStep === 4
+      // activeStep will be 4 on first render because not yet incremented
+      // if the user closes the flyout without completing the form and comes back, we will be at step 5
+      ...(isTourShown(SecurityStepId.alertsCases) &&
+      (activeStep === AlertsCasesTourSteps.addAlertToCase ||
+        activeStep === AlertsCasesTourSteps.createCase)
         ? {
             headerContent: (
               // isTourAnchor=true no matter what in order to
@@ -107,7 +112,10 @@ export const useAddToCaseActions = ({
           }
         : {}),
     });
-    if (isTourShown(SecurityStepId.alertsCases) && activeStep === 4) {
+    if (
+      isTourShown(SecurityStepId.alertsCases) &&
+      activeStep === AlertsCasesTourSteps.addAlertToCase
+    ) {
       incrementStep(SecurityStepId.alertsCases);
     }
   }, [onMenuItemClick, createCaseFlyout, caseAttachments, isTourShown, activeStep, incrementStep]);

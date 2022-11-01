@@ -104,7 +104,7 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
       ```
       createCaseFlyout.open({
         attachments: caseAttachments,
-        ...(isTourShown(SecurityStepId.alertsCases) && activeStep === 4
+        ...(isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.addAlertToCase
           ? {
               headerContent: (
                 // isTourAnchor=true no matter what in order to
@@ -131,7 +131,7 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
 
   So we utilize the `useTourContext` to do the following check and increment the step in `handleAddToNewCaseClick`:
   ```
-  if (isTourShown(SecurityStepId.alertsCases) && activeStep === 4) {
+  if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.addAlertToCase) {
     incrementStep(SecurityStepId.alertsCases);
   }
   ```
