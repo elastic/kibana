@@ -8,7 +8,7 @@
 import React, { CSSProperties } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { JourneyStep } from '../../../../../../common/runtime_types';
-import { JourneyStepScreenshotContainer } from './journey_step_screenshot_container';
+import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
 import { getTextColorForMonitorStatus, parseBadgeStatus } from './status_badge';
 
 interface Props {

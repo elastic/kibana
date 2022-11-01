@@ -94,12 +94,12 @@ export const MonitorType = t.intersection([
     id: t.string,
     status: t.string,
     type: t.string,
+    check_group: t.string,
   }),
   t.partial({
     duration: t.type({
       us: t.number,
     }),
-    check_group: t.string,
     ip: t.string,
     name: t.string,
     timespan: t.type({
@@ -268,6 +268,7 @@ export const makePing = (f: {
       status: f.status || 'up',
       duration: { us: f.duration || 100000 },
       name: f.name,
+      check_group: 'myCheckGroup',
     },
     ...(f.location ? { observer: { geo: { name: f.location } } } : {}),
     ...(f.url ? { url: { full: f.url } } : {}),

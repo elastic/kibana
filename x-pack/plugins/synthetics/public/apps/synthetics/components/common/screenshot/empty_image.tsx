@@ -8,16 +8,22 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, useEuiBackgroundColor, EuiIcon, EuiLoadingContent } from '@elastic/eui';
+import {
+  useEuiTheme,
+  useEuiBackgroundColor,
+  EuiIcon,
+  EuiLoadingContent,
+  EuiText,
+} from '@elastic/eui';
 
-export const THUMBNAIL_WIDTH = 96;
-export const THUMBNAIL_HEIGHT = 64;
+export const IMAGE_WIDTH = 360;
+export const IMAGE_HEIGHT = 203;
 
-export const thumbnailStyle = css`
+export const imageStyle = css`
   padding: 0;
   margin: auto;
-  width: ${THUMBNAIL_WIDTH}px;
-  height: ${THUMBNAIL_HEIGHT}px;
+  width: ${IMAGE_WIDTH}px;
+  height: ${IMAGE_HEIGHT}px;
   object-fit: contain;
   overflow: hidden;
   display: flex;
@@ -25,10 +31,10 @@ export const thumbnailStyle = css`
   justify-content: center;
 `;
 
-export const EmptyThumbnail = ({
+export const EmptyImage = ({
   isLoading = false,
-  width = THUMBNAIL_WIDTH,
-  height = THUMBNAIL_HEIGHT,
+  width = IMAGE_WIDTH,
+  height = IMAGE_HEIGHT,
 }: {
   isLoading: boolean;
   width?: number;
@@ -43,7 +49,7 @@ export const EmptyThumbnail = ({
       aria-label={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : SCREENSHOT_NOT_AVAILABLE}
       title={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : SCREENSHOT_NOT_AVAILABLE}
       css={css`
-        ${thumbnailStyle};
+        ${imageStyle};
         width: ${width}px;
         height: ${height}px;
         background: ${useEuiBackgroundColor('subdued')};
@@ -52,19 +58,23 @@ export const EmptyThumbnail = ({
     >
       {isLoading ? (
         <EuiLoadingContent
+          lines={1}
           data-test-subj="stepScreenshotPlaceholderLoading"
           css={css`
             width: 100%;
-            height: 100%;
-            transform: scale(1, 100); // To create a skeleton loading effect
+            height: 8%;
+            transform: scale(1, 13); // To create a skeleton loading effect
           `}
         />
       ) : (
-        <EuiIcon
-          data-test-subj="stepScreenshotNotAvailable"
-          type="eyeClosed"
-          color={euiTheme.colors.disabledText}
-        />
+        <div>
+          <EuiIcon
+            data-test-subj="stepScreenshotNotAvailable"
+            type="eyeClosed"
+            color={euiTheme.colors.disabledText}
+          />
+          <EuiText color={euiTheme.colors.disabledText}>{IMAGE_UN_AVAILABLE}</EuiText>
+        </div>
       )}
     </div>
   );
@@ -81,5 +91,12 @@ export const SCREENSHOT_NOT_AVAILABLE = i18n.translate(
   'xpack.synthetics.monitor.step.screenshot.notAvailable',
   {
     defaultMessage: 'Step screenshot is not available.',
+  }
+);
+
+export const IMAGE_UN_AVAILABLE = i18n.translate(
+  'xpack.synthetics.monitor.step.screenshot.unAvailable',
+  {
+    defaultMessage: 'Image unavailable',
   }
 );
