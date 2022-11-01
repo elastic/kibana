@@ -10,6 +10,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   // Failing: See https://github.com/elastic/kibana/issues/131192
+  // Failing: See https://github.com/elastic/kibana/issues/131192
   describe.skip('kibana server with ssl', () => {
     it('redirects http requests at redirect port to https', async () => {
       const host = process.env.TEST_KIBANA_HOST || 'localhost';
