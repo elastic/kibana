@@ -16,7 +16,6 @@ export const INITIAL_METRICS = {
   gap_duration_s: null,
 };
 
-
 // Immutably updates the monitoring object with timestamp and duration.
 // Used when converting from and between raw monitoring object
 export const updateMonitoring = ({

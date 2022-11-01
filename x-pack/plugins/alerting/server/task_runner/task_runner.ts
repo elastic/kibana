@@ -199,7 +199,8 @@ export class TaskRunner<
       monitoring?: RuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
-      running?: boolean; }
+      running?: boolean;
+    }
   ) {
     const client = this.context.internalSavedObjectsRepository;
     try {
@@ -588,7 +589,7 @@ export class TaskRunner<
     runDate,
     stateWithMetrics,
   }: {
-    nextRun: string| null;
+    nextRun: string | null;
     runDate: Date;
     stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
   }) {
@@ -633,7 +634,9 @@ export class TaskRunner<
     }
 
     this.logger.debug(
-      `deprecated ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionStatus)}`
+      `deprecated ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(
+        executionStatus
+      )}`
     );
     this.logger.debug(
       `ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(lastRun)}`
@@ -657,7 +660,7 @@ export class TaskRunner<
     this.ruleMonitoring.addHistory({
       duration: executionStatus.lastDuration,
       hasError: executionStatus.error != null,
-      runDate
+      runDate,
     });
 
     if (!this.cancelled) {
@@ -670,9 +673,7 @@ export class TaskRunner<
       this.logger.debug(
         `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
           executionStatus
-        )} - ${JSON.stringify(
-          lastRun
-        )}`
+        )} - ${JSON.stringify(lastRun)}`
       );
       await this.updateRuleSavedObject(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
@@ -858,7 +859,8 @@ export class TaskRunner<
       },
       monitoring: this.ruleMonitoring.getMonitoring(),
       running: false,
-      nextRun: nextRunString && new Date(nextRunString).getTime() > date.getTime() ? nextRunString : null,
+      nextRun:
+        nextRunString && new Date(nextRunString).getTime() > date.getTime() ? nextRunString : null,
     });
   }
 }

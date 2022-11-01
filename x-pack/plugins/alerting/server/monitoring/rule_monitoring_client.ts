@@ -37,7 +37,15 @@ export class RuleMonitoringService {
     return this.monitoring;
   }
 
-  public addHistory({ duration, hasError = true, runDate }: {duration: number | undefined; hasError: boolean; runDate: Date}) {
+  public addHistory({
+    duration,
+    hasError = true,
+    runDate,
+  }: {
+    duration: number | undefined;
+    hasError: boolean;
+    runDate: Date;
+  }) {
     const date = runDate ?? new Date();
     const monitoringHistory: RuleMonitoringHistory = {
       success: true,
@@ -59,8 +67,10 @@ export class RuleMonitoringService {
 
   public getLastRunMetricsSetters() {
     return {
-      setLastRunMetricsTotalSearchDurationMs: this.setLastRunMetricsTotalSearchDurationMs.bind(this),
-      setLastRunMetricsTotalIndexingDurationMs: this.setLastRunMetricsTotalIndexingDurationMs.bind(this),
+      setLastRunMetricsTotalSearchDurationMs:
+        this.setLastRunMetricsTotalSearchDurationMs.bind(this),
+      setLastRunMetricsTotalIndexingDurationMs:
+        this.setLastRunMetricsTotalIndexingDurationMs.bind(this),
       setLastRunMetricsTotalAlertDetected: this.setLastRunMetricsTotalAlertDetected.bind(this),
       setLastRunMetricsTotalAlertCreated: this.setLastRunMetricsTotalAlertCreated.bind(this),
       setLastRunMetricsGapDurationS: this.setLastRunMetricsGapDurationS.bind(this),
