@@ -122,7 +122,10 @@ export class CoreSystem {
     };
 
     this.i18n = new I18nService();
-    this.analytics = new AnalyticsService(this.coreContext);
+    const contextClone: any = {}; 
+    Object.assign(contextClone, this.coreContext);
+    contextClone.env.mode.dev = true;
+    this.analytics = new AnalyticsService(contextClone);
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();

@@ -93,8 +93,8 @@ export class ElasticV3BrowserShipper implements IShipper {
 
     if (performanceEvents.length > 0) {
       const eventNames = performanceEvents.map((e) => e.properties.eventName);
-      // eslint-disable-next-line no-console
-      console.error(
+
+      this.initContext.logger.info(
         `[${ElasticV3BrowserShipper.shipperName}]: adding events to queue ${
           events.length
         } performance events - ${eventNames.join(',')}`
@@ -111,8 +111,7 @@ export class ElasticV3BrowserShipper implements IShipper {
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
-    // eslint-disable-next-line no-console
-    console.error('shutdown');
+    this.initContext.logger.info('shutdown');
     this.internalQueue$.complete(); // NOTE: When completing the observable, the buffer logic does not wait and releases any buffered events.
   }
 
@@ -147,13 +146,8 @@ export class ElasticV3BrowserShipper implements IShipper {
 
     if (performanceEvents.length > 0) {
       const eventNames = performanceEvents.map((e) => e.properties.eventName);
-      // eslint-disable-next-line no-console
-      console.error(
-        `[${ElasticV3BrowserShipper.shipperName}]: sending ${
-          events.length
-        } performance events - ${eventNames.join(',')}`
-      );
-      this.initContext.logger.debug(
+
+      this.initContext.logger.info(
         `[${ElasticV3BrowserShipper.shipperName}]: sending ${
           events.length
         } performance events - ${eventNames.join(',')}`
@@ -172,11 +166,7 @@ export class ElasticV3BrowserShipper implements IShipper {
     const responseText = await response.text();
 
     if (performanceEvents.length > 0) {
-      // eslint-disable-next-line no-console
-      console.error(
-        `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await responseText}`
-      );
-      this.initContext.logger.debug(
+      this.initContext.logger.info(
         `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await responseText}`
       );
     }
