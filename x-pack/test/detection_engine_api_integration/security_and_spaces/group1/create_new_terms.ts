@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('should not be able to create a new terms rule new terms number greater than 3', async () => {
+    it('should not be able to create a new terms rule with field number greater than 3', async () => {
       const rule = {
         ...getCreateNewTermsRulesSchemaMock('rule-1'),
         history_window_start: 'now-5m',
