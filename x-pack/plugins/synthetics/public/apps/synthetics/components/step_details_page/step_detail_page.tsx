@@ -16,9 +16,11 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
+import { NetworkTimingsBreakdown } from './network_timings_breakdown';
 import { StepImage } from './components/step_image';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
+
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
 
 export const StepDetailPage = () => {
@@ -70,8 +72,8 @@ export const StepDetailPage = () => {
               <EuiFlexItem grow={1}>
                 {/* TODO: Add breakdown of network timings donut*/}
               </EuiFlexItem>
-              <EuiFlexItem grow={2} css={{ height: 150 }}>
-                {/* TODO: Add breakdown of network events*/}
+              <EuiFlexItem grow={2}>
+                <NetworkTimingsBreakdown />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
