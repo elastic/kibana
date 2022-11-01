@@ -22,8 +22,8 @@ import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service
 import type {
   ActionDetailsApiResponse,
   KillProcessActionOutputContent,
-} from '../../../../../common/endpoint/types';
-import { endpointActionResponseCodes } from '../endpoint_action_response_codes';
+} from '../../../../../../common/endpoint/types';
+import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
 describe('When using the kill-process action from response actions console', () => {
   let render: (
