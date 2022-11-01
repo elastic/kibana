@@ -127,7 +127,7 @@
             "section": "def-server.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; fileName: string; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; strategy: ",
+          "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; fileName: string; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; strategy: ",
           {
             "pluginId": "@kbn/core-logging-server",
             "scope": "server",
@@ -135,7 +135,7 @@
             "section": "def-server.NumericRollingStrategyConfig",
             "text": "NumericRollingStrategyConfig"
           },
-          "; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; fileName: string; policy: Readonly<{} & { type: \"size-limit\"; size: ",
+          "; fileName: string; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; policy: Readonly<{} & { type: \"size-limit\"; size: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "server",
