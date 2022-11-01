@@ -78,6 +78,5 @@ export default ({ getService, getPageObjects }) => {
 
       await testSubjects.click('confirmModalConfirmButton');
     });
-
   });
 };
