@@ -640,23 +640,23 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
 
 # Reporting
-/x-pack/examples/reporting_example/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/examples/screenshotting_example/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/plugins/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/test/functional/apps/dashboard/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/test/functional/apps/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/test/functional/apps/reporting_management/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/test/examples/screenshotting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/test/functional/es_archives/lens/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/test/functional/es_archives/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/test/reporting_api_integration/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/test/reporting_functional/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/x-pack/test/stack_functional_integration/apps/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
-/docs/user/reporting @elastic/kibana-reporting-services @elastic/kibana-app-services
-/docs/settings/reporting-settings.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
-/docs/setup/configuring-reporting.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
-#CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
+/x-pack/examples/reporting_example/ @elastic/kibana-global-experience
+/x-pack/examples/screenshotting_example/ @elastic/kibana-global-experience
+/x-pack/plugins/reporting/ @elastic/kibana-global-experience
+/x-pack/test/functional/apps/dashboard/reporting/ @elastic/kibana-global-experience
+/x-pack/test/functional/apps/reporting/ @elastic/kibana-global-experience
+/x-pack/test/functional/apps/reporting_management/ @elastic/kibana-global-experience
+/x-pack/test/examples/screenshotting/ @elastic/kibana-global-experience
+/x-pack/test/functional/es_archives/lens/reporting/ @elastic/kibana-global-experience
+/x-pack/test/functional/es_archives/reporting/ @elastic/kibana-global-experience
+/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/kibana-global-experience
+/x-pack/test/reporting_api_integration/ @elastic/kibana-global-experience
+/x-pack/test/reporting_functional/ @elastic/kibana-global-experience
+/x-pack/test/stack_functional_integration/apps/reporting/ @elastic/kibana-global-experience
+/docs/user/reporting @elastic/kibana-global-experience
+/docs/settings/reporting-settings.asciidoc @elastic/kibana-global-experience
+/docs/setup/configuring-reporting.asciidoc @elastic/kibana-global-experience
+#CC# /x-pack/plugins/reporting/ @elastic/kibana-global-experience
 
 # EUI design
 /src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/shared-ux
