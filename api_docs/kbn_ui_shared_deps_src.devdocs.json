@@ -441,6 +441,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-server.externals.kbnesquery",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/es-query'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-server.externals.kbnstd",
             "type": "string",
             "tags": [],
@@ -489,6 +500,28 @@
             "type": "string",
             "tags": [],
             "label": "classnames",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-server.externals.tanstackreactquery",
+            "type": "string",
+            "tags": [],
+            "label": "'@tanstack/react-query'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-server.externals.tanstackreactquerydevtools",
+            "type": "string",
+            "tags": [],
+            "label": "'@tanstack/react-query-devtools'",
             "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,

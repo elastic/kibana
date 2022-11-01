@@ -1967,7 +1967,7 @@
           },
           "<",
           "ActionTypeConfig",
-          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { options: Readonly<{} & { config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; tokenUrl: string; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { scope: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; tokenUrl: string; secrets: Readonly<{} & { clientSecret: string; }>; }>; type: \"jwt\" | \"client\"; }>, configurationUtilities: ",
+          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { options: Readonly<{} & { config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; tokenUrl: string; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { scope: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; tokenUrl: string; secrets: Readonly<{} & { clientSecret: string; }>; }>; type: \"client\" | \"jwt\"; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
           ") => Promise<{ accessToken: string | null; }>; enqueueExecution: (options: ",
           "ExecuteOptions",
