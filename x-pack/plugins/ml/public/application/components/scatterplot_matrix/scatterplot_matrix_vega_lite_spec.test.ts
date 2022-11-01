@@ -27,15 +27,23 @@ describe('getColorSpec()', () => {
   it('should return only user selection condition and the default color for non-outlier specs', () => {
     const colorSpec = getColorSpec(euiThemeLight);
 
-    expect(colorSpec).toEqual({ condition: { selection: USER_SELECTION, value: COLOR_OUTLIER }, value: DEFAULT_COLOR  });
+    expect(colorSpec).toEqual({
+      condition: { selection: USER_SELECTION, value: COLOR_OUTLIER },
+      value: DEFAULT_COLOR,
+    });
   });
 
   it('should return user selection condition and conditional spec for outliers', () => {
     const colorSpec = getColorSpec(euiThemeLight, 'outlier_score');
-    
+
     expect(colorSpec).toEqual({
       condition: {
-        test: { or: [ { selection: USER_SELECTION }, "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)"] },
+        test: {
+          or: [
+            { selection: USER_SELECTION },
+            "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+          ],
+        },
         value: COLOR_OUTLIER,
       },
       value: euiThemeLight.euiColorMediumShade,
@@ -77,7 +85,10 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       size: 8,
       type: 'circle',
     });
-    expect(vegaLiteSpec.spec.encoding.color).toEqual({ condition: { selection: USER_SELECTION, value: COLOR_OUTLIER }, value: DEFAULT_COLOR  });
+    expect(vegaLiteSpec.spec.encoding.color).toEqual({
+      condition: { selection: USER_SELECTION, value: COLOR_OUTLIER },
+      value: DEFAULT_COLOR,
+    });
     expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
@@ -105,7 +116,12 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
       condition: {
         // Note the escaped dot character
-        test: { or: [ { selection: USER_SELECTION }, "(datum['ml\\.outlier_score'] >= mlOutlierScoreThreshold.cutoff)"] },
+        test: {
+          or: [
+            { selection: USER_SELECTION },
+            "(datum['ml\\.outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+          ],
+        },
         value: COLOR_OUTLIER,
       },
       value: euiThemeLight.euiColorMediumShade,

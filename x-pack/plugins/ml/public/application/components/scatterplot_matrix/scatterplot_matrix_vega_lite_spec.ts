@@ -39,7 +39,12 @@ export const getColorSpec = (
     return {
       condition: {
         value: COLOR_OUTLIER,
-        test: { or: [ { selection: USER_SELECTION }, `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`] }
+        test: {
+          or: [
+            { selection: USER_SELECTION },
+            `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
+          ],
+        },
       },
       value: euiTheme.euiColorMediumShade,
     };
@@ -58,7 +63,7 @@ export const getColorSpec = (
     };
   }
 
-  return { condition: { selection: USER_SELECTION, value: COLOR_OUTLIER }, value: DEFAULT_COLOR  };
+  return { condition: { selection: USER_SELECTION, value: COLOR_OUTLIER }, value: DEFAULT_COLOR };
 };
 
 // Escapes the characters .[] in field names with double backslashes
@@ -212,10 +217,11 @@ export const getScatterplotMatrixVegaLiteSpec = (
               },
             },
           }
-        : { selection: {
+        : {
+            selection: {
               // Always allow user selection
               [USER_SELECTION]: { type: 'interval', empty: 'none' },
-            }
+            },
           }),
       width: SCATTERPLOT_SIZE,
       height: SCATTERPLOT_SIZE,
