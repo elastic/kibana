@@ -19516,7 +19516,6 @@
     "xpack.ml.aiops.explainLogRateSpikes.docTitle": "解释日志速率峰值",
     "xpack.ml.aiopsBreadcrumbLabel": "AIOps",
     "xpack.ml.aiopsBreadcrumbs.explainLogRateSpikesLabel": "解释日志速率峰值",
-    "xpack.ml.aiopsBreadcrumbs.selectDateViewLabel": "数据视图",
     "xpack.ml.alertConditionValidation.title": "告警条件包含以下问题：",
     "xpack.ml.alertContext.anomalyExplorerUrlDescription": "要在 Anomaly Explorer 中打开的 URL",
     "xpack.ml.alertContext.isInterimDescription": "表示排名靠前的命中是否包含中间结果",

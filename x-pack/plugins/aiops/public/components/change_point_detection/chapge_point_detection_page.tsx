@@ -72,7 +72,7 @@ export const ChangePointDetectionPage: FC = () => {
   );
 
   return (
-    <div data-test-subj="aiopsChanePointDetectionPage">
+    <div data-test-subj="aiopsChangePointDetectionPage">
       <SearchBarWrapper
         query={resultQuery}
         onQueryChange={setQuery}

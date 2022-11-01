@@ -55,7 +55,7 @@ const getExplainLogRateSpikesBreadcrumbs = (navigateToPath: NavigateToPath, base
   getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
   getBreadcrumbWithUrlForApp('EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
   {
-    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDateViewLabel', {
+    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDataViewLabel', {
       defaultMessage: 'Select Data View',
     }),
   },
@@ -66,7 +66,7 @@ const getLogCategorizationBreadcrumbs = (navigateToPath: NavigateToPath, basePat
   getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
   getBreadcrumbWithUrlForApp('LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
   {
-    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDateViewLabel', {
+    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDataViewLabel', {
       defaultMessage: 'Select Data View',
     }),
   },
@@ -77,7 +77,7 @@ const getChangePointDetectionBreadcrumbs = (navigateToPath: NavigateToPath, base
   getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION', navigateToPath, basePath),
   getBreadcrumbWithUrlForApp('CHANGE_POINT_DETECTION', navigateToPath, basePath),
   {
-    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDateViewLabel', {
+    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDataViewLabel', {
       defaultMessage: 'Select Data View',
     }),
   },

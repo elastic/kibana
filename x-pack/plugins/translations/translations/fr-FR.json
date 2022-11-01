@@ -19505,7 +19505,6 @@
     "xpack.ml.aiops.explainLogRateSpikes.docTitle": "Expliquer les pics de taux de log",
     "xpack.ml.aiopsBreadcrumbLabel": "AIOps",
     "xpack.ml.aiopsBreadcrumbs.explainLogRateSpikesLabel": "Expliquer les pics de taux de log",
-    "xpack.ml.aiopsBreadcrumbs.selectDateViewLabel": "Vue de données",
     "xpack.ml.alertConditionValidation.title": "La condition d'alerte contient les problèmes suivants :",
     "xpack.ml.alertContext.anomalyExplorerUrlDescription": "URL pour ouvrir dans Anomaly Explorer",
     "xpack.ml.alertContext.isInterimDescription": "Indique si les premiers résultats contiennent des résultats temporaires",

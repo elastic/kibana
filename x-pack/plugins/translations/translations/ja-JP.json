@@ -19486,7 +19486,6 @@
     "xpack.ml.aiops.explainLogRateSpikes.docTitle": "ログレートスパイクを説明",
     "xpack.ml.aiopsBreadcrumbLabel": "AIOps",
     "xpack.ml.aiopsBreadcrumbs.explainLogRateSpikesLabel": "ログレートスパイクを説明",
-    "xpack.ml.aiopsBreadcrumbs.selectDateViewLabel": "データビュー",
     "xpack.ml.alertConditionValidation.title": "アラート条件には次の問題が含まれます。",
     "xpack.ml.alertContext.anomalyExplorerUrlDescription": "異常エクスプローラーを開くURL",
     "xpack.ml.alertContext.isInterimDescription": "上位の一致に中間結果が含まれるかどうかを示します",
