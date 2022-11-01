@@ -144,7 +144,7 @@ export { loadRule } from './application/lib/rule_api/get_rule';
 export { loadAllActions } from './application/lib/action_connector_api';
 export { suspendedComponentWithProps } from './application/lib/suspended_component_with_props';
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
-export type { TIME_UNITS } from './application/constants';
+export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from './application/app';
 
