@@ -27,6 +27,7 @@ import { installIndexTemplatesRoute } from './synthetics_service/install_index_t
 import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
+import { editSyntheticsProjectMonitorRoute } from './monitor_cruds/edit_monitor_project';
 import { addSyntheticsProjectMonitorRouteLegacy } from './monitor_cruds/add_monitor_project_legacy';
 import { syntheticsGetPingsRoute } from './pings';
 import { createGetCurrentStatusRoute } from './status/current_status';
@@ -44,6 +45,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   deleteSyntheticsMonitorProjectRoute,
   disableSyntheticsRoute,
   editSyntheticsMonitorRoute,
+  editSyntheticsProjectMonitorRoute,
   enableSyntheticsRoute,
   getServiceLocationsRoute,
   getSyntheticsMonitorRoute,

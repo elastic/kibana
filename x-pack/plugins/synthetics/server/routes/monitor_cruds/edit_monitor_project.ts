@@ -11,12 +11,12 @@ import { ProjectMonitor } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { ProjectMonitorFormatterCreate } from '../../synthetics_service/project_monitor/project_monitor_formatter_create';
+import { ProjectMonitorFormatterUpdate } from '../../synthetics_service/project_monitor/project_monitor_formatter_update';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
 
-export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
-  method: 'POST',
+export const editSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
+  method: 'PUT',
   path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
   validate: {
     params: schema.object({
@@ -59,7 +59,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       );
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
-      const pushMonitorFormatter = new ProjectMonitorFormatterCreate({
+      const pushMonitorFormatter = new ProjectMonitorFormatterUpdate({
         projectId: decodedProjectName,
         spaceId,
         locations: publicLocations,
@@ -75,7 +75,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       await pushMonitorFormatter.configureAllProjectMonitors();
 
       return {
-        createdMonitors: pushMonitorFormatter.createdMonitors,
+        updatedMonitors: pushMonitorFormatter.updatedMonitors,
         failedMonitors: pushMonitorFormatter.failedMonitors,
       };
     } catch (error) {
@@ -85,7 +85,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   },
 });
 
-export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.create.toolarge', {
+export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.update.toolarge', {
   defaultMessage:
-    'Create request payload is too large. Please send a max of 250 monitors to create per request',
+    'Update request payload is too large. Please send a max of 250 monitors to update per request',
 });
