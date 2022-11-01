@@ -33,9 +33,11 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types'
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
 import { Direction, TableId } from '../../../../common/types';
-import { timelineActions } from '../../../timelines/store/timeline';
 import type { ESQuery } from '../../../../common/typed_json';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { dataTableActions } from '../../store/data_table';
+import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
+import { ERROR_TIMELINE_EVENTS } from './translations';
 export type InspectResponse = Inspect & { response: string[] };
 
 export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
@@ -126,6 +128,8 @@ export const useTimelineEvents = ({
   data,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
   const dispatch = useDispatch();
+  const { startTracking } = useTrackHttpRequest();
+  // const { startTracking } = useApmTracking(id);
   const refetch = useRef<Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -138,8 +142,8 @@ export const useTimelineEvents = ({
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
-      dispatch(timelineActions.clearEventsLoading({ id }));
-      dispatch(timelineActions.clearEventsDeleted({ id }));
+      dispatch(dataTableActions.clearEventsLoading({ id }));
+      dispatch(dataTableActions.clearEventsDeleted({ id }));
     }
   }, [dispatch, id]);
 
@@ -160,7 +164,7 @@ export const useTimelineEvents = ({
 
   const setUpdated = useCallback(
     (updatedAt: number) => {
-      dispatch(timelineActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
+      dispatch(dataTableActions.setTableUpdatedAt({ id, updated: updatedAt }));
     },
     [dispatch, id]
   );
@@ -195,6 +199,8 @@ export const useTimelineEvents = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         if (data && data.search) {
+          const { endTracking } = startTracking({ name: id });
+          const abortSignal = abortCtrl.current.signal;
           searchSubscription$.current = data.search
             .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
               { ...request, entityType },
@@ -203,7 +209,7 @@ export const useTimelineEvents = ({
                   request.language === 'eql'
                     ? 'timelineEqlSearchStrategy'
                     : 'timelineSearchStrategy',
-                abortSignal: abortCtrl.current.signal,
+                abortSignal,
                 // we only need the id to throw better errors
                 indexPattern: { id: dataViewId } as unknown as DataView,
               }
@@ -229,7 +235,8 @@ export const useTimelineEvents = ({
                   searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
                   setLoading(false);
-                  addWarning('i18n.ERROR_TIMELINE_EVENTS');
+                  endTracking('invalid');
+                  addWarning(ERROR_TIMELINE_EVENTS);
                   searchSubscription$.current.unsubscribe();
                 }
               },
@@ -247,7 +254,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, entityType, dataViewId, setUpdated, addWarning]
+    [skip, data, startTracking, id, entityType, dataViewId, setUpdated, addWarning]
   );
 
   useEffect(() => {

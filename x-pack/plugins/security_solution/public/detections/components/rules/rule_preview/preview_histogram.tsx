@@ -16,7 +16,6 @@ import { StatefulEventsViewer } from '../../../../common/components/events_viewe
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { dataTableActions } from '../../../../common/store/data_table';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { getHistogramConfig, isNoisy } from './helpers';
@@ -85,10 +84,6 @@ export const PreviewHistogram = ({
   // It seems like the Table/Grid component uses end date value as a non-inclusive one,
   // thus the alerts which have timestamp equal to the end date value are not displayed in the table.
   // To fix that, we extend end date value by 1s to make sure all alerts are included in the table.
-  const extendedEndDate = useMemo(
-    () => timeframeOptions.timeframeEnd.add('1', 's').toISOString(),
-    [timeframeOptions]
-  );
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
@@ -102,29 +97,19 @@ export const PreviewHistogram = ({
   });
   const license = useLicense();
   const {
-    dataTable: {
-      columns,
-      defaultColumns,
-      deletedEventIds,
-      itemsPerPage,
-      itemsPerPageOptions,
-      sort,
-    } = getAlertsPreviewDefaultModel(license),
+    dataTable: { columns, defaultColumns, itemsPerPage, sort } = getAlertsPreviewDefaultModel(
+      license
+    ),
   } = useSelector((state: State) => eventsViewerSelector(state, TableId.rulePreview));
 
   const {
     browserFields,
-    indexPattern: selectedIndexPattern,
     runtimeMappings,
     dataViewId: selectedDataViewId,
-    loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
   const { globalFullScreen } = useGlobalFullScreen();
   const previousPreviewId = usePrevious(previewId);
-  const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
-    'tGridEventRenderedViewEnabled'
-  );
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {
@@ -161,6 +146,21 @@ export const PreviewHistogram = ({
   );
 
   const chartData = useMemo((): ChartSeriesData[] => [{ key: 'hits', value: data }], [data]);
+  const previewFilter = useMemo(
+    () => [
+      {
+        query: {
+          bool: {
+            filter: `kibana.alert.rule.uuid:${previewId}`,
+          },
+        },
+        meta: {
+          language: 'kuery',
+        },
+      },
+    ],
+    [previewId]
+  );
 
   return (
     <>
@@ -201,7 +201,7 @@ export const PreviewHistogram = ({
       <EuiSpacer />
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <StatefulEventsViewer
-          pageFilters={{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }}
+          pageFilters={previewFilter}
           defaultModel={getAlertsPreviewDefaultModel(license)}
           end={endDate}
           entityType={'events'}
@@ -210,6 +210,7 @@ export const PreviewHistogram = ({
           renderCellValue={PreviewRenderCellValue}
           rowRenderers={defaultRowRenderers}
           start={startDate}
+          scopeId={SourcererScopeName.detections}
         />
       </FullScreenContainer>
       <DetailsPanel

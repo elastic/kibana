@@ -185,6 +185,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
+
   const { Navigation } = useSessionViewNavigation({
     scopeId: tableId,
   });
@@ -257,14 +259,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         config: esQueryConfig,
         browserFields,
         dataProviders: [],
-        filters,
+        filters: globalFilters,
         from: start,
         indexPattern,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, indexPattern, browserFields, filters, start, end, query]
+    [esQueryConfig, indexPattern, browserFields, globalFilters, start, end, query]
   );
 
   const canQueryTimeline = useMemo(

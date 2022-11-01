@@ -7,6 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALERTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.eventsTab.unit', {
+    values: { totalCount },
+    defaultMessage: `external {totalCount, plural, =1 {alert} other {alerts}}`,
+  });
+
 export const EVENTS_UNIT = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.hosts.navigaton.eventsUnit', {
     values: { totalCount },
@@ -48,9 +54,3 @@ export const SHOW_EXTERNAL_ALERTS = i18n.translate(
 export const EVENTS_GRAPH_TITLE = i18n.translate('xpack.securitySolution.eventsGraphTitle', {
   defaultMessage: 'Events',
 });
-
-export const ALERTS_UNIT = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.eventsTab.unit', {
-    values: { totalCount },
-    defaultMessage: `external {totalCount, plural, =1 {alert} other {alerts}}`,
-  });
