@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPanel, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiPanel,
+  EuiHorizontalRule,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -71,7 +77,13 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
         <EuiPanel hasBorder>
           <StatItemHeader toggle={toggle} toggleStatus={toggleStatus} description={description} />
-
+          {loading && (
+            <EuiFlexGroup justifyContent="center" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="l" data-test-subj="loading-spinner" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
           {toggleStatus && !loading && (
             <>
               {isChartEmbeddablesEnabled ? (

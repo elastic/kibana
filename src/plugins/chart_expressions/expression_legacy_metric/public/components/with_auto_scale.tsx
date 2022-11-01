@@ -20,7 +20,7 @@ import { useResizeObserver } from '@elastic/eui';
 import { autoScaleWrapperStyle } from './with_auto_scale.styles';
 
 interface AutoScaleParams {
-  alignment?: 'left' | 'center' | 'right';
+  autoScaleMetricAlignment?: 'left' | 'center' | 'right';
   minScale?: number;
   containerStyles: CSSProperties;
 }
@@ -122,11 +122,12 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
             transform: `scale(${scale || 0})`,
             ...(parentDimensions.width &&
             scale &&
-            autoScaleParams?.alignment &&
-            autoScaleParams?.alignment !== 'center'
+            autoScaleParams?.autoScaleMetricAlignment &&
+            autoScaleParams?.autoScaleMetricAlignment !== 'center'
               ? {
                   position: 'relative',
-                  [autoScaleParams.alignment]: (1 - scale) * parentDimensions.width * scale * -1,
+                  [autoScaleParams.autoScaleMetricAlignment]:
+                    (1 - scale) * parentDimensions.width * scale * -1,
                 }
               : {}),
           }}

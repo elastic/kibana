@@ -32,7 +32,7 @@ export type LabelsConfig = Labels & { style: Style; position: LabelPositionType 
 
 export type MetricAlignment = 'left' | 'center' | 'right';
 export interface MetricVisParam {
-  alignment?: MetricAlignment;
+  autoScaleMetricAlignment?: MetricAlignment;
   percentageMode: boolean;
   percentageFormatPattern?: string;
   metricColorMode: ColorMode;

@@ -121,7 +121,6 @@ Object {
       "accessor": "bd17c23e-4f83-4108-8005-2669170d064b",
       "layerId": "cea37c70-8f91-43bf-b9fe-72d8c049f6a3",
       "layerType": "data",
-      "textAlign": "center",
     },
   },
   "title": "[Network] Unique private IPs - destination metric",
