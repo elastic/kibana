@@ -29,7 +29,9 @@ for (const deployment of prDeployments) {
     const lastCommit = pullRequest.commits.slice(-1)[0];
     const lastCommitTimestamp = new Date(lastCommit.committedDate).getTime() / 1000;
 
-    const persistDeployment = Boolean(pullRequest.labels.filter((label: any) => label.name === 'ci:cloud-persist-deployment').length)
+    const persistDeployment = Boolean(
+      pullRequest.labels.filter((label: any) => label.name === 'ci:cloud-persist-deployment').length
+    );
     if (persistDeployment) {
       continue;
     }
