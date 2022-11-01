@@ -42,6 +42,15 @@ Review important information about the {kib} 8.5.0 release.
 Review the following information about the {kib} 8.5.0 release.
 
 [float]
+[[known-issues-8.5.0]]
+=== Known issues
+
+Due to a recent change in the Red Hat scan verification process,
+this version of Kibana is not available in the Red Hat Ecosystem Catalog.
+This bug will be fixed in the next release.
+Please use the https://www.docker.elastic.co/r/kibana/kibana[Elastic docker registry] to download the 8.5.0 Kibana image.
+
+[float]
 [[breaking-changes-8.5.0]]
 === Breaking changes
 
