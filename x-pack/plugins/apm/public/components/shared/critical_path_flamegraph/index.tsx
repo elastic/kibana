@@ -6,130 +6,22 @@
  */
 import { Chart, Datum, Flame, Settings } from '@elastic/charts';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   euiPaletteColorBlind,
-  EuiPanel,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useMemo, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  AGENT_NAME,
-  SERVICE_NAME,
-  SPAN_NAME,
-  SPAN_SUBTYPE,
-  SPAN_TYPE,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import { asPercent } from '../../../../common/utils/formatters';
-import type { CriticalPathResponse } from '../../../../server/routes/traces/get_aggregated_critical_path';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { AgentIcon } from '../agent_icon';
-import { SpanIcon } from '../span_icon';
+import { CriticalPathFlamegraphTooltip } from './critical_path_flamegraph_tooltip';
 import { criticalPathToFlamegraph } from './critical_path_to_flamegraph';
 
 const chartClassName = css`
   flex-grow: 1;
 `;
-
-function CustomTooltip({
-  metadata,
-  countInclusive,
-  countExclusive,
-  totalCount,
-}: {
-  metadata?: CriticalPathResponse['metadata'][string];
-  countInclusive: number;
-  countExclusive: number;
-  totalCount: number;
-}) {
-  if (!metadata) {
-    return <></>;
-  }
-
-  return (
-    <EuiPanel>
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {metadata['processor.event'] === ProcessorEvent.transaction ? (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="s"
-              style={{ overflowWrap: 'anywhere' }}
-              alignItems="center"
-            >
-              <EuiFlexItem grow={false}>
-                {metadata[TRANSACTION_NAME]}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge>{metadata[TRANSACTION_TYPE]}</EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem>
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="s"
-              style={{ overflowWrap: 'anywhere' }}
-              alignItems="center"
-            >
-              <EuiFlexItem grow={false}>
-                <SpanIcon
-                  type={metadata[SPAN_TYPE]}
-                  subtype={metadata[SPAN_SUBTYPE]}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{metadata[SPAN_NAME]}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <AgentIcon agentName={metadata[AGENT_NAME]} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{metadata[SERVICE_NAME]}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.apm.criticalPathFlameGraph.selfTime', {
-                defaultMessage: 'Self time: {value}',
-                values: {
-                  value: asPercent(countExclusive / totalCount, 1),
-                },
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.apm.criticalPathFlameGraph.totalTime', {
-                defaultMessage: 'Total time: {value}',
-                values: {
-                  value: asPercent(countInclusive / totalCount, 1),
-                },
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-}
 
 export function CriticalPathFlamegraph(
   props: {
@@ -245,7 +137,7 @@ export function CriticalPathFlamegraph(
                       flameGraph.countExclusive[valueIndex];
 
                     return (
-                      <CustomTooltip
+                      <CriticalPathFlamegraphTooltip
                         metadata={operationMetadata}
                         countInclusive={countInclusive}
                         countExclusive={countExclusive}
