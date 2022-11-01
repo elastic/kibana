@@ -71,7 +71,7 @@
 /src/plugins/inspector/ @elastic/kibana-app-services
 /src/plugins/kibana_utils/ @elastic/kibana-app-services
 /src/plugins/navigation/ @elastic/kibana-app-services
-/src/plugins/share/ @elastic/kibana-app-services
+/src/plugins/share/ @elastic/kibana-global-experience
 /src/plugins/ui_actions/ @elastic/kibana-app-services
 /src/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /src/plugins/data_view_field_editor @elastic/kibana-app-services
