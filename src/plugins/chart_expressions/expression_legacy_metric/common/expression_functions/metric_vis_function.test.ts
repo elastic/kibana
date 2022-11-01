@@ -23,7 +23,6 @@ describe('interpreter/functions#metric', () => {
   let args: MetricArguments;
   beforeEach(() => {
     args = {
-      metricAlignment: 'left',
       percentageMode: false,
       colorMode: 'None',
       palette: {

@@ -19,7 +19,7 @@ import { VisParams, visType, LabelPositionType, MetricAlignment } from './expres
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
 export interface MetricArguments {
-  metricAlignment: MetricAlignment;
+  autoScaleMetricAlignment?: MetricAlignment;
   percentageMode: boolean;
   colorMode: ColorMode;
   showLabels: boolean;
