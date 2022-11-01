@@ -125,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: '*' },
               },
             },
           ]);
@@ -174,6 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: 'web' },
               },
             },
           ]);
@@ -206,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
             logger,
             void 0,
             timeFrame,
-            ['middleware']
+            [{ key: 'middleware', bucketKey: { groupBy0: 'middleware' } }]
           );
           expect(results).to.eql([
             {
@@ -222,6 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: 'web' },
               },
               middleware: {
                 timeSize: 5,
@@ -235,6 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: 'middleware' },
               },
             },
           ]);
@@ -281,6 +285,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: '*' },
               },
             },
           ]);
@@ -312,6 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: '*' },
               },
             },
           ]);
@@ -358,6 +364,7 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  bucketKey: { groupBy0: '*' },
                 },
               },
             ]);
@@ -388,7 +395,10 @@ export default function ({ getService }: FtrProviderContext) {
               logger,
               void 0,
               timeFrame,
-              ['web', 'prod']
+              [
+                { key: 'web', bucketKey: { groupBy0: 'web' } },
+                { key: 'prod', bucketKey: { groupBy0: 'prod' } },
+              ]
             );
             expect(results).to.eql([
               {
@@ -404,6 +414,7 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  bucketKey: { groupBy0: '*' },
                 },
                 web: {
                   timeSize: 5,
@@ -417,6 +428,7 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  bucketKey: { groupBy0: 'web' },
                 },
                 prod: {
                   timeSize: 5,
@@ -430,6 +442,7 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  bucketKey: { groupBy0: 'prod' },
                 },
               },
             ]);
@@ -480,6 +493,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: '*' },
               },
             },
           ]);
@@ -522,6 +536,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: '*' },
               },
             },
           ]);
@@ -553,6 +568,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: '*' },
               },
             },
           ]);
@@ -598,6 +614,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: 'dev' },
               },
               prod: {
                 timeSize: 5,
@@ -611,6 +628,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: 'prod' },
               },
             },
           ]);
@@ -645,6 +663,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: 'prod' },
               },
             },
           ]);
@@ -665,7 +684,7 @@ export default function ({ getService }: FtrProviderContext) {
             logger,
             void 0,
             timeFrame,
-            ['dev']
+            [{ key: 'dev', bucketKey: { groupBy0: 'dev' } }]
           );
           expect(results).to.eql([
             {
@@ -681,12 +700,13 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: 'dev' },
               },
             },
           ]);
         });
 
-        it('should NOT resport any alerts when missing group recovers', async () => {
+        it('should NOT report any alerts when missing group recovers', async () => {
           const params = {
             ...baseParams,
             criteria: [
@@ -711,7 +731,7 @@ export default function ({ getService }: FtrProviderContext) {
             logger,
             moment(gauge.midpoint).subtract(1, 'm').valueOf(),
             timeFrame,
-            ['dev']
+            [{ key: 'dev', bucketKey: { groupBy0: 'dev' } }]
           );
           expect(results).to.eql([{}]);
         });
@@ -746,6 +766,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: 'prod' },
               },
               dev: {
                 timeSize: 5,
@@ -759,6 +780,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: 'dev' },
               },
             },
           ]);
@@ -807,6 +829,7 @@ export default function ({ getService }: FtrProviderContext) {
               shouldFire: true,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: '*' },
             },
           },
         ]);
@@ -851,6 +874,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: '*' },
               },
             },
           ]);
@@ -901,6 +925,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: true,
                 isNoData: false,
+                bucketKey: { groupBy0: 'dev' },
               },
             },
           ]);
