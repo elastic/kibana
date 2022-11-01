@@ -55,6 +55,26 @@ export const ALERT_STATUS_WARNING = i18n.translate(
     defaultMessage: 'Warning',
   }
 );
+export const RULE_LAST_RUN_OUTCOME_SUCCEEDED = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleLastRunOutcomeSucceeded',
+  {
+    defaultMessage: 'Succeeded',
+  }
+);
+
+export const RULE_LAST_RUN_OUTCOME_WARNING = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleLastRunOutcomeWarning',
+  {
+    defaultMessage: 'Warning',
+  }
+);
+
+export const RULE_LAST_RUN_OUTCOME_FAILED = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleLastRunOutcomeFailed',
+  {
+    defaultMessage: 'Failed',
+  }
+);
 
 export const rulesStatusesTranslationsMapping = {
   ok: ALERT_STATUS_OK,
@@ -63,6 +83,12 @@ export const rulesStatusesTranslationsMapping = {
   pending: ALERT_STATUS_PENDING,
   unknown: ALERT_STATUS_UNKNOWN,
   warning: ALERT_STATUS_WARNING,
+};
+
+export const rulesLastRunOutcomeTranslationMapping = {
+  succeeded: RULE_LAST_RUN_OUTCOME_SUCCEEDED,
+  warning: RULE_LAST_RUN_OUTCOME_WARNING,
+  failed: RULE_LAST_RUN_OUTCOME_FAILED,
 };
 
 export const ALERT_ERROR_UNKNOWN_REASON = i18n.translate(
@@ -198,3 +224,90 @@ export const CLEAR_SELECTION = i18n.translate(
     defaultMessage: 'Clear selection',
   }
 );
+
+export const RULE_STATUS_ACTIVE = (total: number) => {
+  return i18n.translate(
+    'xpack.triggersActionsUI.sections.rulesList.totalStatusesActiveDescription',
+    {
+      defaultMessage: 'Active: {total}',
+      values: { total },
+    }
+  );
+};
+
+export const RULE_STATUS_ERROR = (total: number) => {
+  return i18n.translate(
+    'xpack.triggersActionsUI.sections.rulesList.totalStatusesErrorDescription',
+    {
+      defaultMessage: 'Error: {total}',
+      values: { total },
+    }
+  );
+};
+
+export const RULE_STATUS_WARNING = (total: number) => {
+  return i18n.translate(
+    'xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription',
+    {
+      defaultMessage: 'Warning: {total}',
+      values: { total },
+    }
+  );
+};
+
+export const RULE_STATUS_OK = (total: number) => {
+  return i18n.translate('xpack.triggersActionsUI.sections.rulesList.totalStatusesOkDescription', {
+    defaultMessage: 'Ok: {total}',
+    values: { total },
+  });
+};
+
+export const RULE_STATUS_PENDING = (total: number) => {
+  return i18n.translate(
+    'xpack.triggersActionsUI.sections.rulesList.totalStatusesPendingDescription',
+    {
+      defaultMessage: 'Pending: {total}',
+      values: { total },
+    }
+  );
+};
+
+export const RULE_STATUS_UNKNOWN = (total: number) => {
+  return i18n.translate(
+    'xpack.triggersActionsUI.sections.rulesList.totalStatusesUnknownDescription',
+    {
+      defaultMessage: 'Unknown: {total}',
+      values: { total },
+    }
+  );
+};
+
+export const RULE_LAST_RUN_OUTCOME_SUCCEEDED_DESCRIPTION = (total: number) => {
+  return i18n.translate(
+    'xpack.triggersActionsUI.sections.rulesList.lastRunOutcomeSucceededDescription',
+    {
+      defaultMessage: 'Succeeded: {total}',
+      values: { total },
+    }
+  );
+};
+
+export const RULE_LAST_RUN_OUTCOME_WARNING_DESCRIPTION = (total: number) => {
+  return i18n.translate(
+    'xpack.triggersActionsUI.sections.rulesList.lastRunOutcomeWarningDescription',
+    {
+      defaultMessage: 'Warning: {total}',
+      values: { total },
+    }
+  );
+};
+
+export const RULE_LAST_RUN_OUTCOME_FAILED_DESCRIPTION = (total: number) => {
+  return i18n.translate(
+    'xpack.triggersActionsUI.sections.rulesList.lastRunOutcomeFailedDescription',
+    {
+      defaultMessage: 'Failed: {total}',
+      values: { total },
+    }
+  );
+};

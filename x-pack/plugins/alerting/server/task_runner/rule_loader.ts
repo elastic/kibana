@@ -79,9 +79,9 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
   }
 
   if (rule.monitoring) {
-    if (rule.monitoring.execution.history.length >= MONITORING_HISTORY_LIMIT) {
+    if (rule.monitoring.run.history.length >= MONITORING_HISTORY_LIMIT) {
       // Remove the first (oldest) record
-      rule.monitoring.execution.history.shift();
+      rule.monitoring.run.history.shift();
     }
   }
 

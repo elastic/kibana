@@ -40,7 +40,7 @@ const getMockRule = () => {
       error: null,
     },
     monitoring: {
-      execution: {
+      run: {
         history: [
           {
             success: true,

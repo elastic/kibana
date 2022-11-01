@@ -32,7 +32,9 @@ import {
   RuleExecutionStatuses,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
+  RuleLastRunOutcomes,
   RuleNotifyWhenType,
+  RuleMonitoringHistory,
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
@@ -40,7 +42,6 @@ import {
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
-  RuleMonitoring,
   MappedParams,
   RuleSnooze,
 } from '../common';
@@ -81,6 +82,7 @@ export interface RuleExecutorServices<
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
+  ruleMonitoringService: RuleMonitoringService;
 }
 
 export interface RuleExecutorOptions<
@@ -207,6 +209,18 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   };
 }
 
+export interface RawRuleLastRun extends SavedObjectAttributes {
+  outcome: RuleLastRunOutcomes;
+  warning: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
+  outcomeMsg: string | null;
+  alertsCount: {
+    active?: number | null;
+    new?: number | null;
+    recovered?: number | null;
+    ignored?: number | null;
+  };
+}
+
 export type PartialRule<Params extends RuleTypeParams = never> = Pick<Rule<Params>, 'id'> &
   Partial<Omit<Rule<Params>, 'id'>>;
 
@@ -249,9 +263,12 @@ export interface RawRule extends SavedObjectAttributes {
   mutedInstanceIds: string[];
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
-  monitoring?: RuleMonitoring;
+  monitoring?: RawRuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   isSnoozedUntil?: string | null;
+  lastRun?: RawRuleLastRun | null;
+  nextRun?: string | null;
+  running: boolean;
 }
 
 export interface AlertingPlugin {
@@ -277,6 +294,37 @@ export interface InvalidatePendingApiKey {
   createdAt: string;
 }
 
+export interface RawRuleMonitoring extends SavedObjectAttributes {
+  run: {
+    history: RuleMonitoringHistory[];
+    calculated_metrics: {
+      p50?: number;
+      p95?: number;
+      p99?: number;
+      success_ratio: number;
+    };
+    last_run: {
+      timestamp: string;
+      metrics: {
+        duration?: number;
+        total_search_duration_ms?: number | null;
+        total_indexing_duration_ms?: number | null;
+        total_alerts_detected?: number | null;
+        total_alerts_created?: number | null;
+        gap_duration_s?: number | null;
+      };
+    };
+  };
+}
+
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export interface RuleMonitoringService {
+  setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
+  setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
+  setLastRunMetricsTotalAlertDetected: (totalAlertDetected: number) => void;
+  setLastRunMetricsTotalAlertCreated: (totalAlertCreated: number) => void;
+  setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
+}

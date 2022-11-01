@@ -36,6 +36,9 @@ export const AlertAttributesExcludedFromAAD = [
   'snoozeEndTime', // field removed in 8.2, but must be retained in case an rule created/updated in 8.2 is being migrated
   'snoozeSchedule',
   'isSnoozedUntil',
+  'lastRun',
+  'nextRun',
+  'running',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
@@ -52,7 +55,10 @@ export type AlertAttributesExcludedFromAADType =
   | 'monitoring'
   | 'snoozeEndTime'
   | 'snoozeSchedule'
-  | 'isSnoozedUntil';
+  | 'isSnoozedUntil'
+  | 'lastRun'
+  | 'nextRun'
+  | 'running';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,

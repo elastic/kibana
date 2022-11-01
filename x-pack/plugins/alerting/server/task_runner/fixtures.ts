@@ -67,7 +67,7 @@ export const generateSavedObjectParams = ({
   '1',
   {
     monitoring: {
-      execution: {
+      run: {
         calculated_metrics: {
           success_ratio: 1,
         },
@@ -217,7 +217,7 @@ export const generateRunnerResult = ({
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
-      execution: {
+      run: {
         calculated_metrics: {
           success_ratio: successRatio,
         },
