@@ -20,9 +20,14 @@ import { enterConsoleCommand } from '../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { GET_FILE_ROUTE } from '../../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
-import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import type {
+  ActionDetailsApiResponse,
+  EndpointPrivileges,
+  ResponseActionGetFileOutputContent,
+} from '../../../../../common/endpoint/types';
 import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../common/translations';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
+import { endpointActionResponseCodes } from '../endpoint_action_response_codes';
 
 jest.mock('../../../../common/components/user_privileges');
 
@@ -152,6 +157,44 @@ describe('When using get-file action from response actions console', () => {
     await waitFor(() => {
       expect(renderResult.getByTestId('getFileSuccess').textContent).toEqual(
         'File retrieved from the host.Click here to download(ZIP file passcode: elastic)'
+      );
+    });
+  });
+
+  it.each([
+    'ra_get-file_error_not-found',
+    'ra_get-file_error_is-directory',
+    'ra_get-file_error_invalid-input',
+    'ra_get-file_error_not-permitted',
+    'ra_get-file_error_too-big',
+    'ra_get-file_error_disk-quota',
+    'ra_get-file_error_processing',
+    'ra_get-file_error_upload-api-unreachable',
+    'ra_get-file_error_upload-timeout',
+    'ra_get-file_error_queue-timeout',
+  ])('should show detailed error if get-file failure returned code: %s', async (outputCode) => {
+    const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/a.b.c',
+    }) as ActionDetailsApiResponse<ResponseActionGetFileOutputContent>;
+    pendingDetailResponse.data.agents = ['a.b.c'];
+    pendingDetailResponse.data.wasSuccessful = false;
+    pendingDetailResponse.data.errors = ['not found'];
+    pendingDetailResponse.data.outputs = {
+      'a.b.c': {
+        type: 'json',
+        content: {
+          code: outputCode,
+        } as unknown as ResponseActionGetFileOutputContent,
+      },
+    };
+    apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
+    await render();
+    enterConsoleCommand(renderResult, 'get-file --path one');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('getFile-actionFailure').textContent).toMatch(
+        // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
+        new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
       );
     });
   });
