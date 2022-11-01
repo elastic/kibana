@@ -10,8 +10,8 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { NewTermsRuleParams } from '../../schemas/rule_schemas';
-import { newTermsRuleParams } from '../../schemas/rule_schemas';
+import type { NewTermsRuleParams } from '../../rule_schema';
+import { newTermsRuleParams } from '../../rule_schema';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../../signals/single_search_after';
 import { getFilter } from '../../signals/get_filter';
@@ -37,7 +37,8 @@ import {
 import { createEnrichEventsFunction } from '../../signals/enrichments';
 
 export const createNewTermsAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateRuleOptions,
+  isPreview?: boolean
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
   const { logger } = createOptions;
   return {
@@ -105,6 +106,7 @@ export const createNewTermsAlertType = (
         params,
         spaceId,
         state,
+        startedAt,
       } = execOptions;
 
       // Validate the history window size compared to `from` at runtime as well as in the `validate`
@@ -276,12 +278,14 @@ export const createNewTermsAlertType = (
             newTerms: [bucket.key],
           }));
 
+          const alertTimestampOverride = isPreview ? startedAt : undefined;
           const wrappedAlerts = wrapNewTermsAlerts({
             eventsAndTerms,
             spaceId,
             completeRule,
             mergeStrategy,
             indicesToQuery: inputIndex,
+            alertTimestampOverride,
           });
 
           const bulkCreateResult = await bulkCreate(
