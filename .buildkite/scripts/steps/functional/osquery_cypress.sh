@@ -11,8 +11,7 @@ export JOB=kibana-osquery-cypress
 
 echo "--- Osquery Cypress tests"
 
-checks-reporter-with-killswitch "Osquery Cypress Tests" \
- node scripts/functional_tests \
-   --debug --bail \
-   --config x-pack/test/osquery_cypress/cli_config.ts
+node scripts/functional_tests \
+  --debug --bail \
+  --config x-pack/test/osquery_cypress/cli_config.ts
 
