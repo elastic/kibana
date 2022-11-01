@@ -16,6 +16,8 @@ export interface CollapseArgs {
   fn: CollapseFunction[];
 }
 
+export type { CollapseExpressionFunction };
+
 /**
  * Collapses multiple rows into a single row using the specified function.
  *

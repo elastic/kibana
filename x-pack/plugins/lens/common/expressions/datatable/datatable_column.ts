@@ -48,13 +48,14 @@ export interface ColumnState {
 }
 
 export type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column' };
-
-export const datatableColumn: ExpressionFunctionDefinition<
+export type DatatableColumnFunction = ExpressionFunctionDefinition<
   'lens_datatable_column',
   null,
   ColumnState & { sortingHint?: SortingHint },
   DatatableColumnResult
-> = {
+>;
+
+export const datatableColumn: DatatableColumnFunction = {
   name: 'lens_datatable_column',
   aliases: [],
   type: 'lens_datatable_column',
