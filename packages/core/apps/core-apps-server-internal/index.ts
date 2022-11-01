@@ -7,13 +7,9 @@
  */
 
 export { CoreAppsService } from './src';
-export {
-  registerBundleRoutes,
-  registerRouteForBundle,
-  FileHashCache,
-  type IFileHashCache,
-} from './src';
 export type {
   InternalCoreAppsServiceRequestHandlerContext,
   InternalCoreAppsServiceRouter,
 } from './src';
+// only used by integration tests
+export { FileHashCache, registerRouteForBundle } from './src';

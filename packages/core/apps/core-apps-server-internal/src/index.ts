@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-export {
-  registerBundleRoutes,
-  registerRouteForBundle,
-  FileHashCache,
-  type IFileHashCache,
-} from './bundle_routes';
 export { CoreAppsService } from './core_app';
 export type {
   InternalCoreAppsServiceRequestHandlerContext,
   InternalCoreAppsServiceRouter,
 } from './internal_types';
+// only used by integration tests
+export { registerRouteForBundle, FileHashCache } from './bundle_routes';
