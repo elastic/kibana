@@ -88,6 +88,9 @@ describe('SingleMetricAttributes', () => {
                     operationType: 'median',
                     scale: 'ratio',
                     sourceField: 'transaction.duration.us',
+                    params: {
+                      emptyAsNull: true,
+                    },
                   },
                 },
                 incompleteColumns: {},
