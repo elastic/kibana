@@ -97,7 +97,7 @@ function getAlwaysFiringAlertType() {
 async function alwaysFiringExecutor(alertExecutorOptions: any) {
   const { services, params, state, spaceId, namespace, rule } = alertExecutorOptions;
   let group: string | null = 'default';
-  const alertInfo = { alertId: rule.id, spaceId, namespace, ...rule };
+  const alertInfo = { spaceId, namespace, ...rule };
 
   if (params.groupsToScheduleActionsInSeries) {
     const index = state.groupInSeriesIndex || 0;
