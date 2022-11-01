@@ -70,7 +70,7 @@ The Opsgenie connector supports two types of actions: Create alert and Close ale
 
 When testing the Opsgenie connector, choose the appropriate action from the selector. Each action has different properties that can be configured.
 
-Action::    Whether to create or close an alert within Opsgenie. When using the Opsgenie connector for a rule action, the action selector is hidden and automatically set to the appropriate value. If the action is run when a rule fires, it will create an alert within Opsgenie. If the action is run when a rule recovers, it will close an alert within Opsgenie.
+Action:: Select *Create alert* to configure the actions that occur when a rule's conditions are met. Select *Close alert* to define the recovery actions that occur when a rule's conditions are no longer met.
 
 [float]
 [[opsgenie-action-create-alert-configuration]]
