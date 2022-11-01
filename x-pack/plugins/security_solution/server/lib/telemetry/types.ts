@@ -434,4 +434,6 @@ export interface TelemetryTimelineArtifact {
   ancestors: number;
   descendants: number;
   descendant_levels: number;
+  alerts_retrieved_size: number;
+  alert_eql_queries: string[];
 }

@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { Logger } from '@kbn/core/server';
-import type { SafeEndpointEvent } from '../../../../common/endpoint/types';
+import type { EqlHitsEvent, EqlSearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
@@ -16,20 +16,21 @@ import type {
   ESLicense,
   TimelineTelemetryTemplate,
   TimelineTelemetryEvent,
-  TelemetryTimelineArtifact
+  TelemetryTimelineArtifact,
+  EnhancedAlertEvent,
 } from '../types';
 import { TELEMETRY_CHANNEL_TIMELINE, TASK_METRICS_CHANNEL } from '../constants';
 import { resolverEntity } from '../../../endpoint/routes/resolver/entity/utils/build_resolver_entity';
 import { tlog, createTaskMetric } from '../helpers';
 import { artifactService } from '../artifact';
-import { telemetryTimelineArtifact } from '../timeline_artifact'
-
+import { telemetryTimelineArtifact } from '../timeline_artifact';
+import type { SafeEndpointEvent } from '../../../../common/endpoint/types';
 
 export function createTelemetryTimelineTaskConfig() {
   return {
     type: 'security:telemetry-timelines',
     title: 'Security Solution Timeline telemetry',
-    interval: '3h',
+    interval: '30s',
     timeout: '10m',
     version: '1.0.0',
     runTask: async (
@@ -73,11 +74,8 @@ export function createTelemetryTimelineTaskConfig() {
           license_uuid: licenseInfo?.uid,
         };
 
-        // Fetch EP Alerts
-
-        const endpointAlerts = await receiver.fetchTimelineEndpointAlerts(3);
-
-        const aggregations = endpointAlerts?.aggregations as unknown as {
+        const endpointAlertCount = await receiver.fetchEndpointAlertCount(3);
+        const aggregations = endpointAlertCount?.aggregations as unknown as {
           endpoint_alert_count: { value: number };
         };
         tlog(logger, `Endpoint alert count: ${aggregations?.endpoint_alert_count}`);
@@ -87,11 +85,12 @@ export function createTelemetryTimelineTaskConfig() {
           incrementBy: aggregations?.endpoint_alert_count.value,
         });
 
+        // Fetch EP Alerts
+        // const endpointAlerts = await receiver.fetchTimelineEndpointAlerts(3);
+        const eqlSearchResponse = await fetchAlerts(receiver);
+
         // No EP Alerts -> Nothing to do
-        if (
-          endpointAlerts.hits.hits?.length === 0 ||
-          endpointAlerts.hits.hits?.length === undefined
-        ) {
+        if (!eqlSearchResponse) {
           tlog(logger, 'no endpoint alerts received. exiting telemetry task.');
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, true, startTime),
@@ -99,9 +98,11 @@ export function createTelemetryTimelineTaskConfig() {
           return counter;
         }
 
-        // Build process tree for each EP Alert recieved
+        const endpointAlerts = formatEqlSearchResponse(eqlSearchResponse) ?? [];
 
-        for (const alert of endpointAlerts.hits.hits) {
+        // Build process tree for each EP Alert received
+
+        for (const alert of endpointAlerts) {
           const eventId = alert._source ? alert._source['event.id'] : 'unknown';
           const alertUUID = alert._source ? alert._source['kibana.alert.uuid'] : 'unknown';
 
@@ -205,10 +206,29 @@ const updateArtifact = async (logger: Logger) => {
     telemetryTimelineArtifact.ancestors = artifact.ancestors;
     telemetryTimelineArtifact.descendants = artifact.descendants;
     telemetryTimelineArtifact.descendant_levels = artifact.descendant_levels;
-    return 0;
+    telemetryTimelineArtifact.alerts_retrieved_size = artifact.alerts_retrieved_size;
+    telemetryTimelineArtifact.alert_eql_queries = artifact.alert_eql_queries;
   } catch (err) {
     tlog(logger, `Failed to set telemetry timeline artifact due to ${err.message}`);
     telemetryTimelineArtifact.resetAllToDefault();
-    return 0;
   }
-}
+};
+
+const fetchAlerts = async (receiver: ITelemetryReceiver) => {
+  for (const query of telemetryTimelineArtifact.alert_eql_queries) {
+    const res = await receiver.fetchTimelineEndpointAlerts(query);
+    if (res?.hits?.total?.value ?? -1 > 0) {
+      return res;
+    }
+  }
+};
+
+const formatEqlSearchResponse = (response: EqlSearchResponse<EnhancedAlertEvent>) => {
+  if (response.hits.sequences) {
+    return response.hits.sequences?.reduce((accum: EqlHitsEvent[], current) => {
+      return [...accum, ...current.events];
+    }, []) as unknown as Array<EqlHitsEvent<EnhancedAlertEvent>>;
+  } else if (response.hits.events) {
+    return response.hits.events;
+  }
+};

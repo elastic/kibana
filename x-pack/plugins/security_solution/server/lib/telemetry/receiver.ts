@@ -32,6 +32,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import type { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { EqlSearchRequest, EqlSearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import {
   exceptionListItemToTelemetryEntry,
@@ -58,7 +59,7 @@ import type {
   ValueListIndicatorMatchResponseAggregation,
 } from './types';
 import { telemetryConfiguration } from './configuration';
-import { telemetryTimelineArtifact } from './timeline_artifact'
+import { telemetryTimelineArtifact } from './timeline_artifact';
 
 export interface ITelemetryReceiver {
   start(
@@ -149,7 +150,9 @@ export interface ITelemetryReceiver {
 
   fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
 
-  fetchTimelineEndpointAlerts(
+  fetchTimelineEndpointAlerts(query: string): Promise<EqlSearchResponse<EnhancedAlertEvent>>;
+
+  fetchEndpointAlertCount(
     interval: number
   ): Promise<SearchResponse<EnhancedAlertEvent, Record<string, AggregationsAggregate>>>;
 
@@ -682,16 +685,29 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
   }
 
-  public async fetchTimelineEndpointAlerts(interval: number) {
+  public async fetchTimelineEndpointAlerts(query: string) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
+    const eqlSearchRequest: EqlSearchRequest = {
+      index: `${this.alertsIndex}*`,
+      size: telemetryTimelineArtifact.alerts_retrieved_size,
+      query,
+    };
+
+    return this.esClient.eql.search<EnhancedAlertEvent>(eqlSearchRequest);
+  }
+
+  public async fetchEndpointAlertCount(interval: number) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve endpoint count');
+    }
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.alertsIndex}*`,
       ignore_unavailable: true,
-      size: 30,
+      size: 0,
       body: {
         query: {
           bool: {
