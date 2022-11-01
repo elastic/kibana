@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
@@ -40,6 +40,8 @@ import { Loader } from '../../../../common/components/loader';
 import { Panel } from '../../../../common/components/panel';
 import * as commonI18n from '../common/translations';
 import { usersActions } from '../../../../users/store';
+import { useNavigateToTimeline } from '../../detection_response/hooks/use_navigate_to_timeline';
+import type { TimeRange } from '../../../../common/store/inputs/model';
 
 const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
@@ -90,8 +92,34 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     [dispatch, riskEntity]
   );
 
+  const { openTimelineWithFilters } = useNavigateToTimeline();
+
+  const openEntityInTimeline = useCallback(
+    (entityName: string, oldestAlertTimestamp?: string) => {
+      const timeRange: TimeRange | undefined = oldestAlertTimestamp
+        ? {
+            kind: 'relative',
+            from: oldestAlertTimestamp ?? '',
+            fromStr: oldestAlertTimestamp ?? '',
+            to: new Date().toISOString(),
+            toStr: 'now',
+          }
+        : undefined;
+
+      const filter = {
+        field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+        value: entityName,
+      };
+      openTimelineWithFilters([[filter]], timeRange);
+    },
+    [riskEntity, openTimelineWithFilters]
+  );
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(entity.tableQueryId);
-  const columns = useMemo(() => getRiskScoreColumns(riskEntity), [riskEntity]);
+  const columns = useMemo(
+    () => getRiskScoreColumns(riskEntity, openEntityInTimeline),
+    [riskEntity, openEntityInTimeline]
+  );
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
@@ -146,6 +174,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     },
     timerange,
     riskEntity,
+    includeAlertsCount: true,
   });
 
   useQueryInspector({

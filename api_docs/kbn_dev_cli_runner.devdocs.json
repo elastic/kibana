@@ -1336,7 +1336,13 @@
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
@@ -1370,7 +1376,13 @@
             "label": "procRunner",
             "description": [],
             "signature": [
-              "ProcRunner"
+              {
+                "pluginId": "@kbn/dev-proc-runner",
+                "scope": "server",
+                "docId": "kibKbnDevProcRunnerPluginApi",
+                "section": "def-server.ProcRunner",
+                "text": "ProcRunner"
+              }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,

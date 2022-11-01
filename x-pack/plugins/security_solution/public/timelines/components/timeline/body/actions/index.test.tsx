@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { TableId } from '../../../../../../common/types/timeline';
+import { TableId, TimelineId } from '../../../../../../common/types/timeline';
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions, isAlert } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -60,6 +60,9 @@ jest.mock('../../../../../common/lib/kibana', () => {
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
     }),
+    useNavigateTo: jest.fn().mockReturnValue({
+      navigateTo: jest.fn(),
+    }),
     useGetUserCasesPermissions: originalKibanaLib.useGetUserCasesPermissions,
   };
 });
@@ -97,7 +100,7 @@ const defaultProps = {
   setEventsLoading: () => {},
   showCheckboxes: true,
   showNotes: false,
-  timelineId: 'test',
+  timelineId: TimelineId.test,
   toggleShowNotes: () => {},
 };
 
@@ -271,7 +274,7 @@ describe('Actions', () => {
           <Actions
             {...defaultProps}
             ecsData={ecsData}
-            timelineId={TableId.kubernetesPageSessions}
+            timelineId={TableId.kubernetesPageSessions} // not a bug, this needs to be fixed by providing a generic interface for actions registry
           />
         </TestProviders>
       );
