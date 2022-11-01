@@ -209,7 +209,6 @@ describe('Guided setup', () => {
       const readyToCompleteGuideState: GuideState = {
         guideId: 'testGuide',
         status: 'ready_to_complete',
-        isActive: true,
         steps: [
           {
             id: 'step1',
@@ -238,31 +237,29 @@ describe('Guided setup', () => {
     test('should not show the completed state when the last step is not marked as complete', async () => {
       const { component, exists, find } = testBed;
 
-      const readyToCompleteGuideState: GuideState = {
-        guideId: 'search',
-        status: 'in_progress',
-        isActive: true,
+      const mockCompleteTestGuideState: GuideState = {
+        ...mockActiveTestGuideState,
         steps: [
           {
-            id: 'add_data',
+            id: mockActiveTestGuideState.steps[0].id,
             status: 'complete',
           },
           {
-            id: 'browse_docs',
+            id: mockActiveTestGuideState.steps[1].id,
             status: 'complete',
           },
           {
-            id: 'search_experience',
-            status: 'ready_to_complete',
+            id: mockActiveTestGuideState.steps[2].id,
+            status: 'complete',
           },
         ],
       };
 
-      await updateComponentWithState(component, readyToCompleteGuideState, true);
+      await updateComponentWithState(component, mockCompleteTestGuideState, true);
 
       expect(find('guideTitle').text()).not.toContain('Well done');
       expect(find('guideDescription').text()).not.toContain(
-        `You've completed the Elastic Enterprise Search guide`
+        `You've completed the Elastic Testing example guide`
       );
       expect(exists('useElasticButton')).toBe(false);
     });
