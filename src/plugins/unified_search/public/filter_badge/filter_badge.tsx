@@ -11,11 +11,12 @@ import { EuiBadge, EuiFlexGroup, EuiIcon, EuiTextColor, useEuiTheme } from '@ela
 import { css } from '@emotion/css';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { BooleanRelation, isCombinedFilter } from '@kbn/es-query';
+import { isCombinedFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
 import { FilterBadgeContextType } from './filter_badge_context';
+import { getBooleanRelationType } from '../utils';
 
 export interface FilterBadgeProps {
   filter: Filter;
@@ -24,8 +25,6 @@ export interface FilterBadgeProps {
   hideAlias?: boolean;
   filterLabelStatus: FilterLabelStatus;
 }
-
-const rootLevelConditionType = BooleanRelation.AND;
 
 function FilterBadge({
   filter,
@@ -36,6 +35,8 @@ function FilterBadge({
   ...rest
 }: FilterBadgeProps) {
   const { euiTheme } = useEuiTheme();
+
+  const rootLevelConditionType = getBooleanRelationType(filter);
 
   const badgePading = useMemo(
     () => css`
