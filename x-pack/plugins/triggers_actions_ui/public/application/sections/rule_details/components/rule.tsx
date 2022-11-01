@@ -79,8 +79,7 @@ export function RuleComponent({
   };
 
   const healthColor = (rule.lastRun && getOutcomeHealthColor(rule.lastRun.outcome)) || 'default';
-  const isLicenseError =
-    rule.lastRun?.warning === RuleExecutionStatusErrorReasons.License;
+  const isLicenseError = rule.lastRun?.warning === RuleExecutionStatusErrorReasons.License;
   const statusMessage = isLicenseError
     ? ALERT_STATUS_LICENSE_ERROR
     : rule.lastRun && rulesLastRunOutcomeTranslationMapping[rule.lastRun.outcome];
