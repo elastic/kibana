@@ -261,7 +261,7 @@ export const ESBucketScriptAggRT = rt.type({
         lang: rt.keyof({ painless: null, expression: null }),
       }),
     }),
-    rt.partial({ gap_policy: rt.keyof({ skip: null, insert_zeros: null }) }),
+    rt.partial({ gap_policy: rt.keyof({ skip: null, insert_zeros: null, keep_values: null }) }),
   ]),
 });
 
@@ -340,6 +340,7 @@ export const SnapshotMetricTypeKeys = {
   count: null,
   cpu: null,
   cpuCores: null,
+  diskLatency: null,
   load: null,
   memory: null,
   memoryTotal: null,
