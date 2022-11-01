@@ -368,9 +368,6 @@ describe('metric_visualization', () => {
                     "type": "expression",
                   },
                 ],
-                "metricAlignment": Array [
-                  "left",
-                ],
                 "palette": Array [],
                 "showLabels": Array [
                   true,
