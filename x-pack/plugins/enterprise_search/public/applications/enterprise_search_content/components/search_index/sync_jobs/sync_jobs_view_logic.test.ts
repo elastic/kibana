@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
+import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 
 import moment from 'moment';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { HttpError, Status } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../../common/types/api';
 
-import { SyncStatus } from '../../../../../common/types/connectors';
-import { FetchSyncJobsApiLogic } from '../../api/connector/fetch_sync_jobs_api_logic';
+import { SyncStatus } from '../../../../../../common/types/connectors';
+import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
-import { IndexViewLogic } from './index_view_logic';
+import { IndexViewLogic } from '../index_view_logic';
+
 import { SyncJobView, SyncJobsViewLogic } from './sync_jobs_view_logic';
 
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
@@ -60,13 +61,15 @@ describe('SyncJobsViewLogic', () => {
         created_at: '2022-09-05T14:59:39.816+00:00',
         deleted_document_count: 20,
         error: null,
+        id: 'id',
         index_name: 'indexName',
         indexed_document_count: 50,
+        indexed_document_size: 40,
         status: SyncStatus.COMPLETED,
         worker_hostname: 'hostname_fake',
       };
       const syncJobView: SyncJobView = {
-        docsCount: 30,
+        ...syncJob,
         duration: moment.duration(1, 'hour'),
         lastSync: syncJob.completed_at,
         status: SyncStatus.COMPLETED,
