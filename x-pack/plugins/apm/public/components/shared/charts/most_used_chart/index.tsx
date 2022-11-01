@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -23,7 +24,6 @@ export function MostUsedChart({
   end,
   filters,
   metric,
-  bucketSize = 5,
 }: {
   start: string;
   end: string;
@@ -33,7 +33,7 @@ export function MostUsedChart({
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const {
-    lens: { EmbeddableComponent },
+    lens: { EmbeddableComponent, navigateToPrefilledEditor, canUseEditor },
   } = services;
 
   const lensAttributes = useMemo(
@@ -41,10 +41,50 @@ export function MostUsedChart({
       getLensAttributes({
         filters,
         metric,
-        bucketSize,
       }),
-    [filters, metric, bucketSize]
+    [filters, metric]
   );
+
+  const openInLens = useCallback(() => {
+    if (lensAttributes) {
+      navigateToPrefilledEditor(
+        {
+          id: `dataVisualizer-${metric}`,
+          timeRange: {
+            from: start,
+            to: end,
+          },
+          attributes: lensAttributes,
+        },
+        {
+          openInNewTab: true,
+        }
+      );
+    }
+  }, [navigateToPrefilledEditor, lensAttributes, start, end]);
+
+  const getOpenInLensAction = () => {
+    return {
+      id: 'openInLens',
+      order: 1,
+      type: 'link',
+      getDisplayName() {
+        return i18n.translate('xpack.apm.serviceOverview.openInLens', {
+          defaultMessage: 'Open in Lens',
+        });
+      },
+      getIconType() {
+        return 'visArea';
+      },
+      async isCompatible() {
+        return true;
+      },
+      async execute() {
+        openInLens();
+        return;
+      },
+    };
+  };
 
   return (
     <EmbeddableComponent
@@ -58,6 +98,7 @@ export function MostUsedChart({
         from: start,
         to: end,
       }}
+      {...(canUseEditor() && { extraActions: [getOpenInLensAction()] })}
     />
   );
 }
