@@ -8,6 +8,7 @@
 import React, { ChangeEvent, Fragment } from 'react';
 import {
   EuiCallOut,
+  EuiText,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
@@ -252,41 +253,26 @@ export function LayerSettings(props: Props) {
           })}
           iconType="layers"
         >
-          <p>
-            {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddText', {
-              defaultMessage: 'To add a layer to the layer group:',
-            })}
+          <EuiText>
             <ul>
               <li>
                 {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToFront', {
                   defaultMessage:
-                    'Drag a layer over the layer group. This will add the layer to the top of the layer group.',
+                    'To add your first layer, drag it onto the group name',
                 })}
               </li>
               <li>
                 {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToPosition', {
-                  defaultMessage: 'Drag a layer above a layer in the layer group.',
-                })}
-              </li>
-            </ul>
-          </p>
-          <p>
-            {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupRemoveText', {
-              defaultMessage: 'To remove a layer from the layer group:',
-            })}
-            <ul>
-              <li>
-                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupRemoveAbove', {
-                  defaultMessage: 'Drag a layer above the layer group.',
+                  defaultMessage: 'To add another layer, drag it anywhere above the last layer in the group',
                 })}
               </li>
               <li>
-                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupRemoveBelow', {
-                  defaultMessage: 'Drag a layer below the last layer in the layer group.',
+                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupRemove', {
+                  defaultMessage: 'To remove a layer, drag it above or below the group',
                 })}
               </li>
             </ul>
-          </p>
+          </EuiText>
         </EuiCallOut>
         <EuiSpacer size="m" />
       </>
