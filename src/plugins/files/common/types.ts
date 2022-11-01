@@ -106,6 +106,25 @@ export type BaseFileMetadata = {
   };
 
   /**
+   * Data about the user that created the file
+   */
+  user?: {
+    /**
+     * The human-friendly user name of the owner of the file
+     *
+     * @note this field cannot be used to uniquely ID a user. See {@link BaseFileMetadata['user']['id']}.
+     */
+    name?: string;
+    /**
+     * The unique ID of the user who created the file, taken from the user profile
+     * ID.
+     *
+     * See https://www.elastic.co/guide/en/elasticsearch/reference/master/user-profile.html.
+     */
+    id?: string;
+  };
+
+  /**
    * The file extension, for example "jpg", "png", "svg" and so forth
    */
   extension?: string;
@@ -138,25 +157,6 @@ export type BaseFileMetadata = {
 };
 
 /**
- * Metadata add by the files service.
- */
-export interface FileSystemMetadata {
-  /**
-   * The human-friendly user name of the owner of the file
-   *
-   * @note this field cannot be used to uniquely ID a user. See {@link FileSystemMetadata['uid']}.
-   */
-  owner?: string;
-  /**
-   * The unique ID of the user who created the file, taken from the user profile
-   * ID.
-   *
-   * See https://www.elastic.co/guide/en/elasticsearch/reference/master/user-profile.html.
-   */
-  uid?: string;
-}
-
-/**
  * Extra metadata on a file object specific to Kibana implementation.
  */
 export type FileMetadata<Meta = unknown> = Required<
@@ -173,7 +173,7 @@ export type FileMetadata<Meta = unknown> = Required<
      * User-defined metadata and some pre-defined system fields that can be used
      * for searching and filtering.
      */
-    Meta?: Meta & FileSystemMetadata;
+    Meta?: Meta;
   };
 
 /**
