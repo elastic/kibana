@@ -74,7 +74,7 @@ describe('checkAccountAccessStatus', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false, kibanaVersion: '8.4' } as UptimeServerSetup
+      { isDev: false, stackVersion: '8.4' } as UptimeServerSetup
     );
 
     apiClient.locations = [
