@@ -57,9 +57,9 @@ describe('SingleMetricAttributes', () => {
   });
 
   it('returns attributes as expected', () => {
-    const jsonAttr = lnsAttr.getJSON();
+    const jsonAttr = lnsAttr.getJSON('lnsLegacyMetric');
     expect(jsonAttr).toEqual({
-      description: 'undefined',
+      description: '',
       references: [],
       state: {
         adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
@@ -121,9 +121,9 @@ describe('SingleMetricAttributes', () => {
       formulaHelper
     );
 
-    const jsonAttr = lnsAttr.getJSON();
+    const jsonAttr = lnsAttr.getJSON('lnsLegacyMetric');
     expect(jsonAttr).toEqual({
-      description: 'undefined',
+      description: '',
       references: [],
       state: {
         adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
@@ -206,7 +206,7 @@ describe('SingleMetricAttributes', () => {
       formulaHelper
     );
 
-    const jsonAttr = lnsAttr.getJSON();
+    const jsonAttr = lnsAttr.getJSON('lnsLegacyMetric');
     expect(jsonAttr).toEqual(sampleMetricFormulaAttribute);
   });
 });

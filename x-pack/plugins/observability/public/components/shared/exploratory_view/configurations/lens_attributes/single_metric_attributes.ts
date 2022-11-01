@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  FormulaPublicApi,
-  MetricState,
-  OperationType,
-  TypedLensByValueInput,
-} from '@kbn/lens-plugin/public';
+import { FormulaPublicApi, MetricState, OperationType } from '@kbn/lens-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 
@@ -44,7 +39,12 @@ export class SingleMetricLensAttributes extends LensAttributes {
     this.columnId = 'layer-0-column-1';
 
     this.globalFilter = this.getGlobalFilter(this.isMultiSeries);
-    this.layers = this.getSingleMetricLayer()!;
+    const layer0 = this.getSingleMetricLayer()!;
+
+    this.layers = {
+      layer0,
+    };
+    this.visualization = this.getMetricState();
   }
 
   getSingleMetricLayer() {
@@ -100,18 +100,16 @@ export class SingleMetricLensAttributes extends LensAttributes {
       }
 
       return {
-        layer0: {
-          columns: {
-            [this.columnId]: {
-              ...buildNumberColumn(sourceField),
-              label: columnLabel ?? '',
-              operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
-              filter: columnFilter,
-            },
+        columns: {
+          [this.columnId]: {
+            ...buildNumberColumn(sourceField),
+            label: columnLabel ?? '',
+            operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
+            filter: columnFilter,
           },
-          columnOrder: [this.columnId],
-          incompleteColumns: {},
         },
+        columnOrder: [this.columnId],
+        incompleteColumns: {},
       };
     }
   }
@@ -149,9 +147,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
       dataView
     );
 
-    return {
-      layer0: layer!,
-    };
+    return layer!;
   }
 
   getPercentileLayer({
@@ -168,17 +164,15 @@ export class SingleMetricLensAttributes extends LensAttributes {
     columnFilter?: ColumnFilter;
   }) {
     return {
-      layer0: {
-        columns: {
-          [this.columnId]: {
-            ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
-            label: columnLabel ?? '',
-            filter: columnFilter,
-          },
+      columns: {
+        [this.columnId]: {
+          ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
+          label: columnLabel ?? '',
+          filter: columnFilter,
         },
-        columnOrder: [this.columnId],
-        incompleteColumns: {},
       },
+      columnOrder: [this.columnId],
+      incompleteColumns: {},
     };
   }
 
@@ -189,33 +183,6 @@ export class SingleMetricLensAttributes extends LensAttributes {
       layerType: 'data',
       ...(this.metricStateOptions ?? {}),
       size: 's',
-    };
-  }
-
-  getJSON(refresh?: number): TypedLensByValueInput['attributes'] {
-    const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
-
-    const visualization = this.getMetricState();
-
-    const { internalReferences, adHocDataViews } = this.getReferences();
-
-    return {
-      title: 'Prefilled from exploratory view app',
-      description: String(refresh),
-      visualizationType: 'lnsLegacyMetric',
-      references: [],
-      state: {
-        internalReferences,
-        adHocDataViews,
-        visualization,
-        datasourceStates: {
-          formBased: {
-            layers: this.layers,
-          },
-        },
-        query: query || { query: '', language: 'kuery' },
-        filters: [],
-      },
     };
   }
 }
