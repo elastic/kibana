@@ -97,6 +97,7 @@ export function runSaveAs(this: DashboardContainer) {
           dispatch(setLastSavedInput(stateToSave));
         });
       }
+      if (newCopyOnSave) this.expectIdChange();
       resolve(saveResult);
       return saveResult;
     };
@@ -182,6 +183,7 @@ export async function runClone(this: DashboardContainer) {
 
       dispatch(setTitle(newTitle));
       resolve(saveResult);
+      this.expectIdChange();
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
     showCloneModal({ onClone, title: currentState.title, onClose: () => resolve(undefined) });

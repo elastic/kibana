@@ -9,7 +9,7 @@
 import './_dashboard_container.scss';
 
 import uuid from 'uuid';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -28,6 +28,7 @@ import {
 } from './embeddable/dashboard_container_factory';
 
 export interface DashboardContainerRendererProps {
+  savedObjectId?: string;
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
   getInitialInput?: () => Partial<DashboardContainerInput>;
   onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
@@ -35,12 +36,24 @@ export interface DashboardContainerRendererProps {
 }
 
 export const DashboardContainerRenderer = ({
+  savedObjectId,
   getInitialInput,
   getCreationOptions,
   onControlGroupInputLoaded,
   onDashboardContainerLoaded,
 }: DashboardContainerRendererProps) => {
   const dashboardRoot = useRef(null);
+  const [dashboardIdToBuild, setDashboardIdToBuild] = useState<string | undefined>(savedObjectId);
+  const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
+
+  useEffect(() => {
+    // check if dashboard container is expecting id change... if not, update dashboard ID to build to force it to rebuild the container.
+    if (!dashboardContainer) return;
+    if (!dashboardContainer.isExpectingIdChange()) setDashboardIdToBuild(savedObjectId);
+
+    // Disabling exhaustive deps because this useEffect should only be triggered when the savedObjectId changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedObjectId]);
 
   const id = useMemo(() => uuid.v4(), []);
 
@@ -74,6 +87,7 @@ export const DashboardContainerRenderer = ({
         container.render(dashboardRoot.current);
       }
       onDashboardContainerLoaded?.(container);
+      setDashboardContainer(container);
 
       destroyContainer = () => container.destroy();
     })();
@@ -81,9 +95,9 @@ export const DashboardContainerRenderer = ({
       canceled = true;
       destroyContainer?.();
     };
-    // Disabling exhaustive deps because embeddable should only be created once.
+    // Disabling exhaustive deps because embeddable should only be created when the dashboardIdToBuild changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dashboardIdToBuild]);
 
   return <div ref={dashboardRoot} />;
 };

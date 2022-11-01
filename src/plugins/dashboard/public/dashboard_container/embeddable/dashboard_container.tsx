@@ -172,6 +172,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     const unwrapResult = await this.dashboardSavedObjectService.loadDashboardStateFromSavedObject({
       id: this.input.savedObjectId,
     });
+    this.updateInput({ savedObjectId: undefined });
     if (
       !creationOptions?.validateLoadedSavedObject ||
       creationOptions.validateLoadedSavedObject(unwrapResult)
@@ -387,6 +388,23 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       id,
     };
   }
+
+  /**
+   * Sometimes when the ID changes, it's due to a clone operation, or a save as operation. In these cases,
+   * most of the state hasn't actually changed, so there isn't any reason to destroy this container and
+   * load up a fresh one. When an id change is in progress, the renderer can check this method, and if it returns
+   * true, the renderer can safely skip destroying and rebuilding the container.
+   */
+  public isExpectingIdChange() {
+    return this.expectingIdChange;
+  }
+  public expectIdChange() {
+    this.expectingIdChange = true;
+    setTimeout(() => {
+      this.expectingIdChange = false;
+    }, 1); // turn this off after the next update.
+  }
+  private expectingIdChange = false;
 
   public destroy() {
     super.destroy();

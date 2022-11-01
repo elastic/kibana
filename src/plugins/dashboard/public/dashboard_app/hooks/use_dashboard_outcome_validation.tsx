@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { History } from 'history';
 import { useCallback, useMemo, useState } from 'react';
 
 import { DashboardRedirect } from '../types';
 import { pluginServices } from '../../services/plugin_services';
 import { createDashboardEditUrl } from '../../dashboard_constants';
 import { getDashboardURL404String } from '../_dashboard_app_strings';
+import { useDashboardMountContext } from './dashboard_mount_context';
 import { LoadDashboardFromSavedObjectReturn } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
 
 export const useDashboardOutcomeValidation = ({
-  history,
   redirectTo,
 }: {
-  history: History;
   redirectTo: DashboardRedirect;
 }) => {
   const [aliasId, setAliasId] = useState<string>();
   const [outcome, setOutcome] = useState<string>();
   const [savedObjectId, setSavedObjectId] = useState<string>();
+
+  const { scopedHistory: getScopedHistory } = useDashboardMountContext();
+  const scopedHistory = getScopedHistory?.();
 
   /**
    * Unpack dashboard services
@@ -53,9 +54,9 @@ export const useDashboardOutcomeValidation = ({
          * Handle saved object resolve alias outcome by redirecting.
          */
         if (loadOutcome === 'aliasMatch' && dashboardId && alias) {
-          const path = history.location.hash.replace(dashboardId, alias);
+          const path = scopedHistory.location.hash.replace(dashboardId, alias);
           if (screenshotMode.isScreenshotMode()) {
-            history.replace(path);
+            scopedHistory.replace(path);
           } else {
             spaces.redirectLegacyUrl?.({ path, aliasPurpose });
             return false; // redirected. Stop loading dashboard.
@@ -67,7 +68,7 @@ export const useDashboardOutcomeValidation = ({
       }
       return true;
     },
-    [history, redirectTo, screenshotMode, spaces, toasts]
+    [scopedHistory, redirectTo, screenshotMode, spaces, toasts]
   );
 
   const getLegacyConflictWarning = useMemo(() => {
@@ -76,11 +77,11 @@ export const useDashboardOutcomeValidation = ({
         spaces.getLegacyUrlConflict?.({
           currentObjectId: savedObjectId,
           otherObjectId: aliasId,
-          otherObjectPath: `#${createDashboardEditUrl(aliasId)}${history.location.search}`,
+          otherObjectPath: `#${createDashboardEditUrl(aliasId)}${scopedHistory.location.search}`,
         });
     }
     return null;
-  }, [aliasId, history.location.search, outcome, savedObjectId, spaces]);
+  }, [aliasId, outcome, savedObjectId, scopedHistory, spaces]);
 
   return { validateOutcome, getLegacyConflictWarning };
 };

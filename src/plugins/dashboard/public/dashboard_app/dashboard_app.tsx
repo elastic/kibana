@@ -21,6 +21,8 @@ import { type DashboardEmbedSettings, DashboardRedirect } from './types';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
+import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
+import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 
 export interface DashboardAppProps {
   history: History;
@@ -39,6 +41,9 @@ export function DashboardApp({
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer | undefined>(
     undefined
   );
+
+  const { scopedHistory: getScopedHistory } = useDashboardMountContext();
+  const scopedHistory = getScopedHistory?.();
 
   /**
    * Unpack dashboard services
@@ -86,7 +91,6 @@ export function DashboardApp({
   }, [search.session]);
 
   const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation({
-    history,
     redirectTo,
   });
 
@@ -96,11 +100,14 @@ export function DashboardApp({
       unifiedSearchSettings: {
         kbnUrlStateStorage,
       },
+      overrideInput: {
+        ...loadDashboardHistoryLocationState(scopedHistory),
+      }, // override input loaded from dashboard saved object with locator and URL input
       incomingEmbeddable,
       backupStateToSessionStorage: true,
       validateLoadedSavedObject: validateOutcome,
     };
-  }, [incomingEmbeddable, kbnUrlStateStorage, validateOutcome]);
+  }, [incomingEmbeddable, kbnUrlStateStorage, validateOutcome, scopedHistory]);
 
   return (
     <>
@@ -122,6 +129,7 @@ export function DashboardApp({
             }`}
           >
             <DashboardContainerRenderer
+              savedObjectId={savedDashboardId}
               onDashboardContainerLoaded={(finishedContainer) => {
                 setDashboardContainer(finishedContainer);
               }}

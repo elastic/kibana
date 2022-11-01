@@ -26,7 +26,7 @@ import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_consta
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
-import { useDashboardMountContext } from '../dashboard_mount_context';
+import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
 
