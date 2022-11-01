@@ -179,7 +179,7 @@ export class SyntheticsService {
                   type: 'runTaskError',
                   code: e?.code,
                   status: e.status,
-                  kibanaVersion: service.server.kibanaVersion,
+                  stackVersion: service.server.stackVersion,
                 });
                 throw e;
               }
@@ -225,7 +225,7 @@ export class SyntheticsService {
         type: 'scheduleTaskError',
         code: e?.code,
         status: e.status,
-        kibanaVersion: this.server.kibanaVersion,
+        stackVersion: this.server.stackVersion,
       });
 
       this.logger?.error(
@@ -449,7 +449,7 @@ export class SyntheticsService {
                     type: 'runTaskError',
                     code: e?.code,
                     status: e.status,
-                    kibanaVersion: this.server.kibanaVersion,
+                    stackVersion: this.server.stackVersion,
                   });
                   resolve(null);
                 });
