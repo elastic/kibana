@@ -104,7 +104,7 @@ export const ChangePointDetectionPage: FC = () => {
           label={
             <FormattedMessage
               id="xpack.aiops.changePointDetection.progressBarLabel"
-              defaultMessage="Fetching stuff"
+              defaultMessage="Fetching change points"
             />
           }
           value={progress}
@@ -115,7 +115,7 @@ export const ChangePointDetectionPage: FC = () => {
         <EuiSpacer size="m" />
       </div>
 
-      {annotations.length === 0 ? (
+      {annotations.length === 0 && progress === 100 ? (
         <EuiCallOut
           size="s"
           title={

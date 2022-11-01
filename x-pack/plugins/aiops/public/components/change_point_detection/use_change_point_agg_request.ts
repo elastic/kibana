@@ -90,6 +90,7 @@ export function useChangePointResults(
 
   const [results, setResults] = useState<ChangePointAnnotation[]>([]);
   const [activePage, setActivePage] = useState<number>(0);
+  const [progress, setProgress] = useState<number>(0);
 
   const splitFieldCardinality = useSplitFieldCardinality(requestParams.splitField, query);
 
@@ -104,11 +105,12 @@ export function useChangePointResults(
 
   const reset = useCallback(() => {
     cancelRequest();
+    setProgress(0);
     setResults([]);
   }, [cancelRequest]);
 
   const fetchResults = useCallback(
-    async (afterKey?: string) => {
+    async (afterKey?: string, prevBucketsCount?: number) => {
       if (!splitFieldCardinality) return;
 
       const requestPayload = getChangePointDetectionRequestBody(
@@ -131,6 +133,10 @@ export function useChangePointResults(
       if (result === null) return;
 
       const buckets = result.rawResponse.aggregations.groupings.buckets;
+
+      setProgress(
+        Math.round(((buckets.length + (prevBucketsCount ?? 0)) / splitFieldCardinality) * 100)
+      );
 
       const groups = buckets
         .map((v) => {
@@ -158,7 +164,10 @@ export function useChangePointResults(
       });
 
       if (result.rawResponse.aggregations.groupings.after_key?.splitFieldTerm) {
-        fetchResults(result.rawResponse.aggregations.groupings.after_key.splitFieldTerm);
+        fetchResults(
+          result.rawResponse.aggregations.groupings.after_key.splitFieldTerm,
+          buckets.length + (prevBucketsCount ?? 0)
+        );
       }
     },
     [runRequest, requestParams, query, dataView, splitFieldCardinality]
@@ -169,18 +178,13 @@ export function useChangePointResults(
     fetchResults();
   }, [requestParams, query, splitFieldCardinality, fetchResults, reset]);
 
-  const progress = useMemo<number>(() => {
-    if (!splitFieldCardinality) return 0;
-    return Math.round((results.length / splitFieldCardinality) * 100);
-  }, [splitFieldCardinality, results.length]);
-
   const pagination = useMemo(() => {
     return {
       activePage,
-      pageCount: Math.round((splitFieldCardinality ?? 0) / CHARTS_PER_PAGE),
+      pageCount: Math.round((results.length ?? 0) / CHARTS_PER_PAGE),
       updatePagination: setActivePage,
     };
-  }, [activePage, splitFieldCardinality]);
+  }, [activePage, results.length]);
 
   const resultPerPage = useMemo(() => {
     const start = activePage * CHARTS_PER_PAGE;
