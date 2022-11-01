@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IBasePath, Logger } from '@kbn/core/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { namespaceToSpaceId } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import type { UserProfileUserInfo } from '@kbn/user-profile-components';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CaseSavedObject } from '../../common/types';
+import { getCaseViewPath } from '../../common/utils';
 import type { NotificationService, NotifyArgs } from './types';
 
 type WithRequiredProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
@@ -19,11 +20,27 @@ type WithRequiredProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
 type UserProfileUserInfoWithEmail = WithRequiredProperty<UserProfileUserInfo, 'email'>;
 
 export class EmailNotificationService implements NotificationService {
-  constructor(
-    private readonly logger: Logger,
-    private readonly notifications: NotificationsPluginStart,
-    private readonly security: SecurityPluginStart
-  ) {}
+  private readonly logger: Logger;
+  private readonly notifications: NotificationsPluginStart;
+  private readonly security: SecurityPluginStart;
+  private readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
+
+  constructor({
+    logger,
+    notifications,
+    security,
+    publicBaseUrl,
+  }: {
+    logger: Logger;
+    notifications: NotificationsPluginStart;
+    security: SecurityPluginStart;
+    publicBaseUrl?: IBasePath['publicBaseUrl'];
+  }) {
+    this.logger = logger;
+    this.notifications = notifications;
+    this.security = security;
+    this.publicBaseUrl = publicBaseUrl;
+  }
 
   private getTitle(theCase: CaseSavedObject) {
     // TODO: Better title
@@ -31,8 +48,19 @@ export class EmailNotificationService implements NotificationService {
   }
 
   private getMessage(theCase: CaseSavedObject) {
-    // TODO: Add backlink to case
-    return `You got assigned to case "${theCase.attributes.title}"`;
+    let message = `You got assigned to case "${theCase.attributes.title}"`;
+
+    if (this.publicBaseUrl) {
+      const caseUrl = getCaseViewPath({
+        publicBaseUrl: this.publicBaseUrl,
+        caseId: theCase.id,
+        owner: theCase.attributes.owner,
+      });
+
+      message = `${message}. [View case](${caseUrl}).`;
+    }
+
+    return message;
   }
 
   public async notifyAssignees({ assignees, theCase }: NotifyArgs) {

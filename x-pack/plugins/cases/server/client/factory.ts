@@ -172,11 +172,12 @@ export class CasesClientFactory {
      * We do the same. If in the future we use other means
      * of notifications we can refactor to use a factory.
      */
-    const notificationService = new EmailNotificationService(
-      this.logger,
-      this.options.notifications,
-      this.options.securityPluginStart
-    );
+    const notificationService = new EmailNotificationService({
+      logger: this.logger,
+      notifications: this.options.notifications,
+      security: this.options.securityPluginStart,
+      publicBaseUrl: this.options.publicBaseUrl,
+    });
 
     return {
       alertsService: new AlertService(esClient, this.logger),
