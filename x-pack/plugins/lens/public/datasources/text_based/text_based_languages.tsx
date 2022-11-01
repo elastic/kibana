@@ -455,12 +455,12 @@ export function getTextBasedDatasource({
                             columns: props.state.layers[props.layerId].columns.map((col) =>
                               col.columnId !== props.columnId
                                 ? col
-                                : { ...col, fieldName: choice.field }
+                                : { ...col, fieldName: choice.field, meta }
                             ),
                             allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
                               col.columnId !== props.columnId
                                 ? col
-                                : { ...col, fieldName: choice.field }
+                                : { ...col, fieldName: choice.field, meta }
                             ),
                           },
                         },
