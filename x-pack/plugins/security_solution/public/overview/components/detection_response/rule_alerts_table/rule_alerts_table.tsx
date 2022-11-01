@@ -22,7 +22,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { HeaderSection } from '../../../../common/components/header_section';
 
-import { SEVERITY_COLOR } from '../utils';
+import { openAlertsFilter, SEVERITY_COLOR } from '../utils';
 import * as i18n from '../translations';
 import type { RuleAlertsItem } from './use_rule_alerts_items';
 import { useRuleAlertsItems } from './use_rule_alerts_items';
@@ -118,7 +118,9 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
 
   const openRuleInTimeline = useCallback(
     (ruleName: string) => {
-      openTimelineWithFilters([[{ field: 'kibana.alert.rule.name', value: ruleName }]]);
+      openTimelineWithFilters([
+        [{ field: 'kibana.alert.rule.name', value: ruleName }, openAlertsFilter],
+      ]);
     },
     [openTimelineWithFilters]
   );

@@ -28,7 +28,7 @@ import { HostDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import * as i18n from '../translations';
-import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
+import { ITEMS_PER_PAGE, openAlertsFilter, SEVERITY_COLOR } from '../utils';
 import type { HostAlertsItem } from './use_host_alerts_items';
 import { useHostAlertsItems } from './use_host_alerts_items';
 
@@ -53,7 +53,9 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
         : undefined;
 
       openTimelineWithFilters(
-        severityFilter ? [[hostNameFilter, severityFilter]] : [[hostNameFilter]]
+        severityFilter
+          ? [[hostNameFilter, openAlertsFilter, severityFilter]]
+          : [[hostNameFilter, openAlertsFilter]]
       );
     },
     [openTimelineWithFilters]
