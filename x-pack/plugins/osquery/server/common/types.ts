@@ -33,7 +33,7 @@ export interface PackSavedObjectAttributes {
   updated_at: string;
   updated_by: string | undefined;
   policy_ids?: string[];
-  shards: Record<string, number>;
+  shards?: Record<string, number>;
 }
 
 export type PackSavedObject = SavedObject<PackSavedObjectAttributes>;
