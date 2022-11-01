@@ -58,7 +58,7 @@ export const ColorPaletteFlexItem = ({
         <span
           style={{
             backgroundColor: (colourPalette as Record<string, string>)[mimeType],
-            height: 16,
+            height: 20,
             width: `${percent}%`,
           }}
         />
