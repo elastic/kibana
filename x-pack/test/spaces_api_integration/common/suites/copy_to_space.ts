@@ -14,8 +14,8 @@ import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
-import { getTestDataLoader } from '../lib/test_data_loader';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 type TestResponse = Record<string, any>;
 
@@ -71,6 +71,21 @@ const INITIAL_COUNTS: Record<string, Record<string, number>> = {
   space_1: { dashboard: 2, visualization: 3, 'index-pattern': 1 },
   space_2: { dashboard: 1 },
 };
+
+const SPACE_DATA_TO_LOAD: Array<{ spaceName: string | null; dataUrl: string }> = [
+  {
+    spaceName: null,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/default_space.json',
+  },
+  {
+    spaceName: SPACE_1.id,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_1.json',
+  },
+  {
+    spaceName: SPACE_2.id,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_2.json',
+  },
+];
 
 const getDestinationWithoutConflicts = () => 'space_2';
 const getDestinationWithConflicts = (originSpaceId?: string) =>
@@ -627,16 +642,19 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
 
-          await testDataLoader.before();
+          await testDataLoader.createFtrSpaces();
         });
 
         after(async () => {
-          await testDataLoader.after();
+          await testDataLoader.deleteFtrSpaces();
         });
 
         describe('single-namespace types', () => {
-          beforeEach(async () => await testDataLoader.beforeEach());
-          afterEach(async () => await testDataLoader.afterEach());
+          beforeEach(async () => {
+            await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD);
+          });
+
+          afterEach(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
           const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
 
@@ -777,8 +795,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
           const spaces = ['space_2'];
           const includeReferences = false;
           describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
-            before(async () => await testDataLoader.beforeEach());
-            after(async () => await testDataLoader.afterEach());
+            before(async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD));
+            after(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
             const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
             testCases.forEach(({ testTitle, objects, statusCode, response }) => {

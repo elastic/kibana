@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
-
-const SPACE_1 = {
+export const SPACE_1 = {
   id: 'space_1',
   name: 'Space 1',
   description: 'This is the first test space',
   disabledFeatures: [],
 };
 
-const SPACE_2 = {
+export const SPACE_2 = {
   id: 'space_2',
   name: 'Space 2',
   description: 'This is the second test space',
@@ -56,36 +54,47 @@ const OBJECTS_TO_SHARE: Array<{
   },
 ];
 
-export function getTestDataLoader({ getService }: FtrProviderContext) {
+// @ts-ignore
+export function getTestDataLoader({ getService }) {
   const spacesService = getService('spaces');
   const kbnServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   return {
-    before: async () => {
-      await Promise.all([await spacesService.create(SPACE_1), await spacesService.create(SPACE_2)]);
+    createFtrSpaces: async () => {
+      log.debug('Attempting to create Space 1');
+      await spacesService.create(SPACE_1);
+
+      log.debug('Attempting to create Space 1');
+      await spacesService.create(SPACE_2);
     },
 
-    after: async () => {
-      await Promise.all([spacesService.delete(SPACE_1.id), spacesService.delete(SPACE_2.id)]);
+    deleteFtrSpaces: async () => {
+      log.debug('Attempting to delete Space 1');
+      await spacesService.delete(SPACE_1.id);
+
+      log.debug('Attempting to delete Space 2');
+      await spacesService.delete(SPACE_2.id);
     },
 
-    beforeEach: async () => {
-      log.debug('Loading test data for the following spaces: default, space_1 and space_2');
-      await Promise.all([
-        kbnServer.importExport.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/default_space.json'
-        ),
-        kbnServer.importExport.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_1.json',
-          { space: SPACE_1.id }
-        ),
-        kbnServer.importExport.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_2.json',
-          { space: SPACE_2.id }
-        ),
-      ]);
+    createFtrSavedObjectsData: async (
+      spaceData: Array<{ spaceName: string | null; dataUrl: string }>
+    ) => {
+      log.debug('Attempting to load data for spaces specified in Suite');
+
+      for (const spaceDataObj of spaceData) {
+        if (spaceDataObj.spaceName) {
+          log.debug(`Attempting to load data for ${spaceDataObj.spaceName}`);
+          await kbnServer.importExport.load(spaceDataObj.dataUrl, {
+            space: spaceDataObj.spaceName,
+          });
+        } else {
+          log.debug(`Attempting to load data for the default space`);
+          await kbnServer.importExport.load(spaceDataObj.dataUrl);
+        }
+      }
 
       // Adjust spaces for the imported saved objects.
       for (const { objects, spacesToAdd = [], spacesToRemove = [] } of OBJECTS_TO_SHARE) {
@@ -96,6 +105,7 @@ export function getTestDataLoader({ getService }: FtrProviderContext) {
             .map(({ type, id }) => `${type}:${id}`)
             .join(', ')}`
         );
+
         await supertest
           .post('/api/spaces/_update_objects_spaces')
           .send({ objects, spacesToAdd, spacesToRemove })
@@ -103,20 +113,45 @@ export function getTestDataLoader({ getService }: FtrProviderContext) {
       }
     },
 
-    afterEach: async () => {
+    deleteFtrSavedObjectsData: async () => {
       const allSpacesIds = [
-        ...(await spacesService.getAll()).map((space) => space.id),
+        ...(await spacesService.getAll()).map((space: { id: any }) => space.id),
         'non_existent_space',
       ];
-      log.debug(`Removing data from the following spaces: ${allSpacesIds.join(', ')}`);
-      await Promise.all(
-        allSpacesIds.flatMap((spaceId) => [
-          kbnServer.savedObjects.cleanStandardList({ space: spaceId, force: true }).catch(() => {}),
-          kbnServer.savedObjects
-            .clean({ space: spaceId, types: ['sharedtype'], force: true })
-            .catch(() => {}),
-        ])
-      );
+
+      log.debug(`Attempting to remove data from the following spaces: ${allSpacesIds.join(', ')}`);
+      for (const spaceId of allSpacesIds) {
+        log.debug(`Attempting to remove data from ${spaceId}`);
+        await kbnServer.savedObjects.cleanStandardList({ space: spaceId, force: true });
+        await kbnServer.savedObjects.clean({
+          space: spaceId,
+          types: ['sharedtype'],
+          force: true,
+        });
+      }
+    },
+
+    deleteAllSavedObjectsFromKibanaIndex: async () => {
+      await es.deleteByQuery({
+        index: '.kibana',
+        wait_for_completion: true,
+        body: {
+          conflicts: 'proceed',
+          query: {
+            bool: {
+              must_not: [
+                {
+                  term: {
+                    type: {
+                      value: 'space',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
     },
   };
 }
