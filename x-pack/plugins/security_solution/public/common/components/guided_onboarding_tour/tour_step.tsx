@@ -17,7 +17,7 @@ import { TimelineId } from '../../../../common/types';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useTourContext } from './tour';
-import { SecurityStepId, securityTourConfig } from './tour_config';
+import { AlertsCasesTourSteps, SecurityStepId, securityTourConfig } from './tour_config';
 
 interface SecurityTourStep {
   children?: React.ReactElement;
@@ -26,7 +26,7 @@ interface SecurityTourStep {
 }
 
 const isStepExternallyMounted = (stepId: SecurityStepId, step: number) =>
-  step === 5 && stepId === SecurityStepId.alertsCases;
+  step === AlertsCasesTourSteps.createCase && stepId === SecurityStepId.alertsCases;
 
 const StyledTourStep = styled(EuiTourStep)<EuiTourStepProps & { stepId: SecurityStepId }>`
   &.euiPopover__panel[data-popover-open] {
@@ -49,7 +49,7 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
 
   const onClick = useCallback(() => incrementStep(stepId), [incrementStep, stepId]);
 
-  // step === 5 && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
+  // step === AlertsCasesTourSteps.createCase && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
   // If we mount this step, we know we need to render it
   // we are also managing the context on the siem end in the background
   const overrideContext = isStepExternallyMounted(stepId, step);
