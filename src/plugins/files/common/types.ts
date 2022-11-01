@@ -170,8 +170,7 @@ export type FileMetadata<Meta = unknown> = Required<
     FileKind: string;
 
     /**
-     * User-defined metadata and some pre-defined system fields that can be used
-     * for searching and filtering.
+     * User-defined metadata.
      */
     Meta?: Meta;
   };
