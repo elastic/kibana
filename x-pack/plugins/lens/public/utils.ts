@@ -14,6 +14,9 @@ import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { ISearchStart } from '@kbn/data-plugin/public';
+import React from 'react';
 import type { Document } from './persistence/saved_object_store';
 import {
   Datasource,
@@ -279,4 +282,37 @@ export const isOperationFromTheSameGroup = (op1?: DraggingIdentifier, op2?: Drag
     op1.groupId === op2.groupId &&
     op1.layerId === op2.layerId
   );
+};
+
+export const getSearchWarningMessages = (
+  adapter: RequestAdapter,
+  datasource: Datasource,
+  state: unknown,
+  deps: {
+    searchService: ISearchStart;
+  }
+) => {
+  const warningsMap: Map<string, Array<string | React.ReactNode>> = new Map();
+
+  deps.searchService.showWarnings(adapter, (warning, meta) => {
+    const { request, response, requestId } = meta;
+
+    const warningMessages = datasource.getSearchWarningMessages?.(
+      state,
+      warning,
+      request,
+      response
+    );
+
+    if (warningMessages?.length) {
+      const key = (requestId ?? '') + warning.type + warning.reason?.type ?? '';
+      if (!warningsMap.has(key)) {
+        warningsMap.set(key, warningMessages);
+      }
+      return true;
+    }
+    return false;
+  });
+
+  return [...warningsMap.values()].flat();
 };

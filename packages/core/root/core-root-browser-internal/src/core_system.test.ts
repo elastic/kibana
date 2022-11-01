@@ -38,8 +38,10 @@ import {
   MockAnalyticsService,
   analyticsServiceStartMock,
   fetchOptionalMemoryInfoMock,
+  MockLoggingSystem,
+  LoggingSystemConstructor,
 } from './core_system.test.mocks';
-
+import type { EnvironmentMode } from '@kbn/config';
 import { CoreSystem } from './core_system';
 import {
   KIBANA_LOADED_EVENT,
@@ -136,6 +138,7 @@ describe('constructor', () => {
     expect(CoreAppConstructor).toHaveBeenCalledTimes(1);
     expect(ThemeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(AnalyticsServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -179,6 +182,47 @@ describe('constructor', () => {
     expect(coreSystem.stop).not.toHaveBeenCalled();
     stopCoreSystem();
     expect(coreSystem.stop).toHaveBeenCalled();
+  });
+
+  describe('logging system', () => {
+    it('instantiate the logging system with the correct level when in dev mode', () => {
+      const envMode: EnvironmentMode = {
+        name: 'development',
+        dev: true,
+        prod: false,
+      };
+      const injectedMetadata = { env: { mode: envMode } } as any;
+
+      createCoreSystem({
+        injectedMetadata,
+      });
+
+      expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
+      expect(LoggingSystemConstructor).toHaveBeenCalledWith({
+        logLevel: 'all',
+      });
+    });
+    it('instantiate the logging system with the correct level when in production mode', () => {
+      const envMode: EnvironmentMode = {
+        name: 'production',
+        dev: false,
+        prod: true,
+      };
+      const injectedMetadata = { env: { mode: envMode } } as any;
+
+      createCoreSystem({
+        injectedMetadata,
+      });
+
+      expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
+      expect(LoggingSystemConstructor).toHaveBeenCalledWith({
+        logLevel: 'warn',
+      });
+    });
+    it('retrieves the logger factory from the logging system', () => {
+      createCoreSystem({});
+      expect(MockLoggingSystem.asLoggerFactory).toHaveBeenCalledTimes(1);
+    });
   });
 });
 
