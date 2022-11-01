@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RawIndicatorFieldId } from '../types';
+import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { unwrapValue } from './unwrap_value';
 
 describe('unwrapValue()', () => {
