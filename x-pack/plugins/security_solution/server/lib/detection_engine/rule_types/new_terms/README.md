@@ -18,9 +18,7 @@ Phase 3: Any new terms from phase 2 are processed and the first document to cont
 
 ## Alert schema
 
-New terms alerts have following fields: 
-- `kibana.alert.new_terms`. This field contains the detected term that caused the alert. A single source document may have multiple new terms if the source document contains an array of values in the specified field. In that case, multiple alerts will be generated from the single source document - one for each new value.
-
+New terms alerts have one special field at the moment: `kibana.alert.new_terms`. This field contains the detected term that caused the alert. A single source document may have multiple new terms if the source document contains an array of values in the specified field. In that case, multiple alerts will be generated from the single source document - one for each new value.
 
 ## Timestamp override and fallback
 
