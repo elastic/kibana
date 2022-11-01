@@ -165,7 +165,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     }
 
     const rowHeightsOptions: EuiDataGridRowHeightsOptions = {
-      defaultHeight: 'auto',
+      lineHeight: '30px',
     };
 
     if (!indicatorCount) {
