@@ -149,7 +149,7 @@ describe('saved search embeddable', () => {
   it('should emit error output in case of fetch error', async () => {
     const search = jest.fn().mockReturnValue(throwError(new Error('Fetch error')));
     const { embeddable } = createEmbeddable(search);
-    embeddable.updateOutput = jest.fn();
+    jest.spyOn(embeddable, 'updateOutput');
 
     embeddable.render(mountpoint);
     // wait for data fetching
