@@ -9,7 +9,6 @@ import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
   EuiBasicTable,
@@ -18,7 +17,6 @@ import {
   EuiIconTip,
   EuiLink,
   EuiButtonEmpty,
-  EuiHealth,
   EuiText,
   EuiToolTip,
   EuiTableSortingType,
@@ -32,21 +30,17 @@ import {
 } from '@elastic/eui';
 import {
   RuleExecutionStatus,
-  RuleExecutionStatusErrorReasons,
   formatDuration,
   parseDuration,
   MONITORING_HISTORY_LIMIT,
 } from '@kbn/alerting-plugin/common';
 
 import {
-  rulesStatusesTranslationsMapping,
-  ALERT_STATUS_LICENSE_ERROR,
   SELECT_ALL_RULES,
   CLEAR_SELECTION,
   TOTAL_RULES,
   SELECT_ALL_ARIA_LABEL,
 } from '../translations';
-import { getHealthColor } from './rule_execution_status_filter';
 import {
   Rule,
   RuleTableItem,
@@ -67,6 +61,7 @@ import { hasAllPrivilege } from '../../../lib/capabilities';
 import { RuleTagBadge } from './rule_tag_badge';
 import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './rules_list_notify_badge';
+import { RulesListTableStatusCell } from './rules_list_table_status_cell';
 import {
   RulesListColumns,
   RulesListVisibleColumns,
@@ -92,9 +87,9 @@ const percentileOrdinals = {
 };
 
 export const percentileFields = {
-  [Percentiles.P50]: 'monitoring.execution.calculated_metrics.p50',
-  [Percentiles.P95]: 'monitoring.execution.calculated_metrics.p95',
-  [Percentiles.P99]: 'monitoring.execution.calculated_metrics.p99',
+  [Percentiles.P50]: 'monitoring.run.calculated_metrics.p50',
+  [Percentiles.P95]: 'monitoring.run.calculated_metrics.p95',
+  [Percentiles.P99]: 'monitoring.run.calculated_metrics.p99',
 };
 
 const EMPTY_OBJECT = {};
@@ -299,58 +294,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
       );
     },
     [isRuleTypeEditableInContext, onDisableRule, onEnableRule, onRuleChanged]
-  );
-
-  const renderRuleExecutionStatus = useCallback(
-    (executionStatus: RuleExecutionStatus, rule: RuleTableItem) => {
-      const healthColor = getHealthColor(executionStatus.status);
-      const tooltipMessage =
-        executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
-      const isLicenseError =
-        executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
-      const statusMessage = isLicenseError
-        ? ALERT_STATUS_LICENSE_ERROR
-        : rulesStatusesTranslationsMapping[executionStatus.status];
-
-      const health = (
-        <EuiHealth data-test-subj={`ruleStatus-${executionStatus.status}`} color={healthColor}>
-          {statusMessage}
-        </EuiHealth>
-      );
-
-      const healthWithTooltip = tooltipMessage ? (
-        <EuiToolTip
-          data-test-subj="ruleStatus-error-tooltip"
-          position="top"
-          content={tooltipMessage}
-        >
-          {health}
-        </EuiToolTip>
-      ) : (
-        health
-      );
-
-      return (
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem>{healthWithTooltip}</EuiFlexItem>
-          {isLicenseError && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="ruleStatus-error-license-fix"
-                onClick={() => onManageLicenseClick(rule)}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.fixLicenseLink"
-                  defaultMessage="Fix"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      );
-    },
-    [onManageLicenseClick]
   );
 
   const selectionColumn = useMemo(() => {
@@ -684,7 +627,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
       },
       {
         id: 'ruleExecutionSuccessRatio',
-        field: 'monitoring.execution.calculated_metrics.success_ratio',
+        field: 'monitoring.run.calculated_metrics.success_ratio',
         width: '12%',
         selectorName: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selector.successRatioTitle',
@@ -729,7 +672,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '120px',
         'data-test-subj': 'rulesTableCell-lastResponse',
         render: (_executionStatus: RuleExecutionStatus, rule: RuleTableItem) => {
-          return renderRuleExecutionStatus(rule.executionStatus, rule);
+          return (
+            <RulesListTableStatusCell rule={rule} onManageLicenseClick={onManageLicenseClick} />
+          );
         },
       },
       {
@@ -827,11 +772,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
     onRuleEditClick,
     onSnoozeRule,
     onUnsnoozeRule,
+    onManageLicenseClick,
     renderCollapsedItemActions,
     renderPercentileCellValue,
     renderPercentileColumnName,
     renderRuleError,
-    renderRuleExecutionStatus,
     renderRuleStatusDropdown,
     ruleTypesState.data,
     selectedPercentile,

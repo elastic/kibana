@@ -40,6 +40,7 @@ import {
   RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
+  RuleLastRun,
 } from '@kbn/alerting-plugin/common';
 import type { BulkEditError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -106,6 +107,7 @@ export type {
   RuleStatusDropdownProps,
   RuleTagFilterProps,
   RuleStatusFilterProps,
+  RuleLastRun,
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,

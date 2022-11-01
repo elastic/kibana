@@ -36,7 +36,8 @@ export type RulesListVisibleColumns =
   | 'ruleExecutionPercentile'
   | 'ruleExecutionSuccessRatio'
   | 'ruleExecutionStatus'
-  | 'ruleExecutionState';
+  | 'ruleExecutionState'
+  | 'ruleLastRunOutcome';
 
 const OriginalRulesListVisibleColumns: RulesListVisibleColumns[] = [
   'ruleName',
