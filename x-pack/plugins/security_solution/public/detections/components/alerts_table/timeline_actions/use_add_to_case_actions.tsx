@@ -107,7 +107,7 @@ export const useAddToCaseActions = ({
               <GuidedOnboardingTourStep
                 onClick={createCaseFlyout.submit}
                 isTourAnchor
-                step={5}
+                step={AlertsCasesTourSteps.createCase}
                 stepId={SecurityStepId.alertsCases}
               />
             ),

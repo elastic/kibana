@@ -414,7 +414,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   return (
     <GuidedOnboardingTourStep
       isTourAnchor={isTourAnchor}
-      step={3}
+      step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
       stepId={SecurityStepId.alertsCases}
     >
       <StyledEuiTabbedContent

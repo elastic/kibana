@@ -9,7 +9,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
-import { SecurityStepId } from '../../../common/components/guided_onboarding_tour/tour_config';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../common/components/guided_onboarding_tour/tour_config';
 import { isActiveTimeline } from '../../../helpers';
 import { TableId } from '../../../../common/types';
 import { useResponderActionItem } from '../endpoint_responder';
@@ -264,7 +267,7 @@ export const TakeActionDropdown = React.memo(
       () => (
         <GuidedOnboardingTourStep
           onClick={handleAddToNewCaseClick}
-          step={4}
+          step={AlertsCasesTourSteps.addAlertToCase}
           stepId={SecurityStepId.alertsCases}
         >
           <EuiButton

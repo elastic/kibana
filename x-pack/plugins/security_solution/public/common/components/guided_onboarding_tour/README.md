@@ -47,7 +47,7 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
 
      <img width="1332" alt="1" src="https://user-images.githubusercontent.com/6935300/197848717-47c1959d-5dd5-4d72-a81d-786987000360.png">
 
-   The component for this anchor is `RenderCellValue` which returns `DefaultCellRenderer`. We wrap  `DefaultCellRenderer` with `GuidedOnboardingTourStep`, passing `step={1}  stepId={SecurityStepId.alertsCases}` to indicate the step. Since there are many other iterations of this component on the page, we also need to pass the `isTourAnchor` property to determine which of these components should be the anchor. In the code, this looks something like:
+   The component for this anchor is `RenderCellValue` which returns `DefaultCellRenderer`. We wrap  `DefaultCellRenderer` with `GuidedOnboardingTourStep`, passing `step={AlertsCasesTourSteps.pointToAlertName}  stepId={SecurityStepId.alertsCases}` to indicate the step. Since there are many other iterations of this component on the page, we also need to pass the `isTourAnchor` property to determine which of these components should be the anchor. In the code, this looks something like:
 
       ```
       export const RenderCellValue = (props) => {
@@ -63,7 +63,7 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
         return (
           <GuidedOnboardingTourStep
             isTourAnchor={isTourAnchor}
-            step={1}
+            step={AlertsCasesTourSteps.pointToAlertName}
             stepId={SecurityStepId.alertsCases}
           >
             <DefaultCellRenderer {...props} />
@@ -109,7 +109,7 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
               headerContent: (
                 // isTourAnchor=true no matter what in order to
                 // force active guide step outside of security solution (cases)
-                <GuidedOnboardingTourStep isTourAnchor step={5} stepId={SecurityStepId.alertsCases} />
+                <GuidedOnboardingTourStep isTourAnchor step={AlertsCasesTourSteps.createCase} stepId={SecurityStepId.alertsCases} />
               ),
             }
           : {}),
