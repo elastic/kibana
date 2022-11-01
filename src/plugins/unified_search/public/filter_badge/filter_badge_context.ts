@@ -12,6 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 interface FilterBadgeContextType {
   dataViews: DataView[];
   filterLabelStatus: string;
+  isRootCombinedFilterNegate?: boolean;
 }
 
 export const FilterBadgeContextType = React.createContext<FilterBadgeContextType>(

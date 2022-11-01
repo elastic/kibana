@@ -39,8 +39,10 @@ const FilterBadgeContent = ({ filter, dataViews, filterLabelStatus }: FilterBadg
 };
 
 export function FilterExpressionBadge({ filter, isRootLevel }: FilterBadgeExpressionProps) {
-  const { dataViews, filterLabelStatus } = useContext(FilterBadgeContextType);
+  const { dataViews, filterLabelStatus, isRootCombinedFilterNegate } =
+    useContext(FilterBadgeContextType);
   const conditionalOperationType = getBooleanRelationType(filter);
+  const shouldShowBrakets = isRootCombinedFilterNegate ? isRootCombinedFilterNegate : !isRootLevel;
 
   const paddingLeft = useEuiPaddingCSS('left').xs;
   const paddingRight = useEuiPaddingCSS('right').xs;
@@ -56,13 +58,13 @@ export function FilterExpressionBadge({ filter, isRootLevel }: FilterBadgeExpres
 
   return conditionalOperationType ? (
     <>
-      {!isRootLevel ? (
+      {shouldShowBrakets ? (
         <span css={paddingLeft}>
           <EuiTextColor className={bracketСolor}>(</EuiTextColor>
         </span>
       ) : null}
       <FilterBadgeGroup filters={filter.meta?.params} booleanRelation={conditionalOperationType} />
-      {!isRootLevel ? (
+      {shouldShowBrakets ? (
         <span css={paddingRight}>
           <EuiTextColor className={bracketСolor}>)</EuiTextColor>
         </span>

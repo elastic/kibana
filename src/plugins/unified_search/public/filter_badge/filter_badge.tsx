@@ -26,6 +26,10 @@ export interface FilterBadgeProps {
   filterLabelStatus: FilterLabelStatus;
 }
 
+const flexGroupMargin = css`
+  margin: 0;
+`;
+
 function FilterBadge({
   filter,
   dataViews,
@@ -89,11 +93,13 @@ function FilterBadge({
           value={{
             dataViews,
             filterLabelStatus: valueLabel,
+            isRootCombinedFilterNegate: filter.meta.negate,
           }}
         >
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+          <EuiFlexGroup wrap responsive={false} gutterSize="xs" className={flexGroupMargin}>
+            {isCombinedFilter(filter) ? prefix : null}
             <FilterBadgeGroup
-              filters={isCombinedFilter(filter) ? filter.meta.params : [filter]}
+              filters={[filter]}
               booleanRelation={rootLevelConditionType}
               isRootLevel={true}
             />
