@@ -17,12 +17,12 @@ import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation'
 import { showBulkErrorToast } from './show_bulk_error_toast';
 import { showBulkSuccessToast } from './show_bulk_success_toast';
 import type { QueryOrIds } from '../../api/api';
-import { useAllRuleIdsForBulkAction } from './use_all_rule_ids_for_bulk_action';
+import { useGuessRuleIdsForBulkAction } from './use_guess_rule_ids_for_bulk_action';
 
 export function useBulkExport() {
   const toasts = useAppToasts();
   const { mutateAsync } = useBulkExportMutation();
-  const getAllRuleIdsForBulkAction = useAllRuleIdsForBulkAction();
+  const guessRuleIdsForBulkAction = useGuessRuleIdsForBulkAction();
   const rulesTableContext = useRulesTableContextOptional();
   const setLoadingRules = rulesTableContext?.actions.setLoadingRules;
 
@@ -30,7 +30,7 @@ export function useBulkExport() {
     async (queryOrIds: QueryOrIds) => {
       try {
         setLoadingRules?.({
-          ids: queryOrIds.ids ?? getAllRuleIdsForBulkAction(BulkActionType.export),
+          ids: queryOrIds.ids ?? guessRuleIdsForBulkAction(BulkActionType.export),
           action: BulkActionType.export,
         });
         return await mutateAsync(queryOrIds);
@@ -40,7 +40,7 @@ export function useBulkExport() {
         setLoadingRules?.({ ids: [], action: null });
       }
     },
-    [getAllRuleIdsForBulkAction, setLoadingRules, mutateAsync, toasts]
+    [guessRuleIdsForBulkAction, setLoadingRules, mutateAsync, toasts]
   );
 
   return { bulkExport };

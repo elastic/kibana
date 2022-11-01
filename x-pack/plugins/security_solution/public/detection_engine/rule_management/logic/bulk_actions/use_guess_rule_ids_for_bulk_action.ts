@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 
-export function useAllRuleIdsForBulkAction(): (bulkActionType: BulkActionType) => string[] {
+export function useGuessRuleIdsForBulkAction(): (bulkActionType: BulkActionType) => string[] {
   const rulesTableContext = useRulesTableContextOptional();
 
   return useCallback(

@@ -19,7 +19,7 @@ import type { BulkAction } from '../../api/api';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
 import { showBulkErrorToast } from './show_bulk_error_toast';
 import { showBulkSuccessToast } from './show_bulk_success_toast';
-import { useAllRuleIdsForBulkAction } from './use_all_rule_ids_for_bulk_action';
+import { useGuessRuleIdsForBulkAction } from './use_guess_rule_ids_for_bulk_action';
 
 export const goToRuleEditPage = (
   ruleId: string,
@@ -38,7 +38,7 @@ interface UseExecuteBulkActionOptions {
 export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
   const toasts = useAppToasts();
   const { mutateAsync } = useBulkActionMutation();
-  const getAllRuleIdsForBulkAction = useAllRuleIdsForBulkAction();
+  const guessRuleIdsForBulkAction = useGuessRuleIdsForBulkAction();
   const rulesTableContext = useRulesTableContextOptional();
   const setLoadingRules = rulesTableContext?.actions.setLoadingRules;
 
@@ -46,7 +46,7 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
     async (bulkAction: BulkAction) => {
       try {
         setLoadingRules?.({
-          ids: bulkAction.ids ?? getAllRuleIdsForBulkAction(bulkAction.type),
+          ids: bulkAction.ids ?? guessRuleIdsForBulkAction(bulkAction.type),
           action: bulkAction.type,
         });
 
@@ -64,13 +64,7 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
         setLoadingRules?.({ ids: [], action: null });
       }
     },
-    [
-      options?.suppressSuccessToast,
-      getAllRuleIdsForBulkAction,
-      setLoadingRules,
-      mutateAsync,
-      toasts,
-    ]
+    [options?.suppressSuccessToast, guessRuleIdsForBulkAction, setLoadingRules, mutateAsync, toasts]
   );
 
   return { executeBulkAction };
