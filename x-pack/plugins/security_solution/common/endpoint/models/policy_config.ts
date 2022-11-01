@@ -200,7 +200,7 @@ export const policyFactoryWithoutPaidFeatures = (
         ...policy.windows.popup,
         malware: {
           message: '',
-          enabled: policy.windows.popup.malware.enabled,
+          enabled: true, // disabling/configuring malware popup is a paid feature
         },
         ransomware: {
           message: '',
@@ -230,7 +230,7 @@ export const policyFactoryWithoutPaidFeatures = (
         ...policy.mac.popup,
         malware: {
           message: '',
-          enabled: policy.mac.popup.malware.enabled,
+          enabled: true, // disabling/configuring malware popup is a paid feature
         },
         memory_protection: {
           message: '',
@@ -256,7 +256,7 @@ export const policyFactoryWithoutPaidFeatures = (
         ...policy.linux.popup,
         malware: {
           message: '',
-          enabled: policy.linux.popup.malware.enabled,
+          enabled: true, // disabling/configuring malware popup is a paid feature
         },
         memory_protection: {
           message: '',
