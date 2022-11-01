@@ -9,6 +9,7 @@
 import React, { useCallback } from 'react';
 import { FieldIcon } from '@kbn/react-field';
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import {
   EuiFlexGroup,
@@ -36,63 +37,51 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
     [onHandleField]
   );
 
-  const getTypeForFieldIcon = (filterableField: DataViewField) =>
-    filterableField.type === 'string' && filterableField.esTypes
-      ? filterableField.esTypes[0]
-      : filterableField.type;
-
-  const getLabel = useCallback((view: DataViewField) => {
-    return {
-      label: view.customLabel || view.name,
-      value: getTypeForFieldIcon(view),
-    };
-  }, []);
+  const getLabel = useCallback(
+    (dataViewField: DataViewField) => ({
+      label: dataViewField.customLabel || dataViewField.name,
+      value: dataViewField.type as KBN_FIELD_TYPES,
+    }),
+    []
+  );
 
   const optionFields = fields.map(getLabel);
-  const euiOptions: EuiComboBoxOptionOption[] = optionFields;
+  const euiOptions: Array<EuiComboBoxOptionOption<KBN_FIELD_TYPES>> = optionFields;
   const selectedEuiOptions = (field ? [field] : [])
-    .filter((option) => {
-      return fields.indexOf(option) !== -1;
-    })
-    .map((option) => {
-      return euiOptions[fields.indexOf(option)];
-    });
+    .filter((option) => fields.indexOf(option) !== -1)
+    .map((option) => euiOptions[fields.indexOf(option)]);
 
   const onComboBoxChange = (newOptions: EuiComboBoxOptionOption[]) => {
-    const newValues = newOptions.map(({ label }) => {
-      return fields[optionFields.findIndex((optionField) => optionField.label === label)];
-    });
+    const newValues = newOptions.map(
+      ({ label }) => fields[optionFields.findIndex((optionField) => optionField.label === label)]
+    );
     onFieldChange(newValues);
   };
 
   return (
-    <>
-      <EuiComboBox
-        options={euiOptions}
-        selectedOptions={selectedEuiOptions}
-        onChange={onComboBoxChange}
-        id={id}
-        isDisabled={!dataView}
-        placeholder={i18n.translate('unifiedSearch.filter.filtersBuilder.fieldSelectPlaceholder', {
-          defaultMessage: 'Select a field',
-        })}
-        sortMatchesBy="startsWith"
-        singleSelection={{ asPlainText: true }}
-        isClearable={false}
-        compressed
-        fullWidth
-        data-test-subj="filterFieldSuggestionList"
-        renderOption={(option: EuiComboBoxOptionOption) => {
-          return (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={null}>
-                <FieldIcon type={option.value as string} fill="none" />
-              </EuiFlexItem>
-              <EuiFlexItem>{option.label}</EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        }}
-      />
-    </>
+    <EuiComboBox
+      id={id}
+      options={euiOptions}
+      selectedOptions={selectedEuiOptions}
+      onChange={onComboBoxChange}
+      isDisabled={!dataView}
+      placeholder={i18n.translate('unifiedSearch.filter.filtersBuilder.fieldSelectPlaceholder', {
+        defaultMessage: 'Select a field',
+      })}
+      sortMatchesBy="startsWith"
+      singleSelection={{ asPlainText: true }}
+      isClearable={false}
+      compressed
+      fullWidth
+      data-test-subj="filterFieldSuggestionList"
+      renderOption={(option) => (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={null}>
+            <FieldIcon type={option.value!} fill="none" />
+          </EuiFlexItem>
+          <EuiFlexItem>{option.label}</EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    />
   );
 }
