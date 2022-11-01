@@ -22,14 +22,16 @@ export const ColorPalette = ({
 }) => {
   return (
     <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false} style={{ width: 30 }}>
-        <EuiText size="xs">{label}</EuiText>
+      <EuiFlexItem grow={false} style={{ width: 40 }}>
+        <EuiText size="s">{label}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <ColorPaletteFlexItem mimeType={mimeType} percent={isNaN(percent) ? 0 : percent} />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: 45 }}>
-        <EuiText size="xs">{value}</EuiText>
+      <EuiFlexItem grow={false} style={{ width: 60, justifySelf: 'flex-end' }}>
+        <EuiText size="s" style={{ fontWeight: 'bold' }} className="eui-textRight">
+          {value}
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
