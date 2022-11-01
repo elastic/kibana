@@ -8,19 +8,50 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { TableListView, TableListViewKibanaProvider } from '@kbn/content-management-table-list';
+import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list';
+import numeral from '@elastic/numeral';
+import { useKibana } from './context';
+import { i18nTexts } from './i18n_texts';
+import { EmptyPrompt } from './components';
+
+type FilesUserContentSchema = UserContentCommonSchema;
 
 export const App: FunctionComponent = () => {
+  const {
+    services: { filesClient },
+  } = useKibana();
   return (
-    <TableListView
-      entityName="test"
-      entityNamePlural="tests"
-      findItems={() => Promise.resolve({ total: 0, hits: [] })}
+    <TableListView<FilesUserContentSchema>
+      emptyPrompt={<EmptyPrompt />}
+      entityName={i18nTexts.entityName}
+      entityNamePlural={i18nTexts.entityNamePlural}
+      findItems={(searchQuery) =>
+        filesClient.find({ name: searchQuery || undefined }).then(({ files, total }) => ({
+          hits: files.map((file) => ({
+            id: file.id,
+            updatedAt: file.updated,
+            references: [],
+            type: 'file',
+            attributes: {
+              title: file.name,
+              size: file.size,
+            },
+          })),
+          total,
+        }))
+      }
+      customTableColumn={{
+        name: i18nTexts.size,
+        field: 'attributes.size',
+        render: (value: any) => value && numeral(value).format('0[.]0 b'),
+      }}
       initialFilter=""
-      initialPageSize={10}
+      initialPageSize={50}
       listingLimit={1000}
       tableListTitle="Files"
       onClickTitle={() => {}}
+      deleteItems={async () => {}}
+      asManagementSection
     />
   );
 };

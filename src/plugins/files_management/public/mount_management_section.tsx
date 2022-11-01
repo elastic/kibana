@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaContextProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
@@ -25,19 +25,21 @@ export const mountManagementSection = (
   { element }: ManagementAppMountParams
 ) => {
   ReactDOM.render(
-    <TableListViewKibanaProvider
-      {...{
-        core: coreStart as unknown as TableListViewKibanaDependencies['core'],
-        toMountPoint,
-        FormattedRelative,
-      }}
-    >
-      <KibanaContextProvider
-        services={{ filesClient: startDeps.files.filesClientFactory.asUnscoped() }}
+    <I18nProvider>
+      <TableListViewKibanaProvider
+        {...{
+          core: coreStart as unknown as TableListViewKibanaDependencies['core'],
+          toMountPoint,
+          FormattedRelative,
+        }}
       >
-        <App />
-      </KibanaContextProvider>
-    </TableListViewKibanaProvider>,
+        <KibanaContextProvider
+          services={{ filesClient: startDeps.files.filesClientFactory.asUnscoped() }}
+        >
+          <App />
+        </KibanaContextProvider>
+      </TableListViewKibanaProvider>
+    </I18nProvider>,
     element
   );
 

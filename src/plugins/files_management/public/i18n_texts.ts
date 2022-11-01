@@ -13,4 +13,13 @@ export const i18nTexts = {
   entityNamePlural: i18n.translate('filesManagement.entityNamePlural.title', {
     defaultMessage: 'files',
   }),
+  emptyPromptTitle: i18n.translate('filesManagement.emptyPrompt.title', {
+    defaultMessage: 'No files found',
+  }),
+  emptyPromptDescription: i18n.translate('filesManagement.emptyPrompt.title', {
+    defaultMessage: 'Any files created in Kibana will be listed here.',
+  }),
+  size: i18n.translate('filesManagement.table.sizeColumnName', {
+    defaultMessage: 'Size',
+  }),
 };
