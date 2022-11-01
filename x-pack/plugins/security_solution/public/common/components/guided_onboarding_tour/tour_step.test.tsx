@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
+import type { EuiTourStepProps } from '@elastic/eui';
 import { GuidedOnboardingTourStep, SecurityTourStep } from './tour_step';
 import { SecurityStepId } from './tour_config';
 import { useTourContext } from './tour';
@@ -19,7 +20,7 @@ import { createSecuritySolutionStorageMock } from '@kbn/timelines-plugin/public/
 jest.mock('./tour');
 const mockTourStep = jest
   .fn()
-  .mockImplementation(({ children, footerAction }: { children: React.ReactNode }) => (
+  .mockImplementation(({ children, footerAction }: EuiTourStepProps) => (
     <span data-test-subj="tourStepMock">
       {children} {footerAction}
     </span>
