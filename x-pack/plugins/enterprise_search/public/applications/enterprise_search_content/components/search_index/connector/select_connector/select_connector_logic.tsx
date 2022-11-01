@@ -19,7 +19,7 @@ import {
 } from '../../../../api/connector/set_native_connector_api_logic';
 
 import { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
-import { FetchIndexApiWrapperLogic } from '../../../../api/index/fetch_index_wrapper.logic';
+import { FetchIndexApiWrapperLogic } from '../../../../api/index/fetch_index_wrapper_logic';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';
 import { isConnectorIndex } from '../../../../utils/indices';

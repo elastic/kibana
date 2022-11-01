@@ -26,7 +26,7 @@ import {
 import {
   FetchIndexApiWrapperLogic,
   FetchIndexApiWrapperLogicActions,
-} from '../../../api/index/fetch_index_wrapper.logic';
+} from '../../../api/index/fetch_index_wrapper_logic';
 
 import { isCrawlerIndex } from '../../../utils/indices';
 import { IndexNameLogic } from '../index_name_logic';

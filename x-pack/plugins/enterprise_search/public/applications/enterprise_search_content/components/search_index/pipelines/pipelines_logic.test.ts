@@ -11,7 +11,7 @@ import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { UpdatePipelineApiLogic } from '../../../api/connector/update_pipeline_api_logic';
 import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
-import { FetchIndexApiWrapperLogic } from '../../../api/index/fetch_index_wrapper.logic';
+import { FetchIndexApiWrapperLogic } from '../../../api/index/fetch_index_wrapper_logic';
 
 import { PipelinesLogic } from './pipelines_logic';
 

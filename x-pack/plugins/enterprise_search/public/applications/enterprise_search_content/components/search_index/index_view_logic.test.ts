@@ -14,7 +14,7 @@ import { HttpError, Status } from '../../../../../common/types/api';
 
 import { SyncStatus } from '../../../../../common/types/connectors';
 import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
-import { FetchIndexApiWrapperLogic } from '../../api/index/fetch_index_wrapper.logic';
+import { FetchIndexApiWrapperLogic } from '../../api/index/fetch_index_wrapper_logic';
 
 import { IngestionMethod, IngestionStatus } from '../../types';
 

@@ -27,7 +27,7 @@ import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync
 import {
   FetchIndexApiWrapperLogic,
   FetchIndexApiWrapperLogicActions,
-} from '../../api/index/fetch_index_wrapper.logic';
+} from '../../api/index/fetch_index_wrapper_logic';
 
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
 import {

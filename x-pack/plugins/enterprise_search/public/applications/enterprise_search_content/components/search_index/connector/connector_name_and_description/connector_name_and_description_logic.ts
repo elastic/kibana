@@ -25,7 +25,7 @@ import { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_log
 import {
   FetchIndexApiWrapperLogic,
   FetchIndexApiWrapperLogicActions,
-} from '../../../../api/index/fetch_index_wrapper.logic';
+} from '../../../../api/index/fetch_index_wrapper_logic';
 import { isConnectorIndex } from '../../../../utils/indices';
 
 type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;

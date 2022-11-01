@@ -46,7 +46,7 @@ import {
   FetchIndexApiWrapperLogic,
   FetchIndexApiWrapperLogicValues,
   FetchIndexApiWrapperLogicActions,
-} from '../../../api/index/fetch_index_wrapper.logic';
+} from '../../../api/index/fetch_index_wrapper_logic';
 import { CreateMlInferencePipelineApiLogic } from '../../../api/ml_models/create_ml_inference_pipeline';
 import {
   DeleteMlInferencePipelineApiLogic,

@@ -24,7 +24,7 @@ import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/
 import {
   FetchIndexApiWrapperLogic,
   FetchIndexApiWrapperLogicValues,
-} from '../../../../api/index/fetch_index_wrapper.logic';
+} from '../../../../api/index/fetch_index_wrapper_logic';
 import {
   GetMappingsArgs,
   GetMappingsResponse,

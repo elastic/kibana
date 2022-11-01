@@ -31,7 +31,7 @@ import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { flashSuccessToast } from '../../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
-import { FetchIndexApiWrapperLogic } from '../../../../api/index/fetch_index_wrapper.logic';
+import { FetchIndexApiWrapperLogic } from '../../../../api/index/fetch_index_wrapper_logic';
 import { NEW_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../../../routes';
 import { isConnectorIndex } from '../../../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../../../layout';
