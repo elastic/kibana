@@ -12,16 +12,12 @@ import { monaco } from '../monaco_imports';
 import { WorkerProxyService } from './worker_proxy_service';
 import { ID } from './constants';
 
-const wps = new WorkerProxyService();
-
-monaco.languages.onLanguage(ID, async () => {
-  return wps.setup();
-});
-
 const OWNER = 'XJSON_GRAMMAR_CHECKER';
 
-export const registerGrammarChecker = () => {
-  const allDisposables: monaco.IDisposable[] = [];
+monaco.languages.onLanguage(ID, async () => {
+  const wps = new WorkerProxyService();
+
+  wps.setup();
 
   const updateAnnotations = async (model: monaco.editor.IModel): Promise<void> => {
     if (model.isDisposed()) {
@@ -50,21 +46,20 @@ export const registerGrammarChecker = () => {
   };
 
   const onModelAdd = (model: monaco.editor.IModel) => {
-    if (model.getModeId() === ID) {
-      allDisposables.push(
-        model.onDidChangeContent(async () => {
-          updateAnnotations(model);
-        })
-      );
-
-      updateAnnotations(model);
+    if (model.getModeId() !== ID) {
+      return;
     }
-  };
-  allDisposables.push(monaco.editor.onDidCreateModel(onModelAdd));
-  return () => {
-    wps.stop();
-    allDisposables.forEach((d) => d.dispose());
-  };
-};
 
-registerGrammarChecker();
+    const { dispose } = model.onDidChangeContent(async () => {
+      updateAnnotations(model);
+    });
+
+    model.onWillDispose(() => {
+      dispose();
+    });
+
+    updateAnnotations(model);
+  };
+
+  monaco.editor.onDidCreateModel(onModelAdd);
+});
