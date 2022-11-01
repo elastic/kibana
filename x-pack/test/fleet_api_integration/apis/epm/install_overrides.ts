@@ -122,6 +122,7 @@ export default function (providerContext: FtrProviderContext) {
         },
         { meta: true }
       ));
+
       // omit routings
       delete body.template.settings.index.routing;
 
@@ -130,6 +131,7 @@ export default function (providerContext: FtrProviderContext) {
           settings: {
             index: {
               codec: 'best_compression',
+              default_pipeline: 'logs-overrides.test-0.1.0',
               lifecycle: {
                 name: 'overridden by user',
               },
