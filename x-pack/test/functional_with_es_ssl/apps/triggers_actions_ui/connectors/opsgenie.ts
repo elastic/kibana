@@ -249,6 +249,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               'tag1'
             );
           });
+
+          it('should disable the run button when the json editor validation fails', async () => {
+            await testSubjects.click('opsgenie-show-json-editor-toggle');
+
+            await actions.opsgenie.setJsonEditor({
+              message: '',
+            });
+
+            expect(await testSubjects.isEnabled('executeActionButton')).to.be(false);
+          });
         });
 
         describe('closeAlert', () => {
@@ -331,6 +341,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.exists('messageInput');
 
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be(defaultAlias);
+      });
+
+      it('should show the message is required error when clicking the save button', async () => {
+        await testSubjects.click('saveRuleButton');
+        const messageError = await find.byClassName('euiFormErrorText');
+
+        expect(await messageError.getVisibleText()).to.eql('Message is required.');
       });
     });
 

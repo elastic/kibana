@@ -43,11 +43,13 @@ const FormView: React.FC<FormViewProps> = ({
   index,
   messageVariables,
   subActionParams,
+  showSaveError,
 }) => {
   const isMessageInvalid =
-    errors['subActionParams.message'] !== undefined &&
-    errors['subActionParams.message'].length > 0 &&
-    subActionParams?.message !== undefined;
+    (errors['subActionParams.message'] !== undefined &&
+      errors['subActionParams.message'].length > 0 &&
+      subActionParams?.message !== undefined) ||
+    showSaveError;
 
   return (
     <>
@@ -107,6 +109,7 @@ export type CreateAlertProps = Pick<
   subActionParams?: Partial<OpsgenieCreateAlertParams>;
   editSubAction: EditActionCallback;
   editOptionalSubAction: EditActionCallback;
+  showSaveError: boolean;
 };
 
 const CreateAlertComponent: React.FC<CreateAlertProps> = ({
@@ -117,11 +120,23 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
   index,
   messageVariables,
   subActionParams,
+  showSaveError,
 }) => {
   const [showingMoreOptions, setShowingMoreOptions] = useState<boolean>(false);
   const [showJsonEditor, setShowJsonEditor] = useState<boolean>(false);
 
-  const toggleShowJsonEditor = useCallback((event) => setShowJsonEditor(event.target.checked), []);
+  const toggleShowJsonEditor = useCallback(
+    (event) => {
+      if (!event.target.checked) {
+        // when the user switches back remove the json editor error if there was one
+        // must mark as undefined to remove the field so it is not sent to the server side
+        editAction('jsonEditorError', undefined, index);
+      }
+      setShowJsonEditor(event.target.checked);
+    },
+    [editAction, index]
+  );
+
   const toggleShowingMoreOptions = useCallback(
     () => setShowingMoreOptions((previousState) => !previousState),
     []
@@ -157,6 +172,7 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
             index={index}
             messageVariables={messageVariables}
             subActionParams={subActionParams}
+            showSaveError={showSaveError}
           />
           {showingMoreOptions ? (
             <AdditionalOptions

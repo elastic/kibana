@@ -79,7 +79,7 @@ export const TAGS_HELP = i18n.translate('xpack.stackConnectors.components.opsgen
 
 export const TAGS_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.tagsLabel',
-  { defaultMessage: 'Opsgenie Tags' }
+  { defaultMessage: 'Opsgenie tags' }
 );
 
 export const PRIORITY_LABEL = i18n.translate(

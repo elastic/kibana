@@ -39,6 +39,7 @@ const JsonEditorComponent: React.FC<JsonEditorProps> = ({
       } else {
         setJsonEditorErrors([error.message]);
       }
+
       return;
     }
   }, []);
@@ -47,11 +48,15 @@ const JsonEditorComponent: React.FC<JsonEditorProps> = ({
     (json: string) => {
       const parsedJson = parseJson(json);
       if (!parsedJson) {
+        editAction('jsonEditorError', true, index);
+
         return;
       }
 
       const decodedValue = decodeJsonWithSchema(parsedJson);
       if (!decodedValue) {
+        editAction('jsonEditorError', true, index);
+
         return;
       }
 
@@ -62,8 +67,15 @@ const JsonEditorComponent: React.FC<JsonEditorProps> = ({
 
   useEffect(() => {
     // show the initial error messages
-    decodeJsonWithSchema(subActionParams ?? {});
-  }, [subActionParams, decodeJsonWithSchema]);
+    const decodedValue = decodeJsonWithSchema(subActionParams ?? {});
+    if (!decodedValue) {
+      editAction('jsonEditorError', true, index);
+    } else {
+      // must mark as undefined to remove the field so it is not sent to the server side
+      editAction('jsonEditorError', undefined, index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subActionParams, decodeJsonWithSchema, index]);
 
   return (
     <JsonEditorWithMessageVariables

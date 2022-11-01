@@ -44,6 +44,21 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
     return mainMessage;
   }
 
+  /**
+   * When testing invalid requests with Opsgenie the response seems to take the form:
+   * {
+   *   ['field that is invalid']: 'message about what the issue is'
+   * }
+   *
+   * e.g.
+   *
+   * {
+   *   "message": "Message can not be empty.",
+   *   "username": "must be a well-formed email address"
+   * }
+   *
+   * So we'll just stringify it.
+   */
   private getDetailedErrorMessage(errorField: unknown) {
     try {
       return JSON.stringify(errorField);

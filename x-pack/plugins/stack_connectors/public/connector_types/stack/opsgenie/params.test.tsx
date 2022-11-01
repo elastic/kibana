@@ -267,7 +267,7 @@ describe('OpsgenieParamFields', () => {
     act(() =>
       userEvent.selectOptions(
         screen.getByTestId('opsgenie-subActionSelect'),
-        screen.getByText('Close Alert')
+        screen.getByText('Close alert')
       )
     );
 

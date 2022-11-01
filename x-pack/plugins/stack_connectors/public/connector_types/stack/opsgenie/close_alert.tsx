@@ -75,6 +75,7 @@ type CloseAlertProps = Omit<
   subActionParams?: RecursivePartial<OpsgenieCloseAlertParams>;
   editSubAction: EditActionCallback;
   editOptionalSubAction: EditActionCallback;
+  showSaveError: boolean;
 };
 
 const CloseAlertComponent: React.FC<CloseAlertProps> = ({
@@ -84,11 +85,13 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
   index,
   messageVariables,
   subActionParams,
+  showSaveError,
 }) => {
   const isAliasInvalid =
-    errors['subActionParams.alias'] !== undefined &&
-    errors['subActionParams.alias'].length > 0 &&
-    subActionParams?.alias !== undefined;
+    (errors['subActionParams.alias'] !== undefined &&
+      errors['subActionParams.alias'].length > 0 &&
+      subActionParams?.alias !== undefined) ||
+    showSaveError;
 
   const [showingMoreOptions, setShowingMoreOptions] = useState<boolean>(false);
   const toggleShowingMoreOptions = useCallback(

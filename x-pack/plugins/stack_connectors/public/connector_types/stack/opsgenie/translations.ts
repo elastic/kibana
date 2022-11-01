@@ -38,14 +38,14 @@ export const ACTION_LABEL = i18n.translate(
 export const CREATE_ALERT_ACTION = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.createAlertAction',
   {
-    defaultMessage: 'Create Alert',
+    defaultMessage: 'Create alert',
   }
 );
 
 export const CLOSE_ALERT_ACTION = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.closeAlertAction',
   {
-    defaultMessage: 'Close Alert',
+    defaultMessage: 'Close alert',
   }
 );
 
@@ -102,5 +102,12 @@ export const SOURCE_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.sourceLabel',
   {
     defaultMessage: 'Source',
+  }
+);
+
+export const JSON_EDITOR_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.jsonEditorError',
+  {
+    defaultMessage: 'JSON editor error exists',
   }
 );

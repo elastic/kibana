@@ -29,6 +29,7 @@ describe('CreateAlert', () => {
   const editOptionalSubAction = jest.fn();
 
   const options = {
+    showSaveError: false,
     errors: {
       'subActionParams.message': [],
       'subActionParams.alias': [],
@@ -124,5 +125,54 @@ describe('CreateAlert', () => {
     userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
 
     expect(screen.getByTestId('opsgenie-entity-row')).toBeInTheDocument();
+  });
+
+  it('sets the json editor error to undefined when the toggle is switched off', async () => {
+    render(<CreateAlert {...options} />);
+
+    userEvent.click(screen.getByTestId('opsgenie-show-json-editor-toggle'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('actionJsonEditor')).toBeInTheDocument();
+    });
+
+    userEvent.click(screen.getByTestId('opsgenie-show-json-editor-toggle'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('actionJsonEditor')).not.toBeInTheDocument();
+      // first call to edit actions is because the editor was rendered and validation failed
+      expect(editAction.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "jsonEditorError",
+            true,
+            0,
+          ],
+          Array [
+            "jsonEditorError",
+            undefined,
+            0,
+          ],
+        ]
+      `);
+    });
+  });
+
+  it('shows the message required error when showSaveError is true', async () => {
+    render(
+      <CreateAlert
+        {...{
+          ...options,
+          showSaveError: true,
+          errors: {
+            'subActionParams.message': ['MessageError'],
+          },
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('MessageError')).toBeInTheDocument();
+    });
   });
 });

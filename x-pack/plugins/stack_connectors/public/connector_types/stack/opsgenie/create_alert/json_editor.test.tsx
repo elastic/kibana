@@ -50,14 +50,42 @@ describe('JsonEditor', () => {
     });
   });
 
-  it('does not call the callback when the json input is invalid', async () => {
+  it('calls editActions setting the error state to true', async () => {
+    render(<JsonEditor {...options} />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('[message]: expected value of type [string] but got [undefined]')
+      ).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(editAction).toHaveBeenCalledWith('jsonEditorError', true, 0);
+    });
+  });
+
+  it('calls editActions setting the error state to true twice', async () => {
     render(<JsonEditor {...options} />);
 
     fireEvent.change(screen.getByTestId('subActionParamsJsonEditor'), {
       target: { value: 'invalid json' },
     });
 
-    expect(editAction).not.toBeCalled();
+    // first time is from the useEffect, second is from the fireEvent
+    expect(editAction.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "jsonEditorError",
+          true,
+          0,
+        ],
+        Array [
+          "jsonEditorError",
+          true,
+          0,
+        ],
+      ]
+    `);
   });
 
   it('calls the callback when the json input is valid', async () => {
@@ -100,7 +128,7 @@ describe('JsonEditor', () => {
     ).toBeInTheDocument();
   });
 
-  it('does not call the callback when schema validation fails', async () => {
+  it('calls editAction setting editor error to true when validation fails', async () => {
     render(<JsonEditor {...options} />);
 
     const validJson = JSON.stringify({
@@ -115,7 +143,20 @@ describe('JsonEditor', () => {
     expect(
       screen.getByText('Invalid value "tags should be an array not a string" supplied to "tags"')
     ).toBeInTheDocument();
-    expect(editAction).not.toHaveBeenCalled();
+    expect(editAction.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "jsonEditorError",
+          true,
+          0,
+        ],
+        Array [
+          "jsonEditorError",
+          true,
+          0,
+        ],
+      ]
+    `);
   });
 
   it('calls the callback with only the message field after editing the json', async () => {
@@ -140,5 +181,31 @@ describe('JsonEditor', () => {
     });
 
     expect(editAction).toHaveBeenCalledWith('subActionParams', { message: 'a new message' }, 0);
+  });
+
+  it('sets the editor error to undefined when validation succeeds', async () => {
+    render(
+      <JsonEditor
+        {...{
+          ...options,
+          subActionParams: {
+            message: 'a message',
+            alias: 'an alias',
+          },
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(editAction.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "jsonEditorError",
+            undefined,
+            0,
+          ],
+        ]
+      `);
+    });
   });
 });

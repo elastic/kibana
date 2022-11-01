@@ -14,11 +14,10 @@ import {
 import { OpsgenieSubActions } from '../../../../common';
 import type {
   OpsgenieActionConfig,
-  OpsgenieActionParams,
   OpsgenieActionSecrets,
 } from '../../../../server/connector_types/stack';
 import { DEFAULT_ALIAS } from './constants';
-import { ValidationParams } from './types';
+import { OpsgenieConnectorTypeParams, ValidationParams } from './types';
 
 const SELECT_MESSAGE = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.selectMessageText',
@@ -34,7 +33,7 @@ const TITLE = i18n.translate('xpack.stackConnectors.components.opsgenie.connecto
 export const getConnectorType = (): ConnectorTypeModel<
   OpsgenieActionConfig,
   OpsgenieActionSecrets,
-  OpsgenieActionParams
+  OpsgenieConnectorTypeParams
 > => {
   return {
     id: '.opsgenie',
@@ -66,16 +65,18 @@ const validateParams = async (
   const errors = {
     'subActionParams.message': new Array<string>(),
     'subActionParams.alias': new Array<string>(),
+    jsonEditorError: new Array<string>(),
   };
 
   const validationResult = {
     errors,
   };
 
-  if (actionParams.subAction === OpsgenieSubActions.CreateAlert) {
-    if (!actionParams?.subActionParams?.message?.length) {
-      errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
-    }
+  if (
+    actionParams.subAction === OpsgenieSubActions.CreateAlert &&
+    !actionParams?.subActionParams?.message?.length
+  ) {
+    errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
   }
 
   if (
@@ -83,6 +84,11 @@ const validateParams = async (
     !actionParams?.subActionParams?.alias?.length
   ) {
     errors['subActionParams.alias'].push(translations.ALIAS_IS_REQUIRED);
+  }
+
+  if (actionParams.jsonEditorError) {
+    // This error doesn't actually get displayed it is used to cause the run/save button to fail within the action form
+    errors.jsonEditorError.push(translations.JSON_EDITOR_ERROR);
   }
 
   return validationResult;

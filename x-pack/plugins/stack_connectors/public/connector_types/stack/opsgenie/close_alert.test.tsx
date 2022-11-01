@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, render, within, fireEvent } from '@testing-library/react';
+import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import { CloseAlert } from './close_alert';
 import userEvent from '@testing-library/user-event';
 
@@ -15,6 +15,7 @@ describe('CreateAlert', () => {
   const editOptionalSubAction = jest.fn();
 
   const options = {
+    showSaveError: false,
     errors: {
       'subActionParams.message': [],
       'subActionParams.alias': [],
@@ -105,5 +106,23 @@ describe('CreateAlert', () => {
     userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
 
     expect(screen.getByTestId('opsgenie-source-row')).toBeInTheDocument();
+  });
+
+  it('shows the message required error when showSaveError is true', async () => {
+    render(
+      <CloseAlert
+        {...{
+          ...options,
+          showSaveError: true,
+          errors: {
+            'subActionParams.alias': ['MessageError'],
+          },
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('MessageError')).toBeInTheDocument();
+    });
   });
 });

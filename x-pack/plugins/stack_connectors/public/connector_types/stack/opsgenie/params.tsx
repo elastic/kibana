@@ -6,11 +6,18 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import { ActionParamsProps, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ActionParamsProps,
+  ActionConnectorMode,
+  IErrorObject,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isEmpty, unset, cloneDeep } from 'lodash';
 import { OpsgenieSubActions } from '../../../../common';
-import type { OpsgenieActionParams } from '../../../../server/connector_types/stack';
+import type {
+  OpsgenieActionParams,
+  OpsgenieCreateAlertSubActionParams,
+} from '../../../../server/connector_types/stack';
 import * as i18n from './translations';
 import { CreateAlert } from './create_alert';
 import { CloseAlert } from './close_alert';
@@ -82,7 +89,7 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
       editAction('subActionParams', params, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subAction, currentSubAction]);
+  }, [subAction, currentSubAction, subActionParams?.alias, index]);
 
   return (
     <>
@@ -99,8 +106,9 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
         </EuiFormRow>
       )}
 
-      {subAction != null && subAction === OpsgenieSubActions.CreateAlert && (
+      {subAction === OpsgenieSubActions.CreateAlert && (
         <CreateAlert
+          showSaveError={showCreateAlertSaveError(actionParams, errors)}
           subActionParams={subActionParams}
           editAction={editAction}
           editSubAction={editSubAction}
@@ -111,8 +119,9 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
         />
       )}
 
-      {subAction != null && subAction === OpsgenieSubActions.CloseAlert && (
+      {subAction === OpsgenieSubActions.CloseAlert && (
         <CloseAlert
+          showSaveError={showCloseAlertSaveError(actionParams, errors)}
           subActionParams={subActionParams}
           editSubAction={editSubAction}
           editOptionalSubAction={editOptionalSubAction}
@@ -126,6 +135,45 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
 };
 
 OpsgenieParamFields.displayName = 'OpsgenieParamFields';
+
+/**
+ * The show*AlertSaveError functions are used to cause a rerender when fields are set to `null` when a user attempts to
+ * save the form before providing values for the required fields (message for creating an alert and alias for closing an alert).
+ * If we only passed in subActionParams the child components would not rerender because the objects field is only updated
+ * and not the entire object.
+ */
+
+const showCreateAlertSaveError = (
+  params: Partial<OpsgenieActionParams>,
+  errors: IErrorObject
+): boolean => {
+  const errorArray = errors['subActionParams.message'] as string[] | undefined;
+  const errorsLength = errorArray?.length ?? 0;
+
+  return (
+    isCreateAlertParams(params) && params.subActionParams?.message === null && errorsLength > 0
+  );
+};
+
+const showCloseAlertSaveError = (
+  params: Partial<OpsgenieActionParams>,
+  errors: IErrorObject
+): boolean => {
+  const errorArray = errors['subActionParams.alias'] as string[] | undefined;
+  const errorsLength = errorArray?.length ?? 0;
+
+  return isCloseAlertParams(params) && params.subActionParams?.alias === null && errorsLength > 0;
+};
+
+const isCreateAlertParams = (
+  params: Partial<OpsgenieActionParams>
+): params is Partial<OpsgenieCreateAlertSubActionParams> =>
+  params.subAction === OpsgenieSubActions.CreateAlert;
+
+const isCloseAlertParams = (
+  params: Partial<OpsgenieActionParams>
+): params is OpsgenieCreateAlertSubActionParams =>
+  params.subAction === OpsgenieSubActions.CloseAlert;
 
 // eslint-disable-next-line import/no-default-export
 export { OpsgenieParamFields as default };

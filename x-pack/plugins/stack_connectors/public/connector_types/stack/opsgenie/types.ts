@@ -21,7 +21,18 @@ export type OpsgenieActionConnector = UserConfiguredActionConnector<
   OpsgenieActionSecrets
 >;
 
-export type ValidationParams = RecursivePartial<OpsgenieActionParams>;
+/**
+ * These fields will never be sent to Opsgenie or the sub actions framework. This allows us to pass a value to the
+ * validation functions so it cause a validation failure if the json editor has an error. That way the user can't save
+ * test.
+ */
+interface JsonEditorError {
+  jsonEditorError: boolean;
+}
+
+export type OpsgenieConnectorTypeParams = OpsgenieActionParams & JsonEditorError;
+
+export type ValidationParams = RecursivePartial<OpsgenieActionParams> & JsonEditorError;
 
 type EditActionParameters = Parameters<ActionParamsProps<OpsgenieActionParams>['editAction']>;
 
