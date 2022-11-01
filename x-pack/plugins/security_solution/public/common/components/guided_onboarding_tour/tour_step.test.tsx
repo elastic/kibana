@@ -74,7 +74,8 @@ describe('GuidedOnboardingTourStep', () => {
   });
   it('onClick={undefined}, call incrementStep on click', () => {
     const { getByTestId } = render(
-      <GuidedOnboardingTourStep {...defaultProps}>{mockChildren}</GuidedOnboardingTourStep>
+      <GuidedOnboardingTourStep {...defaultProps}>{mockChildren}</GuidedOnboardingTourStep>,
+      { wrapper: TestProviders }
     );
     const nextButton = getByTestId('onboarding--securityTourNextStepButton');
     act(() => {
@@ -87,7 +88,8 @@ describe('GuidedOnboardingTourStep', () => {
     const { getByTestId } = render(
       <GuidedOnboardingTourStep {...defaultProps} onClick={onClick}>
         {mockChildren}
-      </GuidedOnboardingTourStep>
+      </GuidedOnboardingTourStep>,
+      { wrapper: TestProviders }
     );
     const nextButton = getByTestId('onboarding--securityTourNextStepButton');
     act(() => {
