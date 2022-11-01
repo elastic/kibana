@@ -21,7 +21,6 @@ import {
   KIBANA_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { SearchHit } from '../../../../../../../common/search_strategy';
-import type { Ecs } from '../../../../../../../common/ecs';
 import { TimelineId } from '../../../../../../../common/types';
 import { SeverityBadge } from '../../../../../components/rules/severity_badge';
 import { getEnrichedFieldInfo } from '../../../../../../common/components/event_details/helpers';
