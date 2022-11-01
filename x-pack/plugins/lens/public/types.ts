@@ -605,7 +605,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
-  isMetricDimension: boolean;
+  isMetricDimension?: boolean;
   layerType: LayerType | undefined;
   supportStaticValue: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
@@ -630,6 +630,7 @@ export interface DragDropOperation {
   filterOperations: (operation: OperationMetadata) => boolean;
   indexPatternId?: string;
   isNewColumn?: boolean;
+  isMetricDimension?: boolean;
   prioritizedOperation?: string;
 }
 

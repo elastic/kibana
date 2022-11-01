@@ -533,9 +533,15 @@ export function getTextBasedDatasource({
     },
 
     getDropProps: (props) => {
-      const { source } = props;
+      const { source, target, state } = props;
       if (!source) {
         return;
+      }
+      if (target && target.isMetricDimension) {
+        const layerId = target.layerId;
+        const currentLayer = state.layers[layerId];
+        const field = currentLayer.allColumns.find((f) => f.columnId === source.id);
+        if (field?.meta?.type !== 'number') return;
       }
       const label = source.field as string;
       return { dropTypes: ['field_add'], nextLabel: label };

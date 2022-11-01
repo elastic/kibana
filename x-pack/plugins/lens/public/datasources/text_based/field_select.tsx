@@ -13,7 +13,7 @@ import { FieldPicker, FieldOptionValue, FieldOption } from '../../shared_compone
 import type { TextBasedLayerColumn } from './types';
 import type { DataType } from '../../types';
 
-interface FieldOptionCompatible extends DatatableColumn {
+export interface FieldOptionCompatible extends DatatableColumn {
   compatible: boolean;
 }
 
