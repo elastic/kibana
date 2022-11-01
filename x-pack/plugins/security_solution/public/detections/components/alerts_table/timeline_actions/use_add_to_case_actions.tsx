@@ -70,7 +70,9 @@ export const useAddToCaseActions = ({
 
   const prefillCasesValue = useMemo(
     () =>
-      isTourShown(SecurityStepId.alertsCases) && (activeStep === 4 || activeStep === 5)
+      isTourShown(SecurityStepId.alertsCases) &&
+      (activeStep === AlertsCasesTourSteps.addAlertToCase ||
+        activeStep === AlertsCasesTourSteps.createCase)
         ? sampleCase
         : {},
     [activeStep, isTourShown]
