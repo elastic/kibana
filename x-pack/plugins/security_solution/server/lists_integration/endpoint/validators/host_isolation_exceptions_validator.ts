@@ -105,7 +105,7 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
   }
 
   async validatePreExport(): Promise<void> {
-    await this.validateHasWritePrivilege();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreSingleListFind(): Promise<void> {

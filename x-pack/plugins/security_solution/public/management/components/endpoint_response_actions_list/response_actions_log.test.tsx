@@ -21,6 +21,7 @@ import { getActionListMock } from './mocks';
 import { useGetEndpointsList } from '../../hooks/endpoint/use_get_endpoints_list';
 import uuid from 'uuid';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
+import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -29,8 +30,8 @@ let mockUseGetEndpointActionList: {
   data?: ActionListApiResponse;
   refetch: () => unknown;
 };
-jest.mock('../../hooks/endpoint/use_get_endpoint_action_list', () => {
-  const original = jest.requireActual('../../hooks/endpoint/use_get_endpoint_action_list');
+jest.mock('../../hooks/response_actions/use_get_endpoint_action_list', () => {
+  const original = jest.requireActual('../../hooks/response_actions/use_get_endpoint_action_list');
   return {
     ...original,
     useGetEndpointActionList: () => mockUseGetEndpointActionList,
@@ -113,9 +114,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 jest.mock('../../hooks/endpoint/use_get_endpoints_list');
 
+jest.mock('../../../common/components/user_privileges');
+
 const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 
 describe('Response actions history', () => {
+  const useUserPrivilegesMock = _useUserPrivileges as jest.Mock<
+    ReturnType<typeof _useUserPrivileges>
+  >;
+
   const testPrefix = 'response-actions-list';
 
   let render: (
@@ -409,6 +416,53 @@ describe('Response actions history', () => {
       );
     });
 
+    it('should contain download link in expanded row for `get-file` action WITH file operation permission', async () => {
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
+      };
+
+      render();
+      const { getByTestId } = renderResult;
+
+      const expandButton = getByTestId(`${testPrefix}-expand-button`);
+      userEvent.click(expandButton);
+      const downloadLink = getByTestId(`${testPrefix}-getFileDownloadLink`);
+      expect(downloadLink).toBeTruthy();
+      expect(downloadLink.textContent).toEqual(
+        'Click here to download(ZIP file passcode: elastic)'
+      );
+    });
+
+    it('should not contain download link in expanded row for `get-file` action when NO file operation permission', async () => {
+      const privileges = useUserPrivilegesMock();
+
+      useUserPrivilegesMock.mockImplementationOnce(() => {
+        return {
+          ...privileges,
+          endpointPrivileges: {
+            ...privileges.endpointPrivileges,
+            canWriteFileOperations: false,
+          },
+        };
+      });
+
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
+      };
+
+      render();
+      const { getByTestId, queryByTestId } = renderResult;
+
+      const expandButton = getByTestId(`${testPrefix}-expand-button`);
+      userEvent.click(expandButton);
+      const output = getByTestId(`${testPrefix}-details-tray-output`);
+      expect(output).toBeTruthy();
+      expect(output.textContent).toEqual('get-file completed successfully');
+      expect(queryByTestId(`${testPrefix}-getFileDownloadLink`)).toBeNull();
+    });
+
     it('should refresh data when autoRefresh is toggled on', async () => {
       render();
       const { getByTestId } = renderResult;
@@ -552,17 +606,22 @@ describe('Response actions history', () => {
 
     it('should show a list of actions when opened', () => {
       render();
-      const { getByTestId } = renderResult;
+      const { getByTestId, getAllByTestId } = renderResult;
 
       userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(filterList.querySelectorAll('ul>li').length).toEqual(
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
         RESPONSE_ACTION_API_COMMANDS_NAMES.length
       );
-      expect(
-        Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
-      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'processes', 'get-file']);
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'isolate',
+        'release',
+        'kill-process',
+        'suspend-process',
+        'processes',
+        'get-file',
+      ]);
     });
 
     it('should have `clear all` button `disabled` when no selected values', () => {
@@ -580,15 +639,17 @@ describe('Response actions history', () => {
 
     it('should show a list of statuses when opened', () => {
       render();
-      const { getByTestId } = renderResult;
+      const { getByTestId, getAllByTestId } = renderResult;
 
       userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(filterList.querySelectorAll('ul>li').length).toEqual(3);
-      expect(
-        Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
-      ).toEqual(['Failed', 'Pending', 'Successful']);
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(3);
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'Failed',
+        'Pending',
+        'Successful',
+      ]);
     });
 
     it('should have `clear all` button `disabled` when no selected values', () => {
@@ -623,13 +684,13 @@ describe('Response actions history', () => {
 
     it('should show a list of host names when opened', () => {
       render({ showHostNames: true });
-      const { getByTestId } = renderResult;
+      const { getByTestId, getAllByTestId } = renderResult;
 
       const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(filterList.querySelectorAll('ul>li').length).toEqual(9);
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(9);
       expect(
         getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`).querySelector(
           '.euiNotificationBadge'
@@ -652,16 +713,15 @@ describe('Response actions history', () => {
         }
       });
 
-      const filterList = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
-
-      const selectedFilterOptions = Array.from(filterList.querySelectorAll('ul>li')).reduce<
-        number[]
-      >((acc, curr, i) => {
-        if (curr.getAttribute('aria-checked') === 'true') {
-          acc.push(i);
-        }
-        return acc;
-      }, []);
+      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+        (acc, curr, i) => {
+          if (curr.getAttribute('aria-checked') === 'true') {
+            acc.push(i);
+          }
+          return acc;
+        },
+        []
+      );
 
       expect(selectedFilterOptions).toEqual([1, 3, 5]);
     });
@@ -686,16 +746,16 @@ describe('Response actions history', () => {
 
       // re-open
       userEvent.click(popoverButton);
-      const filterList = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
 
-      const selectedFilterOptions = Array.from(filterList.querySelectorAll('ul>li')).reduce<
-        number[]
-      >((acc, curr, i) => {
-        if (curr.getAttribute('aria-checked') === 'true') {
-          acc.push(i);
-        }
-        return acc;
-      }, []);
+      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+        (acc, curr, i) => {
+          if (curr.getAttribute('aria-checked') === 'true') {
+            acc.push(i);
+          }
+          return acc;
+        },
+        []
+      );
 
       expect(selectedFilterOptions).toEqual([0, 1, 2]);
     });
@@ -730,15 +790,15 @@ describe('Response actions history', () => {
         }
       });
 
-      const filterList = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
-      const selectedFilterOptions = Array.from(filterList.querySelectorAll('ul>li')).reduce<
-        number[]
-      >((acc, curr, i) => {
-        if (curr.getAttribute('aria-checked') === 'true') {
-          acc.push(i);
-        }
-        return acc;
-      }, []);
+      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+        (acc, curr, i) => {
+          if (curr.getAttribute('aria-checked') === 'true') {
+            acc.push(i);
+          }
+          return acc;
+        },
+        []
+      );
 
       expect(selectedFilterOptions).toEqual([0, 1, 2, 4, 6, 8]);
     });
