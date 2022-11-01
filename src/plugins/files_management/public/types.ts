@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
+import { FilesClient, FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 
 export interface AppContext {
-  appDependencies: StartDependencies;
+  filesClient: FilesClient;
 }
 
 export interface SetupDependencies {

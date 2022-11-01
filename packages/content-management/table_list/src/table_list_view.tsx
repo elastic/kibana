@@ -446,9 +446,13 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     return null;
   }
 
+  const PageTemplate = asManagementSection
+    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
+    : KibanaPageTemplate;
+
   if (!fetchError && hasNoItems) {
     return (
-      <KibanaPageTemplate
+      <PageTemplate
         panelled={!asManagementSection}
         isEmptyState={true}
         data-test-subj={pageDataTestSubject}
@@ -458,13 +462,9 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         >
           {renderNoItemsMessage()}
         </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+      </PageTemplate>
     );
   }
-
-  const PageTemplate = asManagementSection
-    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
-    : KibanaPageTemplate;
 
   return (
     <PageTemplate panelled={!asManagementSection} data-test-subj={pageDataTestSubject}>

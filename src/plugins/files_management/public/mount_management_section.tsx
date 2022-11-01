@@ -32,7 +32,9 @@ export const mountManagementSection = (
         FormattedRelative,
       }}
     >
-      <KibanaContextProvider services={{ appDependencies: startDeps }}>
+      <KibanaContextProvider
+        services={{ filesClient: startDeps.files.filesClientFactory.asUnscoped() }}
+      >
         <App />
       </KibanaContextProvider>
     </TableListViewKibanaProvider>,
