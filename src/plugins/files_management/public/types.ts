@@ -9,6 +9,10 @@
 import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 
+export interface AppContext {
+  appDependencies: StartDependencies;
+}
+
 export interface SetupDependencies {
   files: FilesSetup;
   management: ManagementSetup;

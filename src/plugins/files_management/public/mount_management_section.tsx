@@ -8,16 +8,36 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { KibanaContextProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { FormattedRelative } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import {
+  TableListViewKibanaProvider,
+  TableListViewKibanaDependencies,
+} from '@kbn/content-management-table-list';
 import type { StartDependencies } from './types';
+import { App } from './app';
 
 export const mountManagementSection = (
   coreStart: CoreStart,
   startDeps: StartDependencies,
   { element }: ManagementAppMountParams
 ) => {
-  ReactDOM.render(<div>Yo!</div>, element);
+  ReactDOM.render(
+    <TableListViewKibanaProvider
+      {...{
+        core: coreStart as unknown as TableListViewKibanaDependencies['core'],
+        toMountPoint,
+        FormattedRelative,
+      }}
+    >
+      <KibanaContextProvider services={{ appDependencies: startDeps }}>
+        <App />
+      </KibanaContextProvider>
+    </TableListViewKibanaProvider>,
+    element
+  );
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);

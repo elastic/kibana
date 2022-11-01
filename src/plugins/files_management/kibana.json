@@ -10,5 +10,6 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["files", "management"],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "requiredBundles": ["kibanaReact"]
 }
