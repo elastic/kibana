@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { Ast, AstFunction } from '@kbn/interpreter';
+import { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionFunctionTheme,
+} from '@kbn/expressions-plugin/common';
 import {
   EventAnnotationServiceType,
   isManualPointAnnotationConfig,
@@ -18,11 +22,15 @@ import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   AvailableReferenceLineIcon,
   DataDecorationConfigFn,
+  ExtendedDataLayerFn,
   ReferenceLineDecorationConfigFn,
+  SeriesType,
+  XScaleType,
   XYCurveType,
 } from '@kbn/expression-xy-plugin/common';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type {
   State,
   YConfig,
@@ -45,6 +53,7 @@ import {
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
 import { axisExtentConfigToExpression } from '../../shared_components';
+import type { CollapseExpressionFunction } from '../../../common/expressions';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI | undefined,
@@ -498,77 +507,61 @@ const dataLayerToExpression = (
   const isStacked = dataFromType.includes('stacked');
   const isHorizontal = dataFromType.includes('horizontal');
 
+  const collapseFn = buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
+    by: layer.xAccessor ? [layer.xAccessor] : [],
+    metric: layer.accessors,
+    fn: [layer.collapseFn!],
+  });
+
+  const extendedDataLayerFn = buildExpressionFunction<ExtendedDataLayerFn>('extendedDataLayer', {
+    layerId: layer.layerId,
+    simpleView: Boolean(layer.simpleView),
+    xAccessor: layer.xAccessor,
+    xScaleType: getScaleType(
+      metadata[layer.layerId][layer.xAccessor],
+      ScaleType.Linear
+    ) as XScaleType,
+    isHistogram: isHistogramDimension,
+    isPercentage,
+    isStacked,
+    isHorizontal,
+    splitAccessors: layer.collapseFn || !layer.splitAccessor ? undefined : [layer.splitAccessor],
+    decorations: layer.yConfig
+      ? layer.yConfig.map((yConfig) =>
+          yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)
+        )
+      : [],
+    curveType,
+    seriesType: seriesType as SeriesType,
+    showLines: seriesType === 'line' || seriesType === 'area',
+    accessors: layer.accessors,
+    columnToLabel: JSON.stringify(columnToLabel),
+    palette: [
+      {
+        type: 'expression',
+        chain: [
+          layer.palette
+            ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
+                variable: 'palette',
+                default: [
+                  paletteService.get(layer.palette.name).toExpression(layer.palette.params),
+                ],
+              }).toAst()
+            : buildExpressionFunction<SystemPaletteExpressionFunctionDefinition>('system_palette', {
+                name: 'default',
+              }).toAst(),
+        ],
+      },
+    ],
+  });
+
   return {
     type: 'expression',
     chain: [
       ...(datasourceExpression
-        ? [
-            ...datasourceExpression.chain,
-            ...(layer.collapseFn
-              ? [
-                  {
-                    type: 'function',
-                    function: 'lens_collapse',
-                    arguments: {
-                      by: layer.xAccessor ? [layer.xAccessor] : [],
-                      metric: layer.accessors,
-                      fn: [layer.collapseFn!],
-                    },
-                  } as AstFunction,
-                ]
-              : []),
-          ]
+        ? [...datasourceExpression.chain, ...(layer.collapseFn ? [collapseFn.toAst()] : [])]
         : []),
-      {
-        type: 'function',
-        function: 'extendedDataLayer',
-        arguments: {
-          layerId: [layer.layerId],
-          simpleView: [Boolean(layer.simpleView)],
-          xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
-          xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)],
-          isHistogram: [isHistogramDimension],
-          isPercentage: isPercentage ? [isPercentage] : [],
-          isStacked: isStacked ? [isStacked] : [],
-          isHorizontal: isHorizontal ? [isHorizontal] : [],
-          splitAccessors: layer.collapseFn || !layer.splitAccessor ? [] : [layer.splitAccessor],
-          decorations: layer.yConfig
-            ? layer.yConfig.map((yConfig) =>
-                yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)
-              )
-            : [],
-          curveType: [curveType],
-          seriesType: [seriesType],
-          showLines: seriesType === 'line' || seriesType === 'area' ? [true] : [false],
-          accessors: layer.accessors,
-          columnToLabel: [JSON.stringify(columnToLabel)],
-          palette: [
-            {
-              type: 'expression',
-              chain: [
-                layer.palette
-                  ? {
-                      type: 'function',
-                      function: 'theme',
-                      arguments: {
-                        variable: ['palette'],
-                        default: [
-                          paletteService.get(layer.palette.name).toExpression(layer.palette.params),
-                        ],
-                      },
-                    }
-                  : {
-                      type: 'function',
-                      function: 'system_palette',
-                      arguments: {
-                        name: ['default'],
-                      },
-                    },
-              ],
-            },
-          ],
-        },
-      },
+      extendedDataLayerFn.toAst(),
     ],
   };
 };

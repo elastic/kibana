@@ -62,4 +62,5 @@ export type {
   CommonXYReferenceLineLayerConfigResult,
   ReferenceLineDecorationConfigFn,
   DataDecorationConfigFn,
+  ExtendedDataLayerFn,
 } from './types';
