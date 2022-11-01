@@ -19,11 +19,28 @@ export default function ({ getService }: FtrProviderContext) {
       .then((response: SupertestResponse) => response.body);
   }
 
+  const TEST_TYPES = [
+    'sampleOneTimeTaskTimingOut',
+    'sampleRecurringTaskTimingOut',
+    'sampleRecurringTaskWhichHangs',
+    'sampleTask',
+    'sampleTaskWithLimitedConcurrency',
+    'sampleTaskWithSingleConcurrency',
+    'singleAttemptSampleTask',
+    'taskWhichExecutesOtherTasksEphemerally',
+    'timedTask',
+    'timedTaskWithLimitedConcurrency',
+    'timedTaskWithSingleConcurrency',
+  ];
+
   // This test is meant to fail when any change is made in task manager registered types.
   // The intent is to trigger a code review from the Response Ops team to review the new task type changes.
   describe('check_registered_task_types', () => {
     it('should check changes on all registered task types', async () => {
-      expect((await getRegisteredTypes()).sort()).to.eql([
+      const types = (await getRegisteredTypes())
+        .filter((t: string) => !TEST_TYPES.includes(t))
+        .sort();
+      expect(types).to.eql([
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
@@ -103,12 +120,6 @@ export default function ({ getService }: FtrProviderContext) {
         'osquery:telemetry-saved-queries',
         'report:execute',
         'reports:monitor',
-        'sampleOneTimeTaskTimingOut',
-        'sampleRecurringTaskTimingOut',
-        'sampleRecurringTaskWhichHangs',
-        'sampleTask',
-        'sampleTaskWithLimitedConcurrency',
-        'sampleTaskWithSingleConcurrency',
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
         'security:telemetry-configuration',
@@ -117,11 +128,6 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-prebuilt-rule-alerts',
         'security:telemetry-timelines',
         'session_cleanup',
-        'singleAttemptSampleTask',
-        'taskWhichExecutesOtherTasksEphemerally',
-        'timedTask',
-        'timedTaskWithLimitedConcurrency',
-        'timedTaskWithSingleConcurrency',
       ]);
     });
   });
