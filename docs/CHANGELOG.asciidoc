@@ -39,8 +39,6 @@ Review important information about the {kib} 8.5.0 release.
 [[release-notes-8.5.0]]
 == {kib} 8.5.0
 
-coming::[8.5.0]
-
 Review the following information about the {kib} 8.5.0 release.
 
 [float]
