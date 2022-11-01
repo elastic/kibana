@@ -60,4 +60,5 @@ export type {
   CommonXYReferenceLineLayerConfig,
   ReferenceLineDecorationConfigResult,
   CommonXYReferenceLineLayerConfigResult,
+  ReferenceLineDecorationConfigFn,
 } from './types';

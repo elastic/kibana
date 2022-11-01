@@ -8,13 +8,18 @@
 import { Ast, AstFunction } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import {
   EventAnnotationServiceType,
   isManualPointAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { XYCurveType } from '@kbn/expression-xy-plugin/common';
+import {
+  AvailableReferenceLineIcon,
+  ReferenceLineDecorationConfigFn,
+  XYCurveType,
+} from '@kbn/expression-xy-plugin/common';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type {
@@ -79,7 +84,7 @@ export const toExpression = (
     }
   });
 
-  return buildExpression(
+  return buildXYExpression(
     state,
     metadata,
     datasourceLayers,
@@ -159,7 +164,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
   }
 }
 
-export const buildExpression = (
+export const buildXYExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   datasourceLayers: DatasourceLayers,
@@ -593,27 +598,20 @@ const extendedYConfigToRLDecorationConfigExpression = (
   yConfig: YConfig,
   defaultColor?: string
 ): Ast => {
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'referenceLineDecorationConfig',
-        arguments: {
-          forAccessor: [yConfig.forAccessor],
-          position: yConfig.axisMode ? [yConfig.axisMode] : [],
-          color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
-          lineStyle: [yConfig.lineStyle || 'solid'],
-          lineWidth: [yConfig.lineWidth || 1],
-          fill: [yConfig.fill || 'none'],
-          icon: hasIcon(yConfig.icon) ? [yConfig.icon] : [],
-          iconPosition:
-            hasIcon(yConfig.icon) || yConfig.textVisibility
-              ? [yConfig.iconPosition || 'auto']
-              : ['auto'],
-          textVisibility: [yConfig.textVisibility || false],
-        },
-      },
-    ],
-  };
+  const referenceLineDecorationConfigFn = buildExpressionFunction<ReferenceLineDecorationConfigFn>(
+    'referenceLineDecorationConfig',
+    {
+      forAccessor: yConfig.forAccessor,
+      position: yConfig.axisMode as Position,
+      color: yConfig.color ?? defaultColor,
+      lineStyle: yConfig.lineStyle || 'solid',
+      lineWidth: yConfig.lineWidth || 1,
+      fill: yConfig.fill || 'none',
+      icon: hasIcon(yConfig.icon) ? (yConfig.icon as AvailableReferenceLineIcon) : undefined,
+      iconPosition:
+        hasIcon(yConfig.icon) || yConfig.textVisibility ? yConfig.iconPosition || 'auto' : 'auto',
+      textVisibility: yConfig.textVisibility || false,
+    }
+  );
+  return buildExpression([referenceLineDecorationConfigFn]).toAst();
 };
