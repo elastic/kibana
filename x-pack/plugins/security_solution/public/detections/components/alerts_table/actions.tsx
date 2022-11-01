@@ -22,6 +22,10 @@ import {
   ALERT_RULE_TYPE,
   ALERT_RULE_NOTE,
   ALERT_RULE_PARAMETERS,
+  ALERT_THROTTLE_START,
+  ALERT_THROTTLE_END,
+  ALERT_THROTTLE_VALUES,
+  ALERT_THROTTLE_COUNT,
 } from '@kbn/rule-data-utils';
 
 import type { TGridModel } from '@kbn/timelines-plugin/public';
@@ -34,10 +38,6 @@ import {
   ALERT_THRESHOLD_RESULT,
   ALERT_NEW_TERMS,
   ALERT_RULE_INDICES,
-  ALERT_THROTTLE_START,
-  ALERT_THROTTLE_END,
-  ALERT_THROTTLE_VALUES,
-  ALERT_THROTTLE_COUNT,
 } from '../../../../common/field_maps/field_names';
 import type { TimelineResult } from '../../../../common/types/timeline';
 import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';

@@ -7,7 +7,14 @@
 
 import objectHash from 'object-hash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_UUID,
+  ALERT_THROTTLE_FIELDS,
+  ALERT_THROTTLE_VALUES,
+  ALERT_THROTTLE_COUNT,
+  ALERT_THROTTLE_END,
+  ALERT_THROTTLE_START,
+} from '@kbn/rule-data-utils';
 import type {
   BaseFieldsLatest,
   ThrottledFieldsLatest,
@@ -17,13 +24,6 @@ import type { ConfigType } from '../../../../../config';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import type { SignalSource } from '../../../signals/types';
 import { buildBulkBody } from './build_bulk_body';
-import {
-  ALERT_THROTTLE_FIELDS,
-  ALERT_THROTTLE_VALUES,
-  ALERT_THROTTLE_COUNT,
-  ALERT_THROTTLE_END,
-  ALERT_THROTTLE_START,
-} from '../../../../../../common/field_maps/field_names';
 import type { BuildReasonMessage } from '../../../signals/reason_formatters';
 
 export interface ThrottleBuckets {
