@@ -65,7 +65,7 @@ export function sendErrorTelemetryEvents(
 
 export function formatTelemetryEvent({
   monitor,
-  kibanaVersion,
+  stackVersion,
   isInlineScript,
   lastUpdatedAt,
   durationSinceLastUpdated,
@@ -73,7 +73,7 @@ export function formatTelemetryEvent({
   errors,
 }: {
   monitor: SavedObject<EncryptedSyntheticsMonitor>;
-  kibanaVersion: string;
+  stackVersion: string;
   isInlineScript: boolean;
   lastUpdatedAt?: string;
   durationSinceLastUpdated?: number;
@@ -83,6 +83,7 @@ export function formatTelemetryEvent({
   const { attributes } = monitor;
 
   return {
+    stackVersion,
     updatedAt: deletedAt || monitor.updated_at,
     lastUpdatedAt,
     durationSinceLastUpdated,
@@ -94,7 +95,6 @@ export function formatTelemetryEvent({
     locationsCount: attributes[ConfigKey.LOCATIONS].length,
     monitorNameLength: attributes[ConfigKey.NAME].length,
     monitorInterval: scheduleToMilli(attributes[ConfigKey.SCHEDULE]),
-    stackVersion: kibanaVersion,
     scriptType: getScriptType(attributes as Partial<MonitorFields>, isInlineScript),
     errors:
       errors && errors?.length
@@ -115,7 +115,7 @@ export function formatTelemetryEvent({
 export function formatTelemetryUpdateEvent(
   currentMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
   previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
-  kibanaVersion: string,
+  stackVersion: string,
   isInlineScript: boolean,
   errors?: ServiceLocationErrors | null
 ) {
@@ -127,8 +127,8 @@ export function formatTelemetryUpdateEvent(
   }
 
   return formatTelemetryEvent({
+    stackVersion,
     monitor: currentMonitor as SavedObject<EncryptedSyntheticsMonitor>,
-    kibanaVersion,
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,
     isInlineScript,
@@ -138,7 +138,7 @@ export function formatTelemetryUpdateEvent(
 
 export function formatTelemetryDeleteEvent(
   previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
-  kibanaVersion: string,
+  stackVersion: string,
   deletedAt: string,
   isInlineScript: boolean,
   errors?: ServiceLocationErrors | null
@@ -150,8 +150,8 @@ export function formatTelemetryDeleteEvent(
   }
 
   return formatTelemetryEvent({
+    stackVersion,
     monitor: previousMonitor as SavedObject<EncryptedSyntheticsMonitor>,
-    kibanaVersion,
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,
     deletedAt,

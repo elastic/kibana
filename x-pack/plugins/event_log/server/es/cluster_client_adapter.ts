@@ -51,13 +51,25 @@ interface QueryOptionsEventsBySavedObjectFilter {
   legacyIds?: string[];
 }
 
-export interface AggregateEventsWithAuthFilter {
+interface QueryOptionsEventsWithAuthFilter {
   index: string;
   namespace: string | undefined;
+  type: string;
+  ids: string[];
+  authFilter: KueryNode;
+}
+
+export interface AggregateEventsWithAuthFilter {
+  index: string;
+  namespaces?: Array<string | undefined>;
   type: string;
   authFilter: KueryNode;
   aggregateOptions: AggregateOptionsType;
 }
+
+export type FindEventsOptionsWithAuthFilter = QueryOptionsEventsWithAuthFilter & {
+  findOptions: FindOptionsType;
+};
 
 export type FindEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
   findOptions: FindOptionsType;
@@ -70,6 +82,12 @@ export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySave
 export interface AggregateEventsBySavedObjectResult {
   aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
+
+type GetQueryBodyWithAuthFilterOpts =
+  | (FindEventsOptionsWithAuthFilter & {
+      namespaces: AggregateEventsWithAuthFilter['namespaces'];
+    })
+  | AggregateEventsWithAuthFilter;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AliasAny = any;
@@ -390,6 +408,50 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
+  public async queryEventsWithAuthFilter(
+    queryOptions: FindEventsOptionsWithAuthFilter
+  ): Promise<QueryEventsBySavedObjectResult> {
+    const { index, type, ids, findOptions } = queryOptions;
+    const { page, per_page: perPage, sort } = findOptions;
+
+    const esClient = await this.elasticsearchClientPromise;
+
+    const query = getQueryBodyWithAuthFilter(
+      this.logger,
+      { ...queryOptions, namespaces: [queryOptions.namespace] },
+      pick(queryOptions.findOptions, ['start', 'end', 'filter'])
+    );
+
+    const body: estypes.SearchRequest['body'] = {
+      size: perPage,
+      from: (page - 1) * perPage,
+      query,
+      ...(sort
+        ? { sort: sort.map((s) => ({ [s.sort_field]: { order: s.sort_order } })) as estypes.Sort }
+        : {}),
+    };
+
+    try {
+      const {
+        hits: { hits, total },
+      } = await esClient.search<IValidatedEvent>({
+        index,
+        track_total_hits: true,
+        body,
+      });
+      return {
+        page,
+        per_page: perPage,
+        total: isNumber(total) ? total : total!.value,
+        data: hits.map((hit) => hit._source),
+      };
+    } catch (err) {
+      throw new Error(
+        `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
+      );
+    }
+  }
+
   public async aggregateEventsBySavedObjects(
     queryOptions: AggregateEventsOptionsBySavedObjectFilter
   ): Promise<AggregateEventsBySavedObjectResult> {
@@ -463,13 +525,15 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
 export function getQueryBodyWithAuthFilter(
   logger: Logger,
-  opts: AggregateEventsWithAuthFilter,
+  opts: GetQueryBodyWithAuthFilterOpts,
   queryOptions: QueryOptionsType
 ) {
-  const { namespace, type, authFilter } = opts;
+  const { namespaces, type, authFilter } = opts;
   const { start, end, filter } = queryOptions ?? {};
 
-  const namespaceQuery = getNamespaceQuery(namespace);
+  const namespaceQuery = (namespaces ?? [undefined]).map((namespace) =>
+    getNamespaceQuery(namespace)
+  );
   let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
   try {
     const filterKueryNode = filter ? fromKueryExpression(filter) : null;
@@ -502,8 +566,12 @@ export function getQueryBodyWithAuthFilter(
         },
       },
     },
-    // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
-    namespaceQuery,
+    {
+      bool: {
+        // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
+        should: namespaceQuery,
+      },
+    },
   ];
 
   const musts: estypes.QueryDslQueryContainer[] = [
