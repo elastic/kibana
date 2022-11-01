@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { FileSystemMetadata, Pagination, UpdatableFileMetadata } from '../../common/types';
+import type { Pagination, UpdatableFileMetadata } from '../../common/types';
 
 /**
  * Arguments to create a new file.
@@ -27,7 +27,7 @@ export interface CreateFileArgs<Meta = unknown> {
   /**
    * Custom metadata like tags or identifiers for the file.
    */
-  meta?: Meta & FileSystemMetadata;
+  meta?: Meta;
   /**
    * The MIME type of the file.
    */
