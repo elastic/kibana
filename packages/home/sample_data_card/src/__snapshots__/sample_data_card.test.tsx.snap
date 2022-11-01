@@ -40,11 +40,15 @@ exports[`SampleDataCard installed renders with app links 1`] = `
     </div>
   </div>
   <span
-    class="euiBetaBadge euiBetaBadge--hollow emotion-euiCard__betaBadge"
-    id="generated-idBetaBadge"
-    title="installed"
+    class="emotion-euiCard__betaBadgeAnchor"
   >
-    installed
+    <span
+      class="euiBetaBadge euiBetaBadge--hollow emotion-euiCard__betaBadge"
+      id="generated-idBetaBadge"
+      title="installed"
+    >
+      installed
+    </span>
   </span>
   <div
     class="emotion-euiCard__footer"
@@ -150,11 +154,15 @@ exports[`SampleDataCard installed renders without app links 1`] = `
     </div>
   </div>
   <span
-    class="euiBetaBadge euiBetaBadge--hollow emotion-euiCard__betaBadge"
-    id="generated-idBetaBadge"
-    title="installed"
+    class="emotion-euiCard__betaBadgeAnchor"
   >
-    installed
+    <span
+      class="euiBetaBadge euiBetaBadge--hollow emotion-euiCard__betaBadge"
+      id="generated-idBetaBadge"
+      title="installed"
+    >
+      installed
+    </span>
   </span>
   <div
     class="emotion-euiCard__footer"

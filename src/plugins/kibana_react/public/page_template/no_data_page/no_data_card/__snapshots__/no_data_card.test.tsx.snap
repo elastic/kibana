@@ -124,11 +124,15 @@ exports[`NoDataCard props recommended 1`] = `
     </div>
   </div>
   <span
-    class="euiBetaBadge euiBetaBadge--hollow emotion-euiCard__betaBadge"
-    id="generated-idBetaBadge"
-    title="Recommended"
+    class="emotion-euiCard__betaBadgeAnchor"
   >
-    Recommended
+    <span
+      class="euiBetaBadge euiBetaBadge--hollow emotion-euiCard__betaBadge"
+      id="generated-idBetaBadge"
+      title="Recommended"
+    >
+      Recommended
+    </span>
   </span>
 </div>
 `;
