@@ -499,31 +499,33 @@ export default async function ({ readConfigFile }) {
             cluster: ['manage', 'manage_ccr'],
           },
         },
-
-        follower_index_user: {
-          elasticsearch: {
-            cluster: ['monitor', 'manage', 'manage_ccr', 'transport_client', 'read_ccr', 'all'],
-            indices: [
-              {
-                names: ['*'],
-                privileges: [
-                  'write',
-                  'monitor',
-                  'manage_follow_index',
-                  'manage_leader_index',
-                  'read',
-                  'view_index_metadata',
-                ],
-              },
-            ],
-          },
-          kibana: [
-            {
-              base: ['all'],
-              spaces: ['*'],
-            },
-          ],
-        },
+        // There is an issue open for follower_index_user permissions not working correctly
+        // in kibana.
+        // https://github.com/elastic/kibana/issues/143720
+        // follower_index_user: {
+        //   elasticsearch: {
+        //     cluster: ['monitor', 'manage', 'manage_ccr', 'transport_client', 'read_ccr', 'all'],
+        //     indices: [
+        //       {
+        //         names: ['*'],
+        //         privileges: [
+        //           'write',
+        //           'monitor',
+        //           'manage_follow_index',
+        //           'manage_leader_index',
+        //           'read',
+        //           'view_index_metadata',
+        //         ],
+        //       },
+        //     ],
+        //   },
+        //   kibana: [
+        //     {
+        //       base: ['all'],
+        //       spaces: ['*'],
+        //     },
+        //   ],
+        // },
 
         manage_ilm: {
           elasticsearch: {
