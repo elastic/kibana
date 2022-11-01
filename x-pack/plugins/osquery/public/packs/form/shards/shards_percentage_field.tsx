@@ -48,7 +48,7 @@ const ShardsPercentageFieldComponent = ({
       label={
         hideLabel
           ? ''
-          : i18n.translate('xpack.osquery.pack.form.policyFieldLabel', {
+          : i18n.translate('xpack.osquery.pack.form.percentageFieldLabel', {
               defaultMessage: 'Percentage',
             })
       }
