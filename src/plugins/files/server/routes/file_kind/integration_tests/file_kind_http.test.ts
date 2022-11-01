@@ -39,8 +39,9 @@ describe('File kind HTTP API', () => {
       status: 'AWAITING_UPLOAD',
       mimeType: 'image/png',
       extension: 'png',
-      meta: {
-        owner: expect.any(String),
+      meta: {},
+      user: {
+        name: expect.any(String),
       },
       alt: 'a picture of my dog',
     });
