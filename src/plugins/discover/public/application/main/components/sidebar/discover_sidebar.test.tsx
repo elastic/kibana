@@ -6,17 +6,20 @@
  * Side Public License, v 1.
  */
 import { ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { DiscoverSidebarProps } from './discover_sidebar';
+import {
+  DiscoverSidebarComponent as DiscoverSidebar,
+  DiscoverSidebarProps,
+} from './discover_sidebar';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
 
 import { getDefaultFieldFilter } from './lib/field_filter';
-import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
-import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -25,10 +28,14 @@ import { FetchStatus } from '../../../types';
 import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import * as ExistingFieldsHookApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
+import { ExistenceFetchStatus } from '@kbn/unified-field-list-plugin/public';
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])
 );
+
+jest.spyOn(ExistingFieldsHookApi, 'useExistingFieldsReader');
 
 jest.mock('../../../../kibana_services', () => ({
   getUiActions: () => ({
@@ -42,9 +49,9 @@ function getCompProps(): DiscoverSidebarProps {
   const hits = getDataTableRecords(dataView);
 
   const dataViewList = [
-    { id: '0', title: 'b' } as DataViewListItem,
-    { id: '1', title: 'a' } as DataViewListItem,
-    { id: '2', title: 'c' } as DataViewListItem,
+    { id: '0', title: 'b', isPersisted: () => true } as DataViewListItem,
+    { id: '1', title: 'a', isPersisted: () => true } as DataViewListItem,
+    { id: '2', title: 'c', isPersisted: () => true } as DataViewListItem,
   ];
 
   const fieldCounts: Record<string, number> = {};
@@ -54,6 +61,20 @@ function getCompProps(): DiscoverSidebarProps {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
+
+  (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockClear();
+  (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockImplementation(() => ({
+    hasFieldData: (dataViewId: string, fieldName: string) => {
+      return dataViewId === dataView.id && Object.keys(fieldCounts).includes(fieldName);
+    },
+    getFieldsExistenceStatus: (dataViewId: string) => {
+      return dataViewId === dataView.id
+        ? ExistenceFetchStatus.succeeded
+        : ExistenceFetchStatus.unknown;
+    },
+    isFieldsExistenceInfoUnavailable: (dataViewId: string) => dataViewId !== dataView.id,
+  }));
+
   const availableFields$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     fields: [] as string[],
@@ -82,6 +103,7 @@ function getCompProps(): DiscoverSidebarProps {
     createNewDataView: jest.fn(),
     onDataViewCreated: jest.fn(),
     documents$,
+    documents: hits,
     availableFields$,
     useNewFieldsApi: true,
   };
@@ -96,22 +118,19 @@ function getAppStateContainer() {
   return appStateContainer;
 }
 
-describe('discover sidebar', function () {
-  let props: DiscoverSidebarProps;
+async function mountComponent(
+  props: DiscoverSidebarProps
+): Promise<ReactWrapper<DiscoverSidebarProps>> {
   let comp: ReactWrapper<DiscoverSidebarProps>;
+  const mockedServices = createDiscoverServicesMock();
+  mockedServices.data.dataViews.getIdsWithTitle = jest.fn().mockReturnValue(props.dataViewList);
+  mockedServices.data.dataViews.get = jest.fn().mockImplementation((id) => {
+    return [...props.dataViewList, props.selectedDataView].find((d) => d!.id === id);
+  });
 
-  beforeAll(async () => {
-    props = getCompProps();
-    mockDiscoverServices.data.dataViews.getIdsWithTitle = jest
-      .fn()
-      .mockReturnValue(props.dataViewList);
-    mockDiscoverServices.data.dataViews.get = jest.fn().mockImplementation((id) => {
-      const dataView = props.dataViewList.find((d) => d.id === id);
-      return { ...dataView, isPersisted: () => true };
-    });
-
+  await act(async () => {
     comp = await mountWithIntl(
-      <KibanaContextProvider services={mockDiscoverServices}>
+      <KibanaContextProvider services={mockedServices}>
         <DiscoverAppStateProvider value={getAppStateContainer()}>
           <DiscoverSidebar {...props} />
         </DiscoverAppStateProvider>
@@ -122,20 +141,36 @@ describe('discover sidebar', function () {
     await comp.update();
   });
 
+  await comp!.update();
+
+  return comp!;
+}
+
+describe('discover sidebar', function () {
+  let props: DiscoverSidebarProps;
+  let comp: ReactWrapper<DiscoverSidebarProps>;
+
+  beforeEach(async () => {
+    props = getCompProps();
+    comp = await mountComponent(props);
+  });
+
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
-    const popular = findTestSubject(comp, 'fieldList-popular');
-    const selected = findTestSubject(comp, 'fieldList-selected');
-    const unpopular = findTestSubject(comp, 'fieldList-unpopular');
-    expect(popular.children().length).toBe(1);
-    expect(unpopular.children().length).toBe(6);
-    expect(selected.children().length).toBe(1);
+    const popularFieldsCount = findTestSubject(comp, 'fieldListGroupedPopularFields-count');
+    const selectedFieldsCount = findTestSubject(comp, 'fieldListGroupedSelectedFields-count');
+    const availableFieldsCount = findTestSubject(comp, 'fieldListGroupedAvailableFields-count');
+    expect(popularFieldsCount.text()).toBe('1');
+    expect(availableFieldsCount.text()).toBe('3');
+    expect(selectedFieldsCount.text()).toBe('1');
   });
   it('should allow selecting fields', function () {
-    findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
+    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
+    findTestSubject(availableFields, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
   it('should allow deselecting fields', function () {
-    findTestSubject(comp, 'fieldToggle-extension').simulate('click');
+    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
+    findTestSubject(availableFields, 'fieldToggle-extension').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
 
@@ -147,7 +182,8 @@ describe('discover sidebar', function () {
   });
 
   it('should render "Edit field" button', async () => {
-    findTestSubject(comp, 'field-bytes').simulate('click');
+    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
+    findTestSubject(availableFields, 'field-bytes').simulate('click');
     await new Promise((resolve) => setTimeout(resolve, 0));
     await comp.update();
     const editFieldButton = findTestSubject(comp, 'discoverFieldListPanelEdit-bytes');
@@ -156,29 +192,24 @@ describe('discover sidebar', function () {
     expect(props.editField).toHaveBeenCalledWith('bytes');
   });
 
-  it('should not render Add/Edit field buttons in viewer mode', () => {
-    const compInViewerMode = mountWithIntl(
-      <KibanaContextProvider services={mockDiscoverServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer()}>
-          <DiscoverSidebar {...props} editField={undefined} />
-        </DiscoverAppStateProvider>
-      </KibanaContextProvider>
-    );
+  it('should not render Add/Edit field buttons in viewer mode', async () => {
+    const compInViewerMode = await mountComponent({
+      ...getCompProps(),
+      editField: undefined,
+    });
     const addFieldButton = findTestSubject(compInViewerMode, 'dataView-add-field_btn');
     expect(addFieldButton.length).toBe(0);
-    findTestSubject(comp, 'field-bytes').simulate('click');
+    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
+    findTestSubject(availableFields, 'field-bytes').simulate('click');
     const editFieldButton = findTestSubject(compInViewerMode, 'discoverFieldListPanelEdit-bytes');
     expect(editFieldButton.length).toBe(0);
   });
 
   it('should render buttons in data view picker correctly', async () => {
-    const compWithPicker = mountWithIntl(
-      <KibanaContextProvider services={mockDiscoverServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer()}>
-          <DiscoverSidebar {...props} showDataViewPicker />
-        </DiscoverAppStateProvider>
-      </KibanaContextProvider>
-    );
+    const compWithPicker = await mountComponent({
+      ...getCompProps(),
+      showDataViewPicker: true,
+    });
     // open data view picker
     findTestSubject(compWithPicker, 'dataView-switch-link').simulate('click');
     expect(findTestSubject(compWithPicker, 'changeDataViewPopover').length).toBe(1);
@@ -198,18 +229,12 @@ describe('discover sidebar', function () {
   });
 
   it('should not render buttons in data view picker when in viewer mode', async () => {
-    const compWithPickerInViewerMode = mountWithIntl(
-      <KibanaContextProvider services={mockDiscoverServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer()}>
-          <DiscoverSidebar
-            {...props}
-            showDataViewPicker
-            editField={undefined}
-            createNewDataView={undefined}
-          />
-        </DiscoverAppStateProvider>
-      </KibanaContextProvider>
-    );
+    const compWithPickerInViewerMode = await mountComponent({
+      ...getCompProps(),
+      showDataViewPicker: true,
+      editField: undefined,
+      createNewDataView: undefined,
+    });
     // open data view picker
     findTestSubject(compWithPickerInViewerMode, 'dataView-switch-link').simulate('click');
     expect(findTestSubject(compWithPickerInViewerMode, 'changeDataViewPopover').length).toBe(1);
@@ -223,14 +248,11 @@ describe('discover sidebar', function () {
     expect(createDataViewButton.length).toBe(0);
   });
 
-  it('should render the Visualize in Lens button in text based languages mode', () => {
-    const compInViewerMode = mountWithIntl(
-      <KibanaContextProvider services={mockDiscoverServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer()}>
-          <DiscoverSidebar {...props} onAddFilter={undefined} />
-        </DiscoverAppStateProvider>
-      </KibanaContextProvider>
-    );
+  it('should render the Visualize in Lens button in text based languages mode', async () => {
+    const compInViewerMode = await mountComponent({
+      ...getCompProps(),
+      onAddFilter: undefined,
+    });
     const visualizeField = findTestSubject(compInViewerMode, 'textBased-visualize');
     expect(visualizeField.length).toBe(1);
   });

@@ -35,12 +35,15 @@ export function createDiscoverServicesMock(): DiscoverServices {
 
   dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
   dataPlugin.query.filterManager.getUpdates$ = jest.fn(() => of({}) as unknown as Observable<void>);
-  dataPlugin.query.timefilter.timefilter.getAbsoluteTime = jest.fn(() => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  });
+  dataPlugin.query.timefilter.timefilter.createFilter = jest.fn();
+  dataPlugin.query.timefilter.timefilter.getAbsoluteTime = jest.fn(() => ({
+    from: '2021-08-31T22:00:00.000Z',
+    to: '2022-09-01T09:16:29.553Z',
+  }));
   dataPlugin.query.timefilter.timefilter.getTime = jest.fn(() => {
     return { from: 'now-15m', to: 'now' };
   });
+  dataPlugin.dataViews = createDiscoverDataViewsMock();
 
   return {
     core: coreMock.createStart(),
@@ -134,18 +137,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     expressions: expressionsPlugin,
     savedObjectsTagging: {},
-    dataViews: createDiscoverDataViewsMock(),
-    timefilter: {
-      createFilter: jest.fn(),
-      getAbsoluteTime: jest.fn(() => ({
-        from: '2021-08-31T22:00:00.000Z',
-        to: '2022-09-01T09:16:29.553Z',
-      })),
-      getTime: jest.fn(() => ({
-        from: 'now-15m',
-        to: 'now',
-      })),
-    },
+    dataViews: dataPlugin.dataViews,
+    timefilter: dataPlugin.query.timefilter.timefilter,
   } as unknown as DiscoverServices;
 }
 

@@ -224,15 +224,14 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'discoverFieldListPanelAddExistFilter-extension').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
-  it('should allow filtering by string, and calcFieldCount should just be executed once', function () {
-    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('6');
-    act(() => {
-      findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
-        target: { value: 'abc' },
+  it('should allow filtering by string, and calcFieldCount should just be executed once', async function () {
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('3');
+    await act(async () => {
+      await findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
+        target: { value: 'bytes' },
       });
     });
-    comp.update();
-    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('4');
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('1');
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
 

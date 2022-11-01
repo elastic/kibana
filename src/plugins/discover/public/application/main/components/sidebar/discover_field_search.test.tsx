@@ -44,6 +44,7 @@ describe('DiscoverFieldSearch', () => {
     const input = findTestSubject(component, 'fieldFilterSearchInput');
     input.simulate('change', { target: { value: 'new filter' } });
     expect(defaultProps.onChange).toBeCalledTimes(1);
+    expect(defaultProps.onChange).toHaveBeenCalledWith('name', 'new filter');
   });
 
   test('change in active filters should change facet selection and call onChange', () => {

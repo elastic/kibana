@@ -331,7 +331,7 @@ export function DiscoverFieldSearch({
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
             fullWidth
-            onChange={(event) => onChange('name', event.currentTarget.value)}
+            onChange={(event) => onChange('name', event.target.value)}
             placeholder={searchPlaceholder}
             value={value}
           />
