@@ -174,9 +174,8 @@ export function Detail() {
     isLoading: packageInfoLoading,
     isInitialRequest: packageIsInitialRequest,
     resendRequest: refreshPackageInfo,
-    // no need to reload package if using a specific version
   } = useGetPackageInfoByKey(pkgName, pkgVersion, {
-    prerelease: !pkgVersion ? prereleaseIntegrationsEnabled : undefined,
+    prerelease: prereleaseIntegrationsEnabled,
   });
 
   const [latestGAVersion, setLatestGAVersion] = useState<string | undefined>();
