@@ -96,7 +96,7 @@ export const CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiops.changePointDetectionBreadcrumbLabel', {
     defaultMessage: 'Change Point Detection',
   }),
-  href: '/aiops/log_categorization_index_select',
+  href: '/aiops/change_point_detection_index_select',
 });
 
 export const CREATE_JOB_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
