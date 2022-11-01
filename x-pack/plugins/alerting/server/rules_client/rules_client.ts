@@ -75,7 +75,6 @@ import {
   RuleSnooze,
   RuleSnoozeSchedule,
   RawAlertInstance as RawAlert,
-  RawRuleMonitoring,
 } from '../types';
 import {
   validateRuleTypeParams,
@@ -85,7 +84,7 @@ import {
   convertRuleIdsToKueryNode,
   getRuleSnoozeEndTime,
   convertEsSortToEventLogSort,
-  getDefaultRawRuleMonitoring,
+  getDefaultMonitoring,
   updateMonitoring,
   convertMonitoringFromRawAndVerify,
   getNextRunString,
@@ -627,7 +626,7 @@ export class RulesClient {
       notifyWhen,
       running: false,
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
-      monitoring: getDefaultRawRuleMonitoring(lastRunTimestamp.toISOString()),
+      monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
     };
 
     const mappedParams = getMappedParams(updatedParams);
@@ -2652,7 +2651,7 @@ export class RulesClient {
         ...attributes,
         ...(!existingApiKey && (await this.createNewAPIKeySet({ attributes, username }))),
         ...(attributes.monitoring && {
-          monitoring: updateMonitoring<RawRuleMonitoring>({
+          monitoring: updateMonitoring({
             monitoring: attributes.monitoring,
             timestamp: now.toISOString(),
             duration: 0,

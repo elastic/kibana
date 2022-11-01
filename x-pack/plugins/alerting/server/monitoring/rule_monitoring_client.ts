@@ -6,22 +6,11 @@
  */
 
 import stats from 'stats-lite';
-import { INITIAL_METRICS } from '../lib/monitoring';
+import { getDefaultMonitoring } from '../lib/monitoring';
 import { RuleMonitoring, RuleMonitoringHistory } from '../types';
 
 export class RuleMonitoringService {
-  private monitoring: RuleMonitoring = {
-    run: {
-      history: [],
-      calculated_metrics: {
-        success_ratio: 0,
-      },
-      last_run: {
-        timestamp: new Date().toISOString(),
-        metrics: INITIAL_METRICS,
-      },
-    },
-  };
+  private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());
 
   public setLastRunMetricsDuration(duration: number) {
     this.monitoring.run.last_run.metrics.duration = duration;
@@ -33,7 +22,7 @@ export class RuleMonitoringService {
     }
   }
 
-  public getMonitoring() {
+  public getMonitoring(): RuleMonitoring {
     return this.monitoring;
   }
 

@@ -34,7 +34,7 @@ import {
   RawAlertInstance,
   RawRule,
   RawRuleExecutionStatus,
-  RuleMonitoring,
+  RawRuleMonitoring,
   RuleTaskState,
   RuleTypeRegistry,
   RawRuleLastRun,
@@ -196,7 +196,7 @@ export class TaskRunner<
     namespace: string | undefined,
     attributes: {
       executionStatus?: RawRuleExecutionStatus;
-      monitoring?: RuleMonitoring;
+      monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
       running?: boolean;
@@ -679,7 +679,7 @@ export class TaskRunner<
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         nextRun,
         lastRun: lastRunToRaw(lastRun),
-        monitoring: this.ruleMonitoring.getMonitoring(),
+        monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
       });
     }
 
@@ -857,7 +857,7 @@ export class TaskRunner<
         outcomeMsg,
         alertsCount: {},
       },
-      monitoring: this.ruleMonitoring.getMonitoring(),
+      monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
       running: false,
       nextRun:
         nextRunString && new Date(nextRunString).getTime() > date.getTime() ? nextRunString : null,

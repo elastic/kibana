@@ -251,9 +251,12 @@ export interface RawRule extends SavedObjectAttributes {
   mutedInstanceIds: string[];
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
-  monitoring?: RuleMonitoring;
+  monitoring?: RawRuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   isSnoozedUntil?: string | null;
+  lastRun?: RawRuleLastRun | null;
+  nextRun?: string | null;
+  running: boolean;
 }
 
 export interface AlertingPlugin {
@@ -292,3 +295,4 @@ export interface RuleMonitoringService {
 }
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
+export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}

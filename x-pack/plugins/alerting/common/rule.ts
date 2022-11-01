@@ -203,7 +203,7 @@ export interface RuleMonitoringCalculatedMetrics extends SavedObjectAttributes {
   success_ratio: number;
 }
 
-export interface RuleMonitoringLastRunMetrics {
+export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
   duration: number;
   total_search_duration_ms?: number | null;
   total_indexing_duration_ms?: number | null;
@@ -212,7 +212,7 @@ export interface RuleMonitoringLastRunMetrics {
   gap_duration_s?: number | null;
 }
 
-export interface RuleMonitoringLastRun {
+export interface RuleMonitoringLastRun extends SavedObjectAttributes {
   timestamp: string;
   metrics: RuleMonitoringLastRunMetrics;
 }

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { RuleMonitoring } from '../types';
+import { Logger } from '@kbn/core/server';
+import { RuleMonitoring, RawRuleMonitoring } from '../types';
 
 export const INITIAL_METRICS = {
   duration: 0,
@@ -14,6 +14,21 @@ export const INITIAL_METRICS = {
   total_alerts_detected: null,
   total_alerts_created: null,
   gap_duration_s: null,
+};
+
+export const getDefaultMonitoring = (timestamp: string) => {
+  return {
+    run: {
+      history: [],
+      calculated_metrics: {
+        success_ratio: 0,
+      },
+      last_run: {
+        timestamp,
+        metrics: INITIAL_METRICS,
+      },
+    },
+  };
 };
 
 // Immutably updates the monitoring object with timestamp and duration.
@@ -43,4 +58,28 @@ export const updateMonitoring = ({
       ...rest,
     },
   };
+};
+
+export const convertMonitoringFromRawAndVerify = (
+  logger: Logger,
+  ruleId: string,
+  monitoring: RawRuleMonitoring
+): RuleMonitoring | undefined => {
+  if (!monitoring) {
+    return undefined;
+  }
+
+  const lastRunDate = monitoring.run.last_run.timestamp;
+
+  let parsedDateMillis = lastRunDate ? Date.parse(lastRunDate) : Date.now();
+  if (isNaN(parsedDateMillis)) {
+    logger.debug(`invalid monitoring last_run.timestamp "${lastRunDate}" in raw rule ${ruleId}`);
+    parsedDateMillis = Date.now();
+  }
+
+  return updateMonitoring({
+    monitoring,
+    timestamp: new Date(parsedDateMillis).toISOString(),
+    duration: monitoring.run.last_run.metrics.duration || 0,
+  });
 };
