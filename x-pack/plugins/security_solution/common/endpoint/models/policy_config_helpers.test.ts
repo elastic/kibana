@@ -7,7 +7,7 @@
 
 import type { PolicyConfig } from '../types';
 import { ProtectionModes } from '../types';
-import { policyFactory, policyFactoryWithoutPaidFeatures } from './policy_config';
+import { policyFactory } from './policy_config';
 import { disableProtections } from './policy_config_helpers';
 
 describe('Policy Config helpers', () => {
@@ -16,15 +16,60 @@ describe('Policy Config helpers', () => {
       expect(disableProtections(policyFactory())).toEqual<PolicyConfig>(eventsOnlyPolicy);
     });
 
-    it('does not touch supported fields', () => {
-      const expectedPolicy = policyFactoryWithoutPaidFeatures(eventsOnlyPolicy);
+    it('does not enable supported fields', () => {
+      const defaultPolicy: PolicyConfig = policyFactory();
 
-      const policy = disableProtections(policyFactoryWithoutPaidFeatures());
+      const notSupported: PolicyConfig['windows']['memory_protection'] = {
+        mode: ProtectionModes.off,
+        supported: false,
+      };
 
-      expect(policy).toEqual<PolicyConfig>(expectedPolicy);
+      const inputPolicyWithoutSupportedProtections: PolicyConfig = {
+        ...defaultPolicy,
+        windows: {
+          ...defaultPolicy.windows,
+          memory_protection: notSupported,
+          behavior_protection: notSupported,
+          ransomware: notSupported,
+        },
+        mac: {
+          ...defaultPolicy.mac,
+          memory_protection: notSupported,
+          behavior_protection: notSupported,
+        },
+        linux: {
+          ...defaultPolicy.linux,
+          memory_protection: notSupported,
+          behavior_protection: notSupported,
+        },
+      };
+
+      const expectedPolicyWithoutSupportedProtections: PolicyConfig = {
+        ...eventsOnlyPolicy,
+        windows: {
+          ...eventsOnlyPolicy.windows,
+          memory_protection: notSupported,
+          behavior_protection: notSupported,
+          ransomware: notSupported,
+        },
+        mac: {
+          ...eventsOnlyPolicy.mac,
+          memory_protection: notSupported,
+          behavior_protection: notSupported,
+        },
+        linux: {
+          ...eventsOnlyPolicy.linux,
+          memory_protection: notSupported,
+          behavior_protection: notSupported,
+        },
+      };
+
+      const policy = disableProtections(inputPolicyWithoutSupportedProtections);
+
+      expect(policy).toEqual<PolicyConfig>(expectedPolicyWithoutSupportedProtections);
     });
 
-    it('does not touch events', () => {
+    it('does not enable events', () => {
       const defaultPolicy: PolicyConfig = policyFactory();
 
       const windowsEvents: typeof defaultPolicy.windows.events = {
