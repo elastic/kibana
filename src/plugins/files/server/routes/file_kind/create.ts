@@ -31,16 +31,13 @@ export const handler: CreateHandler<Endpoint> = async ({ fileKind, files }, req,
   const {
     body: { name, alt, meta, mimeType },
   } = req;
-  const { username: owner, profile_uid: uid } = security?.authc.getCurrentUser(req) ?? {};
+  const user = security?.authc.getCurrentUser(req);
   const file = await fileService.asCurrentUser().create({
     fileKind,
     name,
     alt,
-    meta: {
-      owner,
-      uid,
-      ...meta,
-    },
+    meta,
+    user: user ? { name: user.username, id: user.profile_uid } : undefined,
     mime: mimeType,
   });
   const body: Endpoint['output'] = {
