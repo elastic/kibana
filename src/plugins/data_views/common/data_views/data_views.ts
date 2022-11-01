@@ -939,10 +939,9 @@ export class DataViewsService {
   async create(
     spec: DataViewSpec,
     skipFetchFields = false,
-    displayErrors = true,
-    recreateDataView = false
+    displayErrors = true
   ): Promise<DataView> {
-    if (spec.id && !recreateDataView) {
+    if (spec.id) {
       const cachedDataView = spec.id ? await this.dataViewCache.get(spec.id) : undefined;
 
       if (cachedDataView) {
