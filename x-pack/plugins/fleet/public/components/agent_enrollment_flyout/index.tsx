@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -27,7 +27,7 @@ import {
   useStartServices,
   useFleetStatus,
   useAgentEnrollmentFlyoutData,
-  useGetFleetServerHosts,
+  useFleetServerHostsForPolicy,
 } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy, AgentPolicy } from '../../types';
@@ -57,8 +57,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
     return policies.find((p) => p.id === id);
   };
 
-  const fleetServerHostsRequest = useGetFleetServerHosts();
-
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();
 
@@ -77,16 +75,9 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
 
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
 
-  const fleetServerHosts = useMemo(() => {
-    return (
-      fleetServerHostsRequest.data?.items.filter((item) =>
-        agentPolicyWithPackagePolicies?.fleet_server_host_id
-          ? item.id === agentPolicyWithPackagePolicies?.fleet_server_host_id
-          : item.is_default
-      )?.[0].host_urls ?? []
-    );
-  }, [agentPolicyWithPackagePolicies, fleetServerHostsRequest]);
-  console.log(fleetServerHosts);
+  const { fleetServerHosts, isLoadingInitialRequest } = useFleetServerHostsForPolicy(
+    agentPolicyWithPackagePolicies
+  );
 
   const selectedPolicy = agentPolicyWithPackagePolicies
     ? agentPolicyWithPackagePolicies
@@ -109,9 +100,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   }, [selectedPolicy, isFleetServerPolicySelected]);
 
   const { isK8s } = useIsK8sPolicy(selectedPolicy ? selectedPolicy : undefined);
-
-  const isLoadingInitialRequest =
-    fleetServerHostsRequest.isLoading && fleetServerHostsRequest.isInitialRequest;
 
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
