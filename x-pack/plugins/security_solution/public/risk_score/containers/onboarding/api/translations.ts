@@ -80,12 +80,6 @@ export const START_TRANSFORMS_ERROR_MESSAGE = (totalCount: number) =>
     defaultMessage: `Failed to start {totalCount, plural, =1 {Transform} other {Transforms}}`,
   });
 
-export const RESTART_TRANSFORMS_ERROR_MESSAGE = (totalCount?: number) =>
-  i18n.translate('xpack.securitySolution.riskScore.api.transforms.start.errorMessageTitle', {
-    values: { totalCount },
-    defaultMessage: `Failed to start {totalCount, plural, =1 {Transform} other {Transforms}}`,
-  });
-
 export const STOP_TRANSFORMS_ERROR_MESSAGE = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.riskScore.api.transforms.stop.errorMessageTitle', {
     values: { totalCount },
