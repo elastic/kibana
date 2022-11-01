@@ -22,3 +22,5 @@ program
   .action(async () => {
     return await bootstrap();
   });
+
+program.parse(process.argv);
