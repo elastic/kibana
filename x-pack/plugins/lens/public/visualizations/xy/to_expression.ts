@@ -29,6 +29,7 @@ import {
   SeriesType,
   XScaleType,
   XYCurveType,
+  YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -414,26 +415,21 @@ export const buildXYExpression = (
 };
 
 const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {
-  return yAxisConfigs.map((axis) => ({
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'yAxisConfig',
-        arguments: {
-          id: axis.id ? [axis.id] : [],
-          position: axis.position ? [axis.position] : [],
-          extent: axis.extent ? [axisExtentConfigToExpression(axis.extent)] : [],
-          showTitle: [axis.showTitle ?? true],
-          title: axis.title !== undefined ? [axis.title] : [],
-          showLabels: [axis.showLabels ?? true],
-          showGridLines: [axis.showGridLines ?? true],
-          labelsOrientation: axis.labelsOrientation !== undefined ? [axis.labelsOrientation] : [],
-          scaleType: axis.scaleType ? [axis.scaleType] : [],
-        },
-      },
-    ],
-  }));
+  return yAxisConfigs.map((axis) =>
+    buildExpression([
+      buildExpressionFunction<YAxisConfigFn>('yAxisConfig', {
+        id: axis.id,
+        position: axis.position,
+        extent: axis.extent ? axisExtentConfigToExpression(axis.extent) : undefined,
+        showTitle: axis.showTitle ?? true,
+        title: axis.title,
+        showLabels: axis.showLabels ?? true,
+        showGridLines: axis.showGridLines ?? true,
+        labelsOrientation: axis.labelsOrientation,
+        scaleType: axis.scaleType,
+      }),
+    ]).toAst()
+  );
 };
 
 const referenceLineLayerToExpression = (
