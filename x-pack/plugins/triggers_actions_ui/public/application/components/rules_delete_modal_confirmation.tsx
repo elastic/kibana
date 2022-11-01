@@ -8,7 +8,6 @@
 import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { KueryNode } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/lib/kibana';
 import { bulkDeleteRules } from '../lib/rule_api';
 import {
@@ -17,6 +16,8 @@ import {
   getConfirmModalText,
   getFailedNotificationText,
   getSuccessfulNotificationText,
+  singleRuleTitle,
+  multipleRuleTitle,
 } from './translations';
 
 export const RulesDeleteModalConfirmation = ({
@@ -44,13 +45,6 @@ export const RulesDeleteModalConfirmation = ({
 
   const [deleteModalFlyoutVisible, setDeleteModalVisibility] = useState<boolean>(false);
 
-  const singleTitle = i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
-    defaultMessage: 'rule',
-  });
-  const multipleTitle = i18n.translate('xpack.triggersActionsUI.sections.rulesList.multipleTitle', {
-    defaultMessage: 'rules',
-  });
-
   useEffect(() => {
     setDeleteModalVisibility(idsToDelete.length > 0 || Boolean(rulesToDeleteFilter));
   }, [idsToDelete, rulesToDeleteFilter]);
@@ -68,6 +62,7 @@ export const RulesDeleteModalConfirmation = ({
   const onConfirmProp = useCallback(async () => {
     setDeleteModalVisibility(false);
     setIsDeletingRules(true);
+
     const { errors, total } = await bulkDeleteRules({
       filter: rulesToDeleteFilter,
       ids: idsToDelete,
@@ -78,25 +73,17 @@ export const RulesDeleteModalConfirmation = ({
     const numErrors = errors.length;
     const numSuccesses = total - numErrors;
     if (numSuccesses > 0) {
-      toasts.addSuccess(getSuccessfulNotificationText(numSuccesses, singleTitle, multipleTitle));
+      toasts.addSuccess(
+        getSuccessfulNotificationText(numSuccesses, singleRuleTitle, multipleRuleTitle)
+      );
     }
 
     if (numErrors > 0) {
-      toasts.addDanger(getFailedNotificationText(numErrors, singleTitle, multipleTitle));
+      toasts.addDanger(getFailedNotificationText(numErrors, singleRuleTitle, multipleRuleTitle));
       await onErrors();
     }
     await onDeleted();
-  }, [
-    http,
-    idsToDelete,
-    multipleTitle,
-    onDeleted,
-    onErrors,
-    rulesToDeleteFilter,
-    setIsDeletingRules,
-    singleTitle,
-    toasts,
-  ]);
+  }, [http, idsToDelete, onDeleted, onErrors, rulesToDeleteFilter, setIsDeletingRules, toasts]);
 
   if (!deleteModalFlyoutVisible) {
     return null;
@@ -106,13 +93,17 @@ export const RulesDeleteModalConfirmation = ({
     <EuiConfirmModal
       buttonColor="danger"
       data-test-subj="rulesDeleteConfirmation"
-      title={getConfirmButtonText(numberIdsToDelete, singleTitle, multipleTitle)}
+      title={getConfirmButtonText(numberIdsToDelete, singleRuleTitle, multipleRuleTitle)}
       onCancel={onCancelProp}
       onConfirm={onConfirmProp}
       cancelButtonText={cancelButtonText}
-      confirmButtonText={getConfirmButtonText(numberIdsToDelete, singleTitle, multipleTitle)}
+      confirmButtonText={getConfirmButtonText(
+        numberIdsToDelete,
+        singleRuleTitle,
+        multipleRuleTitle
+      )}
     >
-      <p>{getConfirmModalText(numberIdsToDelete, singleTitle, multipleTitle)}</p>
+      <p>{getConfirmModalText(numberIdsToDelete, singleRuleTitle, multipleRuleTitle)}</p>
       {showWarningText && (
         <EuiCallOut title={<>{warningText}</>} color="warning" iconType="alert" />
       )}

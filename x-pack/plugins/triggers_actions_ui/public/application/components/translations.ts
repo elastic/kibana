@@ -7,6 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const singleRuleTitle = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.singleTitle',
+  {
+    defaultMessage: 'rule',
+  }
+);
+export const multipleRuleTitle = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.multipleTitle',
+  {
+    defaultMessage: 'rules',
+  }
+);
+
 export const cancelButtonText = i18n.translate(
   'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.cancelButtonLabel',
   {
