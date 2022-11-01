@@ -18,14 +18,14 @@ import {
 } from '../../../api/pipelines/fetch_ml_inference_pipeline_history';
 import { IndexNameLogic } from '../index_name_logic';
 
-interface InferenceHistoryActions {
+export interface InferenceHistoryActions {
   fetchIndexInferenceHistory: Actions<
     FetchMlInferencePipelineHistoryApiLogicArgs,
     FetchMlInferencePipelineHistoryApiLogicResponse
   >['makeRequest'];
 }
 
-interface InferenceHistoryValues {
+export interface InferenceHistoryValues {
   fetchIndexInferenceHistoryStatus: Status;
   indexName: string;
   inferenceHistory: MlInferenceHistoryItem[] | undefined;
