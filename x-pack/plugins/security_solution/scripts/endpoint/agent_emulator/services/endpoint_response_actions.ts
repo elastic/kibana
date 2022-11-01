@@ -9,8 +9,8 @@ import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import * as cborx from 'cbor-x';
+import { basename } from 'path';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
-import type { UploadedFile } from '../../../../common/endpoint/types/file_storage';
 import { checkInFleetAgent } from '../../common/fleet_services';
 import { sendEndpointMetadataUpdate } from '../../common/endpoint_metadata_services';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
@@ -181,29 +181,52 @@ export const sendEndpointActionResponse = async (
 
   // For `get-file`, upload a file to ES
   if (action.command === 'get-file' && !endpointResponse.error) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const filePath = (
+      action as ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>
+    )?.parameters?.path!;
+
+    const fileName = basename(filePath.replace(/\\/g, '/'));
+
     // Index the file's metadata
-    const fileMeta = await esClient.index<UploadedFile>({
+    const fileMeta = await esClient.index({
       index: FILE_STORAGE_METADATA_INDEX,
       id: getFileDownloadId(action, action.agents[0]),
       body: {
+        action_id: action.id,
+        agent_id: action.agents[0],
+        contents: [
+          {
+            hash: {
+              sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
+            },
+            name: fileName ?? 'bad_file.txt',
+            path: filePath,
+            size: 4,
+            type: 'file',
+          },
+        ],
         file: {
-          created: new Date().toISOString(),
-          extension: 'zip',
-          path: '/some/path/bad_file.txt',
-          type: 'file',
-          size: 221,
-          name: 'bad_file.txt.zip',
-          mime_type: 'application/zip',
-          Status: 'READY',
+          attributes: ['archive', 'compressed'],
           ChunkSize: 4194304,
+          Compression: 'deflate',
+          hash: {
+            sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
+          },
+          mime_type: 'application/zip',
+          name: 'upload.zip',
+          size: 125,
+          Status: 'READY',
+          type: 'file',
         },
+        source: 'endpoint',
       },
       refresh: 'wait_for',
     });
 
     // Index the file content (just one chunk)
     // call to `.index()` copied from File plugin here:
-    // https://github.com/elastic/kibana/blob/main/x-pack/plugins/files/server/blob_storage_service/adapters/es/content_stream/content_stream.ts#L195
+    // https://github.com/elastic/kibana/blob/main/src/plugins/files/server/blob_storage_service/adapters/es/content_stream/content_stream.ts#L195
     await esClient.index(
       {
         index: FILE_STORAGE_DATA_INDEX,

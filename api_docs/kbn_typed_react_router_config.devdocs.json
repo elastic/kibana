@@ -690,7 +690,7 @@
             "label": "element",
             "description": [],
             "signature": [
-              "React.ReactElement<any, any>"
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
             "deprecated": false,

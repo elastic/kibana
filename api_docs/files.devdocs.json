@@ -901,24 +901,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.lazy",
-            "type": "CompoundType",
-            "tags": [
-              "default"
-            ],
-            "label": "lazy",
-            "description": [
-              "\nAs an optimisation images are only loaded when they are visible.\nThis setting overrides this behavior and loads an image as soon as the\ncomponent mounts.\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/files/public/components/image/image.tsx",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1132,6 +1114,42 @@
           },
           {
             "parentPluginId": "files",
+            "id": "def-public.Props.onUploadStart",
+            "type": "Function",
+            "tags": [],
+            "label": "onUploadStart",
+            "description": [
+              "\nWill be called whenever an upload starts"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onUploadEnd",
+            "type": "Function",
+            "tags": [],
+            "label": "onUploadEnd",
+            "description": [
+              "\nWill be called when attempt ends, in error otherwise"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
             "id": "def-public.Props.compressed",
             "type": "CompoundType",
             "tags": [
@@ -1250,6 +1268,43 @@
                 "description": [],
                 "signature": [
                   "string[]"
+                ],
+                "path": "x-pack/plugins/files/public/components/file_picker/file_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onUpload",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpload",
+            "description": [
+              "\nWhen a user has succesfully uploaded some files this callback will be called"
+            ],
+            "signature": [
+              "((done: ",
+              "DoneNotification",
+              "[]) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/file_picker/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.Props.onUpload.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "done",
+                "description": [],
+                "signature": [
+                  "DoneNotification",
+                  "[]"
                 ],
                 "path": "x-pack/plugins/files/public/components/file_picker/file_picker.tsx",
                 "deprecated": false,
@@ -2916,7 +2971,13 @@
               "\nA logger for debuggin purposes"
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
@@ -4106,7 +4167,13 @@
             ],
             "signature": [
               "(req: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "files",
@@ -4130,7 +4197,13 @@
                   "- the Kibana request to scope the service to"
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/files/server/file_service/file_service_factory.ts",
@@ -6759,7 +6832,13 @@
           "\nAn {@link SavedObject} containing a file object (i.e., metadata only)."
         ],
         "signature": [
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "files",
