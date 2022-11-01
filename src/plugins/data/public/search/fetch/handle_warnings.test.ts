@@ -13,6 +13,7 @@ import { setNotifications } from '../../services';
 import { SearchResponseWarning } from '../types';
 import { filterWarnings, handleWarnings } from './handle_warnings';
 import * as extract from './extract_warnings';
+import { SearchRequest } from '../../../common';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -152,6 +153,8 @@ describe('Filtering and showing warnings', () => {
 
   describe('filterWarnings', () => {
     const callback = jest.fn();
+    const request = {} as SearchRequest;
+    const response = {} as estypes.SearchResponse;
 
     beforeEach(() => {
       callback.mockImplementation(() => {
@@ -161,19 +164,19 @@ describe('Filtering and showing warnings', () => {
 
     it('filters out all', () => {
       callback.mockImplementation(() => true);
-      expect(filterWarnings(warnings, callback)).toEqual([]);
+      expect(filterWarnings(warnings, callback, request, response, 'id')).toEqual([]);
     });
 
     it('filters out some', () => {
       callback.mockImplementation(
         (warning: SearchResponseWarning) => warning.reason?.type !== 'generic_shard_failure'
       );
-      expect(filterWarnings(warnings, callback)).toEqual([warnings[2]]);
+      expect(filterWarnings(warnings, callback, request, response, 'id')).toEqual([warnings[2]]);
     });
 
     it('filters out none', () => {
       callback.mockImplementation(() => false);
-      expect(filterWarnings(warnings, callback)).toEqual(warnings);
+      expect(filterWarnings(warnings, callback, request, response, 'id')).toEqual(warnings);
     });
   });
 });
