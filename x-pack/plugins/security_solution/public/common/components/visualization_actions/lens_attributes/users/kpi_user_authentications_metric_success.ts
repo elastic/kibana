@@ -16,7 +16,6 @@ export const kpiUserAuthenticationsMetricSuccessLensAttributes: LensAttributes =
       accessor: '0eb97c09-a351-4280-97da-944e4bd30dd7',
       layerId: '4590dafb-4ac7-45aa-8641-47a3ff0b817c',
       layerType: 'data',
-      textAlign: 'center',
     },
     query: {
       language: 'kuery',
