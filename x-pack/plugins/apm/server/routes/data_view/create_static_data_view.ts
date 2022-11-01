@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   TRACE_ID,
   TRANSACTION_ID,
+  TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../common/data_view_constants';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
@@ -173,6 +174,17 @@ function createAndSaveStaticDataView({
           params: {
             urlTemplate: 'apm/link-to/transaction/{{value}}',
             labelTemplate: '{{value}}',
+          },
+        },
+        [TRANSACTION_DURATION]: {
+          id: 'duration',
+          params: {
+            inputFormat: 'microseconds',
+            outputFormat: 'asMilliseconds',
+            showSuffix: true,
+            useShortSuffix: true,
+            outputPrecision: 2,
+            includeSpaceWithSuffix: true,
           },
         },
       },
