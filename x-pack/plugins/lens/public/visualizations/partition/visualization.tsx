@@ -319,7 +319,7 @@ export const getPieVisualization = ({
     };
 
     return {
-      groups: [getPrimaryGroupConfig(), getSecondaryGroupConfig(), getMetricGroupConfig()].filter(
+      groups: [getMetricGroupConfig(), getPrimaryGroupConfig(), getSecondaryGroupConfig()].filter(
         Boolean
       ) as VisualizationDimensionGroupConfig[],
     };

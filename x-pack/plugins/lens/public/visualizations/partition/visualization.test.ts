@@ -187,30 +187,7 @@ describe('pie_visualization', () => {
       });
 
       // palette should be assigned to the first non-collapsed dimension
-      expect(configuration.groups[0].accessors).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "columnId": "1",
-            "triggerIcon": "aggregate",
-          },
-          Object {
-            "columnId": "2",
-            "palette": Array [
-              "red",
-              "black",
-            ],
-            "triggerIcon": "colorBy",
-          },
-          Object {
-            "columnId": "3",
-            "triggerIcon": "aggregate",
-          },
-          Object {
-            "columnId": "4",
-            "triggerIcon": undefined,
-          },
-        ]
-      `);
+      expect(configuration.groups[0].accessors).toMatchInlineSnapshot(`Array []`);
 
       const mosaicState = getExampleState();
       mosaicState.shape = PieChartTypes.MOSAIC;
@@ -228,6 +205,7 @@ describe('pie_visualization', () => {
 
       expect(mosaicConfiguration.groups.map(({ accessors }) => accessors)).toMatchInlineSnapshot(`
         Array [
+          Array [],
           Array [
             Object {
               "columnId": "1",
@@ -252,7 +230,6 @@ describe('pie_visualization', () => {
               "triggerIcon": undefined,
             },
           ],
-          Array [],
         ]
       `);
     });
@@ -274,7 +251,7 @@ describe('pie_visualization', () => {
           state,
           frame,
           layerId: state.layers[0].layerId,
-        }).groups[1].accessors
+        }).groups[0].accessors
       ).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -319,7 +296,7 @@ describe('pie_visualization', () => {
           state,
           frame,
           layerId: state.layers[0].layerId,
-        }).groups[1].accessors
+        }).groups[0].accessors
       ).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -354,12 +331,12 @@ describe('pie_visualization', () => {
           layerId: state.layers[0].layerId,
         });
 
-      expect(getConfig(state).groups[0].supportsMoreColumns).toBeFalsy();
+      expect(getConfig(state).groups[1].supportsMoreColumns).toBeFalsy();
 
       const stateWithCollapsed = cloneDeep(state);
       stateWithCollapsed.layers[0].collapseFns = { '1': 'sum' };
 
-      expect(getConfig(stateWithCollapsed).groups[0].supportsMoreColumns).toBeTruthy();
+      expect(getConfig(stateWithCollapsed).groups[1].supportsMoreColumns).toBeTruthy();
     });
 
     it('counts multiple metrics toward the dimension limits', () => {
@@ -404,7 +381,7 @@ describe('pie_visualization', () => {
           state,
           frame,
           layerId: state.layers[0].layerId,
-        }).groups[1].dimensionsTooMany
+        }).groups[0].dimensionsTooMany
       ).toBe(3);
 
       state.layers[0].allowMultipleMetrics = true;
@@ -413,7 +390,7 @@ describe('pie_visualization', () => {
           state,
           frame,
           layerId: state.layers[0].layerId,
-        }).groups[1].dimensionsTooMany
+        }).groups[0].dimensionsTooMany
       ).toBe(0);
     });
 
@@ -427,7 +404,7 @@ describe('pie_visualization', () => {
             state,
             frame: mockFrame(),
             layerId: state.layers[0].layerId,
-          }).groups[0].fakeFinalAccessor
+          }).groups[1].fakeFinalAccessor
         ).toEqual({ label: '2 metrics' });
       }
     );
