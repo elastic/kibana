@@ -16,51 +16,42 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
 import { MostUsedMetric } from './';
 
+const BUCKET_SIZE = 5;
+
 export function getLensAttributes({
   metric,
-  bucketSize,
   filters,
 }: {
   metric: MostUsedMetric;
-  bucketSize: number;
   filters: QueryDslQueryContainer[];
 }): TypedLensByValueInput['attributes'] {
   const metricId = metric.replaceAll('.', '-');
   const dataLayer: PersistedIndexPatternLayer = {
-    incompleteColumns: {},
-    sampling: 1,
     columnOrder: ['termsColumn', 'countColumn'],
     columns: {
       termsColumn: {
-        label: `Top ${bucketSize} values of ${metric}`,
+        label: `Top ${BUCKET_SIZE} values of ${metric}`,
         dataType: 'string',
         operationType: 'terms',
         scale: 'ordinal',
         sourceField: metric,
         isBucketed: true,
         params: {
-          size: bucketSize,
+          size: BUCKET_SIZE,
           orderBy: {
             type: 'column',
             columnId: 'countColumn',
           },
           orderDirection: 'desc',
-          otherBucket: true,
-          parentFormat: {
-            id: 'terms',
-          },
         },
       } as TermsIndexPatternColumn,
       countColumn: {
         label: 'Count of records',
         dataType: 'number',
         operationType: 'count',
-        isBucketed: false,
         scale: 'ratio',
+        isBucketed: false,
         sourceField: '___records___',
-        params: {
-          emptyAsNull: true,
-        },
       } as CountIndexPatternColumn,
     },
   };
@@ -86,14 +77,10 @@ export function getLensAttributes({
             categoryDisplay: 'default',
             legendDisplay: 'hide',
             numberDisplay: 'percent',
-            showValuesInLegend: true,
-            nestedLegend: false,
             layerType: 'data',
           },
         ],
       } as PieVisualizationState,
-      internalReferences: [],
-      adHocDataViews: {},
       datasourceStates: {
         formBased: {
           layers: {

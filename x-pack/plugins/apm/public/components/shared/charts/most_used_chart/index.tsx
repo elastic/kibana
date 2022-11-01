@@ -66,7 +66,6 @@ export function MostUsedChart({
   const getOpenInLensAction = () => {
     return {
       id: 'openInLens',
-      order: 1,
       type: 'link',
       getDisplayName() {
         return i18n.translate('xpack.apm.serviceOverview.openInLens', {
