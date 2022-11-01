@@ -21,3 +21,4 @@ export { countUsageOfPredefinedIds } from './count_usage_of_predefined_ids';
 export { rewriteRule } from './rewrite_rule';
 export { rewriteActions } from './rewrite_actions';
 export { actionsSchema } from './actions_schema';
+export { rewriteNamespaces } from './rewrite_namespaces';
