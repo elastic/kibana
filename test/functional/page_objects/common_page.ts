@@ -486,7 +486,7 @@ export class CommonPageObject extends FtrService {
    * Get visible text of the Welcome Banner
    */
   async getWelcomeText() {
-    await this.testSubjects.exists('global-banner-item')
+    await this.testSubjects.exists('global-banner-item');
     return await this.testSubjects.getVisibleText('global-banner-item');
   }
 
