@@ -182,4 +182,29 @@ describe('CreateCaseForm', () => {
 
     expect(result.getByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
   });
+
+  it('should not prefill the form when no initialValue provided', () => {
+    const { queryByDisplayValue } = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
+
+    expect(queryByDisplayValue('title')).not.toBeInTheDocument();
+    expect(queryByDisplayValue('description')).not.toBeInTheDocument();
+  });
+
+  it('should prefill the form when provided with initialValue', () => {
+    const { getByDisplayValue } = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm
+          {...casesFormProps}
+          initialValue={{ title: 'title', description: 'description' }}
+        />
+      </MockHookWrapperComponent>
+    );
+
+    expect(getByDisplayValue('title')).toBeInTheDocument();
+    expect(getByDisplayValue('description')).toBeInTheDocument();
+  });
 });

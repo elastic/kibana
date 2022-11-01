@@ -82,7 +82,6 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const { owner, isSubmit } = useCasesContext();
 
     useEffect(() => {
-      console.log('useEffect', isSubmit);
       if (isSubmit) submit();
     }, [isSubmit, submit]);
 
