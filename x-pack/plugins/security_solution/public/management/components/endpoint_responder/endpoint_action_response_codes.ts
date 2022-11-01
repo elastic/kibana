@@ -9,6 +9,69 @@ import { i18n } from '@kbn/i18n';
 
 const CODES = Object.freeze({
   // -----------------------------------------------------------------
+  // GET-FILE CODES
+  // -----------------------------------------------------------------
+  /** file not found */
+  'ra_get-file_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.notFound',
+    { defaultMessage: 'The file specified was not found' }
+  ),
+
+  /** path is reachable but does not point to a file */
+  'ra_get-file_error_is-directory': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.isDirectory',
+    { defaultMessage: 'The path defined is not a file' }
+  ),
+
+  /** path did not pass basic validation: malformed path, unix instead of windows, invalid characters, not full path, etc */
+  'ra_get-file_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.invalidPath',
+    { defaultMessage: 'The path defined in not valid' }
+  ),
+
+  /** Maybe: possible to be able to list the file but not read it's content */
+  'ra_get-file_error_not-permitted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.notPermitted',
+    { defaultMessage: 'File is not permitted to be read' }
+  ),
+
+  /** file size exceeds hard coded limit (100MB) */
+  'ra_get-file_error_too-big': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.tooBig',
+    { defaultMessage: 'The file requested is too large and can not be retrieved' }
+  ),
+
+  /** Endpoint ran out of file upload queue size */
+  'ra_get-file_error_disk-quota': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.diskQuota',
+    { defaultMessage: 'Endpoint ran out of disk quota while attempting to retrieve file' }
+  ),
+
+  /** Something interrupted preparing the zip: file read error, zip error */
+  'ra_get-file_error_processing': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.errorProcessing',
+    { defaultMessage: 'File retrieval was interrupted' }
+  ),
+
+  /** The fleet upload API was unreachable (not just busy) */
+  'ra_get-file_error_upload-api-unreachable': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.uploadApiUnreachable',
+    { defaultMessage: 'File upload api (fleet-server) is unreachable' }
+  ),
+
+  /** Perhaps internet connection was too slow or unstable to upload all chunks before unique upload-id expired. Endpoint will re-try a bit (3 times?). */
+  'ra_get-file_error_upload-timeout': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.uploadTimeout',
+    { defaultMessage: 'File upload timed out' }
+  ),
+
+  /** Upload API could be busy, endpoint should periodically re-try */
+  'ra_get-file_error_queue-timeout': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.queueTimeout',
+    { defaultMessage: 'Timed out while attempting to connect o upload API' }
+  ),
+
+  // -----------------------------------------------------------------
   // SUSPEND-PROCESS CODES
   // -----------------------------------------------------------------
   /**
