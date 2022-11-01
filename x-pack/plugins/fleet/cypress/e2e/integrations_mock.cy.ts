@@ -28,7 +28,7 @@ describe('Add Integration - Mock API', () => {
         ],
       });
 
-      cy.intercept(`/api/fleet/epm/packages/apache/${oldVersion}`, {
+      cy.intercept(`/api/fleet/epm/packages/apache/${oldVersion}*`, {
         item: {
           name: 'apache',
           version: oldVersion,
@@ -99,7 +99,7 @@ describe('Add Integration - Mock API', () => {
 
       cy.getBySel(INTEGRATION_POLICIES_UPGRADE_CHECKBOX).uncheck({ force: true });
 
-      cy.intercept(`/api/fleet/epm/packages/apache/${newVersion}`, {
+      cy.intercept(`/api/fleet/epm/packages/apache/${newVersion}*`, {
         item: {
           name: 'apache',
           version: newVersion,
