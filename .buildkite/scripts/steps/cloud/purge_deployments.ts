@@ -29,23 +29,26 @@ for (const deployment of prDeployments) {
     const lastCommit = pullRequest.commits.slice(-1)[0];
     const lastCommitTimestamp = new Date(lastCommit.committedDate).getTime() / 1000;
 
-    if (pullRequest.state !== 'OPEN') {
-      console.log(`Pull Request #${prNumber} is no longer open, will delete associated deployment`);
-      deploymentsToPurge.push(deployment);
-    } else if (
-      !pullRequest.labels.filter((label: any) =>
-        /^ci:(deploy-cloud|cloud-deploy|cloud-redeploy)$/.test(label.name)
-      )
-    ) {
-      console.log(
-        `Pull Request #${prNumber} no longer has a cloud deployment label, will delete associated deployment`
-      );
-      deploymentsToPurge.push(deployment);
-    } else if (lastCommitTimestamp < NOW - DAY_IN_SECONDS * 2) {
-      console.log(
-        `Pull Request #${prNumber} has not been updated in more than 2 days, will delete associated deployment`
-      );
-      deploymentsToPurge.push(deployment);
+    const persistDeployment = Boolean(pullRequest.labels.filter((label: any) => label.name === 'ci:cloud-persist-deployment').length)
+    if (!persistDeployment) {
+      if (pullRequest.state !== 'OPEN') {
+        console.log(`Pull Request #${prNumber} is no longer open, will delete associated deployment`);
+        deploymentsToPurge.push(deployment);
+      } else if (
+        !pullRequest.labels.filter((label: any) =>
+          /^ci:(deploy-cloud|cloud-deploy|cloud-redeploy)$/.test(label.name)
+        )
+      ) {
+        console.log(
+          `Pull Request #${prNumber} no longer has a cloud deployment label, will delete associated deployment`
+        );
+        deploymentsToPurge.push(deployment);
+      } else if (lastCommitTimestamp < NOW - DAY_IN_SECONDS * 2) {
+        console.log(
+          `Pull Request #${prNumber} has not been updated in more than 2 days, will delete associated deployment`
+        );
+        deploymentsToPurge.push(deployment);
+      }
     }
   } catch (ex) {
     console.error(ex.toString());
