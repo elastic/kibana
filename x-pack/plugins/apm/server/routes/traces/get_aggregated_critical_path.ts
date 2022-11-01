@@ -51,7 +51,7 @@ export interface CriticalPathResponse {
   operationIdByNodeId: Record<NodeId, OperationId>;
 }
 
-const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
+const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
 
 export async function getAggregatedCriticalPath({
   traceIds,
@@ -83,7 +83,9 @@ export async function getAggregatedCriticalPath({
         bool: {
           filter: [
             ...termsQuery(TRACE_ID, ...traceIds),
-            ...rangeQuery(start - TWO_DAYS, end + TWO_DAYS),
+            // we need a range query to allow ES to skip shards based on the time range,
+            // but we need enough padding to make sure we get the full trace
+            ...rangeQuery(start - TWO_DAYS_MS, end + TWO_DAYS_MS),
           ],
         },
       },
@@ -115,14 +117,16 @@ export async function getAggregatedCriticalPath({
                   "processor.event": doc['processor.event'].value,
                   "agent.name": doc['agent.name'].value
                 ];
+
+                def isSpan = !doc['span.id'].empty;
                 
-                if (!doc['span.id'].empty) {
+                if (isSpan) {
                   id = doc['span.id'].value;
                   operationMetadata.put('span.name', doc['span.name'].value);
-                  if (doc['span.type'].size() > 0) {
+                  if (!doc['span.type'].empty) {
                     operationMetadata.put('span.type', doc['span.type'].value);
                   }
-                  if (doc['span.subtype'].size() > 0) {
+                  if (!doc['span.subtype'].empty) {
                     operationMetadata.put('span.subtype', doc['span.subtype'].value);
                   }
                   duration = doc['span.duration.us'].value;
@@ -138,7 +142,7 @@ export async function getAggregatedCriticalPath({
                 def map = [
                   "traceId": doc['trace.id'].value,
                   "id": id,
-                  "parentId": doc['parent.id'].size() == 0 ? null : doc['parent.id'].value,
+                  "parentId": doc['parent.id'].empty ? null : doc['parent.id'].value,
                   "operationId": operationId,
                   "timestamp": doc['timestamp.us'].value,
                   "duration": duration
@@ -160,222 +164,222 @@ export async function getAggregatedCriticalPath({
                 }
                 
                 def processEvent (def context, def event) {
-                if (context.processedEvents[event.id] != null) {
-                  return context.processedEvents[event.id];
-                }
-                
-                def processedEvent = [
-                  "children": []
-                ];
-                
-                if(event.parentId != null) {
-                  def parent = context.events[event.parentId];
-                  if (parent == null) {
-                    return null;
+                  if (context.processedEvents[event.id] != null) {
+                    return context.processedEvents[event.id];
                   }
-                  def processedParent = processEvent(context, parent);
-                  if (processedParent == null) {
-                    return null;
+                  
+                  def processedEvent = [
+                    "children": []
+                  ];
+                  
+                  if(event.parentId != null) {
+                    def parent = context.events[event.parentId];
+                    if (parent == null) {
+                      return null;
+                    }
+                    def processedParent = processEvent(context, parent);
+                    if (processedParent == null) {
+                      return null;
+                    }
+                    processedParent.children.add(processedEvent);
                   }
-                  processedParent.children.add(processedEvent);
-                }
-                
-                context.processedEvents.put(event.id, processedEvent);
-                
-                processedEvent.putAll(event);
+                  
+                  context.processedEvents.put(event.id, processedEvent);
+                  
+                  processedEvent.putAll(event);
 
-                if (context.params.serviceName != null && context.params.transactionName != null) {
-                  
-                  def metadata = context.metadata[event.operationId];
-                  
-                  if (metadata != null
-                    && context.params.serviceName == metadata['service.name']
-                    && metadata['transaction.name'] != null 
-                    && context.params.transactionName == metadata['transaction.name']
-                  ) {
+                  if (context.params.serviceName != null && context.params.transactionName != null) {
+                    
+                    def metadata = context.metadata[event.operationId];
+                    
+                    if (metadata != null
+                      && context.params.serviceName == metadata['service.name']
+                      && metadata['transaction.name'] != null 
+                      && context.params.transactionName == metadata['transaction.name']
+                    ) {
+                      context.entryTransactions.add(processedEvent);
+                    }
+
+                  } else if (event.parentId == null) {
                     context.entryTransactions.add(processedEvent);
                   }
-
-                } else if (event.parentId == null) {
-                  context.entryTransactions.add(processedEvent);
+                  
+                  return processedEvent;
                 }
                 
-                return processedEvent;
-              }
-              
-              double getClockSkew (def context, def item, def parent ) {
-                if (parent == null) {
+                double getClockSkew (def context, def item, def parent ) {
+                  if (parent == null) {
+                    return 0;
+                  }
+                  
+                  def processorEvent = context.metadata[item.operationId]['processor.event'];
+                  
+                  def isTransaction = processorEvent == 'transaction';
+                  
+                  if (!isTransaction) {
+                    return parent.skew;
+                  }
+                  
+                  double parentStart = parent.timestamp + parent.skew;
+                  double offsetStart = parentStart - item.timestamp;
+                  if (offsetStart > 0) {
+                    double latency = Math.round(Math.max(parent.duration - item.duration, 0) / 2);
+                    return offsetStart + latency;
+                  }
+                  
                   return 0;
                 }
                 
-                def processorEvent = context.metadata[item.operationId]['processor.event'];
-                
-                def isTransaction = processorEvent == 'transaction';
-                
-                if (!isTransaction) {
-                  return parent.skew;
-                }
-                
-                double parentStart = parent.timestamp + parent.skew;
-                double offsetStart = parentStart - item.timestamp;
-                if (offsetStart > 0) {
-                  double latency = Math.round(Math.max(parent.duration - item.duration, 0) / 2);
-                  return offsetStart + latency;
-                }
-                
-                return 0;
-              }
-              
-              void setOffsetAndSkew ( def context, def event, def parent, def startOfTrace ) {
-                event.skew = getClockSkew(context, event, parent);
-                event.offset = event.timestamp - startOfTrace;
-                for(child in event.children) {
-                  setOffsetAndSkew(context, child, event, startOfTrace);
-                }
-                event.end = event.offset + event.skew + event.duration;
-              }
-              
-              void count ( def context, def nodeId, def duration ) {
-                context.timeByNodeId[nodeId] = (context.timeByNodeId[nodeId] ?: 0) + duration;
-              }
-              
-              void scan ( def context, def item, def start, def end, def path ) {
-                
-                def nodeId = toHash(path);
-      
-                def childNodes = context.nodes[nodeId] != null ? context.nodes[nodeId] : [];
-                
-                context.nodes[nodeId] = childNodes;
-                
-                context.operationIdByNodeId[nodeId] = item.operationId;
-                
-                if (item.children.size() == 0) {
-                  count(context, nodeId, end - start);
-                  return;
-                }
-                
-                item.children.sort((a, b) -> {
-                  if (b.end === a.end) {
-                    return 0;
+                void setOffsetAndSkew ( def context, def event, def parent, def startOfTrace ) {
+                  event.skew = getClockSkew(context, event, parent);
+                  event.offset = event.timestamp - startOfTrace;
+                  for(child in event.children) {
+                    setOffsetAndSkew(context, child, event, startOfTrace);
                   }
-                  if (b.end > a.end) {
-                    return 1;
-                  }
-                  return -1;
-                });
+                  event.end = event.offset + event.skew + event.duration;
+                }
                 
-                def scanTime = end;
+                void count ( def context, def nodeId, def duration ) {
+                  context.timeByNodeId[nodeId] = (context.timeByNodeId[nodeId] ?: 0) + duration;
+                }
                 
-                for(child in item.children) {
-                  double normalizedChildStart = Math.max(child.offset + child.skew, start);
-                  double childEnd = child.offset + child.skew + child.duration;
+                void scan ( def context, def item, def start, def end, def path ) {
                   
-                  double normalizedChildEnd = Math.min(childEnd, scanTime);
-            
-                  def isOnCriticalPath = !(
-                    normalizedChildStart >= scanTime ||
-                    normalizedChildEnd < start ||
-                    childEnd > scanTime
-                  );
+                  def nodeId = toHash(path);
+        
+                  def childNodes = context.nodes[nodeId] != null ? context.nodes[nodeId] : [];
                   
-                  if (!isOnCriticalPath) {
-                    continue;
+                  context.nodes[nodeId] = childNodes;
+                  
+                  context.operationIdByNodeId[nodeId] = item.operationId;
+                  
+                  if (item.children.size() == 0) {
+                    count(context, nodeId, end - start);
+                    return;
                   }
                   
-                  def childPath = path.clone();
+                  item.children.sort((a, b) -> {
+                    if (b.end === a.end) {
+                      return 0;
+                    }
+                    if (b.end > a.end) {
+                      return 1;
+                    }
+                    return -1;
+                  });
                   
-                  childPath.add(child.operationId);
+                  def scanTime = end;
                   
-                  def childId = toHash(childPath);
-                  
-                  if(!childNodes.contains(childId)) {
-                    childNodes.add(childId);
+                  for(child in item.children) {
+                    double normalizedChildStart = Math.max(child.offset + child.skew, start);
+                    double childEnd = child.offset + child.skew + child.duration;
+                    
+                    double normalizedChildEnd = Math.min(childEnd, scanTime);
+              
+                    def isOnCriticalPath = !(
+                      normalizedChildStart >= scanTime ||
+                      normalizedChildEnd < start ||
+                      childEnd > scanTime
+                    );
+                    
+                    if (!isOnCriticalPath) {
+                      continue;
+                    }
+                    
+                    def childPath = path.clone();
+                    
+                    childPath.add(child.operationId);
+                    
+                    def childId = toHash(childPath);
+                    
+                    if(!childNodes.contains(childId)) {
+                      childNodes.add(childId);
+                    }
+                    
+                    if (normalizedChildEnd < (scanTime - 1000)) {
+                      count(context, nodeId, scanTime - normalizedChildEnd); 
+                    }
+                    
+                    scan(context, child, normalizedChildStart, childEnd, childPath);
+                    
+                    scanTime = normalizedChildStart;
                   }
                   
-                  if (normalizedChildEnd < (scanTime - 1000)) {
-                    count(context, nodeId, scanTime - normalizedChildEnd); 
+                  if (scanTime > start) {
+                    count(context, nodeId, scanTime - start);
                   }
                   
-                  scan(context, child, normalizedChildStart, childEnd, childPath);
-                  
-                  scanTime = normalizedChildStart;
                 }
+              
+                def events = [:];
+                def metadata = [:];
+                def processedEvents = [:];
+                def entryTransactions = [];
+                def timeByNodeId = [:];
+                def nodes = [:];
+                def rootNodes = [];
+                def operationIdByNodeId = [:];
                 
-                if (scanTime > start) {
-                  count(context, nodeId, scanTime - start);
-                }
                 
-              }
-            
-              def events = [:];
-              def metadata = [:];
-              def processedEvents = [:];
-              def entryTransactions = [];
-              def timeByNodeId = [:];
-              def nodes = [:];
-              def rootNodes = [];
-              def operationIdByNodeId = [:];
+                def context = [
+                  "events": events,
+                  "metadata": metadata,
+                  "processedEvents": processedEvents,
+                  "entryTransactions": entryTransactions,
+                  "timeByNodeId": timeByNodeId,
+                  "nodes": nodes,
+                  "operationIdByNodeId": operationIdByNodeId,
+                  "params": params
+                ];
               
-              
-              def context = [
-                "events": events,
-                "metadata": metadata,
-                "processedEvents": processedEvents,
-                "entryTransactions": entryTransactions,
-                "timeByNodeId": timeByNodeId,
-                "nodes": nodes,
-                "operationIdByNodeId": operationIdByNodeId,
-                "params": params
-              ];
-            
-              for(state in states) {
-                if (state.eventsById != null) {
-                  events.putAll(state.eventsById);
-                }
-                if (state.metadataByOperationId != null) {
-                  metadata.putAll(state.metadataByOperationId);
-                }
-              }
-              
-              
-              for(def event: events.values()) {
-                processEvent(context, event);
-              }
-              
-              for(transaction in context.entryTransactions) {
-                transaction.skew = 0;
-                transaction.offset = 0;
-                setOffsetAndSkew(context, transaction, null, transaction.timestamp);
-                
-                def path = [];
-                def parent = transaction;
-                while (parent != null) {
-                  path.add(parent.operationId);
-                  if (parent.parentId == null) {
-                    break;
+                for(state in states) {
+                  if (state.eventsById != null) {
+                    events.putAll(state.eventsById);
                   }
-                  parent = context.processedEvents[parent.parentId];
+                  if (state.metadataByOperationId != null) {
+                    metadata.putAll(state.metadataByOperationId);
+                  }
                 }
+                
+                
+                for(def event: events.values()) {
+                  processEvent(context, event);
+                }
+                
+                for(transaction in context.entryTransactions) {
+                  transaction.skew = 0;
+                  transaction.offset = 0;
+                  setOffsetAndSkew(context, transaction, null, transaction.timestamp);
+                  
+                  def path = [];
+                  def parent = transaction;
+                  while (parent != null) {
+                    path.add(parent.operationId);
+                    if (parent.parentId == null) {
+                      break;
+                    }
+                    parent = context.processedEvents[parent.parentId];
+                  }
 
-                Collections.reverse(path);
+                  Collections.reverse(path);
 
-                def nodeId = toHash(path);
-                
-                scan(context, transaction, 0, transaction.duration, path);
-                
-                if (!rootNodes.contains(nodeId)) {
-                  rootNodes.add(nodeId);
+                  def nodeId = toHash(path);
+                  
+                  scan(context, transaction, 0, transaction.duration, path);
+                  
+                  if (!rootNodes.contains(nodeId)) {
+                    rootNodes.add(nodeId);
+                  }
+                  
                 }
                 
-              }
-              
-              return [
-                "timeByNodeId": timeByNodeId,
-                "metadata": metadata,
-                "nodes": nodes,
-                "rootNodes": rootNodes,
-                "operationIdByNodeId": operationIdByNodeId
-              ];`,
+                return [
+                  "timeByNodeId": timeByNodeId,
+                  "metadata": metadata,
+                  "nodes": nodes,
+                  "rootNodes": rootNodes,
+                  "operationIdByNodeId": operationIdByNodeId
+                ];`,
             },
           },
         },

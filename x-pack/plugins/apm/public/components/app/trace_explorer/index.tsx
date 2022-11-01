@@ -19,19 +19,19 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { TraceExplorerSamplesFetcherContextProvider } from '../../../hooks/use_trace_explorer_samples';
 import { APIClientRequestParamsOf } from '../../../services/rest/create_call_apm_api';
 import { ApmDatePicker } from '../../shared/date_picker/apm_date_picker';
-import { fromQuery, toQuery } from '../../shared/links/url_helpers';
+import { push } from '../../shared/links/url_helpers';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 import { TraceSearchBox } from './trace_search_box';
 
 export function TraceExplorer({ children }: { children: React.ReactElement }) {
-  const [query, setQuery] = useState<TraceSearchQuery>({
+  const [searchQuery, setSearchQuery] = useState<TraceSearchQuery>({
     query: '',
     type: TraceSearchType.kql,
   });
 
   const {
-    query: queryParams,
+    query,
     query: {
       rangeFrom,
       rangeTo,
@@ -44,7 +44,7 @@ export function TraceExplorer({ children }: { children: React.ReactElement }) {
   const history = useHistory();
 
   useEffect(() => {
-    setQuery({
+    setSearchQuery({
       query: queryFromUrlParams,
       type: typeFromUrlParams,
     });
@@ -80,21 +80,19 @@ export function TraceExplorer({ children }: { children: React.ReactElement }) {
           <EuiFlexGroup direction="row">
             <EuiFlexItem grow>
               <TraceSearchBox
-                query={query}
+                query={searchQuery}
                 error={false}
                 loading={false}
                 onQueryCommit={() => {
-                  history.push({
-                    ...history.location,
-                    search: fromQuery({
-                      ...toQuery(history.location.search),
-                      query: query.query,
-                      type: query.type,
-                    }),
+                  push(history, {
+                    query: {
+                      query: searchQuery.query,
+                      type: searchQuery.type,
+                    },
                   });
                 }}
                 onQueryChange={(nextQuery) => {
-                  setQuery(nextQuery);
+                  setSearchQuery(nextQuery);
                 }}
               />
             </EuiFlexItem>
@@ -108,7 +106,7 @@ export function TraceExplorer({ children }: { children: React.ReactElement }) {
             <EuiTab
               href={router.link('/traces/explorer/waterfall', {
                 query: {
-                  ...queryParams,
+                  ...query,
                   traceId: '',
                   transactionId: '',
                   waterfallItemId: '',
@@ -123,9 +121,7 @@ export function TraceExplorer({ children }: { children: React.ReactElement }) {
             </EuiTab>
             <EuiTab
               href={router.link('/traces/explorer/critical_path', {
-                query: {
-                  ...queryParams,
-                },
+                query,
               })}
               isSelected={routePath === '/traces/explorer/critical_path'}
             >

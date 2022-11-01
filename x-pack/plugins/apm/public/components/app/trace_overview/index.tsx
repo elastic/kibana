@@ -17,6 +17,10 @@ import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { Breadcrumb } from '../breadcrumb';
 import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 
+type Tab = Required<
+  Required<React.ComponentProps<typeof ApmMainTemplate>>['pageHeader']
+>['tabs'][number];
+
 export function TraceOverview({ children }: { children: React.ReactElement }) {
   const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
 
@@ -26,9 +30,22 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
 
   const routePath = useApmRoutePath();
 
-  if (!isTraceExplorerEnabled) {
-    return children;
-  }
+  const topTracesLink = router.link('/traces', {
+    query: {
+      comparisonEnabled: query.comparisonEnabled,
+      environment: query.environment,
+      kuery: query.kuery,
+      rangeFrom: query.rangeFrom,
+      rangeTo: query.rangeTo,
+      offset: query.offset,
+      refreshInterval: query.refreshInterval,
+      refreshPaused: query.refreshPaused,
+    },
+  });
+
+  const title = i18n.translate('xpack.apm.views.traceOverview.title', {
+    defaultMessage: 'Traces',
+  });
 
   const explorerLink = router.link('/traces/explorer/waterfall', {
     query: {
@@ -50,22 +67,36 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
     },
   });
 
-  const topTracesLink = router.link('/traces', {
-    query: {
-      comparisonEnabled: query.comparisonEnabled,
-      environment: query.environment,
-      kuery: query.kuery,
-      rangeFrom: query.rangeFrom,
-      rangeTo: query.rangeTo,
-      offset: query.offset,
-      refreshInterval: query.refreshInterval,
-      refreshPaused: query.refreshPaused,
-    },
-  });
-
-  const title = i18n.translate('xpack.apm.views.traceOverview.title', {
-    defaultMessage: 'Traces',
-  });
+  const tabs: Tab[] = isTraceExplorerEnabled
+    ? [
+        {
+          href: topTracesLink,
+          label: i18n.translate('xpack.apm.traceOverview.topTracesTab', {
+            defaultMessage: 'Top traces',
+          }),
+          isSelected: routePath === '/traces',
+        },
+        {
+          href: explorerLink,
+          label: (
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.apm.traceOverview.traceExplorerTab', {
+                  defaultMessage: 'Explorer',
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TechnicalPreviewBadge
+                  icon="beaker"
+                  style={{ verticalAlign: 'middle' }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          isSelected: routePath.startsWith('/traces/explorer'),
+        },
+      ]
+    : [];
 
   return (
     <Breadcrumb href="/traces" title={title}>
@@ -80,37 +111,7 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
           },
         }}
         pageHeader={{
-          tabs: [
-            {
-              href: topTracesLink,
-              label: i18n.translate('xpack.apm.traceOverview.topTracesTab', {
-                defaultMessage: 'Top traces',
-              }),
-              isSelected: routePath === '/traces',
-            },
-            {
-              href: explorerLink,
-              label: (
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    {i18n.translate(
-                      'xpack.apm.traceOverview.traceExplorerTab',
-                      {
-                        defaultMessage: 'Explorer',
-                      }
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <TechnicalPreviewBadge
-                      icon="beaker"
-                      style={{ verticalAlign: 'middle' }}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-              isSelected: routePath.startsWith('/traces/explorer'),
-            },
-          ],
+          tabs,
         }}
       >
         {children}
