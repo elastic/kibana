@@ -37,7 +37,6 @@ export async function getServiceAgent({
   end: number;
 }) {
   const params = {
-    terminate_after: 1,
     apm: {
       events: [
         ProcessorEvent.error,
@@ -60,11 +59,6 @@ export async function getServiceAgent({
               },
             },
           ],
-          should: {
-            exists: {
-              field: SERVICE_RUNTIME_NAME,
-            },
-          },
         },
       },
       sort: {
@@ -80,6 +74,8 @@ export async function getServiceAgent({
   if (response.hits.total.value === 0) {
     return {};
   }
+
+  console.log(JSON.stringify(response, null, 2));
 
   const { agent, service } = response.hits.hits[0]._source as ServiceAgent;
   return { agentName: agent?.name, runtimeName: service?.runtime?.name };
