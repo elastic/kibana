@@ -106,6 +106,9 @@ export class SingleMetricLensAttributes extends LensAttributes {
             label: columnLabel ?? '',
             operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
             filter: columnFilter,
+            params: {
+              emptyAsNull: true,
+            },
           },
         },
         columnOrder: [this.columnId],

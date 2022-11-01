@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, FORMULA_COLUMN, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
+import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
 import { DOWN_LABEL, UP_LABEL } from '../constants/labels';
 import { SYNTHETICS_STEP_NAME } from '../constants/field_names/synthetics';
 import { buildExistsFilter } from '../utils';
@@ -42,8 +42,7 @@ export function getSyntheticsHeatmapConfig({ dataView }: ConfigProps): SeriesCon
         id: 'failed_tests',
         columnFilter: { language: 'kuery', query: 'summary.down > 0' },
         format: 'number',
-        columnType: FORMULA_COLUMN,
-        formula: 'count()',
+        field: RECORDS_FIELD,
       },
     ],
     labels: { ...FieldLabels, [SUMMARY_UP]: UP_LABEL, [SUMMARY_DOWN]: DOWN_LABEL },
