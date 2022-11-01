@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         omit(
           {
             ...newMonitor,
-            [ConfigKey.HEARTBEAT_ID]: apiResponse.body.id,
+            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
           },
           secretKeys
@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           {
             ...DEFAULT_FIELDS[DataStream.HTTP],
             ...newMonitor,
-            [ConfigKey.HEARTBEAT_ID]: apiResponse.body.id,
+            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
             revision: 1,
           },

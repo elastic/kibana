@@ -135,7 +135,7 @@ describe('Case migrations v8.5.0 -> v8.6.0', () => {
       ...monitor850UI,
       attributes: {
         ...monitor850UI.attributes,
-        [ConfigKey.HEARTBEAT_ID]: monitor850UI.id,
+        [ConfigKey.MONITOR_QUERY_ID]: monitor850UI.id,
         [ConfigKey.CONFIG_ID]: monitor850UI.id,
       },
     });
@@ -146,7 +146,7 @@ describe('Case migrations v8.5.0 -> v8.6.0', () => {
       ...monitor850Project,
       attributes: {
         ...monitor850Project.attributes,
-        [ConfigKey.HEARTBEAT_ID]: monitor850Project.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID],
+        [ConfigKey.MONITOR_QUERY_ID]: monitor850Project.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID],
         [ConfigKey.CONFIG_ID]: monitor850Project.id,
       },
     });
@@ -166,7 +166,7 @@ describe('Case migrations v8.5.0 -> v8.6.0', () => {
       ...monitor850UI,
       attributes: {
         ...attributes,
-        [ConfigKey.HEARTBEAT_ID]: monitor850UI.id,
+        [ConfigKey.MONITOR_QUERY_ID]: monitor850UI.id,
         [ConfigKey.CONFIG_ID]: monitor850UI.id,
       },
     });
@@ -188,7 +188,7 @@ describe('Case migrations v8.5.0 -> v8.6.0', () => {
       ...monitor850UI,
       attributes: {
         ...attributes,
-        [ConfigKey.HEARTBEAT_ID]: monitor850UI.id,
+        [ConfigKey.MONITOR_QUERY_ID]: monitor850UI.id,
         [ConfigKey.CONFIG_ID]: monitor850UI.id,
       },
     });
@@ -208,7 +208,7 @@ describe('Case migrations v8.5.0 -> v8.6.0', () => {
       ...monitor850UI,
       attributes: {
         ...attributes,
-        [ConfigKey.HEARTBEAT_ID]: monitor850UI.id,
+        [ConfigKey.MONITOR_QUERY_ID]: monitor850UI.id,
         [ConfigKey.CONFIG_ID]: monitor850UI.id,
       },
     });

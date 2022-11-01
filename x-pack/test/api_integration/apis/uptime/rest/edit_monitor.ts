@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         omit(
           {
             ...newMonitor,
-            [ConfigKey.HEARTBEAT_ID]: monitorId,
+            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
             [ConfigKey.CONFIG_ID]: monitorId,
           },
           secretKeys
@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
         omit(
           {
             ...newMonitor,
-            [ConfigKey.HEARTBEAT_ID]: monitorId,
+            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
             [ConfigKey.CONFIG_ID]: monitorId,
           },
           secretKeys

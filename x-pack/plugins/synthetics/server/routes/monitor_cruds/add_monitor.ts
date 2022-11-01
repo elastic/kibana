@@ -126,7 +126,7 @@ export const createNewSavedObjectMonitor = async ({
     syntheticsMonitorType,
     formatSecrets({
       ...normalizedMonitor,
-      [ConfigKey.HEARTBEAT_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+      [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
       [ConfigKey.CONFIG_ID]: id,
       revision: 1,
     }),
