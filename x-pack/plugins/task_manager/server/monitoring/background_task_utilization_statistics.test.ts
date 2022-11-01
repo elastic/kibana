@@ -27,6 +27,8 @@ import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 import { sum } from 'lodash';
 
 describe('Task Run Statistics', () => {
+  const pollInterval = 3000;
+
   beforeAll(() => {
     jest.resetAllMocks();
   });
@@ -43,7 +45,8 @@ describe('Task Run Statistics', () => {
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
       runningAverageWindowSize,
-      adHocTaskCounter
+      adHocTaskCounter,
+      pollInterval
     );
 
     function expectWindowEqualsUpdate(
@@ -106,7 +109,8 @@ describe('Task Run Statistics', () => {
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
       runningAverageWindowSize,
-      adHocTaskCounter
+      adHocTaskCounter,
+      pollInterval
     );
 
     function expectWindowEqualsUpdate(
@@ -169,7 +173,8 @@ describe('Task Run Statistics', () => {
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
       runningAverageWindowSize,
-      adHocTaskCounter
+      adHocTaskCounter,
+      pollInterval
     );
 
     function expectWindowEqualsUpdate(
@@ -222,7 +227,8 @@ describe('Task Run Statistics', () => {
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
       runningAverageWindowSize,
-      adHocTaskCounter
+      adHocTaskCounter,
+      pollInterval
     );
 
     function expectWindowEqualsUpdate(
@@ -276,7 +282,8 @@ describe('Task Run Statistics', () => {
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
       runningAverageWindowSize,
-      adHocTaskCounter
+      adHocTaskCounter,
+      pollInterval
     );
 
     function expectWindowEqualsUpdate(
@@ -339,7 +346,8 @@ describe('Task Run Statistics', () => {
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
       runningAverageWindowSize,
-      adHocTaskCounter
+      adHocTaskCounter,
+      pollInterval
     );
 
     function expectWindowEqualsUpdate(
@@ -402,7 +410,8 @@ describe('Task Run Statistics', () => {
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
       runningAverageWindowSize,
-      adHocTaskCounter
+      adHocTaskCounter,
+      pollInterval
     );
 
     function expectWindowEqualsUpdate(
@@ -457,7 +466,8 @@ describe('Task Run Statistics', () => {
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
       runningAverageWindowSize,
-      adHocTaskCounter
+      adHocTaskCounter,
+      pollInterval
     );
 
     function expectWindowEqualsUpdate(

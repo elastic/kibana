@@ -75,7 +75,8 @@ export interface SummarizedBackgroundTaskUtilizationStat extends JsonObject {
 export function createBackgroundTaskUtilizationAggregator(
   taskPollingLifecycle: TaskPollingLifecycle,
   runningAverageWindowSize: number,
-  adHocTaskCounter: AdHocTaskCounter
+  adHocTaskCounter: AdHocTaskCounter,
+  pollInterval: number
 ): AggregatedStatProvider<BackgroundTaskUtilizationStat> {
   const taskRunEventToAdhocStat = createTaskRunEventToAdhocStat(runningAverageWindowSize);
   const taskRunAdhocEvents$: Observable<Pick<BackgroundTaskUtilizationStat, 'adhoc'>> =
@@ -87,7 +88,7 @@ export function createBackgroundTaskUtilizationAggregator(
       })),
       filter(({ task }) => get(task, 'schedule.interval', null) == null),
       map(({ taskEvent }) => {
-        return taskRunEventToAdhocStat(taskEvent.timing!, adHocTaskCounter);
+        return taskRunEventToAdhocStat(taskEvent.timing!, adHocTaskCounter, pollInterval);
       })
     );
 
@@ -101,7 +102,7 @@ export function createBackgroundTaskUtilizationAggregator(
       })),
       filter(({ task }) => get(task, 'schedule.interval', null) != null),
       map(({ taskEvent, task }) => {
-        return taskRunEventToRecurringStat(taskEvent.timing!, task);
+        return taskRunEventToRecurringStat(taskEvent.timing!, task, pollInterval);
       })
     );
 
@@ -218,9 +219,10 @@ function createTaskRunEventToAdhocStat(runningAverageWindowSize: number) {
   const taskCounterQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   return (
     timing: TaskTiming,
-    adHocTaskCounter: AdHocTaskCounter
+    adHocTaskCounter: AdHocTaskCounter,
+    pollInterval: number
   ): Pick<BackgroundTaskUtilizationStat, 'adhoc'> => {
-    const { duration, adjusted } = getServiceTimeStats(timing);
+    const { duration, adjusted } = getServiceTimeStats(timing, pollInterval);
     const created = adHocTaskCounter.count;
     adHocTaskCounter.reset();
     return {
@@ -247,9 +249,10 @@ function createTaskRunEventToRecurringStat(runningAverageWindowSize: number) {
   const taskCounterQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   return (
     timing: TaskTiming,
-    task: ConcreteTaskInstance
+    task: ConcreteTaskInstance,
+    pollInterval: number
   ): Pick<BackgroundTaskUtilizationStat, 'recurring'> => {
-    const { duration, adjusted } = getServiceTimeStats(timing);
+    const { duration, adjusted } = getServiceTimeStats(timing, pollInterval);
     const interval = parseIntervalAsMinute(task.schedule?.interval!);
     return {
       recurring: {
@@ -266,9 +269,8 @@ function createTaskRunEventToRecurringStat(runningAverageWindowSize: number) {
   };
 }
 
-function getServiceTimeStats(timing: TaskTiming) {
+function getServiceTimeStats(timing: TaskTiming, pollInterval: number) {
   const duration = timing!.stop - timing!.start;
-  const pollInterval = 3 * 1000;
   const adjusted = Math.ceil(duration / pollInterval) * pollInterval;
   return { duration, adjusted };
 }
