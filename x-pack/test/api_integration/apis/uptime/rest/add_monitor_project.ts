@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         const { body } = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send(projectMonitors)
           .expect(200);
@@ -216,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         const { body } = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send(httpProjectMonitors)
           .expect(200);
@@ -334,7 +334,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         const { body } = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send(tcpProjectMonitors)
           .expect(200);
@@ -439,7 +439,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         const { body } = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send(icmpProjectMonitors)
           .expect(200);
@@ -541,7 +541,7 @@ export default function ({ getService }: FtrProviderContext) {
       const project = `test-project-${uuid.v4()}`;
       try {
         const { body } = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send(projectMonitors)
           .expect(200);
@@ -565,12 +565,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send(projectMonitors)
           .expect(200);
         const { body } = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send(projectMonitors)
           .expect(200);
@@ -594,7 +594,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         const { body } = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({ monitors: [{ ...projectMonitors.monitors[0], schedule: '3m', tags: '' }] })
           .expect(200);
@@ -668,8 +668,8 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
         await supertestWithoutAuth
-          .post(
-            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
+          .put(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
               '{projectName}',
               project
             )}`
@@ -722,8 +722,8 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
         await supertestWithoutAuth
-          .post(
-            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
+          .put(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
               '{projectName}',
               project
             )}`
@@ -756,7 +756,7 @@ export default function ({ getService }: FtrProviderContext) {
       const project = `test-project-${uuid.v4()}`;
       try {
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send(projectMonitors)
           .expect(200);
@@ -787,7 +787,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // update project monitor via push api
         const { body } = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send(projectMonitors)
           .expect(200);
@@ -817,12 +817,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send(projectMonitors);
 
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({
             ...projectMonitors,
@@ -882,10 +882,11 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const { body } = await supertestWithoutAuth
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .auth(username, password)
           .set('kbn-xsrf', 'true')
-          .send({ monitors: testMonitors });
+          .send({ monitors: testMonitors })
+          .expect(200);
 
         expect(body).eql({
           createdMonitors: [testMonitors[0].id],
@@ -964,7 +965,7 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
         const { body } = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({ monitors: testMonitors })
           .expect(200);
@@ -990,7 +991,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({
             ...projectMonitors,
@@ -1057,7 +1058,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
       try {
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send(monitorRequest)
           .expect(200);
@@ -1085,7 +1086,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(packagePolicy.policy_id).eql(testPolicyId);
 
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({
             monitors: [{ ...monitorRequest.monitors[0], privateLocations: [] }],
@@ -1115,7 +1116,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({
             monitors: [
@@ -1161,7 +1162,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({
             monitors: [{ ...projectMonitors.monitors[0], privateLocations: [] }],
@@ -1196,7 +1197,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({
             monitors: [
@@ -1241,7 +1242,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({
             monitors: [
@@ -1289,7 +1290,7 @@ export default function ({ getService }: FtrProviderContext) {
       const project = `test-project-${uuid.v4()}`;
       try {
         await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({
             monitors: [
@@ -1356,7 +1357,7 @@ export default function ({ getService }: FtrProviderContext) {
         const {
           body: { message },
         } = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({
             monitors,
@@ -1369,6 +1370,69 @@ export default function ({ getService }: FtrProviderContext) {
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY)
           .set('kbn-xsrf', 'true')
           .send({ ...projectMonitors, keep_stale: false, project });
+      }
+    });
+
+    it('project monitors - cannot update a monitor of one type to another type', async () => {
+      const project = `test-project-${uuid.v4()}`;
+
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send(projectMonitors)
+          .expect(200);
+        const { body } = await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [{ ...httpProjectMonitors.monitors[1], id: projectMonitors.monitors[0].id }],
+          })
+          .expect(200);
+        expect(body).eql({
+          createdMonitors: [],
+          updatedMonitors: [],
+          failedMonitors: [
+            {
+              details: `Monitor ${projectMonitors.monitors[0].id} of type browser cannot be updated to type http. Please delete the monitor first and try again.`,
+              payload: {
+                'check.request': {
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                  method: 'POST',
+                },
+                'check.response': {
+                  body: {
+                    positive: ['Saved', 'saved'],
+                  },
+                  status: [200],
+                },
+                enabled: false,
+                hash: 'ekrjelkjrelkjre',
+                id: projectMonitors.monitors[0].id,
+                locations: ['localhost'],
+                name: 'My Monitor 3',
+                response: {
+                  include_body: 'always',
+                },
+                'response.include_headers': false,
+                schedule: 60,
+                timeout: '80s',
+                type: 'http',
+                tags: 'tag2,tag2',
+                urls: ['http://localhost:9200'],
+              },
+              reason: 'Cannot update monitor to different type.',
+            },
+          ],
+        });
+      } finally {
+        await Promise.all([
+          projectMonitors.monitors.map((monitor) => {
+            return deleteMonitor(monitor.id, project);
+          }),
+        ]);
       }
     });
   });

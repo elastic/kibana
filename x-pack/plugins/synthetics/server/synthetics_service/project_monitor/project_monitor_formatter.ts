@@ -50,6 +50,27 @@ export const INSUFFICIENT_FLEET_PERMISSIONS = i18n.translate(
   }
 );
 
+export const CANNOT_UPDATE_MONITOR_TO_DIFFERENT_TYPE = i18n.translate(
+  'xpack.synthetics.service.projectMonitors.cannotUpdateMonitorToDifferentType',
+  {
+    defaultMessage: 'Cannot update monitor to different type.',
+  }
+);
+
+export const FAILED_TO_UPDATE_MONITOR = i18n.translate(
+  'xpack.synthetics.service.projectMonitors.failedToUpdateMonitor',
+  {
+    defaultMessage: 'Failed to create or update monitor',
+  }
+);
+
+export const FAILED_TO_UPDATE_MONITORS = i18n.translate(
+  'xpack.synthetics.service.projectMonitors.failedToUpdateMonitors',
+  {
+    defaultMessage: 'Failed to create or update monitors',
+  }
+);
+
 export class ProjectMonitorFormatter {
   private projectId: string;
   private spaceId: string;
@@ -123,7 +144,28 @@ export class ProjectMonitorFormatter {
         monitor,
       });
       if (normM) {
-        if (previousMonitor) {
+        if (
+          previousMonitor &&
+          previousMonitor.attributes[ConfigKey.MONITOR_TYPE] !== normM[ConfigKey.MONITOR_TYPE]
+        ) {
+          this.failedMonitors.push({
+            reason: CANNOT_UPDATE_MONITOR_TO_DIFFERENT_TYPE,
+            details: i18n.translate(
+              'xpack.synthetics.service.projectMonitors.cannotUpdateMonitorToDifferentTypeDetails',
+              {
+                defaultMessage:
+                  'Monitor {monitorId} of type {previousType} cannot be updated to type {currentType}. Please delete the monitor first and try again.',
+                values: {
+                  currentType: monitor.type,
+                  previousType: previousMonitor.attributes[ConfigKey.MONITOR_TYPE],
+                  monitorId: monitor.id,
+                },
+              }
+            ),
+            payload: monitor,
+          });
+          continue;
+        } else if (previousMonitor) {
           this.updatedMonitors.push(monitor.id);
           normalizedUpdateMonitors.push({ monitor: normM as MonitorFields, previousMonitor });
         } else {
@@ -198,7 +240,7 @@ export class ProjectMonitorFormatter {
       this.server.logger.error(e);
       this.failedMonitors.push({
         id: monitor.id,
-        reason: 'Failed to create or update monitor',
+        reason: FAILED_TO_UPDATE_MONITOR,
         details: e.message,
         payload: monitor,
       });
@@ -241,8 +283,16 @@ export class ProjectMonitorFormatter {
           this.createdMonitors.push(...monitors.map((monitor) => monitor[ConfigKey.JOURNEY_ID]!));
         } else {
           this.failedMonitors.push({
-            reason: `Failed to create ${monitors.length} monitors`,
-            details: 'Failed to create monitors',
+            reason: i18n.translate(
+              'xpack.synthetics.service.projectMonitors.failedToCreateXMonitors',
+              {
+                defaultMessage: 'Failed to create {length} monitors.',
+                values: {
+                  length: monitors.length,
+                },
+              }
+            ),
+            details: FAILED_TO_UPDATE_MONITORS,
             payload: monitors,
           });
         }
@@ -250,7 +300,12 @@ export class ProjectMonitorFormatter {
     } catch (e) {
       this.server.logger.error(e);
       this.failedMonitors.push({
-        reason: `Failed to create ${monitors.length} monitors`,
+        reason: i18n.translate('xpack.synthetics.service.projectMonitors.failedToCreateXMonitors', {
+          defaultMessage: 'Failed to create {length} monitors.',
+          values: {
+            length: monitors.length,
+          },
+        }),
         details: e.message,
         payload: monitors,
       });

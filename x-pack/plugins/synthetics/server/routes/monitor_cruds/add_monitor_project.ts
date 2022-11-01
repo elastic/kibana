@@ -16,8 +16,8 @@ import { ProjectMonitorFormatter } from '../../synthetics_service/project_monito
 const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
 
 export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
-  method: 'POST',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
+  method: 'PUT',
+  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE,
   validate: {
     params: schema.object({
       projectName: schema.string(),
