@@ -14,7 +14,7 @@ import * as observabilityPublic from '@kbn/observability-plugin/public';
 import { getShortTimeStamp } from '../../../utils/monitor_test_result/timestamp';
 import '../../../utils/testing/__mocks__/use_composite_image.mock';
 import { mockRef } from '../../../utils/testing/__mocks__/screenshot_ref.mock';
-import * as retrieveHooks from './use_retrieve_step_image';
+import * as retrieveHooks from '../monitor_test_result/use_retrieve_step_image';
 
 jest.mock('@kbn/observability-plugin/public');
 
