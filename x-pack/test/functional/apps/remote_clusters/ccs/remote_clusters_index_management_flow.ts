@@ -97,7 +97,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const indicesList = await pageObjects.indexManagement.getIndexList();
         const followerIndex = indicesList[0];
-        expect(followerIndex.indexDocuments).to.not.eql('0');
         expect(followerIndex.indexDocuments).to.eql('1');
       });
     });
