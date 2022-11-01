@@ -39,7 +39,7 @@ export const NetworkTimingsBreakdown = () => {
             selectedMetricField: 'network_timings',
             reportDefinitions: { 'monitor.check_group': [checkGroupId] },
             time: {
-              from: 'now-12h/h',
+              from: 'now-24h/h',
               to: 'now',
             },
           },
