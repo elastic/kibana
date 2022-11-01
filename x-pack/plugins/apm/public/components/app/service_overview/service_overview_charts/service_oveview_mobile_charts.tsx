@@ -7,13 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import {
-  EuiFlexGroup,
-  EuiTitle,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -31,10 +25,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
-import {
-  MostUsedChart,
-  MostUsedMetric,
-} from '../../../shared/charts/most_used_chart';
+import { MostUsedChart, MostUsedMetric } from './most_used_chart';
 
 interface Props {
   latencyChartHeight: number;

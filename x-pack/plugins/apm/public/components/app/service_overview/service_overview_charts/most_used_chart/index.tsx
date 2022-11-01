@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ApmPluginStartDeps } from '../../../../plugin';
+import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLensAttributes } from './get_lens_attributes';
 
 export enum MostUsedMetric {

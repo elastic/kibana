@@ -13,7 +13,7 @@ import {
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
+import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../common/data_view_constants';
 import { MostUsedMetric } from './';
 
 const BUCKET_SIZE = 5;
