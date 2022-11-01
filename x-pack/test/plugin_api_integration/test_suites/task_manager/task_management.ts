@@ -338,9 +338,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         const scheduledTask = await currentTask(task.id);
-        expect(scheduledTask.attempts).to.be.greaterThan(0);
+        expect(scheduledTask.attempts).to.be.greaterThan(1);
         expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(
-          Date.parse(task.runAt) + 5 * 60 * 1000
+          Date.parse(task.runAt) + 30 * 1000
         );
       });
     });
