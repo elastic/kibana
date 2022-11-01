@@ -8,7 +8,7 @@
 import { JsonObject } from '@kbn/utility-types';
 import { get } from 'lodash';
 import { combineLatest, filter, map, Observable, startWith } from 'rxjs';
-import { CreateTaskCounter } from '../lib/create_task_counter';
+import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 import { parseIntervalAsMinute } from '../lib/intervals';
 import { unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
@@ -75,7 +75,7 @@ export interface SummarizedBackgroundTaskUtilizationStat extends JsonObject {
 export function createBackgroundTaskUtilizationAggregator(
   taskPollingLifecycle: TaskPollingLifecycle,
   runningAverageWindowSize: number,
-  createTaskCounter: CreateTaskCounter
+  adHocTaskCounter: AdHocTaskCounter
 ): AggregatedStatProvider<BackgroundTaskUtilizationStat> {
   const taskRunEventToAdhocStat = createTaskRunEventToAdhocStat(runningAverageWindowSize);
   const taskRunAdhocEvents$: Observable<Pick<BackgroundTaskUtilizationStat, 'adhoc'>> =
@@ -87,7 +87,7 @@ export function createBackgroundTaskUtilizationAggregator(
       })),
       filter(({ task }) => get(task, 'schedule.interval', null) == null),
       map(({ taskEvent }) => {
-        return taskRunEventToAdhocStat(taskEvent.timing!, createTaskCounter);
+        return taskRunEventToAdhocStat(taskEvent.timing!, adHocTaskCounter);
       })
     );
 
@@ -218,11 +218,11 @@ function createTaskRunEventToAdhocStat(runningAverageWindowSize: number) {
   const taskCounterQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   return (
     timing: TaskTiming,
-    createTaskCounter: CreateTaskCounter
+    adHocTaskCounter: AdHocTaskCounter
   ): Pick<BackgroundTaskUtilizationStat, 'adhoc'> => {
     const { duration, adjusted } = getServiceTimeStats(timing);
-    const created = createTaskCounter.count;
-    createTaskCounter.reset();
+    const created = adHocTaskCounter.count;
+    adHocTaskCounter.reset();
     return {
       adhoc: {
         created: {

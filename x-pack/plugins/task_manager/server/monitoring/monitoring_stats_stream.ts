@@ -41,7 +41,7 @@ import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
-import { CreateTaskCounter } from '../lib/create_task_counter';
+import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 
 export type { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 
@@ -87,7 +87,7 @@ export function createAggregators(
   config: TaskManagerConfig,
   managedConfig: ManagedConfiguration,
   logger: Logger,
-  createTaskCounter: CreateTaskCounter,
+  adHocTaskCounter: AdHocTaskCounter,
   taskPollingLifecycle?: TaskPollingLifecycle,
   ephemeralTaskLifecycle?: EphemeralTaskLifecycle
 ): AggregatedStatProvider {
@@ -108,7 +108,7 @@ export function createAggregators(
       createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
         config.monitored_stats_running_average_window,
-        createTaskCounter
+        adHocTaskCounter
       )
     );
   }

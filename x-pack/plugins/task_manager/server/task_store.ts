@@ -34,7 +34,7 @@ import {
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { CreateTaskCounter } from './lib/create_task_counter';
+import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -43,7 +43,7 @@ export interface StoreOpts {
   definitions: TaskTypeDictionary;
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: ISavedObjectsSerializer;
-  createTaskCounter: CreateTaskCounter;
+  adHocTaskCounter: AdHocTaskCounter;
 }
 
 export interface SearchOpts {
@@ -97,7 +97,7 @@ export class TaskStore {
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
-  private createTaskCounter: CreateTaskCounter;
+  private adHocTaskCounter: AdHocTaskCounter;
 
   /**
    * Constructs a new TaskStore.
@@ -115,7 +115,7 @@ export class TaskStore {
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
-    this.createTaskCounter = opts.createTaskCounter;
+    this.adHocTaskCounter = opts.adHocTaskCounter;
   }
 
   /**
@@ -145,7 +145,7 @@ export class TaskStore {
         { id: taskInstance.id, refresh: false }
       );
       if (get(taskInstance, 'schedule.interval', null) == null) {
-        this.createTaskCounter.increment();
+        this.adHocTaskCounter.increment();
       }
     } catch (e) {
       this.errors$.next(e);
@@ -176,9 +176,9 @@ export class TaskStore {
         objects,
         { refresh: false }
       );
-      this.createTaskCounter.increment(
-        savedObjects.saved_objects.filter((so) => {
-          return get(so, 'schedule.interval', null) == null;
+      this.adHocTaskCounter.increment(
+        taskInstances.filter((task) => {
+          return get(task, 'schedule.interval', null) == null;
         }).length
       );
     } catch (e) {

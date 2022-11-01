@@ -9,10 +9,10 @@
  * Keeps track of how many tasks have been created.
  *
  * @export
- * @class CreateTaskCounter
+ * @class AdHocTaskCounter
  *
  */
-export class CreateTaskCounter {
+export class AdHocTaskCounter {
   /**
    * Gets the number of created tasks.
    */

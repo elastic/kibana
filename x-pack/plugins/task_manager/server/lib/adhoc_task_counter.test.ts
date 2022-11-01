@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CreateTaskCounter } from './create_task_counter';
+import { AdHocTaskCounter } from './adhoc_task_counter';
 
-describe('CreateTaskCounter', () => {
-  const counter = new CreateTaskCounter();
+describe('AdHocTaskCounter', () => {
+  const counter = new AdHocTaskCounter();
 
   afterAll(() => {
     counter.reset();
