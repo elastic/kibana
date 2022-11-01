@@ -21,7 +21,7 @@ import {
   type ISearchSource,
 } from '@kbn/data-plugin/public';
 import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
-import { CommonAlertParams, EsQueryAlertParams, SearchType } from '../types';
+import { CommonAlertParams, EsQueryAlertMetaData, EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
@@ -71,10 +71,10 @@ interface SearchSourceExpressionFormProps {
   searchSource: ISearchSource;
   ruleParams: EsQueryAlertParams<SearchType.searchSource>;
   errors: IErrorObject;
-  metadata?: Record<string, unknown>;
+  metadata?: EsQueryAlertMetaData;
   initialSavedQuery?: SavedQuery;
   setParam: (paramField: string, paramValue: unknown) => void;
-  onChangeMetaData: (metadata: Record<string, unknown>) => void;
+  onChangeMetaData: (metadata: EsQueryAlertMetaData) => void;
 }
 
 const isSearchSourceParam = (action: LocalStateAction): action is SearchSourceParamsAction => {

@@ -13,6 +13,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EXPRESSION_ERRORS } from './constants';
+import type { DataViewSelectPopoverMetaData } from '../components/data_view_select_popover';
 
 export interface Comparator {
   text: string;
@@ -32,6 +33,10 @@ export interface CommonAlertParams extends RuleTypeParams {
   timeWindowSize: number;
   timeWindowUnit: string;
   excludeHitsFromPreviousRun: boolean;
+}
+
+export interface EsQueryAlertMetaData extends DataViewSelectPopoverMetaData {
+  isManagementPage?: boolean;
 }
 
 export type EsQueryAlertParams<T = SearchType> = T extends SearchType.searchSource

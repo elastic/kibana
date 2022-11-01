@@ -13,7 +13,12 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { CommonAlertParams, EsQueryAlertParams, SearchType } from '../types';
+import {
+  CommonAlertParams,
+  type EsQueryAlertMetaData,
+  EsQueryAlertParams,
+  SearchType,
+} from '../types';
 import { EsQueryAlertTypeExpression } from './expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Subject } from 'rxjs';
@@ -144,7 +149,7 @@ dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
 
 const Wrapper: React.FC<{
   ruleParams: EsQueryAlertParams<SearchType.searchSource> | EsQueryAlertParams<SearchType.esQuery>;
-  metadata?: Record<string, unknown>;
+  metadata?: EsQueryAlertMetaData;
 }> = ({ ruleParams, metadata }) => {
   const [currentRuleParams, setCurrentRuleParams] = useState<CommonAlertParams>(ruleParams);
   const errors = {
@@ -186,7 +191,7 @@ const Wrapper: React.FC<{
 
 const setup = (
   ruleParams: EsQueryAlertParams<SearchType.searchSource> | EsQueryAlertParams<SearchType.esQuery>,
-  metadata?: Record<string, unknown>
+  metadata?: EsQueryAlertMetaData
 ) => {
   return mountWithIntl(
     <KibanaContextProvider
@@ -253,7 +258,7 @@ describe('EsQueryAlertTypeExpression', () => {
   test('should render QueryDSL view without the form type chooser', async () => {
     let wrapper: ReactWrapper;
     await act(async () => {
-      wrapper = setup(defaultEsQueryRuleParams, {});
+      wrapper = setup(defaultEsQueryRuleParams, { adHocDataViewList: [], isManagementPage: false });
       wrapper = await wrapper.update();
     });
     expect(findTestSubject(wrapper!, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
@@ -264,7 +269,10 @@ describe('EsQueryAlertTypeExpression', () => {
   test('should render KQL and Lucene view without the form type chooser', async () => {
     let wrapper: ReactWrapper;
     await act(async () => {
-      wrapper = setup(defaultSearchSourceRuleParams, { adHocDataViewList: [] });
+      wrapper = setup(defaultSearchSourceRuleParams, {
+        adHocDataViewList: [],
+        isManagementPage: false,
+      });
       wrapper = await wrapper.update();
     });
     wrapper = await wrapper!.update();
