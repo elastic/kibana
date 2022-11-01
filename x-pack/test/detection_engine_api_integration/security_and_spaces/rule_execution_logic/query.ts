@@ -12,6 +12,11 @@ import {
   ALERT_RULE_RULE_ID,
   ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
+  ALERT_THROTTLE_FIELDS,
+  ALERT_THROTTLE_VALUES,
+  ALERT_THROTTLE_START,
+  ALERT_THROTTLE_END,
+  ALERT_THROTTLE_COUNT,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
@@ -24,11 +29,6 @@ import {
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
-  ALERT_THROTTLE_FIELDS,
-  ALERT_THROTTLE_VALUES,
-  ALERT_THROTTLE_START,
-  ALERT_THROTTLE_END,
-  ALERT_THROTTLE_COUNT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import {
   createRule,
