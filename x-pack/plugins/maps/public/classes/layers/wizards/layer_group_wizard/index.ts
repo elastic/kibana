@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './indicator';
+export { layerGroupWizardConfig } from './config';
