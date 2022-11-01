@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ReactElement } from 'react';
 import { RasterTileSource } from 'maplibre-gl';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
@@ -56,7 +57,13 @@ export class XYZTMSSource extends AbstractSource implements IRasterSource {
   async getUrlTemplate(): Promise<string> {
     return this._descriptor.urlTemplate;
   }
+  async hasLegendDetails(): Promise<boolean> {
+    return false;
+  }
 
+  renderLegendDetails(): ReactElement<any> | null {
+    return null;
+  }
   isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData): boolean {
     if (!sourceData.url) {
       return false;

@@ -6,6 +6,7 @@
  */
 
 import { RasterTileLayer } from './raster_tile_layer';
+import { ReactElement } from 'react';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { DataRequestMeta, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { AbstractSource } from '../../sources/source';
@@ -26,12 +27,20 @@ class MockTileSource extends AbstractSource implements IRasterSource {
     super(descriptor);
     this._descriptor = descriptor;
   }
+  async hasLegendDetails(): Promise<boolean> {
+    return false;
+  }
+
+  renderLegendDetails(): ReactElement<any> | null {
+    return null;
+  }
   async canSkipSourceUpdate(
     dataRequest: DataRequest,
     nextRequestMeta: DataRequestMeta
   ): Promise<boolean> {
     return true;
   }
+
   isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData): boolean {
     return false;
   }
