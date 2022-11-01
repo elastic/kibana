@@ -42,6 +42,22 @@ export const emptyScreenStrings = {
     }),
 };
 
+export const dashboardSaveToastStrings = {
+  getSuccessString: (dashTitle: string) =>
+    i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
+      defaultMessage: `Dashboard '{dashTitle}' was saved`,
+      values: { dashTitle },
+    }),
+  getFailureString: (dashTitle: string, errorMessage: string) =>
+    i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
+      defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
+      values: {
+        dashTitle,
+        errorMessage,
+      },
+    }),
+};
+
 export const dashboardSavedObjectErrorStrings = {
   getDashboardLoadError: (message: string) =>
     i18n.translate('dashboard.loadingError.errorMessage', {
@@ -57,8 +73,22 @@ export const dashboardSavedObjectErrorStrings = {
     i18n.translate('dashboard.deleteError.toastDescription', {
       defaultMessage: 'Error encountered while deleting dashboard',
     }),
-  getPanelTooOldError: () =>
-    i18n.translate('dashboard.loadURLError.PanelTooOld', {
-      defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3',
+};
+
+export const panelStorageErrorStrings = {
+  getPanelsGetError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.getError', {
+      defaultMessage: 'Error encountered while fetching unsaved changes: {message}',
+      values: { message },
+    }),
+  getPanelsSetError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.setError', {
+      defaultMessage: 'Error encountered while setting unsaved changes: {message}',
+      values: { message },
+    }),
+  getPanelsClearError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.clearError', {
+      defaultMessage: 'Error encountered while clearing unsaved changes: {message}',
+      values: { message },
     }),
 };

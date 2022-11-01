@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
 import { RefreshInterval } from '@kbn/data-plugin/common';
+import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
+
 import { Serializable } from '@kbn/utility-types';
 import { DashboardOptions, GridData } from '../types';
 

@@ -27,8 +27,8 @@ import {
   DashboardContainerByValueInput,
 } from '../../../../common';
 import { DashboardSavedObjectRequiredServices } from '../types';
-import { dashboardSaveToastStrings } from '../../../dashboard_strings';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../dashboard_constants';
+import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
 

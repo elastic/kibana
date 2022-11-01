@@ -23,7 +23,13 @@ export function syncDataViews(this: DashboardContainer) {
 
   const onUpdateDataViews = async (newDataViewIds: string[]) => {
     // fetch all data views. These should be cached locally at this time so we will not need to query ES.
-    const allDataViews = await Promise.all(newDataViewIds.map((id) => dataViews.get(id)));
+    const responses = await Promise.allSettled(newDataViewIds.map((id) => dataViews.get(id)));
+    // Keep only fullfilled ones as each panel will handle the rejected ones already on their own
+    const allDataViews = responses
+      .filter(
+        (response): response is PromiseFulfilledResult<DataView> => response.status === 'fulfilled'
+      )
+      .map(({ value }) => value);
     this.setAllDataViews(allDataViews);
   };
 

@@ -31,6 +31,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 
@@ -49,6 +50,13 @@ import {
   DashboardContainerInput,
   DashboardContainerByValueInput,
 } from '../../../common';
+import {
+  syncDataViews,
+  getHasUnsavedChanges,
+  startDiffingDashboardState,
+  startUnifiedSearchIntegration,
+  applySavedFiltersToUnifiedSearch,
+} from './integrations';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { createPanelState } from '../component/panel';
 import { pluginServices } from '../../services/plugin_services';
@@ -60,12 +68,6 @@ import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { DashboardSavedObjectService } from '../../services/dashboard_saved_object/types';
 import { dashboardContainerInputIsByValue } from '../../../common/dashboard_container/type_guards';
-import {
-  syncDataViews,
-  getHasUnsavedChanges,
-  startDiffingDashboardState,
-  startUnifiedSearchIntegration,
-} from './integrations';
 
 export interface DashboardLoadedInfo {
   timeToData: number;
@@ -217,8 +219,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     // set up unified search integration
     if (creationOptions?.unifiedSearchSettings) {
       const { kbnUrlStateStorage } = creationOptions.unifiedSearchSettings;
+      this.kbnUrlStateStorage = kbnUrlStateStorage;
       const initialTimeRange = this.startUnifiedSearchIntegration({
-        kbnUrlStateStorage,
         initialInput,
         setCleanupFunction: (cleanup) => {
           this.stopSyncingWithUnifiedSearch = cleanup;
@@ -325,7 +327,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public getReduxEmbeddableTools() {
     if (!this.reduxEmbeddableTools) {
-      throw new Error('Dashboard must be initialized before it can be rendered');
+      throw new Error('Dashboard must be initialized before accessing redux embeddable tools');
     }
     return this.reduxEmbeddableTools;
   }
@@ -389,23 +391,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     };
   }
 
-  /**
-   * Sometimes when the ID changes, it's due to a clone operation, or a save as operation. In these cases,
-   * most of the state hasn't actually changed, so there isn't any reason to destroy this container and
-   * load up a fresh one. When an id change is in progress, the renderer can check this method, and if it returns
-   * true, the renderer can safely skip destroying and rebuilding the container.
-   */
-  public isExpectingIdChange() {
-    return this.expectingIdChange;
-  }
-  public expectIdChange() {
-    this.expectingIdChange = true;
-    setTimeout(() => {
-      this.expectingIdChange = false;
-    }, 1); // turn this off after the next update.
-  }
-  private expectingIdChange = false;
-
   public destroy() {
     super.destroy();
     this.onDestroyControlGroup?.();
@@ -417,6 +402,23 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 
+  /**
+   * Sometimes when the ID changes, it's due to a clone operation, or a save as operation. In these cases,
+   * most of the state hasn't actually changed, so there isn't any reason to destroy this container and
+   * load up a fresh one. When an id change is in progress, the renderer can check this method, and if it returns
+   * true, the renderer can safely skip destroying and rebuilding the container.
+   */
+  public isExpectingIdChange() {
+    return this.expectingIdChange;
+  }
+  private expectingIdChange = false;
+  public expectIdChange() {
+    this.expectingIdChange = true;
+    setTimeout(() => {
+      this.expectingIdChange = false;
+    }, 1); // turn this off after the next update.
+  }
+
   // ------------------------------------------------------------------------------------------------------
   // Integrations
   // ------------------------------------------------------------------------------------------------------
@@ -424,6 +426,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   /**
    * Unified Search
    */
+  public applySavedFiltersToUnifiedSearch = applySavedFiltersToUnifiedSearch;
+  public kbnUrlStateStorage?: IKbnUrlStateStorage;
+
   private startUnifiedSearchIntegration = startUnifiedSearchIntegration;
   private stopSyncingWithUnifiedSearch?: () => void;
 

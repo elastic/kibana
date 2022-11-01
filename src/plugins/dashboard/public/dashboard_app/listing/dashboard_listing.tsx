@@ -32,6 +32,10 @@ import {
   getNewDashboardTitle,
   dashboardListingErrorStrings,
 } from '../_dashboard_app_strings';
+import {
+  DashboardAppNoDataPage,
+  isDashboardAppInNoDataState,
+} from '../no_data/dashboard_app_no_data';
 import { DashboardRedirect } from '../types';
 import { DashboardAttributes } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
@@ -39,7 +43,6 @@ import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_constants';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';

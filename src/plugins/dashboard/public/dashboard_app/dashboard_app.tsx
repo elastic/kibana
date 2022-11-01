@@ -7,7 +7,7 @@
  */
 
 import { History } from 'history';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
@@ -16,13 +16,17 @@ import { DASHBOARD_APP_ID } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
 import type { DashboardContainer } from '../dashboard_container';
-import { DashboardAppNoDataPage } from './dashboard_app_no_data';
+import { DashboardAppNoDataPage } from './no_data/dashboard_app_no_data';
 import { type DashboardEmbedSettings, DashboardRedirect } from './types';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
+import {
+  loadAndRemoveDashboardState,
+  startSyncingDashboardUrlState,
+} from './url_state/sync_dashboard_url_state';
 
 export interface DashboardAppProps {
   history: History;
@@ -42,11 +46,8 @@ export function DashboardApp({
     undefined
   );
 
-  const { scopedHistory: getScopedHistory } = useDashboardMountContext();
-  const scopedHistory = getScopedHistory?.();
-
   /**
-   * Unpack dashboard services
+   * Unpack & set up dashboard services
    */
   const {
     screenshotMode: { isScreenshotMode },
@@ -56,16 +57,17 @@ export function DashboardApp({
     settings: { uiSettings },
     data: { search },
   } = pluginServices.getServices();
-
   const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
     DASHBOARD_APP_ID,
     true
   );
+  const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
-  const DashboardReduxWrapper = useMemo(
-    () => dashboardContainer?.getReduxEmbeddableTools().Wrapper,
-    [dashboardContainer]
-  );
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'app',
+    id: savedDashboardId || 'new',
+  });
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -77,37 +79,63 @@ export function DashboardApp({
     [toasts, history, uiSettings]
   );
 
-  useExecutionContext(executionContext, {
-    type: 'application',
-    page: 'app',
-    id: savedDashboardId || 'new',
-  });
-
-  // clear search session when leaving dashboard route
+  /**
+   * Clear search session when leaving dashboard route
+   */
   useEffect(() => {
     return () => {
       search.session.clear();
     };
   }, [search.session]);
 
+  /**
+   * Validate saved object load outcome
+   */
   const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation({
     redirectTo,
   });
 
-  // create settings to pass into the dashboard renderer
-  const creationOptions: DashboardCreationOptions = useMemo(() => {
+  /**
+   * Create options to pass into the dashboard renderer
+   */
+  const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
+  const getCreationOptions = useCallback(() => {
+    const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
     return {
       unifiedSearchSettings: {
         kbnUrlStateStorage,
       },
       overrideInput: {
-        ...loadDashboardHistoryLocationState(scopedHistory),
-      }, // override input loaded from dashboard saved object with locator and URL input
+        // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
+        ...initialUrlState,
+        ...stateFromLocator,
+      },
       incomingEmbeddable,
       backupStateToSessionStorage: true,
       validateLoadedSavedObject: validateOutcome,
-    };
-  }, [incomingEmbeddable, kbnUrlStateStorage, validateOutcome, scopedHistory]);
+    } as DashboardCreationOptions;
+  }, [incomingEmbeddable, kbnUrlStateStorage, validateOutcome, stateFromLocator]);
+
+  /**
+   * Get the redux wrapper from the dashboard container. This is used to wrap the top nav so it can interact with the
+   * dashboard's redux state.
+   */
+  const DashboardReduxWrapper = useMemo(
+    () => dashboardContainer?.getReduxEmbeddableTools().Wrapper,
+    [dashboardContainer]
+  );
+
+  /**
+   * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
+   */
+  useEffect(() => {
+    if (!dashboardContainer) return;
+    const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
+      kbnUrlStateStorage,
+      dashboardContainer,
+    });
+    return () => stopWatchingAppStateInUrl();
+  }, [dashboardContainer, kbnUrlStateStorage]);
 
   return (
     <>
@@ -136,7 +164,7 @@ export function DashboardApp({
               getInitialInput={() => {
                 return { savedObjectId: savedDashboardId };
               }}
-              getCreationOptions={async () => creationOptions}
+              getCreationOptions={async () => getCreationOptions()}
             />
           </div>
         </>

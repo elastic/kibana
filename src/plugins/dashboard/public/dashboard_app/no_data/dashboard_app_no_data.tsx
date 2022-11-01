@@ -12,7 +12,7 @@ import {
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
 
-import { pluginServices } from '../services/plugin_services';
+import { pluginServices } from '../../services/plugin_services';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,

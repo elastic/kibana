@@ -21,7 +21,7 @@ import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 
 import { dashboardUrlParams } from '../../dashboard_router';
-import { shareModalStrings } from '../../../dashboard_strings';
+import { shareModalStrings } from '../../_dashboard_app_strings';
 import { pluginServices } from '../../../services/plugin_services';
 import type { DashboardContainerByValueInput } from '../../../../common';
 import { convertPanelMapToSavedPanels, DashboardOptions } from '../../../../common';
@@ -134,7 +134,7 @@ export function ShowShareModal({
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
-      savedQuery: unsavedDashboardState.savedQuery,
+      // savedQuery: unsavedDashboardState.savedQuery, // TODO saved query
       options: unsavedDashboardState.options as unknown as DashboardOptions & SerializableRecord,
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels

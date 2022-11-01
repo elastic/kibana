@@ -16,9 +16,9 @@ import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/p
 import { DashboardSpacesService } from '../spaces/types';
 import type { DashboardStartDependencies } from '../../plugin';
 import type { DashboardSessionStorageServiceType } from './types';
-import { panelStorageErrorStrings } from '../../dashboard_strings';
 import type { DashboardContainerByValueInput } from '../../../common';
 import { DashboardNotificationsService } from '../notifications/types';
+import { panelStorageErrorStrings } from '../../dashboard_container/_dashboard_container_strings';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';

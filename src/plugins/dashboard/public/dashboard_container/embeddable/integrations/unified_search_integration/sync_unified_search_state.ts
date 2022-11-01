@@ -9,7 +9,6 @@
 import { merge, Subject } from 'rxjs';
 
 import type { Filter, Query } from '@kbn/es-query';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs/operators';
 import { connectToQueryState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
@@ -21,10 +20,7 @@ import { pluginServices } from '../../../../services/plugin_services';
  * Sets up syncing and subscriptions between the filter state from the Data plugin
  * and the dashboard Redux store.
  */
-export function syncUnifiedSearchState(
-  this: DashboardContainer,
-  kbnUrlStateStorage: IKbnUrlStateStorage
-) {
+export function syncUnifiedSearchState(this: DashboardContainer) {
   const {
     data: { query: queryService, search },
   } = pluginServices.getServices();

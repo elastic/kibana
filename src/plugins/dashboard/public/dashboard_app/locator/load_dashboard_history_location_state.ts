@@ -11,9 +11,9 @@ import { ForwardedDashboardState } from './locator';
 import { convertSavedPanelsToPanelMap, DashboardContainerByValueInput } from '../../../common';
 
 export const loadDashboardHistoryLocationState = (
-  scopedHistory: ScopedHistory
+  getScopedHistory: () => ScopedHistory
 ): Partial<DashboardContainerByValueInput> => {
-  const state = scopedHistory?.location?.state as undefined | ForwardedDashboardState;
+  const state = getScopedHistory().location.state as undefined | ForwardedDashboardState;
 
   if (!state) {
     return {};

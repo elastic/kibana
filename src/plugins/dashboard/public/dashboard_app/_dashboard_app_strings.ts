@@ -86,6 +86,56 @@ export const getDashboardURL404String = () =>
     defaultMessage: 'The requested dashboard could not be found.',
   });
 
+export const getPanelTooOldErrorString = () =>
+  i18n.translate('dashboard.loadURLError.PanelTooOld', {
+    defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3',
+  });
+
+/*
+  Dashboard Listing Page
+*/
+export const discardConfirmStrings = {
+  getDiscardTitle: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesTitle', {
+      defaultMessage: 'Discard changes to dashboard?',
+    }),
+  getDiscardSubtitle: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
+      defaultMessage: `Once you discard your changes, there's no getting them back.`,
+    }),
+  getDiscardConfirmButtonText: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.confirmButtonLabel', {
+      defaultMessage: 'Discard changes',
+    }),
+  getDiscardCancelButtonText: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+};
+
+export const createConfirmStrings = {
+  getCreateTitle: () =>
+    i18n.translate('dashboard.createConfirmModal.unsavedChangesTitle', {
+      defaultMessage: 'New dashboard already in progress',
+    }),
+  getCreateSubtitle: () =>
+    i18n.translate('dashboard.createConfirmModal.unsavedChangesSubtitle', {
+      defaultMessage: 'Continue editing or start over with a blank dashboard.',
+    }),
+  getStartOverButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.confirmButtonLabel', {
+      defaultMessage: 'Start over',
+    }),
+  getContinueButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.continueButtonLabel', {
+      defaultMessage: 'Continue editing',
+    }),
+  getCancelButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+};
+
 export const dashboardListingErrorStrings = {
   getDashboardLoadError: (message: string) =>
     i18n.translate('dashboard.loadingError.errorMessage', {
@@ -102,9 +152,6 @@ export const dashboardListingErrorStrings = {
     }),
 };
 
-/*
-  Dashboard Listing Page
-*/
 export const dashboardListingTableStrings = {
   getEntityName: () =>
     i18n.translate('dashboard.listing.table.entityName', {
@@ -205,6 +252,37 @@ export const getDashboardBreadcrumb = () =>
   i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
     defaultMessage: 'Dashboard',
   });
+
+/*
+  Share Modal
+*/
+export const shareModalStrings = {
+  getTopMenuCheckbox: () =>
+    i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
+      defaultMessage: 'Top menu',
+    }),
+  getQueryCheckbox: () =>
+    i18n.translate('dashboard.embedUrlParamExtension.query', {
+      defaultMessage: 'Query',
+    }),
+  getTimeFilterCheckbox: () =>
+    i18n.translate('dashboard.embedUrlParamExtension.timeFilter', {
+      defaultMessage: 'Time filter',
+    }),
+  getFilterBarCheckbox: () =>
+    i18n.translate('dashboard.embedUrlParamExtension.filterBar', {
+      defaultMessage: 'Filter bar',
+    }),
+  getCheckboxLegend: () =>
+    i18n.translate('dashboard.embedUrlParamExtension.include', {
+      defaultMessage: 'Include',
+    }),
+  getSnapshotShareWarning: () =>
+    i18n.translate('dashboard.snapshotShare.longUrlWarning', {
+      defaultMessage:
+        'One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard.',
+    }),
+};
 
 /*
   Dashboard Top Nav

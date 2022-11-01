@@ -11,6 +11,11 @@ export {
   getHasUnsavedChanges,
   startDiffingDashboardState,
 } from './diff_state/dashboard_diffing_integration';
+
+export {
+  startUnifiedSearchIntegration,
+  applySavedFiltersToUnifiedSearch,
+} from './unified_search_integration/start_unified_search_integration';
+
 export { syncDataViews } from './data_views_integration/sync_data_views';
 export { syncUnifiedSearchState } from './unified_search_integration/sync_unified_search_state';
-export { startUnifiedSearchIntegration } from './unified_search_integration/start_unified_search_integration';
