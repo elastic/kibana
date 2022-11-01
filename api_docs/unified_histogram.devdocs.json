@@ -1004,7 +1004,13 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              "IUiSettingsClient"
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
             ],
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
