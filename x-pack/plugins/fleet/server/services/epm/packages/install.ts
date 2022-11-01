@@ -113,7 +113,7 @@ export async function ensureInstalledPackage(options: {
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion
     ? { name: pkgName, version: pkgVersion }
-    : await Registry.fetchFindLatestPackageOrThrow(pkgName);
+    : await Registry.fetchFindLatestPackageOrThrow(pkgName, { prerelease: true });
 
   const installedPackageResult = await isPackageVersionOrLaterInstalled({
     savedObjectsClient,
@@ -302,6 +302,7 @@ async function installPackageFromRegistry({
     const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
+        prerelease: true,
       }),
       Registry.getPackage(pkgName, pkgVersion, {
         ignoreUnverified: force && !neverIgnoreVerificationError,

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
@@ -40,7 +40,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('EPM - get', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    setPrereleaseSetting(supertest);
+
     it('returns package info from the registry if it was installed from the registry', async function () {
       // this will install through the registry by default
       await installPackage(testPkgName, testPkgVersion);

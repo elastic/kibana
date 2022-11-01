@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
@@ -286,7 +286,6 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       });
       setupFleetAndAgents(providerContext);
-      setPrereleaseSetting(supertest);
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
         if (systemPkgVersion) {

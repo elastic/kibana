@@ -11,7 +11,7 @@ import {
   MAX_TIME_COMPLETE_INSTALL,
 } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -26,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installing and updating scenarios', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    setPrereleaseSetting(supertest);
+
     after(async () => {
       await deletePackage('multiple_versions', '0.3.0');
     });

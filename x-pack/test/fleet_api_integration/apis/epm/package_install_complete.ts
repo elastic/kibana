@@ -10,7 +10,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_TIME_COMPLETE_INSTALL,
 } from '@kbn/fleet-plugin/common/constants';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from '../agents/services';
 
@@ -26,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('setup checks packages completed install', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    setPrereleaseSetting(supertest);
+
     describe('package install', async () => {
       before(async () => {
         if (!server.enabled) return;

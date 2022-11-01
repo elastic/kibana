@@ -11,7 +11,7 @@ import { sortBy } from 'lodash';
 import { AssetReference } from '@kbn/fleet-plugin/common/types';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 function checkErrorWithResponseDataOrThrow(err: any) {
@@ -45,7 +45,6 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs and uninstalls all assets', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    setPrereleaseSetting(supertest);
 
     describe('installs all assets when installing a package for the first time', async () => {
       before(async () => {

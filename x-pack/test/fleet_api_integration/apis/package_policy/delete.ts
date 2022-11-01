@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -15,7 +15,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('Package Policy - delete', () => {
     skipIfNoDockerRegistry(providerContext);
-    setPrereleaseSetting(supertest);
+
     describe('Delete one', () => {
       let agentPolicy: any;
       let packagePolicy: any;

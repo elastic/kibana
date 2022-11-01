@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -25,7 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs package that has a prerelease version', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    setPrereleaseSetting(supertest);
+
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests

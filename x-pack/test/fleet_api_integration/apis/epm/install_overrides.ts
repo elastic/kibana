@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -26,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs packages that include settings and mappings overrides', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    setPrereleaseSetting(supertest);
+
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests

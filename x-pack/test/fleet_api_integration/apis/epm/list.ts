@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
@@ -23,7 +23,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('EPM - list', async function () {
     skipIfNoDockerRegistry(providerContext);
-    setPrereleaseSetting(supertest);
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });

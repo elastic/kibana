@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import path from 'path';
 import fs from 'fs';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -62,7 +62,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs and uninstalls multiple packages side effects', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    setPrereleaseSetting(supertest);
+
     before(async () => {
       if (!server.enabled) return;
       await installPackages([

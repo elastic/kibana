@@ -114,7 +114,7 @@ export const OverviewPage: React.FC<Props> = memo(
     );
     const { packageVerificationKeyId } = useFleetStatus();
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
-    const isPrerelease = isPackagePrerelease(packageInfo);
+    const isPrerelease = isPackagePrerelease(packageInfo.version);
     return (
       <EuiFlexGroup alignItems="flexStart">
         <LeftColumn grow={2} />

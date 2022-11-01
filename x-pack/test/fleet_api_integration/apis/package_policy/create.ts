@@ -10,7 +10,7 @@ import { Installation } from '@kbn/fleet-plugin/common';
 import uuid from 'uuid/v4';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -38,8 +38,6 @@ export default function (providerContext: FtrProviderContext) {
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
     });
-
-    setPrereleaseSetting(supertest);
 
     before(async function () {
       const { body: agentPolicyResponse } = await supertest

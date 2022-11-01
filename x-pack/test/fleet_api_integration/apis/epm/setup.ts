@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { GetInfoResponse, InstalledRegistry } from '@kbn/fleet-plugin/common/types';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -21,7 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('setup api', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    setPrereleaseSetting(supertest);
+
     // FLAKY: https://github.com/elastic/kibana/issues/118479
     describe.skip('setup performs upgrades', async () => {
       const oldEndpointVersion = '0.13.0';

@@ -10,7 +10,7 @@ import {
   UpgradePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -46,8 +46,6 @@ export default function (providerContext: FtrProviderContext) {
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
     });
-
-    setPrereleaseSetting(supertest);
 
     setupFleetAndAgents(providerContext);
 

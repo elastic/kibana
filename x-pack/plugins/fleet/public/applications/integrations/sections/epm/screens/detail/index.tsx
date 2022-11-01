@@ -189,7 +189,7 @@ export function Detail() {
 
   useEffect(() => {
     const pkg = packageInfoLatestGAData?.item;
-    const isGAVersion = pkg && !isPackagePrerelease(pkg);
+    const isGAVersion = pkg && !isPackagePrerelease(pkg.version);
     if (isGAVersion) {
       setLatestGAVersion(pkg.version);
     }

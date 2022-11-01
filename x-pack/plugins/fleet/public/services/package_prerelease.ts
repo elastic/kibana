@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { PackageInfo } from '../types';
-
-export function isPackagePrerelease(pkg: PackageInfo): boolean {
+export function isPackagePrerelease(version: string): boolean {
   // derive from semver
-  return pkg.version.startsWith('0') || pkg.version.includes('-');
+  return version.startsWith('0') || version.includes('-');
 }
