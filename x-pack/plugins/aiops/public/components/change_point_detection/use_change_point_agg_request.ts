@@ -80,13 +80,16 @@ function getChangePointDetectionRequestBody(
   };
 }
 
-export function useChangePointRequest(
+const CHARTS_PER_PAGE = 6;
+
+export function useChangePointResults(
   requestParams: ChangePointDetectionRequestParams,
   query: QueryDslQueryContainer
 ) {
   const { dataView } = useDataSource();
 
   const [results, setResults] = useState<ChangePointAnnotation[]>([]);
+  const [activePage, setActivePage] = useState<number>(0);
 
   const splitFieldCardinality = useSplitFieldCardinality(requestParams.splitField, query);
 
@@ -168,7 +171,20 @@ export function useChangePointRequest(
     return Math.round((results.length / splitFieldCardinality) * 100);
   }, [splitFieldCardinality, results.length]);
 
-  return { results, isLoading, reset, progress };
+  const pagination = useMemo(() => {
+    return {
+      activePage,
+      pageCount: Math.round((splitFieldCardinality ?? 0) / CHARTS_PER_PAGE),
+      updatePagination: setActivePage,
+    };
+  }, [activePage, splitFieldCardinality]);
+
+  const resultPerPage = useMemo(() => {
+    const start = activePage * CHARTS_PER_PAGE;
+    return results.slice(start, start + CHARTS_PER_PAGE);
+  }, [results, activePage]);
+
+  return { results: resultPerPage, isLoading, reset, progress, pagination };
 }
 
 interface ChangePointAggResponse {

@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiPagination,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
@@ -39,6 +40,7 @@ export const ChangePointDetectionPage: FC = () => {
     updateFilters,
     resultQuery,
     progress,
+    pagination,
   } = useChangePontDetectionContext();
 
   const setFn = useCallback(
@@ -182,6 +184,18 @@ export const ChangePointDetectionPage: FC = () => {
           );
         })}
       </EuiFlexGrid>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiPagination
+            pageCount={pagination.pageCount}
+            activePage={pagination.activePage}
+            onPageClick={pagination.updatePagination}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };

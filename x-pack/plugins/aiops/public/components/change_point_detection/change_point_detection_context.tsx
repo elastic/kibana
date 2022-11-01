@@ -24,7 +24,7 @@ import {
 } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter';
-import { useChangePointRequest } from './use_change_point_agg_request';
+import { useChangePointResults } from './use_change_point_agg_request';
 import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
 import { usePageUrlState } from '../../hooks/use_url_state';
@@ -52,6 +52,11 @@ export const ChangePointDetectionContext = createContext<{
   updateFilters: (update: Filter[]) => void;
   resultQuery: Query;
   progress: number;
+  pagination: {
+    activePage: number;
+    pageCount: number;
+    updatePagination: (newPage: number) => void;
+  };
 }>({
   isLoading: false,
   splitFieldsOptions: [],
@@ -65,16 +70,21 @@ export const ChangePointDetectionContext = createContext<{
   updateFilters: () => {},
   resultQuery: { query: '', language: 'kuery' },
   progress: 0,
+  pagination: {
+    activePage: 0,
+    pageCount: 1,
+    updatePagination: () => {},
+  },
 });
 
 export type ChangePointType =
   | 'dip'
-  | 'distribution_change'
-  | 'non_stationary'
   | 'spike'
-  | 'stationary'
+  | 'distribution_change'
   | 'step_change'
   | 'trend_change'
+  | 'stationary'
+  | 'non_stationary'
   | 'indeterminable';
 
 export interface ChangePointAnnotation {
@@ -228,7 +238,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     results: annotations,
     isLoading: annotationsLoading,
     progress,
-  } = useChangePointRequest(requestParams, combinedQuery);
+    pagination,
+  } = useChangePointResults(requestParams, combinedQuery);
 
   if (!bucketInterval) return null;
 
@@ -245,6 +256,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     resultFilters,
     updateFilters,
     resultQuery,
+    pagination,
   };
 
   return (
