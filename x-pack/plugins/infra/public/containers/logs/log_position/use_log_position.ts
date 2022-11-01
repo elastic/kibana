@@ -8,6 +8,7 @@
 import createContainer from 'constate';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
+import useThrottle from 'react-use/lib/useThrottle';
 import { TimeKey } from '../../../../common/time';
 import { TimefilterState } from '../../../utils/timefilter_state_storage';
 import { useObservableState } from '../../../utils/use_observable';
@@ -68,6 +69,7 @@ type UpdateDateRangeFn = (
 ) => void;
 
 const DESIRED_BUFFER_PAGES = 2;
+const RELATIVE_END_UPDATE_DELAY = 1000;
 
 export const useLogPositionState: () => LogPositionStateParams & LogPositionCallbacks = () => {
   const { initialStateFromUrl, startSyncingWithUrl } = useLogPositionUrlStateSync();
@@ -134,16 +136,20 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     useVisiblePositions(targetPosition);
 
   // `endTimestamp` update conditions
+  const throttledPagesAfterEnd = useThrottle(
+    visiblePositions.pagesAfterEnd,
+    RELATIVE_END_UPDATE_DELAY
+  );
   useEffect(() => {
     if (dateRange.endDateExpression !== 'now') {
       return;
     }
 
     // User is close to the bottom edge of the scroll.
-    if (visiblePositions.pagesAfterEnd <= DESIRED_BUFFER_PAGES) {
+    if (throttledPagesAfterEnd <= DESIRED_BUFFER_PAGES) {
       logPositionStateContainer.transitions.updateTimeRange({ to: 'now' });
     }
-  }, [dateRange.endDateExpression, visiblePositions, logPositionStateContainer]);
+  }, [dateRange.endDateExpression, throttledPagesAfterEnd, logPositionStateContainer]);
 
   useInterval(
     () => logPositionStateContainer.transitions.updateTimeRange({ from: 'now-1d', to: 'now' }),
