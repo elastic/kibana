@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.7>>
 * <<release-notes-7.17.6>>
 * <<release-notes-7.17.5>>
 * <<release-notes-7.17.4>>
@@ -76,6 +77,49 @@ Review important information about the {kib} 7.17.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.17.7]]
+== {kib} 7.17.7
+
+Review the following information about the 7.17.7 release.
+
+[float]
+[[breaking-changes-v7.17.7]]
+=== Breaking changes
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in the 7.17.7 release.
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[enhancement-v7.17.7]]
+=== Enhancement
+Security::
+When you start {kib}, the hashed saved object encryption key is now logged to help you solve conflicting `xpack.encryptedSavedObjects.encryptionKey` configurations {kibana-pull}139874[#139874]
+
+[float]
+[[fixes-v7.17.7]]
+=== Bug fixes
+Alerting::
+Set .alerts-* auto-expand replicas to 0-1 {kibana-pull}140335[#140335]
+
+Machine Learning::
+* Fixes Open in Single Metric Viewer links not reflecting custom time range for Anomaly chart embeddables {kibana-pull}141007[#141007]
+* Fixes Anomaly charts time and query not being added to dashboard and case {kibana-pull}140147[#140147]
+
+Platform::
+Fixes a bug where savedObjects 'export' and 'copy to space' sometimes caused {kib} to crash for complex object graphs {kibana-pull}142078[#142078]
+
+Uptime::
+Handle index not found errors {kibana-pull}142685[#142685]
 
 [[release-notes-7.17.6]]
 == {kib} 7.17.6
@@ -86,9 +130,7 @@ Review the following information about the 7.17.6 release.
 [[breaking-changes-v7.17.6]]
 === Breaking changes
 
-// tag::notable-breaking-changes[]
 There are no breaking changes in the 7.17.6 release.
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following: 
 
