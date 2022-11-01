@@ -823,7 +823,7 @@ export class DataViewsService {
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
 
-    const indexPattern = await this.create(spec, true, displayErrors);
+    const indexPattern = await this.createFromSpec(spec, true, displayErrors);
     indexPattern.matchedIndices = indices;
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
@@ -898,7 +898,7 @@ export class DataViewsService {
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    * @returns DataView
    */
-  async create(
+  private async createFromSpec(
     { id, name, title, ...restOfSpec }: DataViewSpec,
     skipFetchFields = false,
     displayErrors = true
@@ -930,6 +930,30 @@ export class DataViewsService {
   }
 
   /**
+   * Create data view instance.
+   * @param spec data view spec
+   * @param skipFetchFields if true, will not fetch fields
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
+   * @returns DataView
+   */
+  async create(
+    spec: DataViewSpec,
+    skipFetchFields = false,
+    displayErrors = true,
+    recreateDataView = false
+  ): Promise<DataView> {
+    if (spec.id && !recreateDataView) {
+      const cachedDataView = spec.id ? await this.dataViewCache.get(spec.id) : undefined;
+
+      if (cachedDataView) {
+        return cachedDataView;
+      }
+    }
+
+    return await this.createFromSpec(spec, skipFetchFields, displayErrors);
+  }
+
+  /**
    * Create a new data view and save it right away.
    * @param spec data view spec
    * @param override Overwrite if existing index pattern exists.
@@ -943,7 +967,7 @@ export class DataViewsService {
     skipFetchFields = false,
     displayErrors = true
   ) {
-    const indexPattern = await this.create(spec, skipFetchFields, displayErrors);
+    const indexPattern = await this.createFromSpec(spec, skipFetchFields, displayErrors);
     const createdIndexPattern = await this.createSavedObject(indexPattern, override, displayErrors);
     await this.setDefault(createdIndexPattern.id!);
     return createdIndexPattern!;
