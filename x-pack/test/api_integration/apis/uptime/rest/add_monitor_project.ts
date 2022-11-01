@@ -108,6 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(projectMonitors)
           .expect(200);
         expect(body).eql({
+          updatedMonitors: [],
           createdMonitors: successfulMonitors.map((monitor) => monitor.id),
           failedMonitors: [],
         });
@@ -221,6 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(body).eql({
+          updatedMonitors: [],
           createdMonitors: successfulMonitors.map((monitor) => monitor.id),
           failedMonitors: [
             {
@@ -338,6 +340,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(body).eql({
+          updatedMonitors: [],
           createdMonitors: successfulMonitors.map((monitor) => monitor.id),
           failedMonitors: [
             {
@@ -441,6 +444,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(icmpProjectMonitors)
           .expect(200);
         expect(body).eql({
+          updatedMonitors: [],
           createdMonitors: successfulMonitors.map((monitor) => monitor.id),
           failedMonitors: [
             {
@@ -543,6 +547,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(body).eql({
+          updatedMonitors: [],
           failedMonitors: [],
           createdMonitors: projectMonitors.monitors.map((monitor) => monitor.id),
         });
@@ -555,7 +560,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - returns an error if the monitor already exists', async () => {
+    it('project monitors - returns a list of successfully updated monitors', async () => {
       const project = `test-project-${uuid.v4()}`;
 
       try {
@@ -572,35 +577,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).eql({
           createdMonitors: [],
-          failedMonitors: [
-            {
-              details: `Monitor ${projectMonitors.monitors[0].id} already exists. Please send PUT request to update.`,
-              payload: {
-                content:
-                  'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
-                filter: {
-                  match: 'check if title is present',
-                },
-                hash: 'ekrjelkjrelkjre',
-                id: projectMonitors.monitors[0].id,
-                locations: ['localhost'],
-                name: 'check if title is present',
-                params: {},
-                playwrightOptions: {
-                  chromiumSandbox: false,
-                  headless: true,
-                },
-                schedule: 10,
-                tags: [],
-                throttling: {
-                  download: 5,
-                  latency: 20,
-                  upload: 3,
-                },
-              },
-              reason: 'Failed to create monitor.',
-            },
-          ],
+          failedMonitors: [],
+          updatedMonitors: projectMonitors.monitors.map((monitor) => monitor.id),
         });
       } finally {
         await Promise.all([
@@ -622,6 +600,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(body).eql({
+          updatedMonitors: [],
           failedMonitors: [
             {
               details: 'Invalid value "3m" supplied to "schedule"',
@@ -773,105 +752,105 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    // it('project monitors - is able to decrypt monitor when updated after hydration', async () => {
-    //   const project = `test-project-${uuid.v4()}`;
-    //   try {
-    //     await supertest
-    //       .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-    //       .set('kbn-xsrf', 'true')
-    //       .send(projectMonitors)
-    //       .expect(200);
+    it('project monitors - is able to decrypt monitor when updated after hydration', async () => {
+      const project = `test-project-${uuid.v4()}`;
+      try {
+        await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send(projectMonitors)
+          .expect(200);
 
-    //     const response = await supertest
-    //       .get(API_URLS.SYNTHETICS_MONITORS)
-    //       .query({
-    //         filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
-    //       })
-    //       .set('kbn-xsrf', 'true')
-    //       .expect(200);
+        const response = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
 
-    //     const { monitors } = response.body;
+        const { monitors } = response.body;
 
-    //     // add urls and ports to mimic hydration
-    //     const updates = {
-    //       [ConfigKey.URLS]: 'https://modified-host.com',
-    //       [ConfigKey.PORT]: 443,
-    //     };
+        // add urls and ports to mimic hydration
+        const updates = {
+          [ConfigKey.URLS]: 'https://modified-host.com',
+          [ConfigKey.PORT]: 443,
+        };
 
-    //     const modifiedMonitor = { ...monitors[0]?.attributes, ...updates };
+        const modifiedMonitor = { ...monitors[0]?.attributes, ...updates };
 
-    //     await supertest
-    //       .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.id)
-    //       .set('kbn-xsrf', 'true')
-    //       .send(modifiedMonitor)
-    //       .expect(200);
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.id)
+          .set('kbn-xsrf', 'true')
+          .send(modifiedMonitor)
+          .expect(200);
 
-    //     // update project monitor via push api
-    //     const { body } = await supertest
-    //       .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-    //       .set('kbn-xsrf', 'true')
-    //       .send(projectMonitors)
-    //       .expect(200);
+        // update project monitor via push api
+        const { body } = await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send(projectMonitors)
+          .expect(200);
 
-    //     expect(body).eql({
-    //       updatedMonitors: [projectMonitors.monitors[0].id],
-    //       createdMonitors: [],
-    //       failedMonitors: [],
-    //     });
+        expect(body).eql({
+          updatedMonitors: [projectMonitors.monitors[0].id],
+          createdMonitors: [],
+          failedMonitors: [],
+        });
 
-    //     // ensure that monitor can still be decrypted
-    //     await supertest
-    //       .get(API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.id)
-    //       .set('kbn-xsrf', 'true')
-    //       .expect(200);
-    //   } finally {
-    //     await Promise.all([
-    //       projectMonitors.monitors.map((monitor) => {
-    //         return deleteMonitor(monitor.id, project);
-    //       }),
-    //     ]);
-    //   }
-    // });
+        // ensure that monitor can still be decrypted
+        await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.id)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+      } finally {
+        await Promise.all([
+          projectMonitors.monitors.map((monitor) => {
+            return deleteMonitor(monitor.id, project);
+          }),
+        ]);
+      }
+    });
 
-    // it('project monitors - is able to enable and disable monitors', async () => {
-    //   const project = `test-project-${uuid.v4()}`;
+    it('project monitors - is able to enable and disable monitors', async () => {
+      const project = `test-project-${uuid.v4()}`;
 
-    //   try {
-    //     await supertest
-    //       .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-    //       .set('kbn-xsrf', 'true')
-    //       .send(projectMonitors);
+      try {
+        await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send(projectMonitors);
 
-    //     await supertest
-    //       .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-    //       .set('kbn-xsrf', 'true')
-    //       .send({
-    //         ...projectMonitors,
-    //         monitors: [
-    //           {
-    //             ...projectMonitors.monitors[0],
-    //             enabled: false,
-    //           },
-    //         ],
-    //       })
-    //       .expect(200);
-    //     const response = await supertest
-    //       .get(API_URLS.SYNTHETICS_MONITORS)
-    //       .query({
-    //         filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
-    //       })
-    //       .set('kbn-xsrf', 'true')
-    //       .expect(200);
-    //     const { monitors } = response.body;
-    //     expect(monitors[0].attributes.enabled).eql(false);
-    //   } finally {
-    //     await Promise.all([
-    //       projectMonitors.monitors.map((monitor) => {
-    //         return deleteMonitor(monitor.id, project);
-    //       }),
-    //     ]);
-    //   }
-    // });
+        await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [
+              {
+                ...projectMonitors.monitors[0],
+                enabled: false,
+              },
+            ],
+          })
+          .expect(200);
+        const response = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors } = response.body;
+        expect(monitors[0].attributes.enabled).eql(false);
+      } finally {
+        await Promise.all([
+          projectMonitors.monitors.map((monitor) => {
+            return deleteMonitor(monitor.id, project);
+          }),
+        ]);
+      }
+    });
 
     it('project monitors - returns a failed monitor when user defines a private location without fleet permissions', async () => {
       const project = `test-project-${uuid.v4()}`;
@@ -910,6 +889,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).eql({
           createdMonitors: [testMonitors[0].id],
+          updatedMonitors: [],
           failedMonitors: [
             {
               details:
@@ -991,6 +971,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).to.eql({
           createdMonitors: [testMonitors[0].id, 'test-id-2'],
+          updatedMonitors: [],
           failedMonitors: [],
         });
       } finally {
@@ -1066,239 +1047,243 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    // it('deletes integration policies for project monitors when private location is removed from the monitor - lightweight', async () => {
-    //   const project = `test-project-${uuid.v4()}`;
+    it('deletes integration policies for project monitors when private location is removed from the monitor - lightweight', async () => {
+      const project = `test-project-${uuid.v4()}`;
 
-    //   const monitorRequest = {
-    //     monitors: [
-    //       { ...httpProjectMonitors.monitors[1], privateLocations: ['Test private location 0'] },
-    //     ],
-    //   };
-    //   try {
-    //     await supertest
-    //       .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-    //       .set('kbn-xsrf', 'true')
-    //       .send(monitorRequest)
-    //       .expect(200);
+      const monitorRequest = {
+        monitors: [
+          { ...httpProjectMonitors.monitors[1], privateLocations: ['Test private location 0'] },
+        ],
+      };
+      try {
+        await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send(monitorRequest)
+          .expect(200);
 
-    //     const monitorsResponse = await supertest
-    //       .get(API_URLS.SYNTHETICS_MONITORS)
-    //       .query({
-    //         filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitorRequest.monitors[0].id}`,
-    //       })
-    //       .set('kbn-xsrf', 'true')
-    //       .expect(200);
+        const monitorsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitorRequest.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
 
-    //     const apiResponsePolicy = await supertest.get(
-    //       '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-    //     );
+        const apiResponsePolicy = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
 
-    //     const packagePolicy = apiResponsePolicy.body.items.find(
-    //       (pkgPolicy: PackagePolicy) =>
-    //         pkgPolicy.id ===
-    //         `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
-    //         }-${testPolicyId}`
-    //     );
+        const packagePolicy = apiResponsePolicy.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
+        );
 
-    //     expect(packagePolicy.policy_id).eql(testPolicyId);
+        expect(packagePolicy.policy_id).eql(testPolicyId);
 
-    //     await supertest
-    //       .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-    //       .set('kbn-xsrf', 'true')
-    //       .send({
-    //         monitors: [{ ...monitorRequest.monitors[0], privateLocations: [] }],
-    //       })
-    //       .expect(200);
+        await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [{ ...monitorRequest.monitors[0], privateLocations: [] }],
+          })
+          .expect(200);
 
-    //     const apiResponsePolicy2 = await supertest.get(
-    //       '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-    //     );
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
 
-    //     const packagePolicy2 = apiResponsePolicy2.body.items.find(
-    //       (pkgPolicy: PackagePolicy) =>
-    //         pkgPolicy.id ===
-    //         `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
-    //         }-${testPolicyId}`
-    //     );
+        const packagePolicy2 = apiResponsePolicy2.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
+        );
 
-    //     expect(packagePolicy2).eql(undefined);
-    //   } finally {
-    //     await deleteMonitor(projectMonitors.monitors[0].id, project);
-    //   }
-    // });
+        expect(packagePolicy2).eql(undefined);
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, project);
+      }
+    });
 
-    // it('deletes integration policies for project monitors when private location is removed from the monitor', async () => {
-    //   const project = `test-project-${uuid.v4()}`;
+    it('deletes integration policies for project monitors when private location is removed from the monitor', async () => {
+      const project = `test-project-${uuid.v4()}`;
 
-    //   try {
-    //     await supertest
-    //       .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-    //       .set('kbn-xsrf', 'true')
-    //       .send({
-    //         monitors: [
-    //           { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
-    //         ],
-    //       })
-    //       .expect(200);
+      try {
+        await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [
+              { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
+            ],
+          })
+          .expect(200);
 
-    //     const monitorsResponse = await supertest
-    //       .get(API_URLS.SYNTHETICS_MONITORS)
-    //       .query({
-    //         filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
-    //       })
-    //       .set('kbn-xsrf', 'true')
-    //       .expect(200);
+        const monitorsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
 
-    //     const apiResponsePolicy = await supertest.get(
-    //       '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-    //     );
+        const apiResponsePolicy = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
 
-    //     const packagePolicy = apiResponsePolicy.body.items.find(
-    //       (pkgPolicy: PackagePolicy) =>
-    //         pkgPolicy.id ===
-    //         `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
-    //         }-${testPolicyId}`
-    //     );
+        const packagePolicy = apiResponsePolicy.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
+        );
 
-    //     expect(packagePolicy.policy_id).eql(testPolicyId);
+        expect(packagePolicy.policy_id).eql(testPolicyId);
 
-    //     const configId = monitorsResponse.body.monitors[0].id;
-    //     const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+        const configId = monitorsResponse.body.monitors[0].id;
+        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
 
-    //     comparePolicies(
-    //       packagePolicy,
-    //       getTestProjectSyntheticsPolicy({
-    //         inputs: {},
-    //         name: 'check if title is present-Test private location 0',
-    //         id,
-    //         configId,
-    //         projectId: project,
-    //       })
-    //     );
+        comparePolicies(
+          packagePolicy,
+          getTestProjectSyntheticsPolicy({
+            inputs: {},
+            name: 'check if title is present-Test private location 0',
+            id,
+            configId,
+            projectId: project,
+          })
+        );
 
-    //     await supertest
-    //       .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-    //       .set('kbn-xsrf', 'true')
-    //       .send({
-    //         monitors: [{ ...projectMonitors.monitors[0], privateLocations: [] }],
-    //       })
-    //       .expect(200);
+        await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [{ ...projectMonitors.monitors[0], privateLocations: [] }],
+          })
+          .expect(200);
 
-    //     const apiResponsePolicy2 = await supertest.get(
-    //       '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-    //     );
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
 
-    //     const packagePolicy2 = apiResponsePolicy2.body.items.find(
-    //       (pkgPolicy: PackagePolicy) =>
-    //         pkgPolicy.id ===
-    //         `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
-    //         }-${testPolicyId}`
-    //     );
+        const packagePolicy2 = apiResponsePolicy2.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
+        );
 
-    //     expect(packagePolicy2).eql(undefined);
-    //   } finally {
-    //     await deleteMonitor(projectMonitors.monitors[0].id, project);
+        expect(packagePolicy2).eql(undefined);
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, project);
 
-    //     const apiResponsePolicy2 = await supertest.get(
-    //       '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-    //     );
-    //     expect(apiResponsePolicy2.body.items.length).eql(0);
-    //   }
-    // });
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+        expect(apiResponsePolicy2.body.items.length).eql(0);
+      }
+    });
 
-    // it('handles updating package policies when project monitors are updated', async () => {
-    //   const project = `test-project-${uuid.v4()}`;
+    it('handles updating package policies when project monitors are updated', async () => {
+      const project = `test-project-${uuid.v4()}`;
 
-    //   try {
-    //     await supertest
-    //       .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-    //       .set('kbn-xsrf', 'true')
-    //       .send({
-    //         monitors: [
-    //           {
-    //             ...projectMonitors.monitors[0],
-    //             privateLocations: ['Test private location 0'],
-    //           },
-    //         ],
-    //       });
+      try {
+        await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [
+              {
+                ...projectMonitors.monitors[0],
+                privateLocations: ['Test private location 0'],
+              },
+            ],
+          });
 
-    //     const monitorsResponse = await supertest
-    //       .get(API_URLS.SYNTHETICS_MONITORS)
-    //       .query({
-    //         filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
-    //       })
-    //       .set('kbn-xsrf', 'true')
-    //       .expect(200);
+        const monitorsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
 
-    //     const apiResponsePolicy = await supertest.get(
-    //       '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-    //     );
+        const apiResponsePolicy = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
 
-    //     const configId = monitorsResponse.body.monitors[0].id;
-    //     const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
-    //     const policyId = `${id}-${testPolicyId}`;
+        const configId = monitorsResponse.body.monitors[0].id;
+        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+        const policyId = `${id}-${testPolicyId}`;
 
-    //     const packagePolicy = apiResponsePolicy.body.items.find(
-    //       (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId
-    //     );
+        const packagePolicy = apiResponsePolicy.body.items.find(
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId
+        );
 
-    //     expect(packagePolicy.policy_id).eql(testPolicyId);
+        expect(packagePolicy.policy_id).eql(testPolicyId);
 
-    //     comparePolicies(
-    //       packagePolicy,
-    //       getTestProjectSyntheticsPolicy({
-    //         inputs: {},
-    //         name: 'check if title is present-Test private location 0',
-    //         id,
-    //         configId,
-    //         projectId: project,
-    //       })
-    //     );
+        comparePolicies(
+          packagePolicy,
+          getTestProjectSyntheticsPolicy({
+            inputs: {},
+            name: 'check if title is present-Test private location 0',
+            id,
+            configId,
+            projectId: project,
+          })
+        );
 
-    //     await supertest
-    //       .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-    //       .set('kbn-xsrf', 'true')
-    //       .send({
-    //         monitors: [
-    //           {
-    //             ...projectMonitors.monitors[0],
-    //             privateLocations: ['Test private location 0'],
-    //             enabled: false,
-    //           },
-    //         ],
-    //       });
+        await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [
+              {
+                ...projectMonitors.monitors[0],
+                privateLocations: ['Test private location 0'],
+                enabled: false,
+              },
+            ],
+          });
 
-    //     const apiResponsePolicy2 = await supertest.get(
-    //       '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-    //     );
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
 
-    //     const configId2 = monitorsResponse.body.monitors[0].id;
-    //     const id2 = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
-    //     const policyId2 = `${id}-${testPolicyId}`;
+        const configId2 = monitorsResponse.body.monitors[0].id;
+        const id2 = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+        const policyId2 = `${id}-${testPolicyId}`;
 
-    //     const packagePolicy2 = apiResponsePolicy2.body.items.find(
-    //       (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId2
-    //     );
+        const packagePolicy2 = apiResponsePolicy2.body.items.find(
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId2
+        );
 
-    //     comparePolicies(
-    //       packagePolicy2,
-    //       getTestProjectSyntheticsPolicy({
-    //         inputs: { enabled: { value: false, type: 'bool' } },
-    //         name: 'check if title is present-Test private location 0',
-    //         id: id2,
-    //         configId: configId2,
-    //         projectId: project,
-    //       })
-    //     );
-    //   } finally {
-    //     await deleteMonitor(projectMonitors.monitors[0].id, project);
+        comparePolicies(
+          packagePolicy2,
+          getTestProjectSyntheticsPolicy({
+            inputs: { enabled: { value: false, type: 'bool' } },
+            name: 'check if title is present-Test private location 0',
+            id: id2,
+            configId: configId2,
+            projectId: project,
+          })
+        );
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, project);
 
-    //     const apiResponsePolicy2 = await supertest.get(
-    //       '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-    //     );
-    //     expect(apiResponsePolicy2.body.items.length).eql(0);
-    //   }
-    // });
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+        expect(apiResponsePolicy2.body.items.length).eql(0);
+      }
+    });
 
     it('handles location formatting for both private and public locations', async () => {
       const project = `test-project-${uuid.v4()}`;

@@ -79,7 +79,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./add_monitor'));
       loadTestFile(require.resolve('./add_monitor_project_legacy'));
       loadTestFile(require.resolve('./add_monitor_project'));
-      loadTestFile(require.resolve('./edit_monitor_project'));
       loadTestFile(require.resolve('./get_monitor_project'));
       loadTestFile(require.resolve('./add_monitor_private_location'));
       loadTestFile(require.resolve('./edit_monitor'));
