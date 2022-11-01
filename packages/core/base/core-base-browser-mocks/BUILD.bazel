@@ -35,12 +35,14 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "//packages/kbn-logging-mocks",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-   "//packages/core/base/core-base-browser-internal:npm_module_types",
+  "//packages/kbn-logging-mocks:npm_module_types",
+  "//packages/core/base/core-base-browser-internal:npm_module_types",
 ]
 
 jsts_transpiler(

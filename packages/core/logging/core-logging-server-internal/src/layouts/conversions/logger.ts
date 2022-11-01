@@ -8,8 +8,7 @@
 
 import chalk from 'chalk';
 import { LogRecord } from '@kbn/logging';
-
-import { Conversion } from './type';
+import type { Conversion } from '@kbn/core-logging-common-internal';
 
 export const LoggerConversion: Conversion = {
   pattern: /%logger/g,

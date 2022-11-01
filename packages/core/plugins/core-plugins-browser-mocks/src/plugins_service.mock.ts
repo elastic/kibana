@@ -7,6 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type { PluginsService, PluginsServiceSetup } from '@kbn/core-plugins-browser-internal';
 
@@ -43,6 +44,7 @@ const createPluginInitializerContextMock = (config: unknown = {}) => {
         dist: false,
       },
     },
+    logger: loggerMock.create(),
     config: {
       get: <T>() => config as T,
     },
