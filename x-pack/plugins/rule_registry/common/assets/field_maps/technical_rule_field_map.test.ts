@@ -198,6 +198,31 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.throttle.count": Object {
+        "array": false,
+        "required": false,
+        "type": "long",
+      },
+      "kibana.alert.throttle.end": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
+      "kibana.alert.throttle.fields": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.throttle.start": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
+      "kibana.alert.throttle.values": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.time_range": Object {
         "format": "epoch_millis||strict_date_optional_time",
         "type": "date_range",
