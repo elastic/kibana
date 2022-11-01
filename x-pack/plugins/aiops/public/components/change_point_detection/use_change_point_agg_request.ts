@@ -135,9 +135,7 @@ export function useChangePointResults(
       const groups = buckets
         .map((v) => {
           const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
-
           const timeAsString = v.change_point_request.bucket?.key;
-
           return {
             group_field: v.key.splitFieldTerm,
             type: changePointType,
@@ -147,11 +145,16 @@ export function useChangePointResults(
             reason: v.change_point_request.type[changePointType].reason,
           } as ChangePointAnnotation;
         })
-        .filter((v): v is ChangePointAnnotation => !!v)
-        .sort((a, b) => (a.p_value ?? 100) - (b.p_value ?? 100));
+        // Filter out change point results without p_value
+        .filter((v): v is ChangePointAnnotation => !!v && Number.isFinite(v.p_value));
 
       setResults((prev) => {
-        return (prev ?? []).concat(groups);
+        return (
+          (prev ?? [])
+            .concat(groups)
+            // Lower p_value indicates a bigger change point, hence the acs sorting
+            .sort((a, b) => a.p_value - b.p_value)
+        );
       });
 
       if (result.rawResponse.aggregations.groupings.after_key?.splitFieldTerm) {

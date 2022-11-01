@@ -93,7 +93,7 @@ export interface ChangePointAnnotation {
   timestamp: string;
   group_field: string;
   type: ChangePointType;
-  p_value?: number;
+  p_value: number;
 }
 
 const DEFAULT_AGG_FUNCTION = 'min';
