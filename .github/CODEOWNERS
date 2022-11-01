@@ -49,7 +49,7 @@
 /test/functional/apps/visualize/ @elastic/kibana-vis-editors
 
 # Application Services
-/examples/bfetch_explorer/ @elastic/kibana-app-services
+/examples/bfetch_explorer/ @elastic/kibana-global-experience
 /examples/dashboard_embeddable_examples/ @elastic/kibana-app-services
 /examples/demo_search/ @elastic/kibana-app-services
 /examples/developer_examples/ @elastic/kibana-app-services
@@ -61,7 +61,7 @@
 /examples/field_formats_example/ @elastic/kibana-app-services
 /examples/partial_results_example/ @elastic/kibana-app-services
 /examples/search_examples/ @elastic/kibana-app-services
-/src/plugins/bfetch/ @elastic/kibana-app-services
+/src/plugins/bfetch/ @elastic/kibana-global-experience
 /src/plugins/data/ @elastic/kibana-app-services
 /src/plugins/data_views/ @elastic/kibana-app-services
 /src/plugins/embeddable/ @elastic/kibana-app-services
@@ -937,7 +937,7 @@ packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-mapbox-gl @elastic/kibana-gis
-packages/kbn-monaco @elastic/kibana-app-services
+packages/kbn-monaco @elastic/kibana-global-experience
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-osquery-io-ts-types @elastic/security-asset-management
