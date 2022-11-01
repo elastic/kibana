@@ -540,12 +540,20 @@ export class SavedSearchEmbeddable
         domNode
       );
 
+      const hasError = this.getOutput().error !== undefined;
+
       if (
         this.searchProps!.isLoading === false &&
         props.searchProps.rows &&
         props.searchProps.rows.length
       ) {
         this.renderComplete.dispatchComplete();
+        this.updateOutput({
+          ...this.getOutput(),
+          rendered: true,
+        });
+      } else if (hasError) {
+        this.renderComplete.dispatchError();
         this.updateOutput({
           ...this.getOutput(),
           rendered: true,
