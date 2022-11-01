@@ -20,7 +20,6 @@ export const StepTitle = () => {
   return (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem grow>{currentStep?.synthetics?.step?.name}</EuiFlexItem>
-      <EuiFlexItem grow={false} />
     </EuiFlexGroup>
   );
 };
