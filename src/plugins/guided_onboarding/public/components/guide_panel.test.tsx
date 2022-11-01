@@ -240,7 +240,7 @@ describe('Guided setup', () => {
 
       const readyToCompleteGuideState: GuideState = {
         guideId: 'search',
-        status: 'ready_to_complete',
+        status: 'in_progress',
         isActive: true,
         steps: [
           {
