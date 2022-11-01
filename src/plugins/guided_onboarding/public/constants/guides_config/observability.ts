@@ -53,7 +53,7 @@ export const observabilityConfig: GuideConfig = {
       ],
       location: {
         appID: 'dashboards',
-        path: '#/view/kubernetes-e0195ce0-bcaf-11ec-b64f-7dd6e8e82013',
+        path: '#/view/kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
       },
       manualCompletion: {
         title: i18n.translate(
