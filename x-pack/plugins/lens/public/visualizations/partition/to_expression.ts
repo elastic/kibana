@@ -78,9 +78,10 @@ export const getSortedGroups = (
   return Array.from(new Set(originalOrder?.concat(layer[accessor] ?? [])));
 };
 
-const prepareDimension = (accessor: string) => {
-  return buildExpressionFunction<ExpressionFunctionVisDimension>('visdimension', { accessor });
-};
+const prepareDimension = (accessor: string) =>
+  buildExpression([
+    buildExpressionFunction<ExpressionFunctionVisDimension>('visdimension', { accessor }),
+  ]).toAst();
 
 const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (state, attributes, layer) => {
   const show = !attributes.isPreview && layer.categoryDisplay !== CategoryDisplay.HIDE;
@@ -134,13 +135,11 @@ const generateCommonArguments = (
 ) => {
   return {
     labels: generateCommonLabelsAstArgs(state, attributes, layer),
-    buckets: buildExpression(
-      operations
-        .filter(({ columnId }) => !isCollapsed(columnId, layer))
-        .map(({ columnId }) => columnId)
-        .map(prepareDimension)
-    ).toAst(),
-    metric: layer.metric ? buildExpression([prepareDimension(layer.metric)]).toAst() : [],
+    buckets: operations
+      .filter(({ columnId }) => !isCollapsed(columnId, layer))
+      .map(({ columnId }) => columnId)
+      .map(prepareDimension),
+    metric: layer.metric ? prepareDimension(layer.metric) : [],
     legendDisplay: (attributes.isPreview
       ? LegendDisplay.HIDE
       : layer.legendDisplay) as PartitionVisLegendDisplay,
@@ -195,13 +194,11 @@ const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) =>
     buildExpressionFunction<MosaicVisExpressionFunctionDefinition>('mosaicVis', {
       ...generateCommonArguments(...rest),
       // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
-      buckets: buildExpression(
-        rest[2]
-          .filter(({ columnId }) => !isCollapsed(columnId, rest[3]))
-          .reverse()
-          .map((o) => o.columnId)
-          .map(prepareDimension)
-      ).toAst(),
+      buckets: rest[2]
+        .filter(({ columnId }) => !isCollapsed(columnId, rest[3]))
+        .reverse()
+        .map((o) => o.columnId)
+        .map(prepareDimension),
     }),
   ]).toAst();
 

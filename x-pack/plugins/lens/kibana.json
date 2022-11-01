@@ -31,6 +31,7 @@
     "unifiedFieldList"
   ],
   "optionalPlugins": [
+    "expressionPartitionVis",
     "usageCollection",
     "taskManager",
     "globalSearch",
