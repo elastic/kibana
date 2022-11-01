@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import useIntersection from 'react-use/lib/useIntersection';
 import { i18n } from '@kbn/i18n';
 
+import { EmptyImage } from './empty_image';
 import {
   isScreenshotImageBlob,
   isScreenshotRef,
@@ -18,10 +19,10 @@ import {
 
 import { SyntheticsSettingsContext } from '../../../contexts';
 
-import { useRetrieveStepImage } from './use_retrieve_step_image';
-import { ScreenshotOverlayFooter } from './screenshot_overlay_footer';
-import { JourneyStepImagePopover } from './journey_step_image_popover';
-import { EmptyThumbnail } from './empty_thumbnail';
+import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
+import { ScreenshotOverlayFooter } from '../monitor_test_result/screenshot_overlay_footer';
+import { JourneyStepImagePopover } from '../monitor_test_result/journey_step_image_popover';
+import { EmptyThumbnail } from '../monitor_test_result/empty_thumbnail';
 
 interface Props {
   checkGroup?: string;
@@ -29,6 +30,7 @@ interface Props {
   stepStatus?: string;
   initialStepNo?: number;
   allStepsLoaded?: boolean;
+  asThumbnail?: boolean;
   retryFetchOnRevisit?: boolean; // Set to `true` fro "Run Once" / "Test Now" modes
 }
 
@@ -39,6 +41,7 @@ export const JourneyStepScreenshotContainer = ({
   allStepsLoaded,
   initialStepNo = 1,
   retryFetchOnRevisit = false,
+  asThumbnail = true,
 }: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
@@ -135,9 +138,12 @@ export const JourneyStepScreenshotContainer = ({
           isImagePopoverOpen={isImagePopoverOpen}
           isStepFailed={stepStatus === 'failed'}
           isLoading={Boolean(loading)}
+          asThumbnail={asThumbnail}
         />
-      ) : (
+      ) : asThumbnail ? (
         <EmptyThumbnail isLoading={loading || !allStepsLoaded} />
+      ) : (
+        <EmptyImage isLoading={loading || !allStepsLoaded} />
       )}
     </div>
   );

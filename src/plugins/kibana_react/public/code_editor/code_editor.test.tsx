@@ -34,23 +34,36 @@ const simpleLogLang: monaco.languages.IMonarchLanguage = {
   },
 };
 
-monaco.languages.register({ id: 'loglang' });
-monaco.languages.setMonarchTokensProvider('loglang', simpleLogLang);
-
 const logs = `
 [Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
 [Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
 [Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
 `;
 
-class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-
 describe('<CodeEditor />', () => {
-  window.ResizeObserver = ResizeObserver;
+  beforeAll(() => {
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(), // deprecated
+        removeListener: jest.fn(), // deprecated
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
+    window.ResizeObserver = class ResizeObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    };
+
+    monaco.languages.register({ id: 'loglang' });
+    monaco.languages.setMonarchTokensProvider('loglang', simpleLogLang);
+  });
 
   test('is rendered', () => {
     const component = mountWithIntl(
