@@ -17,6 +17,8 @@ export default ({ getService, getPageObjects }) => {
     const testSubjects = getService('testSubjects');
     const find = getService('find');
 
+    // this needs to match
+    // https://github.com/elastic/kibana/blob/main/x-pack/test/upgrade/apps/rules/rules_smoke_tests.ts#L48
     const alertName = 'UpgradeRule';
 
     before(async () => {
