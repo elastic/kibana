@@ -1576,14 +1576,14 @@ describe('rules_list component with items', () => {
 
   it('rule list items with actions are editable if canExecuteAction is true', async () => {
     await setup();
-    expect(wrapper.find('.euiButtonIcon-isDisabled').length).toEqual(2);
+    expect(wrapper.find('button.euiButtonIcon[disabled=true]').length).toEqual(2);
   });
 
   it('rule list items with actions are not editable if canExecuteAction is false', async () => {
     const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
     hasExecuteActionsCapability.mockReturnValue(false);
     await setup();
-    expect(wrapper.find('.euiButtonIcon-isDisabled').length).toEqual(8);
+    expect(wrapper.find('button.euiButtonIcon[disabled=true]').length).toEqual(8);
     hasExecuteActionsCapability.mockReturnValue(true);
   });
 });
