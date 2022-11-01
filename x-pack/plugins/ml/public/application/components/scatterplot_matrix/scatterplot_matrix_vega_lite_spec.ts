@@ -20,6 +20,7 @@ import { LegendType, LEGEND_TYPES } from '../vega_chart/common';
 export const OUTLIER_SCORE_FIELD = 'outlier_score';
 
 const SCATTERPLOT_SIZE = 125;
+export const USER_SELECTION = 'user_selection';
 
 export const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 export const COLOR_OUTLIER = euiPaletteNegative(2)[1];
@@ -38,7 +39,7 @@ export const getColorSpec = (
     return {
       condition: {
         value: COLOR_OUTLIER,
-        test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
+        test: { or: [ { selection: USER_SELECTION }, `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`] }
       },
       value: euiTheme.euiColorMediumShade,
     };
@@ -48,7 +49,8 @@ export const getColorSpec = (
   // this returns either a continuous or categorical color spec.
   if (color !== undefined && legendType !== undefined) {
     return {
-      field: getEscapedVegaFieldName(color),
+      condition: { selection: USER_SELECTION, value: COLOR_OUTLIER },
+      field: getEscapedVegaFieldName(color ?? '00FF00'),
       type: legendType,
       scale: {
         range: legendType === LEGEND_TYPES.NOMINAL ? COLOR_RANGE_NOMINAL : COLOR_RANGE_QUANTITATIVE,
@@ -56,7 +58,7 @@ export const getColorSpec = (
     };
   }
 
-  return { value: DEFAULT_COLOR };
+  return { condition: { selection: USER_SELECTION, value: COLOR_OUTLIER }, value: DEFAULT_COLOR  };
 };
 
 // Escapes the characters .[] in field names with double backslashes
@@ -193,6 +195,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
       ...(outliers
         ? {
             selection: {
+              [USER_SELECTION]: { type: 'interval', empty: 'none' },
               mlOutlierScoreThreshold: {
                 type: 'single',
                 fields: ['cutoff'],
@@ -209,7 +212,11 @@ export const getScatterplotMatrixVegaLiteSpec = (
               },
             },
           }
-        : {}),
+        : { selection: {
+              // Always allow user selection
+              [USER_SELECTION]: { type: 'interval', empty: 'none' },
+            }
+          }),
       width: SCATTERPLOT_SIZE,
       height: SCATTERPLOT_SIZE,
     },

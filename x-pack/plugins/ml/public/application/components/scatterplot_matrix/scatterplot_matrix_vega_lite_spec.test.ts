@@ -20,33 +20,35 @@ import {
   COLOR_OUTLIER,
   COLOR_RANGE_NOMINAL,
   DEFAULT_COLOR,
+  USER_SELECTION,
 } from './scatterplot_matrix_vega_lite_spec';
 
 describe('getColorSpec()', () => {
-  it('should return the default color for non-outlier specs', () => {
+  it('should return only user selection condition and the default color for non-outlier specs', () => {
     const colorSpec = getColorSpec(euiThemeLight);
 
-    expect(colorSpec).toEqual({ value: DEFAULT_COLOR });
+    expect(colorSpec).toEqual({ condition: { selection: USER_SELECTION, value: COLOR_OUTLIER }, value: DEFAULT_COLOR  });
   });
 
-  it('should return a conditional spec for outliers', () => {
+  it('should return user selection condition and conditional spec for outliers', () => {
     const colorSpec = getColorSpec(euiThemeLight, 'outlier_score');
-
+    
     expect(colorSpec).toEqual({
       condition: {
-        test: "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+        test: { or: [ { selection: USER_SELECTION }, "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)"] },
         value: COLOR_OUTLIER,
       },
       value: euiThemeLight.euiColorMediumShade,
     });
   });
 
-  it('should return a field based spec for non-outlier specs with legendType supplied', () => {
+  it('should return user selection condition and a field based spec for non-outlier specs with legendType supplied', () => {
     const colorName = 'the-color-field';
 
     const colorSpec = getColorSpec(euiThemeLight, undefined, colorName, LEGEND_TYPES.NOMINAL);
 
     expect(colorSpec).toEqual({
+      condition: { selection: USER_SELECTION, value: COLOR_OUTLIER },
       field: colorName,
       scale: {
         range: COLOR_RANGE_NOMINAL,
@@ -75,7 +77,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       size: 8,
       type: 'circle',
     });
-    expect(vegaLiteSpec.spec.encoding.color).toEqual({ value: DEFAULT_COLOR });
+    expect(vegaLiteSpec.spec.encoding.color).toEqual({ condition: { selection: USER_SELECTION, value: COLOR_OUTLIER }, value: DEFAULT_COLOR  });
     expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
@@ -103,7 +105,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
       condition: {
         // Note the escaped dot character
-        test: "(datum['ml\\.outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+        test: { or: [ { selection: USER_SELECTION }, "(datum['ml\\.outlier_score'] >= mlOutlierScoreThreshold.cutoff)"] },
         value: COLOR_OUTLIER,
       },
       value: euiThemeLight.euiColorMediumShade,
@@ -146,6 +148,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       type: 'circle',
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
+      condition: { selection: USER_SELECTION, value: COLOR_OUTLIER },
       field: 'the-color-field',
       scale: {
         range: COLOR_RANGE_NOMINAL,
