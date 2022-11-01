@@ -10,13 +10,20 @@
  * Logs messages and errors
  */
 export class Logger {
+  /**
+   * @param {{silent?: boolean; quiet?: boolean;}} settings
+   */
   constructor(settings = {}) {
     this.previousLineEnded = true;
     this.silent = !!settings.silent;
     this.quiet = !!settings.quiet;
   }
 
-  log(data, sameLine) {
+  /**
+   * @param {string} data
+   * @param {boolean} sameLine
+   */
+  log(data, sameLine = false) {
     if (this.silent || this.quiet) return;
 
     if (!sameLine && !this.previousLineEnded) {
@@ -34,6 +41,9 @@ export class Logger {
     this.previousLineEnded = !sameLine;
   }
 
+  /**
+   * @param {string} data
+   */
   error(data) {
     if (this.silent) return;
 

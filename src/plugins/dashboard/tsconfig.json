@@ -5,7 +5,7 @@
     "emitDeclarationOnly": true,
     "declaration": true,
   },
-  "include": ["*.ts", ".storybook/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../inspector/tsconfig.json" },

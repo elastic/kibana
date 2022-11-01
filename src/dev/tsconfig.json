@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+  },
+  "include": [
+    "**/*.js",
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/types/**/*"
+  ],
+  "kbn_references": [
+    { "path": "../core/tsconfig.json" },
+    { "path": "../../tsconfig.json" },
+    { "path": "../../x-pack/plugins/screenshotting/tsconfig.json" },
+  ]
+}
