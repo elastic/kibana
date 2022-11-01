@@ -42,7 +42,6 @@ export interface ClientConfigType {
 }
 
 export interface AppDependencies {
-  isReadOnlyMode: boolean;
   kibanaVersionInfo: KibanaVersionContext;
   plugins: {
     cloud?: CloudSetup;

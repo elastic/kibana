@@ -98,7 +98,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
           <EuiText>
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.checkUpcomingVersion"
-              defaultMessage={`If you are not on the latest version of the Elastic stack, use the Upgrade Assistant to prepare for the next upgrade.`}
+              defaultMessage="If you are not on the latest version of the Elastic stack, use the Upgrade Assistant to prepare for the next upgrade."
             />
           </EuiText>
           <EuiText data-test-subj="whatsNewLink">

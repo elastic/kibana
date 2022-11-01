@@ -15,13 +15,6 @@ const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
-  /*
-   * In readonly mode, the user will not be able to perform any actions in the UI
-   * and will be presented with a message indicating as such.
-   * We are enabling users to address any upgrade issues during minor releases hence
-   * this flag will is set to false during 8.6+.
-   */
-  readonly: schema.boolean({ defaultValue: false }),
 });
 
 export type UpgradeAssistantConfig = TypeOf<typeof configSchema>;
@@ -29,7 +22,6 @@ export type UpgradeAssistantConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<UpgradeAssistantConfig> = {
   exposeToBrowser: {
     ui: true,
-    readonly: true,
   },
   schema: configSchema,
   deprecations: () => [],

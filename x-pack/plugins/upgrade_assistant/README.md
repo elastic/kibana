@@ -2,7 +2,7 @@
 
 ## About
 
-Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. It will only be enabled on the last minor before the next major release. This is controlled via the config: `xpack.upgrade_assistant.readonly` ([#101296](https://github.com/elastic/kibana/pull/101296)).
+Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 Its primary purposes are to:
 

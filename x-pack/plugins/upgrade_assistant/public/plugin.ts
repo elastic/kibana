@@ -24,7 +24,6 @@ export class UpgradeAssistantUIPlugin
     { management, cloud, share, usageCollection }: SetupDependencies
   ) {
     const {
-      readonly,
       ui: { enabled: isUpgradeAssistantUiEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
@@ -61,7 +60,6 @@ export class UpgradeAssistantUIPlugin
 
           const appDependencies: AppDependencies = {
             kibanaVersionInfo,
-            isReadOnlyMode: readonly,
             plugins: {
               cloud,
               share,

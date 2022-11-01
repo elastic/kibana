@@ -73,7 +73,6 @@ shareMock.url.locators.get = (id: IdKey) => ({
 });
 
 export const getAppContextMock = (kibanaVersion: SemVer) => ({
-  isReadOnlyMode: false,
   kibanaVersionInfo: {
     currentMajor: kibanaVersion.major,
     prevMajor: kibanaVersion.major - 1,
