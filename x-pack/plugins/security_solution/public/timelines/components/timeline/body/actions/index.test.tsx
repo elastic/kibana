@@ -7,14 +7,21 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { TableId } from '../../../../../../common/types/timeline';
+import { TableId, TimelineId } from '../../../../../../common/types/timeline';
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions, isAlert } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { licenseService } from '../../../../../common/hooks/use_license';
+import { useTourContext } from '../../../../../common/components/guided_onboarding_tour';
+import {
+  GuidedOnboardingTourStep,
+  SecurityTourStep,
+} from '../../../../../common/components/guided_onboarding_tour/tour_step';
+import { SecurityStepId } from '../../../../../common/components/guided_onboarding_tour/tour_config';
 
+jest.mock('../../../../../common/components/guided_onboarding_tour');
 jest.mock('../../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
@@ -60,6 +67,9 @@ jest.mock('../../../../../common/lib/kibana', () => {
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
     }),
+    useNavigateTo: jest.fn().mockReturnValue({
+      navigateTo: jest.fn(),
+    }),
     useGetUserCasesPermissions: originalKibanaLib.useGetUserCasesPermissions,
   };
 });
@@ -97,12 +107,17 @@ const defaultProps = {
   setEventsLoading: () => {},
   showCheckboxes: true,
   showNotes: false,
-  timelineId: 'test',
+  timelineId: TimelineId.test,
   toggleShowNotes: () => {},
 };
 
 describe('Actions', () => {
   beforeAll(() => {
+    (useTourContext as jest.Mock).mockReturnValue({
+      activeStep: 1,
+      incrementStep: () => null,
+      isTourShown: () => false,
+    });
     (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
   });
 
@@ -135,6 +150,121 @@ describe('Actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
+  });
+
+  describe('Guided Onboarding Step', () => {
+    const incrementStepMock = jest.fn();
+    beforeEach(() => {
+      (useTourContext as jest.Mock).mockReturnValue({
+        activeStep: 2,
+        incrementStep: incrementStepMock,
+        isTourShown: () => true,
+      });
+      jest.clearAllMocks();
+    });
+
+    const ecsData = {
+      ...mockTimelineData[0].ecs,
+      kibana: { alert: { rule: { uuid: ['123'], parameters: {} } } },
+    };
+    const isTourAnchorConditions: { [key: string]: unknown } = {
+      ecsData,
+      timelineId: TableId.alertsOnAlertsPage,
+      ariaRowindex: 1,
+    };
+
+    test('if isTourShown is false [isTourAnchor=false], SecurityTourStep is not active', () => {
+      (useTourContext as jest.Mock).mockReturnValue({
+        activeStep: 2,
+        incrementStep: jest.fn(),
+        isTourShown: () => false,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} {...isTourAnchorConditions} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
+      expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
+    });
+
+    test('if all conditions make isTourAnchor=true, SecurityTourStep is active', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} {...isTourAnchorConditions} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
+      expect(wrapper.find(SecurityTourStep).exists()).toEqual(true);
+    });
+
+    test('on expand event click and SecurityTourStep is active, incrementStep', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} {...isTourAnchorConditions} />
+        </TestProviders>
+      );
+
+      wrapper.find('[data-test-subj="expand-event"]').first().simulate('click');
+
+      expect(incrementStepMock).toHaveBeenCalledWith(SecurityStepId.alertsCases);
+    });
+
+    test('on expand event click and SecurityTourStep is active, but step is not 2, do not incrementStep', () => {
+      (useTourContext as jest.Mock).mockReturnValue({
+        activeStep: 1,
+        incrementStep: incrementStepMock,
+        isTourShown: () => true,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} {...isTourAnchorConditions} />
+        </TestProviders>
+      );
+
+      wrapper.find('[data-test-subj="expand-event"]').first().simulate('click');
+
+      expect(incrementStepMock).not.toHaveBeenCalled();
+    });
+
+    test('on expand event click and SecurityTourStep is not active, do not incrementStep', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} />
+        </TestProviders>
+      );
+
+      wrapper.find('[data-test-subj="expand-event"]').first().simulate('click');
+
+      expect(incrementStepMock).not.toHaveBeenCalled();
+    });
+
+    test('if isTourAnchor=false, SecurityTourStep is not active', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
+      expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
+    });
+    describe.each(Object.keys(isTourAnchorConditions))('tour condition true: %s', (key: string) => {
+      it('Single condition does not make tour step exist', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <Actions {...defaultProps} {...{ [key]: isTourAnchorConditions[key] }} />
+          </TestProviders>
+        );
+
+        expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
+        expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
+      });
+    });
   });
 
   describe('Alert context menu enabled?', () => {
@@ -271,7 +401,7 @@ describe('Actions', () => {
           <Actions
             {...defaultProps}
             ecsData={ecsData}
-            timelineId={TableId.kubernetesPageSessions}
+            timelineId={TableId.kubernetesPageSessions} // not a bug, this needs to be fixed by providing a generic interface for actions registry
           />
         </TestProviders>
       );
