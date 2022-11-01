@@ -16,7 +16,7 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
       tabindex="0"
     >
       <div
-        class="emotion-euiPopoverArrow-top"
+        class="euiPopover__arrow emotion-euiPopoverArrow-top"
         data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
@@ -117,7 +117,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
       tabindex="0"
     >
       <div
-        class="emotion-euiPopoverArrow-top"
+        class="euiPopover__arrow emotion-euiPopoverArrow-top"
         data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
@@ -370,7 +370,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
       tabindex="0"
     >
       <div
-        class="emotion-euiPopoverArrow-top"
+        class="euiPopover__arrow emotion-euiPopoverArrow-top"
         data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
@@ -471,7 +471,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
       tabindex="0"
     >
       <div
-        class="emotion-euiPopoverArrow-top"
+        class="euiPopover__arrow emotion-euiPopoverArrow-top"
         data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
@@ -657,7 +657,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
       tabindex="0"
     >
       <div
-        class="emotion-euiPopoverArrow-top"
+        class="euiPopover__arrow emotion-euiPopoverArrow-top"
         data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
