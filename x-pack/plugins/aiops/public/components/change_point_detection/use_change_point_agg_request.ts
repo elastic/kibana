@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   ChangePointAnnotation,
@@ -163,7 +163,12 @@ export function useChangePointRequest(
     fetchResults();
   }, [requestParams, query, splitFieldCardinality, fetchResults, reset]);
 
-  return { results, isLoading, reset };
+  const progress = useMemo<number>(() => {
+    if (!splitFieldCardinality) return 0;
+    return Math.round((results.length / splitFieldCardinality) * 100);
+  }, [splitFieldCardinality, results.length]);
+
+  return { results, isLoading, reset, progress };
 }
 
 interface ChangePointAggResponse {

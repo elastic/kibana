@@ -51,6 +51,7 @@ export const ChangePointDetectionContext = createContext<{
   resultFilters: Filter[];
   updateFilters: (update: Filter[]) => void;
   resultQuery: Query;
+  progress: number;
 }>({
   isLoading: false,
   splitFieldsOptions: [],
@@ -63,6 +64,7 @@ export const ChangePointDetectionContext = createContext<{
   resultFilters: [],
   updateFilters: () => {},
   resultQuery: { query: '', language: 'kuery' },
+  progress: 0,
 });
 
 export type ChangePointType =
@@ -222,15 +224,17 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return mergedQuery;
   }, [resultFilters, resultQuery, uiSettings, dataView, timeRange]);
 
-  const { results: annotations, isLoading: annotationsLoading } = useChangePointRequest(
-    requestParams,
-    combinedQuery
-  );
+  const {
+    results: annotations,
+    isLoading: annotationsLoading,
+    progress,
+  } = useChangePointRequest(requestParams, combinedQuery);
 
   if (!bucketInterval) return null;
 
   const value = {
     isLoading: annotationsLoading,
+    progress,
     timeBuckets,
     requestParams,
     updateRequestParams,

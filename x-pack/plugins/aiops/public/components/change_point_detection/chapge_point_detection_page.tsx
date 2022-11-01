@@ -12,7 +12,6 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiProgress,
@@ -23,6 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
+import { css } from '@emotion/react';
 import { SearchBarWrapper } from './search_bar';
 import { useChangePontDetectionContext } from './change_point_detection_context';
 import { MetricFieldSelector } from './metric_field_selector';
@@ -32,13 +32,13 @@ import { ChartComponent } from './chart_component';
 
 export const ChangePointDetectionPage: FC = () => {
   const {
-    isLoading,
     requestParams,
     updateRequestParams,
     annotations,
     resultFilters,
     updateFilters,
     resultQuery,
+    progress,
   } = useChangePontDetectionContext();
 
   const setFn = useCallback(
@@ -91,11 +91,27 @@ export const ChangePointDetectionPage: FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isLoading ? (
-        <EuiProgress size="xs" color="accent" />
-      ) : (
-        <EuiHorizontalRule size="full" margin="s" />
-      )}
+      <EuiSpacer size="m" />
+
+      <div
+        css={css`
+          visibility: ${progress === 100 ? 'hidden' : 'visible'};
+        `}
+      >
+        <EuiProgress
+          label={
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.progressBarLabel"
+              defaultMessage="Fetching stuff"
+            />
+          }
+          value={progress}
+          max={100}
+          valueText
+          size="m"
+        />
+        <EuiSpacer size="m" />
+      </div>
 
       {annotations.length === 0 ? (
         <EuiCallOut
