@@ -61,7 +61,6 @@ const createMatchesIndicesValidator = ({
   isRollup,
 }: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: async ({ value, customData: { provider } }) => {
-    // todo can I pass in value here?
     const { matchedIndices, rollupIndex } = (await provider()) as {
       matchedIndices: MatchedIndicesSet;
       rollupIndex?: string;
@@ -69,7 +68,6 @@ const createMatchesIndicesValidator = ({
 
     console.log('*** validator has results', matchedIndices);
     // verifies that the title matches at least one index, alias, or data stream
-    // const { newRollupIndexName } = await refreshMatchedIndices(removeSpaces(value));
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
 
     if (matchedIndices.exactMatchedIndices.length === 0) {

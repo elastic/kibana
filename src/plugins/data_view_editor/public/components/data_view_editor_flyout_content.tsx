@@ -119,7 +119,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       }
 
       // todo export asObservable references instead of full subjects
-
       const indexPatternStub: DataViewSpec = {
         title: removeSpaces(formData.title),
         timeFieldName: formData.timestampField?.value,

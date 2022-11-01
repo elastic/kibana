@@ -206,7 +206,6 @@ export class DataViewEditorService {
   };
 
   private loadIndices = async () => {
-    // todo this could happen twice, at most - might be fixed, verify
     const allSrcs = await this.getIndicesCached({
       pattern: '*',
       showAllIndices: this.allowHidden,
