@@ -17,6 +17,7 @@ import {
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   AvailableReferenceLineIcon,
+  DataDecorationConfigFn,
   ReferenceLineDecorationConfigFn,
   XYCurveType,
 } from '@kbn/expression-xy-plugin/common';
@@ -578,20 +579,15 @@ const yConfigToDataDecorationConfigExpression = (
   defaultColor?: string
 ): Ast => {
   const axisId = yAxisConfigs.find((axis) => axis.id && axis.position === yConfig.axisMode)?.id;
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'dataDecorationConfig',
-        arguments: {
-          axisId: axisId ? [axisId] : [],
-          forAccessor: [yConfig.forAccessor],
-          color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
-        },
-      },
-    ],
-  };
+  const dataDecorationConfigFn = buildExpressionFunction<DataDecorationConfigFn>(
+    'dataDecorationConfig',
+    {
+      axisId,
+      forAccessor: yConfig.forAccessor,
+      color: yConfig.color ?? defaultColor,
+    }
+  );
+  return buildExpression([dataDecorationConfigFn]).toAst();
 };
 
 const extendedYConfigToRLDecorationConfigExpression = (
