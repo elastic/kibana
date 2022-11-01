@@ -238,4 +238,39 @@ storiesOf('CodeEditor', module)
         text: 'Hover dialog example can be triggered by hovering over a word',
       },
     }
+  )
+  .add(
+    'json support',
+    () => (
+      <div>
+        <CodeEditor
+          languageId="json"
+          editorDidMount={(editor) => {
+            monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+              validate: true,
+              schemas: [
+                {
+                  uri: editor.getModel()?.uri.toString() ?? '',
+                  fileMatch: ['*'],
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      version: {
+                        enum: ['v1', 'v2'],
+                      },
+                    },
+                  },
+                },
+              ],
+            });
+          }}
+          height={250}
+          value="{}"
+          onChange={action('onChange')}
+        />
+      </div>
+    ),
+    {
+      info: { text: 'JSON language support' },
+    }
   );
