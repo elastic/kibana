@@ -50,7 +50,7 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
           action: bulkAction.type,
         });
 
-        const response = await mutateAsync(bulkAction);
+        const response = await mutateAsync({ bulkAction });
         sendTelemetry(bulkAction.type, response);
 
         if (!options?.suppressSuccessToast) {

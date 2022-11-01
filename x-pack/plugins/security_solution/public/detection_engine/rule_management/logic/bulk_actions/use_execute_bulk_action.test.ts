@@ -67,7 +67,7 @@ describe('useExecuteBulkAction', () => {
 
     await executeBulkAction(bulkAction);
 
-    expect(mutateAsync).toHaveBeenCalledWith(bulkAction);
+    expect(mutateAsync).toHaveBeenCalledWith({ bulkAction });
   });
 
   describe('state handlers', () => {

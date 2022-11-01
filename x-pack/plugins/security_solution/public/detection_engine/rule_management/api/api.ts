@@ -223,7 +223,7 @@ type EditBulkAction = {
 } & QueryOrIds;
 export type BulkAction = PlainBulkAction | EditBulkAction;
 
-interface PerformBulkActionProps {
+export interface PerformBulkActionProps {
   bulkAction: BulkAction;
   dryRun?: boolean;
 }

@@ -7,7 +7,7 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type { BulkAction, BulkActionResponse } from '../api';
+import type { BulkActionResponse, PerformBulkActionProps } from '../api';
 import { performBulkAction } from '../api';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFindRulesQuery, useUpdateRulesCache } from './use_find_rules_query';
@@ -18,7 +18,7 @@ import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/consta
 export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
 export const useBulkActionMutation = (
-  options?: UseMutationOptions<BulkActionResponse, Error, BulkAction>
+  options?: UseMutationOptions<BulkActionResponse, Error, PerformBulkActionProps>
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
@@ -26,13 +26,18 @@ export const useBulkActionMutation = (
   const invalidateFetchPrebuiltRulesStatusQuery = useInvalidateFetchPrebuiltRulesStatusQuery();
   const updateRulesCache = useUpdateRulesCache();
 
-  return useMutation<BulkActionResponse, Error, BulkAction>(
-    (bulkAction: BulkAction) => performBulkAction({ bulkAction }),
+  return useMutation<BulkActionResponse, Error, PerformBulkActionProps>(
+    (bulkActionProps: PerformBulkActionProps) => performBulkAction(bulkActionProps),
     {
       ...options,
       mutationKey: BULK_ACTION_MUTATION_KEY,
       onSuccess: (...args) => {
-        const [res, { type: actionType }] = args;
+        const [
+          res,
+          {
+            bulkAction: { type: actionType },
+          },
+        ] = args;
         switch (actionType) {
           case BulkActionType.enable:
           case BulkActionType.disable: {
