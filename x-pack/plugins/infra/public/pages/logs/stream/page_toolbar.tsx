@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo } from 'react';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
@@ -108,13 +107,3 @@ export const LogsToolbar = () => {
     </>
   );
 };
-
-const QueryBarFlexItem = euiStyled(EuiFlexItem)`
-  @media (min-width: 1200px) {
-    flex: 0 0 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-`;
