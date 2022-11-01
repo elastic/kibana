@@ -160,66 +160,24 @@ export function ServiceOverviewMobileCharts({
       <EuiFlexItem>
         <EuiFlexGroup direction={rowDirection} gutterSize="s">
           {/* Device */}
-          <EuiFlexItem grow={5}>
-            <EuiPanel hasBorder={true}>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center" wrap>
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h2>
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.mostUsedDevice',
-                            {
-                              defaultMessage: 'Most used device',
-                            }
-                          )}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexItem>
-                <MostUsedChart
-                  metric={MostUsedMetric.DEVICE_NAME}
-                  start={start}
-                  end={end}
-                  filters={mostUsedChartFilters}
-                />
-              </EuiFlexItem>
-            </EuiPanel>
+          <EuiFlexItem>
+            <MostUsedChart
+              title="Most used device"
+              metric={MostUsedMetric.DEVICE_NAME}
+              start={start}
+              end={end}
+              filters={mostUsedChartFilters}
+            />
           </EuiFlexItem>
           {/* NCT */}
-          <EuiFlexItem grow={5}>
-            <EuiPanel hasBorder={true}>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center" wrap>
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h2>
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.mostUsedNCT',
-                            {
-                              defaultMessage: 'Most used NCT',
-                            }
-                          )}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexItem>
-                <MostUsedChart
-                  metric={MostUsedMetric.NCT}
-                  start={start}
-                  end={end}
-                  filters={mostUsedChartFilters}
-                />
-              </EuiFlexItem>
-            </EuiPanel>
+          <EuiFlexItem>
+            <MostUsedChart
+              title="Most used NCT"
+              metric={MostUsedMetric.NCT}
+              start={start}
+              end={end}
+              filters={mostUsedChartFilters}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -227,66 +185,24 @@ export function ServiceOverviewMobileCharts({
       <EuiFlexItem>
         <EuiFlexGroup direction={rowDirection} gutterSize="s">
           {/* OS Version */}
-          <EuiFlexItem grow={5}>
-            <EuiPanel hasBorder={true}>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center" wrap>
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h2>
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.mostUsedOsVersion',
-                            {
-                              defaultMessage: 'Most used OS version',
-                            }
-                          )}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexItem>
-                <MostUsedChart
-                  metric={MostUsedMetric.OS_VERSION}
-                  start={start}
-                  end={end}
-                  filters={mostUsedChartFilters}
-                />
-              </EuiFlexItem>
-            </EuiPanel>
+          <EuiFlexItem>
+            <MostUsedChart
+              title="Most used OS version"
+              metric={MostUsedMetric.OS_VERSION}
+              start={start}
+              end={end}
+              filters={mostUsedChartFilters}
+            />
           </EuiFlexItem>
           {/* App version */}
-          <EuiFlexItem grow={5}>
-            <EuiPanel hasBorder={true}>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center" wrap>
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h2>
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.mostUsedVersion',
-                            {
-                              defaultMessage: 'Most used app version',
-                            }
-                          )}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexItem>
-                <MostUsedChart
-                  metric={MostUsedMetric.APP_VERSION}
-                  start={start}
-                  end={end}
-                  filters={mostUsedChartFilters}
-                />
-              </EuiFlexItem>
-            </EuiPanel>
+          <EuiFlexItem>
+            <MostUsedChart
+              title="Most used app version"
+              metric={MostUsedMetric.APP_VERSION}
+              start={start}
+              end={end}
+              filters={mostUsedChartFilters}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

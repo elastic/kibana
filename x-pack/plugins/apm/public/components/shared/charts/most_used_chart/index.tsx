@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiTitle, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -20,11 +21,13 @@ export enum MostUsedMetric {
 }
 
 export function MostUsedChart({
+  title,
   start,
   end,
   filters,
   metric,
 }: {
+  title: string;
   start: string;
   end: string;
   filters: QueryDslQueryContainer[];
@@ -86,18 +89,36 @@ export function MostUsedChart({
   };
 
   return (
-    <EmbeddableComponent
-      viewMode={ViewMode.VIEW}
-      id={`most-used-${metric.replaceAll('.', '-')}`}
-      hidePanelTitles
-      withDefaultActions
-      style={{ height: 200 }}
-      attributes={lensAttributes}
-      timeRange={{
-        from: start,
-        to: end,
-      }}
-      {...(canUseEditor() && { extraActions: [getOpenInLensAction()] })}
-    />
+    <EuiPanel hasBorder={true}>
+      <EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate(`xpack.apm.serviceOverview.${metric}`, {
+                defaultMessage: title,
+                values: {
+                  title,
+                },
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EmbeddableComponent
+          viewMode={ViewMode.VIEW}
+          id={`most-used-${metric.replaceAll('.', '-')}`}
+          hidePanelTitles
+          withDefaultActions
+          style={{ height: 200 }}
+          attributes={lensAttributes}
+          timeRange={{
+            from: start,
+            to: end,
+          }}
+          {...(canUseEditor() && { extraActions: [getOpenInLensAction()] })}
+        />
+      </EuiFlexItem>
+    </EuiPanel>
   );
 }
