@@ -199,7 +199,7 @@ export const syncNewMonitor = async ({
         errors: syncErrors,
         monitor: monitorSavedObject,
         isInlineScript: Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-        kibanaVersion: server.kibanaVersion,
+        stackVersion: server.stackVersion,
       })
     );
 

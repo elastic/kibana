@@ -35,14 +35,14 @@ export class ServiceAPIClient {
   public locations: PublicLocations;
   private logger: Logger;
   private readonly config?: ServiceConfig;
-  private readonly kibanaVersion: string;
+  private readonly stackVersion: string;
   private readonly server: UptimeServerSetup;
 
   constructor(logger: Logger, config: ServiceConfig, server: UptimeServerSetup) {
     this.config = config;
     const { username, password } = config ?? {};
     this.username = username;
-    this.kibanaVersion = server.kibanaVersion;
+    this.stackVersion = server.stackVersion;
 
     if (username && password) {
       this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
@@ -96,7 +96,7 @@ export class ServiceAPIClient {
   }
 
   addVersionHeader(req: AxiosRequestConfig) {
-    req.headers = { ...req.headers, 'x-kibana-version': this.kibanaVersion };
+    req.headers = { ...req.headers, 'x-kibana-version': this.stackVersion };
     return req;
   }
 
@@ -157,7 +157,7 @@ export class ServiceAPIClient {
           data: {
             monitors: monitorsStreams,
             output,
-            stack_version: this.kibanaVersion,
+            stack_version: this.stackVersion,
             is_edit: isEdit,
           },
           headers: this.authorization
@@ -197,7 +197,7 @@ export class ServiceAPIClient {
                 code: err.code,
                 status: err.response?.data?.status,
                 url,
-                kibanaVersion: this.server.kibanaVersion,
+                stackVersion: this.server.stackVersion,
               });
               if (err.response?.data?.reason) {
                 this.logger.error(err.response?.data?.reason);

@@ -138,7 +138,7 @@ const sendNewMonitorTelemetry = (
         errors,
         monitor,
         isInlineScript: Boolean((monitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-        kibanaVersion: server.kibanaVersion,
+        stackVersion: server.stackVersion,
       })
     );
   }
