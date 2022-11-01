@@ -75,6 +75,16 @@ When you add the *Break-down-by* field, use five or less colors. Use the *Other*
 [[create-goal-and-single-value-visualizations]]
 ==== Create goal and single value visualizations
 
+To make metric visualizations as clear as possible, configure all of the components. 
+
+. To display additional information, add subtitles. For example, add subtitles to describe any applied filters.
+
+. To change the metric visualization format, increase or decrease *Layout columns*. 
++
+When you display metric visualizations in columns, you can easily identify differences between the values. 
++
+When you display metric visualizations in row, you increase the readability. 
+
 [discrete]
 [[create-line-and-area-visualizations]]
 ==== Create line and area visualizations

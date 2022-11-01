@@ -162,91 +162,107 @@ Consider the alertnative bar chart visualizations for best displaying your data.
 [discrete]
 [[supported-visualizations-goal-and-single-value]]
 === Goal and single value
+Goal and single value visualizations convey a clear understanding of how a specific indicator behaves. The primary goal is to display a number of the the most accurate, precise, and immediate value. 
 
-Metrics convey a clear understanding of how a specific indicator behaves. The primary goal is to display a number of the 
-the most accurate, precise, and immediate value. 
-
-Supported visualizations:
+{kib} supports the following goal and single value visualizations:
 
 * (Technical preview) Gauge horizontal 
 * (Technical preview) Gauge vertical
 * Legacy metric
 * (Technical preview) Metric
 
-Use metrics for the following quantitative data:
+Use goal and single value visualizations when you want to display the following quantitative data:
 
 * Plain numbers
 * Counts of elements, such as visitors and flights
 * Percentages
 * Formulas, such as sum and average
 
-Add metrics to your dashboard to answer the following questions:
+Add goal and single value visualizations to your dashboard to answer the following types of questions:
 
 * How many visitors did we have?
 * What's the current usage of CPU and Memory?
 * How many flights have been delayed?
 
-[image]
+[discrete]
+[[components-of-a-bar-chart]]
+==== Components of goal and single value visualizations
 
+All goal and single value visualizations include the same set of components for visualizing your data. 
+
+[role="screenshot"]
+image:images/lens_anatomyOfAGoal_8.6.png[Goal visualization with callouts for each goal part]
++
 [cols=2*]
 |===
-
 | *1*
-| *Title* [Description]
+| *Title* The name of the field. 
 
 | *2*
-| *Subtitle* [Description]
+| *Metric* The value of the field.
 
 | *3*
-| *Measure unit* [Description]
+| *Goal value* The value of the goal you want to achieve.
 
 | *4*
-| *Value* [Description]
+| *Maximum value* The maximum value of the field.
 
 | *5*
-| *Minimum value* [Description]
+| *Tick* A visually aligned and labeled measurement.
 
-| *5*
-| *Maximum value* [Description]
+| *6*
+| *Minimum value* TThe minimum value of the field.
+|===
 
-| *5*
-| *Bar and color values* [Description]
+[role="screenshot"]
+image:images/lens_anatomyOfAMetric_8.6.png[Metric visualization with callouts for each metric part]
++
+[cols=2*]
+|===
+| *1*
+| *Title* The name of the value. 
+
+| *2*
+| *Subtitle* Additional information about the primary field.
+
+| *3*
+| *Secondary metric* The value of an optional secondary field.
+
+| *4*
+| *Primary metric* The value of the required primary field.
+
+| *4*
+| *Maximum value* The maximum value of an optional field.
 |===
 
 [discrete]
 [[supported-visualizations-metric-best-practices]]
-==== Metric best practices
+==== Goal and single value visualizations best practices
 
-To make metrics as clear as possible, use all the required components. 
+To create goal and single value visualizations that best display your data, review the best practices. 
 
-Text and values should be self-explanatory and shouldn't require any prior contextual knowledge in order to be understood. Be specific without being verbose.
+Make sure the text and values are self-explanatory. Be specific without being verbose.
 
-[image]
+[cols="50, 50"]
+|===
+a| *X*
+| image:images/lens_badBestPracticeMetric_8.6.png[Example of a bad metric visualization]
 
-When the displayed value is the result of applied filters and does not reflect the selected dashboard time range, 
-remember to make this explicit. You can use subtitles or <other smaller text name> to inform users of the choices 
-and calculations. 
-
-*Don'ts*
-Don’t rely solely on <micro visualization functionality> or <background visualization functionality> to provide a precise and understandable analysis of data trends. 
-These options give a contextual and wider layer of information that could help understanding the overall trends and evolution of data but they are not detailed enough 
-to get specific insights. 
-
-If your goal is to precisely see evolution of values over time please use a line chart instead, where you’ll have all the information required to perform a proper analysis 
-(grid, values, axis, legend…)
-
-[image] 
+a| *&check;*
+| image:images/lens_goodBestPracticeMetric_8.6.png[Example of a good metric visualization]
+|===
 
 [discrete]
 [[supported-visualizations-metric-alternatives]]
-==== Alternative metric visualizations
+==== Alternative goal and single value visualizations
 
-* *Bar chart* When many indicators/metrics share the same scale (e.g. percentage) it’s better to put them on the same chart in order to simplify the comparison among them
+* *Bar chart* When your metric visualizations share the same scale, such as percentage, use a bar chart to easily compare side-by-side.
 
-* *Table* Tables offer the possibility to sort and handle data in a more detailed manner. Use tables with conditional formatting to obtain a similar result but with more controls.
+* *Table* Tables allow you to sort and format the data, but with additional options.
 
-* *Text* Use plain text with a dedicated box when a long explanation is needed. Metric chart has limitations in terms of component size and length of text, instead of 
-abounding with text, switch to a simpler component such a plain text.
+* *Text* When you need to describe visualizations in detail, use text.
+
+//* *Line chart* Instead of using the background functionality to display how the data changes over time, use a line chart. 
 
 [discrete]
 [[supported-visualizations-line-and-area]]
