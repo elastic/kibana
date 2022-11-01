@@ -6,11 +6,12 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { CaseAttributes, CommentAttributes } from '../../../../common/api';
+import type { CaseSavedObject } from '../../../common/types';
+import type { CommentAttributes } from '../../../../common/api';
 import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 
-export const mockCases: Array<SavedObject<CaseAttributes>> = [
+export const mockCases: CaseSavedObject[] = [
   {
     type: 'cases',
     id: 'mock-id-1',

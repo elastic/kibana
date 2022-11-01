@@ -38,7 +38,7 @@ import type { PersistableStateAttachmentTypeRegistry } from '../attachment_frame
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
-import { NotificationsService } from '../services/notifications';
+import { EmailNotificationService } from '../services/notifications/email_notification_service';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -167,7 +167,16 @@ export class CasesClientFactory {
       this.options.licensingPluginStart.featureUsage.notifyUsage
     );
 
-    const notificationsService = new NotificationsService(this.options.notifications);
+    /**
+     * The notifications plugins only exports the EmailService.
+     * We do the same. If in the future we use other means
+     * of notifications we can refactor to use a factory.
+     */
+    const notificationService = new EmailNotificationService(
+      this.logger,
+      this.options.notifications,
+      this.options.securityPluginStart
+    );
 
     return {
       alertsService: new AlertService(esClient, this.logger),
@@ -180,7 +189,7 @@ export class CasesClientFactory {
       ),
       attachmentService,
       licensingService,
-      notificationsService,
+      notificationService,
     };
   }
 

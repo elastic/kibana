@@ -29,7 +29,6 @@ import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
-import { notifyAssignees } from '../utils';
 
 /**
  * Creates a new case.
@@ -42,11 +41,10 @@ export const create = async (
 ): Promise<CaseResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseService, userActionService, licensingService, notificationsService },
+    services: { caseService, userActionService, licensingService, notificationService },
     user,
     logger,
     authorization: auth,
-    securityStartPlugin,
   } = clientArgs;
 
   const query = pipe(
@@ -123,11 +121,13 @@ export const create = async (
     });
 
     if (query.assignees && query.assignees.length !== 0) {
-      await notifyAssignees({
-        assignees: query.assignees,
-        theCase: flattenedCase,
-        bulkGetUserProfiles: securityStartPlugin.userProfiles.bulkGet,
-        notificationsService,
+      const assigneesWithoutCurrentUser = query.assignees.filter(
+        (assignee) => assignee.uid !== user.profile_uid
+      );
+
+      await notificationService.notifyAssignees({
+        assignees: assigneesWithoutCurrentUser,
+        theCase: newCase,
       });
     }
 

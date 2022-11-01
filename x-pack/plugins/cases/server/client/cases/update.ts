@@ -20,11 +20,12 @@ import { nodeBuilder } from '@kbn/es-query';
 
 import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 import type {
+  CaseAssignees,
   CasePatchRequest,
+  CaseResponse,
   CasesPatchRequest,
   CasesResponse,
   CommentAttributes,
-  CaseAttributes,
   User,
 } from '../../../common/api';
 import {
@@ -42,7 +43,7 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
-import { arraysDifference, getCaseToUpdate, bulkNotifyAssignees } from '../utils';
+import { arraysDifference, getCaseToUpdate } from '../utils';
 
 import type { AlertService, CasesService } from '../../services';
 import { createCaseError } from '../../common/error';
@@ -58,6 +59,7 @@ import { Operations } from '../../authorization';
 import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
+import type { CaseSavedObject } from '../../common/types';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -252,7 +254,7 @@ async function updateAlerts({
 }
 
 function partitionPatchRequest(
-  casesMap: Map<string, SavedObject<CaseAttributes>>,
+  casesMap: Map<string, CaseSavedObject>,
   patchReqCases: CasePatchRequest[]
 ): {
   nonExistingCases: CasePatchRequest[];
@@ -287,7 +289,7 @@ function partitionPatchRequest(
 
 interface UpdateRequestWithOriginalCase {
   updateReq: CasePatchRequest;
-  originalCase: SavedObject<CaseAttributes>;
+  originalCase: CaseSavedObject;
 }
 
 /**
@@ -306,12 +308,11 @@ export const update = async (
       userActionService,
       alertsService,
       licensingService,
-      notificationsService,
+      notificationService,
     },
     user,
     logger,
     authorization,
-    securityStartPlugin,
   } = clientArgs;
 
   const query = pipe(
@@ -324,10 +325,15 @@ export const update = async (
       caseIds: query.cases.map((q) => q.id),
     });
 
+    /**
+     * Warning: The code below assumes that the
+     * casesMap is immutable. It should be used
+     * only for read.
+     */
     const casesMap = myCases.saved_objects.reduce((acc, so) => {
       acc.set(so.id, so);
       return acc;
-    }, new Map<string, SavedObject<CaseAttributes>>());
+    }, new Map<string, CaseSavedObject>());
 
     const { nonExistingCases, conflictedCases, casesToAuthorize } = partitionPatchRequest(
       casesMap,
@@ -421,22 +427,26 @@ export const update = async (
       alertsService,
     });
 
-    const returnUpdatedCase = myCases.saved_objects
-      .filter((myCase) =>
-        updatedCases.saved_objects.some((updatedCase) => updatedCase.id === myCase.id)
-      )
-      .map((myCase) => {
-        const updatedCase = updatedCases.saved_objects.find((c) => c.id === myCase.id);
-        return flattenCaseSavedObject({
+    const returnUpdatedCase = updatedCases.saved_objects.reduce((flattenCases, updatedCase) => {
+      const originalCase = casesMap.get(updatedCase.id);
+
+      if (!originalCase) {
+        return flattenCases;
+      }
+
+      return [
+        ...flattenCases,
+        flattenCaseSavedObject({
           savedObject: {
-            ...myCase,
+            ...originalCase,
             ...updatedCase,
-            attributes: { ...myCase.attributes, ...updatedCase?.attributes },
-            references: myCase.references,
-            version: updatedCase?.version ?? myCase.version,
+            attributes: { ...originalCase.attributes, ...updatedCase?.attributes },
+            references: originalCase.references,
+            version: updatedCase?.version ?? originalCase.version,
           },
-        });
-      });
+        }),
+      ];
+    }, [] as CaseResponse[]);
 
     await userActionService.bulkCreateUpdateCase({
       unsecuredSavedObjectsClient,
@@ -445,26 +455,37 @@ export const update = async (
       user,
     });
 
-    const casesAndUsersToNotifyForAssignment = returnUpdatedCase
-      .map((theCase) => {
-        // Warning: If the casesMap mutates in the future this will be invalid
-        const alreadyAssignedToCase = casesMap.get(theCase.id)?.attributes.assignees ?? [];
-        const comparedAssignees = arraysDifference(alreadyAssignedToCase, theCase.assignees ?? []);
+    const casesAndAssigneesToNotifyForAssignment = returnUpdatedCase.reduce((acc, updatedCase) => {
+      const originalCaseSO = casesMap.get(updatedCase.id);
 
-        if (comparedAssignees && comparedAssignees.addedItems.length > 0) {
-          return { theCase, assignees: comparedAssignees.addedItems };
-        }
+      if (!originalCaseSO) {
+        return acc;
+      }
 
-        return { theCase, assignees: [] };
-      })
-      .filter(({ assignees }) => assignees.length > 0);
+      const alreadyAssignedToCase = originalCaseSO.attributes.assignees ?? [];
+      const comparedAssignees = arraysDifference(
+        alreadyAssignedToCase,
+        updatedCase.assignees ?? []
+      );
 
-    if (casesAndUsersToNotifyForAssignment.length > 0) {
-      await bulkNotifyAssignees({
-        casesAndUsersToNotifyForAssignment,
-        bulkGetUserProfiles: securityStartPlugin.userProfiles.bulkGet,
-        notificationsService,
-      });
+      if (comparedAssignees && comparedAssignees.addedItems.length > 0) {
+        const theCase = {
+          ...originalCaseSO,
+          attributes: { ...originalCaseSO.attributes, ...updatedCase },
+        };
+
+        const assigneesWithoutCurrentUser = comparedAssignees.addedItems.filter(
+          (assignee) => assignee.uid !== user.profile_uid
+        );
+
+        acc.push({ theCase, assignees: assigneesWithoutCurrentUser });
+      }
+
+      return acc;
+    }, [] as Array<{ assignees: CaseAssignees; theCase: CaseSavedObject }>);
+
+    if (casesAndAssigneesToNotifyForAssignment.length > 0) {
+      await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
     }
 
     return CasesResponseRt.encode(returnUpdatedCase);

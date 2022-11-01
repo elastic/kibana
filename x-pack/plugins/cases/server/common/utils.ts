@@ -23,7 +23,7 @@ import {
   OWNER_INFO,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type { AlertInfo } from './types';
+import type { AlertInfo, CaseSavedObject } from './types';
 
 import type {
   CaseAttributes,
@@ -117,7 +117,7 @@ export const flattenCaseSavedObject = ({
   totalComment = comments.length,
   totalAlerts = 0,
 }: {
-  savedObject: SavedObject<CaseAttributes>;
+  savedObject: CaseSavedObject;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
