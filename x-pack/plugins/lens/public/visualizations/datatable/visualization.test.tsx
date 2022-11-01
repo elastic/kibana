@@ -550,7 +550,7 @@ describe('Datatable Visualization', () => {
       expect(columnArgs[0].arguments).toEqual(
         expect.objectContaining({
           columnId: ['c'],
-          palette: [expect.objectContaining({})],
+          palette: [expect.any(Object)],
           transposable: [true],
           colorMode: ['none'],
         })
