@@ -31,7 +31,6 @@ import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
 import { createInstallableFrom } from '.';
-import { getPrereleaseFromSettings } from './get_prerelease_setting';
 
 export type { SearchParams } from '../registry';
 export { getFile } from '../registry';
@@ -143,11 +142,6 @@ export async function getPackageInfo({
   ignoreUnverified?: boolean;
   prerelease?: boolean;
 }): Promise<PackageInfo> {
-  // if prerelease param not defined, query from settings
-  if (prerelease === undefined) {
-    prerelease = await getPrereleaseFromSettings(savedObjectsClient);
-  }
-
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),

@@ -61,7 +61,6 @@ import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackages } from './bundled_packages';
-import { getPrereleaseFromSettings } from './get_prerelease_setting';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -111,13 +110,10 @@ export async function ensureInstalledPackage(options: {
     spaceId = DEFAULT_SPACE_ID,
   } = options;
 
-  // check prerelease setting to enable installing latest GA version, even if there is a newer prerelease version
-  const prerelease = await getPrereleaseFromSettings(savedObjectsClient);
-
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion
     ? { name: pkgName, version: pkgVersion }
-    : await Registry.fetchFindLatestPackageOrThrow(pkgName, { prerelease });
+    : await Registry.fetchFindLatestPackageOrThrow(pkgName);
 
   const installedPackageResult = await isPackageVersionOrLaterInstalled({
     savedObjectsClient,
@@ -302,14 +298,10 @@ async function installPackageFromRegistry({
       installType,
     });
 
-    // check prerelease setting to enable installing latest GA version, even if there is a newer prerelease version
-    const prerelease = await getPrereleaseFromSettings(savedObjectsClient);
-
     // get latest package version and requested version in parallel for performance
     const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
-        prerelease,
       }),
       Registry.getPackage(pkgName, pkgVersion, {
         ignoreUnverified: force && !neverIgnoreVerificationError,

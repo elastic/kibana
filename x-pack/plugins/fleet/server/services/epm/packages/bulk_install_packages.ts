@@ -14,7 +14,6 @@ import type { InstallResult } from '../../../types';
 
 import { installPackage, isPackageVersionOrLaterInstalled } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
-import { getPrereleaseFromSettings } from './get_prerelease_setting';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -35,16 +34,13 @@ export async function bulkInstallPackages({
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
 
-  // auto upgrade to prerelease versions only if the setting is enabled
-  const prerelease = await getPrereleaseFromSettings(savedObjectsClient);
-
   const packagesResults = await Promise.allSettled(
     packagesToInstall.map(async (pkg) => {
       if (typeof pkg !== 'string') {
         return Promise.resolve(pkg);
       }
 
-      return Registry.fetchFindLatestPackageOrThrow(pkg, { prerelease });
+      return Registry.fetchFindLatestPackageOrThrow(pkg);
     })
   );
 
