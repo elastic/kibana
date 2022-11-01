@@ -26,13 +26,13 @@ const CODES = Object.freeze({
   /** path did not pass basic validation: malformed path, unix instead of windows, invalid characters, not full path, etc */
   'ra_get-file_error_invalid-input': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.getFile.invalidPath',
-    { defaultMessage: 'The path defined in not valid' }
+    { defaultMessage: 'The path defined is not valid' }
   ),
 
   /** Maybe: possible to be able to list the file but not read it's content */
   'ra_get-file_error_not-permitted': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.getFile.notPermitted',
-    { defaultMessage: 'File is not permitted to be read' }
+    { defaultMessage: 'Endpoint unable to read file requested (not permitted)' }
   ),
 
   /** file size exceeds hard coded limit (100MB) */
@@ -68,7 +68,7 @@ const CODES = Object.freeze({
   /** Upload API could be busy, endpoint should periodically re-try */
   'ra_get-file_error_queue-timeout': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.getFile.queueTimeout',
-    { defaultMessage: 'Timed out while attempting to connect o upload API' }
+    { defaultMessage: 'Endpoint timed out while attempting to connect to upload API' }
   ),
 
   // -----------------------------------------------------------------
