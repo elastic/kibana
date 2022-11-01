@@ -48,6 +48,7 @@ export function DependencyOperationDetailView() {
       detailTab,
       sortField = '@timestamp',
       sortDirection = 'desc',
+      showCriticalPath,
     },
   } = useApmParams('/dependencies/operation');
 
@@ -199,6 +200,14 @@ export function DependencyOperationDetailView() {
               waterfallItemId={waterfallItemId}
               detailTab={detailTab}
               selectedSample={selectedSample || null}
+              showCriticalPath={showCriticalPath}
+              onShowCriticalPathChange={(nextShowCriticalPath) => {
+                push(history, {
+                  query: {
+                    showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
+                  },
+                });
+              }}
             />
           </ResettingHeightRetainer>
         </EuiPanel>
