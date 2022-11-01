@@ -1,0 +1,133 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`guide card footer snapshots should render the footer when the guide has been completed 1`] = `
+<Fragment>
+  <EuiProgress
+    label="Completed"
+    max={2}
+    size="s"
+    value={1}
+    valueText="1/2 steps"
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <div
+    className="eui-textCenter"
+  >
+    <EuiButton
+      data-test-subj="onboarding--guideCard--view--search"
+      fill={true}
+      onClick={[Function]}
+    >
+      View guide
+    </EuiButton>
+  </div>
+</Fragment>
+`;
+
+exports[`guide card footer snapshots should render the footer when the guide has not started yet 1`] = `
+<div
+  className="eui-textCenter"
+>
+  <EuiButton
+    data-test-subj="onboarding--guideCard--view--search"
+    fill={true}
+    onClick={[Function]}
+  >
+    View guide
+  </EuiButton>
+</div>
+`;
+
+exports[`guide card footer snapshots should render the footer when the guide is in progress 1`] = `
+<Fragment>
+  <EuiProgress
+    label="In progress"
+    labelProps={
+      Object {
+        "css": Object {
+          "map": undefined,
+          "name": "x46p4t",
+          "next": undefined,
+          "styles": "
+  text-align: 'left';
+",
+          "toString": [Function],
+        },
+      }
+    }
+    max={2}
+    size="s"
+    value={1}
+    valueText="1/2 steps"
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <div
+    className="eui-textCenter"
+  >
+    <EuiButton
+      data-test-subj="onboarding--guideCard--continue--search"
+      fill={true}
+      onClick={[Function]}
+    >
+      Continue
+    </EuiButton>
+  </div>
+</Fragment>
+`;
+
+exports[`guide card footer snapshots should render the footer when the guide is ready to complete 1`] = `
+<Fragment>
+  <EuiProgress
+    label="In progress"
+    labelProps={
+      Object {
+        "css": Object {
+          "map": undefined,
+          "name": "x46p4t",
+          "next": undefined,
+          "styles": "
+  text-align: 'left';
+",
+          "toString": [Function],
+        },
+      }
+    }
+    max={2}
+    size="s"
+    value={1}
+    valueText="1/2 steps"
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <div
+    className="eui-textCenter"
+  >
+    <EuiButton
+      data-test-subj="onboarding--guideCard--continue--search"
+      fill={true}
+      onClick={[Function]}
+    >
+      Continue
+    </EuiButton>
+  </div>
+</Fragment>
+`;
+
+exports[`guide card footer snapshots should render the footer when the guided onboarding has not started yet 1`] = `
+<div
+  className="eui-textCenter"
+>
+  <EuiButton
+    data-test-subj="onboarding--guideCard--view--search"
+    fill={true}
+    onClick={[Function]}
+  >
+    View guide
+  </EuiButton>
+</div>
+`;

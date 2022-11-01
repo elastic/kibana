@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  AggregationsCalendarInterval,
-  MappingRuntimeFieldType,
-  TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { InvalidTransformError } from '../../../errors';
 import { ALL_VALUE, apmTransactionDurationIndicatorSchema } from '../../../types/schema';
 import {
   SLO_DESTINATION_INDEX_NAME,
@@ -22,17 +19,17 @@ import { TransformGenerator } from '.';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
 
-export class ApmTransactionDurationTransformGenerator implements TransformGenerator {
+export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
-      throw new Error(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
+      throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(),
+      this.buildCommonGroupBy(slo),
       this.buildAggregations(slo.indicator)
     );
   }
@@ -77,20 +74,7 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
 
     return {
       index: APM_SOURCE_INDEX,
-      runtime_mappings: {
-        'slo.id': {
-          type: 'keyword' as MappingRuntimeFieldType,
-          script: {
-            source: `emit('${slo.id}')`,
-          },
-        },
-        'slo.revision': {
-          type: 'long' as MappingRuntimeFieldType,
-          script: {
-            source: `emit(${slo.revision})`,
-          },
-        },
-      },
+      runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
           filter: [
@@ -110,27 +94,6 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
     return {
       pipeline: SLO_INGEST_PIPELINE_NAME,
       index: SLO_DESTINATION_INDEX_NAME,
-    };
-  }
-
-  private buildGroupBy() {
-    return {
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
-        },
-      },
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          calendar_interval: '1m' as AggregationsCalendarInterval,
-        },
-      },
     };
   }
 

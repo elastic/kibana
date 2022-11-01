@@ -8,7 +8,7 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { convertBucketToColumns } from '.';
+import { BucketAggs, convertBucketToColumns } from '.';
 import { DateHistogramColumn, FiltersColumn, RangeColumn, TermsColumn } from '../../types';
 import { AggBasedColumn, SchemaConfig } from '../../..';
 
@@ -27,7 +27,7 @@ jest.mock('../convert', () => ({
 describe('convertBucketToColumns', () => {
   const field = stubLogstashDataView.fields[0].name;
   const dateField = stubLogstashDataView.fields.find((f) => f.type === 'date')!.name;
-  const bucketAggs: SchemaConfig[] = [
+  const bucketAggs: Array<SchemaConfig<BucketAggs | BUCKET_TYPES.DATE_RANGE>> = [
     {
       accessor: 0,
       label: '',
@@ -152,6 +152,7 @@ describe('convertBucketToColumns', () => {
       },
     },
   ];
+  const visType = 'heatmap';
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -167,7 +168,7 @@ describe('convertBucketToColumns', () => {
   >([
     [
       'null if bucket agg type is not supported',
-      [{ dataView: stubLogstashDataView, agg: bucketAggs[6], aggs, metricColumns }],
+      [{ dataView: stubLogstashDataView, agg: bucketAggs[6], aggs, metricColumns, visType }],
       () => {},
       null,
     ],
@@ -179,6 +180,7 @@ describe('convertBucketToColumns', () => {
           agg: { ...bucketAggs[0], aggParams: undefined },
           aggs,
           metricColumns,
+          visType,
         },
       ],
       () => {},
@@ -186,7 +188,7 @@ describe('convertBucketToColumns', () => {
     ],
     [
       'filters column if bucket agg is valid filters agg',
-      [{ dataView: stubLogstashDataView, agg: bucketAggs[0], aggs, metricColumns }],
+      [{ dataView: stubLogstashDataView, agg: bucketAggs[0], aggs, metricColumns, visType }],
       () => {
         mockConvertToFiltersColumn.mockReturnValue({
           operationType: 'filters',
@@ -198,7 +200,7 @@ describe('convertBucketToColumns', () => {
     ],
     [
       'date histogram column if bucket agg is valid date histogram agg',
-      [{ dataView: stubLogstashDataView, agg: bucketAggs[1], aggs, metricColumns }],
+      [{ dataView: stubLogstashDataView, agg: bucketAggs[1], aggs, metricColumns, visType }],
       () => {
         mockConvertToDateHistogramColumn.mockReturnValue({
           operationType: 'date_histogram',
@@ -210,7 +212,7 @@ describe('convertBucketToColumns', () => {
     ],
     [
       'date histogram column if bucket agg is valid terms agg with date field',
-      [{ dataView: stubLogstashDataView, agg: bucketAggs[3], aggs, metricColumns }],
+      [{ dataView: stubLogstashDataView, agg: bucketAggs[3], aggs, metricColumns, visType }],
       () => {
         mockConvertToDateHistogramColumn.mockReturnValue({
           operationType: 'date_histogram',
@@ -222,7 +224,7 @@ describe('convertBucketToColumns', () => {
     ],
     [
       'terms column if bucket agg is valid terms agg with no date field',
-      [{ dataView: stubLogstashDataView, agg: bucketAggs[2], aggs, metricColumns }],
+      [{ dataView: stubLogstashDataView, agg: bucketAggs[2], aggs, metricColumns, visType }],
       () => {
         mockConvertToTermsColumn.mockReturnValue({
           operationType: 'terms',
@@ -234,7 +236,7 @@ describe('convertBucketToColumns', () => {
     ],
     [
       'range column if bucket agg is valid histogram agg',
-      [{ dataView: stubLogstashDataView, agg: bucketAggs[4], aggs, metricColumns }],
+      [{ dataView: stubLogstashDataView, agg: bucketAggs[4], aggs, metricColumns, visType }],
       () => {
         mockConvertToRangeColumn.mockReturnValue({
           operationType: 'range',
@@ -246,7 +248,7 @@ describe('convertBucketToColumns', () => {
     ],
     [
       'range column if bucket agg is valid range agg',
-      [{ dataView: stubLogstashDataView, agg: bucketAggs[5], aggs, metricColumns }],
+      [{ dataView: stubLogstashDataView, agg: bucketAggs[5], aggs, metricColumns, visType }],
       () => {
         mockConvertToRangeColumn.mockReturnValue({
           operationType: 'range',

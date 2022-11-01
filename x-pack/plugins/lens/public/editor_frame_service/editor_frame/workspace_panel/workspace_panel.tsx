@@ -36,6 +36,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { getSearchWarningMessages } from '../../../utils';
 import {
   FramePublicAPI,
   isLensBrushEvent,
@@ -162,6 +163,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const changesApplied = useLensSelector(selectChangesApplied);
   const triggerApply = useLensSelector(selectTriggerApplyChanges);
   const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
+  const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
@@ -230,32 +232,37 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (renderDeps.current) {
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
+        const datasource = Object.values(renderDeps.current.datasourceMap)[0];
+        const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
 
-        const requestWarnings: string[] = [];
-        const datasource = Object.values(renderDeps.current?.datasourceMap)[0];
-        const datasourceState = Object.values(renderDeps.current?.datasourceStates)[0].state;
+        let requestWarnings: Array<React.ReactNode | string> = [];
+
         if (adapters?.requests) {
-          plugins.data.search.showWarnings(adapters.requests, (warning) => {
-            const warningMessage = datasource.getSearchWarningMessages?.(datasourceState, warning);
-
-            requestWarnings.push(...(warningMessage || []));
-            if (warningMessage && warningMessage.length) return true;
-          });
-        }
-        if (adapters && adapters.tables) {
-          dispatchLens(
-            onActiveDataChange({
-              activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-                (acc, [key, value], index, tables) => ({
-                  ...acc,
-                  [tables.length === 1 ? defaultLayerId : key]: value,
-                }),
-                {}
-              ),
-              requestWarnings,
-            })
+          requestWarnings = getSearchWarningMessages(
+            adapters.requests,
+            datasource,
+            datasourceState,
+            {
+              searchService: plugins.data.search,
+            }
           );
         }
+
+        dispatchLens(
+          onActiveDataChange({
+            activeData:
+              adapters && adapters.tables
+                ? Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+                    (acc, [key, value], index, tables) => ({
+                      ...acc,
+                      [tables.length === 1 ? defaultLayerId : key]: value,
+                    }),
+                    {}
+                  )
+                : undefined,
+            requestWarnings,
+          })
+        );
       }
     },
     [dispatchLens, plugins.data.search]
@@ -317,6 +324,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceStates,
           datasourceLayers,
           indexPatterns: dataViews.indexPatterns,
+          searchSessionId,
         });
 
         if (ast) {
@@ -349,16 +357,17 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }));
     }
   }, [
-    activeVisualization,
-    visualization.state,
-    datasourceMap,
-    datasourceStates,
-    datasourceLayers,
     configurationValidationError?.length,
     missingRefsErrors.length,
     unknownVisError,
+    activeVisualization,
+    visualization.state,
     visualization.activeId,
+    datasourceMap,
+    datasourceStates,
+    datasourceLayers,
     dataViews.indexPatterns,
+    searchSessionId,
   ]);
 
   useEffect(() => {

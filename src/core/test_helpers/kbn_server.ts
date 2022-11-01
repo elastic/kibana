@@ -21,7 +21,7 @@ import {
 } from '@kbn/test';
 import { CliArgs, Env } from '@kbn/config';
 
-import { InternalCoreSetup, InternalCoreStart } from '../server/internal_types';
+import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '../server/root';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put' | 'patch';

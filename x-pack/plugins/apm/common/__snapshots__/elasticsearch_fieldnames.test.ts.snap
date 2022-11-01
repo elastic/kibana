@@ -45,6 +45,8 @@ exports[`Error CONTAINER_IMAGE 1`] = `undefined`;
 
 exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
 
+exports[`Error DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
+
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
 exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -75,6 +77,8 @@ exports[`Error FAAS_DURATION 1`] = `undefined`;
 
 exports[`Error FAAS_ID 1`] = `undefined`;
 
+exports[`Error FAAS_NAME 1`] = `undefined`;
+
 exports[`Error FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
 exports[`Error HOST 1`] = `
@@ -83,11 +87,15 @@ Object {
 }
 `;
 
+exports[`Error HOST_ARCHITECTURE 1`] = `undefined`;
+
 exports[`Error HOST_HOSTNAME 1`] = `"my hostname"`;
 
 exports[`Error HOST_NAME 1`] = `undefined`;
 
 exports[`Error HOST_OS_PLATFORM 1`] = `undefined`;
+
+exports[`Error HOST_OS_VERSION 1`] = `undefined`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -148,6 +156,8 @@ exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Error METRICSET_NAME 1`] = `undefined`;
+
+exports[`Error NETWORK_CONNECTION_TYPE 1`] = `undefined`;
 
 exports[`Error OBSERVER_HOSTNAME 1`] = `undefined`;
 
@@ -300,6 +310,8 @@ exports[`Span CONTAINER_IMAGE 1`] = `undefined`;
 
 exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
 
+exports[`Span DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
+
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 
 exports[`Span ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -330,15 +342,21 @@ exports[`Span FAAS_DURATION 1`] = `undefined`;
 
 exports[`Span FAAS_ID 1`] = `undefined`;
 
+exports[`Span FAAS_NAME 1`] = `undefined`;
+
 exports[`Span FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
 exports[`Span HOST 1`] = `undefined`;
+
+exports[`Span HOST_ARCHITECTURE 1`] = `undefined`;
 
 exports[`Span HOST_HOSTNAME 1`] = `undefined`;
 
 exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HOST_OS_PLATFORM 1`] = `undefined`;
+
+exports[`Span HOST_OS_VERSION 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -399,6 +417,8 @@ exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Span METRICSET_NAME 1`] = `undefined`;
+
+exports[`Span NETWORK_CONNECTION_TYPE 1`] = `undefined`;
 
 exports[`Span OBSERVER_HOSTNAME 1`] = `undefined`;
 
@@ -551,6 +571,8 @@ exports[`Transaction CONTAINER_IMAGE 1`] = `undefined`;
 
 exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 
+exports[`Transaction DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
+
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 
 exports[`Transaction ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -581,6 +603,8 @@ exports[`Transaction FAAS_DURATION 1`] = `undefined`;
 
 exports[`Transaction FAAS_ID 1`] = `undefined`;
 
+exports[`Transaction FAAS_NAME 1`] = `undefined`;
+
 exports[`Transaction FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
 exports[`Transaction HOST 1`] = `
@@ -589,11 +613,15 @@ Object {
 }
 `;
 
+exports[`Transaction HOST_ARCHITECTURE 1`] = `undefined`;
+
 exports[`Transaction HOST_HOSTNAME 1`] = `"my hostname"`;
 
 exports[`Transaction HOST_NAME 1`] = `undefined`;
 
 exports[`Transaction HOST_OS_PLATFORM 1`] = `undefined`;
+
+exports[`Transaction HOST_OS_VERSION 1`] = `undefined`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
@@ -660,6 +688,8 @@ exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Transaction METRICSET_NAME 1`] = `undefined`;
+
+exports[`Transaction NETWORK_CONNECTION_TYPE 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_HOSTNAME 1`] = `undefined`;
 

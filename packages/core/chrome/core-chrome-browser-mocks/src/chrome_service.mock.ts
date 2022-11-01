@@ -50,6 +50,8 @@ const createStartContractMock = () => {
     setBreadcrumbs: jest.fn(),
     getBreadcrumbsAppendExtension$: jest.fn(),
     setBreadcrumbsAppendExtension: jest.fn(),
+    getGlobalHelpExtensionMenuLinks$: jest.fn(),
+    registerGlobalHelpExtensionMenuLink: jest.fn(),
     getHelpExtension$: jest.fn(),
     setHelpExtension: jest.fn(),
     setHelpSupportUrl: jest.fn(),
@@ -70,6 +72,7 @@ const createStartContractMock = () => {
   startContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb]));
   startContract.getBreadcrumbsAppendExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
+  startContract.getGlobalHelpExtensionMenuLinks$.mockReturnValue(new BehaviorSubject([]));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
   startContract.getBodyClasses$.mockReturnValue(new BehaviorSubject([]));

@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { EuiText, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GuideState } from '../../common/types';
+import type { GuideState } from '@kbn/guided-onboarding';
 import { apiService } from '../services/api';
 
 interface QuitGuideModalProps {
