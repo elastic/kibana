@@ -85,7 +85,7 @@ describe('epicLocalStorage', () => {
       leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
-      scopeId: SourcererScopeName.default,
+      sourcererScope: SourcererScopeName.default,
       start: from,
     };
   });

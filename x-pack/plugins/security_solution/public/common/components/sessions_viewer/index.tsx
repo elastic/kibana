@@ -126,7 +126,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        scopeId={SourcererScopeName.default}
+        sourcererScope={SourcererScopeName.default}
         start={startDate}
         unit={unit}
       />

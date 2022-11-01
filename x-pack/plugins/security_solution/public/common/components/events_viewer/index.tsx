@@ -82,7 +82,7 @@ export interface Props {
   entityType: EntityType;
   tableId: TableId;
   leadingControlColumns: ControlColumnProps[];
-  scopeId: SourcererScopeName;
+  sourcererScope: SourcererScopeName;
   start: string;
   showTotalCount?: boolean;
   pageFilters?: Filter[];
@@ -93,6 +93,7 @@ export interface Props {
   additionalFilters?: React.ReactNode;
   hasAlertsCrud?: boolean;
   unit?: (n: number) => string;
+  indexNames?: string[];
 }
 
 /**
@@ -113,10 +114,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   renderCellValue,
   rowRenderers,
   start,
-  scopeId,
+  sourcererScope,
   additionalFilters,
   hasAlertsCrud = false,
   unit,
+  indexNames,
 }) => {
   const dispatch = useDispatch();
   const {
@@ -153,7 +155,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     selectedPatterns,
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
-  } = useSourcererDataView(scopeId);
+  } = useSourcererDataView(sourcererScope);
 
   const { globalFullScreen } = useGlobalFullScreen();
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
@@ -162,13 +164,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const editorActionsRef = useRef<FieldEditorActions>(null);
 
   useEffect(() => {
+    // if ()
     dispatch(
       dataTableActions.createTGrid({
         columns,
         dataViewId: selectedDataViewId,
         defaultColumns,
         id: tableId,
-        indexNames: selectedPatterns,
+        indexNames: indexNames ?? selectedPatterns,
         itemsPerPage,
         showCheckboxes,
         sort,
@@ -234,7 +237,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   );
 
   const fieldBrowserOptions = useFieldBrowserOptions({
-    sourcererScope: scopeId,
+    sourcererScope,
     editorActionsRef,
     upsertColumn: (column, index) =>
       dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
@@ -266,7 +269,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, indexPattern, browserFields, globalFilters, start, end, query]
+    [esQueryConfig, browserFields, globalFilters, start, indexPattern, query, end]
   );
 
   const canQueryTimeline = useMemo(
@@ -307,7 +310,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       fields,
       filterQuery,
       id: tableId,
-      indexNames: selectedPatterns,
+      indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
       runtimeMappings,
       skip: !canQueryTimeline,

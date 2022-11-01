@@ -10,12 +10,11 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { useDispatch, useSelector } from 'react-redux';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { StatefulEventsViewer } from '../../../../common/components/events_viewer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
-import { dataTableActions } from '../../../../common/store/data_table';
-import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { getHistogramConfig, isNoisy } from './helpers';
@@ -29,7 +28,6 @@ import { BarChart } from '../../../../common/components/charts/barchart';
 import { usePreviewHistogram } from './use_preview_histogram';
 import { getAlertsPreviewDefaultModel } from '../../alerts_table/default_config';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import type { SortColumnTable } from '../../../../../common/types';
 import { TableId } from '../../../../../common/types';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -37,9 +35,9 @@ import { DetailsPanel } from '../../../../timelines/components/side_panel';
 import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import type { State } from '../../../../common/store';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -74,7 +72,7 @@ export const PreviewHistogram = ({
   indexPattern,
   timeframeOptions,
 }: PreviewHistogramProps) => {
-  const dispatch = useDispatch();
+  const { uiSettings } = useKibana().services;
   const { setQuery, isInitializing } = useGlobalTime();
   const startDate = useMemo(
     () => timeframeOptions.timeframeStart.toISOString(),
@@ -84,6 +82,10 @@ export const PreviewHistogram = ({
   // It seems like the Table/Grid component uses end date value as a non-inclusive one,
   // thus the alerts which have timestamp equal to the end date value are not displayed in the table.
   // To fix that, we extend end date value by 1s to make sure all alerts are included in the table.
+  const extendedEndDate = useMemo(
+    () => timeframeOptions.timeframeEnd.add('1', 's').toISOString(),
+    [timeframeOptions]
+  );
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
@@ -96,17 +98,7 @@ export const PreviewHistogram = ({
     ruleType,
   });
   const license = useLicense();
-  const {
-    dataTable: { columns, defaultColumns, itemsPerPage, sort } = getAlertsPreviewDefaultModel(
-      license
-    ),
-  } = useSelector((state: State) => eventsViewerSelector(state, TableId.rulePreview));
-
-  const {
-    browserFields,
-    runtimeMappings,
-    dataViewId: selectedDataViewId,
-  } = useSourcererDataView(SourcererScopeName.detections);
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
 
   const { globalFullScreen } = useGlobalFullScreen();
   const previousPreviewId = usePrevious(previewId);
@@ -125,42 +117,40 @@ export const PreviewHistogram = ({
     }
   }, [setQuery, inspect, isLoading, isInitializing, refetch, previewId]);
 
-  useEffect(() => {
-    dispatch(
-      dataTableActions.createTGrid({
-        columns,
-        dataViewId: selectedDataViewId,
-        defaultColumns,
-        id: TableId.rulePreview,
-        indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
-        itemsPerPage,
-        sort: sort as SortColumnTable[],
-      })
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const barConfig = useMemo(
     (): ChartSeriesConfigs => getHistogramConfig(endDate, startDate, !isEqlRule),
     [endDate, startDate, isEqlRule]
   );
 
   const chartData = useMemo((): ChartSeriesData[] => [{ key: 'hits', value: data }], [data]);
-  const previewFilter = useMemo(
-    () => [
+  const config = getEsQueryConfig(uiSettings);
+  const pageFilters = useMemo(() => {
+    const filterQuery = buildEsQuery(
+      indexPattern,
+      [{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }],
+      [],
       {
-        query: {
-          bool: {
-            filter: `kibana.alert.rule.uuid:${previewId}`,
+        nestedIgnoreUnmapped: true,
+        ...config,
+        dateFormatTZ: undefined,
+      }
+    );
+    return [
+      {
+        ...filterQuery,
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'kibana.alert.rule.uuid',
+          params: {
+            query: previewId,
           },
         },
-        meta: {
-          language: 'kuery',
-        },
       },
-    ],
-    [previewId]
-  );
+    ];
+  }, [config, indexPattern, previewId]);
 
   return (
     <>
@@ -201,16 +191,17 @@ export const PreviewHistogram = ({
       <EuiSpacer />
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <StatefulEventsViewer
-          pageFilters={previewFilter}
+          pageFilters={pageFilters}
           defaultModel={getAlertsPreviewDefaultModel(license)}
-          end={endDate}
+          end={extendedEndDate}
           entityType={'events'}
           tableId={TableId.rulePreview}
           leadingControlColumns={getPreviewTableControlColumn(1.5)}
           renderCellValue={PreviewRenderCellValue}
           rowRenderers={defaultRowRenderers}
           start={startDate}
-          scopeId={SourcererScopeName.detections}
+          sourcererScope={SourcererScopeName.detections}
+          indexNames={[`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]}
         />
       </FullScreenContainer>
       <DetailsPanel

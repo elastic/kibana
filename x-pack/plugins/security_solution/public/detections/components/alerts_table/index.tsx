@@ -208,7 +208,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       pageFilters={defaultFiltersMemo}
       renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}
-      scopeId={SourcererScopeName.detections}
+      sourcererScope={SourcererScopeName.detections}
       start={from}
     />
   );
