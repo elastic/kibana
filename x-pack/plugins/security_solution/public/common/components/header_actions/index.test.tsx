@@ -14,15 +14,12 @@ import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { licenseService } from '../../hooks/use_license';
 import { TableId } from '../../../../common/types';
-import { useTourContext } from '../../../../../common/components/guided_onboarding_tour';
-import {
-  GuidedOnboardingTourStep,
-  SecurityTourStep,
-} from '../../../../../common/components/guided_onboarding_tour/tour_step';
-import { SecurityStepId } from '../../../../../common/components/guided_onboarding_tour/tour_config';
+import { useTourContext } from '../guided_onboarding_tour';
+import { GuidedOnboardingTourStep, SecurityTourStep } from '../guided_onboarding_tour/tour_step';
+import { SecurityStepId } from '../guided_onboarding_tour/tour_config';
 
+jest.mock('../guided_onboarding_tour');
 jest.mock('../../../detections/components/user_info', () => ({
-jest.mock('../../../../../common/components/guided_onboarding_tour');
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
 jest.mock('../../hooks/use_experimental_features', () => ({

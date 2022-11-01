@@ -22,7 +22,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { InspectButtonContainer } from '../inspect';
+import { InspectButton, InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { eventsViewerSelector } from './selectors';
@@ -54,11 +54,12 @@ import { getDefaultViewSelection, resolverIsShowing, getCombinedFilterQuery } fr
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../event_rendered_view/helpers';
 import { useTimelineEvents } from './use_timelines_events';
 import { TableContext, TGridEmpty, TGridLoading } from './shared';
-import { InspectButton } from '../data_table/inspect';
 import { StatefulDataTableComponent } from '../data_table';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import type { AlertWorkflowStatus } from '../../types';
 import { StatefulEventRenderedView } from '../event_rendered_view';
+import { useQueryInspector } from '../page/manage_query';
+import type { SetQuery } from '../../containers/use_global_time/types';
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
@@ -207,18 +208,22 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     ) : null;
   }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
   const setQuery = useCallback(
-    (inspect, loading, refetch) => {
+    ({ id, inspect, loading, refetch }: SetQuery) =>
       dispatch(
         inputsActions.setQuery({
-          id: tableId,
+          id,
           inputId: InputsModelId.global,
           inspect,
           loading,
           refetch,
         })
-      );
-    },
-    [dispatch, tableId]
+      ),
+    [dispatch]
+  );
+
+  const deleteQuery = useCallback(
+    ({ id }) => dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
+    [dispatch]
   );
 
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
@@ -318,6 +323,15 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       startDate: start,
     });
 
+  useQueryInspector({
+    queryId: tableId,
+    loading,
+    refetch,
+    setQuery,
+    deleteQuery,
+    inspect,
+  });
+
   useEffect(() => {
     dispatch(dataTableActions.updateIsLoading({ id: tableId, isLoading: loading }));
   }, [dispatch, tableId, loading]);
@@ -341,8 +355,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     [deletedEventIds, events]
   );
   useEffect(() => {
-    setQuery(inspect, loading, refetch);
-  }, [inspect, loading, refetch, setQuery]);
+    setQuery({ id: tableId, inspect, loading, refetch });
+  }, [inspect, loading, refetch, setQuery, tableId]);
 
   // Clear checkbox selection when new events are fetched
   useEffect(() => {
@@ -370,7 +384,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               $view={tableView}
             >
               <UpdatedFlexItem grow={false} $show={!loading}>
-                <InspectButton title={justTitle} inspect={inspect} loading={loading} />
+                <InspectButton title={justTitle} queryId={tableId} />
               </UpdatedFlexItem>
               <UpdatedFlexItem grow={false} $show={!loading}>
                 {!resolverIsShowing(graphEventId) && additionalFilters}

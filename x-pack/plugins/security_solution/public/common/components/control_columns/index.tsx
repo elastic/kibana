@@ -24,9 +24,9 @@ import type {
   SortColumnTable,
 } from '../../../../common/types';
 import { HeaderCheckBox, RowCheckBox } from './checkbox';
-import { RowAction } from '../data_table/row_action';
 import { addBuildingBlockStyle } from '../data_table/helpers';
 import { getPageRowIndex } from '../data_table/pagination';
+import { RowAction } from './row_action';
 
 export const checkBoxControlColumn: ControlColumnProps = {
   id: 'checkbox-control-column',
