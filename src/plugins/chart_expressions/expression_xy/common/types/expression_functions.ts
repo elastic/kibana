@@ -240,6 +240,24 @@ export type ExpressionAnnotationResult = ExpressionAnnotationsLayers & {
   type: 'event_annotations_result';
 };
 
+export interface EventAnnotationResultArgs {
+  layers?: ExtendedAnnotationLayerConfigResult[];
+  datatable: Datatable;
+}
+
+export interface EventAnnotationResultResult {
+  type: 'event_annotations_result';
+  layers: ExtendedAnnotationLayerConfigResult[];
+  datatable: Datatable;
+}
+
+export type EventAnnotationResultFn = ExpressionFunctionDefinition<
+  'event_annotations_result',
+  null,
+  EventAnnotationResultArgs,
+  EventAnnotationResultResult
+>;
+
 export interface LayeredXYArgs {
   legend: LegendConfigResult;
   endValue?: EndValue;

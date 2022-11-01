@@ -22,8 +22,10 @@ import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   AvailableReferenceLineIcon,
   DataDecorationConfigFn,
+  EventAnnotationResultFn,
   ExtendedAnnotationLayerFn,
   ExtendedDataLayerFn,
+  LayeredXyVisFn,
   LegendConfigFn,
   ReferenceLineDecorationConfigFn,
   ReferenceLineLayerFn,
@@ -318,80 +320,65 @@ export const buildXYExpression = (
     extent: state.xExtent ? [axisExtentConfigToExpression(state.xExtent)] : [],
   });
 
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'layeredXyVis',
-        arguments: {
-          legend: [buildExpression([legendConfigFn]).toAst()],
-          fittingFunction: [state.fittingFunction || 'None'],
-          endValue: [state.endValue || 'None'],
-          emphasizeFitting: [state.emphasizeFitting || false],
-          fillOpacity: [state.fillOpacity || 0.3],
-          valueLabels: [state?.valueLabels || 'hide'],
-          hideEndzones: [state?.hideEndzones || false],
-          addTimeMarker: [state?.showCurrentTimeMarker || false],
-          valuesInLegend: [state?.valuesInLegend || false],
-          yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
-          xAxisConfig: [buildExpression([xAxisConfigFn]).toAst()],
-          layers: [
-            ...validDataLayers.map((layer) =>
-              dataLayerToExpression(
-                layer,
-                yAxisConfigs,
-                datasourceLayers[layer.layerId],
-                metadata,
-                paletteService,
-                datasourceExpressionsByLayers[layer.layerId],
-                state.curveType || 'LINEAR'
-              )
-            ),
-            ...validReferenceLayers.map((layer) =>
-              referenceLineLayerToExpression(
-                layer,
-                datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId],
-                datasourceExpressionsByLayers[layer.layerId]
-              )
-            ),
-          ],
-          annotations:
-            validAnnotationsLayers.length &&
-            validAnnotationsLayers.flatMap((l) => l.annotations.filter(isValidAnnotation)).length
-              ? [
-                  {
-                    type: 'expression',
-                    chain: [
-                      {
-                        type: 'function',
-                        function: 'event_annotations_result',
-                        arguments: {
-                          layers: validAnnotationsLayers.map((layer) =>
-                            annotationLayerToExpression(layer, eventAnnotationService)
-                          ),
-                          datatable: eventAnnotationService.toFetchExpression({
-                            interval:
-                              (validDataLayers[0]?.xAccessor &&
-                                metadata[validDataLayers[0]?.layerId]?.[
-                                  validDataLayers[0]?.xAccessor
-                                ]?.interval) ||
-                              'auto',
-                            groups: validAnnotationsLayers.map((layer) => ({
-                              indexPatternId: layer.indexPatternId,
-                              annotations: layer.annotations.filter(isValidAnnotation),
-                            })),
-                          }),
-                        },
-                      },
-                    ],
-                  },
-                ]
-              : [],
-        },
-      },
+  const layeredXyVisFn = buildExpressionFunction<LayeredXyVisFn>('layeredXyVis', {
+    legend: buildExpression([legendConfigFn]).toAst(),
+    fittingFunction: state.fittingFunction || 'None',
+    endValue: state.endValue || 'None',
+    emphasizeFitting: state.emphasizeFitting || false,
+    fillOpacity: state.fillOpacity || 0.3,
+    valueLabels: state?.valueLabels || 'hide',
+    hideEndzones: state?.hideEndzones || false,
+    addTimeMarker: state?.showCurrentTimeMarker || false,
+    valuesInLegend: state?.valuesInLegend || false,
+    yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
+    xAxisConfig: buildExpression([xAxisConfigFn]).toAst(),
+    showTooltip: [],
+    layers: [
+      ...validDataLayers.map((layer) =>
+        dataLayerToExpression(
+          layer,
+          yAxisConfigs,
+          datasourceLayers[layer.layerId],
+          metadata,
+          paletteService,
+          datasourceExpressionsByLayers[layer.layerId],
+          state.curveType || 'LINEAR'
+        )
+      ),
+      ...validReferenceLayers.map((layer) =>
+        referenceLineLayerToExpression(
+          layer,
+          datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId],
+          datasourceExpressionsByLayers[layer.layerId]
+        )
+      ),
     ],
-  };
+    annotations:
+      validAnnotationsLayers.length &&
+      validAnnotationsLayers.flatMap((l) => l.annotations.filter(isValidAnnotation)).length
+        ? [
+            buildExpression([
+              buildExpressionFunction<EventAnnotationResultFn>('event_annotations_result', {
+                layers: validAnnotationsLayers.map((layer) =>
+                  annotationLayerToExpression(layer, eventAnnotationService)
+                ),
+                datatable: eventAnnotationService.toFetchExpression({
+                  interval:
+                    (validDataLayers[0]?.xAccessor &&
+                      metadata[validDataLayers[0]?.layerId]?.[validDataLayers[0]?.xAccessor]
+                        ?.interval) ||
+                    'auto',
+                  groups: validAnnotationsLayers.map((layer) => ({
+                    indexPatternId: layer.indexPatternId,
+                    annotations: layer.annotations.filter(isValidAnnotation),
+                  })),
+                }),
+              }),
+            ]).toAst(),
+          ]
+        : [],
+  });
+  return buildExpression([layeredXyVisFn]).toAst();
 };
 
 const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {

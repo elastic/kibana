@@ -69,4 +69,6 @@ export type {
   YAxisConfigFn,
   XAxisConfigFn,
   LegendConfigFn,
+  EventAnnotationResultFn,
+  LayeredXyVisFn,
 } from './types';
