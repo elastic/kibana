@@ -42,7 +42,6 @@ const defaultProps = {
 describe('CreateCaseFlyout', () => {
   let mockedContext: AppMockRenderer;
   beforeEach(() => {
-    // (useFormContext as jest.Mock).mockReturnValue({ isSubmitting: false, submit: mockSubmit });
     (useCasesContext as jest.Mock).mockReturnValue({
       owner: SECURITY_SOLUTION_OWNER,
       isSubmit: false,
