@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/lib/kibana';
@@ -60,6 +60,44 @@ export const RulesDeleteModalConfirmation = ({
     notifications: { toasts },
   } = useKibana().services;
 
+  const onCancelProp = useCallback(() => {
+    setDeleteModalVisibility(false);
+    onCancel();
+  }, [onCancel]);
+
+  const onConfirmProp = useCallback(async () => {
+    setDeleteModalVisibility(false);
+    setIsDeletingRules(true);
+    const { errors, total } = await bulkDeleteRules({
+      filter: rulesToDeleteFilter,
+      ids: idsToDelete,
+      http,
+    });
+    setIsDeletingRules(false);
+
+    const numErrors = errors.length;
+    const numSuccesses = total - numErrors;
+    if (numSuccesses > 0) {
+      toasts.addSuccess(getSuccessfulNotificationText(numSuccesses, singleTitle, multipleTitle));
+    }
+
+    if (numErrors > 0) {
+      toasts.addDanger(getFailedNotificationText(numErrors, singleTitle, multipleTitle));
+      await onErrors();
+    }
+    await onDeleted();
+  }, [
+    http,
+    idsToDelete,
+    multipleTitle,
+    onDeleted,
+    onErrors,
+    rulesToDeleteFilter,
+    setIsDeletingRules,
+    singleTitle,
+    toasts,
+  ]);
+
   if (!deleteModalFlyoutVisible) {
     return null;
   }
@@ -69,34 +107,8 @@ export const RulesDeleteModalConfirmation = ({
       buttonColor="danger"
       data-test-subj="rulesDeleteConfirmation"
       title={getConfirmButtonText(numberIdsToDelete, singleTitle, multipleTitle)}
-      onCancel={() => {
-        setDeleteModalVisibility(false);
-        onCancel();
-      }}
-      onConfirm={async () => {
-        setDeleteModalVisibility(false);
-        setIsDeletingRules(true);
-        const { errors, total } = await bulkDeleteRules({
-          filter: rulesToDeleteFilter,
-          ids: idsToDelete,
-          http,
-        });
-        setIsDeletingRules(false);
-
-        const numErrors = errors.length;
-        const numSuccesses = total - numErrors;
-        if (numSuccesses > 0) {
-          toasts.addSuccess(
-            getSuccessfulNotificationText(numSuccesses, singleTitle, multipleTitle)
-          );
-        }
-
-        if (numErrors > 0) {
-          toasts.addDanger(getFailedNotificationText(numErrors, singleTitle, multipleTitle));
-          await onErrors();
-        }
-        await onDeleted();
-      }}
+      onCancel={onCancelProp}
+      onConfirm={onConfirmProp}
       cancelButtonText={cancelButtonText}
       confirmButtonText={getConfirmButtonText(numberIdsToDelete, singleTitle, multipleTitle)}
     >
