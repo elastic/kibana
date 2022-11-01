@@ -49,9 +49,9 @@ export const pingStatusReducer = createReducer(initialState, (builder) => {
         }
 
         state.pingStatuses[config_id][locationId][timestamp] = ping;
-
-        state.loading = false;
       });
+
+      state.loading = false;
     })
     .addCase(getMonitorPingStatusesAction.fail, (state, action) => {
       state.error = action.payload;

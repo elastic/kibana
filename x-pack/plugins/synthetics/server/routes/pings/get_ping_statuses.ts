@@ -57,7 +57,7 @@ export const syntheticsGetPingStatusesRoute: UMRestApiRouteFactory = (libs: UMSe
 });
 
 function grabPingError(doc: any): PingError | undefined {
-  const docContainsError = Object.keys(doc).some((key) => key.startsWith('error.'));
+  const docContainsError = Object.keys(doc?.fields ?? {}).some((key) => key.startsWith('error.'));
   if (!docContainsError) {
     return undefined;
   }
