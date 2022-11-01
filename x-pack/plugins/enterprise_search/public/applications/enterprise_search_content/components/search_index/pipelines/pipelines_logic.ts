@@ -43,10 +43,10 @@ import {
   FetchCustomPipelineApiLogic,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import {
-  FetchIndexApiLogic,
-  FetchIndexApiParams,
-  FetchIndexApiResponse,
-} from '../../../api/index/fetch_index_api_logic';
+  FetchIndexApiWrapperLogic,
+  FetchIndexApiWrapperLogicValues,
+  FetchIndexApiWrapperLogicActions,
+} from '../../../api/index/fetch_index_wrapper.logic';
 import { CreateMlInferencePipelineApiLogic } from '../../../api/ml_models/create_ml_inference_pipeline';
 import {
   DeleteMlInferencePipelineApiLogic,
@@ -96,7 +96,7 @@ type PipelinesActions = Pick<
   >['apiSuccess'];
   fetchDefaultPipeline: Actions<undefined, FetchDefaultPipelineResponse>['makeRequest'];
   fetchDefaultPipelineSuccess: Actions<undefined, FetchDefaultPipelineResponse>['apiSuccess'];
-  fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
+  fetchIndexApiSuccess: FetchIndexApiWrapperLogicActions['apiSuccess'];
   fetchMlInferenceProcessors: typeof FetchMlInferencePipelineProcessorsApiLogic.actions.makeRequest;
   fetchMlInferenceProcessorsApiError: (error: HttpError) => HttpError;
   openAddMlInferencePipelineModal: () => void;
@@ -114,7 +114,7 @@ interface PipelinesValues {
   defaultPipelineValues: IngestPipelineParams;
   defaultPipelineValuesData: IngestPipelineParams | null;
   hasIndexIngestionPipeline: boolean;
-  index: FetchIndexApiResponse;
+  index: FetchIndexApiWrapperLogicValues['indexData'];
   indexName: string;
   mlInferencePipelineProcessors: InferencePipeline[];
   pipelineName: string;
@@ -142,7 +142,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ],
       UpdatePipelineApiLogic,
       ['apiSuccess', 'apiError', 'makeRequest'],
-      FetchIndexApiLogic,
+      FetchIndexApiWrapperLogic,
       ['apiSuccess as fetchIndexApiSuccess'],
       FetchDefaultPipelineApiLogic,
       ['apiSuccess as fetchDefaultPipelineSuccess', 'makeRequest as fetchDefaultPipeline'],
@@ -167,8 +167,8 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ['data as customPipelineData'],
       FetchDefaultPipelineApiLogic,
       ['data as defaultPipelineValuesData'],
-      FetchIndexApiLogic,
-      ['data as index'],
+      FetchIndexApiWrapperLogic,
+      ['indexData as index'],
       FetchMlInferencePipelineProcessorsApiLogic,
       ['data as mlInferencePipelineProcessors'],
     ],

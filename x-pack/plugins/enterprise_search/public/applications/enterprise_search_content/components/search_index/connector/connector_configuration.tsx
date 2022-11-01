@@ -47,10 +47,7 @@ import { NativeConnectorConfiguration } from './native_connector_configuration/n
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const {
-    indexData: { index },
-    recheckIndexLoading,
-  } = useValues(IndexViewLogic);
+  const { index, recheckIndexLoading } = useValues(IndexViewLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { recheckIndex } = useActions(IndexViewLogic);
   if (!isConnectorIndex(index)) {

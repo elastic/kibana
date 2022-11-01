@@ -34,9 +34,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
 
 export const ConnectorNameAndDescriptionForm: React.FC = () => {
-  const {
-    indexData: { index },
-  } = useValues(IndexViewLogic);
+  const { index } = useValues(IndexViewLogic);
   const { status } = useValues(ConnectorNameAndDescriptionApiLogic);
   const {
     localNameAndDescription: { name, description },

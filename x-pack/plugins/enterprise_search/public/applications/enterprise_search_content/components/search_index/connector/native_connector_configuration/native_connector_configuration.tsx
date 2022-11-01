@@ -37,9 +37,7 @@ import { NativeConnectorConfigurationConfig } from './native_connector_configura
 import { ResearchConfiguration } from './research_configuration';
 
 export const NativeConnectorConfiguration: React.FC = () => {
-  const {
-    indexData: { index },
-  } = useValues(IndexViewLogic);
+  const { index } = useValues(IndexViewLogic);
 
   if (!isConnectorIndex(index)) {
     return <></>;

@@ -8,41 +8,37 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
-import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { flashAPIErrors } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { GenerateApiKeyLogic } from '../../api/generate_api_key/generate_api_key_logic';
 import {
-  FetchIndexApiLogic,
-  FetchIndexApiParams,
-  FetchIndexApiResponse,
-} from '../../api/index/fetch_index_api_logic';
+  FetchIndexApiWrapperLogic,
+  FetchIndexApiWrapperLogicActions,
+} from '../../api/index/fetch_index_wrapper.logic';
+
 import { SEARCH_INDICES_PATH } from '../../routes';
 
-type OverviewLogicActions = Pick<
-  Actions<FetchIndexApiParams, FetchIndexApiResponse>,
-  'apiError'
-> & {
+interface OverviewLogicActions {
+  apiError: FetchIndexApiWrapperLogicActions['apiError'];
   apiReset: typeof GenerateApiKeyLogic.actions.apiReset;
   closeGenerateModal: void;
   openGenerateModal: void;
   toggleClientsPopover: void;
   toggleManageApiKeyPopover: void;
-};
+}
 
 interface OverviewLogicValues {
   apiKey: string;
   apiKeyData: typeof GenerateApiKeyLogic.values.data;
   apiKeyStatus: typeof GenerateApiKeyLogic.values.status;
-  data: typeof FetchIndexApiLogic.values.data;
-  indexData: typeof FetchIndexApiLogic.values.data;
+  indexData: typeof FetchIndexApiWrapperLogic.values.indexData;
   isClientsPopoverOpen: boolean;
   isError: boolean;
   isGenerateModalOpen: boolean;
   isLoading: boolean;
   isManageKeysPopoverOpen: boolean;
-  status: typeof FetchIndexApiLogic.values.status;
+  status: typeof FetchIndexApiWrapperLogic.values.status;
 }
 
 export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogicActions>>({
@@ -53,10 +49,10 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
     toggleManageApiKeyPopover: true,
   },
   connect: {
-    actions: [FetchIndexApiLogic, ['apiError'], GenerateApiKeyLogic, ['apiReset']],
+    actions: [FetchIndexApiWrapperLogic, ['apiError'], GenerateApiKeyLogic, ['apiReset']],
     values: [
-      FetchIndexApiLogic,
-      ['data', 'status'],
+      FetchIndexApiWrapperLogic,
+      ['indexData', 'status'],
       GenerateApiKeyLogic,
       ['data as apiKeyData', 'status as apiKeyStatus'],
     ],
@@ -101,12 +97,11 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
       (apiKeyStatus, apiKeyData) =>
         apiKeyStatus === Status.SUCCESS ? apiKeyData.apiKey.encoded : '',
     ],
-    indexData: [() => [selectors.data], (data) => data],
+    isError: [() => [selectors.status], (status) => status === Status.ERROR],
     isLoading: [
-      () => [selectors.status, selectors.data],
+      () => [selectors.status, selectors.indexData],
       (status, data) =>
         status === Status.IDLE || (typeof data === 'undefined' && status === Status.LOADING),
     ],
-    isError: [() => [selectors.status], (status) => status === Status.ERROR],
   }),
 });

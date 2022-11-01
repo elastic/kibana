@@ -29,9 +29,7 @@ import { ConnectorNameAndDescriptionForm } from './connector_name_and_descriptio
 import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
 
 export const ConnectorNameAndDescription: React.FC = () => {
-  const {
-    indexData: { index },
-  } = useValues(IndexViewLogic);
+  const { index } = useValues(IndexViewLogic);
   const {
     isEditing,
     nameAndDescription: { name, description },

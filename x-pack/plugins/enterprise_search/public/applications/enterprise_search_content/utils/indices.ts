@@ -15,6 +15,7 @@ import {
   ConnectorIndex,
   CrawlerIndex,
   ElasticsearchIndexWithIngestion,
+  ElasticsearchIndex,
 } from '../../../../common/types/indices';
 
 import {
@@ -27,7 +28,7 @@ import {
 } from '../types';
 
 export function isConnectorIndex(
-  index: ElasticsearchIndexWithIngestion | undefined
+  index: ElasticsearchIndexWithIngestion | null
 ): index is ConnectorIndex {
   const connectorIndex = index as ConnectorIndex;
   return (
@@ -37,12 +38,12 @@ export function isConnectorIndex(
 }
 
 export function isCrawlerIndex(
-  index: ElasticsearchIndexWithIngestion | undefined
+  index: ElasticsearchIndexWithIngestion | null
 ): index is CrawlerIndex {
   return !!(index as CrawlerIndex)?.crawler;
 }
 
-export function isApiIndex(index: ElasticsearchIndexWithIngestion | undefined): boolean {
+export function isApiIndex(index: ElasticsearchIndexWithIngestion | null): boolean {
   if (!index) {
     return false;
   }
@@ -104,15 +105,9 @@ export function getLastUpdated(index?: ElasticsearchIndexWithIngestion): string 
   return isConnectorIndex(index) ? index.connector.last_synced ?? 'never' : null;
 }
 
-export function indexToViewIndex(
-  index: ConnectorIndex | CrawlerIndex | ElasticsearchIndexWithIngestion
-): ConnectorViewIndex;
-export function indexToViewIndex(
-  index: ConnectorIndex | CrawlerIndex | ElasticsearchIndexWithIngestion
-): CrawlerViewIndex;
-export function indexToViewIndex(
-  index: ConnectorIndex | CrawlerIndex | ElasticsearchIndexWithIngestion
-): ApiViewIndex {
+export function indexToViewIndex(index: ElasticsearchIndex): ConnectorViewIndex;
+export function indexToViewIndex(index: ElasticsearchIndex): CrawlerViewIndex;
+export function indexToViewIndex(index: ElasticsearchIndex): ApiViewIndex {
   const extraFields = {
     ingestionMethod: getIngestionMethod(index),
     ingestionStatus: getIngestionStatus(index),

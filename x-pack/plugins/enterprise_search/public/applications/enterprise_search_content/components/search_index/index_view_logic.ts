@@ -25,10 +25,9 @@ import {
 
 import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
 import {
-  FetchIndexApiLogic,
-  FetchIndexApiParams,
-  FetchIndexApiResponse,
-} from '../../api/index/fetch_index_api_logic';
+  FetchIndexApiWrapperLogic,
+  FetchIndexApiWrapperLogicActions,
+} from '../../api/index/fetch_index_wrapper.logic';
 
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
 import {
@@ -47,7 +46,6 @@ import { IndexNameLogic } from './index_name_logic';
 const FETCH_INDEX_POLLING_DURATION = 5000; // 1 seconds
 const FETCH_INDEX_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
 
-type FetchIndexApiValues = Actions<FetchIndexApiParams, FetchIndexApiResponse>;
 type StartSyncApiValues = Actions<StartSyncArgs, {}>;
 
 export interface IndexViewActions {
@@ -55,11 +53,11 @@ export interface IndexViewActions {
   createNewFetchIndexTimeout(duration: number): { duration: number };
   fetchCrawlerData: () => void;
   fetchIndex: () => void;
-  fetchIndexApiSuccess: FetchIndexApiValues['apiSuccess'];
-  makeFetchIndexRequest: FetchIndexApiValues['makeRequest'];
+  fetchIndexApiSuccess: FetchIndexApiWrapperLogicActions['apiSuccess'];
+  makeFetchIndexRequest: FetchIndexApiWrapperLogicActions['makeRequest'];
   makeStartSyncRequest: StartSyncApiValues['makeRequest'];
   recheckIndex: () => void;
-  resetFetchIndexApi: FetchIndexApiValues['apiReset'];
+  resetFetchIndexApi: FetchIndexApiWrapperLogicActions['apiReset'];
   resetRecheckIndexLoading: () => void;
   setFetchIndexTimeoutId(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   startFetchIndexPoll(): void;
@@ -72,12 +70,11 @@ export interface IndexViewActions {
 export interface IndexViewValues {
   connector: Connector | undefined;
   connectorId: string | null;
-  data: typeof FetchIndexApiLogic.values.data;
+  fetchIndexApiData: typeof FetchIndexApiWrapperLogic.values.fetchIndexApiData;
   fetchIndexApiStatus: Status;
   fetchIndexTimeoutId: NodeJS.Timeout | null;
-  indexData: {
-    index: ElasticsearchViewIndex | undefined;
-  };
+  index: ElasticsearchViewIndex | undefined;
+  indexData: typeof FetchIndexApiWrapperLogic.values.indexData;
   indexName: string;
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
@@ -89,6 +86,7 @@ export interface IndexViewValues {
   recheckIndexLoading: boolean;
   resetFetchIndexLoading: boolean;
   syncStatus: SyncStatus | null;
+  wrapperIsInitialLoad: typeof FetchIndexApiWrapperLogic.values.isInitialLoading;
 }
 
 export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewActions>>({
@@ -111,7 +109,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         'apiSuccess as startSyncApiSuccess',
         'makeRequest as makeStartSyncRequest',
       ],
-      FetchIndexApiLogic,
+      FetchIndexApiWrapperLogic,
       [
         'apiError as fetchIndexApiError',
         'apiReset as resetFetchIndexApi',
@@ -124,10 +122,15 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       ['setIndexName'],
     ],
     values: [
-      FetchIndexApiLogic,
-      ['data', 'status as fetchIndexApiStatus'],
       IndexNameLogic,
       ['indexName'],
+      FetchIndexApiWrapperLogic,
+      [
+        'fetchIndexApiData',
+        'status as fetchIndexApiStatus',
+        'indexData',
+        'isInitialLoading as wrapperIsInitialLoad',
+      ],
     ],
   },
   events: ({ actions, values }) => ({
@@ -189,8 +192,8 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       actions.fetchIndex();
     },
     startSync: () => {
-      if (isConnectorIndex(values.data)) {
-        actions.makeStartSyncRequest({ connectorId: values.data.connector.id });
+      if (isConnectorIndex(values.fetchIndexApiData)) {
+        actions.makeStartSyncRequest({ connectorId: values.fetchIndexApiData.connector.id });
       }
     },
     startSyncApiError: (e) => flashAPIErrors(e),
@@ -218,18 +221,6 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         setFetchIndexTimeoutId: (_, { timeoutId }) => timeoutId,
       },
     ],
-    indexData: [
-      { index: undefined },
-      {
-        fetchIndexApiSuccess: (_, indexData) => {
-          return {
-            index: indexToViewIndex(indexData),
-          };
-        },
-
-        resetFetchIndexApi: () => ({ index: undefined }),
-      },
-    ],
     localSyncNowValue: [
       false,
       {
@@ -249,32 +240,37 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
   selectors: ({ selectors }) => ({
     connector: [
       () => [selectors.indexData],
-      (indexData) =>
-        indexData.index &&
-        (isConnectorViewIndex(indexData.index) || isCrawlerIndex(indexData.index))
-          ? indexData.index.connector
+      (index) =>
+        index && (isConnectorViewIndex(index) || isCrawlerIndex(index))
+          ? index.connector
           : undefined,
     ],
     connectorId: [
       () => [selectors.indexData],
-      (indexData) => (isConnectorViewIndex(indexData.index) ? indexData.index.connector.id : null),
+      (index) => (isConnectorViewIndex(index) ? index.connector.id : null),
     ],
-    // index: [() => [selectors.data], (data) => (data ? indexToViewIndex(data) : undefined)],
-    ingestionMethod: [() => [selectors.data], (data) => getIngestionMethod(data)],
-    ingestionStatus: [() => [selectors.data], (data) => getIngestionStatus(data)],
+    index: [
+      () => [selectors.indexData],
+      (data: IndexViewValues['indexData']) => (data ? indexToViewIndex(data) : undefined),
+    ],
+    ingestionMethod: [() => [selectors.fetchIndexApiData], (data) => getIngestionMethod(data)],
+    ingestionStatus: [() => [selectors.fetchIndexApiData], (data) => getIngestionStatus(data)],
     isSyncing: [
       () => [selectors.syncStatus],
       (syncStatus: SyncStatus) => syncStatus === SyncStatus.IN_PROGRESS,
     ],
     isWaitingForSync: [
-      () => [selectors.data, selectors.localSyncNowValue],
+      () => [selectors.fetchIndexApiData, selectors.localSyncNowValue],
       (data, localSyncNowValue) => data?.connector?.sync_now || localSyncNowValue,
     ],
-    lastUpdated: [() => [selectors.data], (data) => getLastUpdated(data)],
+    lastUpdated: [() => [selectors.fetchIndexApiData], (data) => getLastUpdated(data)],
     pipelineData: [
       () => [selectors.connector],
       (connector: Connector | undefined) => connector?.pipeline ?? undefined,
     ],
-    syncStatus: [() => [selectors.data], (data) => data?.connector?.last_sync_status ?? null],
+    syncStatus: [
+      () => [selectors.fetchIndexApiData],
+      (data) => data?.connector?.last_sync_status ?? null,
+    ],
   }),
 });

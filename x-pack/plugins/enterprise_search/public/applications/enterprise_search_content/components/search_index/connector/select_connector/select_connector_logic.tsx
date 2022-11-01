@@ -18,10 +18,8 @@ import {
   SetNativeConnectorResponse,
 } from '../../../../api/connector/set_native_connector_api_logic';
 
-import {
-  FetchIndexApiLogic,
-  FetchIndexApiResponse,
-} from '../../../../api/index/fetch_index_api_logic';
+import { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
+import { FetchIndexApiWrapperLogic } from '../../../../api/index/fetch_index_wrapper.logic';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';
 import { isConnectorIndex } from '../../../../utils/indices';
@@ -52,7 +50,7 @@ export const SelectConnectorLogic = kea<
   },
   connect: {
     actions: [SetNativeConnectorLogic, ['apiError', 'apiSuccess', 'makeRequest']],
-    values: [FetchIndexApiLogic, ['data as index']],
+    values: [FetchIndexApiWrapperLogic, ['indexData as index']],
   },
   events: ({ actions, values }) => ({
     afterMount: () => {
@@ -70,7 +68,7 @@ export const SelectConnectorLogic = kea<
   listeners: ({ actions, values }) => ({
     apiError: (error) => flashAPIErrors(error),
     apiSuccess: () => {
-      FetchIndexApiLogic.actions.makeRequest({ indexName: values.index.name });
+      FetchIndexApiWrapperLogic.actions.makeRequest({ indexName: values.index.name });
     },
     makeRequest: () => clearFlashMessages(),
     saveNativeConnector: () => {

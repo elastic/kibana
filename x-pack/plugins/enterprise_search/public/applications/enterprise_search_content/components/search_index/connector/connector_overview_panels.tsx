@@ -40,10 +40,7 @@ const StatusPanel: React.FC<{ ingestionStatus: IngestionStatus }> = ({ ingestion
 );
 
 export const ConnectorOverviewPanels: React.FC = () => {
-  const {
-    ingestionStatus,
-    indexData: { index },
-  } = useValues(IndexViewLogic);
+  const { ingestionStatus, index } = useValues(IndexViewLogic);
 
   return isConnectorIndex(index) ? (
     <EuiFlexGroup>

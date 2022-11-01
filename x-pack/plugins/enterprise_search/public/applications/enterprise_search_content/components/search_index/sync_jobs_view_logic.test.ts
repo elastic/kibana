@@ -53,7 +53,7 @@ describe('SyncJobsViewLogic', () => {
   });
 
   describe('actions', () => {
-    describe('FetchIndexApiLogic.apiSuccess', () => {
+    describe('FetchIndexApiWrapperLogic.apiSuccess', () => {
       const syncJob = {
         completed_at: '2022-09-05T15:59:39.816+00:00',
         connector_id: 'we2284IBjobuR2-lAuXh',

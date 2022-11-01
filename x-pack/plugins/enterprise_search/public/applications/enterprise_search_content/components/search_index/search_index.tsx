@@ -15,7 +15,6 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { Status } from '../../../../../common/types/api';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import {
@@ -55,10 +54,7 @@ export enum SearchIndexTabId {
 }
 
 export const SearchIndex: React.FC = () => {
-  const {
-    indexData: { index },
-    fetchIndexApiStatus: indexApiStatus,
-  } = useValues(IndexViewLogic);
+  const { index, wrapperIsInitialLoad } = useValues(IndexViewLogic);
 
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
@@ -168,10 +164,7 @@ export const SearchIndex: React.FC = () => {
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
       pageViewTelemetry={tabId}
-      isLoading={
-        indexApiStatus === Status.IDLE ||
-        (typeof index === 'undefined' && indexApiStatus === Status.LOADING)
-      }
+      isLoading={wrapperIsInitialLoad}
       pageHeader={{
         pageTitle: indexName,
         rightSideItems: getHeaderActions(index),

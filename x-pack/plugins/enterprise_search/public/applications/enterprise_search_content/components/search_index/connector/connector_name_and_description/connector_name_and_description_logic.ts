@@ -21,11 +21,11 @@ import {
   PutConnectorNameAndDescriptionArgs,
   PutConnectorNameAndDescriptionResponse,
 } from '../../../../api/connector/update_connector_name_and_description_api_logic';
+import { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
 import {
-  FetchIndexApiLogic,
-  FetchIndexApiParams,
-  FetchIndexApiResponse,
-} from '../../../../api/index/fetch_index_api_logic';
+  FetchIndexApiWrapperLogic,
+  FetchIndexApiWrapperLogicActions,
+} from '../../../../api/index/fetch_index_wrapper.logic';
 import { isConnectorIndex } from '../../../../utils/indices';
 
 type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;
@@ -34,7 +34,7 @@ type ConnectorNameAndDescriptionActions = Pick<
   Actions<PutConnectorNameAndDescriptionArgs, PutConnectorNameAndDescriptionResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
-  fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
+  fetchIndexApiSuccess: FetchIndexApiWrapperLogicActions['apiSuccess'];
   saveNameAndDescription: () => void;
   setIsEditing(isEditing: boolean): { isEditing: boolean };
   setLocalNameAndDescription(nameAndDescription: NameAndDescription): NameAndDescription;
@@ -65,10 +65,10 @@ export const ConnectorNameAndDescriptionLogic = kea<
     actions: [
       ConnectorNameAndDescriptionApiLogic,
       ['apiError', 'apiSuccess', 'makeRequest'],
-      FetchIndexApiLogic,
+      FetchIndexApiWrapperLogic,
       ['apiSuccess as fetchIndexApiSuccess'],
     ],
-    values: [FetchIndexApiLogic, ['data as index']],
+    values: [FetchIndexApiWrapperLogic, ['indexData as index']],
   },
   events: ({ actions, values }) => ({
     afterMount: () =>
@@ -83,7 +83,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
           { defaultMessage: 'Configuration successfully updated' }
         )
       );
-      FetchIndexApiLogic.actions.makeRequest({ indexName });
+      FetchIndexApiWrapperLogic.actions.makeRequest({ indexName });
     },
     fetchIndexApiSuccess: (index) => {
       if (!values.isEditing && isConnectorIndex(index)) {

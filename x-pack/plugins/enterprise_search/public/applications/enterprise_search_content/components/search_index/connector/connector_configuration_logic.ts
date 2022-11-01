@@ -22,18 +22,18 @@ import {
   PostConnectorConfigurationArgs,
   PostConnectorConfigurationResponse,
 } from '../../../api/connector/update_connector_configuration_api_logic';
+import { FetchIndexApiResponse } from '../../../api/index/fetch_index_api_logic';
 import {
-  FetchIndexApiLogic,
-  FetchIndexApiParams,
-  FetchIndexApiResponse,
-} from '../../../api/index/fetch_index_api_logic';
+  FetchIndexApiWrapperLogic,
+  FetchIndexApiWrapperLogicActions,
+} from '../../../api/index/fetch_index_wrapper.logic';
 import { isConnectorIndex } from '../../../utils/indices';
 
 type ConnectorConfigurationActions = Pick<
   Actions<PostConnectorConfigurationArgs, PostConnectorConfigurationResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
-  fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
+  fetchIndexApiSuccess: FetchIndexApiWrapperLogicActions['apiSuccess'];
   saveConfig: () => void;
   setConfigState(configState: ConnectorConfiguration): {
     configState: ConnectorConfiguration;
@@ -76,10 +76,10 @@ export const ConnectorConfigurationLogic = kea<
     actions: [
       ConnectorConfigurationApiLogic,
       ['apiError', 'apiSuccess', 'makeRequest'],
-      FetchIndexApiLogic,
+      FetchIndexApiWrapperLogic,
       ['apiSuccess as fetchIndexApiSuccess'],
     ],
-    values: [FetchIndexApiLogic, ['data as index']],
+    values: [FetchIndexApiWrapperLogic, ['indexData as index']],
   },
   events: ({ actions, values }) => ({
     afterMount: () =>
@@ -96,7 +96,7 @@ export const ConnectorConfigurationLogic = kea<
           { defaultMessage: 'Configuration successfully updated' }
         )
       );
-      FetchIndexApiLogic.actions.makeRequest({ indexName });
+      FetchIndexApiWrapperLogic.actions.makeRequest({ indexName });
     },
     fetchIndexApiSuccess: (index) => {
       if (!values.isEditing && isConnectorIndex(index)) {
