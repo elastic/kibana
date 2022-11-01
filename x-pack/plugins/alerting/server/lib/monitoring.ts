@@ -5,29 +5,43 @@
  * 2.0.
  */
 
-import stats from 'stats-lite';
 import { RuleMonitoring } from '../types';
 
-export const getExecutionSuccessRatio = (ruleMonitoring: RuleMonitoring) => {
-  const { history } = ruleMonitoring.run;
-  return history.filter(({ success }) => success).length / history.length;
+export const INITIAL_METRICS = {
+  duration: 0,
+  total_search_duration_ms: null,
+  total_indexing_duration_ms: null,
+  total_alerts_detected: null,
+  total_alerts_created: null,
+  gap_duration_s: null,
 };
 
-export const getExecutionDurationPercentiles = (ruleMonitoring: RuleMonitoring) => {
-  const durationSamples = ruleMonitoring.run.history.reduce<number[]>((duration, history) => {
-    if (typeof history.duration === 'number') {
-      return [...duration, history.duration];
-    }
-    return duration;
-  }, []);
 
-  if (durationSamples.length) {
-    return {
-      p50: stats.percentile(durationSamples as number[], 0.5),
-      p95: stats.percentile(durationSamples as number[], 0.95),
-      p99: stats.percentile(durationSamples as number[], 0.99),
-    };
-  }
+// Immutably updates the monitoring object with timestamp and duration.
+// Used when converting from and between raw monitoring object
+export const updateMonitoring = ({
+  monitoring,
+  timestamp,
+  duration,
+}: {
+  monitoring: RuleMonitoring;
+  timestamp: string;
+  duration: number;
+}) => {
+  const { run } = monitoring;
+  const { last_run: lastRun, ...rest } = run;
+  const { metrics = INITIAL_METRICS } = lastRun;
 
-  return {};
+  return {
+    run: {
+      last_run: {
+        timestamp,
+        metrics: {
+          ...metrics,
+          duration,
+        },
+      },
+      ...rest,
+    },
+  };
 };

@@ -114,7 +114,6 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     },
     monitoring: {
       properties: {
-        // TODO migrations
         run: {
           properties: {
             history: {
@@ -255,7 +254,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     running: {
       type: 'boolean',
     },
-    next_run: {
+    nextRun: {
       type: 'date',
     },
     // Deprecated, if you need to add new property please do it in `last_run`
@@ -295,21 +294,21 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
-    last_run: {
+    lastRun: {
       properties: {
         outcome: {
           type: 'keyword',
         },
-        outcome_order: {
+        outcomeOrder: {
           type: 'float',
         },
         warning: {
           type: 'text',
         },
-        outcome_msg: {
+        outcomeMsg: {
           type: 'text',
         },
-        alerts_count: {
+        alertsCount: {
           properties: {
             active: {
               type: 'float',

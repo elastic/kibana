@@ -6,7 +6,16 @@
  */
 import { omit } from 'lodash';
 
-import { RuleTypeParams, SanitizedRule } from '../../types';
+import { RuleTypeParams, SanitizedRule, RuleLastRun } from '../../types';
+
+export const rewriteRuleLastRun = (lastRun: RuleLastRun) => {
+  const { outcomeMsg, alertsCount, ...rest } = lastRun;
+  return {
+    alerts_count: alertsCount,
+    outcome_msg: outcomeMsg,
+    ...rest,
+  };
+};
 
 export const rewriteRule = ({
   alertTypeId,
@@ -24,6 +33,8 @@ export const rewriteRule = ({
   snoozeSchedule,
   isSnoozedUntil,
   activeSnoozes,
+  lastRun,
+  nextRun,
   ...rest
 }: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] }) => ({
   ...rest,
@@ -51,4 +62,6 @@ export const rewriteRule = ({
     params,
     connector_type_id: actionTypeId,
   })),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
 });

@@ -43,6 +43,7 @@ import {
   RuleMonitoring,
   MappedParams,
   RuleSnooze,
+  RuleLastRun,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -289,3 +290,5 @@ export interface RuleMonitoringService {
   setLastRunMetricsTotalAlertCreated: (totalAlertCreated: number) => void;
   setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
 }
+
+export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}

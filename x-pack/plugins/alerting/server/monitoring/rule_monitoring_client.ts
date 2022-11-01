@@ -6,6 +6,7 @@
  */
 
 import stats from 'stats-lite';
+import { INITIAL_METRICS } from '../lib/monitoring';
 import { RuleMonitoring, RuleMonitoringHistory } from '../types';
 
 export class RuleMonitoringService {
@@ -17,14 +18,7 @@ export class RuleMonitoringService {
       },
       last_run: {
         timestamp: new Date().toISOString(),
-        metrics: {
-          duration: 0,
-          total_search_duration_ms: null,
-          total_indexing_duration_ms: null,
-          total_alerts_detected: null,
-          total_alerts_created: null,
-          gap_duration_s: null,
-        },
+        metrics: INITIAL_METRICS,
       },
     },
   };
@@ -43,8 +37,8 @@ export class RuleMonitoringService {
     return this.monitoring;
   }
 
-  public addHistory(duration: number | undefined, hasError: boolean = true) {
-    const date = new Date();
+  public addHistory({ duration, hasError = true, runDate }: {duration: number | undefined; hasError: boolean; runDate: Date}) {
+    const date = runDate ?? new Date();
     const monitoringHistory: RuleMonitoringHistory = {
       success: true,
       timestamp: date.getTime(),
@@ -65,11 +59,11 @@ export class RuleMonitoringService {
 
   public getLastRunMetricsSetters() {
     return {
-      setLastRunMetricsTotalSearchDurationMs: this.setLastRunMetricsTotalSearchDurationMs,
-      setLastRunMetricsTotalIndexingDurationMs: this.setLastRunMetricsTotalIndexingDurationMs,
-      setLastRunMetricsTotalAlertDetected: this.setLastRunMetricsTotalAlertDetected,
-      setLastRunMetricsTotalAlertCreated: this.setLastRunMetricsTotalAlertCreated,
-      setLastRunMetricsGapDurationS: this.setLastRunMetricsGapDurationS,
+      setLastRunMetricsTotalSearchDurationMs: this.setLastRunMetricsTotalSearchDurationMs.bind(this),
+      setLastRunMetricsTotalIndexingDurationMs: this.setLastRunMetricsTotalIndexingDurationMs.bind(this),
+      setLastRunMetricsTotalAlertDetected: this.setLastRunMetricsTotalAlertDetected.bind(this),
+      setLastRunMetricsTotalAlertCreated: this.setLastRunMetricsTotalAlertCreated.bind(this),
+      setLastRunMetricsGapDurationS: this.setLastRunMetricsGapDurationS.bind(this),
     };
   }
 
