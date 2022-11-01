@@ -23,16 +23,13 @@ import {
 import type { DataViewListItem, DataView } from '@kbn/data-views-plugin/public';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import { useTriggerUiActionServices } from '../es_query/util';
-
-export interface DataViewSelectPopoverMetaData extends Record<string, unknown> {
-  adHocDataViewList: DataView[];
-}
+import { EsQueryAlertMetaData } from '../es_query/types';
 
 export interface DataViewSelectPopoverProps {
   dataView: DataView;
-  metadata?: DataViewSelectPopoverMetaData;
+  metadata?: EsQueryAlertMetaData;
   onSelectDataView: (selectedDataView: DataView) => void;
-  onChangeMetaData: (metadata: DataViewSelectPopoverMetaData) => void;
+  onChangeMetaData: (metadata: EsQueryAlertMetaData) => void;
 }
 
 const toDataViewListItem = (dataView: DataView): DataViewListItem => {
@@ -44,7 +41,7 @@ const toDataViewListItem = (dataView: DataView): DataViewListItem => {
 };
 
 export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
-  metadata = { adHocDataViewList: [] },
+  metadata = { adHocDataViewList: [], isManagementPage: true },
   dataView,
   onSelectDataView,
   onChangeMetaData,

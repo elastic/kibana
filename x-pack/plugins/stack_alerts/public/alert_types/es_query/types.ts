@@ -11,9 +11,8 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { EXPRESSION_ERRORS } from './constants';
-import type { DataViewSelectPopoverMetaData } from '../components/data_view_select_popover';
 
 export interface Comparator {
   text: string;
@@ -35,7 +34,8 @@ export interface CommonAlertParams extends RuleTypeParams {
   excludeHitsFromPreviousRun: boolean;
 }
 
-export interface EsQueryAlertMetaData extends DataViewSelectPopoverMetaData {
+export interface EsQueryAlertMetaData {
+  adHocDataViewList: DataView[];
   isManagementPage?: boolean;
 }
 
