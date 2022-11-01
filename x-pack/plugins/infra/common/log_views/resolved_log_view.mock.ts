@@ -10,13 +10,7 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { defaultLogViewsStaticConfig } from './defaults';
 import { ResolvedLogView, resolveLogView } from './resolved_log_view';
 import { LogViewAttributes } from './types';
-import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-
-const dataViewMock = {
-  id: 'log-view-data-view-mock',
-  title: 'log-view-data-view-mock-title',
-  fields: [],
-} as unknown as DataView;
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 export const createResolvedLogViewMock = (
   resolvedLogViewOverrides: Partial<ResolvedLogView> = {}
@@ -48,7 +42,12 @@ export const createResolvedLogViewMock = (
       messageColumn: { id: 'MESSAGE_COLUMN_ID' },
     },
   ],
-  dataViewReference: dataViewMock,
+  dataViewReference: createStubDataView({
+    spec: {
+      id: 'log-view-data-view-mock',
+      title: 'log-indices-*',
+    },
+  }),
   ...resolvedLogViewOverrides,
 });
 
