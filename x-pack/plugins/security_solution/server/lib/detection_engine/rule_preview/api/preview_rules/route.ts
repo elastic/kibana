@@ -7,6 +7,7 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
@@ -51,7 +52,6 @@ import {
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
-  createSavedQueryAlertType,
   createThresholdAlertType,
   createNewTermsAlertType,
 } from '../../../rule_types';
@@ -292,7 +292,12 @@ export const previewRulesRoute = async (
         switch (previewRuleParams.type) {
           case 'query':
             const queryAlertType = previewRuleTypeWrapper(
-              createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+              createQueryAlertType({
+                ...ruleOptions,
+                ...queryRuleAdditionalOptions,
+                id: QUERY_RULE_TYPE_ID,
+                name: 'Custom Query Rule',
+              })
             );
             await runExecutors(
               queryAlertType.executor,
@@ -312,7 +317,12 @@ export const previewRulesRoute = async (
             break;
           case 'saved_query':
             const savedQueryAlertType = previewRuleTypeWrapper(
-              createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+              createQueryAlertType({
+                ...ruleOptions,
+                ...queryRuleAdditionalOptions,
+                id: SAVED_QUERY_RULE_TYPE_ID,
+                name: 'Saved Query Rule',
+              })
             );
             await runExecutors(
               savedQueryAlertType.executor,

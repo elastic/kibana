@@ -6,7 +6,6 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { BucketHistory } from '../../signals/alert_grouping/group_and_bulk_create';
@@ -24,11 +23,18 @@ export interface QueryRuleState {
 export const createQueryAlertType = (
   createOptions: CreateQueryRuleOptions
 ): SecurityAlertType<UnifiedQueryRuleParams, QueryRuleState, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, version, osqueryCreateAction, licensing } =
-    createOptions;
+  const {
+    eventsTelemetry,
+    experimentalFeatures,
+    version,
+    osqueryCreateAction,
+    licensing,
+    id,
+    name,
+  } = createOptions;
   return {
-    id: QUERY_RULE_TYPE_ID,
-    name: 'Custom Query Rule',
+    id,
+    name,
     validate: {
       params: {
         validate: (object: unknown) => {
