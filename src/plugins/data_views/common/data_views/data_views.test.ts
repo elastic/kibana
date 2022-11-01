@@ -155,6 +155,9 @@ describe('IndexPatterns', () => {
     const gettedDataView = await indexPatterns.get(id);
 
     expect(dataView).toBe(gettedDataView);
+
+    const dataView2 = await indexPatterns.create({ id });
+    expect(dataView2).toBe(gettedDataView);
   });
 
   test('allowNoIndex flag preserves existing fields when index is missing', async () => {

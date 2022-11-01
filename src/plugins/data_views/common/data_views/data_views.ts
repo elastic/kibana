@@ -891,18 +891,11 @@ export class DataViewsService {
     return indexPatternPromise;
   };
 
-  /**
-   * Create a new data view instance.
-   * @param spec data view spec
-   * @param skipFetchFields if true, will not fetch fields
-   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
-   * @returns DataView
-   */
-  async create(
+  private createFromSpec = async (
     { id, name, title, ...restOfSpec }: DataViewSpec,
     skipFetchFields = false,
-    displayErrors = true
-  ): Promise<DataView> {
+    displayErrors: boolean = true
+  ) => {
     const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 
@@ -913,7 +906,7 @@ export class DataViewsService {
       ...restOfSpec,
     };
 
-    const indexPattern = new DataView({
+    const dataView = new DataView({
       spec,
       fieldFormats: this.fieldFormats,
       shortDotsEnable,
@@ -921,12 +914,39 @@ export class DataViewsService {
     });
 
     if (!skipFetchFields) {
-      await this.refreshFields(indexPattern, displayErrors);
+      await this.refreshFields(dataView, displayErrors);
     }
 
-    this.dataViewCache.set(indexPattern.id!, Promise.resolve(indexPattern));
+    return dataView;
+  };
 
-    return indexPattern;
+  /**
+   * Create data view instance.
+   * @param spec data view spec
+   * @param skipFetchFields if true, will not fetch fields
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
+   * @returns DataView
+   */
+  async create(
+    spec: DataViewSpec,
+    skipFetchFields = false,
+    displayErrors = true
+  ): Promise<DataView> {
+    // cache if we have an id
+    if (spec.id) {
+      const indexPatternPromise =
+        this.dataViewCache.get(spec.id) ||
+        this.dataViewCache.set(spec.id, this.createFromSpec(spec, skipFetchFields, displayErrors));
+
+      // don't cache failed requests
+      indexPatternPromise.catch(() => {
+        this.dataViewCache.clear(spec.id!);
+      });
+
+      return indexPatternPromise;
+    }
+
+    return this.createFromSpec(spec, skipFetchFields, displayErrors);
   }
 
   /**
