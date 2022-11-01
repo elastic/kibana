@@ -88,7 +88,13 @@
             "signature": [
               "Subject",
               "<",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]>"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
@@ -239,15 +245,45 @@
                 "text": "ViewMode"
               },
               "; title: string; id: string; lastReloadRequestTime: number; hidePanelTitles: boolean; enhancements: ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               "; disabledActions: string[]; disableTriggers: boolean; searchSessionId: string; syncColors: boolean; syncCursor: boolean; syncTooltips: boolean; executionContext: ",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               "; query: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               "; filters: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]; timeRange: ",
-              "TimeRange",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               "; timeslice: [number, number]; controlStyle: \"twoLine\" | \"oneLine\"; ignoreParentSettings: ",
               "ParentIgnoreSettings",
               "; fieldName: string; parentFieldName: string; childFieldName: string; dataViewId: string; }, ",
@@ -565,7 +601,13 @@
             "description": [],
             "signature": [
               "(filters: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]) => void"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
@@ -580,7 +622,13 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "Filter",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
@@ -990,7 +1038,13 @@
                 "text": "EmbeddableStateWithType"
               },
               ", references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]) => ",
               {
                 "pluginId": "embeddable",
@@ -1027,7 +1081,13 @@
                 "label": "references",
                 "description": [],
                 "signature": [
-                  "SavedObjectReference",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
@@ -1061,7 +1121,13 @@
                 "text": "EmbeddableStateWithType"
               },
               "; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]; }"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
@@ -1147,7 +1213,7 @@
             "label": "getDisplayName",
             "description": [],
             "signature": [
-              "() => string"
+              "() => any"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
@@ -2051,7 +2117,7 @@
             "label": "getDisplayName",
             "description": [],
             "signature": [
-              "() => string"
+              "() => any"
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
@@ -2083,7 +2149,7 @@
             "label": "getDescription",
             "description": [],
             "signature": [
-              "() => string"
+              "() => any"
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
@@ -2108,7 +2174,13 @@
                 "text": "EmbeddableStateWithType"
               },
               ", references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]) => ",
               {
                 "pluginId": "embeddable",
@@ -2145,7 +2217,13 @@
                 "label": "references",
                 "description": [],
                 "signature": [
-                  "SavedObjectReference",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
@@ -2179,7 +2257,13 @@
                 "text": "EmbeddableStateWithType"
               },
               "; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]; }"
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
@@ -2581,7 +2665,7 @@
             "label": "getDisplayName",
             "description": [],
             "signature": [
-              "() => string"
+              "() => any"
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
@@ -2597,7 +2681,7 @@
             "label": "getDescription",
             "description": [],
             "signature": [
-              "() => string"
+              "() => any"
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
@@ -2938,7 +3022,13 @@
                 "text": "EmbeddableStateWithType"
               },
               ", references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]) => ",
               {
                 "pluginId": "embeddable",
@@ -2975,7 +3065,13 @@
                 "label": "references",
                 "description": [],
                 "signature": [
-                  "SavedObjectReference",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
@@ -3009,7 +3105,13 @@
                 "text": "EmbeddableStateWithType"
               },
               "; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]; }"
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
@@ -3185,7 +3287,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/controls/public/types.ts",
@@ -4016,11 +4124,29 @@
             "text": "EmbeddableInput"
           },
           " & { query?: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           " | undefined; filters?: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[] | undefined; timeRange?: ",
-          "TimeRange",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined; timeslice?: [number, number] | undefined; controlStyle?: ",
           "ControlStyle",
           " | undefined; ignoreParentSettings?: ",
@@ -4422,7 +4548,13 @@
             "text": "RawControlGroupAttributes"
           },
           ", \"id\">) => ",
-          "SerializableRecord"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
         "deprecated": false,
@@ -4464,7 +4596,13 @@
         "description": [],
         "signature": [
           "(serializable: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ") => Omit<",
           {
             "pluginId": "controls",
@@ -4487,7 +4625,13 @@
             "label": "serializable",
             "description": [],
             "signature": [
-              "SerializableRecord"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              }
             ],
             "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
             "deprecated": false,
@@ -5111,11 +5255,23 @@
             "text": "ControlsPanels"
           },
           " & ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           "; ignoreParentSettings: ",
           "ParentIgnoreSettings",
           " & ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           "; }"
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
