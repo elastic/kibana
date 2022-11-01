@@ -10,7 +10,6 @@ import {
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
 } from '../../../common/endpoint/models/policy_config';
 import type { LicenseService } from '../../../common/license/license';
-import { isAtLeast } from '../../../common/license/license';
 import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import type { AnyPolicyCreateConfig, PolicyCreateEndpointConfig } from '../types';
@@ -28,15 +27,17 @@ export const createDefaultPolicy = (
   licenseService: LicenseService,
   config: AnyPolicyCreateConfig | undefined
 ): PolicyConfig => {
-  const policy = isAtLeast(licenseService.getLicenseInformation(), 'platinum')
-    ? policyConfigFactory()
-    : policyConfigFactoryWithoutPaidFeatures();
+  const factoryPolicy = policyConfigFactory();
 
-  if (config?.type === 'cloud') {
-    return getCloudPolicyConfig(policy);
-  }
+  const defaultPolicyPerType =
+    config?.type === 'cloud'
+      ? getCloudPolicyConfig(factoryPolicy)
+      : getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
 
-  return getEndpointPolicyWithIntegrationConfig(policy, config);
+  // Apply license limitations in the final step, so it's not overriden (see malware popup)
+  return licenseService.isPlatinumPlus()
+    ? defaultPolicyPerType
+    : policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);
 };
 
 /**

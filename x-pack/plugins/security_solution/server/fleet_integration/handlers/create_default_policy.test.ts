@@ -50,6 +50,11 @@ describe('Create Default Policy tests ', () => {
       expect(policy.windows.behavior_protection).toEqual(disabledButSupported);
       expect(policy.mac.memory_protection).toEqual(disabledButSupported);
       expect(policy.linux.behavior_protection).toEqual(disabledButSupported);
+
+      // malware popups should be disabled
+      expect(policy.windows.popup.malware.enabled).toBeFalsy();
+      expect(policy.mac.popup.malware.enabled).toBeFalsy();
+      expect(policy.linux.popup.malware.enabled).toBeFalsy();
     });
 
     it('Should return PolicyConfig for events only without paid features when license is below platinum', () => {
@@ -68,6 +73,11 @@ describe('Create Default Policy tests ', () => {
       expect(policy.windows.behavior_protection).toEqual(disabledAndUnsupported);
       expect(policy.mac.memory_protection).toEqual(disabledAndUnsupported);
       expect(policy.linux.behavior_protection).toEqual(disabledAndUnsupported);
+
+      // malware popups are enabled on unpaid license
+      expect(policy.windows.popup.malware.enabled).toBeTruthy();
+      expect(policy.mac.popup.malware.enabled).toBeTruthy();
+      expect(policy.linux.popup.malware.enabled).toBeTruthy();
     });
   });
 
