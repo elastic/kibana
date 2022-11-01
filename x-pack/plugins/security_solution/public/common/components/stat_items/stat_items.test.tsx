@@ -48,6 +48,12 @@ jest.mock('../visualization_actions', () => {
   };
 });
 
+jest.mock('../visualization_actions/lens_embeddable', () => {
+  return {
+    LensEmbeddable: () => <div className="lensEmbeddable" />,
+  };
+});
+
 const mockSetToggle = jest.fn();
 
 jest
@@ -103,16 +109,16 @@ describe('Stat Items Component', () => {
       expect(wrapper.find('[data-test-subj="stat-title"]')).toBeTruthy();
     });
 
-    test('should not render icons', () => {
-      expect(wrapper.find('[data-test-subj="stat-icon"]').filter('EuiIcon')).toHaveLength(0);
+    test('should render icons', () => {
+      expect(wrapper.find('[data-test-subj="stat-icon"]').filter('EuiIcon')).toHaveLength(1);
     });
 
     test('should not render barChart', () => {
-      expect(wrapper.find(BarChart)).toHaveLength(0);
+      expect(wrapper.find('[data-test-subj="embeddable-bar-chart"]')).toHaveLength(0);
     });
 
     test('should not render areaChart', () => {
-      expect(wrapper.find(AreaChart)).toHaveLength(0);
+      expect(wrapper.find('[data-test-subj="embeddable-area-chart"]')).toHaveLength(0);
     });
 
     test('should not render spliter', () => {
@@ -221,7 +227,7 @@ describe('Stat Items Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find(`.viz-actions`).exists()).toEqual(true);
+      expect(wrapper.find(`[data-test-subj="embeddable-metric"]`).exists()).toEqual(true);
       expect(wrapper.find('[data-test-subj="stat-title"]').first().exists()).toEqual(true);
     });
     test('toggleStatus=false, render none', () => {
@@ -234,7 +240,7 @@ describe('Stat Items Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('.viz-actions').first().exists()).toEqual(false);
+      expect(wrapper.find(`[data-test-subj="embeddable-metric"]`).first().exists()).toEqual(false);
       expect(wrapper.find('[data-test-subj="stat-title"]').first().exists()).toEqual(false);
     });
   });
