@@ -90,11 +90,10 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
       anchor: `[data-test-subj="create-case-flyout"]`,
       anchorPosition: 'leftUp',
       dataTestSubj: getTourAnchor(5, SecurityStepId.alertsCases),
-      hideNextButton: true,
     }
     ```
 
-   Notice that the **anchor prop is defined** as `[data-test-subj="create-case-flyout"]` in the step 5 config. There is also a `hideNextButton` boolean utilized here.
+   Notice that the **anchor prop is defined** as `[data-test-subj="create-case-flyout"]` in the step 5 config.
    As you can see pictured below, the tour step anchor is the create case flyout and the next button is hidden.
 
      <img width="1336" alt="5" src="https://user-images.githubusercontent.com/6935300/197848670-09a6fa58-7417-4c9b-9be0-fb58224c2dc8.png">

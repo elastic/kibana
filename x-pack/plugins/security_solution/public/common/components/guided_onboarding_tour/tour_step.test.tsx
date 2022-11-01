@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import { GuidedOnboardingTourStep, SecurityTourStep } from './tour_step';
 import { SecurityStepId } from './tour_config';
 import { useTourContext } from './tour';
@@ -13,8 +13,10 @@ import { useTourContext } from './tour';
 jest.mock('./tour');
 const mockTourStep = jest
   .fn()
-  .mockImplementation(({ children }: { children: React.ReactNode }) => (
-    <span data-test-subj="tourStepMock">{children}</span>
+  .mockImplementation(({ children, footerAction }: { children: React.ReactNode }) => (
+    <span data-test-subj="tourStepMock">
+      {children} {footerAction}
+    </span>
   ));
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -33,10 +35,11 @@ const defaultProps = {
 const mockChildren = <h1 data-test-subj="h1">{'random child element'}</h1>;
 
 describe('GuidedOnboardingTourStep', () => {
+  const incrementStep = jest.fn();
   beforeEach(() => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 1,
-      incrementStep: jest.fn(),
+      incrementStep,
       isTourShown: () => true,
     });
     jest.clearAllMocks();
@@ -60,6 +63,30 @@ describe('GuidedOnboardingTourStep', () => {
     const header = getByTestId('h1');
     expect(tourStep).not.toBeInTheDocument();
     expect(header).toBeInTheDocument();
+  });
+  it('onClick={undefined}, call incrementStep on click', () => {
+    const { getByTestId } = render(
+      <GuidedOnboardingTourStep {...defaultProps}>{mockChildren}</GuidedOnboardingTourStep>
+    );
+    const nextButton = getByTestId('onboarding--securityTourNextStepButton');
+    act(() => {
+      fireEvent.click(nextButton);
+    });
+    expect(incrementStep).toHaveBeenCalled();
+  });
+  it('onClick={any function}, do not call incrementStep on click', () => {
+    const onClick = jest.fn();
+    const { getByTestId } = render(
+      <GuidedOnboardingTourStep {...defaultProps} onClick={onClick}>
+        {mockChildren}
+      </GuidedOnboardingTourStep>
+    );
+    const nextButton = getByTestId('onboarding--securityTourNextStepButton');
+    act(() => {
+      fireEvent.click(nextButton);
+    });
+    expect(onClick).toHaveBeenCalled();
+    expect(incrementStep).not.toHaveBeenCalled();
   });
 });
 
@@ -206,20 +233,5 @@ describe('SecurityTourStep', () => {
       <SecurityTourStep {...securityTourStepDefaultProps} step={1} />
     );
     expect(queryByTestId('tourStepMock')).not.toBeInTheDocument();
-  });
-
-  it('does not render next button if step hideNextButton=true ', () => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: 4,
-      incrementStep: jest.fn(),
-      isTourShown: () => true,
-    });
-    render(
-      <SecurityTourStep {...securityTourStepDefaultProps} step={4}>
-        {mockChildren}
-      </SecurityTourStep>
-    );
-    const mockCall = { ...mockTourStep.mock.calls[0][0] };
-    expect(mockCall.footerAction).toMatchInlineSnapshot(`<React.Fragment />`);
   });
 });

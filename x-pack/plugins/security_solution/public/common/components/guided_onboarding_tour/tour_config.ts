@@ -20,7 +20,6 @@ export type StepConfig = Pick<
 > & {
   anchor?: ElementTarget;
   dataTestSubj: string;
-  hideNextButton?: boolean;
   imageConfig?: {
     altText: string;
     src: string;
@@ -125,12 +124,12 @@ const alertsCasesConfig: StepConfig[] = [
 
 export const sampleCase = {
   title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.createCase.title', {
-    defaultMessage: `Malicious signal detected`,
+    defaultMessage: `Demo signal detected`,
   }),
   description: i18n.translate(
     'xpack.securitySolution.guided_onboarding.tour.createCase.description',
     {
-      defaultMessage: `This is a very unfortunate case of a malicious signal. I've seen it do horrible things. My oh my what a terror, run for your lives!`,
+      defaultMessage: `This is where you'd document a malicious signal. You can include whatever information is relevant to the case and would be helpful for anyone else that needs to read up on it.`,
     }
   ),
 };
