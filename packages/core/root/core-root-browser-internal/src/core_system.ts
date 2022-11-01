@@ -123,13 +123,12 @@ export class CoreSystem {
 
     this.i18n = new I18nService();
 
-
     const tmpCoreContext: CoreContext = {
       coreId: Symbol('core'),
       env: {
         mode: {
           ...injectedMetadata.env.mode,
-          dev: true
+          dev: true,
         },
         packageInfo: injectedMetadata.env.packageInfo,
       },
