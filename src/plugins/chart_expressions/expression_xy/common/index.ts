@@ -65,4 +65,5 @@ export type {
   ExtendedDataLayerFn,
   ExtendedAnnotationLayerConfigResult,
   ExtendedAnnotationLayerFn,
+  ReferenceLineLayerFn,
 } from './types';

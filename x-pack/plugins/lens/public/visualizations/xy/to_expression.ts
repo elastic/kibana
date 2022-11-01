@@ -25,6 +25,7 @@ import {
   ExtendedAnnotationLayerFn,
   ExtendedDataLayerFn,
   ReferenceLineDecorationConfigFn,
+  ReferenceLineLayerFn,
   SeriesType,
   XScaleType,
   XYCurveType,
@@ -440,26 +441,19 @@ const referenceLineLayerToExpression = (
   datasourceLayer: DatasourcePublicAPI | undefined,
   datasourceExpression: Ast
 ): Ast => {
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'referenceLineLayer',
-        arguments: {
-          layerId: [layer.layerId],
-          decorations: layer.yConfig
-            ? layer.yConfig.map((yConfig) =>
-                extendedYConfigToRLDecorationConfigExpression(yConfig, defaultReferenceLineColor)
-              )
-            : [],
-          accessors: layer.accessors,
-          columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
-          ...(datasourceExpression ? { table: [datasourceExpression] } : {}),
-        },
-      },
-    ],
-  };
+  const referenceLineLayerFn = buildExpressionFunction<ReferenceLineLayerFn>('referenceLineLayer', {
+    layerId: layer.layerId,
+    decorations: layer.yConfig
+      ? layer.yConfig.map((yConfig) =>
+          extendedYConfigToRLDecorationConfigExpression(yConfig, defaultReferenceLineColor)
+        )
+      : [],
+    accessors: layer.accessors,
+    columnToLabel: JSON.stringify(getColumnToLabelMap(layer, datasourceLayer)),
+    ...(datasourceExpression ? { table: [datasourceExpression] } : {}),
+  });
+
+  return buildExpression([referenceLineLayerFn]).toAst();
 };
 
 const annotationLayerToExpression = (
