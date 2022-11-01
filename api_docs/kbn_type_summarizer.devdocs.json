@@ -22,7 +22,13 @@
         ],
         "signature": [
           "(log: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/type-summarizer-core",
+            "scope": "server",
+            "docId": "kibKbnTypeSummarizerCorePluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           ", options: ",
           {
             "pluginId": "@kbn/type-summarizer",
@@ -47,7 +53,13 @@
             "label": "log",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/type-summarizer-core",
+                "scope": "server",
+                "docId": "kibKbnTypeSummarizerCorePluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
             "deprecated": false,
