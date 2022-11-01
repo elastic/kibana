@@ -115,8 +115,9 @@ export type MonitoringType = typeof monitoringTypes;
 export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type ArchivePackage = PackageSpecManifest &
-  // should an uploaded package be able to specify `internal`?
-  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch'>;
+  Pick<RegistryPackage, 'readme' | 'assets' | 'internal' | 'elasticsearch'> & {
+    data_streams?: ArchiveDataStream[];
+  };
 
 export interface BundledPackage {
   name: string;
@@ -346,6 +347,10 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
 }
 
+export type ArchiveDataStream = RegistryDataStream & {
+  [RegistryDataStreamKeys.elasticsearch]?: ArchiveElasticsearch;
+};
+
 export interface RegistryElasticsearch {
   privileges?: RegistryDataStreamPrivileges;
   'index_template.settings'?: estypes.IndicesIndexSettings;
@@ -353,6 +358,10 @@ export interface RegistryElasticsearch {
   'ingest_pipeline.name'?: string;
   source_mode?: 'default' | 'synthetic';
 }
+
+export type ArchiveElasticsearch = RegistryElasticsearch & {
+  source_mode?: 'default' | 'synthetic';
+};
 
 export interface RegistryDataStreamPrivileges {
   cluster?: string[];
