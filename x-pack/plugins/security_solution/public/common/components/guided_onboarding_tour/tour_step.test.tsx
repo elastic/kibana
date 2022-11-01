@@ -9,6 +9,12 @@ import { render } from '@testing-library/react';
 import { GuidedOnboardingTourStep, SecurityTourStep } from './tour_step';
 import { SecurityStepId } from './tour_config';
 import { useTourContext } from './tour';
+import { mockGlobalState, SUB_PLUGINS_REDUCER, TestProviders } from '../../mock';
+import { TimelineId } from '../../../../common/types';
+import { createStore } from '../../store';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
+import { createSecuritySolutionStorageMock } from '@kbn/timelines-plugin/public/mock/mock_local_storage';
 
 jest.mock('./tour');
 const mockTourStep = jest
@@ -43,7 +49,8 @@ describe('GuidedOnboardingTourStep', () => {
   });
   it('renders as a tour step', () => {
     const { getByTestId } = render(
-      <GuidedOnboardingTourStep {...defaultProps}>{mockChildren}</GuidedOnboardingTourStep>
+      <GuidedOnboardingTourStep {...defaultProps}>{mockChildren}</GuidedOnboardingTourStep>,
+      { wrapper: TestProviders }
     );
     const tourStep = getByTestId('tourStepMock');
     const header = getByTestId('h1');
@@ -54,7 +61,8 @@ describe('GuidedOnboardingTourStep', () => {
     const { getByTestId, queryByTestId } = render(
       <GuidedOnboardingTourStep {...defaultProps} isTourAnchor={false}>
         {mockChildren}
-      </GuidedOnboardingTourStep>
+      </GuidedOnboardingTourStep>,
+      { wrapper: TestProviders }
     );
     const tourStep = queryByTestId('tourStepMock');
     const header = getByTestId('h1');
@@ -83,7 +91,8 @@ describe('SecurityTourStep', () => {
     render(
       <SecurityTourStep {...securityTourStepDefaultProps} step={99}>
         {mockChildren}
-      </SecurityTourStep>
+      </SecurityTourStep>,
+      { wrapper: TestProviders }
     );
     expect(mockTourStep).not.toHaveBeenCalled();
   });
@@ -92,7 +101,8 @@ describe('SecurityTourStep', () => {
     render(
       <SecurityTourStep {...securityTourStepDefaultProps} step={4}>
         {mockChildren}
-      </SecurityTourStep>
+      </SecurityTourStep>,
+      { wrapper: TestProviders }
     );
     expect(mockTourStep).not.toHaveBeenCalled();
   });
@@ -103,12 +113,16 @@ describe('SecurityTourStep', () => {
       incrementStep: jest.fn(),
       isTourShown: () => false,
     });
-    render(<SecurityTourStep {...securityTourStepDefaultProps}>{mockChildren}</SecurityTourStep>);
+    render(<SecurityTourStep {...securityTourStepDefaultProps}>{mockChildren}</SecurityTourStep>, {
+      wrapper: TestProviders,
+    });
     expect(mockTourStep).not.toHaveBeenCalled();
   });
 
   it('renders tour step with correct number of steppers', () => {
-    render(<SecurityTourStep {...securityTourStepDefaultProps}>{mockChildren}</SecurityTourStep>);
+    render(<SecurityTourStep {...securityTourStepDefaultProps}>{mockChildren}</SecurityTourStep>, {
+      wrapper: TestProviders,
+    });
     const mockCall = { ...mockTourStep.mock.calls[0][0] };
     expect(mockCall.step).toEqual(1);
     expect(mockCall.stepsTotal).toEqual(5);
@@ -118,7 +132,8 @@ describe('SecurityTourStep', () => {
     render(
       <SecurityTourStep {...securityTourStepDefaultProps} step={5}>
         {mockChildren}
-      </SecurityTourStep>
+      </SecurityTourStep>,
+      { wrapper: TestProviders }
     );
     const mockCall = { ...mockTourStep.mock.calls[0][0] };
     expect(mockCall.step).toEqual(5);
@@ -134,7 +149,8 @@ describe('SecurityTourStep', () => {
     render(
       <SecurityTourStep {...securityTourStepDefaultProps} step={3}>
         {mockChildren}
-      </SecurityTourStep>
+      </SecurityTourStep>,
+      { wrapper: TestProviders }
     );
     const mockCall = { ...mockTourStep.mock.calls[0][0] };
     expect(mockCall.footerAction).toMatchInlineSnapshot(`
@@ -163,7 +179,8 @@ describe('SecurityTourStep', () => {
     const { container } = render(
       <SecurityTourStep {...securityTourStepDefaultProps} step={3}>
         {mockChildren}
-      </SecurityTourStep>
+      </SecurityTourStep>,
+      { wrapper: TestProviders }
     );
     const selectParent = container.querySelector(
       `[data-test-subj="tourStepMock"] [data-test-subj="h1"]`
@@ -184,7 +201,8 @@ describe('SecurityTourStep', () => {
     const { container } = render(
       <SecurityTourStep {...securityTourStepDefaultProps} step={2}>
         {mockChildren}
-      </SecurityTourStep>
+      </SecurityTourStep>,
+      { wrapper: TestProviders }
     );
     const selectParent = container.querySelector(
       `[data-test-subj="tourStepMock"] [data-test-subj="h1"]`
@@ -197,13 +215,17 @@ describe('SecurityTourStep', () => {
   });
 
   it('if a tour step does not have children and has anchor, only render tour step', () => {
-    const { getByTestId } = render(<SecurityTourStep {...securityTourStepDefaultProps} step={5} />);
+    const { getByTestId } = render(
+      <SecurityTourStep {...securityTourStepDefaultProps} step={5} />,
+      { wrapper: TestProviders }
+    );
     expect(getByTestId('tourStepMock')).toBeInTheDocument();
   });
 
   it('if a tour step does not have children and does not have anchor, render nothing', () => {
     const { queryByTestId } = render(
-      <SecurityTourStep {...securityTourStepDefaultProps} step={1} />
+      <SecurityTourStep {...securityTourStepDefaultProps} step={1} />,
+      { wrapper: TestProviders }
     );
     expect(queryByTestId('tourStepMock')).not.toBeInTheDocument();
   });
@@ -217,9 +239,40 @@ describe('SecurityTourStep', () => {
     render(
       <SecurityTourStep {...securityTourStepDefaultProps} step={4}>
         {mockChildren}
-      </SecurityTourStep>
+      </SecurityTourStep>,
+      { wrapper: TestProviders }
     );
     const mockCall = { ...mockTourStep.mock.calls[0][0] };
     expect(mockCall.footerAction).toMatchInlineSnapshot(`<React.Fragment />`);
+  });
+
+  it('does not render step if timeline is open', () => {
+    const mockstate = {
+      ...mockGlobalState,
+      timeline: {
+        ...mockGlobalState.timeline,
+        timelineById: {
+          [TimelineId.active]: {
+            ...mockGlobalState.timeline.timelineById.test,
+            show: true,
+          },
+        },
+      },
+    };
+    const { storage } = createSecuritySolutionStorageMock();
+    const mockStore = createStore(
+      mockstate,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
+
+    render(
+      <TestProviders store={mockStore}>
+        <SecurityTourStep {...securityTourStepDefaultProps}>{mockChildren}</SecurityTourStep>
+      </TestProviders>
+    );
+    expect(mockTourStep).not.toHaveBeenCalled();
   });
 });
