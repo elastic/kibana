@@ -295,7 +295,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should generate 5 alerts, 1 for each new unique combination in 2 fields', async () => {
-      // ensure there are no alerts for single new terms fields, it means values are not new
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         index: ['new_terms'],
