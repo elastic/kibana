@@ -13,6 +13,7 @@ import {
 } from '@kbn/data-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME } from '../../../../common/constants';
 
 interface SearchOptions {
   /**
@@ -35,9 +36,9 @@ interface SearchOptions {
  * This is a searchService wrapper that will instrument your query with `inspector` and turn it into a Promise,
  * resolved when complete result set is returned or rejected on any error, other than Abort.
  */
-export const search = async <TResponse>(
+export const search = async <TResponse, T = {}>(
   searchService: ISearchStart,
-  searchRequest: IEsSearchRequest,
+  searchRequest: IEsSearchRequest & { factoryQueryType: string } & T,
   { inspectorAdapter, requestName, signal }: SearchOptions
 ): Promise<TResponse> => {
   const requestId = `${Date.now()}`;
@@ -47,6 +48,7 @@ export const search = async <TResponse>(
     searchService
       .search<IEsSearchRequest, IKibanaSearchResponse<TResponse>>(searchRequest, {
         abortSignal: signal,
+        strategy: THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
       })
       .subscribe({
         next: (response) => {

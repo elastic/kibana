@@ -60,6 +60,9 @@ jest.mock('../../../../../common/lib/kibana', () => {
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
     }),
+    useNavigateTo: jest.fn().mockReturnValue({
+      navigateTo: jest.fn(),
+    }),
     useGetUserCasesPermissions: originalKibanaLib.useGetUserCasesPermissions,
   };
 });
