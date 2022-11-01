@@ -413,7 +413,9 @@ const referenceLineLayerToExpression = (
       : [],
     accessors: layer.accessors,
     columnToLabel: JSON.stringify(getColumnToLabelMap(layer, datasourceLayer)),
-    ...(datasourceExpression ? { table: [datasourceExpression] } : {}),
+    ...(datasourceExpression && datasourceExpression.chain.length
+      ? { table: datasourceExpression }
+      : {}),
   });
 
   return buildExpression([referenceLineLayerFn]).toAst();
@@ -483,7 +485,7 @@ const dataLayerToExpression = (
       ? layer.yConfig.map((yConfig) =>
           yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)
         )
-      : [],
+      : undefined,
     curveType,
     seriesType: seriesType as SeriesType,
     showLines: seriesType === 'line' || seriesType === 'area',
