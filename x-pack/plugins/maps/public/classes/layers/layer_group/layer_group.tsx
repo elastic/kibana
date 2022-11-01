@@ -36,6 +36,10 @@ export function isLayerGroup(layer: ILayer) {
   return layer instanceof LayerGroup;
 }
 
+export const DEFAULT_LAYER_GROUP_LABEL = i18n.translate('xpack.maps.layerGroup.defaultName', {
+  defaultMessage: 'Layer group',
+});
+
 export class LayerGroup implements ILayer {
   protected readonly _descriptor: LayerGroupDescriptor;
   private _children: ILayer[] = [];
@@ -48,9 +52,7 @@ export class LayerGroup implements ILayer {
       label:
         typeof options.label === 'string' && options.label.length
           ? options.label
-          : i18n.translate('xpack.maps.layerGroup.defaultName', {
-              defaultMessage: 'Layer group',
-            }),
+          : DEFAULT_LAYER_GROUP_LABEL,
       sourceDescriptor: null,
       visible: typeof options.visible === 'boolean' ? options.visible : true,
     };
