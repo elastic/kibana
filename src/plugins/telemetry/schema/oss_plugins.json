@@ -7783,6 +7783,83 @@
         }
       }
     },
+    "files": {
+      "properties": {
+        "countByExtension": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "extension": {
+                "type": "keyword"
+              },
+              "count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "countByStatus": {
+          "properties": {
+            "AWAITING_UPLOAD": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files awaiting upload"
+              }
+            },
+            "DELETED": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are marked as deleted"
+              }
+            },
+            "READY": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are ready for download"
+              }
+            },
+            "UPLOADING": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are currently uploading"
+              }
+            },
+            "UPLOAD_ERROR": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that failed to upload"
+              }
+            }
+          }
+        },
+        "storage": {
+          "properties": {
+            "esFixedSizeIndex": {
+              "properties": {
+                "capacity": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Capacity of the fixed size index"
+                  }
+                },
+                "available": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Available storage in bytes"
+                  }
+                },
+                "used": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Used storage in bytes"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "index-patterns": {
       "properties": {
         "indexPatternsCount": {
@@ -8704,6 +8781,18 @@
         },
         "observability:apmEnableServiceMetrics": {
           "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmAWSLambdaPriceFactor": {
+          "type": "text",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmAWSLambdaRequestCostPerMillion": {
+          "type": "integer",
           "_meta": {
             "description": "Non-default value of setting."
           }
