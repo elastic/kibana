@@ -78,11 +78,29 @@
               "(deps: ",
               "PrebootDeps",
               ") => { createRegistrar: (router: ",
-              "IRouter",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IRouter",
+                "text": "IRouter"
+              },
               "<",
-              "RequestHandlerContext",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
               ">) => ",
-              "HttpResources",
+              {
+                "pluginId": "@kbn/core-http-resources-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-server.HttpResources",
+                "text": "HttpResources"
+              },
               "; }"
             ],
             "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
@@ -118,11 +136,29 @@
               "(deps: ",
               "SetupDeps",
               ") => { createRegistrar: (router: ",
-              "IRouter",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IRouter",
+                "text": "IRouter"
+              },
               "<",
-              "RequestHandlerContext",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
               ">) => ",
-              "HttpResources",
+              {
+                "pluginId": "@kbn/core-http-resources-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-server.HttpResources",
+                "text": "HttpResources"
+              },
               "; }"
             ],
             "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",

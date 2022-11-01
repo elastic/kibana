@@ -13,6 +13,9 @@ import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt
 import { useInvalidateFindRulesQuery, useUpdateRulesCache } from './use_find_rules_query';
 import { useInvalidateFetchTagsQuery } from './use_fetch_tags_query';
 import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
+import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
+
+export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
 export const useBulkActionMutation = (
   options?: UseMutationOptions<BulkActionResponse, Error, BulkActionProps>
@@ -27,6 +30,7 @@ export const useBulkActionMutation = (
     (action: BulkActionProps) => performBulkAction(action),
     {
       ...options,
+      mutationKey: BULK_ACTION_MUTATION_KEY,
       onSuccess: (...args) => {
         const [res, { action }] = args;
         switch (action) {
