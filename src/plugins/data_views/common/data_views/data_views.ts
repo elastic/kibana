@@ -913,7 +913,7 @@ export class DataViewsService {
       ...restOfSpec,
     };
 
-    const indexPattern = new DataView({
+    const dataView = new DataView({
       spec,
       fieldFormats: this.fieldFormats,
       shortDotsEnable,
@@ -921,12 +921,10 @@ export class DataViewsService {
     });
 
     if (!skipFetchFields) {
-      await this.refreshFields(indexPattern, displayErrors);
+      await this.refreshFields(dataView, displayErrors);
     }
 
-    this.dataViewCache.set(indexPattern.id!, Promise.resolve(indexPattern));
-
-    return indexPattern;
+    return dataView;
   }
 
   /**
@@ -949,7 +947,13 @@ export class DataViewsService {
       }
     }
 
-    return await this.createFromSpec(spec, skipFetchFields, displayErrors);
+    const dataView = await this.createFromSpec(spec, skipFetchFields, displayErrors);
+
+    if (dataView.id) {
+      return this.dataViewCache.set(dataView.id, Promise.resolve(dataView));
+    }
+
+    return dataView;
   }
 
   /**
