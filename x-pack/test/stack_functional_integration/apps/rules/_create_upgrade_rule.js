@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-
 export default ({ getService, getPageObjects }) => {
   describe('pre-upgrade', function describeIndexTests() {
     const PageObjects = getPageObjects(['common', 'settings', 'header']);
     const retry = getService('retry');
-    const log = getService('log');
-    const browser = getService('browser');
-    const monacoEditor = getService('monacoEditor');
     const testSubjects = getService('testSubjects');
     const find = getService('find');
 
@@ -68,7 +63,6 @@ export default ({ getService, getPageObjects }) => {
       await retry.waitFor(
         'Create Rule button is visible',
         async () => await testSubjects.exists('createFirstAlertButton')
-
       );
       await testSubjects.click('createFirstAlertButton');
       await retry.waitFor(
