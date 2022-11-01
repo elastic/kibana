@@ -37,7 +37,7 @@ export class JourneyFtrHarness {
     private readonly auth: Auth,
     private readonly journeyConfig: JourneyConfig<any>
   ) {
-    console.log("============================ BOO")
+    console.log('============================ BOO');
     this.screenshots = new JourneyScreenshots(this.journeyConfig.getName());
   }
 
