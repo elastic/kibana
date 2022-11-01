@@ -51,6 +51,7 @@ import {
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesFindQueryParams } from './types';
 import type { NotificationsService } from '../services/notifications';
+import { UserProfile } from '@kbn/user-profile-components';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -532,4 +533,36 @@ export const notifyAssignees = async ({
   const users = userProfiles.map((profile) => profile.user);
 
   await notificationsService.notify({ users, theCase });
+};
+
+export const bulkNotifyAssignees = async ({
+  casesAndUsersToNotifyForAssignment,
+  bulkGetUserProfiles,
+  notificationsService,
+}: {
+  casesAndUsersToNotifyForAssignment: Array<{ assignees: CaseAssignees; theCase: CaseResponse }>;
+  bulkGetUserProfiles: SecurityPluginStart['userProfiles']['bulkGet'];
+  notificationsService: NotificationsService;
+}) => {
+  // TODO: Filter current user
+  const uids = new Set(
+    casesAndUsersToNotifyForAssignment
+      .map(({ assignees }) => assignees.map((assignee) => assignee.uid))
+      .flat()
+  );
+
+  const userProfiles = await bulkGetUserProfiles({ uids });
+  const userProfilesAsMap = new Map<string, UserProfile>(
+    userProfiles.map((userProfile) => [userProfile.uid, userProfile])
+  );
+
+  const args = casesAndUsersToNotifyForAssignment.map(({ theCase, assignees }) => {
+    // filter undefined
+    return {
+      theCase,
+      users: assignees.map(({ uid }) => userProfilesAsMap.get(uid)?.user).filter(Boolean),
+    };
+  });
+
+  await notificationsService.bulkNotify(args);
 };

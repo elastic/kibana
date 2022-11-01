@@ -42,7 +42,7 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
-import { getCaseToUpdate } from '../utils';
+import { arraysDifference, getCaseToUpdate, bulkNotifyAssignees } from '../utils';
 
 import type { AlertService, CasesService } from '../../services';
 import { createCaseError } from '../../common/error';
@@ -301,11 +301,19 @@ export const update = async (
 ): Promise<CasesResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseService, userActionService, alertsService, licensingService },
+    services: {
+      caseService,
+      userActionService,
+      alertsService,
+      licensingService,
+      notificationsService,
+    },
     user,
     logger,
     authorization,
+    securityStartPlugin,
   } = clientArgs;
+
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)
@@ -436,6 +444,28 @@ export const update = async (
       updatedCases: updatedCases.saved_objects,
       user,
     });
+
+    const casesAndUsersToNotifyForAssignment = returnUpdatedCase
+      .map((theCase) => {
+        // Warning: If the casesMap mutates in the future this will be invalid
+        const alreadyAssignedToCase = casesMap.get(theCase.id)?.attributes.assignees ?? [];
+        const comparedAssignees = arraysDifference(alreadyAssignedToCase, theCase.assignees ?? []);
+
+        if (comparedAssignees && comparedAssignees.addedItems.length > 0) {
+          return { theCase, assignees: comparedAssignees.addedItems };
+        }
+
+        return { theCase, assignees: [] };
+      })
+      .filter(({ assignees }) => assignees.length > 0);
+
+    if (casesAndUsersToNotifyForAssignment.length > 0) {
+      await bulkNotifyAssignees({
+        casesAndUsersToNotifyForAssignment,
+        bulkGetUserProfiles: securityStartPlugin.userProfiles.bulkGet,
+        notificationsService,
+      });
+    }
 
     return CasesResponseRt.encode(returnUpdatedCase);
   } catch (error) {

@@ -13,8 +13,14 @@ type WithRequiredProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
 type UserProfileUserInfoWithEmail = WithRequiredProperty<UserProfileUserInfo, 'email'>;
 
+interface NotifyArgs {
+  users: UserProfileUserInfo[];
+  theCase: CaseResponse;
+}
+
 export class NotificationsService {
   constructor(private readonly notifications: NotificationsPluginStart) {}
+
   private getTitle(theCase: CaseResponse) {
     // TODO: Better title
     return `You got assigned to case "${theCase.title}"`;
@@ -25,7 +31,7 @@ export class NotificationsService {
     return `You got assigned to case "${theCase.title}"`;
   }
 
-  public async notify({ users, theCase }: { users: UserProfileUserInfo[]; theCase: CaseResponse }) {
+  public async notify({ users, theCase }: NotifyArgs) {
     const to = users
       .filter((user): user is UserProfileUserInfoWithEmail => user.email != null)
       .map((user) => user.email);
@@ -33,7 +39,14 @@ export class NotificationsService {
     const subject = this.getTitle(theCase);
     const message = this.getMessage(theCase);
 
+    // TODO: Check if it sends one email per user
     // TODO: add SenderContext to pass cases SO ids as references.
+    // TODO: Silent errors & log
+    // TODO: Should we log-warn for users without email?
     await this.notifications.email?.sendPlainTextEmail({ to, subject, message });
+  }
+
+  public async bulkNotify(args: NotifyArgs[]) {
+    await Promise.all(args.map(({ users, theCase }) => this.notify({ users, theCase })));
   }
 }
