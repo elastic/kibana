@@ -383,11 +383,9 @@ export function getTextBasedDatasource({
         customLabel = selectedField?.fieldName;
       }
 
-      const columnExists = props.state.fieldList.some((f) => f.name === customLabel);
-
       render(
         <EuiButtonEmpty
-          color={columnExists ? 'primary' : 'danger'}
+          color={customLabel ? 'primary' : 'danger'}
           onClick={() => {}}
           data-test-subj="lns-dimensionTrigger-textBased"
         >
