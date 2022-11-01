@@ -167,7 +167,7 @@ describe('backgroundTaskUtilizationRoute', () => {
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
   });
 
-  it(`logs an error if the utilization stats are`, async () => {
+  it(`logs an error if the utilization stats are null`, async () => {
     const router = httpServiceMock.createRouter();
     const stats$ = new Subject<MonitoringStats>();
     const id = uuid.v4();
