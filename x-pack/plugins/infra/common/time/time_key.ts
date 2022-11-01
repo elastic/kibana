@@ -6,14 +6,20 @@
  */
 
 import { ascending, bisector } from 'd3-array';
+import * as rt from 'io-ts';
 import { pick } from 'lodash';
 
-export interface TimeKey {
-  time: number;
-  tiebreaker: number;
-  gid?: string;
-  fromAutoReload?: boolean;
-}
+export const timeKeyRT = rt.intersection([
+  rt.type({
+    time: rt.number,
+    tiebreaker: rt.number,
+  }),
+  rt.partial({
+    gid: rt.string,
+    fromAutoReload: rt.boolean,
+  }),
+]);
+export type TimeKey = rt.TypeOf<typeof timeKeyRT>;
 
 export interface UniqueTimeKey extends TimeKey {
   gid: string;
