@@ -96,9 +96,6 @@ const applyPaletteToAccessorConfigs = (
   });
 };
 
-const ENABLE_MULTIPLE_METRICS_ACTION_ID = 'enableMultipleMetricsAction';
-const DISABLE_MULTIPLE_METRICS_ACTION_ID = 'disableMultipleMetricsAction';
-
 export const getPieVisualization = ({
   paletteService,
   kibanaTheme,
