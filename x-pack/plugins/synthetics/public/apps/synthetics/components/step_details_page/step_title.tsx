@@ -8,6 +8,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { StepDetailPageChildren } from './step_number_nav';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 
 export const StepTitle = () => {
@@ -20,6 +21,9 @@ export const StepTitle = () => {
   return (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem grow>{currentStep?.synthetics?.step?.name}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <StepDetailPageChildren />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

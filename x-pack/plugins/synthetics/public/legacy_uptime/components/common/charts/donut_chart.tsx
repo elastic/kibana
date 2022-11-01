@@ -28,7 +28,7 @@ export const GreenCheckIcon = styled(EuiIcon)`
   position: absolute;
 `;
 
-const themeOverrides: PartialTheme = {
+export const themeOverrides: PartialTheme = {
   chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
   partition: {
     linkLabel: {

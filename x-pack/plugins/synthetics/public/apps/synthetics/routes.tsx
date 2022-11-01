@@ -49,6 +49,7 @@ import {
   MONITOR_ROUTE,
   STEP_DETAIL_ROUTE,
   ERROR_DETAILS_ROUTE,
+  STEP_DETAIL_ROUTE,
   OVERVIEW_ROUTE,
 } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
@@ -62,6 +63,7 @@ import { MonitorSummary } from './components/monitor_details/monitor_summary/mon
 import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
 import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
 import { StepDetailPage } from './components/step_details_page/step_detail_page';
+import { StepDetailPageRightSideItem } from './components/step_details_page/step_nav';
 
 type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -298,7 +300,7 @@ const getRoutes = (
       dataTestSubj: 'syntheticsMonitorEditPage',
       pageHeader: {
         pageTitle: <StepTitle />,
-        rightSideItems: [],
+        rightSideItems: [<StepDetailPageRightSideItem />],
         breadcrumbs: [
           {
             text: <OutPortal node={MonitorDetailsLinkPortalNode} />,

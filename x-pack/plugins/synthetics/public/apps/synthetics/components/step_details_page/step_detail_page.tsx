@@ -8,6 +8,16 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
+import { ObjectCountList } from './components/object_count_list';
+import { ObjectWeightList } from './components/object_weight_list';
+import { StepMetrics } from './components/step_metrics';
+import { NetworkTimingsDonut } from './components/network_timings_donut';
+import { NetworkTimingsBreakdown } from './network_timings_breakdown';
+import { StepImage } from './components/step_image';
+import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -68,10 +78,10 @@ export const StepDetailPage = () => {
           <EuiPanel>
             <EuiFlexGroup>
               <EuiFlexItem grow={1}>
-                {/* TODO: Add breakdown of network timings donut*/}
+                <NetworkTimingsDonut />
               </EuiFlexItem>
-              <EuiFlexItem grow={2} css={{ height: 150 }}>
-                {/* TODO: Add breakdown of network events*/}
+              <EuiFlexItem grow={2}>
+                <NetworkTimingsBreakdown />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -79,15 +89,19 @@ export const StepDetailPage = () => {
       </EuiFlexGroup>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
-          <EuiPanel>{/* TODO: Add step metrics*/} </EuiPanel>
+          <EuiPanel>
+            <StepMetrics />
+          </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <EuiPanel>
             <EuiFlexGroup>
-              <EuiFlexItem grow={1} css={{ height: 150 }}>
-                {/* TODO: Add breakdown of object list*/}
+              <EuiFlexItem grow={1}>
+                <ObjectWeightList />
               </EuiFlexItem>
-              <EuiFlexItem grow={1}>{/* TODO: Add breakdown of object weight*/}</EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <ObjectCountList />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>

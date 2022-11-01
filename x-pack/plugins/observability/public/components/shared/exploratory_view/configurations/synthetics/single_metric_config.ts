@@ -94,6 +94,16 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         },
       },
       {
+        id: 'step_duration',
+        field: SYNTHETICS_STEP_DURATION,
+        label: i18n.translate('xpack.observability.expView.stepDuration', {
+          defaultMessage: 'Total step duration',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+      },
+      {
         id: 'monitor_errors',
         label: i18n.translate('xpack.observability.expView.errors', {
           defaultMessage: 'Errors',
