@@ -24,7 +24,7 @@ import {
   TextAlignment,
 } from '@kbn/expressions-plugin/common';
 import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
-import { MetricVisExpressionFunctionDefinition } from '@kbn/expression-legacy-metric-vis-plugin/common';
+import type { MetricVisExpressionFunctionDefinition } from '@kbn/expression-legacy-metric-vis-plugin/common';
 import { getSuggestions } from './metric_suggestions';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
