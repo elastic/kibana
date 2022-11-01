@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
@@ -65,7 +64,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   onEventDetailsPanelOpened,
   onRowSelected,
   onRuleChange,
-  refetch,
   showCheckboxes,
   showNotes,
   timelineId,
@@ -299,7 +297,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
           ecsRowData={ecsData}
           scopeId={timelineId}
           disabled={isContextMenuDisabled}
-          refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />
         {isDisabled === false ? (
