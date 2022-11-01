@@ -7,7 +7,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { Filter, FieldFilter } from '@kbn/es-query';
+import { Filter, FieldFilter, FILTERS } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
 import { isFilterable, IpAddress } from '@kbn/data-plugin/common';
@@ -66,6 +66,11 @@ export function isFilterValid(
   if (!indexPattern || !field || !operator) {
     return false;
   }
+
+  if (operator.type !== FILTERS.EXISTS && !params) {
+    return false;
+  }
+
   switch (operator.type) {
     case 'phrase':
       return validateParams(params, field);
