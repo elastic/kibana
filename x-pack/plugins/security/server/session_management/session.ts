@@ -16,12 +16,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AuthenticationProvider } from '../../common';
 import type { ConfigType } from '../config';
 import type { SessionCookie } from './session_cookie';
-import {
-  SessionError,
-  SessionExpiredError,
-  SessionMissingError,
-  SessionUnexpectedError,
-} from './session_errors';
+import { SessionExpiredError, SessionMissingError, SessionUnexpectedError } from './session_errors';
 import type { SessionIndex, SessionIndexValue } from './session_index';
 
 /**
@@ -156,7 +151,7 @@ export class Session {
   async get(request: KibanaRequest) {
     const sessionCookieValue = await this.options.sessionCookie.get(request);
     if (!sessionCookieValue) {
-      throw new SessionMissingError();
+      return { error: new SessionMissingError(), value: null };
     }
 
     const sessionLogger = this.getLoggerForSID(sessionCookieValue.sid);
@@ -168,7 +163,7 @@ export class Session {
     ) {
       sessionLogger.debug('Session has expired and will be invalidated.');
       await this.invalidate(request, { match: 'current' });
-      throw new SessionExpiredError();
+      return { error: new SessionExpiredError(), value: null };
     }
 
     const sessionIndexValue = await this.options.sessionIndex.get(sessionCookieValue.sid);
@@ -177,7 +172,7 @@ export class Session {
         'Session value is not available in the index, session cookie will be invalidated.'
       );
       await this.options.sessionCookie.clear(request);
-      throw new SessionUnexpectedError();
+      return { error: new SessionUnexpectedError(), value: null };
     }
 
     let decryptedContent: SessionValueContentToEncrypt;
@@ -190,31 +185,17 @@ export class Session {
         `Unable to decrypt session content, session will be invalidated: ${err.message}`
       );
       await this.invalidate(request, { match: 'current' });
-      throw new SessionUnexpectedError();
+      return { error: new SessionUnexpectedError(), value: null };
     }
 
     return {
-      ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
-      // Unlike session index, session cookie contains the most up-to-date idle timeout expiration.
-      idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
+      error: null,
+      value: {
+        ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
+        // Unlike session index, session cookie contains the most up-to-date idle timeout expiration.
+        idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
+      },
     };
-  }
-
-  /**
-   * Extracts session value for the specified request. Under the hood it can clear session if it is
-   * invalid or created by the legacy versions of Kibana.
-   * @param request Request instance to get session value for.
-   */
-  async tryGet(request: KibanaRequest) {
-    try {
-      return await this.get(request);
-    } catch (err) {
-      if (err instanceof SessionError) {
-        return null;
-      } else {
-        throw err;
-      }
-    }
   }
 
   /**

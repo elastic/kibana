@@ -15,8 +15,7 @@ import { sessionIndexMock } from './session_index.mock';
 export const sessionMock = {
   create: (): jest.Mocked<PublicMethodsOf<Session>> => ({
     getSID: jest.fn(),
-    get: jest.fn().mockRejectedValue(new SessionMissingError()),
-    tryGet: jest.fn().mockResolvedValue(null),
+    get: jest.fn().mockResolvedValue({ error: new SessionMissingError(), value: null }),
     create: jest.fn(),
     update: jest.fn(),
     extend: jest.fn(),

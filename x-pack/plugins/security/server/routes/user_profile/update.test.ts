@@ -101,7 +101,10 @@ describe('Update profile routes', () => {
     });
 
     it('fails if session does not have profile ID.', async () => {
-      session.tryGet.mockResolvedValue(sessionMock.createValue({ userProfileId: undefined }));
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: undefined }),
+      });
 
       await expect(
         routeHandler(
@@ -115,7 +118,7 @@ describe('Update profile routes', () => {
     });
 
     it('fails for Elastic Cloud users.', async () => {
-      session.tryGet.mockResolvedValue(sessionMock.createValue());
+      session.get.mockResolvedValue({ error: null, value: sessionMock.createValue() });
       authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ elastic_cloud_user: true }));
 
       await expect(
@@ -130,7 +133,10 @@ describe('Update profile routes', () => {
     });
 
     it('updates profile.', async () => {
-      session.tryGet.mockResolvedValue(sessionMock.createValue({ userProfileId: 'u_some_id' }));
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
       authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
 
       await expect(

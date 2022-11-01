@@ -40,7 +40,7 @@ describe('LoggedOut view routes', () => {
   });
 
   it('redirects user to the root page if they have a session already.', async () => {
-    session.tryGet.mockResolvedValue(sessionMock.createValue());
+    session.get.mockResolvedValue({ error: null, value: sessionMock.createValue() });
 
     const request = httpServerMock.createKibanaRequest();
 
@@ -51,7 +51,7 @@ describe('LoggedOut view routes', () => {
       headers: { location: '/mock-server-basepath/' },
     });
 
-    expect(session.tryGet).toHaveBeenCalledWith(request);
+    expect(session.get).toHaveBeenCalledWith(request);
   });
 
   it('renders view if user does not have an active session.', async () => {
@@ -59,7 +59,7 @@ describe('LoggedOut view routes', () => {
     const responseFactory = httpResourcesMock.createResponseFactory();
     await routeHandler({} as any, request, responseFactory);
 
-    expect(session.tryGet).toHaveBeenCalledWith(request);
+    expect(session.get).toHaveBeenCalledWith(request);
     expect(responseFactory.renderAnonymousCoreApp).toHaveBeenCalledWith();
   });
 });

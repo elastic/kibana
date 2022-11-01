@@ -27,7 +27,6 @@ import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import {
   type Session,
-  SessionError,
   SessionExpiredError,
   SessionUnexpectedError,
   type SessionValue,
@@ -297,7 +296,7 @@ export class Authenticator {
     assertRequest(request);
     assertLoginAttempt(attempt);
 
-    const existingSessionValue = await this.tryGetSessionValue(request);
+    const { value: existingSessionValue } = await this.getSessionValue(request);
 
     // Login attempt can target specific provider by its name (e.g. chosen at the Login Selector UI)
     // or a group of providers with the specified type (e.g. in case of 3rd-party initiated login
@@ -364,19 +363,9 @@ export class Authenticator {
   async authenticate(request: KibanaRequest): Promise<AuthenticationResult> {
     assertRequest(request);
 
-    let existingSessionValue = null;
-    let existingSessionError = null;
-    try {
-      existingSessionValue = await this.getSessionValue(request);
-    } catch (err) {
-      if (err instanceof SessionError) {
-        existingSessionError = err;
-      } else {
-        throw err;
-      }
-    }
+    const existingSession = await this.getSessionValue(request);
 
-    if (this.shouldRedirectToLoginSelector(request, existingSessionValue)) {
+    if (this.shouldRedirectToLoginSelector(request, existingSession.value)) {
       const providerNameSuggestedByHint = request.url.searchParams.get(
         AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER
       );
@@ -397,9 +386,9 @@ export class Authenticator {
               )}`
             : ''
         }${
-          existingSessionError instanceof SessionExpiredError
+          existingSession.error instanceof SessionExpiredError
             ? `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-                existingSessionError.code
+                existingSession.error.code
               )}`
             : ''
         }`
@@ -409,29 +398,29 @@ export class Authenticator {
     const requestIsRedirectable = canRedirectRequest(request);
 
     const suggestedProviderName =
-      existingSessionValue?.provider.name ??
+      existingSession.value?.provider.name ??
       request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
     for (const [providerName, provider] of this.providerIterator(suggestedProviderName)) {
       // Check if current session has been set by this provider.
       const ownsSession =
-        existingSessionValue?.provider.name === providerName &&
-        existingSessionValue?.provider.type === provider.type;
+        existingSession.value?.provider.name === providerName &&
+        existingSession.value?.provider.type === provider.type;
 
       let authenticationResult = await provider.authenticate(
         request,
-        ownsSession ? existingSessionValue!.state : null
+        ownsSession ? existingSession.value!.state : null
       );
 
       if (!authenticationResult.notHandled()) {
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
           authenticationResult,
-          existingSessionValue,
+          existingSessionValue: existingSession.value,
         });
 
         if (requestIsRedirectable) {
           if (
-            existingSessionError instanceof SessionExpiredError &&
+            existingSession.error instanceof SessionExpiredError &&
             authenticationResult.redirectURL?.startsWith(
               `${this.options.basePath.get(request)}/login?`
             )
@@ -440,7 +429,7 @@ export class Authenticator {
             authenticationResult = AuthenticationResult.redirectTo(
               authenticationResult.redirectURL +
                 `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-                  existingSessionError.code
+                  existingSession.error.code
                 )}`,
               {
                 user: authenticationResult.user,
@@ -455,7 +444,7 @@ export class Authenticator {
             sessionUpdateResult ? sessionUpdateResult.value : null
           );
         } else {
-          if (existingSessionError instanceof SessionExpiredError) {
+          if (existingSession.error instanceof SessionExpiredError) {
             // TODO: Make this less verbose! Possible alternatives:
             // 1. Make authResponseHeaders editable
             // 2. Create utility function outside of the AuthenticationResult class to create clones of AuthenticationResult objects with certain properties augmented
@@ -468,14 +457,14 @@ export class Authenticator {
                 state: authenticationResult.state,
                 authResponseHeaders: {
                   ...authenticationResult.authResponseHeaders,
-                  [SESSION_ERROR_REASON_HEADER]: existingSessionError.code,
+                  [SESSION_ERROR_REASON_HEADER]: existingSession.error.code,
                 },
               });
             } else if (authenticationResult.failed()) {
               authenticationResult = AuthenticationResult.failed(authenticationResult.error!, {
                 authResponseHeaders: {
                   ...authenticationResult.authResponseHeaders,
-                  [SESSION_ERROR_REASON_HEADER]: existingSessionError.code,
+                  [SESSION_ERROR_REASON_HEADER]: existingSession.error.code,
                 },
               });
             } else {
@@ -492,15 +481,15 @@ export class Authenticator {
     }
 
     if (
-      existingSessionError instanceof SessionExpiredError ||
-      existingSessionError instanceof SessionUnexpectedError
+      existingSession.error instanceof SessionExpiredError ||
+      existingSession.error instanceof SessionUnexpectedError
     ) {
       const options = requestIsRedirectable
         ? undefined
         : {
-            authResponseHeaders: { [SESSION_ERROR_REASON_HEADER]: existingSessionError.code },
+            authResponseHeaders: { [SESSION_ERROR_REASON_HEADER]: existingSession.error.code },
           };
-      return AuthenticationResult.failed(existingSessionError, options);
+      return AuthenticationResult.failed(existingSession.error, options);
     } else {
       return AuthenticationResult.notHandled();
     }
@@ -513,7 +502,7 @@ export class Authenticator {
   async reauthenticate(request: KibanaRequest) {
     assertRequest(request);
 
-    const existingSessionValue = await this.tryGetSessionValue(request);
+    const { value: existingSessionValue } = await this.getSessionValue(request);
     if (!existingSessionValue) {
       this.logger.warn('Session is no longer available and cannot be re-authenticated.');
       return AuthenticationResult.notHandled();
@@ -545,7 +534,7 @@ export class Authenticator {
   async logout(request: KibanaRequest) {
     assertRequest(request);
 
-    const sessionValue = await this.tryGetSessionValue(request);
+    const { value: sessionValue } = await this.getSessionValue(request);
     const suggestedProviderName =
       sessionValue?.provider.name ??
       request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
@@ -585,7 +574,7 @@ export class Authenticator {
   async acknowledgeAccessAgreement(request: KibanaRequest) {
     assertRequest(request);
 
-    const existingSessionValue = await this.tryGetSessionValue(request);
+    const { value: existingSessionValue } = await this.getSessionValue(request);
     const currentUser = this.options.getCurrentUser(request);
 
     if (!existingSessionValue || !currentUser) {
@@ -692,32 +681,19 @@ export class Authenticator {
     // If we detect that for some reason we have a session stored for the provider that is not
     // available anymore (e.g. when user was logged in with one provider, but then configuration has
     // changed and that provider is no longer available), then we should clear session entirely.
-    if (this.providers.get(existingSession.provider.name)?.type !== existingSession.provider.type) {
+    if (
+      existingSession.value &&
+      this.providers.get(existingSession.value.provider.name)?.type !==
+        existingSession.value.provider.type
+    ) {
       this.logger.warn(
-        `Attempted to retrieve session for the "${existingSession.provider.type}/${existingSession.provider.name}" provider, but it is not configured.`
+        `Attempted to retrieve session for the "${existingSession.value.provider.type}/${existingSession.value.provider.name}" provider, but it is not configured.`
       );
-      await this.invalidateSessionValue({ request, sessionValue: existingSession });
-      throw new SessionUnexpectedError();
+      await this.invalidateSessionValue({ request, sessionValue: existingSession.value });
+      return { error: new SessionUnexpectedError(), value: null };
     }
 
     return existingSession;
-  }
-
-  /**
-   * Extracts session value for the specified request. Under the hood it can clear session if it
-   * belongs to the provider that is not available.
-   * @param request Request instance.
-   */
-  private async tryGetSessionValue(request: KibanaRequest) {
-    try {
-      return await this.getSessionValue(request);
-    } catch (err) {
-      if (err instanceof SessionError) {
-        return null;
-      } else {
-        throw err;
-      }
-    }
   }
 
   /**

@@ -309,20 +309,20 @@ export class UserProfileService {
   ) {
     let userSession;
     try {
-      userSession = await session.tryGet(request);
+      userSession = await session.get(request);
     } catch (error) {
       this.logger.error(`Failed to retrieve user session: ${getDetailedErrorMessage(error)}`);
       throw error;
     }
 
-    if (!userSession) {
+    if (userSession.error) {
       return null;
     }
 
-    if (!userSession.userProfileId) {
+    if (!userSession.value.userProfileId) {
       this.logger.debug(
         `User profile missing from the current session [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}].`
       );
       return null;
@@ -332,13 +332,13 @@ export class UserProfileService {
     try {
       // @ts-expect-error Invalid response format.
       body = (await clusterClient.asInternalUser.security.getUserProfile({
-        uid: userSession.userProfileId,
+        uid: userSession.value.userProfileId,
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       })) as { profiles: SecurityUserProfileWithMetadata[] };
     } catch (error) {
       this.logger.error(
         `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}]: ${getDetailedErrorMessage(error)}`
       );
       throw error;
@@ -347,7 +347,7 @@ export class UserProfileService {
     if (body.profiles.length === 0) {
       this.logger.error(
         `The user profile for the current user [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}] is not found.`
       );
       throw new Error(`User profile is not found.`);

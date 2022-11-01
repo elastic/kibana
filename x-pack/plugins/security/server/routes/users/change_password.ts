@@ -39,7 +39,7 @@ export function defineChangeUserPasswordRoutes({
       const currentUser = getAuthenticationService().getCurrentUser(request);
       const isUserChangingOwnPassword =
         currentUser && currentUser.username === username && canUserChangePassword(currentUser);
-      const currentSession = isUserChangingOwnPassword ? await getSession().tryGet(request) : null;
+      const currentSession = isUserChangingOwnPassword ? await getSession().get(request) : null;
 
       // If user is changing their own password they should provide a proof of knowledge their
       // current password via sending it in `Authorization: Basic base64(username:current password)`
@@ -78,10 +78,10 @@ export function defineChangeUserPasswordRoutes({
       // user with the new password and update session. We check this since it's possible to update
       // password even if user is authenticated via HTTP headers and hence doesn't have an active
       // session and in such cases we shouldn't create a new one.
-      if (isUserChangingOwnPassword && currentSession) {
+      if (isUserChangingOwnPassword && currentSession?.value) {
         try {
           const authenticationResult = await getAuthenticationService().login(request, {
-            provider: { name: currentSession.provider.name },
+            provider: { name: currentSession.value.provider.name },
             value: { username, password: newPassword },
           });
 
