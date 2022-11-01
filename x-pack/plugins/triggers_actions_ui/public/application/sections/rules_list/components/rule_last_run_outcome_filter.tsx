@@ -72,7 +72,7 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.ruleLastRunOutcomeFilterLabel"
-            defaultMessage="Outcome"
+            defaultMessage="Last response"
           />
         </EuiFilterButton>
       }

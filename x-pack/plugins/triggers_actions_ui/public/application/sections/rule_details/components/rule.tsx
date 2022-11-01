@@ -20,9 +20,9 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import './rule.scss';
-import { getHealthColor } from '../../rules_list/components/rule_execution_status_filter';
+import { getHealthColor as getOutcomeHealthColor } from '../../rules_list/components/rule_last_run_outcome_filter';
 import {
-  rulesStatusesTranslationsMapping,
+  rulesLastRunOutcomeTranslationMapping,
   ALERT_STATUS_LICENSE_ERROR,
 } from '../../rules_list/translations';
 import type { RuleEventLogListProps } from './rule_event_log_list';
@@ -78,12 +78,12 @@ export function RuleComponent({
     requestRefresh();
   };
 
-  const healthColor = getHealthColor(rule.executionStatus.status);
+  const healthColor = (rule.lastRun && getOutcomeHealthColor(rule.lastRun.outcome)) || 'default';
   const isLicenseError =
-    rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
+    rule.lastRun?.warning === RuleExecutionStatusErrorReasons.License;
   const statusMessage = isLicenseError
     ? ALERT_STATUS_LICENSE_ERROR
-    : rulesStatusesTranslationsMapping[rule.executionStatus.status];
+    : rule.lastRun && rulesLastRunOutcomeTranslationMapping[rule.lastRun.outcome];
 
   const renderRuleAlertList = () => {
     return suspendedComponentWithProps(

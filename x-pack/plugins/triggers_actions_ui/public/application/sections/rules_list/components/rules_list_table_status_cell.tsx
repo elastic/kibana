@@ -28,7 +28,7 @@ export const RulesListTableStatusCell = (props: RulesListTableStatusCellProps) =
 
   const healthColor = useMemo(() => {
     if (isRuleLastRunOutcomeEnabled) {
-      return getOutcomeHealthColor(lastRun!.outcome);
+      return lastRun && getOutcomeHealthColor(lastRun.outcome);
     }
     return getExecutionStatusHealthColor(executionStatus.status);
   }, [isRuleLastRunOutcomeEnabled, executionStatus, lastRun]);
@@ -44,7 +44,10 @@ export const RulesListTableStatusCell = (props: RulesListTableStatusCellProps) =
     : rulesLastRunOutcomeTranslationMapping[lastRun!.outcome];
 
   const health = (
-    <EuiHealth data-test-subj={`ruleStatus-${executionStatus.status}`} color={healthColor}>
+    <EuiHealth
+      data-test-subj={`ruleStatus-${executionStatus.status}`}
+      color={healthColor || 'default'}
+    >
       {statusMessage}
     </EuiHealth>
   );

@@ -306,7 +306,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         warning: {
           type: 'text',
         },
-        outcome_msg: {
+        outcomeMsg: {
           type: 'text',
         },
         alertsCount: {
