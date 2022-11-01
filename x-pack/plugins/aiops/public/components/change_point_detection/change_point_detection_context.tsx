@@ -29,7 +29,6 @@ import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buck
 import { useDataSource } from '../../hooks/use_data_source';
 import { usePageUrlState } from '../../hooks/use_url_state';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
-import { useSplitFieldCardinality } from './use_split_field_cardinality';
 
 export interface ChangePointDetectionRequestParams {
   fn: string;
@@ -76,7 +75,7 @@ export type ChangePointType =
   | 'trend_change'
   | 'indeterminable';
 
-interface ChangePointAnnotation {
+export interface ChangePointAnnotation {
   label: string;
   reason: string;
   timestamp: string;
@@ -91,7 +90,6 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const { dataView, savedSearch } = useDataSource();
   const {
     uiSettings,
-    notifications: { toasts },
     data: {
       query: { filterManager },
     },
@@ -108,7 +106,6 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   const timefilter = useTimefilter();
   const timeBuckets = useTimeBuckets();
-  const [annotations, setAnnotations] = useState<ChangePointAnnotation[]>([]);
   const [resultFilters, setResultFilter] = useState<Filter[]>([]);
 
   const [bucketInterval, setBucketInterval] = useState<TimeBucketsInterval>();
@@ -225,60 +222,15 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return mergedQuery;
   }, [resultFilters, resultQuery, uiSettings, dataView, timeRange]);
 
-  const splitFieldCardinality = useSplitFieldCardinality(requestParams.splitField, combinedQuery);
-
-  const { runRequest, cancelRequest, isLoading } = useChangePointRequest(
+  const { results: annotations, isLoading: annotationsLoading } = useChangePointRequest(
     requestParams,
     combinedQuery
-  );
-
-  const fetchChangePoints = useCallback(async () => {
-    if (!bucketInterval) return;
-
-    cancelRequest();
-
-    const result = await runRequest();
-    if (result === null) {
-      return;
-    }
-
-    if (!result.rawResponse.aggregations) {
-      toasts.addDanger('No agg results');
-      return;
-    }
-
-    const groups = result.rawResponse.aggregations.groupings.buckets
-      .map((v) => {
-        const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
-
-        const timeAsString = v.change_point_request.bucket?.key;
-
-        return {
-          group_field: v.key,
-          type: changePointType,
-          p_value: v.change_point_request.type[changePointType].p_value,
-          timestamp: timeAsString,
-          label: changePointType,
-          reason: v.change_point_request.type[changePointType].reason,
-        } as ChangePointAnnotation;
-      })
-      .filter((v): v is ChangePointAnnotation => !!v)
-      .sort((a, b) => (a.p_value ?? 100) - (b.p_value ?? 100));
-
-    setAnnotations(groups);
-  }, [runRequest, cancelRequest, setAnnotations, toasts, bucketInterval]);
-
-  useEffect(
-    function fetchAggResults() {
-      fetchChangePoints();
-    },
-    [fetchChangePoints, runRequest, requestParams, resultFilters]
   );
 
   if (!bucketInterval) return null;
 
   const value = {
-    isLoading,
+    isLoading: annotationsLoading,
     timeBuckets,
     requestParams,
     updateRequestParams,

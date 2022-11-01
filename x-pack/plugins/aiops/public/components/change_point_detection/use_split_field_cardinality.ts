@@ -42,20 +42,27 @@ export function useSplitFieldCardinality(splitField: string, query: QueryDslQuer
     };
   }, [splitField, dataView, query]);
 
-  const { runRequest: getSplitFieldCardinality } = useCancellableRequest<
-    typeof requestPayload,
-    { rawResponse: SearchResponseBody<unknown, { fieldCount: AggregationsCardinalityAggregate }> }
-  >(requestPayload);
+  const { runRequest: getSplitFieldCardinality, cancelRequest } = useCancellableRequest();
 
   useEffect(
     function performCardinalityCheck() {
-      getSplitFieldCardinality().then((response) => {
+      cancelRequest();
+
+      getSplitFieldCardinality<
+        typeof requestPayload,
+        {
+          rawResponse: SearchResponseBody<
+            unknown,
+            { fieldCount: AggregationsCardinalityAggregate }
+          >;
+        }
+      >(requestPayload).then((response) => {
         if (response?.rawResponse.aggregations) {
           setCardinality(response.rawResponse.aggregations.fieldCount.value);
         }
       });
     },
-    [getSplitFieldCardinality]
+    [getSplitFieldCardinality, requestPayload, cancelRequest]
   );
 
   return cardinality;

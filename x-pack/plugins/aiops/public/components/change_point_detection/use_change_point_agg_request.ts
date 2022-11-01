@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
+  ChangePointAnnotation,
   ChangePointDetectionRequestParams,
   ChangePointType,
 } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableRequest } from '../../hooks/use_cancellable_request';
+import { useSplitFieldCardinality } from './use_split_field_cardinality';
 
 interface RequestOptions {
   index: string;
@@ -21,10 +23,13 @@ interface RequestOptions {
   splitField: string;
   timeField: string;
   timeInterval: string;
+  afterKey?: string;
 }
 
+export const COMPOSITE_AGG_SIZE = 10;
+
 function getChangePointDetectionRequestBody(
-  { index, fn, metricField, splitField, timeInterval, timeField }: RequestOptions,
+  { index, fn, metricField, splitField, timeInterval, timeField, afterKey }: RequestOptions,
   query: QueryDslQueryContainer
 ) {
   return {
@@ -35,8 +40,18 @@ function getChangePointDetectionRequestBody(
         query,
         aggregations: {
           groupings: {
-            terms: {
-              field: splitField,
+            composite: {
+              size: COMPOSITE_AGG_SIZE,
+              ...(afterKey !== undefined ? { after: { splitFieldTerm: afterKey } } : {}),
+              sources: [
+                {
+                  splitFieldTerm: {
+                    terms: {
+                      field: splitField,
+                    },
+                  },
+                },
+              ],
             },
             aggregations: {
               over_time: {
@@ -71,22 +86,84 @@ export function useChangePointRequest(
 ) {
   const { dataView } = useDataSource();
 
-  const requestPayload = useMemo(() => {
-    const params = {
-      index: dataView.getIndexPattern(),
-      fn: requestParams.fn,
-      timeInterval: requestParams.interval,
-      metricField: requestParams.metricField,
-      timeField: dataView.timeFieldName!,
-      splitField: requestParams.splitField,
-    };
+  const [results, setResults] = useState<ChangePointAnnotation[]>([]);
 
-    return getChangePointDetectionRequestBody(params, query);
-  }, [dataView, requestParams, query]);
+  const splitFieldCardinality = useSplitFieldCardinality(requestParams.splitField, query);
 
-  return useCancellableRequest<typeof requestPayload, { rawResponse: ChangePointAggResponse }>(
-    requestPayload
+  const { runRequest, cancelRequest, isLoading } = useCancellableRequest();
+
+  useEffect(
+    function cancelRequestOnChange() {
+      cancelRequest();
+    },
+    [query, cancelRequest, requestParams]
   );
+
+  const reset = useCallback(() => {
+    cancelRequest();
+    setResults([]);
+  }, [cancelRequest]);
+
+  const fetchResults = useCallback(
+    async (afterKey?: string) => {
+      if (!splitFieldCardinality) return;
+
+      const requestPayload = getChangePointDetectionRequestBody(
+        {
+          index: dataView.getIndexPattern(),
+          fn: requestParams.fn,
+          timeInterval: requestParams.interval,
+          metricField: requestParams.metricField,
+          timeField: dataView.timeFieldName!,
+          splitField: requestParams.splitField,
+          afterKey,
+        },
+        query
+      );
+      const result = await runRequest<
+        typeof requestPayload,
+        { rawResponse: ChangePointAggResponse }
+      >(requestPayload);
+
+      if (result === null) return;
+
+      const buckets = result.rawResponse.aggregations.groupings.buckets;
+
+      const groups = buckets
+        .map((v) => {
+          const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
+
+          const timeAsString = v.change_point_request.bucket?.key;
+
+          return {
+            group_field: v.key.splitFieldTerm,
+            type: changePointType,
+            p_value: v.change_point_request.type[changePointType].p_value,
+            timestamp: timeAsString,
+            label: changePointType,
+            reason: v.change_point_request.type[changePointType].reason,
+          } as ChangePointAnnotation;
+        })
+        .filter((v): v is ChangePointAnnotation => !!v)
+        .sort((a, b) => (a.p_value ?? 100) - (b.p_value ?? 100));
+
+      setResults((prev) => {
+        return (prev ?? []).concat(groups);
+      });
+
+      if (result.rawResponse.aggregations.groupings.after_key?.splitFieldTerm) {
+        fetchResults(result.rawResponse.aggregations.groupings.after_key.splitFieldTerm);
+      }
+    },
+    [runRequest, requestParams, query, dataView, splitFieldCardinality]
+  );
+
+  useEffect(() => {
+    reset();
+    fetchResults();
+  }, [requestParams, query, splitFieldCardinality, fetchResults, reset]);
+
+  return { results, isLoading, reset };
 }
 
 interface ChangePointAggResponse {
@@ -96,8 +173,11 @@ interface ChangePointAggResponse {
   hits: { hits: any[]; total: number; max_score: null };
   aggregations: {
     groupings: {
+      after_key?: {
+        splitFieldTerm: string;
+      };
       buckets: Array<{
-        key: string;
+        key: { splitFieldTerm: string };
         doc_count: number;
         over_time: {
           buckets: Array<{

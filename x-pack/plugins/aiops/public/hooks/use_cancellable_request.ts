@@ -14,46 +14,49 @@ import {
 import { tap } from 'rxjs/operators';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
-export function useCancellableRequest<RequestBody, ResponseType extends IKibanaSearchResponse>(
-  requestBody: RequestBody
-) {
+export function useCancellableRequest() {
   const { data } = useAiopsAppContext();
   const abortController = useRef(new AbortController());
   const [isLoading, setIsFetching] = useState<boolean>(false);
 
-  const runRequest = useCallback((): Promise<ResponseType | null> => {
-    return new Promise((resolve, reject) => {
-      data.search
-        .search<RequestBody, ResponseType>(requestBody, {
-          abortSignal: abortController.current.signal,
-        })
-        .pipe(
-          tap(() => {
-            setIsFetching(true);
+  const runRequest = useCallback(
+    <RequestBody, ResponseType extends IKibanaSearchResponse>(
+      requestBody: RequestBody
+    ): Promise<ResponseType | null> => {
+      return new Promise((resolve, reject) => {
+        data.search
+          .search<RequestBody, ResponseType>(requestBody, {
+            abortSignal: abortController.current.signal,
           })
-        )
-        .subscribe({
-          next: (result) => {
-            if (isCompleteResponse(result)) {
-              setIsFetching(false);
-              resolve(result);
-            } else if (isErrorResponse(result)) {
-              reject(result);
-            } else {
-              // partial results
-              // Ignore partial results for now.
-              // An issue with the search function means partial results are not being returned correctly.
-            }
-          },
-          error: (error) => {
-            if (error.name === 'AbortError') {
-              return resolve(null);
-            }
-            reject(error);
-          },
-        });
-    });
-  }, [data.search, requestBody]);
+          .pipe(
+            tap(() => {
+              setIsFetching(true);
+            })
+          )
+          .subscribe({
+            next: (result) => {
+              if (isCompleteResponse(result)) {
+                setIsFetching(false);
+                resolve(result);
+              } else if (isErrorResponse(result)) {
+                reject(result);
+              } else {
+                // partial results
+                // Ignore partial results for now.
+                // An issue with the search function means partial results are not being returned correctly.
+              }
+            },
+            error: (error) => {
+              if (error.name === 'AbortError') {
+                return resolve(null);
+              }
+              reject(error);
+            },
+          });
+      });
+    },
+    [data.search]
+  );
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
