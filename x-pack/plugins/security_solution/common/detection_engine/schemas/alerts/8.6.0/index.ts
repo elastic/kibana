@@ -7,12 +7,12 @@
 
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
-  ALERT_THROTTLE_VALUES,
-  ALERT_THROTTLE_COUNT,
-  ALERT_THROTTLE_END,
-  ALERT_THROTTLE_START,
   ALERT_THROTTLE_FIELDS,
-} from '../../../../field_maps/field_names';
+  ALERT_THROTTLE_VALUES,
+  ALERT_THROTTLE_START,
+  ALERT_THROTTLE_END,
+  ALERT_THROTTLE_COUNT,
+} from '@kbn/rule-data-utils';
 
 import type { BaseFields840, DetectionAlert840 } from '../8.4.0';
 

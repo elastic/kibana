@@ -188,6 +188,31 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
+  [Fields.ALERT_THROTTLE_FIELDS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [Fields.ALERT_THROTTLE_VALUES]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [Fields.ALERT_THROTTLE_START]: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  [Fields.ALERT_THROTTLE_END]: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  [Fields.ALERT_THROTTLE_COUNT]: {
+    type: 'long',
+    array: false,
+    required: false,
+  },
 } as const;
 
 export type TechnicalRuleFieldMap = typeof technicalRuleFieldMap;
