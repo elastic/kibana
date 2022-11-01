@@ -70,6 +70,10 @@ export const allowedExperimentalValues = Object.freeze({
    * if endpointRbacEnabled is enabled, it will take precedence.
    */
   endpointRbacV1Enabled: false,
+  /**
+   * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
+   */
+  alertDetailsPageEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
