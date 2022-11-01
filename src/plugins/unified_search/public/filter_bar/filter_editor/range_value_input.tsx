@@ -84,7 +84,7 @@ function RangeValueInputUI(props: Props) {
             }}
             placeholder={props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.rangeStartInputPlaceholder',
-              defaultMessage: 'Start of the range',
+              defaultMessage: 'Start',
             })}
           />
         }
@@ -100,7 +100,7 @@ function RangeValueInputUI(props: Props) {
             }}
             placeholder={props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.rangeEndInputPlaceholder',
-              defaultMessage: 'End of the range',
+              defaultMessage: 'End',
             })}
           />
         }

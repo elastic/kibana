@@ -152,22 +152,25 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
               : this.renderFiltersBuilderEditor()}
 
             <EuiSpacer size="l" />
-
-            <EuiFieldText
-              value={`${this.state.customLabel}`}
-              onChange={this.onCustomLabelChange}
-              prepend={i18n.translate('unifiedSearch.filter.filterEditor.customLabel', {
-                defaultMessage: 'Custom label',
+            <EuiFormRow
+              label={this.props.intl.formatMessage({
+                id: 'unifiedSearch.filter.filterEditor.createCustomLabelInputLabel',
+                defaultMessage: 'Custom label (optional)',
               })}
-              placeholder={i18n.translate(
-                'unifiedSearch.filter.filterEditor.customLabelPlaceholder',
-                {
-                  defaultMessage: 'Add a custom label here',
-                }
-              )}
-              compressed
               fullWidth
-            />
+            >
+              <EuiFieldText
+                value={`${this.state.customLabel}`}
+                onChange={this.onCustomLabelChange}
+                placeholder={i18n.translate(
+                  'unifiedSearch.filter.filterEditor.customLabelPlaceholder',
+                  {
+                    defaultMessage: 'Add a custom label here',
+                  }
+                )}
+                fullWidth
+              />
+            </EuiFormRow>
           </div>
 
           <EuiPopoverFooter paddingSize="s">
