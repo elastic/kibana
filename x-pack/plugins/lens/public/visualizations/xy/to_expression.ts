@@ -24,9 +24,11 @@ import {
   DataDecorationConfigFn,
   ExtendedAnnotationLayerFn,
   ExtendedDataLayerFn,
+  LegendConfigFn,
   ReferenceLineDecorationConfigFn,
   ReferenceLineLayerFn,
   SeriesType,
+  XAxisConfigFn,
   XScaleType,
   XYCurveType,
   YAxisConfigFn,
@@ -273,6 +275,49 @@ export const buildXYExpression = (
     isRangeAnnotationConfig(a) ||
     (a.filter && a.filter?.query !== '');
 
+  const legendConfigFn = buildExpressionFunction<LegendConfigFn>('legendConfig', {
+    isVisible: state.legend.isVisible,
+    showSingleSeries: state.legend.showSingleSeries,
+    position: !state.legend.isInside ? state.legend.position : [],
+    isInside: state.legend.isInside ? state.legend.isInside : undefined,
+    legendSize: state.legend.isInside
+      ? undefined
+      : state.legend.position === Position.Top || state.legend.position === Position.Bottom
+      ? LegendSize.AUTO
+      : state.legend.legendSize
+      ? state.legend.legendSize
+      : undefined,
+    horizontalAlignment:
+      state.legend.horizontalAlignment && state.legend.isInside
+        ? state.legend.horizontalAlignment
+        : undefined,
+    verticalAlignment:
+      state.legend.verticalAlignment && state.legend.isInside
+        ? state.legend.verticalAlignment
+        : undefined,
+    // ensure that even if the user types more than 5 columns
+    // we will only show 5
+    floatingColumns:
+      state.legend.floatingColumns && state.legend.isInside
+        ? Math.min(5, state.legend.floatingColumns)
+        : [],
+    maxLines: state.legend.maxLines,
+    shouldTruncate:
+      state.legend.shouldTruncate ??
+      getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
+  });
+
+  const xAxisConfigFn = buildExpressionFunction<XAxisConfigFn>('xAxisConfig', {
+    id: 'x',
+    position: 'bottom',
+    title: state.xTitle || '',
+    showTitle: state?.axisTitlesVisibilitySettings?.x ?? true,
+    showLabels: state?.tickLabelsVisibilitySettings?.x ?? true,
+    showGridLines: state?.gridlinesVisibilitySettings?.x ?? true,
+    labelsOrientation: state?.labelsOrientation?.x ?? 0,
+    extent: state.xExtent ? [axisExtentConfigToExpression(state.xExtent)] : [],
+  });
+
   return {
     type: 'expression',
     chain: [
@@ -280,52 +325,7 @@ export const buildXYExpression = (
         type: 'function',
         function: 'layeredXyVis',
         arguments: {
-          legend: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'legendConfig',
-                  arguments: {
-                    isVisible: [state.legend.isVisible],
-                    showSingleSeries: state.legend.showSingleSeries
-                      ? [state.legend.showSingleSeries]
-                      : [],
-                    position: !state.legend.isInside ? [state.legend.position] : [],
-                    isInside: state.legend.isInside ? [state.legend.isInside] : [],
-                    legendSize: state.legend.isInside
-                      ? []
-                      : state.legend.position === Position.Top ||
-                        state.legend.position === Position.Bottom
-                      ? [LegendSize.AUTO]
-                      : state.legend.legendSize
-                      ? [state.legend.legendSize]
-                      : [],
-                    horizontalAlignment:
-                      state.legend.horizontalAlignment && state.legend.isInside
-                        ? [state.legend.horizontalAlignment]
-                        : [],
-                    verticalAlignment:
-                      state.legend.verticalAlignment && state.legend.isInside
-                        ? [state.legend.verticalAlignment]
-                        : [],
-                    // ensure that even if the user types more than 5 columns
-                    // we will only show 5
-                    floatingColumns:
-                      state.legend.floatingColumns && state.legend.isInside
-                        ? [Math.min(5, state.legend.floatingColumns)]
-                        : [],
-                    maxLines: state.legend.maxLines ? [state.legend.maxLines] : [],
-                    shouldTruncate: [
-                      state.legend.shouldTruncate ??
-                        getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
-                    ],
-                  },
-                },
-              ],
-            },
-          ],
+          legend: [buildExpression([legendConfigFn]).toAst()],
           fittingFunction: [state.fittingFunction || 'None'],
           endValue: [state.endValue || 'None'],
           emphasizeFitting: [state.emphasizeFitting || false],
@@ -335,27 +335,7 @@ export const buildXYExpression = (
           addTimeMarker: [state?.showCurrentTimeMarker || false],
           valuesInLegend: [state?.valuesInLegend || false],
           yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
-          xAxisConfig: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'xAxisConfig',
-                  arguments: {
-                    id: ['x'],
-                    position: ['bottom'],
-                    title: [state.xTitle || ''],
-                    showTitle: [state?.axisTitlesVisibilitySettings?.x ?? true],
-                    showLabels: [state?.tickLabelsVisibilitySettings?.x ?? true],
-                    showGridLines: [state?.gridlinesVisibilitySettings?.x ?? true],
-                    labelsOrientation: [state?.labelsOrientation?.x ?? 0],
-                    extent: state.xExtent ? [axisExtentConfigToExpression(state.xExtent)] : [],
-                  },
-                },
-              ],
-            },
-          ],
+          xAxisConfig: [buildExpression([xAxisConfigFn]).toAst()],
           layers: [
             ...validDataLayers.map((layer) =>
               dataLayerToExpression(
@@ -522,23 +502,16 @@ const dataLayerToExpression = (
     showLines: seriesType === 'line' || seriesType === 'area',
     accessors: layer.accessors,
     columnToLabel: JSON.stringify(columnToLabel),
-    palette: [
-      {
-        type: 'expression',
-        chain: [
-          layer.palette
-            ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
-                variable: 'palette',
-                default: [
-                  paletteService.get(layer.palette.name).toExpression(layer.palette.params),
-                ],
-              }).toAst()
-            : buildExpressionFunction<SystemPaletteExpressionFunctionDefinition>('system_palette', {
-                name: 'default',
-              }).toAst(),
-        ],
-      },
-    ],
+    palette: buildExpression([
+      layer.palette
+        ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
+            variable: 'palette',
+            default: [paletteService.get(layer.palette.name).toExpression(layer.palette.params)],
+          })
+        : buildExpressionFunction<SystemPaletteExpressionFunctionDefinition>('system_palette', {
+            name: 'default',
+          }),
+    ]).toAst(),
   });
 
   return {

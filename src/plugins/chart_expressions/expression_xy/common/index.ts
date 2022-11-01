@@ -67,4 +67,6 @@ export type {
   ExtendedAnnotationLayerFn,
   ReferenceLineLayerFn,
   YAxisConfigFn,
+  XAxisConfigFn,
+  LegendConfigFn,
 } from './types';
