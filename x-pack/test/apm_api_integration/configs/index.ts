@@ -11,14 +11,21 @@ import { createTestConfig, CreateTestConfig } from '../common/config';
 const apmFtrConfigs = {
   basic: {
     license: 'basic' as const,
+    kibanaConfig: {
+      'xpack.apm.forceSyntheticSource': 'true',
+    },
   },
   trial: {
     license: 'trial' as const,
+    kibanaConfig: {
+      'xpack.apm.forceSyntheticSource': 'true',
+    },
   },
   rules: {
     license: 'trial' as const,
     kibanaConfig: {
       'xpack.ruleRegistry.write.enabled': 'true',
+      'xpack.apm.forceSyntheticSource': 'true',
     },
   },
 };

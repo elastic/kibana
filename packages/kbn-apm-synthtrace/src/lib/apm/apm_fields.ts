@@ -57,6 +57,7 @@ export type ApmFields = Fields &
     'error.grouping_name': string;
     'error.grouping_key': string;
     'host.name': string;
+    'host.architecture': string;
     'host.hostname': string;
     'http.request.method': string;
     'http.response.status_code': number;
