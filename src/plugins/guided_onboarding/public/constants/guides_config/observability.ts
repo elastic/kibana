@@ -33,7 +33,8 @@ export const observabilityConfig: GuideConfig = {
       integration: 'kubernetes',
       descriptionList: [
         i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.description', {
-          defaultMessage: 'Start by adding your data by setting up the Kubernetes integration.',
+          defaultMessage:
+            'Start by adding your data by setting up the Kubernetes integration. For the best experience, deploy kube-state-metrics in Kubernetes.',
         }),
       ],
       location: {
