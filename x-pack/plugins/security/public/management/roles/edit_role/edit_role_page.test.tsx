@@ -13,6 +13,7 @@ import type { Capabilities } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
@@ -186,20 +187,63 @@ function getProps({
 }
 
 describe('<EditRolePage />', () => {
+  const coreStart = coreMock.createStart();
+
+  beforeEach(() => {
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      roles: {
+        save: true,
+      },
+    };
+  });
+
   describe('with spaces enabled', () => {
+    it('can render readonly view when not enough privileges', async () => {
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        roles: {
+          save: false,
+        },
+      };
+
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              role: {
+                name: 'my custom role',
+                metadata: {},
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+              },
+            })}
+          />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expectReadOnlyFormButtons(wrapper);
+    });
+
     it('can render a reserved role', async () => {
       const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            role: {
-              name: 'superuser',
-              metadata: { _reserved: true },
-              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-            },
-          })}
-        />
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              role: {
+                name: 'superuser',
+                metadata: { _reserved: true },
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+              },
+            })}
+          />
+        </KibanaContextProvider>
       );
 
       await waitForRender(wrapper);
@@ -207,22 +251,25 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
       expectReadOnlyFormButtons(wrapper);
     });
 
     it('can render a user defined role', async () => {
       const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            role: {
-              name: 'my custom role',
-              metadata: {},
-              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-            },
-          })}
-        />
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              role: {
+                name: 'my custom role',
+                metadata: {},
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+              },
+            })}
+          />
+        </KibanaContextProvider>
       );
 
       await waitForRender(wrapper);
@@ -230,65 +277,100 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
       expectSaveFormButtons(wrapper);
     });
 
     it('can render when creating a new role', async () => {
-      const wrapper = mountWithIntl(<EditRolePage {...getProps({ action: 'edit' })} />);
-
-      await waitForRender(wrapper);
-
-      expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expectSaveFormButtons(wrapper);
-    });
-
-    it('can render when cloning an existing role', async () => {
       const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            role: {
-              name: '',
-              metadata: { _reserved: false },
-              elasticsearch: {
-                cluster: ['all', 'manage'],
-                indices: [
-                  {
-                    names: ['foo*'],
-                    privileges: ['all'],
-                    field_security: { except: ['f'], grant: ['b*'] },
-                  },
-                ],
-                run_as: ['elastic'],
-              },
-              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-            },
-          })}
-        />
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...getProps({ action: 'edit' })} />
+        </KibanaContextProvider>
       );
 
       await waitForRender(wrapper);
 
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
+        false
+      );
+      expectSaveFormButtons(wrapper);
+    });
+
+    it('redirects back to roles when creating a new role without privileges', async () => {
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        roles: {
+          save: false,
+        },
+      };
+
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...props} />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(props.history.push).toHaveBeenCalledWith('/');
+    });
+
+    it('can render when cloning an existing role', async () => {
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              role: {
+                name: '',
+                metadata: { _reserved: false },
+                elasticsearch: {
+                  cluster: ['all', 'manage'],
+                  indices: [
+                    {
+                      names: ['foo*'],
+                      privileges: ['all'],
+                      field_security: { except: ['f'], grant: ['b*'] },
+                    },
+                  ],
+                  run_as: ['elastic'],
+                },
+                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+              },
+            })}
+          />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
+        false
+      );
       expectSaveFormButtons(wrapper);
     });
 
     it('renders an auth error when not authorized to manage spaces', async () => {
       const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            canManageSpaces: false,
-            role: {
-              name: 'my custom role',
-              metadata: {},
-              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-            },
-          })}
-        />
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              canManageSpaces: false,
+              role: {
+                name: 'my custom role',
+                metadata: {},
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+              },
+            })}
+          />
+        </KibanaContextProvider>
       );
 
       await waitForRender(wrapper);
@@ -305,19 +387,21 @@ describe('<EditRolePage />', () => {
 
     it('renders a partial read-only view when there is a transform error', async () => {
       const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            canManageSpaces: false,
-            role: {
-              name: 'my custom role',
-              metadata: {},
-              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-              kibana: [],
-              _transform_error: ['kibana'],
-            },
-          })}
-        />
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              canManageSpaces: false,
+              role: {
+                name: 'my custom role',
+                metadata: {},
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [],
+                _transform_error: ['kibana'],
+              },
+            })}
+          />
+        </KibanaContextProvider>
       );
 
       await waitForRender(wrapper);
@@ -331,7 +415,11 @@ describe('<EditRolePage />', () => {
     const error = { response: { status: 500 } };
     const getFeatures = jest.fn().mockRejectedValue(error);
     const props = getProps({ action: 'edit' });
-    const wrapper = mountWithIntl(<EditRolePage {...props} getFeatures={getFeatures} />);
+    const wrapper = mountWithIntl(
+      <KibanaContextProvider services={coreStart}>
+        <EditRolePage {...props} getFeatures={getFeatures} />
+      </KibanaContextProvider>
+    );
 
     await waitForRender(wrapper);
     expect(props.fatalErrors.add).toHaveBeenLastCalledWith(error);
@@ -342,7 +430,11 @@ describe('<EditRolePage />', () => {
     const error = { response: { status: 403 } };
     const getFeatures = jest.fn().mockRejectedValue(error);
     const props = getProps({ action: 'edit' });
-    const wrapper = mountWithIntl(<EditRolePage {...props} getFeatures={getFeatures} />);
+    const wrapper = mountWithIntl(
+      <KibanaContextProvider services={coreStart}>
+        <EditRolePage {...props} getFeatures={getFeatures} />
+      </KibanaContextProvider>
+    );
 
     await waitForRender(wrapper);
     expect(props.fatalErrors.add).not.toHaveBeenCalled();
@@ -356,7 +448,9 @@ describe('<EditRolePage />', () => {
     dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
 
     const wrapper = mountWithIntl(
-      <EditRolePage {...{ ...getProps({ action: 'edit' }), dataViews }} />
+      <KibanaContextProvider services={coreStart}>
+        <EditRolePage {...{ ...getProps({ action: 'edit' }), dataViews }} />
+      </KibanaContextProvider>
     );
 
     await waitForRender(wrapper);
@@ -369,7 +463,11 @@ describe('<EditRolePage />', () => {
   describe('in create mode', () => {
     it('renders an error for existing role name', async () => {
       const props = getProps({ action: 'edit' });
-      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...props} />
+        </KibanaContextProvider>
+      );
 
       await waitForRender(wrapper);
 
@@ -389,7 +487,11 @@ describe('<EditRolePage />', () => {
 
     it('renders an error on save of existing role name', async () => {
       const props = getProps({ action: 'edit' });
-      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...props} />
+        </KibanaContextProvider>
+      );
 
       props.rolesAPIClient.saveRole.mockRejectedValue({
         body: {
@@ -420,7 +522,11 @@ describe('<EditRolePage />', () => {
 
     it('does not render an error for new role name', async () => {
       const props = getProps({ action: 'edit' });
-      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...props} />
+        </KibanaContextProvider>
+      );
 
       props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
 
@@ -440,7 +546,11 @@ describe('<EditRolePage />', () => {
 
     it('does not render a notification on save of new role name', async () => {
       const props = getProps({ action: 'edit' });
-      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...props} />
+        </KibanaContextProvider>
+      );
 
       props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
 
