@@ -186,7 +186,7 @@ describe('action_type_form', () => {
     // Run the timers so the EuiTooltip will be visible
     jest.runAllTimers();
     wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Action contains errors.');
+    expect(wrapper.find('.euiToolTipPopover').last().text()).toBe('Action contains errors.');
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();
   });
