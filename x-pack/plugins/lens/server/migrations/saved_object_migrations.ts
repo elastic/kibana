@@ -583,7 +583,9 @@ const lensMigrations: SavedObjectMigrationMap = {
   ),
   '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
   '8.5.0': flow(migrateMetricIds, enrichAnnotationLayers, migratePartitionChartGroups),
-  '8.6.0': flow(migratePartitionMetrics, migrateIndexPatternDatasource),
+  '8.6.0': flow(migrateIndexPatternDatasource, migratePartitionMetrics),
+  // FOLLOW THESE GUIDELINES IF YOU ARE ADDING A NEW MIGRATION!
+  // 1. Make sure you are applying migrations for a given version in the same order here as they are applied in x-pack/plugins/lens/server/embeddable/make_lens_embeddable_factory.ts
 };
 
 export const getAllMigrations = (
