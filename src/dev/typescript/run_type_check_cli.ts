@@ -154,9 +154,6 @@ export async function runTypeCheckCli() {
         log.warning('Deleted all typescript caches');
       }
 
-      log.warning(
-        `Building types for all bazel packages. This can take a while depending on your changes and won't show any progress while it runs.`
-      );
       await runBazel(['build', '//packages:build_types', '--show_result=1'], {
         cwd: REPO_ROOT,
         logPrefix: '\x1b[94m[bazel]\x1b[39m',
