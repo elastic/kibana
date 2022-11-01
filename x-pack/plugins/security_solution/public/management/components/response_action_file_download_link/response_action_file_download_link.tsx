@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { FormattedError } from '../formatted_error';
-import { useGetFileInfo } from '../../hooks/endpoint/use_get_file_info';
+import { useGetFileInfo } from '../../hooks/response_actions/use_get_file_info';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';

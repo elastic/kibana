@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import type { HostInfo } from '../../../../common/endpoint/types';
-import { HostStatus } from '../../../../common/endpoint/types';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { useGetEndpointDetails } from '../../hooks/endpoint/use_get_endpoint_details';
-import { mockEndpointDetailsApiResult } from '../../pages/endpoint_hosts/store/mock_endpoint_result_list';
+import type { HostInfo } from '../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
+import { mockEndpointDetailsApiResult } from '../../../pages/endpoint_hosts/store/mock_endpoint_result_list';
 import { OfflineCallout } from './offline_callout';
 
-jest.mock('../../hooks/endpoint/use_get_endpoint_details');
+jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
 
 const getEndpointDetails = useGetEndpointDetails as jest.Mock;
 

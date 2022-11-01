@@ -6,9 +6,9 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { endpointActionResponseCodes } from './endpoint_action_response_codes';
-import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
-import type { CommandExecutionResultComponent, CommandExecutionResultProps } from '../console';
+import { endpointActionResponseCodes } from '../lib/endpoint_action_response_codes';
+import type { ActionDetails, MaybeImmutable } from '../../../../../common/endpoint/types';
+import type { CommandExecutionResultComponent, CommandExecutionResultProps } from '../../console';
 
 export interface ActionSuccessProps extends CommandExecutionResultProps {
   action: MaybeImmutable<ActionDetails<{ code?: string }>>;

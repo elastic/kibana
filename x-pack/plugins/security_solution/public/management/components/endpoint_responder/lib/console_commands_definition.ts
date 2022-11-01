@@ -9,21 +9,21 @@ import { i18n } from '@kbn/i18n';
 import type {
   EndpointCapabilities,
   ConsoleResponseActionCommands,
-} from '../../../../common/endpoint/service/response_actions/constants';
-import { GetFileActionResult } from './get_file_action';
-import type { Command, CommandDefinition } from '../console';
-import { IsolateActionResult } from './isolate_action';
-import { ReleaseActionResult } from './release_action';
-import { KillProcessActionResult } from './kill_process_action';
-import { SuspendProcessActionResult } from './suspend_process_action';
-import { EndpointStatusActionResult } from './status_action';
-import { GetProcessesActionResult } from './get_processes_action';
-import type { ParsedArgData } from '../console/service/parsed_command_input';
-import type { EndpointPrivileges, ImmutableArray } from '../../../../common/endpoint/types';
+} from '../../../../../common/endpoint/service/response_actions/constants';
+import { GetFileActionResult } from '../command_render_components/get_file_action';
+import type { Command, CommandDefinition } from '../../console';
+import { IsolateActionResult } from '../command_render_components/isolate_action';
+import { ReleaseActionResult } from '../command_render_components/release_action';
+import { KillProcessActionResult } from '../command_render_components/kill_process_action';
+import { SuspendProcessActionResult } from '../command_render_components/suspend_process_action';
+import { EndpointStatusActionResult } from '../command_render_components/status_action';
+import { GetProcessesActionResult } from '../command_render_components/get_processes_action';
+import type { ParsedArgData } from '../../console/service/parsed_command_input';
+import type { EndpointPrivileges, ImmutableArray } from '../../../../../common/endpoint/types';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_ENDPOINT_FOR_RESPONDER,
-} from '../../../common/translations';
+} from '../../../../common/translations';
 import { getCommandAboutInfo } from './get_command_about_info';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
@@ -125,7 +125,7 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
-export const getEndpointResponseActionsConsoleCommands = ({
+export const getEndpointConsoleCommands = ({
   endpointAgentId,
   endpointCapabilities,
   endpointPrivileges,

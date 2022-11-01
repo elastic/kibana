@@ -7,15 +7,15 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
   ActionLogButton,
-  getEndpointResponseActionsConsoleCommands,
-} from '../../components/endpoint_responder';
-import { useConsoleManager } from '../../components/console';
-import type { HostMetadata } from '../../../../common/endpoint/types';
-import { HeaderEndpointInfo } from '../../components/endpoint_responder/header_endpoint_info';
-import { OfflineCallout } from '../../components/endpoint_responder/offline_callout';
+  getEndpointConsoleCommands,
+  HeaderEndpointInfo,
+  OfflineCallout,
+} from '../components/endpoint_responder';
+import { useConsoleManager } from '../components/console';
+import type { HostMetadata } from '../../../common/endpoint/types';
 
 type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
 
@@ -48,7 +48,7 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
               endpoint: endpointMetadata,
             },
             consoleProps: {
-              commands: getEndpointResponseActionsConsoleCommands({
+              commands: getEndpointConsoleCommands({
                 endpointAgentId,
                 endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
                 endpointPrivileges,

@@ -6,19 +6,16 @@
  */
 
 import { memo, useMemo } from 'react';
-import { parsedPidOrEntityIdParameter } from './utils';
-import type {
-  SuspendProcessActionOutputContent,
-  KillOrSuspendProcessRequestBody,
-} from '../../../../common/endpoint/types';
-import { useSendSuspendProcessRequest } from '../../hooks/endpoint/use_send_suspend_process_endpoint_request';
-import type { ActionRequestComponentProps } from './types';
-import { useConsoleActionSubmitter } from './hooks/use_console_action_submitter';
+import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
+import { parsedPidOrEntityIdParameter } from '../lib/utils';
+import { useSendKillProcessRequest } from '../../../hooks/response_actions/use_send_kill_process_endpoint_request';
+import type { ActionRequestComponentProps } from '../types';
+import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 
-export const SuspendProcessActionResult = memo<
+export const KillProcessActionResult = memo<
   ActionRequestComponentProps<{ pid?: string[]; entityId?: string[] }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
-  const actionCreator = useSendSuspendProcessRequest();
+  const actionCreator = useSendKillProcessRequest();
 
   const actionRequestBody = useMemo<undefined | KillOrSuspendProcessRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
@@ -33,10 +30,7 @@ export const SuspendProcessActionResult = memo<
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
 
-  return useConsoleActionSubmitter<
-    KillOrSuspendProcessRequestBody,
-    SuspendProcessActionOutputContent
-  >({
+  return useConsoleActionSubmitter<KillOrSuspendProcessRequestBody>({
     ResultComponent,
     setStore,
     store,
@@ -44,7 +38,7 @@ export const SuspendProcessActionResult = memo<
     setStatus,
     actionCreator,
     actionRequestBody,
-    dataTestSubj: 'suspendProcess',
+    dataTestSubj: 'killProcess',
   }).result;
 });
-SuspendProcessActionResult.displayName = 'SuspendProcessActionResult';
+KillProcessActionResult.displayName = 'KillProcessActionResult';

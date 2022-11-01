@@ -6,9 +6,9 @@
  */
 
 import React, { memo } from 'react';
-import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
-import type { CommandExecutionResultComponent } from '../console/components/command_execution_result';
-import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
+import { EndpointActionFailureMessage } from '../../endpoint_action_failure_message';
+import type { CommandExecutionResultComponent } from '../../console/components/command_execution_result';
+import type { ActionDetails, MaybeImmutable } from '../../../../../common/endpoint/types';
 
 export const ActionError = memo<{
   action: MaybeImmutable<ActionDetails>;
