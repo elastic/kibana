@@ -234,14 +234,20 @@ export const TakeActionDropdown = React.memo(
     });
 
     const items: React.ReactElement[] = useMemo(
-      () => [
-        ...(tGridEnabled ? addToCaseActionItems : []),
-        ...alertsActionItems,
-        ...hostIsolationActionItems,
-        ...endpointResponseActionsConsoleItems,
-        ...(osqueryAvailable ? [osqueryActionItem] : []),
-        ...investigateInTimelineActionItems,
-      ],
+      () =>
+        [
+          ...(tGridEnabled ? addToCaseActionItems : []),
+          ...alertsActionItems,
+          ...hostIsolationActionItems,
+          ...endpointResponseActionsConsoleItems,
+          ...(osqueryAvailable ? [osqueryActionItem] : []),
+          ...investigateInTimelineActionItems,
+        ].map((element, i) => ({
+          ...element,
+          key: `${
+            element.props['data-test-subj'] ? element.props['data-test-subj'] : 'rando'
+          }-${i}`,
+        })),
       [
         tGridEnabled,
         addToCaseActionItems,

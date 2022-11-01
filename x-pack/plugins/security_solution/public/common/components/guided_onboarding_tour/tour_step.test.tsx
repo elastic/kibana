@@ -8,7 +8,7 @@ import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import type { EuiTourStepProps } from '@elastic/eui';
 import { GuidedOnboardingTourStep, SecurityTourStep } from './tour_step';
-import { SecurityStepId } from './tour_config';
+import { AlertsCasesTourSteps, SecurityStepId } from './tour_config';
 import { useTourContext } from './tour';
 import { mockGlobalState, SUB_PLUGINS_REDUCER, TestProviders } from '../../mock';
 import { TimelineId } from '../../../../common/types';
@@ -102,7 +102,7 @@ describe('GuidedOnboardingTourStep', () => {
 });
 
 describe('SecurityTourStep', () => {
-  const { isTourAnchor: _, ...securityTourStepDefaultProps } = defaultProps;
+  const { isTourAnchor: _, ...stepDefaultProps } = defaultProps;
   beforeEach(() => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 1,
@@ -119,7 +119,7 @@ describe('SecurityTourStep', () => {
       isTourShown: () => true,
     });
     render(
-      <SecurityTourStep {...securityTourStepDefaultProps} step={99}>
+      <SecurityTourStep {...stepDefaultProps} step={99}>
         {mockChildren}
       </SecurityTourStep>,
       { wrapper: TestProviders }
@@ -129,7 +129,7 @@ describe('SecurityTourStep', () => {
 
   it('does not render if tour step does not equal active step', () => {
     render(
-      <SecurityTourStep {...securityTourStepDefaultProps} step={4}>
+      <SecurityTourStep {...stepDefaultProps} step={AlertsCasesTourSteps.addAlertToCase}>
         {mockChildren}
       </SecurityTourStep>,
       { wrapper: TestProviders }
@@ -143,14 +143,14 @@ describe('SecurityTourStep', () => {
       incrementStep: jest.fn(),
       isTourShown: () => false,
     });
-    render(<SecurityTourStep {...securityTourStepDefaultProps}>{mockChildren}</SecurityTourStep>, {
+    render(<SecurityTourStep {...stepDefaultProps}>{mockChildren}</SecurityTourStep>, {
       wrapper: TestProviders,
     });
     expect(mockTourStep).not.toHaveBeenCalled();
   });
 
   it('renders tour step with correct number of steppers', () => {
-    render(<SecurityTourStep {...securityTourStepDefaultProps}>{mockChildren}</SecurityTourStep>, {
+    render(<SecurityTourStep {...stepDefaultProps}>{mockChildren}</SecurityTourStep>, {
       wrapper: TestProviders,
     });
     const mockCall = { ...mockTourStep.mock.calls[0][0] };
@@ -160,7 +160,7 @@ describe('SecurityTourStep', () => {
 
   it('forces the render for step 5 of the SecurityStepId.alertsCases tour step', () => {
     render(
-      <SecurityTourStep {...securityTourStepDefaultProps} step={5}>
+      <SecurityTourStep {...stepDefaultProps} step={AlertsCasesTourSteps.createCase}>
         {mockChildren}
       </SecurityTourStep>,
       { wrapper: TestProviders }
@@ -177,7 +177,7 @@ describe('SecurityTourStep', () => {
       isTourShown: () => true,
     });
     render(
-      <SecurityTourStep {...securityTourStepDefaultProps} step={3}>
+      <SecurityTourStep {...stepDefaultProps} step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}>
         {mockChildren}
       </SecurityTourStep>,
       { wrapper: TestProviders }
@@ -207,7 +207,7 @@ describe('SecurityTourStep', () => {
       isTourShown: () => true,
     });
     const { container } = render(
-      <SecurityTourStep {...securityTourStepDefaultProps} step={3}>
+      <SecurityTourStep {...stepDefaultProps} step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}>
         {mockChildren}
       </SecurityTourStep>,
       { wrapper: TestProviders }
@@ -229,7 +229,7 @@ describe('SecurityTourStep', () => {
       isTourShown: () => true,
     });
     const { container } = render(
-      <SecurityTourStep {...securityTourStepDefaultProps} step={2}>
+      <SecurityTourStep {...stepDefaultProps} step={AlertsCasesTourSteps.expandEvent}>
         {mockChildren}
       </SecurityTourStep>,
       { wrapper: TestProviders }
@@ -246,7 +246,7 @@ describe('SecurityTourStep', () => {
 
   it('if a tour step does not have children and has anchor, only render tour step', () => {
     const { getByTestId } = render(
-      <SecurityTourStep {...securityTourStepDefaultProps} step={5} />,
+      <SecurityTourStep {...stepDefaultProps} step={AlertsCasesTourSteps.createCase} />,
       { wrapper: TestProviders }
     );
     expect(getByTestId('tourStepMock')).toBeInTheDocument();
@@ -254,7 +254,7 @@ describe('SecurityTourStep', () => {
 
   it('if a tour step does not have children and does not have anchor, render nothing', () => {
     const { queryByTestId } = render(
-      <SecurityTourStep {...securityTourStepDefaultProps} step={1} />,
+      <SecurityTourStep {...stepDefaultProps} step={AlertsCasesTourSteps.pointToAlertName} />,
       { wrapper: TestProviders }
     );
     expect(queryByTestId('tourStepMock')).not.toBeInTheDocument();
@@ -284,7 +284,7 @@ describe('SecurityTourStep', () => {
 
     render(
       <TestProviders store={mockStore}>
-        <SecurityTourStep {...securityTourStepDefaultProps}>{mockChildren}</SecurityTourStep>
+        <SecurityTourStep {...stepDefaultProps}>{mockChildren}</SecurityTourStep>
       </TestProviders>
     );
     expect(mockTourStep).not.toHaveBeenCalled();
