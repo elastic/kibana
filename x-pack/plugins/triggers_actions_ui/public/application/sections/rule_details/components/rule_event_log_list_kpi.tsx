@@ -84,6 +84,7 @@ export type RuleEventLogListKPIProps = {
   outcomeFilter?: string[];
   message?: string;
   refreshToken?: number;
+  namespaces?: Array<string | undefined>;
 } & Pick<RuleApis, 'loadExecutionKPIAggregations' | 'loadGlobalExecutionKPIAggregations'>;
 
 export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
@@ -94,6 +95,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
     outcomeFilter,
     message,
     refreshToken,
+    namespaces,
     loadExecutionKPIAggregations,
     loadGlobalExecutionKPIAggregations,
   } = props;
@@ -122,6 +124,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
         dateEnd: getParsedDate(dateEnd),
         outcomeFilter,
         message,
+        ...(namespaces ? { namespaces } : {}),
       });
       setKpi(newKpi);
     } catch (e) {
@@ -136,7 +139,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   useEffect(() => {
     loadKPIs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleId, dateStart, dateEnd, outcomeFilter, message]);
+  }, [ruleId, dateStart, dateEnd, outcomeFilter, message, namespaces]);
 
   useEffect(() => {
     if (isInitialized.current) {

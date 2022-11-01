@@ -59,7 +59,10 @@ export interface LoadExecutionLogAggregationsProps {
   sort?: SortField[];
 }
 
-export type LoadGlobalExecutionLogAggregationsProps = Omit<LoadExecutionLogAggregationsProps, 'id'>;
+export type LoadGlobalExecutionLogAggregationsProps = Omit<
+  LoadExecutionLogAggregationsProps,
+  'id'
+> & { namespaces?: Array<string | undefined> };
 
 export const loadExecutionLogAggregations = async ({
   id,
@@ -103,6 +106,7 @@ export const loadGlobalExecutionLogAggregations = async ({
   perPage = 10,
   page = 0,
   sort = [],
+  namespaces,
 }: LoadGlobalExecutionLogAggregationsProps & { http: HttpSetup }) => {
   const sortField: any[] = sort;
   const filter = getFilter({ outcomeFilter, message });
@@ -119,6 +123,7 @@ export const loadGlobalExecutionLogAggregations = async ({
         // whereas data grid sorts are 0 indexed.
         page: page + 1,
         sort: sortField.length ? JSON.stringify(sortField) : undefined,
+        namespaces: namespaces ? JSON.stringify(namespaces) : undefined,
       },
     }
   );

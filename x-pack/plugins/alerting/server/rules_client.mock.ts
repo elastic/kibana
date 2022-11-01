@@ -34,6 +34,7 @@ const createRulesClientMock = () => {
     getGlobalExecutionKpiWithAuth: jest.fn(),
     getGlobalExecutionLogWithAuth: jest.fn(),
     getActionErrorLog: jest.fn(),
+    getActionErrorLogWithAuth: jest.fn(),
     getSpaceId: jest.fn(),
     bulkEdit: jest.fn(),
     bulkDeleteRules: jest.fn(),

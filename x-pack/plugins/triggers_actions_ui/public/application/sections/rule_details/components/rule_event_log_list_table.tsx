@@ -18,9 +18,11 @@ import {
   Pagination,
   EuiSuperDatePicker,
   OnTimeChangeProps,
+  EuiSwitch,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
-import { useKibana } from '../../../../common/lib/kibana';
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { useKibana, useSpacesData } from '../../../../common/lib/kibana';
 import {
   RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
@@ -37,6 +39,8 @@ import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -66,6 +70,13 @@ const getDefaultColumns = (columns: string[]) => {
   return [...LOCKED_COLUMNS, ...columnsWithoutLockedColumn];
 };
 
+const ALL_SPACES_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.ruleEventLogList.showAllSpacesToggle',
+  {
+    defaultMessage: 'Show rules from all spaces',
+  }
+);
+
 const updateButtonProps = {
   iconOnly: true,
   fill: false,
@@ -84,6 +95,7 @@ export type RuleEventLogListCommonProps = {
   overrideLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
   overrideLoadGlobalExecutionLogAggregations?: RuleApis['loadGlobalExecutionLogAggregations'];
   hasRuleNames?: boolean;
+  hasAllSpaceSwitch?: boolean;
 } & Pick<RuleApis, 'loadExecutionLogAggregations' | 'loadGlobalExecutionLogAggregations'>;
 
 export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'default'> =
@@ -106,6 +118,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     overrideLoadExecutionLogAggregations,
     initialPageSize = 10,
     hasRuleNames = false,
+    hasAllSpaceSwitch = false,
   } = props;
 
   const { uiSettings, notifications } = useKibana().services;
@@ -117,6 +130,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   const [internalRefreshToken, setInternalRefreshToken] = useState<number | undefined>(
     refreshToken
   );
+  const [showFromAllSpaces, setShowFromAllSpaces] = useState(false);
 
   // Data grid states
   const [logs, setLogs] = useState<IExecutionLog[]>();
@@ -152,6 +166,24 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         })) || []
     );
   });
+
+  const spacesData = useSpacesData();
+  const accessibleSpaceIds = useMemo(
+    () => (spacesData ? [...spacesData.spacesMap.values()].map((e) => e.id) : []),
+    [spacesData]
+  );
+  const areMultipleSpacesAccessible = useMemo(
+    () => accessibleSpaceIds.length > 1,
+    [accessibleSpaceIds]
+  );
+  const namespaces = useMemo(
+    () => (showFromAllSpaces && spacesData ? accessibleSpaceIds : undefined),
+    [showFromAllSpaces, spacesData, accessibleSpaceIds]
+  );
+  const activeSpace = useMemo(
+    () => spacesData?.spacesMap.get(spacesData?.activeSpaceId),
+    [spacesData]
+  );
 
   const isInitialized = useRef(false);
 
@@ -197,6 +229,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         dateEnd: getParsedDate(dateEnd),
         page: pagination.pageIndex,
         perPage: pagination.pageSize,
+        namespaces,
       });
       setLogs(result.data);
       setPagination({
@@ -290,6 +323,20 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     [search, setSearchText]
   );
 
+  const onShowAllSpacesChange = useCallback(() => {
+    setShowFromAllSpaces((prev) => !prev);
+    const nextShowFromAllSpaces = !showFromAllSpaces;
+
+    if (nextShowFromAllSpaces && !visibleColumns.includes('space_ids')) {
+      const ruleNameIndex = visibleColumns.findIndex((c) => c === 'rule_name');
+      const newVisibleColumns = [...visibleColumns];
+      newVisibleColumns.splice(ruleNameIndex + 1, 0, 'space_ids');
+      setVisibleColumns(newVisibleColumns);
+    } else if (!nextShowFromAllSpaces && visibleColumns.includes('space_ids')) {
+      setVisibleColumns(visibleColumns.filter((c) => c !== 'space_ids'));
+    }
+  }, [setShowFromAllSpaces, showFromAllSpaces, visibleColumns]);
+
   const renderList = () => {
     if (!logs) {
       return <CenterJustifiedSpinner />;
@@ -307,6 +354,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           dateFormat={dateFormat}
           selectedRunLog={selectedRunLog}
           showRuleNameAndIdColumns={hasRuleNames}
+          showSpaceColumns={showFromAllSpaces}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
           onFlyoutOpen={onFlyoutOpen}
@@ -329,6 +377,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     pagination.pageIndex,
     pagination.pageSize,
     searchText,
+    showFromAllSpaces,
   ]);
 
   useEffect(() => {
@@ -350,7 +399,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiFieldSearch
               fullWidth
@@ -378,6 +427,15 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
               updateButtonProps={updateButtonProps}
             />
           </EuiFlexItem>
+          {hasAllSpaceSwitch && areMultipleSpacesAccessible && (
+            <EuiFlexItem>
+              <EuiSwitch
+                label={ALL_SPACES_LABEL}
+                checked={showFromAllSpaces}
+                onChange={onShowAllSpacesChange}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer />
       </EuiFlexItem>
@@ -389,6 +447,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           outcomeFilter={filter}
           message={searchText}
           refreshToken={internalRefreshToken}
+          namespaces={namespaces}
         />
         <EuiSpacer />
       </EuiFlexItem>
@@ -407,13 +466,29 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           runLog={selectedRunLog}
           refreshToken={refreshToken}
           onClose={onFlyoutClose}
+          activeSpaceId={activeSpace?.id}
         />
       )}
     </EuiFlexGroup>
   );
 };
 
-export const RuleEventLogListTableWithApi = withBulkRuleOperations(RuleEventLogListTable);
+const RuleEventLogListTableWithSpaces: React.FC<RuleEventLogListTableProps> = (props) => {
+  const { spaces } = useKibana().services;
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const SpacesContextWrapper = useCallback(
+    spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+    [spaces]
+  );
+  return (
+    <SpacesContextWrapper feature="triggersActions">
+      <RuleEventLogListTable {...props} />
+    </SpacesContextWrapper>
+  );
+};
+
+export const RuleEventLogListTableWithApi = withBulkRuleOperations(RuleEventLogListTableWithSpaces);
 
 // eslint-disable-next-line import/no-default-export
 export { RuleEventLogListTableWithApi as default };

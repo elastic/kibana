@@ -60,6 +60,7 @@ export interface RuleEventLogDataGrid {
   pageSizeOptions?: number[];
   selectedRunLog?: IExecutionLog;
   showRuleNameAndIdColumns?: boolean;
+  showSpaceColumns?: boolean;
   onChangeItemsPerPage: (pageSize: number) => void;
   onChangePage: (pageIndex: number) => void;
   onFilterChange: (filter: string[]) => void;
@@ -162,6 +163,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     visibleColumns,
     selectedRunLog,
     showRuleNameAndIdColumns = false,
+    showSpaceColumns = false,
     setVisibleColumns,
     setSortingColumns,
     onChangeItemsPerPage,
@@ -207,6 +209,25 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
                 }
               ),
               isSortable: getIsColumnSortable('rule_name'),
+              actions: {
+                showSortAsc: false,
+                showSortDesc: false,
+                showHide: false,
+              },
+            },
+          ]
+        : []),
+      ...(showSpaceColumns
+        ? [
+            {
+              id: 'space_ids',
+              displayAsText: i18n.translate(
+                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.spaceIds',
+                {
+                  defaultMessage: 'Space',
+                }
+              ),
+              isSortable: getIsColumnSortable('space_ids'),
               actions: {
                 showSortAsc: false,
                 showSortDesc: false,
@@ -429,16 +450,22 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
         isSortable: getIsColumnSortable('timed_out'),
       },
     ],
-    [getPaginatedRowIndex, onFlyoutOpen, onFilterChange, showRuleNameAndIdColumns, logs]
+    [
+      getPaginatedRowIndex,
+      onFlyoutOpen,
+      onFilterChange,
+      showRuleNameAndIdColumns,
+      showSpaceColumns,
+      logs,
+    ]
   );
 
-  const columnVisibilityProps = useMemo(
-    () => ({
+  const columnVisibilityProps = useMemo(() => {
+    return {
       visibleColumns,
       setVisibleColumns,
-    }),
-    [visibleColumns, setVisibleColumns]
-  );
+    };
+  }, [visibleColumns, setVisibleColumns]);
 
   const sortingProps = useMemo(
     () => ({
@@ -560,6 +587,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     const actionErrors = logs[pagedRowIndex]?.num_errored_actions || (0 as number);
     const version = logs?.[pagedRowIndex]?.version;
     const ruleId = runLog?.rule_id;
+    const spaceIds = runLog?.space_ids;
 
     if (columnId === 'num_errored_actions' && runLog) {
       return (
@@ -592,6 +620,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             version={version}
             dateFormat={dateFormat}
             ruleId={ruleId}
+            spaceIds={spaceIds}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
