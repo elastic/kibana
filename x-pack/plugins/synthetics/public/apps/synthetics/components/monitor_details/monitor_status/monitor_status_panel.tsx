@@ -126,7 +126,7 @@ export const MonitorStatusPanel = ({
     : '';
 
   return (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} hasBorder={true}>
       <EuiFlexGroup
         direction="row"
         alignItems="baseline"

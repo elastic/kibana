@@ -20,8 +20,18 @@ export const syntheticsGetPingStatusesRoute: UMRestApiRouteFactory = (libs: UMSe
     query: getPingsRouteQuerySchema,
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
-    const { from, to, index, monitorId, status, sort, size, locations, excludedLocations } =
-      request.query;
+    const {
+      from,
+      to,
+      index,
+      monitorId,
+      status,
+      sort,
+      size,
+      pageIndex,
+      locations,
+      excludedLocations,
+    } = request.query;
 
     const result = await queryPings<PingStatus>({
       uptimeEsClient,
@@ -31,6 +41,7 @@ export const syntheticsGetPingStatusesRoute: UMRestApiRouteFactory = (libs: UMSe
       status,
       sort,
       size,
+      pageIndex,
       locations: locations ? JSON.parse(locations) : [],
       excludedLocations,
       fields: ['@timestamp', 'config_id', 'summary.*', 'error.*', 'observer.geo.name'],

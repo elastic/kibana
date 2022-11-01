@@ -111,7 +111,7 @@ export const MonitorSummary = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <MonitorStatusPanel
         from={'now-24h'}
         to={'now'}
