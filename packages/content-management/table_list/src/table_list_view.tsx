@@ -67,6 +67,10 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   editItem?(item: T): void;
+  /**
+   * This assumes the content is already wrapped in an outer PageTemplate component.
+   */
+  asManagementSection?: boolean;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -116,6 +120,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   onClickTitle,
   id = 'userContent',
   children,
+  asManagementSection,
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(
@@ -443,7 +448,11 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
   if (!fetchError && hasNoItems) {
     return (
-      <KibanaPageTemplate panelled isEmptyState={true} data-test-subj={pageDataTestSubject}>
+      <KibanaPageTemplate
+        panelled={!asManagementSection}
+        isEmptyState={true}
+        data-test-subj={pageDataTestSubject}
+      >
         <KibanaPageTemplate.Section
           aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
         >
@@ -453,8 +462,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     );
   }
 
+  const PageTemplate = asManagementSection
+    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
+    : KibanaPageTemplate;
+
   return (
-    <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
+    <PageTemplate panelled={!asManagementSection} data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{tableListTitle}</span>}
         rightSideItems={[renderCreateButton() ?? <span />]}
@@ -509,7 +522,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           />
         )}
       </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+    </PageTemplate>
   );
 }
 

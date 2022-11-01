@@ -106,3 +106,8 @@ export const ConnectedComponent = (params: Params) => {
 };
 
 ConnectedComponent.argTypes = argTypes;
+
+export const LegacyManagementSection = (params: Params) => (
+  <ConnectedComponent {...params} asManagementSection />
+);
+LegacyManagementSection.argTypes = argTypes;

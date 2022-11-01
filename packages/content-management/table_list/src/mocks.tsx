@@ -152,4 +152,8 @@ export const getStoryArgTypes = () => ({
     },
     defaultValue: 20,
   },
+  asManagementSection: {
+    control: 'boolean',
+    defaultValue: false,
+  },
 });
