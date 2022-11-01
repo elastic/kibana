@@ -224,6 +224,7 @@ export const getHeatmapVisualization = ({
               ]
             : [],
           filterOperations: isCellValueSupported,
+          isMetricDimension: true,
           supportsMoreColumns: !state.valueAccessor,
           enableDimensionEditor: true,
           requiredMinDimensionCount: 1,

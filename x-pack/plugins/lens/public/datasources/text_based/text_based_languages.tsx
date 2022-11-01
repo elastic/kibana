@@ -410,6 +410,19 @@ export function getTextBasedDatasource({
       const selectedField = props.state.layers[props.layerId]?.allColumns?.find(
         (column) => column.columnId === props.columnId
       );
+
+      const updatedFields = fields.map((f) => {
+        return {
+          ...f,
+          compatible: props.isMetricDimension
+            ? props.filterOperations({
+                dataType: f.meta.type as DataType,
+                isBucketed: Boolean(f?.meta?.type !== 'number'),
+                scale: 'ordinal',
+              })
+            : true,
+        };
+      });
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <EuiFormRow
@@ -421,7 +434,7 @@ export function getTextBasedDatasource({
             className="lnsIndexPatternDimensionEditor--padded"
           >
             <FieldSelect
-              existingFields={fields}
+              existingFields={updatedFields}
               selectedField={selectedField}
               onChoose={(choice) => {
                 const meta = fields.find((f) => f.name === choice.field)?.meta;

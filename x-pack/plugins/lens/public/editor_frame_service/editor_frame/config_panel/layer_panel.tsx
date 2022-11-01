@@ -718,6 +718,7 @@ export function LayerPanel(
                   groupId: activeGroup.groupId,
                   hideGrouping: activeGroup.hideGrouping,
                   filterOperations: activeGroup.filterOperations,
+                  isMetricDimension: Boolean(activeGroup?.isMetricDimension),
                   dimensionGroups,
                   toggleFullscreen,
                   isFullscreen,

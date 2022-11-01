@@ -241,6 +241,7 @@ export const getLegacyMetricVisualization = ({
               defaultMessage: 'Value',
             }),
           },
+          isMetricDimension: true,
           groupLabel: i18n.translate('xpack.lens.metric.label', {
             defaultMessage: 'Metric',
           }),

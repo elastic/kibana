@@ -291,6 +291,7 @@ export const getDatatableVisualization = ({
             }),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
+          isMetricDimension: true,
           requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsDatatable_metrics',
           enableDimensionEditor: true,
