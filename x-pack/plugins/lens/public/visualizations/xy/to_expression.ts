@@ -22,6 +22,7 @@ import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   AvailableReferenceLineIcon,
   DataDecorationConfigFn,
+  ExtendedAnnotationLayerFn,
   ExtendedDataLayerFn,
   ReferenceLineDecorationConfigFn,
   SeriesType,
@@ -465,20 +466,15 @@ const annotationLayerToExpression = (
   layer: XYAnnotationLayerConfig,
   eventAnnotationService: EventAnnotationServiceType
 ): Ast => {
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'extendedAnnotationLayer',
-        arguments: {
-          simpleView: [Boolean(layer.simpleView)],
-          layerId: [layer.layerId],
-          annotations: eventAnnotationService.toExpression(layer.annotations || []),
-        },
-      },
-    ],
-  };
+  const extendedAnnotationLayerFn = buildExpressionFunction<ExtendedAnnotationLayerFn>(
+    'extendedAnnotationLayer',
+    {
+      simpleView: Boolean(layer.simpleView),
+      layerId: layer.layerId,
+      annotations: eventAnnotationService.toExpression(layer.annotations || []),
+    }
+  );
+  return buildExpression([extendedAnnotationLayerFn]).toAst();
 };
 
 const dataLayerToExpression = (

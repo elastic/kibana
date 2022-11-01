@@ -471,3 +471,10 @@ export type YAxisConfigFn = ExpressionFunctionDefinition<
   YAxisConfig,
   YAxisConfigResult
 >;
+
+export type ExtendedAnnotationLayerFn = ExpressionFunctionDefinition<
+  typeof EXTENDED_ANNOTATION_LAYER,
+  null,
+  ExtendedAnnotationLayerArgs,
+  ExtendedAnnotationLayerConfigResult
+>;

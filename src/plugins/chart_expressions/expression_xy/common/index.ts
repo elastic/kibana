@@ -63,4 +63,6 @@ export type {
   ReferenceLineDecorationConfigFn,
   DataDecorationConfigFn,
   ExtendedDataLayerFn,
+  ExtendedAnnotationLayerConfigResult,
+  ExtendedAnnotationLayerFn,
 } from './types';
