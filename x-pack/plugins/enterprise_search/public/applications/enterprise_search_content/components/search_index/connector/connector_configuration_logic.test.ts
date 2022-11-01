@@ -9,7 +9,7 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea
 import { connectorIndex } from '../../../__mocks__/view_index.mock';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
-import { FetchIndexApiWrapperLogic } from '../../../api/index/fetch_index_wrapper_logic';
+import { CachedFetchIndexApiLogic } from '../../../api/index/fetch_index_wrapper_logic';
 
 import { IndexNameLogic } from '../index_name_logic';
 import { IndexViewLogic } from '../index_view_logic';
@@ -28,7 +28,7 @@ const DEFAULT_VALUES = {
 describe('ConnectorConfigurationLogic', () => {
   const { mount } = new LogicMounter(ConnectorConfigurationLogic);
   const { mount: mountIndexNameLogic } = new LogicMounter(IndexNameLogic);
-  const { mount: mountFetchIndexApiWrapperLogic } = new LogicMounter(FetchIndexApiWrapperLogic);
+  const { mount: mountFetchIndexApiWrapperLogic } = new LogicMounter(CachedFetchIndexApiLogic);
   const { mount: mountIndexViewLogic } = new LogicMounter(IndexViewLogic);
   const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 

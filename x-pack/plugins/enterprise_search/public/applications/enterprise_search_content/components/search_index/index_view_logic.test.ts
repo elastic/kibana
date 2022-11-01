@@ -14,7 +14,7 @@ import { HttpError, Status } from '../../../../../common/types/api';
 
 import { SyncStatus } from '../../../../../common/types/connectors';
 import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
-import { FetchIndexApiWrapperLogic } from '../../api/index/fetch_index_wrapper_logic';
+import { CachedFetchIndexApiLogic } from '../../api/index/fetch_index_wrapper_logic';
 
 import { IngestionMethod, IngestionStatus } from '../../types';
 
@@ -53,7 +53,7 @@ const CONNECTOR_VALUES = {
 
 describe('IndexViewLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(StartSyncApiLogic);
-  const { mount: fetchIndexMount } = new LogicMounter(FetchIndexApiWrapperLogic);
+  const { mount: fetchIndexMount } = new LogicMounter(CachedFetchIndexApiLogic);
   const indexNameLogic = new LogicMounter(IndexNameLogic);
   const { mount } = new LogicMounter(IndexViewLogic);
   const { flashSuccessToast } = mockFlashMessageHelpers;
@@ -78,7 +78,7 @@ describe('IndexViewLogic', () => {
       });
 
       it('should update values', () => {
-        FetchIndexApiWrapperLogic.actions.apiSuccess({
+        CachedFetchIndexApiLogic.actions.apiSuccess({
           ...connectorIndex,
           connector: { ...connectorIndex.connector!, sync_now: true },
         });
@@ -104,7 +104,7 @@ describe('IndexViewLogic', () => {
       });
 
       it('should update values with no connector', () => {
-        FetchIndexApiWrapperLogic.actions.apiSuccess(apiIndex);
+        CachedFetchIndexApiLogic.actions.apiSuccess(apiIndex);
 
         expect(IndexViewLogic.values).toEqual(
           expect.objectContaining({
@@ -120,7 +120,7 @@ describe('IndexViewLogic', () => {
       it('should call createNewFetchIndexTimeout', () => {
         IndexViewLogic.actions.fetchCrawlerData = jest.fn();
         IndexNameLogic.actions.setIndexName('api');
-        FetchIndexApiWrapperLogic.actions.apiSuccess(apiIndex);
+        CachedFetchIndexApiLogic.actions.apiSuccess(apiIndex);
 
         expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
         expect(IndexViewLogic.actions.fetchCrawlerData).not.toHaveBeenCalled();
@@ -128,7 +128,7 @@ describe('IndexViewLogic', () => {
       it('should call fetchCrawler if index is a crawler ', () => {
         IndexViewLogic.actions.fetchCrawlerData = jest.fn();
         IndexNameLogic.actions.setIndexName('crawler');
-        FetchIndexApiWrapperLogic.actions.apiSuccess(crawlerIndex);
+        CachedFetchIndexApiLogic.actions.apiSuccess(crawlerIndex);
 
         expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
         expect(IndexViewLogic.actions.fetchCrawlerData).toHaveBeenCalled();
@@ -136,7 +136,7 @@ describe('IndexViewLogic', () => {
       it('should not call fetchCrawler if index is a crawler but indexName does not match', () => {
         IndexViewLogic.actions.fetchCrawlerData = jest.fn();
         IndexNameLogic.actions.setIndexName('api');
-        FetchIndexApiWrapperLogic.actions.apiSuccess(crawlerIndex);
+        CachedFetchIndexApiLogic.actions.apiSuccess(crawlerIndex);
 
         expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
         expect(IndexViewLogic.actions.fetchCrawlerData).not.toHaveBeenCalled();
@@ -145,7 +145,7 @@ describe('IndexViewLogic', () => {
         IndexViewLogic.actions.resetRecheckIndexLoading = jest.fn();
         IndexNameLogic.actions.setIndexName('api');
         IndexViewLogic.actions.recheckIndex();
-        FetchIndexApiWrapperLogic.actions.apiSuccess(apiIndex);
+        CachedFetchIndexApiLogic.actions.apiSuccess(apiIndex);
 
         expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
         expect(flashSuccessToast).toHaveBeenCalled();
@@ -158,7 +158,7 @@ describe('IndexViewLogic', () => {
       });
 
       it('should call createNewFetchIndexTimeout', () => {
-        FetchIndexApiWrapperLogic.actions.apiError({} as HttpError);
+        CachedFetchIndexApiLogic.actions.apiError({} as HttpError);
 
         expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
       });
@@ -169,7 +169,7 @@ describe('IndexViewLogic', () => {
         // TODO: replace with mounting connectorIndex to FetchIndexApiDirectly to avoid
         // needing to mock out actions unrelated to test called by listeners
         IndexViewLogic.actions.createNewFetchIndexTimeout = jest.fn();
-        FetchIndexApiWrapperLogic.actions.apiSuccess(connectorIndex);
+        CachedFetchIndexApiLogic.actions.apiSuccess(connectorIndex);
         IndexViewLogic.actions.makeStartSyncRequest = jest.fn();
 
         IndexViewLogic.actions.startSync();

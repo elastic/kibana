@@ -23,8 +23,8 @@ import {
 } from '../../../../api/connector/update_connector_name_and_description_api_logic';
 import { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
 import {
-  FetchIndexApiWrapperLogic,
-  FetchIndexApiWrapperLogicActions,
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicActions,
 } from '../../../../api/index/fetch_index_wrapper_logic';
 import { isConnectorIndex } from '../../../../utils/indices';
 
@@ -34,7 +34,7 @@ type ConnectorNameAndDescriptionActions = Pick<
   Actions<PutConnectorNameAndDescriptionArgs, PutConnectorNameAndDescriptionResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
-  fetchIndexApiSuccess: FetchIndexApiWrapperLogicActions['apiSuccess'];
+  fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
   saveNameAndDescription: () => void;
   setIsEditing(isEditing: boolean): { isEditing: boolean };
   setLocalNameAndDescription(nameAndDescription: NameAndDescription): NameAndDescription;
@@ -65,10 +65,10 @@ export const ConnectorNameAndDescriptionLogic = kea<
     actions: [
       ConnectorNameAndDescriptionApiLogic,
       ['apiError', 'apiSuccess', 'makeRequest'],
-      FetchIndexApiWrapperLogic,
+      CachedFetchIndexApiLogic,
       ['apiSuccess as fetchIndexApiSuccess'],
     ],
-    values: [FetchIndexApiWrapperLogic, ['indexData as index']],
+    values: [CachedFetchIndexApiLogic, ['indexData as index']],
   },
   events: ({ actions, values }) => ({
     afterMount: () =>
@@ -83,7 +83,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
           { defaultMessage: 'Configuration successfully updated' }
         )
       );
-      FetchIndexApiWrapperLogic.actions.makeRequest({ indexName });
+      CachedFetchIndexApiLogic.actions.makeRequest({ indexName });
     },
     fetchIndexApiSuccess: (index) => {
       if (!values.isEditing && isConnectorIndex(index)) {

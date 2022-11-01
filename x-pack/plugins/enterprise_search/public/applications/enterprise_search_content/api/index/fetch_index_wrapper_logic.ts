@@ -26,13 +26,13 @@ import {
 // TODO add error
 //
 
-export interface FetchIndexApiWrapperLogicActions {
+export interface CachedFetchIndexApiLogicActions {
   apiError: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiError'];
   apiReset: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiReset'];
   apiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
   makeRequest: Actions<FetchIndexApiParams, FetchIndexApiResponse>['makeRequest']; // TODO poll/ initial load
 }
-export interface FetchIndexApiWrapperLogicValues {
+export interface CachedFetchIndexApiLogicValues {
   fetchIndexApiData: FetchIndexApiResponse;
   indexData: ElasticsearchIndexWithIngestion | null;
   isInitialLoading: boolean;
@@ -40,8 +40,8 @@ export interface FetchIndexApiWrapperLogicValues {
   status: Status;
 }
 
-export const FetchIndexApiWrapperLogic = kea<
-  MakeLogicType<FetchIndexApiWrapperLogicValues, FetchIndexApiWrapperLogicActions>
+export const CachedFetchIndexApiLogic = kea<
+  MakeLogicType<CachedFetchIndexApiLogicValues, CachedFetchIndexApiLogicActions>
 >({
   connect: {
     actions: [FetchIndexApiLogic, ['apiSuccess', 'apiError', 'apiReset', 'makeRequest']],
@@ -62,8 +62,8 @@ export const FetchIndexApiWrapperLogic = kea<
     isInitialLoading: [
       () => [selectors.status, selectors.indexData],
       (
-        status: FetchIndexApiWrapperLogicValues['status'],
-        indexData: FetchIndexApiWrapperLogicValues['indexData']
+        status: CachedFetchIndexApiLogicValues['status'],
+        indexData: CachedFetchIndexApiLogicValues['indexData']
       ) => {
         return status === Status.IDLE || (indexData === null && status === Status.LOADING);
       },

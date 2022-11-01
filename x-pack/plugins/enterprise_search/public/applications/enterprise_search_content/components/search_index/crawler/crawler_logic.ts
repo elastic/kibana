@@ -24,8 +24,8 @@ import {
 } from '../../../api/crawler/types';
 
 import {
-  FetchIndexApiWrapperLogic,
-  FetchIndexApiWrapperLogicActions,
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicActions,
 } from '../../../api/index/fetch_index_wrapper_logic';
 
 import { isCrawlerIndex } from '../../../utils/indices';
@@ -59,7 +59,7 @@ export type CrawlerActions = Pick<
 > & {
   createNewTimeoutForCrawlerData(duration: number): { duration: number };
   fetchCrawlerData(): void;
-  makeFetchIndexRequest: FetchIndexApiWrapperLogicActions['makeRequest'];
+  makeFetchIndexRequest: CachedFetchIndexApiLogicActions['makeRequest'];
   makeStartSyncRequest: StartSyncApiValues['makeRequest'];
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   reApplyCrawlRules(domain?: CrawlerDomain): { domain?: CrawlerDomain };
@@ -80,10 +80,10 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       ['apiError', 'apiSuccess'],
       StartSyncApiLogic,
       ['makeRequest as makeStartSyncRequest'],
-      FetchIndexApiWrapperLogic,
+      CachedFetchIndexApiLogic,
       ['makeRequest as makeFetchIndexRequest'],
     ],
-    values: [GetCrawlerApiLogic, ['status', 'data'], FetchIndexApiWrapperLogic, ['indexData']],
+    values: [GetCrawlerApiLogic, ['status', 'data'], CachedFetchIndexApiLogic, ['indexData']],
   },
   listeners: ({ actions, values }) => ({
     apiError: (error) => {

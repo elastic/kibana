@@ -22,8 +22,8 @@ import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 import {
-  FetchIndexApiWrapperLogic,
-  FetchIndexApiWrapperLogicValues,
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicValues,
 } from '../../../../api/index/fetch_index_wrapper_logic';
 import {
   GetMappingsArgs,
@@ -124,7 +124,7 @@ interface MLInferenceProcessorsValues {
   addInferencePipelineModal: AddInferencePipelineModal;
   createErrors: string[];
   formErrors: AddInferencePipelineFormErrors;
-  index: FetchIndexApiWrapperLogicValues['indexData'];
+  index: CachedFetchIndexApiLogicValues['indexData'];
   isLoading: boolean;
   isPipelineDataValid: boolean;
   mappingData: typeof MappingsApiLogic.values.data;
@@ -178,7 +178,7 @@ export const MLInferenceLogic = kea<
       ],
     ],
     values: [
-      FetchIndexApiWrapperLogic,
+      CachedFetchIndexApiLogic,
       ['indexData as index'],
       MappingsApiLogic,
       ['data as mappingData', 'status as mappingStatus'],

@@ -13,14 +13,14 @@ import { KibanaLogic } from '../../../shared/kibana';
 
 import { GenerateApiKeyLogic } from '../../api/generate_api_key/generate_api_key_logic';
 import {
-  FetchIndexApiWrapperLogic,
-  FetchIndexApiWrapperLogicActions,
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicActions,
 } from '../../api/index/fetch_index_wrapper_logic';
 
 import { SEARCH_INDICES_PATH } from '../../routes';
 
 interface OverviewLogicActions {
-  apiError: FetchIndexApiWrapperLogicActions['apiError'];
+  apiError: CachedFetchIndexApiLogicActions['apiError'];
   apiReset: typeof GenerateApiKeyLogic.actions.apiReset;
   closeGenerateModal: void;
   openGenerateModal: void;
@@ -32,13 +32,13 @@ interface OverviewLogicValues {
   apiKey: string;
   apiKeyData: typeof GenerateApiKeyLogic.values.data;
   apiKeyStatus: typeof GenerateApiKeyLogic.values.status;
-  indexData: typeof FetchIndexApiWrapperLogic.values.indexData;
+  indexData: typeof CachedFetchIndexApiLogic.values.indexData;
   isClientsPopoverOpen: boolean;
   isError: boolean;
   isGenerateModalOpen: boolean;
   isLoading: boolean;
   isManageKeysPopoverOpen: boolean;
-  status: typeof FetchIndexApiWrapperLogic.values.status;
+  status: typeof CachedFetchIndexApiLogic.values.status;
 }
 
 export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogicActions>>({
@@ -49,9 +49,9 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
     toggleManageApiKeyPopover: true,
   },
   connect: {
-    actions: [FetchIndexApiWrapperLogic, ['apiError'], GenerateApiKeyLogic, ['apiReset']],
+    actions: [CachedFetchIndexApiLogic, ['apiError'], GenerateApiKeyLogic, ['apiReset']],
     values: [
-      FetchIndexApiWrapperLogic,
+      CachedFetchIndexApiLogic,
       ['indexData', 'status'],
       GenerateApiKeyLogic,
       ['data as apiKeyData', 'status as apiKeyStatus'],

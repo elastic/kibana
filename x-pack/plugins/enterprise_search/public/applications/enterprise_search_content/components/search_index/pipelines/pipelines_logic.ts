@@ -43,9 +43,9 @@ import {
   FetchCustomPipelineApiLogic,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import {
-  FetchIndexApiWrapperLogic,
-  FetchIndexApiWrapperLogicValues,
-  FetchIndexApiWrapperLogicActions,
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicValues,
+  CachedFetchIndexApiLogicActions,
 } from '../../../api/index/fetch_index_wrapper_logic';
 import { CreateMlInferencePipelineApiLogic } from '../../../api/ml_models/create_ml_inference_pipeline';
 import {
@@ -96,7 +96,7 @@ type PipelinesActions = Pick<
   >['apiSuccess'];
   fetchDefaultPipeline: Actions<undefined, FetchDefaultPipelineResponse>['makeRequest'];
   fetchDefaultPipelineSuccess: Actions<undefined, FetchDefaultPipelineResponse>['apiSuccess'];
-  fetchIndexApiSuccess: FetchIndexApiWrapperLogicActions['apiSuccess'];
+  fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
   fetchMlInferenceProcessors: typeof FetchMlInferencePipelineProcessorsApiLogic.actions.makeRequest;
   fetchMlInferenceProcessorsApiError: (error: HttpError) => HttpError;
   openAddMlInferencePipelineModal: () => void;
@@ -114,7 +114,7 @@ interface PipelinesValues {
   defaultPipelineValues: IngestPipelineParams;
   defaultPipelineValuesData: IngestPipelineParams | null;
   hasIndexIngestionPipeline: boolean;
-  index: FetchIndexApiWrapperLogicValues['indexData'];
+  index: CachedFetchIndexApiLogicValues['indexData'];
   indexName: string;
   mlInferencePipelineProcessors: InferencePipeline[];
   pipelineName: string;
@@ -142,7 +142,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ],
       UpdatePipelineApiLogic,
       ['apiSuccess', 'apiError', 'makeRequest'],
-      FetchIndexApiWrapperLogic,
+      CachedFetchIndexApiLogic,
       ['apiSuccess as fetchIndexApiSuccess'],
       FetchDefaultPipelineApiLogic,
       ['apiSuccess as fetchDefaultPipelineSuccess', 'makeRequest as fetchDefaultPipeline'],
@@ -167,7 +167,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ['data as customPipelineData'],
       FetchDefaultPipelineApiLogic,
       ['data as defaultPipelineValuesData'],
-      FetchIndexApiWrapperLogic,
+      CachedFetchIndexApiLogic,
       ['indexData as index'],
       FetchMlInferencePipelineProcessorsApiLogic,
       ['data as mlInferencePipelineProcessors'],

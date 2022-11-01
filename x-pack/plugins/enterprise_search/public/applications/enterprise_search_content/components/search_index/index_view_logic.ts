@@ -25,8 +25,8 @@ import {
 
 import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
 import {
-  FetchIndexApiWrapperLogic,
-  FetchIndexApiWrapperLogicActions,
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicActions,
 } from '../../api/index/fetch_index_wrapper_logic';
 
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
@@ -53,11 +53,11 @@ export interface IndexViewActions {
   createNewFetchIndexTimeout(duration: number): { duration: number };
   fetchCrawlerData: () => void;
   fetchIndex: () => void;
-  fetchIndexApiSuccess: FetchIndexApiWrapperLogicActions['apiSuccess'];
-  makeFetchIndexRequest: FetchIndexApiWrapperLogicActions['makeRequest'];
+  fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
+  makeFetchIndexRequest: CachedFetchIndexApiLogicActions['makeRequest'];
   makeStartSyncRequest: StartSyncApiValues['makeRequest'];
   recheckIndex: () => void;
-  resetFetchIndexApi: FetchIndexApiWrapperLogicActions['apiReset'];
+  resetFetchIndexApi: CachedFetchIndexApiLogicActions['apiReset'];
   resetRecheckIndexLoading: () => void;
   setFetchIndexTimeoutId(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   startFetchIndexPoll(): void;
@@ -70,11 +70,11 @@ export interface IndexViewActions {
 export interface IndexViewValues {
   connector: Connector | undefined;
   connectorId: string | null;
-  fetchIndexApiData: typeof FetchIndexApiWrapperLogic.values.fetchIndexApiData;
+  fetchIndexApiData: typeof CachedFetchIndexApiLogic.values.fetchIndexApiData;
   fetchIndexApiStatus: Status;
   fetchIndexTimeoutId: NodeJS.Timeout | null;
   index: ElasticsearchViewIndex | undefined;
-  indexData: typeof FetchIndexApiWrapperLogic.values.indexData;
+  indexData: typeof CachedFetchIndexApiLogic.values.indexData;
   indexName: string;
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
@@ -86,7 +86,7 @@ export interface IndexViewValues {
   recheckIndexLoading: boolean;
   resetFetchIndexLoading: boolean;
   syncStatus: SyncStatus | null;
-  wrapperIsInitialLoad: typeof FetchIndexApiWrapperLogic.values.isInitialLoading;
+  wrapperIsInitialLoad: typeof CachedFetchIndexApiLogic.values.isInitialLoading;
 }
 
 export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewActions>>({
@@ -109,7 +109,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         'apiSuccess as startSyncApiSuccess',
         'makeRequest as makeStartSyncRequest',
       ],
-      FetchIndexApiWrapperLogic,
+      CachedFetchIndexApiLogic,
       [
         'apiError as fetchIndexApiError',
         'apiReset as resetFetchIndexApi',
@@ -124,7 +124,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     values: [
       IndexNameLogic,
       ['indexName'],
-      FetchIndexApiWrapperLogic,
+      CachedFetchIndexApiLogic,
       [
         'fetchIndexApiData',
         'status as fetchIndexApiStatus',

@@ -11,7 +11,7 @@ import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { UpdatePipelineApiLogic } from '../../../api/connector/update_pipeline_api_logic';
 import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
-import { FetchIndexApiWrapperLogic } from '../../../api/index/fetch_index_wrapper_logic';
+import { CachedFetchIndexApiLogic } from '../../../api/index/fetch_index_wrapper_logic';
 
 import { PipelinesLogic } from './pipelines_logic';
 
@@ -40,7 +40,7 @@ const DEFAULT_VALUES = {
 
 describe('PipelinesLogic', () => {
   const { mount } = new LogicMounter(PipelinesLogic);
-  const { mount: mountFetchIndexApiWrapperLogic } = new LogicMounter(FetchIndexApiWrapperLogic);
+  const { mount: mountFetchIndexApiWrapperLogic } = new LogicMounter(CachedFetchIndexApiLogic);
   const { mount: mountUpdatePipelineLogic } = new LogicMounter(UpdatePipelineApiLogic);
   const { mount: mountFetchCustomPipelineApiLogic } = new LogicMounter(FetchCustomPipelineApiLogic);
   const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
@@ -65,7 +65,7 @@ describe('PipelinesLogic', () => {
 
   describe('actions', () => {
     it('should set showModal to false and call fetchApiSuccess', async () => {
-      FetchIndexApiWrapperLogic.actions.apiSuccess(connectorIndex);
+      CachedFetchIndexApiLogic.actions.apiSuccess(connectorIndex);
       PipelinesLogic.actions.fetchIndexApiSuccess = jest.fn();
       PipelinesLogic.actions.setPipelineState(newPipeline);
       PipelinesLogic.actions.openModal();
