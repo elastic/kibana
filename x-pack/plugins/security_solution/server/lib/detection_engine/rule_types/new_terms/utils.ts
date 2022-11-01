@@ -126,7 +126,6 @@ export const getAggregationField = (newTermsFields: string[]): string => {
 };
 
 const decodeBucketKey = (bucketKey: string): string[] => {
-  // if newTermsFields has length greater than 1, bucketKey can't be number, so casting is safe here
   return bucketKey
     .split(DELIMITER)
     .map((encodedValue) => Buffer.from(encodedValue, 'base64').toString());
