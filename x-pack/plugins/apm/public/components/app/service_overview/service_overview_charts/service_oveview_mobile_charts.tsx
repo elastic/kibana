@@ -26,6 +26,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { MostUsedChart, MostUsedMetric } from './most_used_chart';
+import { MobileFilters } from './filters';
 
 interface Props {
   latencyChartHeight: number;
@@ -54,7 +55,17 @@ export function ServiceOverviewMobileCharts({
 
   const {
     query,
-    query: { environment, kuery, rangeFrom, rangeTo, transactionType },
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      netConnectionType,
+      device,
+      osVersion,
+      appVersion,
+      transactionType,
+    },
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -77,6 +88,20 @@ export function ServiceOverviewMobileCharts({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <MobileFilters
+          start={start}
+          end={end}
+          environment={environment}
+          kuery={kuery}
+          filters={{
+            device,
+            osVersion,
+            appVersion,
+            netConnectionType,
+          }}
+        />
+      </EuiFlexItem>
       {fallbackToTransactions && (
         <EuiFlexItem>
           <AggregatedTransactionsBadge />
