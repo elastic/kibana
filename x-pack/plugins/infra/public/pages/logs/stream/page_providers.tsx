@@ -16,7 +16,6 @@ import { LogHighlightsStateProvider } from '../../../containers/logs/log_highlig
 import {
   LogPositionStateProvider,
   useLogPositionStateContext,
-  WithLogPositionUrlState,
 } from '../../../containers/logs/log_position';
 import { LogStreamProvider, useLogStreamContext } from '../../../containers/logs/log_stream';
 import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_configuration';
@@ -55,18 +54,11 @@ const ViewLogInContext: React.FC = ({ children }) => {
 
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { logViewId } = useLogViewContext();
-  const { startTimestamp, endTimestamp, targetPosition, isInitialized } =
-    useLogPositionStateContext();
+  const { startTimestamp, endTimestamp, targetPosition } = useLogPositionStateContext();
   const { filterQuery } = useLogFilterStateContext();
 
   // Don't render anything if the date range is incorrect.
   if (!startTimestamp || !endTimestamp) {
-    return null;
-  }
-
-  // Don't initialize the entries until the position has been fully intialized.
-  // See `<WithLogPositionUrlState />`
-  if (!isInitialized) {
     return null;
   }
 
@@ -112,7 +104,6 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
     <LogViewConfigurationProvider>
       <LogEntryFlyoutProvider>
         <LogPositionStateProvider>
-          <WithLogPositionUrlState />
           <ViewLogInContext>
             <LogFilterState>
               <LogEntriesStateProvider>

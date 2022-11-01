@@ -65,7 +65,7 @@ export const LogsToolbar = () => {
             showQueryInput={true}
             showQueryMenu={false}
             showFilterBar={false}
-            showDatePicker={false}
+            showDatePicker={true}
           />
         </QueryBarFlexItem>
         <EuiFlexItem grow={false}>
