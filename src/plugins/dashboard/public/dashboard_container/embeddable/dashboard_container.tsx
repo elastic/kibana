@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import uuid from 'uuid';
 import ReactDOM from 'react-dom';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { cloneDeep } from 'lodash';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 
 import {
   lazyLoadReduxEmbeddablePackage,
@@ -18,12 +18,12 @@ import {
 import {
   ViewMode,
   Container,
-  type PanelState,
+  ErrorEmbeddable,
+  type Embeddable,
   type IEmbeddable,
   type EmbeddableInput,
   type EmbeddableOutput,
   type EmbeddableFactory,
-  ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
@@ -35,28 +35,37 @@ import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 
 import {
-  DashboardContainerByValueInput,
-  DashboardContainerInput,
-  DashboardPanelState,
-} from '../../../common';
+  runClone,
+  runSaveAs,
+  showOptions,
+  runQuickSave,
+  replacePanel,
+  addFromLibrary,
+  showPlaceholderUntil,
+  addOrUpdateEmbeddable,
+} from './api';
 import {
-  IPanelPlacementArgs,
-  PanelPlacementMethod,
-} from '../component/panel/dashboard_panel_placement';
-import { addFromLibrary, runClone, runQuickSave, runSaveAs, showOptions } from './dashboard_api';
+  DashboardPanelState,
+  DashboardContainerInput,
+  DashboardContainerByValueInput,
+} from '../../../common';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { createPanelState } from '../component/panel';
 import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
-import { PLACEHOLDER_EMBEDDABLE } from '../../placeholder_embeddable';
+import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardContainerOutput, DashboardReduxState } from '../types';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { DashboardSavedObjectService } from '../../services/dashboard_saved_object/types';
 import { dashboardContainerInputIsByValue } from '../../../common/dashboard_container/type_guards';
-import { dashboardStateLoadWasSuccessful } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
-import { DashboardCreationOptions } from './dashboard_container_factory';
+import {
+  syncDataViews,
+  getHasUnsavedChanges,
+  startDiffingDashboardState,
+  startUnifiedSearchIntegration,
+} from './integrations';
 
 export interface DashboardLoadedInfo {
   timeToData: number;
@@ -89,6 +98,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private subscriptions: Subscription = new Subscription();
 
   private initialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private initialSavedDashboardId?: string;
 
   private reduxEmbeddableTools?: ReduxEmbeddableTools<
     DashboardReduxState,
@@ -133,58 +143,91 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       },
     } = pluginServices.getServices());
 
+    this.initialSavedDashboardId = dashboardContainerInputIsByValue(this.input)
+      ? undefined
+      : this.input.savedObjectId;
     this.initializeDashboard(creationOptions);
+  }
+
+  public getDashboardSavedObjectId() {
+    if (this.initialized$.value) {
+      return this.getReduxEmbeddableTools().getState().componentState.lastSavedId;
+    }
+    return this.initialSavedDashboardId;
   }
 
   public getInputAsValueType = () => {
     if (!dashboardContainerInputIsByValue(this.input)) {
-      throw new Error('cannot get input as value type until after dahsboard input is unwrapped.');
+      throw new Error('cannot get input as value type until after dashboard input is unwrapped.');
     }
     return this.getInput() as DashboardContainerByValueInput;
   };
 
-  private async unwrapDashboardContainerInput(): Promise<DashboardContainerByValueInput> {
+  private async unwrapDashboardContainerInput(
+    creationOptions?: DashboardCreationOptions
+  ): Promise<DashboardContainerByValueInput | undefined> {
     if (dashboardContainerInputIsByValue(this.input)) {
       return this.input;
     }
-    try {
-      const unwrapResult = await this.dashboardSavedObjectService.loadDashboardStateFromSavedObject(
-        {
-          id: this.input.savedObjectId,
-        }
-      );
-      if (dashboardStateLoadWasSuccessful(unwrapResult)) {
-        return unwrapResult.dashboardInput;
-      }
-      throw new Error('Error loading dashboard state');
-    } catch (e) {
-      this.onFatalError(e);
-      return e;
+    const unwrapResult = await this.dashboardSavedObjectService.loadDashboardStateFromSavedObject({
+      id: this.input.savedObjectId,
+    });
+    if (
+      !creationOptions?.validateLoadedSavedObject ||
+      creationOptions.validateLoadedSavedObject(unwrapResult)
+    ) {
+      return unwrapResult.dashboardInput;
     }
   }
 
   private async initializeDashboard(creationOptions?: DashboardCreationOptions) {
-    const dashboardId = dashboardContainerInputIsByValue(this.input)
-      ? undefined
-      : this.input.savedObjectId;
-
     const reduxEmbeddablePackagePromise = lazyLoadReduxEmbeddablePackage();
-    const dashboardStateUnwrapPromise = this.unwrapDashboardContainerInput();
+    const dashboardStateUnwrapPromise = this.unwrapDashboardContainerInput(creationOptions);
 
     const [reduxEmbeddablePackage, inputFromSavedObject] = await Promise.all([
       reduxEmbeddablePackagePromise,
       dashboardStateUnwrapPromise,
     ]);
 
-    const incomingEmbeddable = creationOptions?.incomingEmbeddable;
+    // inputFromSavedObject will only be undefined if the provided valiation function returns false.
+    if (!inputFromSavedObject) {
+      this.destroy();
+      return;
+    }
 
-    // push by value input to embeddable input
-    const initialInput: DashboardContainerByValueInput = {
+    // Gather input from session storage if integration is used
+    let sessionStorageInput: Partial<DashboardContainerByValueInput> = {};
+    if (creationOptions?.backupStateToSessionStorage) {
+      const { dashboardSessionStorage } = pluginServices.getServices();
+      const sessionInput = dashboardSessionStorage.getState(this.initialSavedDashboardId);
+      if (sessionInput) sessionStorageInput = sessionInput;
+    }
+
+    // Combine input from saved object with override input.
+    const initialInput: DashboardContainerByValueInput = cloneDeep({
       ...inputFromSavedObject,
+      ...sessionStorageInput,
       ...creationOptions?.overrideInput,
-    };
+    });
+
+    // set up data views integration
+    this.dataViewsChangeSubscription = this.syncDataViews();
+
+    // set up unified search integration
+    if (creationOptions?.unifiedSearchSettings) {
+      const { kbnUrlStateStorage } = creationOptions.unifiedSearchSettings;
+      const initialTimeRange = this.startUnifiedSearchIntegration({
+        kbnUrlStateStorage,
+        initialInput,
+        setCleanupFunction: (cleanup) => {
+          this.stopSyncingWithUnifiedSearch = cleanup;
+        },
+      });
+      if (initialTimeRange) initialInput.timeRange = initialTimeRange;
+    }
 
     // deal with the incoming embeddable if there is one
+    const incomingEmbeddable = creationOptions?.incomingEmbeddable;
     if (incomingEmbeddable) {
       initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
       if (
@@ -199,24 +242,39 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       } else {
         // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
         this.untilInitialized().then(() =>
-          this.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input)
+          setTimeout(
+            () => this.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input),
+            1 // add embeddable on next update so that the state diff can pick it up.
+          )
         );
       }
     }
 
     // update input so the redux embeddable tools get the unwrapped, initial input
-    this.updateInput(initialInput);
+    this.updateInput({ ...initialInput });
+
+    // start diffing dashboard state
+    const { diffingMiddleware, initialUnsavedChanges } = await this.startDiffingDashboardState({
+      initialInput,
+      initialLastSavedInput: inputFromSavedObject,
+      useSessionBackup: creationOptions?.backupStateToSessionStorage,
+      setCleanupFunction: (cleanup) => {
+        this.stopDiffingDashboardState = cleanup;
+      },
+    });
 
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       DashboardReduxState,
       typeof dashboardContainerReducers
     >({
-      embeddable: this as IEmbeddable<DashboardContainerByValueInput, DashboardContainerOutput>, // cast to unwrapped state type
+      embeddable: this as Embeddable<DashboardContainerByValueInput, DashboardContainerOutput>, // cast to unwrapped state type
       reducers: dashboardContainerReducers,
+      additionalMiddleware: [diffingMiddleware],
       initialComponentState: {
-        lastSavedId: dashboardId,
         lastSavedInput: inputFromSavedObject,
+        hasUnsavedChanges: initialUnsavedChanges,
+        lastSavedId: this.initialSavedDashboardId,
       },
     });
 
@@ -260,6 +318,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     return newPanel;
   }
 
+  public async getExplicitInputIsEqual(lastExplicitInput: DashboardContainerByValueInput) {
+    return await this.getHasUnsavedChanges(lastExplicitInput);
+  }
+
   public getReduxEmbeddableTools() {
     if (!this.reduxEmbeddableTools) {
       throw new Error('Dashboard must be initialized before it can be rendered');
@@ -287,14 +349,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       </I18nProvider>,
       dom
     );
-  }
-
-  public destroy() {
-    super.destroy();
-    this.onDestroyControlGroup?.();
-    this.subscriptions.unsubscribe();
-    this.reduxEmbeddableTools?.cleanup();
-    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
@@ -334,16 +388,54 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     };
   }
 
+  public destroy() {
+    super.destroy();
+    this.onDestroyControlGroup?.();
+    this.subscriptions.unsubscribe();
+    this.stopDiffingDashboardState?.();
+    this.reduxEmbeddableTools?.cleanup();
+    this.stopSyncingWithUnifiedSearch?.();
+    this.dataViewsChangeSubscription?.unsubscribe();
+    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
+  }
+
+  // ------------------------------------------------------------------------------------------------------
+  // Integrations
+  // ------------------------------------------------------------------------------------------------------
+
+  /**
+   * Unified Search
+   */
+  private startUnifiedSearchIntegration = startUnifiedSearchIntegration;
+  private stopSyncingWithUnifiedSearch?: () => void;
+
+  /**
+   * Data Views
+   */
+  private syncDataViews = syncDataViews;
+  private dataViewsChangeSubscription?: Subscription = undefined;
+
+  /**
+   * Unsaved Changes
+   */
+  private getHasUnsavedChanges = getHasUnsavedChanges;
+  private startDiffingDashboardState = startDiffingDashboardState;
+  private stopDiffingDashboardState?: () => void;
+
   // ------------------------------------------------------------------------------------------------------
   // Dashboard API
   // ------------------------------------------------------------------------------------------------------
 
-  public showOptions = showOptions;
-  public addFromLibrary = addFromLibrary;
-
   public runClone = runClone;
   public runSaveAs = runSaveAs;
   public runQuickSave = runQuickSave;
+
+  public showOptions = showOptions;
+  public addFromLibrary = addFromLibrary;
+
+  public replacePanel = replacePanel;
+  public showPlaceholderUntil = showPlaceholderUntil;
+  public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
   public forceRefresh() {
     this.updateInput({
@@ -351,35 +443,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     });
   }
 
-  public updateViewMode = (newViewMode: ViewMode) => {
-    const {
-      dispatch,
-      actions: { setViewMode },
-    } = this.getReduxEmbeddableTools();
-    dispatch(setViewMode(newViewMode));
-  };
-
-  public getExpandedPanelId = () => {
-    if (!this.reduxEmbeddableTools) throw new Error();
-    return this.reduxEmbeddableTools.getState().componentState.expandedPanelId;
-  };
-
-  public openOverlay = (ref: OverlayRef) => {
-    this.overlayRef = ref;
-  };
-
-  public clearOverlays = () => {
-    this.overlayRef?.close();
-  };
-
-  public setExpandedPanelId = (newId?: string) => {
-    if (!this.reduxEmbeddableTools) throw new Error();
-    const {
-      actions: { setExpandedPanelId },
-      dispatch,
-    } = this.reduxEmbeddableTools;
-    dispatch(setExpandedPanelId(newId));
-  };
+  public onDataViewsUpdate$ = new Subject<DataView[]>();
 
   /**
    * Gets all the dataviews that are actively being used in the dashboard
@@ -395,6 +459,30 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
    */
   public setAllDataViews = (newDataViews: DataView[]) => {
     this.allDataViews = newDataViews;
+    this.onDataViewsUpdate$.next(newDataViews);
+  };
+
+  public getExpandedPanelId = () => {
+    if (!this.reduxEmbeddableTools) throw new Error();
+    return this.reduxEmbeddableTools.getState().componentState.expandedPanelId;
+  };
+
+  public openOverlay = (ref: OverlayRef) => {
+    this.clearOverlays();
+    this.overlayRef = ref;
+  };
+
+  public clearOverlays = () => {
+    this.overlayRef?.close();
+  };
+
+  public setExpandedPanelId = (newId?: string) => {
+    if (!this.reduxEmbeddableTools) throw new Error();
+    const {
+      actions: { setExpandedPanelId },
+      dispatch,
+    } = this.reduxEmbeddableTools;
+    dispatch(setExpandedPanelId(newId));
   };
 
   public getPanelCount = () => {
@@ -413,112 +501,5 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       }
     }
     return titles;
-  }
-
-  public async addOrUpdateEmbeddable<
-    EEI extends EmbeddableInput = EmbeddableInput,
-    EEO extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
-  >(type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
-    const idToReplace = embeddableId || explicitInput.id;
-    if (idToReplace && this.input.panels[idToReplace]) {
-      return this.replacePanel(this.input.panels[idToReplace], {
-        type,
-        explicitInput: {
-          ...explicitInput,
-          id: idToReplace,
-        },
-      });
-    }
-    return this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
-  }
-
-  public replacePanel(
-    previousPanelState: DashboardPanelState<EmbeddableInput>,
-    newPanelState: Partial<PanelState>,
-    generateNewId?: boolean
-  ) {
-    let panels;
-    if (generateNewId) {
-      // replace panel can be called with generateNewId in order to totally destroy and recreate the embeddable
-      panels = { ...this.input.panels };
-      delete panels[previousPanelState.explicitInput.id];
-      const newId = uuid.v4();
-      panels[newId] = {
-        ...previousPanelState,
-        ...newPanelState,
-        gridData: {
-          ...previousPanelState.gridData,
-          i: newId,
-        },
-        explicitInput: {
-          ...newPanelState.explicitInput,
-          id: newId,
-        },
-      };
-    } else {
-      // Because the embeddable type can change, we have to operate at the container level here
-      panels = {
-        ...this.input.panels,
-        [previousPanelState.explicitInput.id]: {
-          ...previousPanelState,
-          ...newPanelState,
-          gridData: {
-            ...previousPanelState.gridData,
-          },
-          explicitInput: {
-            ...newPanelState.explicitInput,
-            id: previousPanelState.explicitInput.id,
-          },
-        },
-      };
-    }
-
-    return this.updateInput({
-      panels,
-      lastReloadRequestTime: new Date().getTime(),
-    });
-  }
-
-  public showPlaceholderUntil<TPlacementMethodArgs extends IPanelPlacementArgs>(
-    newStateComplete: Promise<Partial<PanelState>>,
-    placementMethod?: PanelPlacementMethod<TPlacementMethodArgs>,
-    placementArgs?: TPlacementMethodArgs
-  ): void {
-    const originalPanelState = {
-      type: PLACEHOLDER_EMBEDDABLE,
-      explicitInput: {
-        id: uuid.v4(),
-        disabledActions: [
-          'ACTION_CUSTOMIZE_PANEL',
-          'CUSTOM_TIME_RANGE',
-          'clonePanel',
-          'replacePanel',
-          'togglePanel',
-        ],
-      },
-    } as PanelState<EmbeddableInput>;
-
-    const { otherPanels, newPanel: placeholderPanelState } = createPanelState(
-      originalPanelState,
-      this.input.panels,
-      placementMethod,
-      placementArgs
-    );
-
-    this.updateInput({
-      panels: {
-        ...otherPanels,
-        [placeholderPanelState.explicitInput.id]: placeholderPanelState,
-      },
-    });
-
-    // wait until the placeholder is ready, then replace it with new panel
-    // this is useful as sometimes panels can load faster than the placeholder one (i.e. by value embeddables)
-    this.untilEmbeddableLoaded(originalPanelState.explicitInput.id)
-      .then(() => newStateComplete)
-      .then((newPanelState: Partial<PanelState>) =>
-        this.replacePanel(placeholderPanelState, newPanelState)
-      );
   }
 }

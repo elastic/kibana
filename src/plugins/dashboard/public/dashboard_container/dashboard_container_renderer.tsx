@@ -9,8 +9,7 @@
 import './_dashboard_container.scss';
 
 import uuid from 'uuid';
-import useLifecycles from 'react-use/lib/useLifecycles';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -42,44 +41,49 @@ export const DashboardContainerRenderer = ({
   onDashboardContainerLoaded,
 }: DashboardContainerRendererProps) => {
   const dashboardRoot = useRef(null);
-  const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
 
   const id = useMemo(() => uuid.v4(), []);
 
-  /**
-   * Use Lifecycles to load initial dashboard container
-   */
-  useLifecycles(
-    () => {
-      const { embeddable } = pluginServices.getServices();
-      (async () => {
-        const creationOptions = await getCreationOptions?.();
-        const dashboardFactory = embeddable.getEmbeddableFactory(
-          DASHBOARD_CONTAINER_TYPE
-        ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
-        const container = (await dashboardFactory?.create(
-          {
-            id,
-            ...DEFAULT_DASHBOARD_INPUT,
-            ...getInitialInput?.(),
-          },
-          undefined,
-          creationOptions
-        )) as DashboardContainer;
+  useEffect(() => {
+    let canceled = false;
+    let destroyContainer: () => void;
 
-        await container.untilInitialized();
+    const { embeddable } = pluginServices.getServices();
+    (async () => {
+      const creationOptions = await getCreationOptions?.();
+      const dashboardFactory = embeddable.getEmbeddableFactory(
+        DASHBOARD_CONTAINER_TYPE
+      ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
+      const container = (await dashboardFactory?.create(
+        {
+          id,
+          ...DEFAULT_DASHBOARD_INPUT,
+          ...getInitialInput?.(),
+        },
+        undefined,
+        creationOptions
+      )) as DashboardContainer;
 
-        if (dashboardRoot.current) {
-          container.render(dashboardRoot.current);
-        }
-        setDashboardContainer(container);
-        onDashboardContainerLoaded?.(container);
-      })();
-    },
-    () => {
-      dashboardContainer?.destroy();
-    }
-  );
+      await container.untilInitialized();
+      if (canceled) {
+        container.destroy();
+        return;
+      }
+
+      if (dashboardRoot.current) {
+        container.render(dashboardRoot.current);
+      }
+      onDashboardContainerLoaded?.(container);
+
+      destroyContainer = () => container.destroy();
+    })();
+    return () => {
+      canceled = true;
+      destroyContainer?.();
+    };
+    // Disabling exhaustive deps because embeddable should only be created once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <div ref={dashboardRoot} />;
 };

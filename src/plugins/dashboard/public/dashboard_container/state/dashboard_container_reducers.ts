@@ -7,7 +7,7 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { DashboardReduxState, DashboardStateFromSaveModal } from '../types';
+import { DashboardPublicState, DashboardReduxState, DashboardStateFromSaveModal } from '../types';
 import { DashboardContainerByValueInput } from '../../../common';
 
 export const dashboardContainerReducers = {
@@ -74,6 +74,27 @@ export const dashboardContainerReducers = {
   },
 
   // ------------------------------------------------------------------------------
+  // Unsaved Changes Reducers
+  // ------------------------------------------------------------------------------
+  setHasUnsavedChanges: (
+    state: DashboardReduxState,
+    action: PayloadAction<DashboardPublicState['hasUnsavedChanges']>
+  ) => {
+    state.componentState.hasUnsavedChanges = action.payload;
+  },
+
+  setLastSavedInput: (
+    state: DashboardReduxState,
+    action: PayloadAction<DashboardPublicState['lastSavedInput']>
+  ) => {
+    state.componentState.lastSavedInput = action.payload;
+  },
+
+  resetToLastSavedInput: (state: DashboardReduxState) => {
+    state.explicitInput = state.componentState.lastSavedInput;
+  },
+
+  // ------------------------------------------------------------------------------
   // Options Reducers
   // ------------------------------------------------------------------------------
   setUseMargins: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
@@ -123,9 +144,9 @@ export const dashboardContainerReducers = {
 
   setSavedQueryId: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['savedQuery']>
+    action: PayloadAction<DashboardPublicState['savedQueryId']>
   ) => {
-    state.explicitInput.savedQuery = action.payload;
+    state.componentState.savedQueryId = action.payload;
   },
 
   setTimeRestore: (

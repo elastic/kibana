@@ -7,16 +7,18 @@
  */
 
 import {
+  AnyAction,
   configureStore,
   createSlice,
   Draft,
+  Middleware,
   PayloadAction,
   SliceCaseReducers,
 } from '@reduxjs/toolkit';
 import React, { ReactNode, PropsWithChildren } from 'react';
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { Embeddable } from '@kbn/embeddable-plugin/public';
 
 import {
   EmbeddableReducers,
@@ -36,12 +38,14 @@ export const createReduxEmbeddableTools = <
   reducers,
   embeddable,
   syncSettings,
+  additionalMiddleware,
   initialComponentState,
 }: {
-  embeddable: IEmbeddable<
+  embeddable: Embeddable<
     ReduxEmbeddableStateType['explicitInput'],
     ReduxEmbeddableStateType['output']
   >;
+  additionalMiddleware?: Array<Middleware<AnyAction>>;
   initialComponentState?: ReduxEmbeddableStateType['componentState'];
   syncSettings?: ReduxEmbeddableSyncSettings;
   reducers: ReducerType;
@@ -78,7 +82,10 @@ export const createReduxEmbeddableTools = <
     reducers: { ...reducers, ...genericReducers },
   });
 
-  const store = configureStore({ reducer: slice.reducer });
+  const store = configureStore({
+    reducer: slice.reducer,
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(...additionalMiddleware),
+  });
 
   // create the context which will wrap this embeddable's react components to allow access to update and read from the store.
   const context = {
@@ -122,6 +129,7 @@ export const createReduxEmbeddableTools = <
     actions: context.actions,
     dispatch: store.dispatch,
     getState: store.getState,
+    onStateChange: store.subscribe,
     cleanup: () => stopReduxEmbeddableSync?.(),
   };
 };

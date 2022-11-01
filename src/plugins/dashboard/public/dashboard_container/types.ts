@@ -27,6 +27,7 @@ export interface DashboardPublicState {
   hasUnsavedChanges?: boolean;
   expandedPanelId?: string;
   fullScreenMode?: boolean;
+  savedQueryId?: string;
   lastSavedId?: string;
 }
 

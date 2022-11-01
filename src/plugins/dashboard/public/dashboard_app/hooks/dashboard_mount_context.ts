@@ -10,7 +10,7 @@ import { createContext, useContext } from 'react';
 
 import { ScopedHistory } from '@kbn/core-application-browser';
 
-import { DashboardMountContextProps } from './types';
+import { DashboardMountContextProps } from '../types';
 
 export const DashboardMountContext = createContext<DashboardMountContextProps>({
   // default values for the dashboard mount context

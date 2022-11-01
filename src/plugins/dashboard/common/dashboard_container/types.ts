@@ -37,10 +37,9 @@ export type DashboardContainerInput =
 export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput & { panels: never };
 
 export interface DashboardContainerByValueInput extends EmbeddableInput {
-  // filter context
+  // filter context to be passed to children
   query: Query;
   filters: Filter[];
-  savedQuery?: string;
   timeRestore: boolean;
   timeRange?: TimeRange;
   timeslice?: [number, number];

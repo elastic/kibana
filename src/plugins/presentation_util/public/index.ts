@@ -48,6 +48,7 @@ export {
 export {
   useReduxEmbeddableContext,
   lazyLoadReduxEmbeddablePackage,
+  cleanFiltersForSerialize,
   type ReduxEmbeddableState,
   type ReduxEmbeddableTools,
   type ReduxEmbeddablePackage,

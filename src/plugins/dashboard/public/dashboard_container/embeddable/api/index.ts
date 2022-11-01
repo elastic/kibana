@@ -9,3 +9,4 @@
 export { showOptions } from './show_options_popover';
 export { addFromLibrary } from './add_panel_from_library';
 export { runSaveAs, runQuickSave, runClone } from './run_save_functions';
+export { addOrUpdateEmbeddable, replacePanel, showPlaceholderUntil } from './panel_management';

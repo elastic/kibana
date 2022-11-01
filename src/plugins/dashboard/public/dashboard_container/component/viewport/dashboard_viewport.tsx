@@ -23,23 +23,23 @@ export interface DashboardViewportProps {
   onDataLoaded?: (data: DashboardLoadedInfo) => void;
 }
 
-export const DashboardViewport = ({ onDataLoaded, container }: DashboardViewportProps) => {
+export const DashboardViewport = ({ onDataLoaded }: DashboardViewportProps) => {
   const { chrome } = pluginServices.getServices();
 
   const {
-    actions: { setFullScreenMode },
-    useEmbeddableSelector: select,
     useEmbeddableDispatch,
+    useEmbeddableSelector: select,
+    actions: { setFullScreenMode },
   } = useDashboardContainerContext();
   const dispatch = useEmbeddableDispatch();
 
   const panelCount = Object.keys(select((state) => state.explicitInput.panels)).length;
-  const isEditMode = select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
+
   const dashboardTitle = select((state) => state.explicitInput.title);
   const description = select((state) => state.explicitInput.description);
   const useMargins = select((state) => state.explicitInput.options.useMargins);
-
   const isFullScreenMode = select((state) => state.componentState.fullScreenMode);
+  const isEditMode = select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
 
   // TODO Is embedded externally
   return (
@@ -64,7 +64,7 @@ export const DashboardViewport = ({ onDataLoaded, container }: DashboardViewport
             <DashboardEmptyScreen isEditMode={isEditMode} />
           </div>
         )}
-        <DashboardGrid onDataLoaded={onDataLoaded} container={container} />
+        <DashboardGrid onDataLoaded={onDataLoaded} />
       </div>
     </>
   );

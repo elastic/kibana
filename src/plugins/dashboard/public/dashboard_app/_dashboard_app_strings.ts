@@ -81,6 +81,11 @@ export const getPanelAddedSuccessString = (savedObjectName: string) =>
     },
   });
 
+export const getDashboardURL404String = () =>
+  i18n.translate('dashboard.loadingError.dashboardNotFound', {
+    defaultMessage: 'The requested dashboard could not be found.',
+  });
+
 export const dashboardListingErrorStrings = {
   getDashboardLoadError: (message: string) =>
     i18n.translate('dashboard.loadingError.errorMessage', {

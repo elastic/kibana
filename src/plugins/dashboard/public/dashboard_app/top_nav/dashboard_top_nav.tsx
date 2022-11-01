@@ -9,9 +9,8 @@
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import type { OverlayRef } from '@kbn/core/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { SavedQuery } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { withSuspense, LazyLabsFlyout } from '@kbn/presentation-util-plugin/public';
 
@@ -23,20 +22,13 @@ import {
   leaveConfirmStrings,
 } from '../_dashboard_app_strings';
 import { UI_SETTINGS } from '../../../common';
-import { getFullEditPath } from '../../dashboard_constants';
+import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
 import { useDashboardMountContext } from '../dashboard_mount_context';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
-
-export interface DashboardTopNavState {
-  chromeIsVisible: boolean;
-  addPanelOverlay?: OverlayRef;
-  savedQuery?: SavedQuery;
-  isSaveInProgress?: boolean;
-}
 
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
@@ -47,6 +39,8 @@ const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 
 export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
+  const [isLabsShown, setIsLabsShown] = useState(false);
+
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   /**
@@ -84,9 +78,22 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
 
   const hasUnsavedChanges = select((state) => state.componentState.hasUnsavedChanges);
   const fullScreenMode = select((state) => state.componentState.fullScreenMode);
+  const savedQueryId = select((state) => state.componentState.savedQueryId);
   const lastSavedId = select((state) => state.componentState.lastSavedId);
   const viewMode = select((state) => state.explicitInput.viewMode);
+  const query = select((state) => state.explicitInput.query);
   const title = select((state) => state.explicitInput.title);
+
+  // store data views in state & subscribe to dashboard data view changes.
+  const [allDataViews, setAllDataViews] = useState<DataView[]>(
+    dashboardContainer.getAllDataViews()
+  );
+  useEffect(() => {
+    const subscription = dashboardContainer.onDataViewsUpdate$.subscribe((dataViews) =>
+      setAllDataViews(dataViews)
+    );
+    return () => subscription.unsubscribe();
+  }, [dashboardContainer]);
 
   const dashboardTitle = useMemo(() => {
     return getDashboardTitle(title, viewMode, !lastSavedId);
@@ -165,8 +172,11 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     };
   }, [onAppLeave, getStateTransfer, hasUnsavedChanges]);
 
-  const { viewModeTopNavConfig, editModeTopNavConfig, isLabsShown, setIsLabsShown } =
-    useDashboardMenuItems({ redirectTo });
+  const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
+    redirectTo,
+    isLabsShown,
+    setIsLabsShown,
+  });
 
   const getNavBarProps = (): TopNavMenuProps => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
@@ -197,19 +207,20 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         : undefined;
 
     return {
+      query,
       badges,
-      screenTitle: title,
+      savedQueryId,
       showSearchBar,
       showFilterBar,
       showSaveQuery,
       showQueryInput,
       showDatePicker,
-      appName: 'dashboard',
+      // savedQuery: query, // TODO Figure out saved query
+      screenTitle: title,
       useDefaultBehaviors: true,
+      appName: LEGACY_DASHBOARD_APP_ID,
       visible: viewMode !== ViewMode.PRINT,
-      // savedQuery: state.savedQuery, // TODO SAVED QUERY
-      // savedQueryId: dashboardState.savedQuery,
-      indexPatterns: dashboardContainer.getAllDataViews(),
+      indexPatterns: allDataViews,
       config: showTopNavMenu ? topNavConfig : undefined,
       setMenuMountPoint: embedSettings ? undefined : setHeaderActionMenu,
       className: fullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,

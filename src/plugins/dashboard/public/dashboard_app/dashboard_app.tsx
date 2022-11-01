@@ -12,13 +12,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardContainer } from '../dashboard_container';
+import { DASHBOARD_APP_ID } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
+import type { DashboardContainer } from '../dashboard_container';
 import { DashboardAppNoDataPage } from './dashboard_app_no_data';
-import { DashboardEmbedSettings, DashboardRedirect } from './types';
+import { type DashboardEmbedSettings, DashboardRedirect } from './types';
+import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
-import { DASHBOARD_APP_ID } from '../dashboard_constants';
+import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
+
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -48,6 +51,7 @@ export function DashboardApp({
     settings: { uiSettings },
     data: { search },
   } = pluginServices.getServices();
+
   const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
     DASHBOARD_APP_ID,
     true
@@ -81,6 +85,23 @@ export function DashboardApp({
     };
   }, [search.session]);
 
+  const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation({
+    history,
+    redirectTo,
+  });
+
+  // create settings to pass into the dashboard renderer
+  const creationOptions: DashboardCreationOptions = useMemo(() => {
+    return {
+      unifiedSearchSettings: {
+        kbnUrlStateStorage,
+      },
+      incomingEmbeddable,
+      backupStateToSessionStorage: true,
+      validateLoadedSavedObject: validateOutcome,
+    };
+  }, [incomingEmbeddable, kbnUrlStateStorage, validateOutcome]);
+
   return (
     <>
       {showNoDataPage && (
@@ -94,24 +115,20 @@ export function DashboardApp({
             </DashboardReduxWrapper>
           )}
 
-          {/* TODO CONFLICT WARNING {dashboardAppState.createConflictWarning?.()} */}
+          {getLegacyConflictWarning?.()}
           <div
             className={`dashboardViewport ${
               isScreenshotMode() ? 'dashboardViewport--screenshotMode' : ''
             }`}
           >
             <DashboardContainerRenderer
-              onDashboardContainerLoaded={(finishedContainer) =>
-                setDashboardContainer(finishedContainer)
-              }
+              onDashboardContainerLoaded={(finishedContainer) => {
+                setDashboardContainer(finishedContainer);
+              }}
               getInitialInput={() => {
                 return { savedObjectId: savedDashboardId };
               }}
-              getCreationOptions={async () => {
-                return {
-                  incomingEmbeddable,
-                };
-              }}
+              getCreationOptions={async () => creationOptions}
             />
           </div>
         </>

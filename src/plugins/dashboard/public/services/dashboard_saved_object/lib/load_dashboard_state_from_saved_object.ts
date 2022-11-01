@@ -7,28 +7,28 @@
  */
 import uuid from 'uuid';
 import { has } from 'lodash';
-import { ReactElement } from 'react';
 
+import {
+  ResolvedSimpleSavedObject,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+  ScopedHistory,
+} from '@kbn/core/public';
 import { Filter, Query } from '@kbn/es-query';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
 import { parseSearchSourceJSON, injectSearchSourceReferences } from '@kbn/data-plugin/public';
-import { SavedObjectAttributes, SavedObjectsClientContract, ScopedHistory } from '@kbn/core/public';
 
 import {
-  createDashboardEditUrl,
-  DASHBOARD_SAVED_OBJECT_TYPE,
-  DEFAULT_DASHBOARD_INPUT,
-} from '../../../dashboard_constants';
-import { DashboardSavedObjectRequiredServices } from '../types';
-import {
+  DashboardContainerByValueInput,
   convertSavedPanelsToPanelMap,
   DashboardAttributes,
-  DashboardContainerByValueInput,
   DashboardOptions,
   injectReferences,
 } from '../../../../common';
+import { DashboardSavedObjectRequiredServices } from '../types';
+import { DASHBOARD_SAVED_OBJECT_TYPE, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -46,27 +46,11 @@ export type LoadDashboardFromSavedObjectProps = DashboardSavedObjectRequiredServ
 };
 
 export interface LoadDashboardFromSavedObjectReturn {
-  redirectedToAlias?: boolean;
-  dashboardInput?: DashboardContainerByValueInput;
-  createConflictWarning?: () => ReactElement | undefined;
-}
-
-type SuccessfulLoadDashboardFromSavedObjectReturn = LoadDashboardFromSavedObjectReturn & {
+  dashboardFound: boolean;
+  dashboardId?: string;
+  resolveMeta?: Omit<ResolvedSimpleSavedObject, 'saved_object'>;
   dashboardInput: DashboardContainerByValueInput;
-};
-
-export const dashboardStateLoadWasSuccessful = (
-  incoming?: LoadDashboardFromSavedObjectReturn
-): incoming is SuccessfulLoadDashboardFromSavedObjectReturn => {
-  return Boolean(incoming && incoming?.dashboardInput && !incoming.redirectedToAlias);
-};
-
-const cleanFiltersForSerialize = (filters: Filter[]): Filter[] => {
-  return filters.map((filter) => {
-    if (filter.meta.value) delete filter.meta.value;
-    return filter;
-  });
-};
+}
 
 export const loadDashboardStateFromSavedObject = async ({
   savedObjectsTagging,
@@ -86,25 +70,23 @@ export const loadDashboardStateFromSavedObject = async ({
   const savedObjectId = id;
   const embeddableId = uuid.v4();
 
+  const newDashboardState = { ...DEFAULT_DASHBOARD_INPUT, id: embeddableId };
+
   /**
    * This is a newly created dashboard, so there is no saved object state to load.
    */
-  if (!savedObjectId) return { dashboardInput: { ...DEFAULT_DASHBOARD_INPUT, id: embeddableId } };
+  if (!savedObjectId) return { dashboardInput: newDashboardState, dashboardFound: true };
 
   /**
    * Load the saved object
    */
-  const {
-    outcome,
-    alias_purpose: aliasPurpose,
-    alias_target_id: aliasId,
-    saved_object: rawDashboardSavedObject,
-  } = await savedObjectsClient.resolve<DashboardAttributes>(
-    DASHBOARD_SAVED_OBJECT_TYPE,
-    savedObjectId
-  );
+  const { saved_object: rawDashboardSavedObject, ...resolveMeta } =
+    await savedObjectsClient.resolve<DashboardAttributes>(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      savedObjectId
+    );
   if (!rawDashboardSavedObject._version) {
-    throw new SavedObjectNotFound(DASHBOARD_SAVED_OBJECT_TYPE, savedObjectId);
+    return { dashboardInput: newDashboardState, dashboardFound: false, dashboardId: savedObjectId };
   }
 
   /**
@@ -120,33 +102,6 @@ export const loadDashboardStateFromSavedObject = async ({
       }
     ) as unknown as DashboardAttributes;
   })();
-
-  /**
-   * Handle saved object resolve alias outcome by redirecting
-   */
-  const scopedHistory = getScopedHistory?.();
-  if (scopedHistory && outcome === 'aliasMatch' && savedObjectId && aliasId) {
-    const path = scopedHistory.location.hash.replace(savedObjectId, aliasId);
-    if (screenshotMode.isScreenshotMode()) {
-      scopedHistory.replace(path);
-    } else {
-      await spaces.redirectLegacyUrl?.({ path, aliasPurpose });
-    }
-    return { redirectedToAlias: true };
-  }
-
-  /**
-   * Create conflict warning component if there is a saved object id conflict
-   */
-  const createConflictWarning =
-    scopedHistory && outcome === 'conflict' && aliasId
-      ? () =>
-          spaces.getLegacyUrlConflict?.({
-            currentObjectId: savedObjectId,
-            otherObjectId: aliasId,
-            otherObjectPath: `#${createDashboardEditUrl(aliasId)}${scopedHistory.location.search}`,
-          })
-      : undefined;
 
   /**
    * Create search source and pull filters and query from it.
@@ -197,7 +152,9 @@ export const loadDashboardStateFromSavedObject = async ({
   const panels = convertSavedPanelsToPanelMap(panelsJSON ? JSON.parse(panelsJSON) : []);
 
   return {
-    createConflictWarning,
+    resolveMeta,
+    dashboardFound: true,
+    dashboardId: savedObjectId,
     dashboardInput: {
       ...DEFAULT_DASHBOARD_INPUT,
 
@@ -206,11 +163,11 @@ export const loadDashboardStateFromSavedObject = async ({
       timeRestore,
       description,
       timeRange,
-      options,
       filters,
+      options,
       panels,
-      title,
       query,
+      title,
 
       viewMode: ViewMode.VIEW, // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags: savedObjectsTagging.getTagIdsFromReferences?.(references) ?? [],

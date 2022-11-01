@@ -6,22 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { batch } from 'react-redux';
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
+import { DashboardRedirect } from '../types';
 import { UI_SETTINGS } from '../../../common';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
-import { pluginServices } from '../../services/plugin_services';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
-import { DashboardRedirect } from '../types';
+import { pluginServices } from '../../services/plugin_services';
+import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { SaveDashboardReturn } from '../../services/dashboard_saved_object/types';
+import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
+import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 
-export const useDashboardMenuItems = ({ redirectTo }: { redirectTo: DashboardRedirect }) => {
+export const useDashboardMenuItems = ({
+  redirectTo,
+  isLabsShown,
+  setIsLabsShown,
+}: {
+  redirectTo: DashboardRedirect;
+  isLabsShown: boolean;
+  setIsLabsShown: Dispatch<SetStateAction<boolean>>;
+}) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
-  const [isLabsShown, setIsLabsShown] = useState(false);
 
   /**
    * Unpack dashboard services
@@ -40,7 +50,7 @@ export const useDashboardMenuItems = ({ redirectTo }: { redirectTo: DashboardRed
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
     embeddableInstance: dashboardContainer,
-    actions: { setViewMode, setFullScreenMode },
+    actions: { setViewMode, setFullScreenMode, resetToLastSavedInput },
   } = useDashboardContainerContext();
   const dispatch = useEmbeddableDispatch();
 
@@ -83,7 +93,9 @@ export const useDashboardMenuItems = ({ redirectTo }: { redirectTo: DashboardRed
    */
   const quickSaveDashboard = useCallback(() => {
     setIsSaveInProgress(true);
-    dashboardContainer.runQuickSave().then(() => setIsSaveInProgress(false));
+    dashboardContainer
+      .runQuickSave()
+      .then(() => setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE));
   }, [dashboardContainer]);
 
   /**
@@ -99,6 +111,23 @@ export const useDashboardMenuItems = ({ redirectTo }: { redirectTo: DashboardRed
   const clone = useCallback(() => {
     dashboardContainer.runClone().then((result) => maybeRedirect(result));
   }, [maybeRedirect, dashboardContainer]);
+
+  /**
+   * Returns to view mode. If the dashboard has unsaved changes shows a warning and resets to last saved state.
+   */
+  const returnToViewMode = useCallback(() => {
+    dashboardContainer.clearOverlays();
+    if (hasUnsavedChanges) {
+      confirmDiscardUnsavedChanges(() => {
+        batch(() => {
+          dispatch(resetToLastSavedInput({}));
+          dispatch(setViewMode(ViewMode.VIEW));
+        });
+      });
+      return;
+    }
+    dispatch(setViewMode(ViewMode.VIEW));
+  }, [dashboardContainer, dispatch, hasUnsavedChanges, resetToLastSavedInput, setViewMode]);
 
   /**
    * Register all of the top nav configs that can be used by dashboard.
@@ -156,7 +185,7 @@ export const useDashboardMenuItems = ({ redirectTo }: { redirectTo: DashboardRed
         id: 'cancel',
         disableButton: isSaveInProgress || !lastSavedId,
         testId: 'dashboardViewOnlyMode',
-        run: () => dispatch(setViewMode(ViewMode.VIEW)),
+        run: () => returnToViewMode(),
       } as TopNavMenuData,
 
       share: {
@@ -189,10 +218,12 @@ export const useDashboardMenuItems = ({ redirectTo }: { redirectTo: DashboardRed
     hasUnsavedChanges,
     setFullScreenMode,
     isSaveInProgress,
+    returnToViewMode,
     saveDashboardAs,
-    isLabsShown,
+    setIsLabsShown,
     lastSavedId,
     setViewMode,
+    isLabsShown,
     showShare,
     dispatch,
     clone,
@@ -220,5 +251,5 @@ export const useDashboardMenuItems = ({ redirectTo }: { redirectTo: DashboardRed
     return [...labsMenuItem, menuItems.options, ...shareMenuItem, ...editModeItems];
   }, [lastSavedId, menuItems, share, isLabsEnabled]);
 
-  return { viewModeTopNavConfig, editModeTopNavConfig, isLabsShown, setIsLabsShown };
+  return { viewModeTopNavConfig, editModeTopNavConfig };
 };

@@ -17,11 +17,12 @@ import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout
 import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
-import { DashboardGridItem } from './dashboard_grid_item';
 import { DashboardLoadedEventStatus } from '../../types';
-import { DashboardContainer, DashboardLoadedInfo } from '../../embeddable/dashboard_container';
-import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
+import { DashboardGridItem } from './dashboard_grid_item';
+import { DashboardLoadedInfo } from '../../embeddable/dashboard_container';
 import { useDashboardContainerContext } from '../../dashboard_container_renderer';
+import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
+import { getPanelLayoutsAreEqual } from '../../embeddable/integrations/diff_state/dashboard_diffing_utils';
 
 let lastValidGridSize = 0;
 
@@ -99,11 +100,6 @@ function ResponsiveGrid({
 const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
-export interface DashboardGridProps {
-  onDataLoaded?: (data: DashboardLoadedInfo) => void;
-  container: DashboardContainer;
-}
-
 interface PanelLayout extends Layout {
   i: string;
 }
@@ -124,12 +120,15 @@ const defaultPerformanceTracker: DashboardPerformanceTracker = {
   doneCount: 0,
 };
 
+export interface DashboardGridProps {
+  onDataLoaded?: (data: DashboardLoadedInfo) => void;
+}
+
 export const DashboardGrid = ({ onDataLoaded }: DashboardGridProps) => {
   const {
     actions: { setPanels },
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    embeddableInstance: dashboardContainer,
   } = useDashboardContainerContext();
   const dispatch = useEmbeddableDispatch();
 
@@ -193,7 +192,10 @@ export const DashboardGrid = ({ onDataLoaded }: DashboardGridProps) => {
         },
         {} as { [key: string]: DashboardPanelState }
       );
-      dispatch(setPanels(updatedPanels));
+      // onLayoutChange gets called by react grid layout a lot more than it should, so only dispatch the updated panels if the layout has actually changed
+      if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
+        dispatch(setPanels(updatedPanels));
+      }
     },
     [dispatch, panels, setPanels]
   );
@@ -218,7 +220,7 @@ export const DashboardGrid = ({ onDataLoaded }: DashboardGridProps) => {
         onPanelStatusChange={onPanelStatusChange}
       />
     ));
-  }, [dashboardContainer, expandedPanelId, panelsInOrder, onPanelStatusChange]);
+  }, [expandedPanelId, panelsInOrder, onPanelStatusChange]);
 
   // in print mode, dashboard layout is not controlled by React Grid Layout
   if (viewMode === ViewMode.PRINT) {

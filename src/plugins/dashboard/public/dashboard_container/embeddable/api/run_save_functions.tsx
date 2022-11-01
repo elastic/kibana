@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { batch } from 'react-redux';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
@@ -14,6 +15,7 @@ import { DashboardSaveModal } from './overlays/save_modal';
 import { DashboardContainer } from '../dashboard_container';
 import { showCloneModal } from './overlays/show_clone_modal';
 import { pluginServices } from '../../../services/plugin_services';
+import { DashboardContainerByValueInput } from '../../../../common';
 import { SaveDashboardReturn } from '../../../services/dashboard_saved_object/types';
 
 export function runSaveAs(this: DashboardContainer) {
@@ -31,7 +33,7 @@ export function runSaveAs(this: DashboardContainer) {
   const {
     getState,
     dispatch,
-    actions: { setStateFromSaveModal },
+    actions: { setStateFromSaveModal, setLastSavedInput },
   } = this.getReduxEmbeddableTools();
   const {
     explicitInput: currentState,
@@ -78,24 +80,22 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
+      const stateToSave: DashboardContainerByValueInput = {
+        ...currentState,
+        ...stateFromSaveModal,
+      };
       const saveResult = await saveDashboardStateToSavedObject({
+        currentState: stateToSave,
         saveOptions,
         lastSavedId,
-        currentState: { ...currentState, ...stateFromSaveModal },
       });
 
       stateFromSaveModal.lastSavedId = saveResult.id;
       if (saveResult.id) {
-        dispatch(setStateFromSaveModal(stateFromSaveModal));
-        // TODO: Build last saved state
-        // setTimeout(() => {
-        //   /**
-        //    * set timeout so dashboard state subject can update with the new title before updating the last saved state.
-        //    * TODO: Remove this timeout once the last saved state is also handled in Redux.
-        //    **/
-        //   dashboardAppState.updateLastSavedState?.();
-        //   docTitle.change(stateFromSaveModal.title);
-        // }, 1);
+        batch(() => {
+          dispatch(setStateFromSaveModal(stateFromSaveModal));
+          dispatch(setLastSavedInput(stateToSave));
+        });
       }
       resolve(saveResult);
       return saveResult;
@@ -125,7 +125,11 @@ export async function runQuickSave(this: DashboardContainer) {
     dashboardSavedObject: { saveDashboardStateToSavedObject },
   } = pluginServices.getServices();
 
-  const { getState } = this.getReduxEmbeddableTools();
+  const {
+    getState,
+    dispatch,
+    actions: { setLastSavedInput },
+  } = this.getReduxEmbeddableTools();
   const {
     explicitInput: currentState,
     componentState: { lastSavedId },
@@ -136,10 +140,7 @@ export async function runQuickSave(this: DashboardContainer) {
     currentState,
     saveOptions: {},
   });
-  // TODO: Build last saved state
-  // if (saveResult.id && !saveResult.redirected) {
-  //   dashboardAppState.updateLastSavedState?.();
-  // }
+  dispatch(setLastSavedInput(currentState));
 
   return saveResult;
 }

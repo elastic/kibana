@@ -17,17 +17,19 @@ import {
   EmbeddablePackageState,
 } from '@kbn/embeddable-plugin/public';
 
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
+import {
+  createInject,
+  createExtract,
+  DashboardContainerInput,
+  DashboardContainerByValueInput,
+} from '../../../common';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import type { DashboardContainer } from './dashboard_container';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
-import {
-  createExtract,
-  createInject,
-  DashboardContainerByValueInput,
-  DashboardContainerInput,
-} from '../../../common';
+import { LoadDashboardFromSavedObjectReturn } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -36,8 +38,11 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 
 export interface DashboardCreationOptions {
-  overrideInput?: Partial<DashboardContainerByValueInput>;
+  backupStateToSessionStorage?: boolean;
   incomingEmbeddable?: EmbeddablePackageState;
+  overrideInput?: Partial<DashboardContainerByValueInput>;
+  unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
+  validateLoadedSavedObject?: (result: LoadDashboardFromSavedObjectReturn) => boolean;
 }
 
 export class DashboardContainerFactoryDefinition
