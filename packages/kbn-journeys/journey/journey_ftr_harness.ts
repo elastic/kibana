@@ -38,7 +38,7 @@ export class JourneyFtrHarness {
     private readonly journeyConfig: JourneyConfig<any>
   ) {
     console.log("============================ BOO")
-    // this.screenshots = new JourneyScreenshots(this.journeyConfig.getName());
+    this.screenshots = new JourneyScreenshots(this.journeyConfig.getName());
   }
 
   private browser: ChromiumBrowser | undefined;
@@ -205,12 +205,12 @@ export class JourneyFtrHarness {
       return;
     }
 
-    // const [screenshot, fs] = await Promise.all([
-    //   this.page.screenshot(),
-    //   this.page.screenshot({ fullPage: true }),
-    // ]);
+    const [screenshot, fs] = await Promise.all([
+      this.page.screenshot(),
+      this.page.screenshot({ fullPage: true }),
+    ]);
 
-    // await this.screenshots.addSuccess(step, screenshot, fs);
+    await this.screenshots.addSuccess(step, screenshot, fs);
   }
 
   private async onStepError(step: AnyStep, err: Error) {
@@ -219,14 +219,14 @@ export class JourneyFtrHarness {
       this.currentTransaction = undefined;
     }
 
-    // if (this.page) {
-    //   const [screenshot, fs] = await Promise.all([
-    //     this.page.screenshot(),
-    //     this.page.screenshot({ fullPage: true }),
-    //   ]);
+    if (this.page) {
+      const [screenshot, fs] = await Promise.all([
+        this.page.screenshot(),
+        this.page.screenshot({ fullPage: true }),
+      ]);
 
-    //   await this.screenshots.addError(step, screenshot, fs);
-    // }
+      await this.screenshots.addError(step, screenshot, fs);
+    }
   }
 
   private async withSpan<T>(name: string, type: string | undefined, block: () => Promise<T>) {
