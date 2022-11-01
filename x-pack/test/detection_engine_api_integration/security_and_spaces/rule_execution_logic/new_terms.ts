@@ -322,7 +322,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
     });
 
-    it('should generate 1 alert for unique combination of terms, one if which is a number', async () => {
+    it('should generate 1 alert for unique combination of terms, one of which is a number', async () => {
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         index: ['new_terms'],
@@ -338,7 +338,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['user-0', '1']);
     });
 
-    it('should generate 1 alert for unique combination of terms, one if which is a boolean', async () => {
+    it('should generate 1 alert for unique combination of terms, one of which is a boolean', async () => {
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         index: ['new_terms'],
