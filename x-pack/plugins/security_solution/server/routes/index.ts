@@ -70,7 +70,6 @@ import {
   getRiskScoreIndexStatusRoute,
   installRiskScoresRoute,
   readPrebuiltDevToolContentRoute,
-  restartTransformRoute,
 } from '../lib/risk_score/routes';
 
 export const initRoutes = (

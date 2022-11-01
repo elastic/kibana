@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { RISK_SCORE_RESTART_TRANSFORMS } from '../../../../../common/constants';
 import {
   GET_TRANSFORM_STATE_ERROR_MESSAGE,
   GET_TRANSFORM_STATE_NOT_FOUND_MESSAGE,
-  RESTART_TRANSFORMS_ERROR_MESSAGE,
   START_TRANSFORMS_ERROR_MESSAGE,
   STOP_TRANSFORMS_ERROR_MESSAGE,
   TRANSFORM_CREATION_ERROR_MESSAGE,
@@ -22,8 +20,6 @@ import type {
   DeleteTransformsResult,
   GetTransformsState,
   GetTransformState,
-  RestartTransforms,
-  RestartTransformResult,
   StartTransforms,
   StartTransformsResult,
   StopTransforms,
