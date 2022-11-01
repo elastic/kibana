@@ -28,14 +28,20 @@ const containsWildcard = (roles: string[]) => roles.includes(NODE_WILDCARD_CHAR)
  */
 export interface InternalNodeServicePreboot {
   /**
-   * Retrieve the Kibana instance uuid.
+   * The Kibana process can take on specialised roles via the `node.roles` config.
+   *
+   * The roles can be used by plugins to adjust their behavior based
+   * on the way the Kibana process has been configured.
    */
   roles: NodeRoles;
 }
 
 export interface InternalNodeServiceStart {
   /**
-   * Retrieve the Kibana instance uuid.
+   * The Kibana process can take on specialised roles via the `node.roles` config.
+   *
+   * The roles can be used by plugins to adjust their behavior based
+   * on the way the Kibana process has been configured.
    */
   roles: NodeRoles;
 }
@@ -69,7 +75,7 @@ export class NodeService {
     };
   }
 
-  public async start(): Promise<InternalNodeServiceStart> {
+  public start(): InternalNodeServiceStart {
     if (this.roles == null) {
       throw new Error('NodeService#start() can only be called after NodeService#preboot()');
     }

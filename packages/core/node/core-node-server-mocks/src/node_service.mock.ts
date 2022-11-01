@@ -49,7 +49,7 @@ const createMock = () => {
     stop: jest.fn(),
   };
   mocked.preboot.mockResolvedValue(createInternalPrebootContractMock());
-  mocked.start.mockResolvedValue(createInternalStartContractMock());
+  mocked.start.mockReturnValue(createInternalStartContractMock());
   return mocked;
 };
 
