@@ -240,6 +240,10 @@ export interface FileJSON<Meta = unknown> {
    * See {@link FileStatus} for more details.
    */
   status: FileMetadata['Status'];
+  /**
+   * User data associated with this file
+   */
+  user?: FileMetadata['user'];
 }
 
 /**
