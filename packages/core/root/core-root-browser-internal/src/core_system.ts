@@ -122,7 +122,7 @@ export class CoreSystem {
     };
 
     this.i18n = new I18nService();
-    const contextClone: any = {}; 
+    const contextClone: any = {};
     Object.assign(contextClone, this.coreContext);
     contextClone.env.mode.dev = true;
     this.analytics = new AnalyticsService(contextClone);
