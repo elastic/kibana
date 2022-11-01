@@ -25,7 +25,6 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
 import { getBackupStep } from './backup_step';
-import { getUpgradeReadinessStep } from './upgrade_readiness_step';
 import { getFixIssuesStep } from './fix_issues_step';
 import { getUpgradeStep } from './upgrade_step';
 import { getMigrateSystemIndicesStep } from './migrate_system_indices';
@@ -118,10 +117,6 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               cloud,
               isComplete: isStepComplete('backup'),
               setIsComplete: setCompletedStep.bind(null, 'backup'),
-            }),
-            getUpgradeReadinessStep({
-              isComplete: isStepComplete('upgrade_readiness'),
-              setIsComplete: setCompletedStep.bind(null, 'upgrade_readiness'),
             }),
             getMigrateSystemIndicesStep({
               docLinks,

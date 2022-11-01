@@ -22,7 +22,7 @@ import { useAppContext } from '../../../app_context';
 
 const i18nTexts = {
   upgradeStepTitle: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
-    defaultMessage: 'Upgrade to the Elastic Stack',
+    defaultMessage: 'Upgrade the Elastic Stack',
   }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage:
