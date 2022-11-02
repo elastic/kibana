@@ -8,13 +8,13 @@
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMRouteHandlerResources } from '../../routes/typings';
 
-export interface MlSetup {
+export interface MlClient {
   mlSystem: any;
   anomalyDetectors: any;
   modules: any;
 }
 
-export async function getMlSetup({
+export async function getMlClient({
   plugins,
   context,
   request,
@@ -24,20 +24,23 @@ export async function getMlSetup({
     context.licensing,
   ]);
 
-  return plugins.ml && isActivePlatinumLicense(licensingContext.license)
-    ? {
-        mlSystem: plugins.ml.setup.mlSystemProvider(
-          request,
-          coreContext.savedObjects.client
-        ),
-        anomalyDetectors: plugins.ml.setup.anomalyDetectorsProvider(
-          request,
-          coreContext.savedObjects.client
-        ),
-        modules: plugins.ml.setup.modulesProvider(
-          request,
-          coreContext.savedObjects.client
-        ),
-      }
-    : undefined;
+  const mlplugin = plugins.ml;
+
+  if (!mlplugin || !isActivePlatinumLicense(licensingContext.license)) {
+    return;
+  }
+  return {
+    mlSystem: mlplugin.setup.mlSystemProvider(
+      request,
+      coreContext.savedObjects.client
+    ),
+    anomalyDetectors: mlplugin.setup.anomalyDetectorsProvider(
+      request,
+      coreContext.savedObjects.client
+    ),
+    modules: mlplugin.setup.modulesProvider(
+      request,
+      coreContext.savedObjects.client
+    ),
+  };
 }

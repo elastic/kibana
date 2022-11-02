@@ -13,16 +13,13 @@ import {
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function searchConfigurations({
   service,
   internalESClient,
-  indices,
 }: {
   service: AgentConfiguration['service'];
   internalESClient: APMInternalESClient;
-  indices: ApmIndicesConfig;
 }) {
   // In the following `constant_score` is being used to disable IDF calculation (where frequency of a term influences scoring).
   // Additionally a boost has been added to service.name to ensure it scores higher.
@@ -50,7 +47,7 @@ export async function searchConfigurations({
     : [];
 
   const params = {
-    index: indices.apmAgentConfigurationIndex,
+    index: internalESClient.apmIndices.apmAgentConfigurationIndex,
     body: {
       query: {
         bool: {

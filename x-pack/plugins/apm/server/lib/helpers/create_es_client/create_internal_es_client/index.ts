@@ -15,6 +15,7 @@ import {
   getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
+import { getApmIndices } from '../../../../routes/settings/apm_indices/get_apm_indices';
 
 export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
@@ -26,8 +27,13 @@ export async function createInternalESClient({
   context,
   debug,
   request,
-}: Pick<APMRouteHandlerResources, 'context' | 'request'> & { debug: boolean }) {
-  const { asInternalUser } = (await context.core).elasticsearch.client;
+  config,
+}: Pick<APMRouteHandlerResources, 'context' | 'request' | 'config'> & {
+  debug: boolean;
+}) {
+  const coreContext = await context.core;
+  const { asInternalUser } = coreContext.elasticsearch.client;
+  const savedObjectsClient = coreContext.savedObjects.client;
 
   function callEs<T extends { body: any }>(
     operationName: string,
@@ -62,6 +68,7 @@ export async function createInternalESClient({
   }
 
   return {
+    apmIndices: await getApmIndices({ savedObjectsClient, config }),
     search: async <
       TDocument = unknown,
       TSearchRequest extends ESSearchRequest = ESSearchRequest

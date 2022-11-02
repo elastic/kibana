@@ -11,17 +11,14 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 import { APMInternalESClient } from '../../../../lib/helpers/create_es_client/create_internal_es_client';
-import { ApmIndicesConfig } from '../../apm_indices/get_apm_indices';
 
 export async function getExistingEnvironmentsForService({
   serviceName,
   internalESClient,
-  indices,
   size,
 }: {
   serviceName: string | undefined;
   internalESClient: APMInternalESClient;
-  indices: ApmIndicesConfig;
   size: number;
 }) {
   const bool = serviceName
@@ -29,7 +26,7 @@ export async function getExistingEnvironmentsForService({
     : { must_not: [{ exists: { field: SERVICE_NAME } }] };
 
   const params = {
-    index: indices.apmAgentConfigurationIndex,
+    index: internalESClient.apmIndices.apmAgentConfigurationIndex,
     body: {
       size: 0,
       query: { bool },

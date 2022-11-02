@@ -39,14 +39,12 @@ describe('agent configuration queries', () => {
 
   describe('getExistingEnvironmentsForService', () => {
     it('fetches unavailable environments', async () => {
-      mock = await inspectSearchParams(
-        ({ mockIndices, mockInternalESClient }) =>
-          getExistingEnvironmentsForService({
-            serviceName: 'foo',
-            indices: mockIndices,
-            internalESClient: mockInternalESClient,
-            size: 50,
-          })
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
+        getExistingEnvironmentsForService({
+          serviceName: 'foo',
+          internalESClient: mockInternalESClient,
+          size: 50,
+        })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -55,12 +53,8 @@ describe('agent configuration queries', () => {
 
   describe('listConfigurations', () => {
     it('fetches configurations', async () => {
-      mock = await inspectSearchParams(
-        ({ mockIndices, mockInternalESClient }) =>
-          listConfigurations({
-            indices: mockIndices,
-            internalESClient: mockInternalESClient,
-          })
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
+        listConfigurations(mockInternalESClient)
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -69,31 +63,27 @@ describe('agent configuration queries', () => {
 
   describe('searchConfigurations', () => {
     it('fetches filtered configurations without an environment', async () => {
-      mock = await inspectSearchParams(
-        ({ mockIndices, mockInternalESClient }) =>
-          searchConfigurations({
-            service: {
-              name: 'foo',
-            },
-            indices: mockIndices,
-            internalESClient: mockInternalESClient,
-          })
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
+        searchConfigurations({
+          service: {
+            name: 'foo',
+          },
+          internalESClient: mockInternalESClient,
+        })
       );
 
       expect(mock.params).toMatchSnapshot();
     });
 
     it('fetches filtered configurations with an environment', async () => {
-      mock = await inspectSearchParams(
-        ({ mockIndices, mockInternalESClient }) =>
-          searchConfigurations({
-            service: {
-              name: 'foo',
-              environment: 'bar',
-            },
-            indices: mockIndices,
-            internalESClient: mockInternalESClient,
-          })
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
+        searchConfigurations({
+          service: {
+            name: 'foo',
+            environment: 'bar',
+          },
+          internalESClient: mockInternalESClient,
+        })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -102,39 +92,33 @@ describe('agent configuration queries', () => {
 
   describe('findExactConfiguration', () => {
     it('find configuration by service.name', async () => {
-      mock = await inspectSearchParams(
-        ({ mockIndices, mockInternalESClient }) =>
-          findExactConfiguration({
-            service: { name: 'foo' },
-            indices: mockIndices,
-            internalESClient: mockInternalESClient,
-          })
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
+        findExactConfiguration({
+          service: { name: 'foo' },
+          internalESClient: mockInternalESClient,
+        })
       );
 
       expect(mock.params).toMatchSnapshot();
     });
 
     it('find configuration by service.environment', async () => {
-      mock = await inspectSearchParams(
-        ({ mockIndices, mockInternalESClient }) =>
-          findExactConfiguration({
-            service: { environment: 'bar' },
-            indices: mockIndices,
-            internalESClient: mockInternalESClient,
-          })
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
+        findExactConfiguration({
+          service: { environment: 'bar' },
+          internalESClient: mockInternalESClient,
+        })
       );
 
       expect(mock.params).toMatchSnapshot();
     });
 
     it('find configuration by service.name and service.environment', async () => {
-      mock = await inspectSearchParams(
-        ({ mockIndices, mockInternalESClient }) =>
-          findExactConfiguration({
-            service: { name: 'foo', environment: 'bar' },
-            indices: mockIndices,
-            internalESClient: mockInternalESClient,
-          })
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
+        findExactConfiguration({
+          service: { name: 'foo', environment: 'bar' },
+          internalESClient: mockInternalESClient,
+        })
       );
 
       expect(mock.params).toMatchSnapshot();

@@ -18,7 +18,6 @@ import { deleteCustomLink } from './delete_custom_link';
 import { getTransaction } from './get_transaction';
 import { listCustomLinks } from './list_custom_links';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { getApmIndices } from '../apm_indices/get_apm_indices';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
@@ -61,27 +60,20 @@ const listCustomLinksRoute = createApmServerRoute({
     if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const savedObjectsClient = (await context.core).savedObjects.client;
 
     const { query } = params;
 
-    const [internalESClient, indices] = await Promise.all([
-      createInternalESClient({
-        context,
-        request,
-        debug: resources.params.query._inspect,
-      }),
-      getApmIndices({
-        savedObjectsClient,
-        config,
-      }),
-    ]);
+    const internalESClient = await createInternalESClient({
+      context,
+      request,
+      debug: resources.params.query._inspect,
+      config,
+    });
 
     // picks only the items listed in FILTER_OPTIONS
     const filters = pick(query, FILTER_OPTIONS);
     const customLinks = await listCustomLinks({
       internalESClient,
-      indices,
       filters,
     });
     return { customLinks };
@@ -101,18 +93,13 @@ const createCustomLinkRoute = createApmServerRoute({
     if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    const [internalESClient, indices] = await Promise.all([
-      createInternalESClient({
-        context,
-        request,
-        debug: resources.params.query._inspect,
-      }),
-      getApmIndices({
-        savedObjectsClient,
-        config,
-      }),
-    ]);
+
+    const internalESClient = await createInternalESClient({
+      context,
+      request,
+      debug: resources.params.query._inspect,
+      config,
+    });
     const customLink = params.body;
 
     notifyFeatureUsage({
@@ -120,7 +107,7 @@ const createCustomLinkRoute = createApmServerRoute({
       featureName: 'customLinks',
     });
 
-    await createOrUpdateCustomLink({ customLink, internalESClient, indices });
+    await createOrUpdateCustomLink({ customLink, internalESClient });
   },
 });
 
@@ -142,18 +129,13 @@ const updateCustomLinkRoute = createApmServerRoute({
     if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    const [internalESClient, indices] = await Promise.all([
-      createInternalESClient({
-        context,
-        request,
-        debug: resources.params.query._inspect,
-      }),
-      getApmIndices({
-        savedObjectsClient,
-        config,
-      }),
-    ]);
+
+    const internalESClient = await createInternalESClient({
+      context,
+      request,
+      debug: resources.params.query._inspect,
+      config,
+    });
 
     const { id } = params.path;
     const customLink = params.body;
@@ -162,7 +144,6 @@ const updateCustomLinkRoute = createApmServerRoute({
       customLinkId: id,
       customLink,
       internalESClient,
-      indices,
     });
   },
 });
@@ -184,23 +165,17 @@ const deleteCustomLinkRoute = createApmServerRoute({
     if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    const [internalESClient, indices] = await Promise.all([
-      createInternalESClient({
-        context,
-        request,
-        debug: resources.params.query._inspect,
-      }),
-      getApmIndices({
-        savedObjectsClient,
-        config,
-      }),
-    ]);
+
+    const internalESClient = await createInternalESClient({
+      context,
+      request,
+      debug: resources.params.query._inspect,
+      config,
+    });
     const { id } = params.path;
     const res = await deleteCustomLink({
       customLinkId: id,
       internalESClient,
-      indices,
     });
     return res;
   },

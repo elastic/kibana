@@ -19,7 +19,6 @@ import { AgentConfiguration } from '../../../common/agent_configuration/configur
 import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
 import { APMPluginStartDependencies } from '../../types';
 import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 
 export async function registerFleetPolicyCallbacks({
   plugins,
@@ -98,22 +97,16 @@ function registerPackagePolicyExternalCallback({
     if (packagePolicy.package?.name !== 'apm') {
       return packagePolicy;
     }
-    const { savedObjectsClient } = context as any;
 
-    const [internalESClient, indices] = await Promise.all([
-      createInternalESClient({
-        context: context as any,
-        debug: false,
-        request,
-      }),
-      getApmIndices({
-        savedObjectsClient,
-        config,
-      }),
-    ]);
+    const internalESClient = await createInternalESClient({
+      context: context as any,
+      debug: false,
+      request,
+      config,
+    });
+
     return await mergePackagePolicyWithApm({
       internalESClient,
-      indices,
       fleetPluginStart,
       packagePolicy,
     });

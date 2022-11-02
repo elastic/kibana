@@ -11,7 +11,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { getAnomalyDetectionJobs } from '../../../lib/anomaly_detection/get_anomaly_detection_jobs';
-import { MlSetup } from '../../../lib/helpers/get_ml_setup';
+import { MlClient } from '../../../lib/helpers/get_ml_setup';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
@@ -22,7 +22,7 @@ export async function updateToV3({
   esClient,
 }: {
   logger: Logger;
-  mlSetup?: MlSetup;
+  mlSetup?: MlClient;
   indices: ApmIndicesConfig;
   esClient: ElasticsearchClient;
 }) {

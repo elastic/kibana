@@ -13,7 +13,7 @@ import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map';
 import { notifyFeatureUsage } from '../../feature';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
-import { getMlSetup } from '../../lib/helpers/get_ml_setup';
+import { getMlClient } from '../../lib/helpers/get_ml_setup';
 import { getServiceMap } from './get_service_map';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
@@ -118,7 +118,7 @@ const serviceMapRoute = createApmServerRoute({
     } = await context.core;
     const [mlSetup, apmEventClient, serviceGroup, maxNumberOfServices] =
       await Promise.all([
-        getMlSetup(resources),
+        getMlClient(resources),
         getApmEventClient(resources),
         serviceGroupId
           ? getServiceGroup({

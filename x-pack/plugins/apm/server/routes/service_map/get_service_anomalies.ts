@@ -20,7 +20,7 @@ import {
 } from '../../../common/transaction_types';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
-import { MlSetup } from '../../lib/helpers/get_ml_setup';
+import { MlClient } from '../../lib/helpers/get_ml_setup';
 import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
 import { ApmMlDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
 
@@ -38,7 +38,7 @@ export async function getServiceAnomalies({
   start,
   end,
 }: {
-  mlSetup?: MlSetup;
+  mlSetup?: MlClient;
   environment: string;
   start: number;
   end: number;

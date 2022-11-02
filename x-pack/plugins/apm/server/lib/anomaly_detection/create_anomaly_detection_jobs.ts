@@ -19,7 +19,7 @@ import {
 import { Environment } from '../../../common/environment_rt';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { MlSetup } from '../helpers/get_ml_setup';
+import { MlClient } from '../helpers/get_ml_setup';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 import { ApmIndicesConfig } from '../../routes/settings/apm_indices/get_apm_indices';
@@ -30,7 +30,7 @@ export async function createAnomalyDetectionJobs({
   environments,
   logger,
 }: {
-  mlSetup?: MlSetup;
+  mlSetup?: MlClient;
   indices: ApmIndicesConfig;
   environments: Environment[];
   logger: Logger;
@@ -53,10 +53,10 @@ export async function createAnomalyDetectionJobs({
       `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
     );
 
-    const dataViewName = indices.metric;
+    const apmMetricIndex = indices.metric;
     const responses = await Promise.all(
       uniqueMlJobEnvs.map((environment) =>
-        createAnomalyDetectionJob({ mlSetup, environment, dataViewName })
+        createAnomalyDetectionJob({ mlSetup, environment, apmMetricIndex })
       )
     );
 
@@ -77,11 +77,11 @@ export async function createAnomalyDetectionJobs({
 async function createAnomalyDetectionJob({
   mlSetup,
   environment,
-  dataViewName,
+  apmMetricIndex,
 }: {
-  mlSetup: Required<MlSetup>;
+  mlSetup: Required<MlClient>;
   environment: string;
-  dataViewName: string;
+  apmMetricIndex: string;
 }) {
   return withApmSpan('create_anomaly_detection_job', async () => {
     const randomToken = uuid().substr(-4);
@@ -90,7 +90,7 @@ async function createAnomalyDetectionJob({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,
       prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
       groups: [APM_ML_JOB_GROUP],
-      indexPatternName: dataViewName,
+      indexPatternName: apmMetricIndex,
       applyToAllSpaces: true,
       start: moment().subtract(4, 'weeks').valueOf(),
       query: {
@@ -119,7 +119,7 @@ async function createAnomalyDetectionJob({
 }
 
 async function getUniqueMlJobEnvs(
-  mlSetup: MlSetup,
+  mlSetup: MlClient,
   environments: Environment[],
   logger: Logger
 ) {

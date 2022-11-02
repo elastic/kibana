@@ -21,7 +21,7 @@ import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/co
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getServiceInventorySearchSource } from '../../lib/helpers/get_service_inventory_search_source';
-import { getMlSetup } from '../../lib/helpers/get_ml_setup';
+import { getMlClient } from '../../lib/helpers/get_ml_setup';
 import { getServiceAnnotations } from './annotations';
 import { getServices } from './get_services';
 import { getServiceAgent } from './get_service_agent';
@@ -130,7 +130,7 @@ const servicesRoute = createApmServerRoute({
 
     const [mlSetup, apmEventClient, serviceGroup, randomSampler] =
       await Promise.all([
-        getMlSetup(resources),
+        getMlClient(resources),
         getApmEventClient(resources),
         serviceGroupId
           ? getServiceGroup({ savedObjectsClient, serviceGroupId })
@@ -1108,7 +1108,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
       import('./../../../common/anomaly_detection/service_anomaly_timeseries').ServiceAnomalyTimeseries
     >;
   }> => {
-    const mlSetup = await getMlSetup(resources);
+    const mlSetup = await getMlClient(resources);
 
     if (!mlSetup) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
@@ -1184,7 +1184,7 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
 
     const [mlSetup, apmEventClient, serviceGroup, maxNumberOfServices] =
       await Promise.all([
-        getMlSetup(resources),
+        getMlClient(resources),
         getApmEventClient(resources),
         serviceGroupId
           ? getServiceGroup({ savedObjectsClient, serviceGroupId })

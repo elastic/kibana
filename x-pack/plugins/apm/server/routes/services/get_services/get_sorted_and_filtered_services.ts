@@ -13,7 +13,7 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { Environment } from '../../../../common/environment_rt';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceGroup } from '../../../../common/service_groups';
-import { MlSetup } from '../../../lib/helpers/get_ml_setup';
+import { MlClient } from '../../../lib/helpers/get_ml_setup';
 import { getHealthStatuses } from './get_health_statuses';
 import { lookupServices } from '../../service_groups/lookup_services';
 
@@ -60,7 +60,7 @@ export async function getSortedAndFilteredServices({
   serviceGroup,
   maxNumberOfServices,
 }: {
-  mlSetup?: MlSetup;
+  mlSetup?: MlClient;
   apmEventClient: APMEventClient;
   start: number;
   end: number;

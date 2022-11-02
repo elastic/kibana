@@ -14,15 +14,12 @@ import {
 import { fromESFormat } from './helper';
 import { filterOptionsRt } from './custom_link_types';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function listCustomLinks({
   internalESClient,
-  indices,
   filters = {},
 }: {
   internalESClient: APMInternalESClient;
-  indices: ApmIndicesConfig;
   filters?: t.TypeOf<typeof filterOptionsRt>;
 }): Promise<CustomLink[]> {
   const esFilters = Object.entries(filters).map(([key, value]) => {
@@ -38,7 +35,7 @@ export async function listCustomLinks({
   });
 
   const params = {
-    index: indices.apmCustomLinkIndex,
+    index: internalESClient.apmIndices.apmCustomLinkIndex,
     size: 500,
     body: {
       query: {

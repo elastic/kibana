@@ -27,7 +27,6 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getLatestApmPackage } from './get_latest_apm_package';
 import { getJavaAgentVersionsFromRegistry } from './get_java_agent_versions';
 import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/has_apm_policies',
@@ -246,17 +245,12 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
     }
 
-    const [internalESClient, indices] = await Promise.all([
-      createInternalESClient({
-        context,
-        request,
-        debug: resources.params.query._inspect,
-      }),
-      getApmIndices({
-        savedObjectsClient,
-        config,
-      }),
-    ]);
+    const internalESClient = await createInternalESClient({
+      context,
+      request,
+      debug: resources.params.query._inspect,
+      config: resources.config,
+    });
 
     const cloudApmPackagePolicy = await createCloudApmPackgePolicy({
       cloudPluginSetup,
@@ -265,7 +259,6 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       esClient,
       logger,
       internalESClient,
-      indices,
       request,
     });
 

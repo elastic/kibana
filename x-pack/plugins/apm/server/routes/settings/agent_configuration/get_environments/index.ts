@@ -36,7 +36,6 @@ export async function getEnvironments({
       getExistingEnvironmentsForService({
         serviceName,
         internalESClient,
-        indices: apmEventClient.indices,
         size,
       }),
     ]);

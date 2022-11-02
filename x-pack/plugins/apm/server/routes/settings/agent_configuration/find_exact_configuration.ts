@@ -12,18 +12,15 @@ import {
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
 
 export async function findExactConfiguration({
   service,
   internalESClient,
-  indices,
 }: {
   service: AgentConfiguration['service'];
   internalESClient: APMInternalESClient;
-  indices: ApmIndicesConfig;
 }) {
   const serviceNameFilter = service.name
     ? { term: { [SERVICE_NAME]: service.name } }
@@ -34,7 +31,7 @@ export async function findExactConfiguration({
     : { bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] } };
 
   const params = {
-    index: indices.apmAgentConfigurationIndex,
+    index: internalESClient.apmIndices.apmAgentConfigurationIndex,
     body: {
       query: {
         bool: { filter: [serviceNameFilter, environmentFilter] },
@@ -47,7 +44,7 @@ export async function findExactConfiguration({
       'find_exact_agent_configuration',
       params
     ),
-    getConfigsAppliedToAgentsThroughFleet({ internalESClient, indices }),
+    getConfigsAppliedToAgentsThroughFleet(internalESClient),
   ]);
 
   const hit = agentConfig.hits.hits[0] as

@@ -10,12 +10,12 @@ import {
   getServiceHealthStatus,
   ServiceHealthStatus,
 } from '../../../../common/service_health_status';
-import { MlSetup } from '../../../lib/helpers/get_ml_setup';
+import { MlClient } from '../../../lib/helpers/get_ml_setup';
 import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
 
 interface AggregationParams {
   environment: string;
-  mlSetup?: MlSetup;
+  mlSetup?: MlClient;
   start: number;
   end: number;
 }

@@ -6,20 +6,17 @@
  */
 
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export function deleteCustomLink({
   customLinkId,
   internalESClient,
-  indices,
 }: {
   customLinkId: string;
   internalESClient: APMInternalESClient;
-  indices: ApmIndicesConfig;
 }) {
   const params = {
     refresh: 'wait_for' as const,
-    index: indices.apmCustomLinkIndex,
+    index: internalESClient.apmIndices.apmCustomLinkIndex,
     id: customLinkId,
   };
 

@@ -13,7 +13,7 @@ import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { ML_ERRORS } from '../../../../common/anomaly_detection';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
-import { getMlSetup } from '../../../lib/helpers/get_ml_setup';
+import { getMlClient } from '../../../lib/helpers/get_ml_setup';
 import { getAllEnvironments } from '../../environments/get_all_environments';
 import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { notifyFeatureUsage } from '../../../feature';
@@ -36,7 +36,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
     >;
     hasLegacyJobs: boolean;
   }> => {
-    const mlSetup = await getMlSetup(resources);
+    const mlSetup = await getMlClient(resources);
     const { context } = resources;
     const licensingContext = await context.licensing;
 
@@ -75,7 +75,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
     const coreContext = await context.core;
 
     const [mlSetup, indices] = await Promise.all([
-      getMlSetup(resources),
+      getMlClient(resources),
       getApmIndices({
         savedObjectsClient: coreContext.savedObjects.client,
         config,
@@ -144,7 +144,7 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
     const { config, context } = resources;
     const coreContext = await context.core;
     const [mlSetup, esClient, indices] = await Promise.all([
-      getMlSetup(resources),
+      getMlClient(resources),
       resources.core
         .start()
         .then(

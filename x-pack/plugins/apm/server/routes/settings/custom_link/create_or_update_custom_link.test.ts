@@ -14,13 +14,14 @@ import { APMInternalESClient } from '../../../lib/helpers/create_es_client/creat
 describe('Create or Update Custom link', () => {
   const internalClientIndexMock = jest.fn();
 
-  const mockInternalESClient = {
-    index: internalClientIndexMock,
-  } as unknown as APMInternalESClient;
-
   const mockIndices = {
     apmCustomLinkIndex: 'apmCustomLinkIndex',
   } as unknown as ApmIndicesConfig;
+
+  const mockInternalESClient = {
+    apmIndices: mockIndices,
+    index: internalClientIndexMock,
+  } as unknown as APMInternalESClient;
 
   const customLink = {
     label: 'foo',
@@ -41,7 +42,6 @@ describe('Create or Update Custom link', () => {
   it('creates a new custom link', () => {
     createOrUpdateCustomLink({
       customLink,
-      indices: mockIndices,
       internalESClient: mockInternalESClient,
     });
     expect(internalClientIndexMock).toHaveBeenCalledWith(
@@ -63,7 +63,6 @@ describe('Create or Update Custom link', () => {
     createOrUpdateCustomLink({
       customLinkId: 'bar',
       customLink,
-      indices: mockIndices,
       internalESClient: mockInternalESClient,
     });
     expect(internalClientIndexMock).toHaveBeenCalledWith(

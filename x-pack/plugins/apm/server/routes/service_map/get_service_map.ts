@@ -16,7 +16,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { MlSetup } from '../../lib/helpers/get_ml_setup';
+import { MlClient } from '../../lib/helpers/get_ml_setup';
 import {
   DEFAULT_ANOMALIES,
   getServiceAnomalies,
@@ -32,7 +32,7 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { APMConfig } from '../..';
 
 export interface IEnvOptions {
-  mlSetup?: MlSetup;
+  mlSetup?: MlClient;
   config: APMConfig;
   apmEventClient: APMEventClient;
   serviceNames?: string[];

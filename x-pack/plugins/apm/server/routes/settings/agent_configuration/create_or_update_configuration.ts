@@ -14,22 +14,19 @@ import {
   APMIndexDocumentParams,
   APMInternalESClient,
 } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export function createOrUpdateConfiguration({
   configurationId,
   configurationIntake,
   internalESClient,
-  indices,
 }: {
   configurationId?: string;
   configurationIntake: AgentConfigurationIntake;
   internalESClient: APMInternalESClient;
-  indices: ApmIndicesConfig;
 }) {
   const params: APMIndexDocumentParams<AgentConfiguration> = {
     refresh: true,
-    index: indices.apmAgentConfigurationIndex,
+    index: internalESClient.apmIndices.apmAgentConfigurationIndex,
     body: {
       agent_name: configurationIntake.agent_name,
       service: {

@@ -7,22 +7,19 @@
 
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 // We're not wrapping this function with a span as it is not blocking the request
 export async function markAppliedByAgent({
   id,
   body,
   internalESClient,
-  indices,
 }: {
   id: string;
   body: AgentConfiguration;
   internalESClient: APMInternalESClient;
-  indices: ApmIndicesConfig;
 }) {
   const params = {
-    index: indices.apmAgentConfigurationIndex,
+    index: internalESClient.apmIndices.apmAgentConfigurationIndex,
     id, // by specifying the `id` elasticsearch will do an "upsert"
     body: {
       ...body,
