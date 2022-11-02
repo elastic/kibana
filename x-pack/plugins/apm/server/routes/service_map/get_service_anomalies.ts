@@ -155,14 +155,14 @@ export async function getServiceAnomalies({
 
 export async function getMLJobs(
   anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
-  environment: string
+  environment?: string
 ) {
   const jobs = await getMlJobsWithAPMGroup(anomalyDetectors);
 
   // to filter out legacy jobs we are filtering by the existence of `apm_ml_version` in `custom_settings`
   // and checking that it is compatable.
   const mlJobs = jobs.filter((job) => job.version >= 2);
-  if (environment !== ENVIRONMENT_ALL.value) {
+  if (environment && environment !== ENVIRONMENT_ALL.value) {
     const matchingMLJob = mlJobs.find((job) => job.environment === environment);
     if (!matchingMLJob) {
       return [];
@@ -174,7 +174,7 @@ export async function getMLJobs(
 
 export async function getMLJobIds(
   anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
-  environment: string
+  environment?: string
 ) {
   const mlJobs = await getMLJobs(anomalyDetectors, environment);
   return mlJobs.map((job) => job.jobId);

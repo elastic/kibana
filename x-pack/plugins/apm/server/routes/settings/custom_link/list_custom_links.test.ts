@@ -19,11 +19,8 @@ describe('List Custom Links', () => {
   let mock: SearchParamsMock;
 
   it('fetches all custom links', async () => {
-    mock = await inspectSearchParams(({ mockIndices, mockInternalESClient }) =>
-      listCustomLinks({
-        indices: mockIndices,
-        internalESClient: mockInternalESClient,
-      })
+    mock = await inspectSearchParams(({ mockInternalESClient }) =>
+      listCustomLinks({ internalESClient: mockInternalESClient })
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -34,11 +31,10 @@ describe('List Custom Links', () => {
       [SERVICE_NAME]: 'foo',
       [TRANSACTION_NAME]: 'bar',
     };
-    mock = await inspectSearchParams(({ mockIndices, mockInternalESClient }) =>
+    mock = await inspectSearchParams(({ mockInternalESClient }) =>
       listCustomLinks({
         filters,
         internalESClient: mockInternalESClient,
-        indices: mockIndices,
       })
     );
 

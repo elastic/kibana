@@ -30,10 +30,7 @@ const environmentsRoute = createApmServerRoute({
     environments: Array<
       | 'ENVIRONMENT_NOT_DEFINED'
       | 'ENVIRONMENT_ALL'
-      | t.Branded<
-          string,
-          import('./../../../../../../node_modules/@types/kbn__io-ts-utils/index').NonEmptyStringBrand
-        >
+      | t.Branded<string, import('@kbn/io-ts-utils').NonEmptyStringBrand>
     >;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
