@@ -12,9 +12,10 @@
     "scripts/**/*",
     "server/**/*",
     "typings/**/*",
+    "jest.config.js",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json",
-    "server/**/*.json"
+    "server/**/*.json",
   ],
   "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
