@@ -16,6 +16,7 @@ interface ProcessAlertsOpts<
 > {
   alerts: Record<string, Alert<State, Context>>;
   existingAlerts: Record<string, Alert<State, Context>>;
+  previouslyRecoveredAlerts: Record<string, Alert<State, Context>>;
   hasReachedAlertLimit: boolean;
   alertLimit: number;
 }
@@ -38,6 +39,7 @@ export function processAlerts<
 >({
   alerts,
   existingAlerts,
+  previouslyRecoveredAlerts,
   hasReachedAlertLimit,
   alertLimit,
 }: ProcessAlertsOpts<State, Context>): ProcessAlertsResult<
@@ -48,7 +50,7 @@ export function processAlerts<
 > {
   return hasReachedAlertLimit
     ? processAlertsLimitReached(alerts, existingAlerts, alertLimit)
-    : processAlertsHelper(alerts, existingAlerts);
+    : processAlertsHelper(alerts, existingAlerts, previouslyRecoveredAlerts);
 }
 
 function processAlertsHelper<
@@ -58,9 +60,11 @@ function processAlertsHelper<
   RecoveryActionGroupId extends string
 >(
   alerts: Record<string, Alert<State, Context>>,
-  existingAlerts: Record<string, Alert<State, Context>>
+  existingAlerts: Record<string, Alert<State, Context>>,
+  previouslyRecoveredAlerts: Record<string, Alert<State, Context>>
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
+  const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts || {}));
 
   const currentTime = new Date().toISOString();
   const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
@@ -73,14 +77,21 @@ function processAlertsHelper<
       if (alerts[id].hasScheduledActions()) {
         activeAlerts[id] = alerts[id];
 
-        // if this alert did not exist in previous run, it is considered "new"
+        // if this alert was not active in the previous run, we need to inject start time into the alert state
         if (!existingAlertIds.has(id)) {
-          newAlerts[id] = alerts[id];
+          const state = alerts[id].getState();
+          alerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
 
-          // Inject start time into alert state for new alerts
-          const state = newAlerts[id].getState();
-          newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
-          newAlerts[id].updateFlappingHistory(false);
+          if (previouslyRecoveredAlertsIds.has(id)) {
+            // this alert has flapped from recovered to active
+            alerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
+            alerts[id].updateFlappingHistory(true);
+            previouslyRecoveredAlertsIds.delete(id);
+          } else {
+            // this alert was also not recovered in the previous run, it is considered "new"
+            newAlerts[id] = alerts[id];
+            newAlerts[id].updateFlappingHistory(false);
+          }
         } else {
           // this alert did exist in previous run
           // calculate duration to date for active alerts
@@ -94,8 +105,8 @@ function processAlertsHelper<
             ...(duration !== undefined ? { duration } : {}),
           });
 
-          const wasActive = existingAlerts[id].getLastScheduledActions()?.group !== 'recovered';
-          activeAlerts[id].updateFlappingHistory(!wasActive);
+          // this alert is still active
+          activeAlerts[id].updateFlappingHistory(false);
         }
       } else if (existingAlertIds.has(id)) {
         recoveredAlerts[id] = alerts[id];
@@ -110,12 +121,18 @@ function processAlertsHelper<
           ...(duration ? { duration } : {}),
           ...(state.start ? { end: currentTime } : {}),
         });
-
-        const wasActive = existingAlerts[id].getLastScheduledActions()?.group !== 'recovered';
-        recoveredAlerts[id].updateFlappingHistory(wasActive);
+        // this alert has flapped from active to recovered
+        recoveredAlerts[id].updateFlappingHistory(true);
       }
     }
   }
+
+  // alerts are still recovered
+  for (const id of previouslyRecoveredAlertsIds) {
+    recoveredAlerts[id] = previouslyRecoveredAlerts[id];
+    recoveredAlerts[id].updateFlappingHistory(false);
+  }
+
   return { recoveredAlerts, newAlerts, activeAlerts };
 }
 
@@ -159,6 +176,9 @@ function processAlertsLimitReached<
         ...(state.start ? { start: state.start } : {}),
         ...(duration !== undefined ? { duration } : {}),
       });
+
+      // this alert is still active
+      activeAlerts[id].updateFlappingHistory(false);
     }
   }
 
@@ -176,6 +196,8 @@ function processAlertsLimitReached<
     if (alerts.hasOwnProperty(id) && alerts[id].hasScheduledActions()) {
       // if this alert did not exist in previous run, it is considered "new"
       if (!existingAlertIds.has(id)) {
+        alerts[id].updateFlappingHistory(false);
+
         activeAlerts[id] = alerts[id];
         newAlerts[id] = alerts[id];
 

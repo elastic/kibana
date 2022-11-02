@@ -8,7 +8,12 @@
 import { Logger } from '@kbn/logging';
 import { keys } from 'lodash';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext, RawAlertInstance } from '../types';
+import {
+  AlertInstanceState,
+  AlertInstanceContext,
+  RawAlertInstance,
+  RawAlertRecoveredInstance,
+} from '../types';
 
 export function determineFlapping<
   State extends AlertInstanceState,
@@ -19,12 +24,17 @@ export function determineFlapping<
   logger: Logger,
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
-): Record<string, RawAlertInstance> {
+): {
+  alertsToReturn: Record<string, RawAlertInstance>;
+  recoveredAlertsToReturn: Record<string, RawAlertRecoveredInstance>;
+} {
   const alertsToReturn: Record<string, RawAlertInstance> = {};
+  const recoveredAlertsToReturn: Record<string, RawAlertRecoveredInstance> = {};
+
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
     if (alert.isFlapping()) {
-      logger.info(`Alert ${id} is flapping`);
+      logger.info(`Alert:${id} is flapping`);
     }
     alertsToReturn[id] = alert.toRaw();
   }
@@ -32,13 +42,11 @@ export function determineFlapping<
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
     if (alert.isFlapping()) {
-      logger.info(`Alert ${id} is flapping`);
-      alertsToReturn[id] = alert.toRaw();
-    }
-
-    if (!alert.flappingHistoryAtCapacity()) {
-      alertsToReturn[id] = alert.toRaw();
+      logger.info(`Alert:${id} is flapping`);
+      recoveredAlertsToReturn[id] = alert.toRawRecovered();
+    } else if (!alert.flappingHistoryAtCapacity()) {
+      recoveredAlertsToReturn[id] = alert.toRawRecovered();
     }
   }
-  return alertsToReturn;
+  return { alertsToReturn, recoveredAlertsToReturn };
 }

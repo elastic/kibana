@@ -36,3 +36,8 @@ export const rawAlertInstance = t.partial({
   flappingHistory: flappingHistorySchema,
 });
 export type RawAlertInstance = t.TypeOf<typeof rawAlertInstance>;
+
+export const rawAlertRecoveredInstance = t.partial({
+  flappingHistory: flappingHistorySchema,
+});
+export type RawAlertRecoveredInstance = t.TypeOf<typeof rawAlertRecoveredInstance>;

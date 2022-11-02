@@ -14,6 +14,7 @@ import {
   AlertInstanceContext,
   DefaultActionGroupId,
   AlertInstanceFlappingHistory,
+  RawAlertRecoveredInstance,
 } from '../../common';
 
 import { parseDuration } from '../lib';
@@ -175,8 +176,22 @@ export class Alert<
     return {
       state: this.state,
       meta: this.meta,
-      flappingHistory: this.flappingHistory,
+      flappingHistory: cloneDeep(this.flappingHistory),
     };
+  }
+
+  toRawRecovered(): RawAlertRecoveredInstance {
+    return {
+      flappingHistory: cloneDeep(this.flappingHistory),
+    };
+  }
+
+  setFlappingHistory(fh: boolean[]) {
+    this.flappingHistory = cloneDeep(fh);
+  }
+
+  getFlappingHistory() {
+    return cloneDeep(this.flappingHistory);
   }
 
   updateFlappingHistory(state: boolean) {
@@ -195,6 +210,6 @@ export class Alert<
   }
 
   flappingHistoryAtCapacity(): boolean {
-    return this.flappingHistory.length === 20;
+    return this.flappingHistory.length >= 20;
   }
 }

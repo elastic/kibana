@@ -273,6 +273,7 @@ export class TaskRunner<
       params: { alertId: ruleId, spaceId },
       state: {
         alertInstances: alertRawInstances = {},
+        alertRecoveredInstances: alertRecoveredRawInstances = {},
         alertTypeState: ruleTypeState = {},
         previousStartedAt,
       },
@@ -306,11 +307,18 @@ export class TaskRunner<
       searchSourceClient,
     });
 
-    const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts } =
+    const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts, originalRecoveredAlerts } =
       await this.timer.runWithTimer(TaskRunnerTimerSpan.RuleTypeRun, async () => {
         for (const id in alertRawInstances) {
           if (alertRawInstances.hasOwnProperty(id)) {
             this.alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
+          }
+        }
+
+        const recoveredAlerts: Record<string, Alert<State, Context>> = {};
+        for (const id in alertRecoveredRawInstances) {
+          if (alertRecoveredRawInstances.hasOwnProperty(id)) {
+            recoveredAlerts[id] = new Alert<State, Context>(id, alertRecoveredRawInstances[id]);
           }
         }
 
@@ -429,6 +437,7 @@ export class TaskRunner<
 
         return {
           originalAlerts: alertsCopy,
+          originalRecoveredAlerts: recoveredAlerts,
           updatedRuleTypeState: updatedState || undefined,
           hasReachedAlertLimit: alertFactory.hasReachedAlertLimit(),
         };
@@ -444,6 +453,7 @@ export class TaskRunner<
         } = processAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
           alerts: this.alerts,
           existingAlerts: originalAlerts,
+          previouslyRecoveredAlerts: originalRecoveredAlerts,
           hasReachedAlertLimit,
           alertLimit: this.maxAlerts,
         });
@@ -518,16 +528,18 @@ export class TaskRunner<
     });
 
     // determine if flapping
-    const alertsToReturn = determineFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-      this.logger,
-      activeAlerts,
-      recoveredAlerts
-    );
+    const { alertsToReturn, recoveredAlertsToReturn } = determineFlapping<
+      State,
+      Context,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >(this.logger, activeAlerts, recoveredAlerts);
 
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: alertsToReturn,
+      alertRecoveredInstances: recoveredAlertsToReturn,
     };
   }
 

@@ -25,14 +25,19 @@ describe('processAlerts', () => {
   afterAll(() => clock.restore());
 
   describe('newAlerts', () => {
-    test('considers alert new if it has scheduled actions and its id is not in originalAlertIds list', () => {
+    test('considers alert new if it has scheduled actions and its id is not in originalAlertIds or previouslyRecoveredAlertIds list', () => {
       const newAlert = new Alert<{}, {}, DefaultActionGroupId>('1');
       const existingAlert1 = new Alert<{}, {}, DefaultActionGroupId>('2');
       const existingAlert2 = new Alert<{}, {}, DefaultActionGroupId>('3');
+      const existingRecoveredAlert1 = new Alert<{}, {}, DefaultActionGroupId>('4');
 
       const existingAlerts = {
         '2': existingAlert1,
         '3': existingAlert2,
+      };
+
+      const previouslyRecoveredAlerts = {
+        '4': existingRecoveredAlert1,
       };
 
       const updatedAlerts = {
@@ -49,6 +54,8 @@ describe('processAlerts', () => {
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        // @ts-expect-error
+        previouslyRecoveredAlerts,
         hasReachedAlertLimit: false,
         alertLimit: 10,
       });
@@ -323,6 +330,69 @@ describe('processAlerts', () => {
       // @ts-expect-error
       expect(activeAlert2State.end).not.toBeDefined();
     });
+
+    test('sets start time in active alert state if alert was previously recovered', () => {
+      const previouslyRecoveredAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1');
+      const previouslyRecoveredAlert2 = new Alert<{}, {}, DefaultActionGroupId>('2');
+      const existingAlert1 = new Alert<{}, {}, DefaultActionGroupId>('3');
+      const existingAlert2 = new Alert<{}, {}, DefaultActionGroupId>('4');
+
+      const existingAlerts = {
+        '3': existingAlert1,
+        '4': existingAlert2,
+      };
+
+      const previouslyRecoveredAlerts = {
+        '1': previouslyRecoveredAlert1,
+        '2': previouslyRecoveredAlert2,
+      };
+
+      const updatedAlerts = {
+        ...cloneDeep(existingAlerts),
+        ...cloneDeep(previouslyRecoveredAlerts),
+      };
+
+      updatedAlerts['1'].scheduleActions('default', { foo: '1' });
+      updatedAlerts['2'].scheduleActions('default', { foo: '1' });
+      updatedAlerts['3'].scheduleActions('default', { foo: '1' });
+      updatedAlerts['4'].scheduleActions('default', { foo: '2' });
+
+      expect(previouslyRecoveredAlert1.getState()).toStrictEqual({});
+      expect(previouslyRecoveredAlert2.getState()).toStrictEqual({});
+
+      const { activeAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        // @ts-expect-error
+        previouslyRecoveredAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
+
+      expect(
+        Object.keys(activeAlerts).map((id) => ({ [id]: activeAlerts[id].getFlappingHistory() }))
+      ).toEqual([{ '1': [true] }, { '2': [true] }, { '3': [false] }, { '4': [false] }]);
+
+      const previouslyRecoveredAlert1State = activeAlerts['1'].getState();
+      const previouslyRecoveredAlert2State = activeAlerts['2'].getState();
+
+      // @ts-expect-error
+      expect(previouslyRecoveredAlert1State.start).toEqual('1970-01-01T00:00:00.000Z');
+      // @ts-expect-error
+      expect(previouslyRecoveredAlert2State.start).toEqual('1970-01-01T00:00:00.000Z');
+
+      // @ts-expect-error
+      expect(previouslyRecoveredAlert1State.duration).toEqual('0');
+      // @ts-expect-error
+      expect(previouslyRecoveredAlert2State.duration).toEqual('0');
+
+      // @ts-expect-error
+      expect(previouslyRecoveredAlert1State.end).not.toBeDefined();
+      // @ts-expect-error
+      expect(previouslyRecoveredAlert2State.end).not.toBeDefined();
+    });
   });
 
   describe('recoveredAlerts', () => {
@@ -469,6 +539,32 @@ describe('processAlerts', () => {
       // @ts-expect-error
       expect(recoveredAlert2State.end).not.toBeDefined();
     });
+
+    test('considers alert recovered if it was previously recovered and not active', () => {
+      const recoveredAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1');
+      const recoveredAlert2 = new Alert<{}, {}, DefaultActionGroupId>('2');
+
+      const previouslyRecoveredAlerts = {
+        '1': recoveredAlert1,
+        '2': recoveredAlert2,
+      };
+
+      const updatedAlerts = cloneDeep(previouslyRecoveredAlerts);
+
+      updatedAlerts['1'].setFlappingHistory([false]);
+      updatedAlerts['2'].setFlappingHistory([false]);
+
+      const { recoveredAlerts } = processAlerts({
+        alerts: {},
+        existingAlerts: {},
+        // @ts-expect-error
+        previouslyRecoveredAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
+
+      expect(recoveredAlerts).toEqual(updatedAlerts);
+    });
   });
 
   describe('when hasReachedAlertLimit is true', () => {
@@ -538,6 +634,12 @@ describe('processAlerts', () => {
       updatedAlerts['4'].scheduleActions('default', { foo: '2' });
       // intentionally not scheduling actions for alert "5"
 
+      updatedAlerts['1'].setFlappingHistory([false]);
+      updatedAlerts['2'].setFlappingHistory([false]);
+      updatedAlerts['3'].setFlappingHistory([false]);
+      updatedAlerts['4'].setFlappingHistory([false]);
+      existingAlert5.setFlappingHistory([false]);
+
       const { activeAlerts } = processAlerts({
         // @ts-expect-error
         alerts: updatedAlerts,
@@ -597,6 +699,17 @@ describe('processAlerts', () => {
       updatedAlerts['9'].scheduleActions('default', { foo: '2' });
       updatedAlerts['10'].scheduleActions('default', { foo: '2' });
 
+      updatedAlerts['1'].setFlappingHistory([false]);
+      updatedAlerts['2'].setFlappingHistory([false]);
+      updatedAlerts['3'].setFlappingHistory([false]);
+      updatedAlerts['4'].setFlappingHistory([false]);
+      existingAlert5.setFlappingHistory([false]);
+      updatedAlerts['6'].setFlappingHistory([false]);
+      updatedAlerts['7'].setFlappingHistory([false]);
+      updatedAlerts['8'].setFlappingHistory([false]);
+      updatedAlerts['9'].setFlappingHistory([false]);
+      updatedAlerts['10'].setFlappingHistory([false]);
+
       const { activeAlerts, newAlerts } = processAlerts({
         // @ts-expect-error
         alerts: updatedAlerts,
@@ -619,6 +732,291 @@ describe('processAlerts', () => {
       expect(newAlerts).toEqual({
         '6': newAlert6,
         '7': newAlert7,
+      });
+    });
+  });
+
+  describe('updating flappingHistory', () => {
+    test('if new alert, set flapping state to false', () => {
+      const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1');
+
+      const alerts = cloneDeep({ '1': activeAlert });
+      alerts['1'].scheduleActions('default', { foo: '1' });
+
+      const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts,
+        existingAlerts: {},
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
+
+      expect(activeAlerts).toMatchInlineSnapshot(`
+        Object {
+          "1": Object {
+            "flappingHistory": Array [
+              false,
+            ],
+            "meta": Object {},
+            "state": Object {
+              "duration": "0",
+              "start": "1970-01-01T00:00:00.000Z",
+            },
+          },
+        }
+      `);
+      expect(newAlerts).toMatchInlineSnapshot(`
+        Object {
+          "1": Object {
+            "flappingHistory": Array [
+              false,
+            ],
+            "meta": Object {},
+            "state": Object {
+              "duration": "0",
+              "start": "1970-01-01T00:00:00.000Z",
+            },
+          },
+        }
+      `);
+      expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+    });
+
+    test('if alert is still active, set flapping state to false', () => {
+      const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+        flappingHistory: [false],
+      });
+
+      const alerts = cloneDeep({ '1': activeAlert });
+      alerts['1'].scheduleActions('default', { foo: '1' });
+
+      const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts,
+        // @ts-expect-error
+        existingAlerts: alerts,
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
+
+      expect(activeAlerts).toMatchInlineSnapshot(`
+        Object {
+          "1": Object {
+            "flappingHistory": Array [
+              false,
+              false,
+            ],
+            "meta": Object {},
+            "state": Object {},
+          },
+        }
+      `);
+      expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
+      expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+    });
+
+    test('if alert is active and previously recovered, set flapping state to true', () => {
+      const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1');
+      const recoveredAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+        flappingHistory: [false],
+      });
+
+      const alerts = cloneDeep({ '1': activeAlert });
+      alerts['1'].scheduleActions('default', { foo: '1' });
+      alerts['1'].setFlappingHistory([false]);
+
+      const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts,
+        existingAlerts: {},
+        // @ts-expect-error
+        previouslyRecoveredAlerts: { '1': recoveredAlert },
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
+
+      expect(activeAlerts).toMatchInlineSnapshot(`
+        Object {
+          "1": Object {
+            "flappingHistory": Array [
+              false,
+              true,
+            ],
+            "meta": Object {},
+            "state": Object {
+              "duration": "0",
+              "start": "1970-01-01T00:00:00.000Z",
+            },
+          },
+        }
+      `);
+      expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
+      expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+    });
+
+    test('if alert is recovered and previously active, set flapping state to true', () => {
+      const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+        flappingHistory: [false],
+      });
+      activeAlert.scheduleActions('default', { foo: '1' });
+      const recoveredAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+        flappingHistory: [false],
+      });
+
+      const alerts = cloneDeep({ '1': recoveredAlert });
+
+      const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts,
+        // @ts-expect-error
+        existingAlerts: { '1': activeAlert },
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
+
+      expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
+      expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
+      expect(recoveredAlerts).toMatchInlineSnapshot(`
+        Object {
+          "1": Object {
+            "flappingHistory": Array [
+              false,
+              true,
+            ],
+            "meta": Object {},
+            "state": Object {},
+          },
+        }
+      `);
+    });
+
+    test('if alert is still recovered, set flapping state to false', () => {
+      const recoveredAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+        flappingHistory: [false],
+      });
+
+      const alerts = cloneDeep({ '1': recoveredAlert });
+
+      const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
+        alerts: {},
+        existingAlerts: {},
+        // @ts-expect-error
+        previouslyRecoveredAlerts: alerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
+
+      expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
+      expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
+      expect(recoveredAlerts).toMatchInlineSnapshot(`
+        Object {
+          "1": Object {
+            "flappingHistory": Array [
+              false,
+              false,
+            ],
+            "meta": Object {},
+            "state": Object {},
+          },
+        }
+      `);
+    });
+
+    describe('when hasReachedAlertLimit is true', () => {
+      test('if alert is still active, set flapping state to false', () => {
+        const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+          flappingHistory: [false],
+        });
+
+        const alerts = cloneDeep({ '1': activeAlert });
+        alerts['1'].scheduleActions('default', { foo: '1' });
+
+        const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
+          // @ts-expect-error
+          alerts,
+          // @ts-expect-error
+          existingAlerts: alerts,
+          previouslyRecoveredAlerts: {},
+          hasReachedAlertLimit: true,
+          alertLimit: 10,
+        });
+
+        expect(activeAlerts).toMatchInlineSnapshot(`
+          Object {
+            "1": Object {
+              "flappingHistory": Array [
+                false,
+                false,
+              ],
+              "meta": Object {},
+              "state": Object {},
+            },
+          }
+        `);
+        expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
+        expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+      });
+
+      test('if new alert, set flapping state to false', () => {
+        const activeAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1', {
+          flappingHistory: [false],
+        });
+        activeAlert1.scheduleActions('default', { foo: '1' });
+        const activeAlert2 = new Alert<{}, {}, DefaultActionGroupId>('1');
+        activeAlert2.scheduleActions('default', { foo: '1' });
+
+        const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
+
+        const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
+          // @ts-expect-error
+          alerts,
+          // @ts-expect-error
+          existingAlerts: { '1': activeAlert1 },
+          previouslyRecoveredAlerts: {},
+          hasReachedAlertLimit: true,
+          alertLimit: 10,
+        });
+
+        expect(activeAlerts).toMatchInlineSnapshot(`
+          Object {
+            "1": Object {
+              "flappingHistory": Array [
+                false,
+                false,
+              ],
+              "meta": Object {},
+              "state": Object {},
+            },
+            "2": Object {
+              "flappingHistory": Array [
+                false,
+              ],
+              "meta": Object {},
+              "state": Object {
+                "duration": "0",
+                "start": "1970-01-01T00:00:00.000Z",
+              },
+            },
+          }
+        `);
+        expect(newAlerts).toMatchInlineSnapshot(`
+          Object {
+            "2": Object {
+              "flappingHistory": Array [
+                false,
+              ],
+              "meta": Object {},
+              "state": Object {
+                "duration": "0",
+                "start": "1970-01-01T00:00:00.000Z",
+              },
+            },
+          }
+        `);
+        expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
       });
     });
   });
