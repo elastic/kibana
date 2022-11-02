@@ -289,7 +289,12 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           </EuiFlyoutBody>
 
           <EuiFlyoutFooter css={styles.flyoutOverrides.flyoutFooter}>
-            <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="xs">
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="center"
+              gutterSize="xs"
+              responsive={false}
+            >
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="questionInCircle"

@@ -94,12 +94,12 @@ export const GuideStep = ({
           <>
             <EuiSpacer size="s" />
             <EuiText size="s" data-test-subj="guidePanelStepDescription">
-              {stepConfig.description && <p>{stepConfig.description}</p>}
+              {stepConfig.description && <p css={styles.stepDescription}>{stepConfig.description}</p>}
               {stepConfig.descriptionList &&
                 (stepConfig.descriptionList?.length === 1 ? (
-                  <p>{stepConfig.descriptionList[0]}</p> // If there is only one description, render it as a paragraph
+                  <p css={styles.stepDescription}>{stepConfig.descriptionList[0]}</p> // If there is only one description, render it as a paragraph
                 ) : (
-                  <ul>
+                  <ul css={styles.stepListItems}>
                     {stepConfig.descriptionList.map((description, index) => {
                       return <li key={`description-${index}`}>{description}</li>;
                     })}
