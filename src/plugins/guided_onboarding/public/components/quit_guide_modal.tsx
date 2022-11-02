@@ -24,9 +24,14 @@ import { apiService } from '../services/api';
 interface QuitGuideModalProps {
   closeModal: () => void;
   currentGuide: GuideState;
+  telemetryGuideId: string;
 }
 
-export const QuitGuideModal = ({ closeModal, currentGuide }: QuitGuideModalProps) => {
+export const QuitGuideModal = ({
+  closeModal,
+  currentGuide,
+  telemetryGuideId,
+}: QuitGuideModalProps) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const deleteGuide = async () => {
@@ -61,7 +66,7 @@ export const QuitGuideModal = ({ closeModal, currentGuide }: QuitGuideModalProps
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj={`onboarding--cancelQuitGuideButton--${currentGuide.guideId}`}
+          data-test-subj={`onboarding--cancelQuitGuideButton--${telemetryGuideId}`}
           onClick={closeModal}
         >
           {i18n.translate('guidedOnboarding.quitGuideModal.cancelButtonLabel', {
@@ -71,7 +76,7 @@ export const QuitGuideModal = ({ closeModal, currentGuide }: QuitGuideModalProps
 
         <EuiButton
           // Used for FS tracking and tests
-          data-test-subj={`onboarding--quitGuideButton--${currentGuide.guideId}`}
+          data-test-subj={`onboarding--quitGuideButton--${telemetryGuideId}`}
           onClick={deleteGuide}
           isLoading={isDeleting}
           fill

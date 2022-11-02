@@ -12,7 +12,7 @@ import React from 'react';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { HttpSetup } from '@kbn/core/public';
-import type { GuideId, GuideState } from '@kbn/guided-onboarding';
+import type { GuideState } from '@kbn/guided-onboarding';
 
 import { guidesConfig } from '../constants/guides_config';
 import { apiService } from '../services/api';
@@ -112,7 +112,19 @@ describe('Guided setup', () => {
     // TODO check for the correct button behavior once https://github.com/elastic/kibana/issues/141129 is implemented
     test.skip('should be disabled in there is no active guide', async () => {
       const { exists } = testBed;
-      expect(exists('disabledGuideButton')).toBe(true);
+      expect(exists('guideButton')).toBe(false);
+      expect(exists('guidePanel')).toBe(false);
+    });
+
+    test('should be hidden if the guide is not active', async () => {
+      const { component, exists } = testBed;
+
+      await updateComponentWithState(
+        component,
+        { ...mockActiveTestGuideState, isActive: false },
+        true
+      );
+
       expect(exists('guideButton')).toBe(false);
       expect(exists('guidePanel')).toBe(false);
     });
@@ -222,21 +234,21 @@ describe('Guided setup', () => {
       expect(find('guideDescription').text()).toContain(
         `You've completed the Elastic Enterprise Search guide`
       );
-      expect(exists('onboarding--completeGuideButton--search')).toBe(true);
+      expect(exists('onboarding--completeGuideButton--testGuide')).toBe(true);
     });
 
     describe('Steps', () => {
       const clickStepButton = async ({
-        guideId,
+        telemetryGuideId,
         stepNumber,
       }: {
-        guideId: GuideId;
+        telemetryGuideId: string;
         stepNumber: number;
       }) => {
         const { component, find } = testBed;
 
         await act(async () => {
-          find(`onboarding--stepButton--${guideId}--step${stepNumber}`).simulate('click');
+          find(`onboarding--stepButton--${telemetryGuideId}--step${stepNumber}`).simulate('click');
         });
 
         component.update();
@@ -247,9 +259,9 @@ describe('Guided setup', () => {
 
         await updateComponentWithState(component, mockActiveSearchGuideState, true);
 
-        expect(find('onboarding--stepButton--search--step1').text()).toEqual('Start');
+        expect(find('onboarding--stepButton--testGuide--step1').text()).toEqual('Start');
 
-        await clickStepButton({ guideId: 'search', stepNumber: 1 });
+        await clickStepButton({ telemetryGuideId: 'testGuide', stepNumber: 1 });
 
         expect(exists('guidePanel')).toBe(false);
       });
@@ -259,9 +271,9 @@ describe('Guided setup', () => {
 
         await updateComponentWithState(component, mockInProgressSearchGuideState, true);
 
-        expect(find('onboarding--stepButton--search--step1').text()).toEqual('Continue');
+        expect(find('onboarding--stepButton--testGuide--step1').text()).toEqual('Continue');
 
-        await clickStepButton({ guideId: 'search', stepNumber: 1 });
+        await clickStepButton({ telemetryGuideId: 'testGuide', stepNumber: 1 });
 
         expect(exists('guidePanel')).toBe(false);
       });
@@ -271,14 +283,14 @@ describe('Guided setup', () => {
 
         await updateComponentWithState(component, mockReadyToCompleteSearchGuideState, true);
 
-        expect(find('onboarding--stepButton--search--step2').text()).toEqual('Mark done');
+        expect(find('onboarding--stepButton--testGuide--step2').text()).toEqual('Mark done');
 
-        await clickStepButton({ guideId: 'search', stepNumber: 2 });
+        await clickStepButton({ telemetryGuideId: 'testGuide', stepNumber: 2 });
 
         // The guide panel should remain open after marking a step done
         expect(exists('guidePanel')).toBe(true);
         // Dependent on the Search guide config, which expects step 3 to start
-        expect(find('onboarding--stepButton--search--step3').text()).toEqual('Start');
+        expect(find('onboarding--stepButton--testGuide--step3').text()).toEqual('Start');
       });
 
       test('should render the step description as a paragraph if it is only one sentence', async () => {
@@ -362,7 +374,7 @@ describe('Guided setup', () => {
         const { component, find, exists } = testBed;
 
         await act(async () => {
-          find('onboarding--quitGuideButton--search').simulate('click');
+          find('onboarding--quitGuideButton--testGuide').simulate('click');
         });
 
         component.update();
@@ -376,7 +388,7 @@ describe('Guided setup', () => {
         const { component, find, exists } = testBed;
 
         await act(async () => {
-          find('onboarding--cancelQuitGuideButton--search').simulate('click');
+          find('onboarding--cancelQuitGuideButton--testGuide').simulate('click');
         });
 
         component.update();
