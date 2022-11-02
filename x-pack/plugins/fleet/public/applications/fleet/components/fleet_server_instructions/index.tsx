@@ -160,7 +160,12 @@ export const AddFleetServerLanding: React.FunctionComponent = () => {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiText>
+          <EuiText
+            css={`
+              max-width: 500px;
+              text-align: center;
+            `}
+          >
             <FormattedMessage
               id="xpack.fleet.fleetServerLanding.instructions"
               defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. Follow the instructions below to set up a Fleet Server. For more information, see the {userGuideLink}"

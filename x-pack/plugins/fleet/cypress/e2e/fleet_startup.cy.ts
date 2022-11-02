@@ -84,17 +84,20 @@ describe('Fleet startup', () => {
       cy.getBySel(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).click();
 
       cy.getBySel(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
-      cy.getBySel(CREATE_FLEET_SERVER_POLICY_BTN).click();
+      cy.getBySel(CREATE_FLEET_SERVER_POLICY_BTN, { timeout: 180000 }).click();
 
       // Wait until the success callout is shown before navigating away
       cy.getBySel(AGENT_POLICY_CREATE_STATUS_CALLOUT)
         .should('exist')
         .and('have.class', 'euiCallOut--success');
+      cy.getBySel(AGENT_FLYOUT.CLOSE_BUTTON).click();
 
       // verify policy is created and has fleet server and system package
       verifyPolicy('Fleet Server policy 1', ['Fleet Server', 'System']);
 
+      // Reopen Flyout
       navigateToTab(AGENTS_TAB);
+      cy.getBySel(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).click();
       cy.getBySel(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
 
       // verify create button changed to dropdown
