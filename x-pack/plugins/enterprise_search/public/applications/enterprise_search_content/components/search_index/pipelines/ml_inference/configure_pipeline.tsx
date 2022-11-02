@@ -212,7 +212,7 @@ export const ConfigurePipeline: React.FC = () => {
                     'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.name.helpText',
                     {
                       defaultMessage:
-                        'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens. The pipeline name will be automatically prefixed with "ml-inference-".',
+                        'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens.',
                     }
                   )
                 }
@@ -223,6 +223,7 @@ export const ConfigurePipeline: React.FC = () => {
                   data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-uniqueName`}
                   disabled={inputsDisabled}
                   fullWidth
+                  prepend="ml-inference-"
                   placeholder={i18n.translate(
                     'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.namePlaceholder',
                     {
