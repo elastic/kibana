@@ -27,8 +27,10 @@ let mockUseGetEndpointActionList: {
   data?: ActionListApiResponse;
   refetch: () => unknown;
 };
-jest.mock('../../../hooks/endpoint/use_get_endpoint_action_list', () => {
-  const original = jest.requireActual('../../../hooks/endpoint/use_get_endpoint_action_list');
+jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list', () => {
+  const original = jest.requireActual(
+    '../../../hooks/response_actions/use_get_endpoint_action_list'
+  );
   return {
     ...original,
     useGetEndpointActionList: () => mockUseGetEndpointActionList,
