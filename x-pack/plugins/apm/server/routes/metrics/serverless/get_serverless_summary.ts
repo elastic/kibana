@@ -120,6 +120,7 @@ export async function getServerlessSummary({
         faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
         avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
         avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
+        countInvocations: { value_count: { field: FAAS_BILLED_DURATION } },
         sample: {
           top_metrics: {
             metrics: [{ field: HOST_ARCHITECTURE }],
@@ -160,6 +161,7 @@ export async function getServerlessSummary({
       transactionThroughput,
       billedDuration: response.aggregations?.faasBilledDurationAvg.value,
       totalMemory: response.aggregations?.avgTotalMemory.value,
+      countInvocations: response.aggregations?.countInvocations.value,
     }),
   };
 }

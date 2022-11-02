@@ -104,6 +104,7 @@ describe('calcEstimatedCost', () => {
           totalMemory: 536870912, // 0.5gb
           transactionThroughput: 100000,
           awsLambdaRequestCostPerMillion: 0.2,
+          countInvocations: 1,
         })
       ).toEqual(0.03);
     });
@@ -119,6 +120,7 @@ describe('calcEstimatedCost', () => {
           totalMemory: 536870912, // 0.5gb
           transactionThroughput: 200000,
           awsLambdaRequestCostPerMillion: 0.2,
+          countInvocations: 1,
         })
       ).toEqual(0.05);
     });
