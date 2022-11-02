@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState, useCallback } from 'react';
-import type { TagSelectorProps } from './services';
+import type { TagSelectorProps, SavedObjectsReference } from './services';
 
 const tagsList = ['id-1', 'id-2', 'id-3', 'id-4', 'id-5'];
 
@@ -25,7 +25,7 @@ export const TagSelector = ({ initialSelection, onTagsSelected }: TagSelectorPro
 
   return (
     <div>
-      <ul data-test-subj="tagList">
+      <ul data-test-subj="tagSelector">
         {tagsList.map((tagId, i) => (
           <li key={i}>
             <button
@@ -40,5 +40,23 @@ export const TagSelector = ({ initialSelection, onTagsSelected }: TagSelectorPro
         ))}
       </ul>
     </div>
+  );
+};
+
+export interface TagListProps {
+  references?: SavedObjectsReference[];
+}
+
+export const TagList = ({ references }: TagListProps) => {
+  if (!references) {
+    return null;
+  }
+
+  return (
+    <ul data-test-subj="tagList">
+      {references.map((tag) => (
+        <li key={tag.name}>{tag.name}</li>
+      ))}
+    </ul>
   );
 };

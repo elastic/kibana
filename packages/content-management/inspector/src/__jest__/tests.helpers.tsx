@@ -8,7 +8,7 @@
 import React from 'react';
 import type { ComponentType } from 'react';
 
-import { TagSelector } from '../mocks';
+import { TagSelector, TagList } from '../mocks';
 import { InspectorProvider } from '../services';
 import type { Services } from '../services';
 
@@ -18,6 +18,7 @@ export const getMockServices = (overrides?: Partial<Services>) => {
       onClose: Promise.resolve(),
       close: () => Promise.resolve(),
     })),
+    TagList,
     TagSelector,
     ...overrides,
   };

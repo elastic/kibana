@@ -76,7 +76,9 @@ describe('<InspectorFlyoutContent />', () => {
       expect(find('metadataForm.descriptionInput').props().readOnly).toBe(true);
       expect(exists('saveButton')).toBe(false);
 
-      // TODO: not render TagSelector on readOnly and add test for it
+      // Show tag list and *not* the tag selector
+      expect(exists('tagList')).toBe(true);
+      expect(exists('tagSelector')).toBe(false);
     });
 
     test('should display the "Update" button when not readOnly', async () => {
@@ -175,8 +177,8 @@ describe('<InspectorFlyoutContent />', () => {
       const { find, component } = testBed!;
 
       await act(async () => {
-        find('tagList.tag-id-1').simulate('click');
-        find('tagList.tag-id-2').simulate('click');
+        find('tagSelector.tag-id-1').simulate('click');
+        find('tagSelector.tag-id-2').simulate('click');
       });
 
       component.update();
@@ -194,8 +196,8 @@ describe('<InspectorFlyoutContent />', () => {
       });
 
       await act(async () => {
-        find('tagList.tag-id-3').simulate('click');
-        find('tagList.tag-id-4').simulate('click');
+        find('tagSelector.tag-id-3').simulate('click');
+        find('tagSelector.tag-id-4').simulate('click');
       });
 
       component.update();

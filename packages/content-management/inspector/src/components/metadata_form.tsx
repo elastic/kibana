@@ -94,11 +94,18 @@ export const MetadataForm: FC<Props> = ({
       {TagList && isReadonly === true && (
         <>
           <EuiSpacer />
-          <TagList references={tagsReferences} />
+          <EuiFormRow
+            label={i18n.translate('contentManagement.inspector.metadataForm.tagsLabel', {
+              defaultMessage: 'Tags',
+            })}
+            fullWidth
+          >
+            <TagList references={tagsReferences} />
+          </EuiFormRow>
         </>
       )}
 
-      {TagSelector !== undefined && isReadonly === false && (
+      {TagSelector && isReadonly === false && (
         <>
           <EuiSpacer />
           <TagSelector initialSelection={tags.value} onTagsSelected={setTags} fullWidth />
