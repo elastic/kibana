@@ -661,6 +661,7 @@ export default function ({ getService }: FtrProviderContext) {
         // disable the task
         await bulkDisable([scheduledTask.id]);
         const task = await currentTask(scheduledTask.id);
+        log.debug(`bulkDisable:task(${scheduledTask.id}) enabled: ${task.enabled}`);
         expect(task.enabled).to.eql(false);
       });
 
@@ -671,6 +672,7 @@ export default function ({ getService }: FtrProviderContext) {
         const task = await currentTask(scheduledTask.id);
 
         expect(task.enabled).to.eql(true);
+        log.debug(`bulkEnable:task(${scheduledTask.id}) enabled: ${task.enabled}`);
         expect(Date.parse(task.scheduledAt)).to.be.greaterThan(
           Date.parse(scheduledTask.scheduledAt)
         );
@@ -699,6 +701,7 @@ export default function ({ getService }: FtrProviderContext) {
       let disabledTask: SerializedConcreteTaskInstance;
       await retry.try(async () => {
         disabledTask = await currentTask(scheduledTask.id);
+        log.debug(`bulkDisable:task(${scheduledTask.id}) enabled: ${disabledTask.enabled}`);
         expect(disabledTask.enabled).to.eql(false);
       });
 
@@ -707,7 +710,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         const task = await currentTask(scheduledTask.id);
-
+        log.debug(`bulkEnable:task(${scheduledTask.id}) enabled: ${task.enabled}`);
         expect(task.enabled).to.eql(true);
         expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(disabledTask.scheduledAt));
       });
