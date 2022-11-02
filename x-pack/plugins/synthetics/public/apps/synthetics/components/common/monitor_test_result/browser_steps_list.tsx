@@ -103,7 +103,7 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
           aria-label={VIEW_DETAILS}
           title={VIEW_DETAILS}
           size="s"
-          href={`${basePath}/app/uptime/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
+          href={`${basePath}/app/synthetics/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
           target="_self"
           iconType="apmTrace"
         />
