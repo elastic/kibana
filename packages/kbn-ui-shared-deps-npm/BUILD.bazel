@@ -43,6 +43,8 @@ RUNTIME_DEPS = [
   "@npm//@elastic/numeral",
   "@npm//@emotion/cache",
   "@npm//@emotion/react",
+  "@npm//@tanstack/react-query",
+  "@npm//@tanstack/react-query-devtools",
   "@npm//babel-loader",
   "@npm//core-js",
   "@npm//css-loader",

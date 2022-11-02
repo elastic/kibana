@@ -157,7 +157,8 @@ export async function installAllPipelines({
   let datastreamPipelineCreated = false;
   pipelinePaths.forEach((path) => {
     const { name, extension } = getNameAndExtension(path);
-    if (name === dataStream?.ingest_pipeline) {
+    const isMainPipeline = name === dataStream?.ingest_pipeline;
+    if (isMainPipeline) {
       datastreamPipelineCreated = true;
     }
     const nameForInstallation = getPipelineNameForInstallation({
@@ -168,9 +169,8 @@ export async function installAllPipelines({
     const content = getAsset(path).toString('utf-8');
     pipelinesInfos.push({
       nameForInstallation,
-      customIngestPipelineNameForInstallation: dataStream
-        ? getCustomPipelineNameForDatastream(dataStream)
-        : undefined,
+      customIngestPipelineNameForInstallation:
+        dataStream && isMainPipeline ? getCustomPipelineNameForDatastream(dataStream) : undefined,
       content,
       extension,
     });

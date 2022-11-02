@@ -5172,6 +5172,41 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.ShardFailureOpenModalButton",
+        "type": "Function",
+        "tags": [],
+        "label": "ShardFailureOpenModalButton",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "ShardFailureOpenModalButtonProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/data/public/shard_failure_modal/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureOpenModalButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "ShardFailureOpenModalButtonProps"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.tabifyAggResponse",
         "type": "Function",
         "tags": [],
@@ -9050,6 +9085,104 @@
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.ShardFailureRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "ShardFailureRequest",
+        "description": [],
+        "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest.docvalue_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "docvalue_fields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest._source",
+            "type": "Unknown",
+            "tags": [],
+            "label": "_source",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest.query",
+            "type": "Unknown",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest.script_fields",
+            "type": "Unknown",
+            "tags": [],
+            "label": "script_fields",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest.sort",
+            "type": "Unknown",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest.stored_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "stored_fields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -16317,10 +16450,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -16347,8 +16480,10 @@
                 "id": "def-server.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -24889,10 +25024,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -24919,8 +25054,10 @@
                 "id": "def-common.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -27291,7 +27428,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; delete: (indexPatternId: string) => Promise<{}>; create: ({ id, name, title, ...restOfSpec }: ",
+          ">; delete: (indexPatternId: string) => Promise<{}>; create: (spec: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

@@ -70,6 +70,7 @@ const getSavedObjectTypes = (
       properties: {
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
+        prerelease_integrations_enabled: { type: 'boolean' },
       },
     },
     migrations: {
@@ -104,6 +105,7 @@ const getSavedObjectTypes = (
         data_output_id: { type: 'keyword' },
         monitoring_output_id: { type: 'keyword' },
         download_source_id: { type: 'keyword' },
+        fleet_server_host_id: { type: 'keyword' },
       },
     },
     migrations: {
