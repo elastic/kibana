@@ -38,6 +38,7 @@ export const ObjectCountList = () => {
               percent={percent}
               value={String(count)}
               valueWidth={30}
+              loading={objectMetrics.loading}
             />
             <EuiSpacer size="m" />
           </>
