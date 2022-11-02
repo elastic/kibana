@@ -34,7 +34,10 @@ export const ENTRY_DELETE_BTN = '[data-test-subj="builderItemEntryDeleteButton"]
 
 export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
 
-export const EXCEPTIONS_TABLE = '[data-test-subj="exceptions-table"]';
+export const EXCEPTIONS_OVERFLOW_ACTIONS_BTN =
+  '[data-test-subj="exceptionsListCardOverflowActions"]';
+
+export const EXCEPTIONS_TABLE = '[data-test-subj="pageContainer"]';
 
 export const EXCEPTIONS_TABLE_SEARCH = '[data-test-subj="exceptionsHeaderSearchInput"]';
 
@@ -47,7 +50,7 @@ export const EXCEPTIONS_TABLE_EXPORT_BTN = '[data-test-subj="exceptionsTableExpo
 export const EXCEPTIONS_TABLE_SEARCH_CLEAR =
   '[data-test-subj="allExceptionListsPanel"] button.euiFormControlLayoutClearButton';
 
-export const EXCEPTIONS_TABLE_LIST_NAME = '[data-test-subj="exceptionsTableName"]';
+export const EXCEPTIONS_TABLE_LIST_NAME = '[data-test-subj="exception-list-name"]';
 
 export const EXCEPTIONS_TABLE_MODAL = '[data-test-subj="referenceErrorModal"]';
 

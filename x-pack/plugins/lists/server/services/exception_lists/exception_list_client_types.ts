@@ -502,6 +502,7 @@ export interface ImportExceptionListAndItemsOptions {
   maxExceptionsImportSize: number;
   /** whether or not to overwrite an exception list with imported list if a matching list_id found */
   overwrite: boolean;
+  generateNewListId: boolean;
 }
 
 /**

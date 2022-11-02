@@ -88,7 +88,7 @@ export const EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER = i18n.translate(
 export const ALL_EXCEPTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitle',
   {
-    defaultMessage: 'Exception lists',
+    defaultMessage: 'Rule Exceptions',
   }
 );
 
@@ -165,5 +165,39 @@ export const REFRESH_EXCEPTIONS_TABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.refresh',
   {
     defaultMessage: 'Refresh',
+  }
+);
+
+export const UPLOAD_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionListsImportButton',
+  {
+    defaultMessage: 'Import list',
+  }
+);
+
+export const uploadSuccessMessage = (fileName: string) =>
+  i18n.translate('xpack.securitySolution.lists.exceptionListImportSuccess', {
+    defaultMessage: "Exception list '{fileName}' was imported",
+    values: { fileName },
+  });
+
+export const UPLOAD_SUCCESS_TITLE = i18n.translate(
+  'xpack.securitySolution.lists.exceptionListImportSuccessTitle',
+  {
+    defaultMessage: 'Exception list imported',
+  }
+);
+
+export const UPLOAD_ERROR = i18n.translate(
+  'xpack.securitySolution.lists.exceptionListUploadError',
+  {
+    defaultMessage: 'There was an error uploading the exception list.',
+  }
+);
+
+export const IMPORT_EXCEPTION_LIST = i18n.translate(
+  'xpack.securitySolution.lists.importExceptionListButton',
+  {
+    defaultMessage: 'Import exception list',
   }
 );

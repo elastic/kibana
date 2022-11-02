@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback, useState } from 'react';
-import type { CriteriaWithPagination, EuiSearchBarProps } from '@elastic/eui';
+import React, { useEffect, useCallback, useState } from 'react';
+import type { EuiSearchBarProps } from '@elastic/eui';
+
 import {
-  EuiBasicTable,
-  EuiEmptyPrompt,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPagination,
+  EuiPopover,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingContent,
   EuiProgress,
   EuiSpacer,
@@ -20,28 +27,25 @@ import {
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 
-import { AutoDownload } from '../../../../common/components/auto_download/auto_download';
-import { useFormatUrl } from '../../../../common/components/link_to';
-import { Loader } from '../../../../common/components/loader';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { AutoDownload } from '../../common/components/auto_download/auto_download';
+import { Loader } from '../../common/components/loader';
+import { useKibana } from '../../common/lib/kibana';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 
-import * as i18n from './translations';
+import * as i18n from './translations_exceptions_table';
 import { ExceptionsTableUtilityBar } from './exceptions_table_utility_bar';
-import type { AllExceptionListsColumns } from './columns';
-import { getAllExceptionListsColumns } from './columns';
 import { useAllExceptionLists } from './use_all_exception_lists';
-import { ReferenceErrorModal } from '../../../../detections/components/value_lists_management_flyout/reference_error_modal';
-import { patchRule } from '../../../rule_management/api/api';
+import { ReferenceErrorModal } from '../../detections/components/value_lists_management_flyout/reference_error_modal';
+import { patchRule } from '../../detection_engine/rule_management/api/api';
 import { ExceptionsSearchBar } from './exceptions_search_bar';
-import { getSearchFilters } from '../../../rule_management_ui/components/rules_table/helpers';
-import { SecurityPageName } from '../../../../../common/constants';
-import { useUserData } from '../../../../detections/components/user_info';
-import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
-import type { ExceptionsTableItem } from './types';
-import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
-import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../common/endpoint/service/artifacts/constants';
+import { getSearchFilters } from '../../detection_engine/rule_management_ui/components/rules_table/helpers';
+import { useUserData } from '../../detections/components/user_info';
+import { useListsConfig } from '../../detections/containers/detection_engine/lists/use_lists_config';
+import { MissingPrivilegesCallOut } from '../../detections/components/callouts/missing_privileges_callout';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
+import { ExceptionsListCard } from './exceptions_list_card';
+
+import { ImportExceptionListFlyout } from './import_exceptions_list_flyout';
 
 export type Func = () => Promise<void>;
 
@@ -62,15 +66,13 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 };
 
 export const ExceptionListsTable = React.memo(() => {
-  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
-  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
 
   const { loading: listsConfigLoading } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
 
   const {
-    services: { http, notifications, timelines, application },
+    services: { http, notifications, timelines },
   } = useKibana();
   const { exportExceptionList, deleteExceptionList } = useApi(http);
 
@@ -91,12 +93,12 @@ export const ExceptionListsTable = React.memo(() => {
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
   });
+
   const [initLoading, setInitLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
-  const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
-  const [exportingListIds, setExportingListIds] = useState<string[]>([]);
+
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
-  const { navigateToUrl } = application;
+  const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
   const { addError, addSuccess } = useAppToasts();
 
   const handleDeleteSuccess = useCallback(
@@ -121,11 +123,6 @@ export const ExceptionListsTable = React.memo(() => {
     ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
       async () => {
         try {
-          setDeletingListIds((ids) => [...ids, id]);
-          if (refreshExceptions != null) {
-            refreshExceptions();
-          }
-
           if (exceptionsListsRef[id] != null && exceptionsListsRef[id].rules.length === 0) {
             await deleteExceptionList({
               id,
@@ -150,8 +147,6 @@ export const ExceptionListsTable = React.memo(() => {
           // route to patch rules with associated exception list
         } catch (error) {
           handleDeleteError(error);
-        } finally {
-          setDeletingListIds((ids) => ids.filter((_id) => _id !== id));
         }
       },
     [
@@ -182,7 +177,6 @@ export const ExceptionListsTable = React.memo(() => {
   const handleExport = useCallback(
     ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
       async () => {
-        setExportingListIds((ids) => [...ids, id]);
         await exportExceptionList({
           id,
           listId,
@@ -193,18 +187,6 @@ export const ExceptionListsTable = React.memo(() => {
       },
     [exportExceptionList, handleExportError, handleExportSuccess]
   );
-
-  const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {
-    // Defaulting to true to default to the lower privilege first
-    const isKibanaReadOnly = (canUserREAD && !canUserCRUD) ?? true;
-    return getAllExceptionListsColumns(
-      handleExport,
-      handleDelete,
-      formatUrl,
-      navigateToUrl,
-      isKibanaReadOnly
-    );
-  }, [handleExport, handleDelete, formatUrl, navigateToUrl, canUserREAD, canUserCRUD]);
 
   const handleRefresh = useCallback((): void => {
     if (refreshExceptions != null) {
@@ -218,16 +200,6 @@ export const ExceptionListsTable = React.memo(() => {
       setInitLoading(false);
     }
   }, [initLoading, loading, loadingExceptions, loadingTableInfo]);
-
-  const emptyPrompt = useMemo((): JSX.Element => {
-    return (
-      <EuiEmptyPrompt
-        title={<h3>{i18n.NO_EXCEPTION_LISTS}</h3>}
-        titleSize="xs"
-        body={i18n.NO_LISTS_BODY}
-      />
-    );
-  }, []);
 
   const handleSearch = useCallback(
     async ({
@@ -253,7 +225,6 @@ export const ExceptionListsTable = React.memo(() => {
   );
 
   const handleCloseReferenceErrorModal = useCallback((): void => {
-    setDeletingListIds([]);
     setShowReferenceErrorModal(false);
     setReferenceModalState({
       contentText: '',
@@ -297,7 +268,6 @@ export const ExceptionListsTable = React.memo(() => {
       handleDeleteError(err);
     } finally {
       setReferenceModalState(exceptionReferenceModalInitialState);
-      setDeletingListIds([]);
       setShowReferenceErrorModal(false);
       if (refreshExceptions != null) {
         refreshExceptions();
@@ -313,51 +283,108 @@ export const ExceptionListsTable = React.memo(() => {
     refreshExceptions,
   ]);
 
-  const paginationMemo = useMemo(
-    () => ({
-      pageIndex: pagination.page - 1,
-      pageSize: pagination.perPage,
-      totalItemCount: pagination.total || 0,
-      pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
-    }),
-    [pagination]
-  );
-
   const handleOnDownload = useCallback(() => {
     setExportDownload({});
   }, []);
 
-  const tableItems = useMemo<ExceptionsTableItem[]>(
-    () =>
-      (exceptionListsWithRuleRefs ?? []).map((item) => ({
-        ...item,
-        isDeleting: deletingListIds.includes(item.id),
-        isExporting: exportingListIds.includes(item.id),
-      })),
-    [deletingListIds, exceptionListsWithRuleRefs, exportingListIds]
+  const [activePage, setActivePage] = useState(0);
+  const [rowSize, setRowSize] = useState(5);
+  const [isRowSizePopoverOpen, setIsRowSizePopoverOpen] = useState(false);
+  const onRowSizeButtonClick = () => setIsRowSizePopoverOpen((val) => !val);
+  const closeRowSizePopover = () => setIsRowSizePopoverOpen(false);
+
+  const rowSizeButton = (
+    <EuiButtonEmpty
+      size="xs"
+      color="text"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onRowSizeButtonClick}
+    >
+      {`Rows per page: ${rowSize}`}
+    </EuiButtonEmpty>
   );
 
-  const handlePaginationChange = useCallback(
-    (criteria: CriteriaWithPagination<ExceptionsTableItem>) => {
-      const { index, size } = criteria.page;
-      setPagination((currentPagination) => ({
-        ...currentPagination,
-        perPage: size,
-        page: index + 1,
-      }));
-    },
-    [setPagination]
-  );
+  const getIconType = (size: number) => {
+    return size === rowSize ? 'check' : 'empty';
+  };
+
+  const rowSizeItems = [
+    <EuiContextMenuItem
+      key="5 rows"
+      icon={getIconType(5)}
+      onClick={() => {
+        closeRowSizePopover();
+        setRowSize(5);
+      }}
+    >
+      {'5 rows'}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="10 rows"
+      icon={getIconType(10)}
+      onClick={() => {
+        closeRowSizePopover();
+        setRowSize(10);
+      }}
+    >
+      {'10 rows'}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="25 rows"
+      icon={getIconType(25)}
+      onClick={() => {
+        closeRowSizePopover();
+        setRowSize(25);
+      }}
+    >
+      {'25 rows'}
+    </EuiContextMenuItem>,
+  ];
+
+  useEffect(() => {
+    setPagination({
+      // off-by-one error
+      // we should really update the api to be zero-index based
+      // the same way the pagination component in EUI is zero based.
+      page: activePage + 1,
+      perPage: rowSize,
+      total: 0,
+    });
+  }, [activePage, rowSize, setPagination]);
+
+  const goToPage = (pageNumber: number) => setActivePage(pageNumber);
 
   return (
     <>
       <MissingPrivilegesCallOut />
-      <EuiPageHeader
-        pageTitle={i18n.ALL_EXCEPTIONS}
-        description={
-          <p>{timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}</p>
-        }
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiPageHeader
+            pageTitle={i18n.ALL_EXCEPTIONS}
+            description={timelines.getLastUpdated({
+              showUpdating: loading,
+              updatedAt: lastUpdated,
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton iconType={'importAction'} onClick={() => setDisplayImportListFlyout(true)}>
+            {i18n.IMPORT_EXCEPTION_LIST}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {displayImportListFlyout && (
+        <ImportExceptionListFlyout
+          handleRefresh={handleRefresh}
+          http={http}
+          addSuccess={addSuccess}
+          addError={addError}
+          setDisplayImportListFlyout={setDisplayImportListFlyout}
+        />
+      )}
+
       <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
         {loadingTableInfo && (
@@ -375,7 +402,7 @@ export const ExceptionListsTable = React.memo(() => {
           <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
         )}
 
-        {initLoading ? (
+        {initLoading || loadingTableInfo ? (
           <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
         ) : (
           <>
@@ -383,18 +410,51 @@ export const ExceptionListsTable = React.memo(() => {
               totalExceptionLists={exceptionListsWithRuleRefs.length}
               onRefresh={handleRefresh}
             />
-            <EuiBasicTable<ExceptionsTableItem>
-              data-test-subj="exceptions-table"
-              columns={exceptionsColumns}
-              isSelectable={hasPermissions}
-              itemId="id"
-              items={tableItems}
-              noItemsMessage={emptyPrompt}
-              onChange={handlePaginationChange}
-              pagination={paginationMemo}
-            />
+            <EuiSpacer size="m" />
+            {exceptionListsWithRuleRefs.length > 0 && canUserCRUD !== null && canUserREAD !== null && (
+              <React.Fragment data-test-subj="exceptionsTable">
+                {exceptionListsWithRuleRefs.map((excList) => (
+                  <ExceptionsListCard
+                    key={excList.list_id}
+                    data-test-subj="exceptionsListCard"
+                    readOnly={canUserREAD && !canUserCRUD}
+                    http={http}
+                    exceptionsList={excList}
+                    handleDelete={handleDelete}
+                    handleExport={handleExport}
+                  />
+                ))}
+              </React.Fragment>
+            )}
           </>
         )}
+        <EuiFlexGroup>
+          <EuiFlexItem style={{ flex: '1 1 auto' }}>
+            <EuiFlexGroup alignItems="flexStart">
+              <EuiFlexItem>
+                <EuiPopover
+                  button={rowSizeButton}
+                  isOpen={isRowSizePopoverOpen}
+                  closePopover={closeRowSizePopover}
+                >
+                  <EuiContextMenuPanel items={rowSizeItems} />
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem style={{ alignItems: 'flex-end' }}>
+            <EuiFlexGroup alignItems="flexEnd">
+              <EuiFlexItem>
+                <EuiPagination
+                  aria-label={'Custom pagination example'}
+                  pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
+                  activePage={activePage}
+                  onPageClick={goToPage}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <AutoDownload
           blob={exportDownload.blob}
