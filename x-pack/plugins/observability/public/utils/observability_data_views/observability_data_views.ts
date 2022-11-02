@@ -118,12 +118,23 @@ export class ObservabilityDataViews {
 
   async createDataView(app: AppDataType, indices: string) {
     const appIndicesPattern = getAppIndicesWithPattern(app, indices);
-    return await this.dataViews.create({
+
+    const { runtimeFields } = getFieldFormatsForApp(app);
+
+    const dataView = await this.dataViews.create({
       title: appIndicesPattern,
       id: getAppDataViewId(app, indices),
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
     });
+
+    if (runtimeFields !== null) {
+      runtimeFields.forEach(({ name, field }) => {
+        dataView.addRuntimeField(name, field);
+      });
+    }
+
+    return dataView;
   }
 
   async createAndSavedDataView(app: AppDataType, indices: string) {
