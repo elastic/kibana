@@ -25,9 +25,11 @@ import { pluginServices } from '../../services';
 import { rangeSliderReducers } from '../range_slider_reducers';
 import { RangeSliderReduxState } from '../types';
 import { RangeSliderStrings } from './range_slider_strings';
+import { SettingsForm } from './settings_form';
 
 export const RangeSliderPopover: FC = () => {
   const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const rangeRef = useRef<EuiDualRange | null>(null);
 
   // Controls Services Context
@@ -51,6 +53,9 @@ export const RangeSliderPopover: FC = () => {
   const min = select((state) => state.componentState.min);
   const title = select((state) => state.explicitInput.title);
   const value = select((state) => state.explicitInput.value) ?? ['', ''];
+  const stepSize = select((state) => {
+    return typeof state.componentState.stepSize === 'number' ? state.componentState.stepSize : 1;
+  });
 
   const hasAvailableRange = min !== '' && max !== '';
   const hasLowerBoundSelection = value[0] !== '';
@@ -153,6 +158,7 @@ export const RangeSliderPopover: FC = () => {
 
               dispatch(setSelectedRange([updatedLowerBound, updatedUpperBound]));
             }}
+            step={stepSize}
             value={displayedValue}
             ticks={hasAvailableRange ? ticks : undefined}
             levels={hasAvailableRange ? levels : undefined}
@@ -183,7 +189,21 @@ export const RangeSliderPopover: FC = () => {
             />
           </EuiToolTip>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={RangeSliderStrings.popover.getSettingsButtonTitle()}>
+            <EuiButtonIcon
+              iconType="gear"
+              color="text"
+              onClick={() => {
+                setIsSettingsOpen(!isSettingsOpen);
+              }}
+              aria-label={RangeSliderStrings.popover.getSettingsButtonTitle()}
+              data-test-subj="rangeSlider__settingsButton"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
       </EuiFlexGroup>
+      {isSettingsOpen ? <SettingsForm /> : null}
     </>
   );
 };

@@ -22,5 +22,24 @@ export const RangeSliderStrings = {
       i18n.translate('controls.rangeSlider.popover.noAvailableDataHelpText', {
         defaultMessage: 'There is no data to display. Adjust the time range and filters.',
       }),
+    getSettingsButtonTitle: () =>
+      i18n.translate('controls.rangeSlider.popover.settingsTitle', {
+        defaultMessage: 'Settings',
+      }),
+  },
+  settings: {
+    getStepSizeLabel: () =>
+      i18n.translate('controls.rangeSlider.settings.StepLabel', {
+        defaultMessage: 'Step size',
+      }),
+    getStepSizeNotPositiveNumberError: () =>
+      i18n.translate('controls.rangeSlider.settings.stepSizeNotPositiveNumberError', {
+        defaultMessage: 'Step size must be a positive number',
+      }),
+    getStepSizeNotLessThenMaxError: (max: string) =>
+      i18n.translate('controls.rangeSlider.settings.stepSizeNotLessThenMaxError', {
+        defaultMessage: 'Step size must be less than maximum value {max}',
+        values: { max },
+      }),
   },
 };

@@ -18,6 +18,7 @@ export interface RangeSliderComponentState {
   min: string;
   max: string;
   isInvalid?: boolean;
+  stepSize?: number;
 }
 
 // public only - redux embeddable state type

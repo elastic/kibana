@@ -50,6 +50,12 @@ export const rangeSliderReducers = {
     state.componentState.min = action.payload.min;
     state.componentState.max = action.payload.max;
   },
+  setStepSize: (
+    state: WritableDraft<RangeSliderReduxState>,
+    action: PayloadAction<{ stepSize: number }>
+  ) => {
+    state.componentState.stepSize = action.payload.stepSize;
+  },
   publishFilters: (
     state: WritableDraft<RangeSliderReduxState>,
     action: PayloadAction<Filter[] | undefined>
