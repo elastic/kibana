@@ -18,14 +18,10 @@ import { TransactionsTable } from '../../../shared/transactions_table';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { termQueryClient } from '../../../../../common/utils/term_query_client';
-import { environmentQuery } from '../../../../../common/utils/environment_query';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
 import { MostUsedChart, MostUsedMetric } from './most_used_chart';
+import { LatencyMap } from './latency_map';
 import { MobileFilters } from './filters';
+import { useFiltersForMobileCharts } from './use_filters_for_mobile_charts';
 
 interface Props {
   latencyChartHeight: number;
@@ -42,6 +38,7 @@ export function ServiceOverviewMobileCharts({
 }: Props) {
   const { fallbackToTransactions, serviceName } = useApmServiceContext();
   const router = useApmRouter();
+  const filters = useFiltersForMobileCharts();
 
   const {
     query,
@@ -53,8 +50,7 @@ export function ServiceOverviewMobileCharts({
       netConnectionType,
       device,
       osVersion,
-      appVersion,
-      transactionType,
+      appVersion
     },
   } = useApmParams('/services/{serviceName}/overview');
 
@@ -66,14 +62,6 @@ export function ServiceOverviewMobileCharts({
     },
     query,
   });
-
-  const mostUsedChartFilters = useMemo(() => {
-    return [
-      ...termQueryClient(SERVICE_NAME, serviceName),
-      ...termQueryClient(TRANSACTION_TYPE, transactionType),
-      ...environmentQuery(environment),
-    ];
-  }, [environment, transactionType, serviceName]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -172,7 +160,7 @@ export function ServiceOverviewMobileCharts({
               start={start}
               end={end}
               kuery={kuery}
-              filters={mostUsedChartFilters}
+              filters={filters}
             />
           </EuiFlexItem>
           {/* NCT */}
@@ -183,7 +171,7 @@ export function ServiceOverviewMobileCharts({
               start={start}
               end={end}
               kuery={kuery}
-              filters={mostUsedChartFilters}
+              filters={filters}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -199,7 +187,7 @@ export function ServiceOverviewMobileCharts({
               start={start}
               end={end}
               kuery={kuery}
-              filters={mostUsedChartFilters}
+              filters={filters}
             />
           </EuiFlexItem>
           {/* App version */}
@@ -210,10 +198,14 @@ export function ServiceOverviewMobileCharts({
               start={start}
               end={end}
               kuery={kuery}
-              filters={mostUsedChartFilters}
+              filters={filters}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiPanel hasBorder={true}>
+          <LatencyMap filters={filters} />
+        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -21,7 +21,8 @@
     "unifiedSearch",
     "dataViews",
     "advancedSettings",
-    "lens"
+    "lens",
+    "maps"
   ],
   "optionalPlugins": [
     "actions",
@@ -48,6 +49,7 @@
     "kibanaUtils",
     "ml",
     "observability",
-    "esUiShared"
+    "esUiShared",
+    "maps"
   ]
 }
