@@ -32,7 +32,7 @@ export function AgentExplorerDocsLink({
       target="_blank"
       external
     >
-      {isOpenTelemetryAgentName(agentName) && (
+      {isOpenTelemetryAgentName(agentName) ? (
         <EuiIcon
           type="documentation"
           size="m"
@@ -40,8 +40,7 @@ export function AgentExplorerDocsLink({
             defaultMessage: 'Opentelemetry logo',
           })}
         />
-      )}
-      {!isOpenTelemetryAgentName(agentName) && (
+      ) : (
         <EuiIcon
           type="logoElastic"
           size="m"

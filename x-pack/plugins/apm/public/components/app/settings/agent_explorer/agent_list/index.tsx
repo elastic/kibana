@@ -29,7 +29,7 @@ import { AgentExplorerDocsLink } from '../agent_explorer_docs_link';
 import { AgentInstances } from '../agent_instances';
 
 export type AgentExplorerItem = ValuesType<
-  APIReturnType<'GET /internal/apm/agent_explorer'>['items']
+  APIReturnType<'GET /internal/apm/get_agents_per_service'>['items']
 >;
 
 function formatString(value?: string | null) {

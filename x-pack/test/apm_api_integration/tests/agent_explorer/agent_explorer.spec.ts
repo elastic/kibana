@@ -23,11 +23,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi(
     overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/agent_explorer'>['params']
+      APIClientRequestParamsOf<'GET /internal/apm/get_agents_per_service'>['params']
     >
   ) {
     return await apmApiClient.monitorClusterAndIndicesUser({
-      endpoint: 'GET /internal/apm/agent_explorer',
+      endpoint: 'GET /internal/apm/get_agents_per_service',
       params: {
         query: {
           probability: 1,
@@ -58,27 +58,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             name: goServiceName,
             environment: 'production',
             agentName: 'go',
-            agentVersion: '5.1.2',
           })
-          .instance('instance-go');
+          .instance('instance-go')
+          .defaults({
+            'agent.version': '5.1.2',
+            'service.language.name': 'go',
+          });
 
         const serviceNodeStaging = apm
           .service({
             name: nodeServiceName,
             environment: 'staging',
             agentName: 'nodejs',
-            agentVersion: '1.0.0',
           })
-          .instance('instance-node-staging');
+          .instance('instance-node-staging')
+          .defaults({
+            'agent.version': '1.0.0',
+            'service.language.name': 'javascript',
+          });
 
         const serviceNodeDev = apm
           .service({
             name: nodeServiceName,
             environment: 'dev',
             agentName: 'nodejs',
-            agentVersion: '1.0.3',
           })
-          .instance('instance-node-dev');
+          .instance('instance-node-dev')
+          .defaults({
+            'agent.version': '1.0.3',
+            'service.language.name': 'javascript',
+          });
 
         await synthtraceEsClient.index([
           timerange(start, end)
@@ -144,6 +153,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const matchingFilterTests = [
         ['environment', 'dev', nodeServiceName],
         ['serviceName', nodeServiceName, nodeServiceName],
+        ['agentLanguage', 'go', goServiceName],
         ['kuery', `service.name : ${goServiceName}`, goServiceName],
       ];
 

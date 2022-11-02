@@ -11,7 +11,6 @@ import {
   EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { AgentExplorerFieldName } from '../../../../../../../common/agent_explorer';
@@ -20,10 +19,11 @@ import {
   SERVICE_NODE_NAME_MISSING,
 } from '../../../../../../../common/service_nodes';
 import { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
-import { ServiceNodeMetricOverviewLink } from '../../../../../shared/links/apm/service_node_metric_overview_link';
 import { unit } from '../../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../../shared/item_badge';
+import { ServiceNodeMetricOverviewLink } from '../../../../../shared/links/apm/service_node_metric_overview_link';
+import { TimestampTooltip } from '../../../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 
 type AgentExplorerInstance = ValuesType<
@@ -90,7 +90,7 @@ export function getInstanceColumns(
           defaultMessage: 'Environment',
         }
       ),
-      width: `${unit * 15}px`,
+      width: `${unit * 16}px`,
       sortable: true,
       render: (_, { environments }) => (
         <EnvironmentBadge environments={environments ?? []} />
@@ -102,7 +102,7 @@ export function getInstanceColumns(
         'xpack.apm.agentExplorerInstanceTable.agentVersionColumnLabel',
         { defaultMessage: 'Agent Version' }
       ),
-      width: `${unit * 15}px`,
+      width: `${unit * 16}px`,
       sortable: true,
       render: (_, { agentVersion }) => (
         <ItemsBadge
@@ -126,11 +126,9 @@ export function getInstanceColumns(
           defaultMessage: 'Last report',
         }
       ),
-      width: `${unit * 15}px`,
+      width: `${unit * 16}px`,
       sortable: true,
-      render: (_, { lastReport }) => (
-        <>{moment(new Date(`${lastReport}`)).fromNow()}</>
-      ),
+      render: (_, { lastReport }) => <TimestampTooltip time={lastReport} />,
     },
   ];
 }

@@ -19,7 +19,7 @@ import { getAgents } from './get_agents';
 import { getAgentInstances } from './get_agent_instances';
 
 const agentExplorerRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/agent_explorer',
+  endpoint: 'GET /internal/apm/get_agents_per_service',
   options: { tags: ['access:apm'] },
   params: t.type({
     query: t.intersection([

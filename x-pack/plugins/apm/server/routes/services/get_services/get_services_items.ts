@@ -19,7 +19,7 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 
 export type ServicesItemsSetup = Setup;
 
-const MAX_NUMBER_OF_SERVICES = 500;
+export const MAX_NUMBER_OF_SERVICES = 500;
 
 export async function getServicesItems({
   environment,

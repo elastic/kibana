@@ -9,11 +9,11 @@
 import { flatten, random } from 'lodash';
 
 import { apm, timerange } from '../..';
-import { Instance } from '../lib/apm/instance';
 import { Scenario } from '../cli/scenario';
 import { getLogger } from '../cli/utils/get_common_services';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { ApmFields } from '../lib/apm/apm_fields';
+import { Instance } from '../lib/apm/instance';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
@@ -22,8 +22,6 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
 
   const numServices = 500;
-  const maxInstancesPerService = 5;
-  const minInstancesPerService = 1;
   const languages = ['go', 'dotnet', 'java', 'python'];
   const services = ['web', 'order-processing', 'api-backend', 'proxy'];
   const agentVersions: Record<string, string[]> = {
@@ -44,10 +42,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           const language = languages[index % languages.length];
           const agentLanguageVersions = agentVersions[language];
 
-          const numOfInstances = Math.floor(
-            Math.random() * (maxInstancesPerService - minInstancesPerService + 1) +
-              minInstancesPerService
-          );
+          const numOfInstances = (index % 3) + 1;
 
           return [...Array(numOfInstances).keys()].map((instanceIndex) =>
             apm
@@ -55,10 +50,13 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                 name: `${services[index % services.length]}-${language}-${index}`,
                 environment: ENVIRONMENT,
                 agentName: language,
-                agentVersion:
-                  agentLanguageVersions[Math.floor(Math.random() * agentLanguageVersions.length)],
               })
               .instance(`instance-${index}-${instanceIndex}`)
+              .defaults({
+                'agent.version':
+                  agentLanguageVersions[Math.floor(Math.random() * agentLanguageVersions.length)],
+                'service.language.name': language,
+              })
           );
         })
       );

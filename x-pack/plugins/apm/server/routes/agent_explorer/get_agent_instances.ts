@@ -21,8 +21,7 @@ import {
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-
-const MAX_NUMBER_OF_SERVICES = 500;
+import { MAX_NUMBER_OF_SERVICES } from '../services/get_services/get_services_items';
 
 export async function getAgentInstances({
   environment,

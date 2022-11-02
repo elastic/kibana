@@ -23,8 +23,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-
-const MAX_NUMBER_OF_SERVICES = 500;
+import { MAX_NUMBER_OF_SERVICES } from '../services/get_services/get_services_items';
 
 interface AggregationParams {
   environment: string;

@@ -45,7 +45,7 @@ function useAgentExplorerFetcher({
   return useProgressiveFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi('GET /internal/apm/agent_explorer', {
+        return callApmApi('GET /internal/apm/get_agents_per_service', {
           params: {
             query: {
               environment,
