@@ -49,6 +49,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/semver",
+  "@npm//moment-timezone",
   "@npm//lodash",
   "//packages/kbn-ui-shared-deps-npm:npm_module_types",
   "//packages/kbn-logging:npm_module_types",

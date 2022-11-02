@@ -50,6 +50,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//rxjs",
+  "@npm//moment-timezone",
   "@npm//elastic-apm-node",
   "@npm//chalk",
   "//packages/kbn-safer-lodash-set:npm_module_types",
