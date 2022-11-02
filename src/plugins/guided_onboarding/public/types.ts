@@ -54,7 +54,9 @@ export interface GuidedOnboardingApi {
 export interface StepConfig {
   id: GuideStepIds;
   title: string;
+  // description is displayed as a single paragraph, can be combined with description list
   description?: string;
+  // description list is displayed as an unordered list, can be combined with description
   descriptionList?: string[];
   location?: {
     appID: string;
