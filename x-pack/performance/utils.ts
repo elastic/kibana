@@ -25,7 +25,7 @@ export async function waitForVisualizations(page: Page, log: ToolingLog, visCoun
     const loadedVis = await page.$$('[data-rendering-count]');
     const renderedVis = await page.$$('[data-rendering-count][data-render-complete="true"]');
     log.error(
-      `'waitForVisualizations' failed: loaded - ${loadedVis.length}, rendered - ${renderedVis.length}, expected - ${visCount}\n`
+      `'waitForVisualizations' failed: loaded - ${loadedVis.length}, rendered - ${renderedVis.length}, expected - ${visCount}`
     );
     throw err;
   }
