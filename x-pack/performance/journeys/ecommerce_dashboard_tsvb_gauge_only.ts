@@ -19,7 +19,7 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Ecommerce Dashboard with TSVB Gauge', async ({ page }) => {
+  .step('Go to Ecommerce Dashboard with TSVB Gauge only', async ({ page }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-TSVB-Gauge-Only-Dashboard'));
     await waitForVisualizations(page, 1);
   });
