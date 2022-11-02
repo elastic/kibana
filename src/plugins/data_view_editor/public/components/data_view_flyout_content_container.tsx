@@ -79,6 +79,7 @@ const DataViewFlyoutContentContainer = ({
     requireTimestampField,
   });
 
+  // todo examine removing the provider
   return (
     <DataViewEditorServiceContext.Provider value={{ dataViewEditorService }}>
       <IndexPatternEditorFlyoutContent

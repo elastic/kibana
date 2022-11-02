@@ -60,6 +60,14 @@ export class DataViewEditorService {
     this.rollupCapsResponse = this.getRollupIndexCaps();
     this.dataViewNames$ = from(this.loadDataViewNames(initialName));
 
+    // public observables
+    this.matchedIndices$ = this.matchedIndicesInternal$.asObservable();
+    this.rollupIndicesCaps$ = this.rollupIndicesCapsInternal$.asObservable();
+    this.isLoadingSources$ = this.isLoadingSourcesInternal$.asObservable();
+    this.loadingTimestampFields$ = this.loadingTimestampFieldsInternal$.asObservable();
+    this.timestampFieldOptions$ = this.timestampFieldOptionsInternal$.asObservable();
+    this.rollupIndex$ = this.rollupIndexInternal$.asObservable();
+
     // when list of matched indices is updated always update timestamp fields
     this.matchedIndices$.subscribe(() => this.loadTimestampFields());
 
@@ -90,18 +98,24 @@ export class DataViewEditorService {
   dataViewNames$: Observable<string[]>;
 
   // used for validating rollup data views - must match one and only one data view
-  rollupIndicesCapabilities$ = new BehaviorSubject<RollupIndicesCapsResponse>({});
-  isLoadingSources$ = new BehaviorSubject<boolean>(false);
+  private rollupIndicesCapsInternal$ = new BehaviorSubject<RollupIndicesCapsResponse>({});
+  rollupIndicesCaps$: Observable<RollupIndicesCapsResponse>;
+  private isLoadingSourcesInternal$ = new BehaviorSubject<boolean>(false);
+  isLoadingSources$: Observable<boolean>;
 
-  loadingTimestampFields$ = new BehaviorSubject<boolean>(false);
-  timestampFieldOptions$ = new Subject<TimestampOption[]>();
+  private loadingTimestampFieldsInternal$ = new BehaviorSubject<boolean>(false);
+  loadingTimestampFields$: Observable<boolean>;
+  private timestampFieldOptionsInternal$ = new Subject<TimestampOption[]>();
+  timestampFieldOptions$: Observable<TimestampOption[]>;
 
   // current matched rollup index
-  rollupIndex$ = new BehaviorSubject<string | undefined | null>(undefined);
+  private rollupIndexInternal$ = new BehaviorSubject<string | undefined | null>(undefined);
+  rollupIndex$: Observable<string | undefined | null>;
   // alernates between value and undefined so validation can treat new value as thought its a promise
-  rollupIndexForProvider$ = new Subject<string | undefined | null>();
+  private rollupIndexForProvider$ = new Subject<string | undefined | null>();
 
-  matchedIndices$ = new BehaviorSubject<MatchedIndicesSet>(matchedIndiciesDefault);
+  private matchedIndicesInternal$ = new BehaviorSubject<MatchedIndicesSet>(matchedIndiciesDefault);
+  matchedIndices$: Observable<MatchedIndicesSet>;
 
   // alernates between value and undefined so validation can treat new value as thought its a promise
   private matchedIndicesForProvider$ = new Subject<MatchedIndicesSet | undefined>();
@@ -118,7 +132,7 @@ export class DataViewEditorService {
     } catch (e) {
       // Silently swallow failure responses such as expired trials
     }
-    this.rollupIndicesCapabilities$.next(response);
+    this.rollupIndicesCapsInternal$.next(response);
     return response;
   };
 
@@ -139,7 +153,7 @@ export class DataViewEditorService {
     const indexRequests = [];
     let newRollupIndexName: string | undefined | null;
 
-    this.loadingTimestampFields$.next(true);
+    this.loadingTimestampFieldsInternal$.next(true);
 
     if (query?.endsWith('*')) {
       // todo this isn't working correctly for comma separated index patterns
@@ -181,12 +195,12 @@ export class DataViewEditorService {
       if (type === INDEX_PATTERN_TYPE.ROLLUP) {
         const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
         newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : null;
-        this.rollupIndex$.next(newRollupIndexName);
+        this.rollupIndexInternal$.next(newRollupIndexName);
       } else {
-        this.rollupIndex$.next(null);
+        this.rollupIndexInternal$.next(null);
       }
 
-      this.matchedIndices$.next(matchedIndicesResult);
+      this.matchedIndicesInternal$.next(matchedIndicesResult);
     }
   };
 
@@ -212,7 +226,7 @@ export class DataViewEditorService {
     });
     await this.loadMatchedIndices(this.indexPattern, this.allowHidden, allSrcs, this.type);
 
-    this.isLoadingSources$.next(false);
+    this.isLoadingSourcesInternal$.next(false);
   };
 
   private loadDataViewNames = async (initialName?: string) => {
@@ -272,9 +286,9 @@ export class DataViewEditorService {
   };
 
   private loadTimestampFields = async () => {
-    if (this.matchedIndices$.getValue().exactMatchedIndices.length === 0) {
-      this.timestampFieldOptions$.next([]);
-      this.loadingTimestampFields$.next(false);
+    if (this.matchedIndicesInternal$.getValue().exactMatchedIndices.length === 0) {
+      this.timestampFieldOptionsInternal$.next([]);
+      this.loadingTimestampFieldsInternal$.next(false);
       return;
     }
     const currentLoadingTimestampFieldsIdx = ++this.currentLoadingTimestampFields;
@@ -284,7 +298,7 @@ export class DataViewEditorService {
     };
     if (this.type === INDEX_PATTERN_TYPE.ROLLUP) {
       getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
-      getFieldsOptions.rollupIndex = this.rollupIndex$.getValue() || '';
+      getFieldsOptions.rollupIndex = this.rollupIndexInternal$.getValue() || '';
     }
 
     let timestampOptions: TimestampOption[] = [];
@@ -295,8 +309,8 @@ export class DataViewEditorService {
       );
     } finally {
       if (currentLoadingTimestampFieldsIdx === this.currentLoadingTimestampFields) {
-        this.timestampFieldOptions$.next(timestampOptions);
-        this.loadingTimestampFields$.next(false);
+        this.timestampFieldOptionsInternal$.next(timestampOptions);
+        this.loadingTimestampFieldsInternal$.next(false);
       }
     }
   };

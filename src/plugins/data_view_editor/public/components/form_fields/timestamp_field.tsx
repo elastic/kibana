@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { EuiFormRow, EuiComboBox, EuiFormHelpText, EuiComboBoxOptionOption } from '@elastic/eui';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
@@ -24,9 +24,9 @@ import { TimestampOption, MatchedIndicesSet } from '../../types';
 import { schema } from '../form_schema';
 
 interface Props {
-  options$: Subject<TimestampOption[]>;
-  isLoadingOptions$: BehaviorSubject<boolean>;
-  matchedIndices$: Subject<MatchedIndicesSet>;
+  options$: Observable<TimestampOption[]>;
+  isLoadingOptions$: Observable<boolean>;
+  matchedIndices$: Observable<MatchedIndicesSet>;
 }
 
 const requireTimestampOptionValidator = (options: TimestampOption[]): ValidationConfig => ({

@@ -125,7 +125,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
         id: formData.id,
         name: formData.name,
       };
-      const rollupIndex = dataViewEditorService.rollupIndex$.getValue();
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
         indexPatternStub.type = INDEX_PATTERN_TYPE.ROLLUP;
@@ -165,13 +164,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
   });
 
   const isLoadingSources = useObservable(dataViewEditorService.isLoadingSources$, true);
-
   const existingDataViewNames = useObservable(dataViewEditorService.dataViewNames$);
-
-  const rollupIndicesCapabilities = useObservable(
-    dataViewEditorService.rollupIndicesCapabilities$,
-    {}
-  );
+  const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
+  const rollupIndex = useObservable(dataViewEditorService.rollupIndex$);
 
   useEffect(() => {
     dataViewEditorService.setIndexPattern(title);
@@ -199,7 +194,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     [form]
   );
 
-  // console.log('*** isLoadingSources', );
   if (isLoadingSources || !existingDataViewNames) {
     return <EuiLoadingSpinner size="xl" />;
   }

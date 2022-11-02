@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { StatusMessage } from './status_message';
 import { IndicesList } from './indices_list';
@@ -21,7 +21,7 @@ interface Props {
   type: INDEX_PATTERN_TYPE;
   allowHidden: boolean;
   title: string;
-  matchedIndices$: Subject<MatchedIndicesSet>;
+  matchedIndices$: Observable<MatchedIndicesSet>;
 }
 
 export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }: Props) => {

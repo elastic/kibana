@@ -9,7 +9,7 @@
 import React, { ChangeEvent, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { MatchedItem } from '@kbn/data-views-plugin/public';
 import {
@@ -25,7 +25,7 @@ import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
 interface TitleFieldProps {
   isRollup: boolean;
-  matchedIndices$: Subject<MatchedIndicesSet>;
+  matchedIndices$: Observable<MatchedIndicesSet>;
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
   indexPatternValidationProvider: () => Promise<{
     matchedIndices: MatchedIndicesSet;
