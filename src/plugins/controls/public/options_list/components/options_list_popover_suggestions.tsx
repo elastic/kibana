@@ -51,7 +51,11 @@ export const OptionsListPopoverSuggestions = ({
   );
   const suggestions = showOnlySelected ? selectedOptions : availableOptions;
 
-  if (!loading && (!suggestions || suggestions.length === 0) && !existsSelected) {
+  if (
+    !loading &&
+    (!suggestions || suggestions.length === 0) &&
+    !(showOnlySelected && existsSelected)
+  ) {
     return (
       <div
         className="euiFilterSelect__note"

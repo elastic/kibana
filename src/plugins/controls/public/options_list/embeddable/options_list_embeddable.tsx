@@ -63,6 +63,10 @@ interface OptionsListDataFetchProps {
   filters?: ControlInput['filters'];
 }
 
+const getValidityOfExistsSelection = (invalidSelections: string[] | undefined) => {
+  return invalidSelections?.length === 1 && invalidSelections[0] === 'existsQuery';
+};
+
 export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput, ControlOutput> {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
@@ -169,7 +173,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             actions: {
               clearValidAndInvalidSelections,
               setValidAndInvalidSelections,
-              updateQueryResults,
               publishFilters,
             },
             dispatch,
@@ -188,19 +191,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               }
               newValidSelections.push(selectedOption);
             }
-            batch(() => {
-              dispatch(
-                updateQueryResults({
-                  existsSelectionInvalid: invalidSelections?.includes('existsQuery'),
-                })
-              );
-              dispatch(
-                setValidAndInvalidSelections({
-                  validSelections: newValidSelections,
-                  invalidSelections: newInvalidSelections,
-                })
-              );
-            });
+            dispatch(
+              setValidAndInvalidSelections({
+                validSelections: newValidSelections,
+                invalidSelections: newInvalidSelections,
+              })
+            );
           }
           const newFilters = await this.buildFilter();
           dispatch(publishFilters(newFilters));
@@ -354,7 +350,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         }
         dispatch(
           updateQueryResults({
-            existsSelectionInvalid: invalidSelections?.includes('existsQuery'),
+            existsSelectionInvalid: getValidityOfExistsSelection(invalidSelections),
             availableOptions: suggestions,
             invalidSelections: invalid,
             validSelections: valid,
@@ -373,6 +369,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       batch(() => {
         dispatch(
           updateQueryResults({
+            existsSelectionInvalid: undefined,
             availableOptions: [],
           })
         );
