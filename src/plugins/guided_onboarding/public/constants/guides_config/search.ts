@@ -49,7 +49,7 @@ export const searchConfig: GuideConfig = {
       }),
       descriptionList: [
         i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item1', {
-          defaultMessage: 'Relevance and precision tuning',
+          defaultMessage: 'Tuning for relevance and precision.',
         }),
         i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item2', {
           defaultMessage: 'Adaptive relevance and curations',
