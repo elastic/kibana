@@ -13,7 +13,7 @@ import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
-import { PrivateLocationTestService } from '../uptime/rest/services/private_location_test_service';
+import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('EditMonitor', function () {
