@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import Path from 'path';
 
 export { CoreAppsService } from './src';
 export type {
@@ -13,3 +14,6 @@ export type {
 } from './src';
 // only used by integration tests
 export { FileHashCache, registerRouteForBundle } from './src';
+
+// exporting assets
+export const ASSETS_DIR = Path.resolve(__dirname, '../assets');

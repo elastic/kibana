@@ -40,6 +40,9 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
+  + glob([
+    "assets/**/*"
+  ])
 ]
 
 RUNTIME_DEPS = [
