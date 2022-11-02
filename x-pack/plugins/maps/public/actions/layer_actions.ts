@@ -228,6 +228,9 @@ export function removePreviewLayers() {
   ) => {
     getLayerList(getState()).forEach((layer) => {
       if (layer.isPreviewLayer()) {
+        if (isLayerGroup(layer)) {
+          dispatch(ungroupLayer(layer.getId()));
+        }
         dispatch(removeLayer(layer.getId()));
       }
     });
@@ -613,11 +616,21 @@ export function setLayerQuery(id: string, query: Query) {
 }
 
 export function setLayerParent(id: string, parent: string | undefined) {
-  return {
-    type: UPDATE_LAYER_PROP,
-    id,
-    propName: 'parent',
-    newValue: parent,
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id,
+      propName: 'parent',
+      newValue: parent,
+    });
+
+    if (parent) {
+      // Open parent layer details. Without opening parent details, layer disappears from legend and this confuses users
+      dispatch(showTOCDetails(parent));
+    }
   };
 }
 
@@ -860,6 +873,22 @@ export function createLayerGroup(draggedLayerId: string, combineLayerId: string)
 
     // Move dragged-layer to left of combine-layer
     dispatch(moveLayerToLeftOfTarget(draggedLayerId, combineLayerId));
+  };
+}
+
+function ungroupLayer(layerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layer = getLayerList(getState()).find((findLayer) => findLayer.getId() === layerId);
+    if (!layer || !isLayerGroup(layer)) {
+      return;
+    }
+
+    (layer as LayerGroup).getChildren().forEach((childLayer) => {
+      dispatch(setLayerParent(childLayer.getId(), layer.getParent()));
+    });
   };
 }
 
