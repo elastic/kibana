@@ -13,8 +13,8 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionsViewer } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
-import { mockRule } from '../../../../detections/pages/detection_engine/rules/all/__mocks__/mock';
+import type { Rule } from '../../../rule_management/logic/types';
+import { mockRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import * as i18n from './translations';
 

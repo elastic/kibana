@@ -5,23 +5,27 @@
  * 2.0.
  */
 
+import { mockDataView } from '../../rtl_helpers';
+
 export const testMobileKPIAttr = {
   title: 'Prefilled from exploratory view app',
   description: '',
-  references: [
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    },
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-layer-layer0',
-      type: 'index-pattern',
-    },
-  ],
+  references: [],
   visualizationType: 'lnsXY',
   state: {
+    adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
+    internalReferences: [
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-layer-layer0',
+        type: 'index-pattern',
+      },
+    ],
     datasourceStates: {
       formBased: {
         layers: {
