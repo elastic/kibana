@@ -33,9 +33,6 @@ export interface DataTableState {
 export interface TableById {
   [id: string]: TGridModel;
 }
-
-export const EMPTY_TABLE_BY_ID: TableById = {}; // stable reference
-
 export interface TGridEpicDependencies<State> {
   // kibana$: Observable<CoreStart>;
   storage: Storage;

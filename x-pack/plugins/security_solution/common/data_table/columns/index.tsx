@@ -86,24 +86,3 @@ export type ColumnHeaderOptions = Pick<
   subType?: IFieldSubType;
   type?: string;
 };
-
-export interface ColumnRenderer {
-  isInstance: (columnName: string, data: TimelineNonEcsData[]) => boolean;
-  renderColumn: ({
-    columnName,
-    eventId,
-    field,
-    timelineId,
-    truncate,
-    values,
-    linkValues,
-  }: {
-    columnName: string;
-    eventId: string;
-    field: ColumnHeaderOptions;
-    timelineId: string;
-    truncate?: boolean;
-    values: string[] | null | undefined;
-    linkValues?: string[] | null | undefined;
-  }) => React.ReactNode;
-}
