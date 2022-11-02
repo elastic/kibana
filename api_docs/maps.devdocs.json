@@ -2393,6 +2393,69 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IRasterSource.hasLegendDetails",
+            "type": "Function",
+            "tags": [],
+            "label": "hasLegendDetails",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IRasterSource.renderLegendDetails",
+            "type": "Function",
+            "tags": [],
+            "label": "renderLegendDetails",
+            "description": [],
+            "signature": [
+              "(dataRequest: ",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.DataRequest",
+                "text": "DataRequest"
+              },
+              " | undefined) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IRasterSource.renderLegendDetails.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataRequest",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "public",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-public.DataRequest",
+                    "text": "DataRequest"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
