@@ -444,6 +444,7 @@
 /x-pack/plugins/security_solution/cypress/tasks/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/upgrade_e2e/threat_hunting/cases @elastic/security-threat-hunting-explore
 
+/x-pack/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-explore
