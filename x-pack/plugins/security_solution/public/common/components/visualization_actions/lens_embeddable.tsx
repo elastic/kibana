@@ -72,6 +72,8 @@ const initialState = {
   stats: undefined,
 };
 
+const style = { height: '100%', minWidth: '100px' };
+
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   getLensAttributes,
   height,
@@ -174,7 +176,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
         <LensComponentWrapper height={height}>
           <LensComponent
             id={id}
-            style={{ height: '100%' }}
+            style={style}
             timeRange={timerange}
             attributes={attributes}
             onLoad={onLoad}

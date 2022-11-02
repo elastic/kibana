@@ -105,7 +105,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                 />
               )}
               {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
-              <EuiFlexGroup>
+              <EuiFlexGroup gutterSize={isChartEmbeddablesEnabled ? 'none' : 'l'}>
                 {enableBarChart && (
                   <FlexItem>
                     {isChartEmbeddablesEnabled && barChartLensAttributes ? (

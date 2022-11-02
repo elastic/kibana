@@ -22,7 +22,7 @@ const MetricEmbeddableComponent = ({
   inspectTitle?: string;
 }) => {
   return (
-    <EuiFlexGroup gutterSize="none">
+    <EuiFlexGroup gutterSize="none" className="metricEmbeddable">
       {fields.map((field) => (
         <FlexItem key={`stat-items-field-${field.key}`}>
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>

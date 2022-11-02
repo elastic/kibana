@@ -20,7 +20,7 @@ import type { ChartSeriesData, ChartData } from '../charts/common';
 
 import type { StatItem } from './types';
 
-export const ChartHeight = '100px';
+export const ChartHeight = '120px';
 
 export const FlexGroup = styled(EuiFlexGroup)`
   .no-margin {
