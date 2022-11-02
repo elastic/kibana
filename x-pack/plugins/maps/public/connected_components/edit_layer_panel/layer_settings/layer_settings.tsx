@@ -268,7 +268,7 @@ export function LayerSettings(props: Props) {
               </li>
               <li>
                 {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupRemove', {
-                  defaultMessage: 'To remove a layer, drag it above or below the group',
+                  defaultMessage: 'To remove a layer, drag it above or below the group.',
                 })}
               </li>
             </ul>
