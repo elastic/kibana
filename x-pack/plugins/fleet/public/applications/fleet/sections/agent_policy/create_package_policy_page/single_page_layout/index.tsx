@@ -99,7 +99,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion);
+  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease: true });
   const packageInfo = useMemo(() => {
     if (packageInfoData && packageInfoData.item) {
       return packageInfoData.item;
