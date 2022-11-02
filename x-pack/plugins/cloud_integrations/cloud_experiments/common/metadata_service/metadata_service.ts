@@ -21,18 +21,18 @@ import {
 import { type Duration } from 'moment';
 
 export interface MetadataServiceStartContract {
-  hasDataFetcher: () => Promise<{ has_data: boolean }>;
+  hasDataFetcher: () => Promise<{ hasData: boolean }>;
 }
 
 export interface UserMetadata extends Record<string, string | boolean | number | undefined> {
   // Static values
   userId: string;
   kibanaVersion: string;
-  trial_end_date?: string;
-  is_elastic_staff_owned?: boolean;
+  trialEndDate?: string;
+  isElasticStaff?: boolean;
   // Dynamic/calculated values
-  in_trial?: boolean;
-  has_data?: boolean;
+  inTrial?: boolean;
+  hasData?: boolean;
 }
 
 export interface MetadataServiceConfig {
@@ -50,12 +50,12 @@ export class MetadataService {
 
     // Calculate `in_trial` based on the `trial_end_date`.
     // Elastic Cloud allows customers to end their trials earlier or even extend it in some cases, but this is a good compromise for now.
-    const trialEndDate = initialUserMetadata.trial_end_date;
+    const trialEndDate = initialUserMetadata.trialEndDate;
     if (trialEndDate) {
       this.scheduleUntil(
-        () => ({ in_trial: Date.now() <= new Date(trialEndDate).getTime() }),
+        () => ({ inTrial: Date.now() <= new Date(trialEndDate).getTime() }),
         // Stop recalculating in_trial when the user is no-longer in trial
-        (metadata) => metadata.in_trial === false
+        (metadata) => metadata.inTrial === false
       );
     }
   }
@@ -64,7 +64,7 @@ export class MetadataService {
     return this._userMetadata$.pipe(
       filter(Boolean), // Ensure we don't return undefined
       debounceTime(100), // Swallows multiple emissions that may occur during bootstrap
-      distinct((meta) => [meta.in_trial, meta.has_data].join('-')), // Checks if any of the dynamic fields have changed
+      distinct((meta) => [meta.inTrial, meta.hasData].join('-')), // Checks if any of the dynamic fields have changed
       shareReplay(1)
     );
   }
@@ -76,7 +76,7 @@ export class MetadataService {
     this.scheduleUntil(
       async () => hasDataFetcher(),
       // Stop checking the moment the user has any data
-      (metadata) => metadata.has_data === true
+      (metadata) => metadata.hasData === true
     );
   }
 
