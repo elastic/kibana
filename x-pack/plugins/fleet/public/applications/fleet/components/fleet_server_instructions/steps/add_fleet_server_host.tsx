@@ -6,7 +6,8 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { EuiSelect, EuiStepProps } from '@elastic/eui';
+import type { EuiStepProps } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
