@@ -152,7 +152,7 @@ export const AddFleetServerLanding: React.FunctionComponent = () => {
           <EuiTitle size="m">
             <h2 data-test-subj="addFleetServerHeader">
               <FormattedMessage
-                id="xpack.fleet.fleetServerFlyout.title"
+                id="xpack.fleet.fleetServerLanding.title"
                 defaultMessage="Add a Fleet Server"
               />
             </h2>
@@ -162,7 +162,7 @@ export const AddFleetServerLanding: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiText>
             <FormattedMessage
-              id="xpack.fleet.fleetServerFlyout.instructions"
+              id="xpack.fleet.fleetServerLanding.instructions"
               defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. Follow the instructions below to set up a Fleet Server. For more information, see the {userGuideLink}"
               values={{
                 userGuideLink: (
@@ -186,14 +186,18 @@ export const AddFleetServerLanding: React.FunctionComponent = () => {
           <EuiToolTip
             content={
               <FormattedMessage
-                id="xpack.fleet.agentList.addFleetServerButton.tooltip"
+                id="xpack.fleet.fleetServerLanding.addFleetServerButton.tooltip"
                 defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
               />
             }
           >
-            <EuiButton onClick={onClickAddFleetServer} fill data-test-subj="addFleetServerButton">
+            <EuiButton
+              onClick={onClickAddFleetServer}
+              fill
+              data-test-subj="fleetServerLanding.addFleetServerButton"
+            >
               <FormattedMessage
-                id="xpack.fleet.agentList.addFleetServerButton"
+                id="xpack.fleet.fleetServerLanding.addFleetServerButton"
                 defaultMessage="Add Fleet Server"
               />
             </EuiButton>

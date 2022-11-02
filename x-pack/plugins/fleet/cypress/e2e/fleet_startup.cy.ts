@@ -14,6 +14,7 @@ import {
   ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON,
   ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON,
   FLEET_SERVER_SETUP,
+  LANDING_PAGE_ADD_FLEET_SERVER_BUTTON,
 } from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { verifyPolicy, verifyAgentPackage, navigateToTab } from '../tasks/fleet';
@@ -80,6 +81,8 @@ describe('Fleet startup', () => {
     });
 
     it('should create Fleet Server policy', () => {
+      cy.getBySel(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).click();
+
       cy.getBySel(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
       cy.getBySel(CREATE_FLEET_SERVER_POLICY_BTN).click();
 
