@@ -263,7 +263,7 @@ export function LayerSettings(props: Props) {
               <li>
                 {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToPosition', {
                   defaultMessage:
-                    'To add another layer, drag it anywhere above the last layer in the group',
+                    'To add another layer, drag it anywhere above the last layer in the group.',
                 })}
               </li>
               <li>
