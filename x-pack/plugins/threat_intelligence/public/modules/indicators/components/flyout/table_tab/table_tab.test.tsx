@@ -14,7 +14,7 @@ import {
   RawIndicatorFieldId,
 } from '../../../../../../common/types/indicator';
 import { IndicatorsFlyoutTable, TABLE_TEST_ID } from '.';
-import { unwrapValue } from '../../../utils/unwrap_value';
+import { unwrapValue } from '../../../utils';
 import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
 
 const mockIndicator: Indicator = generateMockIndicator();

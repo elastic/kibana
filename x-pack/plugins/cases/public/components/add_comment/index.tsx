@@ -17,14 +17,21 @@ import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elasti
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import {
+  Form,
+  useForm,
+  UseField,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CommentType } from '../../../common/api';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { Case } from '../../containers/types';
-import { EuiMarkdownEditorRef, MarkdownEditorForm } from '../markdown_editor';
-import { Form, useForm, UseField, useFormData } from '../../common/shared_imports';
+import type { Case } from '../../containers/types';
+import type { EuiMarkdownEditorRef } from '../markdown_editor';
+import { MarkdownEditorForm } from '../markdown_editor';
 
 import * as i18n from './translations';
-import { schema, AddCommentFormSchema } from './schema';
+import type { AddCommentFormSchema } from './schema';
+import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
 

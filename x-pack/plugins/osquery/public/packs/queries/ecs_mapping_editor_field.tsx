@@ -49,8 +49,8 @@ import {
   convertECSMappingToArray,
   convertECSMappingToObject,
 } from '../../../common/schemas/common/utils';
-import ECSSchema from '../../common/schemas/ecs/v8.4.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.4.0.json';
+import ECSSchema from '../../common/schemas/ecs/v8.5.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.5.1.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -728,19 +728,13 @@ interface OsqueryColumn {
 
 export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEditorFieldProps) => {
   const {
-    setError,
-    clearErrors,
     watch: watchRoot,
     register: registerRoot,
     setValue: setValueRoot,
     formState: { errors: errorsRoot },
   } = useFormContext<{ query: string; ecs_mapping: ECSMapping }>();
 
-  useEffect(() => {
-    registerRoot('ecs_mapping');
-  }, [registerRoot]);
-
-  const [query, ecsMapping] = watchRoot(['query', 'ecs_mapping'], { ecs_mapping: {} });
+  const [query, ecsMapping] = watchRoot(['query', 'ecs_mapping']);
   const { control, trigger, watch, formState, resetField, getFieldState } = useForm<{
     ecsMappingArray: ECSMappingArray;
   }>({
@@ -760,6 +754,16 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
   const formValue = watch();
   const ecsMappingArrayState = getFieldState('ecsMappingArray', formState);
   const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
+
+  useEffect(() => {
+    registerRoot('ecs_mapping', {
+      validate: () => {
+        const nonEmptyErrors = reject(ecsMappingArrayState.error, isEmpty) as InternalFieldErrors[];
+
+        return !nonEmptyErrors.length;
+      },
+    });
+  }, [ecsMappingArrayState.error, errorsRoot, registerRoot]);
 
   useEffect(() => {
     const subscription = watchRoot((data, payload) => {
@@ -1019,10 +1023,16 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
       orderBy(suggestions, ['value.suggestion_label', 'value.tableOrder'], ['asc', 'desc']),
       'label'
     );
-    setOsquerySchemaOptions((prevValue) =>
-      !deepEqual(prevValue, newOptions) ? newOptions : prevValue
-    );
-  }, [query]);
+    setOsquerySchemaOptions((prevValue) => {
+      if (!deepEqual(prevValue, newOptions)) {
+        trigger();
+
+        return newOptions;
+      }
+
+      return prevValue;
+    });
+  }, [query, trigger]);
 
   useEffect(() => {
     const parsedMapping = convertECSMappingToObject(formValue.ecsMappingArray);
@@ -1032,27 +1042,6 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
       });
     }
   }, [setValueRoot, formValue, ecsMappingArrayState.isDirty, ecsMapping]);
-
-  useEffect(() => {
-    if (!formState.isValid) {
-      const nonEmptyErrors = reject(ecsMappingArrayState.error, isEmpty) as InternalFieldErrors[];
-      if (nonEmptyErrors.length) {
-        setError('ecs_mapping', {
-          type: nonEmptyErrors[0].key?.type ?? 'custom',
-          message: nonEmptyErrors[0].key?.message ?? '',
-        });
-      }
-    } else {
-      clearErrors('ecs_mapping');
-    }
-  }, [
-    errorsRoot,
-    clearErrors,
-    formState.isValid,
-    formState.errors,
-    setError,
-    ecsMappingArrayState.error,
-  ]);
 
   return (
     <>

@@ -133,7 +133,6 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
               }
             ),
             settings: tailSamplingSettings,
-            isBeta: false,
             isPlatinumLicence: true,
           },
         ]

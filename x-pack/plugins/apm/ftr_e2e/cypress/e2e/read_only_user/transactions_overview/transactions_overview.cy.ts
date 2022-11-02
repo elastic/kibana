@@ -49,17 +49,17 @@ describe('Transactions Overview', () => {
 
   it('persists transaction type selected when navigating to Overview tab', () => {
     cy.visitKibana(serviceTransactionsHref);
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+    cy.getByTestSubj('headerFilterTransactionType').should(
       'have.value',
       'request'
     );
-    cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+    cy.getByTestSubj('headerFilterTransactionType').select('Worker');
+    cy.getByTestSubj('headerFilterTransactionType').should(
       'have.value',
       'Worker'
     );
     cy.get('a[href*="/app/apm/services/opbeans-node/overview"]').click();
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+    cy.getByTestSubj('headerFilterTransactionType').should(
       'have.value',
       'Worker'
     );

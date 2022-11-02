@@ -28,7 +28,7 @@ import {
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { should } from './get_service_metadata_icons';
 
 type ServiceMetadataDetailsRaw = Pick<
@@ -59,6 +59,7 @@ export interface ServiceMetadataDetails {
     type?: string;
     functionNames?: string[];
     faasTriggerTypes?: string[];
+    hostArchitecture?: string;
   };
   cloud?: {
     provider?: string;
@@ -78,19 +79,17 @@ export interface ServiceMetadataDetails {
 
 export async function getServiceMetadataDetails({
   serviceName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
 }: {
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }): Promise<ServiceMetadataDetails> {
-  const { apmEventClient } = setup;
-
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...rangeQuery(start, end),
@@ -104,6 +103,7 @@ export async function getServiceMetadataDetails({
         ProcessorEvent.metric,
       ],
     },
+    sort: [{ '@timestamp': { order: 'desc' as const } }],
     body: {
       track_total_hits: 1,
       size: 1,
@@ -214,6 +214,7 @@ export async function getServiceMetadataDetails({
           faasTriggerTypes: response.aggregations?.faasTriggerTypes.buckets.map(
             (bucket) => bucket.key as string
           ),
+          hostArchitecture: host?.architecture,
         }
       : undefined;
 

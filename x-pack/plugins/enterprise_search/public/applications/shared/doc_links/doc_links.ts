@@ -61,10 +61,9 @@ class DocLinks {
   public connectorsMongoDB: string;
   public connectorsMySQL: string;
   public connectorsWorkplaceSearch: string;
-  public contentExtraction: string;
-  public crawlerGettingStarted: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
+  public deployTrainedModels: string;
   public documentLevelSecurity: string;
   public elasticsearchCreateIndex: string;
   public elasticsearchGettingStarted: string;
@@ -174,10 +173,9 @@ class DocLinks {
     this.connectorsMongoDB = '';
     this.connectorsMySQL = '';
     this.connectorsWorkplaceSearch = '';
-    this.contentExtraction = '';
-    this.crawlerGettingStarted = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
+    this.deployTrainedModels = '';
     this.documentLevelSecurity = '';
     this.elasticsearchCreateIndex = '';
     this.elasticsearchGettingStarted = '';
@@ -289,10 +287,9 @@ class DocLinks {
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
-    this.contentExtraction = docLinks.links.enterpriseSearch.contentExtraction;
-    this.crawlerGettingStarted = docLinks.links.enterpriseSearch.crawlerGettingStarted;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
+    this.deployTrainedModels = docLinks.links.enterpriseSearch.deployTrainedModels;
     this.documentLevelSecurity = docLinks.links.enterpriseSearch.documentLevelSecurity;
     this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
     this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;

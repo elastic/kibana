@@ -8,10 +8,48 @@
 import { mockedQueryService, mockedSearchService } from '../../../common/mocks/test_providers';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { AGGREGATION_NAME, createFetchAggregatedIndicators } from './fetch_aggregated_indicators';
+import { Aggregation, convertAggregationToChartSeries, createFetchAggregatedIndicators } from '.';
+import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../../../../common/constants';
 
 const aggregationResponse = {
-  rawResponse: { aggregations: { [AGGREGATION_NAME]: { buckets: [] } } },
+  rawResponse: { aggregations: { [BARCHART_AGGREGATION_NAME]: { buckets: [] } } },
+};
+
+const aggregation1: Aggregation = {
+  events: {
+    buckets: [
+      {
+        doc_count: 0,
+        key: 1641016800000,
+        key_as_string: '1 Jan 2022 06:00:00 GMT',
+      },
+      {
+        doc_count: 10,
+        key: 1641038400000,
+        key_as_string: '1 Jan 2022 12:00:00 GMT',
+      },
+    ],
+  },
+  doc_count: 0,
+  key: '[Filebeat] AbuseCH Malware',
+};
+const aggregation2: Aggregation = {
+  events: {
+    buckets: [
+      {
+        doc_count: 20,
+        key: 1641016800000,
+        key_as_string: '1 Jan 2022 06:00:00 GMT',
+      },
+      {
+        doc_count: 8,
+        key: 1641038400000,
+        key_as_string: '1 Jan 2022 12:00:00 GMT',
+      },
+    ],
+  },
+  doc_count: 0,
+  key: '[Filebeat] AbuseCH MalwareBazaar',
 };
 
 describe('FetchAggregatedIndicatorsService', () => {
@@ -46,33 +84,13 @@ describe('FetchAggregatedIndicatorsService', () => {
           expect.objectContaining({
             params: expect.objectContaining({
               body: expect.objectContaining({
-                size: 0,
                 query: expect.objectContaining({ bool: expect.anything() }),
-                runtime_mappings: {
-                  'threat.indicator.name': { script: expect.anything(), type: 'keyword' },
-                  'threat.indicator.name_origin': { script: expect.anything(), type: 'keyword' },
-                },
-                aggregations: {
-                  [AGGREGATION_NAME]: {
-                    terms: {
-                      field: 'myField',
-                    },
-                    aggs: {
-                      events: {
-                        date_histogram: {
-                          field: '@timestamp',
-                          fixed_interval: expect.anything(),
-                          min_doc_count: 0,
-                          extended_bounds: expect.anything(),
-                        },
-                      },
-                    },
-                  },
-                },
-                fields: ['@timestamp', 'myField'],
               }),
               index: [],
             }),
+            factoryQueryType: FactoryQueryType.Barchart,
+            dateRange: expect.anything(),
+            field: 'myField',
           }),
           expect.anything()
         );
@@ -113,5 +131,32 @@ describe('FetchAggregatedIndicatorsService', () => {
         expect.assertions(1);
       });
     });
+  });
+});
+
+describe('convertAggregationToChartSeries', () => {
+  it('should convert Aggregation[] to ChartSeries[]', () => {
+    expect(convertAggregationToChartSeries([aggregation1, aggregation2])).toEqual([
+      {
+        x: '1 Jan 2022 06:00:00 GMT',
+        y: 0,
+        g: '[Filebeat] AbuseCH Malware',
+      },
+      {
+        x: '1 Jan 2022 12:00:00 GMT',
+        y: 10,
+        g: '[Filebeat] AbuseCH Malware',
+      },
+      {
+        x: '1 Jan 2022 06:00:00 GMT',
+        y: 20,
+        g: '[Filebeat] AbuseCH MalwareBazaar',
+      },
+      {
+        x: '1 Jan 2022 12:00:00 GMT',
+        y: 8,
+        g: '[Filebeat] AbuseCH MalwareBazaar',
+      },
+    ]);
   });
 });

@@ -6,81 +6,39 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { HostsKpiHosts } from './hosts';
 import { HostsKpiUniqueIps } from './unique_ips';
 import type { HostsKpiProps } from './types';
-import { CallOutSwitcher } from '../../../common/components/callouts';
-import * as i18n from './translations';
-import { RiskScoreDocLink } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
-import { getHostRiskIndex, RiskQueries, RiskScoreEntity } from '../../../../common/search_strategy';
-import { useRiskScoreFeatureStatus } from '../../../risk_score/containers/feature_status';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
-    const spaceId = useSpaceId();
-    const defaultIndex = spaceId ? getHostRiskIndex(spaceId) : undefined;
-    const { isEnabled, isLicenseValid, isLoading } = useRiskScoreFeatureStatus(
-      RiskQueries.hostsRiskScore,
-      defaultIndex
-    );
-
-    return (
-      <>
-        {isLicenseValid && !isEnabled && !isLoading && (
-          <>
-            <CallOutSwitcher
-              namespace="hosts"
-              condition
-              message={{
-                type: 'primary',
-                id: 'hostRiskModule',
-                title: i18n.ENABLE_HOST_RISK_TEXT,
-                description: (
-                  <>
-                    {i18n.LEARN_MORE}{' '}
-                    <RiskScoreDocLink
-                      riskScoreEntity={RiskScoreEntity.host}
-                      title={i18n.HOST_RISK_DATA}
-                    />
-                    <EuiSpacer />
-                  </>
-                ),
-              }}
-            />
-            <EuiSpacer size="l" />
-          </>
-        )}
-
-        <EuiFlexGroup wrap>
-          <EuiFlexItem grow={1}>
-            <HostsKpiHosts
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              updateDateRange={updateDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
-            <HostsKpiUniqueIps
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              updateDateRange={updateDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }
+  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => (
+    <EuiFlexGroup wrap>
+      <EuiFlexItem grow={1}>
+        <HostsKpiHosts
+          filterQuery={filterQuery}
+          from={from}
+          indexNames={indexNames}
+          to={to}
+          updateDateRange={updateDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={2}>
+        <HostsKpiUniqueIps
+          filterQuery={filterQuery}
+          from={from}
+          indexNames={indexNames}
+          to={to}
+          updateDateRange={updateDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  )
 );
 
 HostsKpiComponent.displayName = 'HostsKpiComponent';

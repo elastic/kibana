@@ -71,7 +71,7 @@ as uiSettings within the code.
 
 |{kib-repo}blob/{branch}/src/plugins/data_views/README.mdx[dataViews]
 |The data views API provides a consistent method of structuring and formatting documents
-and field lists across the various Kibana apps. Its typically used in conjunction with
+and field lists across the various Kibana apps. It's typically used in conjunction with
 <DocLink id="kibDevTutorialDataSearchAndSessions" section="high-level-search" text="SearchSource" /> for composing queries.
 
 
@@ -174,6 +174,10 @@ for use in their own application.
 
 |{kib-repo}blob/{branch}/src/plugins/field_formats/README.md[fieldFormats]
 |Index pattern fields formatters
+
+
+|{kib-repo}blob/{branch}/src/plugins/files/README.md[files]
+|File upload, download, sharing, and serving over HTTP implementation in Kibana.
 
 
 |{kib-repo}blob/{branch}/src/plugins/guided_onboarding/README.md[guidedOnboarding]
@@ -311,6 +315,10 @@ In general this plugin provides:
 |This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
 
 
+|{kib-repo}blob/{branch}/src/plugins/unified_histogram/README.md[unifiedHistogram]
+|The unifiedHistogram plugin provides UI components to create a layout including a resizable histogram and a main display.
+
+
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
 |Contains all the components of Kibana's unified search experience. Specifically:
 
@@ -424,8 +432,24 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The cloud plugin adds Cloud-specific features to Kibana.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat/README.md[cloudChat]
+|Integrates with DriftChat in order to provide live support to our Elastic Cloud users. This plugin should only run on Elastic Cloud.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
 |The Cloud Experiments Service provides the necessary APIs to implement A/B testing scenarios, fetching the variations in configuration and reporting back metrics to track conversion rates of the experiments.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_full_story/README.md[cloudFullStory]
+|Integrates with FullStory in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_gain_sight/README.md[cloudGainsight]
+|Integrates with Gainsight in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_links/README.md[cloudLinks]
+|Adds all the links to the Elastic Cloud console.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_security_posture/README.md[cloudSecurityPosture]
@@ -469,10 +493,6 @@ activities.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/files/README.md[files]
-|File upload, download, sharing, and serving over HTTP implementation in Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]

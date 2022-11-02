@@ -10,9 +10,9 @@ import { Story } from '@storybook/react';
 import { EuiContextMenuPanel, EuiDataGrid, EuiDataGridColumn } from '@elastic/eui';
 import { EuiDataGridColumnVisibility } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
+import { IndicatorsFiltersContext } from '../../../indicators';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { FilterInButtonIcon, FilterInContextMenu, FilterInCellAction } from '.';
-import { IndicatorsFiltersContext } from '../../../indicators/containers/indicators_filters/context';
+import { FilterInButtonIcon, FilterInCellAction, FilterInContextMenu } from '.';
 
 export default {
   title: 'FilterIn',

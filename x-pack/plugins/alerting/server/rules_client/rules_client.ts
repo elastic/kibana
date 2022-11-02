@@ -33,6 +33,7 @@ import {
   SavedObjectsUtils,
   SavedObjectAttributes,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkDeleteObject,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
@@ -41,7 +42,11 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  TaskManagerStartContract,
+  TaskStatus,
+} from '@kbn/task-manager-plugin/server';
 import {
   IEvent,
   IEventLogClient,
@@ -100,6 +105,7 @@ import {
   mapSortField,
   validateOperationOnAttributes,
   retryIfBulkEditConflicts,
+  retryIfBulkDeleteConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
 } from './lib';
@@ -174,7 +180,7 @@ export interface RuleAggregation {
   };
 }
 
-export interface RuleBulkEditAggregation {
+export interface RuleBulkOperationAggregation {
   alertTypeId: {
     buckets: Array<{
       key: string[];
@@ -293,8 +299,27 @@ export type BulkEditOptions<Params extends RuleTypeParams> =
   | BulkEditOptionsFilter<Params>
   | BulkEditOptionsIds<Params>;
 
+export interface BulkDeleteOptionsFilter {
+  filter?: string | KueryNode;
+}
+
+export interface BulkDeleteOptionsIds {
+  ids?: string[];
+}
+
+export type BulkDeleteOptions = BulkDeleteOptionsFilter | BulkDeleteOptionsIds;
+
 export interface BulkEditError {
   message: string;
+  rule: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface BulkDeleteError {
+  message: string;
+  status: number;
   rule: {
     id: string;
     name: string;
@@ -394,6 +419,7 @@ export interface GetGlobalExecutionKPIParams {
   dateStart: string;
   dateEnd?: string;
   filter?: string;
+  namespaces?: Array<string | undefined>;
 }
 
 export interface GetGlobalExecutionLogParams {
@@ -403,6 +429,7 @@ export interface GetGlobalExecutionLogParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+  namespaces?: Array<string | undefined>;
 }
 
 export interface GetActionErrorLogByIdParams {
@@ -413,6 +440,7 @@ export interface GetActionErrorLogByIdParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+  namespace?: string;
 }
 
 interface ScheduleTaskOptions {
@@ -429,9 +457,12 @@ const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const preconfiguredConnectorActionRefPrefix = 'preconfigured:';
 
-const MAX_RULES_NUMBER_FOR_BULK_EDIT = 10000;
+const MAX_RULES_NUMBER_FOR_BULK_OPERATION = 10000;
 const API_KEY_GENERATE_CONCURRENCY = 50;
 const RULE_TYPE_CHECKS_CONCURRENCY = 50;
+
+const actionErrorLogDefaultFilter =
+  'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
@@ -711,9 +742,11 @@ export class RulesClient {
   public async resolve<Params extends RuleTypeParams = never>({
     id,
     includeLegacyId,
+    includeSnoozeData = false,
   }: {
     id: string;
     includeLegacyId?: boolean;
+    includeSnoozeData?: boolean;
   }): Promise<ResolvedSanitizedRule<Params>> {
     const { saved_object: result, ...resolveResponse } =
       await this.unsecuredSavedObjectsClient.resolve<RawRule>('alert', id);
@@ -746,7 +779,9 @@ export class RulesClient {
       result.attributes.alertTypeId,
       result.attributes,
       result.references,
-      includeLegacyId
+      includeLegacyId,
+      false,
+      includeSnoozeData
     );
 
     return {
@@ -922,6 +957,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
+    namespaces,
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -972,7 +1008,8 @@ export class RulesClient {
             perPage,
             sort,
           }),
-        }
+        },
+        namespaces
       );
 
       return formatExecutionLogResult(aggResult);
@@ -1021,9 +1058,6 @@ export class RulesClient {
       })
     );
 
-    const defaultFilter =
-      'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
-
     // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
     const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
@@ -1040,10 +1074,86 @@ export class RulesClient {
           end: parsedDateEnd.toISOString(),
           page,
           per_page: perPage,
-          filter: filter ? `(${defaultFilter}) AND (${filter})` : defaultFilter,
+          filter: filter
+            ? `(${actionErrorLogDefaultFilter}) AND (${filter})`
+            : actionErrorLogDefaultFilter,
           sort: convertEsSortToEventLogSort(sort),
         },
         rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
+      return formatExecutionErrorsResult(errorResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getActionErrorLog(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getActionErrorLogWithAuth({
+    id,
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+    namespace,
+  }: GetActionErrorLogByIdParams): Promise<IExecutionErrorsResult> {
+    this.logger.debug(`getActionErrorLogWithAuth(): getting action error logs for rule ${id}`);
+
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'kibana.alert.rule.rule_type_id',
+            consumer: 'kibana.alert.rule.consumer',
+          },
+        }
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const errorResult = await eventLogClient.findEventsWithAuthFilter(
+        'alert',
+        [id],
+        authorizationTuple.filter as KueryNode,
+        namespace,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          page,
+          per_page: perPage,
+          filter: filter
+            ? `(${actionErrorLogDefaultFilter}) AND (${filter})`
+            : actionErrorLogDefaultFilter,
+          sort: convertEsSortToEventLogSort(sort),
+        }
       );
       return formatExecutionErrorsResult(errorResult);
     } catch (err) {
@@ -1058,6 +1168,7 @@ export class RulesClient {
     dateStart,
     dateEnd,
     filter,
+    namespaces,
   }: GetGlobalExecutionKPIParams) {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -1103,7 +1214,8 @@ export class RulesClient {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
           aggs: getExecutionKPIAggregation(filter),
-        }
+        },
+        namespaces
       );
 
       return formatExecutionKPIResult(aggResult);
@@ -1687,6 +1799,212 @@ export class RulesClient {
     );
   }
 
+  private getAuthorizationFilter = async () => {
+    try {
+      const authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Rule,
+        alertingAuthorizationFilterOpts
+      );
+      return authorizationTuple.filter;
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.DELETE,
+          error,
+        })
+      );
+      throw error;
+    }
+  };
+
+  public bulkDeleteRules = async (options: BulkDeleteOptions) => {
+    const filter = (options as BulkDeleteOptionsFilter).filter;
+    const ids = (options as BulkDeleteOptionsIds).ids;
+
+    if (!ids && !filter) {
+      throw Boom.badRequest(
+        "Either 'ids' or 'filter' property in method's arguments should be provided"
+      );
+    }
+
+    if (ids?.length === 0) {
+      throw Boom.badRequest("'ids' property should not be an empty array");
+    }
+
+    if (ids && filter) {
+      throw Boom.badRequest(
+        "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
+      );
+    }
+
+    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
+    const authorizationFilter = await this.getAuthorizationFilter();
+
+    const kueryNodeFilterWithAuth =
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+        : kueryNodeFilter;
+
+    const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
+      RawRule,
+      RuleBulkOperationAggregation
+    >({
+      filter: kueryNodeFilterWithAuth,
+      page: 1,
+      perPage: 0,
+      type: 'alert',
+      aggs: {
+        alertTypeId: {
+          multi_terms: {
+            terms: [
+              { field: 'alert.attributes.alertTypeId' },
+              { field: 'alert.attributes.consumer' },
+            ],
+          },
+        },
+      },
+    });
+
+    if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
+      throw Boom.badRequest(
+        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk delete`
+      );
+    }
+
+    const buckets = aggregations?.alertTypeId.buckets;
+
+    if (buckets === undefined || buckets?.length === 0) {
+      throw Boom.badRequest('No rules found for bulk delete');
+    }
+
+    await pMap(
+      buckets,
+      async ({ key: [ruleType, consumer] }) => {
+        this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
+        try {
+          await this.authorization.ensureAuthorized({
+            ruleTypeId: ruleType,
+            consumer,
+            operation: WriteOperations.BulkDelete,
+            entity: AlertingAuthorizationEntity.Rule,
+          });
+        } catch (error) {
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.DELETE,
+              error,
+            })
+          );
+          throw error;
+        }
+      },
+      { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
+    );
+
+    const { apiKeysToInvalidate, errors, taskIdsToDelete } = await retryIfBulkDeleteConflicts(
+      this.logger,
+      (filterKueryNode: KueryNode | null) => this.bulkDeleteWithOCC({ filter: filterKueryNode }),
+      kueryNodeFilterWithAuth
+    );
+
+    const taskIdsFailedToBeDeleted: string[] = [];
+    if (taskIdsToDelete.length > 0) {
+      try {
+        const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
+        resultFromDeletingTasks?.statuses.forEach((status) => {
+          if (!status.success) {
+            taskIdsFailedToBeDeleted.push(status.id);
+          }
+        });
+        this.logger.debug(
+          `Successfully deleted schedules for underlying tasks: ${taskIdsToDelete
+            .filter((id) => taskIdsFailedToBeDeleted.includes(id))
+            .join(', ')}`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
+            ', '
+          )}. TaskManager bulkRemoveIfExist failed with Error: ${error.message}`
+        );
+      }
+    }
+
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys: apiKeysToInvalidate },
+      this.logger,
+      this.unsecuredSavedObjectsClient
+    );
+
+    return { errors, total, taskIdsFailedToBeDeleted };
+  };
+
+  private bulkDeleteWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
+    const rulesFinder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+        {
+          filter,
+          type: 'alert',
+          perPage: 100,
+          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
+        }
+      );
+
+    const rules: SavedObjectsBulkDeleteObject[] = [];
+    const apiKeysToInvalidate: string[] = [];
+    const taskIdsToDelete: string[] = [];
+    const errors: BulkDeleteError[] = [];
+    const apiKeyToRuleIdMapping: Record<string, string> = {};
+    const taskIdToRuleIdMapping: Record<string, string> = {};
+    const ruleNameToRuleIdMapping: Record<string, string> = {};
+
+    for await (const response of rulesFinder.find()) {
+      for (const rule of response.saved_objects) {
+        if (rule.attributes.apiKey) {
+          apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
+        }
+        if (rule.attributes.name) {
+          ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+        }
+        if (rule.attributes.scheduledTaskId) {
+          taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
+        }
+        rules.push(rule);
+
+        this.auditLogger?.log(
+          ruleAuditEvent({
+            action: RuleAuditAction.DELETE,
+            outcome: 'unknown',
+            savedObject: { type: 'alert', id: rule.id },
+          })
+        );
+      }
+    }
+
+    const result = await this.unsecuredSavedObjectsClient.bulkDelete(rules);
+
+    result.statuses.forEach((status) => {
+      if (status.error === undefined) {
+        if (apiKeyToRuleIdMapping[status.id]) {
+          apiKeysToInvalidate.push(apiKeyToRuleIdMapping[status.id]);
+        }
+        if (taskIdToRuleIdMapping[status.id]) {
+          taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
+        }
+      } else {
+        errors.push({
+          message: status.error.message ?? 'n/a',
+          status: status.error.statusCode,
+          rule: {
+            id: status.id,
+            name: ruleNameToRuleIdMapping[status.id] ?? 'n/a',
+          },
+        });
+      }
+    });
+    return { apiKeysToInvalidate, errors, taskIdsToDelete };
+  };
+
   public async bulkEdit<Params extends RuleTypeParams>(
     options: BulkEditOptions<Params>
   ): Promise<{
@@ -1729,7 +2047,7 @@ export class RulesClient {
 
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
       RawRule,
-      RuleBulkEditAggregation
+      RuleBulkOperationAggregation
     >({
       filter: qNodeFilterWithAuth,
       page: 1,
@@ -1747,9 +2065,9 @@ export class RulesClient {
       },
     });
 
-    if (total > MAX_RULES_NUMBER_FOR_BULK_EDIT) {
+    if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
       throw Boom.badRequest(
-        `More than ${MAX_RULES_NUMBER_FOR_BULK_EDIT} rules matched for bulk edit`
+        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk edit`
       );
     }
     const buckets = aggregations?.alertTypeId.buckets;
@@ -2977,9 +3295,27 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-    const taskDoc = attributes.scheduledTaskId
-      ? await this.taskManager.get(attributes.scheduledTaskId)
-      : null;
+    // Check that the rule is enabled
+    if (!attributes.enabled) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.disabledRuleError', {
+        defaultMessage: 'Error running rule: rule is disabled',
+      });
+    }
+
+    let taskDoc: ConcreteTaskInstance | null = null;
+    try {
+      taskDoc = attributes.scheduledTaskId
+        ? await this.taskManager.get(attributes.scheduledTaskId)
+        : null;
+    } catch (err) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.getTaskError', {
+        defaultMessage: 'Error running rule: {errMessage}',
+        values: {
+          errMessage: err.message,
+        },
+      });
+    }
+
     if (
       taskDoc &&
       (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running)
@@ -2989,7 +3325,16 @@ export class RulesClient {
       });
     }
 
-    await this.taskManager.runSoon(id);
+    try {
+      await this.taskManager.runSoon(attributes.scheduledTaskId ? attributes.scheduledTaskId : id);
+    } catch (err) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.runSoonError', {
+        defaultMessage: 'Error running rule: {errMessage}',
+        values: {
+          errMessage: err.message,
+        },
+      });
+    }
   }
 
   public async listAlertTypes() {

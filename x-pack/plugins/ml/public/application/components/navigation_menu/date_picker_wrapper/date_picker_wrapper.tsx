@@ -126,18 +126,11 @@ export const DatePickerWrapper: FC = () => {
     timefilter.isTimeRangeSelectorEnabled()
   );
 
-  const refreshInterval = useMemo((): RefreshInterval => {
-    const resultInterval = globalState?.refreshInterval ?? timeFilterRefreshInterval;
-
-    /**
-     * Enforce pause when it's set to false with 0 refresh interval.
-     */
-    const pause = resultInterval.pause || (!resultInterval.pause && resultInterval.value <= 0);
-    const value = resultInterval.value;
-
-    return { value, pause };
+  const refreshInterval = useMemo(
+    (): RefreshInterval => globalState?.refreshInterval ?? timeFilterRefreshInterval,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(globalState?.refreshInterval), timeFilterRefreshInterval]);
+    [JSON.stringify(globalState?.refreshInterval), timeFilterRefreshInterval]
+  );
 
   useEffect(
     function warnAboutShortRefreshInterval() {
@@ -251,6 +244,9 @@ export const DatePickerWrapper: FC = () => {
     isPaused: boolean;
     refreshInterval: number;
   }) {
+    if (pause === false && value <= 0) {
+      setRefreshInterval({ pause, value: 5000 });
+    }
     setRefreshInterval({ pause, value });
   }
 

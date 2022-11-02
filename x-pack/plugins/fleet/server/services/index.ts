@@ -59,3 +59,8 @@ export { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 // Package Services
 export { PackageServiceImpl } from './epm';
 export type { PackageService, PackageClient } from './epm';
+
+// Fleet server policy config
+export { migrateSettingsToFleetServerHost } from './fleet_server_host';
+
+export { FleetUsageSender } from './fleet_usage_sender';

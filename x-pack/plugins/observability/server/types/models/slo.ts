@@ -7,50 +7,29 @@
 
 import * as t from 'io-ts';
 import {
-  apmTransactionDurationIndicatorSchema,
-  apmTransactionErrorRateIndicatorSchema,
+  budgetingMethodSchema,
+  dateType,
   indicatorSchema,
-  indicatorTypesSchema,
-  commonSLOSchema,
+  objectiveSchema,
+  timeWindowSchema,
 } from '../schema';
 
-const sloSchema = t.intersection([
-  commonSLOSchema,
-  t.type({
-    id: t.string,
-  }),
-]);
+const sloSchema = t.type({
+  id: t.string,
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  time_window: timeWindowSchema,
+  budgeting_method: budgetingMethodSchema,
+  objective: objectiveSchema,
+  revision: t.number,
+  created_at: dateType,
+  updated_at: dateType,
+});
 
-const apmTransactionErrorRateSLOSchema = t.intersection([
-  sloSchema,
-  t.type({ indicator: apmTransactionErrorRateIndicatorSchema }),
-]);
-
-const apmTransactionDurationSLOSchema = t.intersection([
-  sloSchema,
-  t.type({ indicator: apmTransactionDurationIndicatorSchema }),
-]);
-
-const storedSLOSchema = t.intersection([
-  sloSchema,
-  t.type({ created_at: t.string, updated_at: t.string }),
-]);
+export { sloSchema };
 
 type SLO = t.TypeOf<typeof sloSchema>;
-type APMTransactionErrorRateSLO = t.TypeOf<typeof apmTransactionErrorRateSLOSchema>;
-type APMTransactionDurationSLO = t.TypeOf<typeof apmTransactionDurationSLOSchema>;
+type StoredSLO = t.OutputOf<typeof sloSchema>;
 
-type SLI = t.TypeOf<typeof indicatorSchema>;
-type SLITypes = t.TypeOf<typeof indicatorTypesSchema>;
-
-type StoredSLO = t.TypeOf<typeof storedSLOSchema>;
-
-export { apmTransactionDurationSLOSchema, apmTransactionErrorRateSLOSchema };
-export type {
-  SLO,
-  APMTransactionErrorRateSLO,
-  APMTransactionDurationSLO,
-  SLI,
-  SLITypes,
-  StoredSLO,
-};
+export type { SLO, StoredSLO };

@@ -53,6 +53,7 @@ export enum LAYER_TYPE {
   HEATMAP = 'HEATMAP',
   BLENDED_VECTOR = 'BLENDED_VECTOR',
   MVT_VECTOR = 'MVT_VECTOR',
+  LAYER_GROUP = 'LAYER_GROUP',
 }
 
 export enum SOURCE_TYPES {
@@ -309,6 +310,7 @@ export const emsWorldLayerId = 'world_countries';
 export enum WIZARD_ID {
   CHOROPLETH = 'choropleth',
   GEO_FILE = 'uploadGeoFile',
+  LAYER_GROUP = 'layerGroup',
   NEW_VECTOR = 'newVectorLayer',
   OBSERVABILITY = 'observabilityLayer',
   SECURITY = 'securityLayer',

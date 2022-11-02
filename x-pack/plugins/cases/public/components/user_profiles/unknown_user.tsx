@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { UserAvatar, UserAvatarProps } from '@kbn/user-profile-components';
+import type { UserAvatarProps } from '@kbn/user-profile-components';
+import { UserAvatar } from '@kbn/user-profile-components';
 
 interface CaseUnknownUserAvatarProps {
   size: UserAvatarProps['size'];

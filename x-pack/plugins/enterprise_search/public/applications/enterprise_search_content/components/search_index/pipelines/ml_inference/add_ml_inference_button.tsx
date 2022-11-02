@@ -13,6 +13,7 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../../../shared/kibana/kibana_logic';
+import { IndexViewLogic } from '../../index_view_logic';
 import { PipelinesLogic } from '../pipelines_logic';
 
 export interface AddMLInferencePipelineButtonProps {
@@ -22,6 +23,7 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
   onClick,
 }) => {
   const { capabilities } = useValues(KibanaLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const { canUseMlInferencePipeline, hasIndexIngestionPipeline } = useValues(PipelinesLogic);
   const hasMLPermissions = capabilities?.ml?.canAccessML ?? false;
   if (!hasMLPermissions) {
@@ -32,7 +34,7 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
           { defaultMessage: 'You do not have permission to Machine Learning on this cluster.' }
         )}
       >
-        <AddButton disabled />
+        <AddButton ingestionMethod={ingestionMethod} disabled />
       </EuiToolTip>
     );
   }
@@ -47,7 +49,7 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
           }
         )}
       >
-        <AddButton disabled />
+        <AddButton ingestionMethod={ingestionMethod} disabled />
       </EuiToolTip>
     );
   }
@@ -62,20 +64,27 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
           }
         )}
       >
-        <AddButton disabled />
+        <AddButton ingestionMethod={ingestionMethod} disabled />
       </EuiToolTip>
     );
   }
-  return <AddButton onClick={onClick} />;
+  return <AddButton ingestionMethod={ingestionMethod} onClick={onClick} />;
 };
 
-const AddButton: React.FC<{ disabled?: boolean; onClick?: () => void }> = ({
-  disabled,
-  onClick,
-}) => (
-  <EuiButton color="success" disabled={disabled} iconType="plusInCircle" onClick={onClick}>
+const AddButton: React.FC<{
+  disabled?: boolean;
+  ingestionMethod: string;
+  onClick?: () => void;
+}> = ({ disabled, ingestionMethod, onClick }) => (
+  <EuiButton
+    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addInferencePipeline`}
+    color="success"
+    disabled={disabled}
+    iconType="plusInCircle"
+    onClick={onClick}
+  >
     {i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButtonLabel', {
-      defaultMessage: 'Add inference pipeline',
+      defaultMessage: 'Add Inference Pipeline',
     })}
   </EuiButton>
 );

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "ui": true,
-  "server": false,
+  "server": true,
   "owner": {
     "name": "Protections Experience Team",
     "githubTeam": "protections-experience"
@@ -12,17 +12,11 @@
   "requiredPlugins": [
     "data",
     "dataViews",
-    "unifiedSearch",
     "kibanaUtils",
     "navigation",
     "kibanaReact",
     "triggersActionsUi",
     "inspector"
   ],
-  "requiredBundles": [
-    "data",
-    "unifiedSearch",
-    "kibanaUtils",
-    "kibanaReact"
-  ]
+  "requiredBundles": ["data", "kibanaUtils", "kibanaReact"]
 }

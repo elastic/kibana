@@ -13,6 +13,7 @@ import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitorWithId,
+  EncryptedSyntheticsMonitorWithId,
   HeartbeatConfig,
   PrivateLocation,
   EncryptedSyntheticsMonitor,
@@ -120,19 +121,23 @@ export class SyntheticsMonitorClient {
     }
   }
   async deleteMonitors(
-    monitors: SyntheticsMonitorWithId[],
+    monitors: Array<EncryptedSyntheticsMonitorWithId | SyntheticsMonitorWithId>,
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract,
     spaceId: string
   ) {
+    /* Type cast encrypted saved objects to decrypted saved objects for delete flow only.
+     * Deletion does not require all monitor fields */
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(
-      monitors,
+      monitors as SyntheticsMonitorWithId[],
       request,
       savedObjectsClient,
       spaceId
     );
 
-    const publicDeletePromise = this.syntheticsService.deleteConfigs(monitors);
+    const publicDeletePromise = this.syntheticsService.deleteConfigs(
+      monitors as SyntheticsMonitorWithId[]
+    );
     const [pubicResponse] = await Promise.all([publicDeletePromise, privateDeletePromise]);
 
     return pubicResponse;

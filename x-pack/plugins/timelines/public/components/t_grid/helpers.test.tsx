@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash/fp';
 import { Filter, EsQueryConfig, FilterStateStore } from '@kbn/es-query';
 
-import { DataProviderType, TimelineId } from '../../../common/types/timeline';
+import { DataProviderType } from '../../../common/types/timeline';
 import {
   buildGlobalQuery,
   combineQueries,
@@ -16,9 +16,9 @@ import {
   isSelectableView,
   isViewSelection,
   resolverIsShowing,
-  showGlobalFilters,
 } from './helpers';
 import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
+import { TableId } from '../../types';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 
@@ -635,32 +635,6 @@ describe('Combined Queries', () => {
     });
   });
 
-  describe('showGlobalFilters', () => {
-    test('it returns false when `globalFullScreen` is true and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: 'a valid id' })).toBe(false);
-    });
-
-    test('it returns true when `globalFullScreen` is true and `graphEventId` is undefined, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: undefined })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is true and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: '' })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: 'a valid id' })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is undefined, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: undefined })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: '' })).toBe(true);
-    });
-  });
-
   describe('view selection', () => {
     const validViewSelections = ['gridView', 'eventRenderedView'];
     const invalidViewSelections = [
@@ -674,15 +648,14 @@ describe('Combined Queries', () => {
       null,
     ];
 
-    const selectableViews: TimelineId[] = [
-      TimelineId.detectionsPage,
-      TimelineId.detectionsRulesDetailsPage,
+    const selectableViews: TableId[] = [
+      TableId.alertsOnAlertsPage,
+      TableId.alertsOnRuleDetailsPage,
     ];
 
     const exampleNonSelectableViews: string[] = [
-      TimelineId.casePage,
-      TimelineId.hostsPageEvents,
-      TimelineId.usersPageEvents,
+      TableId.hostsPageEvents,
+      TableId.usersPageEvents,
       'foozle',
       '',
     ];

@@ -365,7 +365,7 @@ describe('getCustomBucketsFromSiblingAggs', () => {
     },
     params: {},
     aggType: METRIC_TYPES.AVG_BUCKET,
-    aggId: 'some-agg-id',
+    aggId: 'some-agg-id-1',
     aggParams: {
       customBucket: bucketWithSerialize1,
     },
@@ -381,7 +381,7 @@ describe('getCustomBucketsFromSiblingAggs', () => {
     },
     params: {},
     aggType: METRIC_TYPES.AVG_BUCKET,
-    aggId: 'some-agg-id',
+    aggId: 'some-agg-id-2',
     aggParams: {
       customBucket: bucketWithSerialize2,
     },
@@ -399,7 +399,7 @@ describe('getCustomBucketsFromSiblingAggs', () => {
     },
     params: {},
     aggType: METRIC_TYPES.AVG_BUCKET,
-    aggId: 'some-agg-id',
+    aggId: 'some-agg-id-3',
     aggParams: {
       customBucket: bucketWithSerialize3,
     },
@@ -407,8 +407,8 @@ describe('getCustomBucketsFromSiblingAggs', () => {
 
   test("should filter out duplicated custom buckets, ignoring id's", () => {
     expect(getCustomBucketsFromSiblingAggs([metric1, metric2, metric3])).toEqual([
-      bucketWithSerialize1,
-      bucketWithSerialize2,
+      { customBucket: bucketWithSerialize1, metricIds: ['some-agg-id-1', 'some-agg-id-3'] },
+      { customBucket: bucketWithSerialize2, metricIds: ['some-agg-id-2'] },
     ]);
   });
 });

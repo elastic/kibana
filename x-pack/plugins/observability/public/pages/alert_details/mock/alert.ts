@@ -32,6 +32,8 @@ import { TopAlert } from '../../alerts';
 
 export const tags: string[] = ['tag1', 'tag2', 'tag3'];
 
+export const mockAlertUuid = '756240e5-92fb-452f-b08e-cd3e0dc51738';
+
 export const alert: TopAlert = {
   reason: '1957 log entries (more than 100.25) match the conditions.',
   fields: {
@@ -50,7 +52,7 @@ export const alert: TopAlert = {
     [ALERT_EVALUATION_VALUE]: 1957,
     [ALERT_INSTANCE_ID]: '*',
     [ALERT_RULE_NAME]: 'Log threshold (from logs)',
-    [ALERT_UUID]: '756240e5-92fb-452f-b08e-cd3e0dc51738',
+    [ALERT_UUID]: mockAlertUuid,
     [SPACE_IDS]: ['default'],
     [VERSION]: '8.0.0',
     [EVENT_KIND]: 'signal',

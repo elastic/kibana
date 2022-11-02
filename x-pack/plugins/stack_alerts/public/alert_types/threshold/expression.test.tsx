@@ -121,6 +121,7 @@ describe('IndexThresholdAlertTypeExpression', () => {
     expect(wrapper.find('[data-test-subj="forLastExpression"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="visualizationPlaceholder"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="thresholdVisualization"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="filterKuery"]').exists()).toBeTruthy();
   });
 
   test(`should render IndexThresholdAlertTypeExpression with expected components when aggType does require field`, async () => {
@@ -133,6 +134,7 @@ describe('IndexThresholdAlertTypeExpression', () => {
     expect(wrapper.find('[data-test-subj="forLastExpression"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="visualizationPlaceholder"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="thresholdVisualization"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="filterKuery"]').exists()).toBeTruthy();
   });
 
   test(`should render IndexThresholdAlertTypeExpression with visualization when there are no expression errors`, async () => {
@@ -175,6 +177,7 @@ describe('IndexThresholdAlertTypeExpression', () => {
     expect(
       wrapper.find('EuiEmptyPrompt[data-test-subj="visualizationPlaceholder"]').text()
     ).toEqual(`Complete the expression to generate a preview.`);
+    expect(wrapper.find('input[data-test-subj="filterKuery"]').text()).toEqual('');
   });
 
   test(`should use alert params when params are defined`, async () => {
@@ -186,6 +189,7 @@ describe('IndexThresholdAlertTypeExpression', () => {
     const groupBy = 'top';
     const termSize = '27';
     const termField = 'host.name';
+
     const wrapper = await setup(
       getAlertParams({
         aggType,

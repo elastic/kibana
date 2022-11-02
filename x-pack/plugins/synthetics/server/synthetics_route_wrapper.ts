@@ -19,6 +19,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   ...uptimeRoute,
   options: {
     tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
+    ...(uptimeRoute.options ?? {}),
   },
   streamHandler: async (context, request, subject) => {
     const coreContext = await context.core;

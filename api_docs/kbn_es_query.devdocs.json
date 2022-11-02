@@ -106,6 +106,59 @@
     "functions": [
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.buildCombinedFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "buildCombinedFilter",
+        "description": [
+          "\nBuilds an COMBINED filter. An COMBINED filter is a filter with multiple sub-filters. Each sub-filter (FilterItem) represents a\ncondition."
+        ],
+        "signature": [
+          "(filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.FilterItem",
+            "text": "FilterItem"
+          },
+          "[]) => ",
+          "CombinedFilter"
+        ],
+        "path": "packages/kbn-es-query/src/filters/build_filters/combined_filter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.buildCombinedFilter.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "An array of CombinedFilterItem"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.FilterItem",
+                "text": "FilterItem"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-es-query/src/filters/build_filters/combined_filter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.buildCustomFilter",
         "type": "Function",
         "tags": [],
@@ -586,7 +639,13 @@
             "text": "FILTERS"
           },
           ", negate: boolean, disabled: boolean, params: ",
-          "Serializable",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Serializable",
+            "text": "Serializable"
+          },
           ", alias: string | null, store: ",
           {
             "pluginId": "@kbn/es-query",
@@ -713,7 +772,13 @@
             "label": "params",
             "description": [],
             "signature": [
-              "Serializable"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.Serializable",
+                "text": "Serializable"
+              }
             ],
             "path": "packages/kbn-es-query/src/filters/build_filters/build_filters.ts",
             "deprecated": false,
@@ -1108,7 +1173,7 @@
             "section": "def-common.DataViewBase",
             "text": "DataViewBase"
           },
-          "[] | undefined, { ignoreFilterIfFieldNotInIndex, nestedIgnoreUnmapped }?: ",
+          "[] | undefined, options?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1186,7 +1251,7 @@
             "id": "def-common.buildQueryFromFilters.$3",
             "type": "Object",
             "tags": [],
-            "label": "{ ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped }",
+            "label": "options",
             "description": [],
             "signature": [
               {
@@ -1616,7 +1681,13 @@
           "(query: ",
           "QueryDslQueryContainer",
           ", queryStringOptions: string | ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ", dateFormatTZ: string | undefined) => ",
           "QueryDslQueryContainer"
         ],
@@ -1652,7 +1723,13 @@
             ],
             "signature": [
               "string | ",
-              "SerializableRecord"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              }
             ],
             "path": "packages/kbn-es-query/src/es_query/decorate_query.ts",
             "deprecated": false,
@@ -2203,6 +2280,53 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.isCombinedFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "isCombinedFilter",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          ") => boolean"
+        ],
+        "path": "packages/kbn-es-query/src/filters/build_filters/combined_filter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.isCombinedFilter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              }
+            ],
+            "path": "packages/kbn-es-query/src/filters/build_filters/combined_filter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -4379,7 +4503,13 @@
             "text": "EsQueryFiltersConfig"
           },
           " & { allowLeadingWildcards?: boolean | undefined; queryStringOptions?: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           " | undefined; }"
         ],
         "path": "packages/kbn-es-query/src/es_query/build_es_query.ts",
@@ -4431,16 +4561,8 @@
             "pluginId": "@kbn/es-query",
             "scope": "common",
             "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.ExistsFilter",
-            "text": "ExistsFilter"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.PhraseFilter",
-            "text": "PhraseFilter"
+            "section": "def-common.RangeFilter",
+            "text": "RangeFilter"
           },
           " | ",
           {
@@ -4455,8 +4577,16 @@
             "pluginId": "@kbn/es-query",
             "scope": "common",
             "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.RangeFilter",
-            "text": "RangeFilter"
+            "section": "def-common.ExistsFilter",
+            "text": "ExistsFilter"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.PhraseFilter",
+            "text": "PhraseFilter"
           },
           " | ",
           {
@@ -4499,6 +4629,38 @@
           "; query?: Record<string, any> | undefined; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.FilterItem",
+        "type": "Type",
+        "tags": [],
+        "label": "FilterItem",
+        "description": [
+          "\nEach item in an COMBINED filter may represent either one filter (to be ORed) or an array of filters (ANDed together before\nbecoming part of the OR clause)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.FilterItem",
+            "text": "FilterItem"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-es-query/src/filters/build_filters/combined_filter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -16,14 +16,21 @@ import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/color
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import type { OperationMetadata, Visualization } from '../../types';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
+import {
+  HeatmapExpressionFunctionDefinition,
+  HeatmapGridExpressionFunctionDefinition,
+  HeatmapLegendExpressionFunctionDefinition,
+} from '@kbn/expression-heatmap-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import type { OperationMetadata, Suggestion, Visualization } from '../../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
 import {
   CHART_NAMES,
   CHART_SHAPES,
   DEFAULT_PALETTE_NAME,
-  FUNCTION_NAME,
   GROUP_ID,
   HEATMAP_GRID_FUNCTION,
   LEGEND_FUNCTION,
@@ -32,7 +39,7 @@ import {
 import { HeatmapToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
-import { layerTypes } from '../../../common';
+import { FormBasedPersistedState } from '../..';
 
 const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Magnitude',
@@ -146,7 +153,7 @@ export const getHeatmapVisualization = ({
     return (
       state || {
         layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         title: 'Empty Heatmap chart',
         ...getInitialState(),
       }
@@ -289,7 +296,7 @@ export const getHeatmapVisualization = ({
   getSupportedLayers() {
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.heatmap.addLayer', {
           defaultMessage: 'Visualization',
         }),
@@ -319,82 +326,53 @@ export const getHeatmapVisualization = ({
       return null;
     }
 
+    const legendFn = buildExpressionFunction<HeatmapLegendExpressionFunctionDefinition>(
+      'heatmap_legend',
+      {
+        isVisible: state.legend.isVisible,
+        position: state.legend.position,
+        legendSize: state.legend.legendSize,
+      }
+    );
+
+    const gridConfigFn = buildExpressionFunction<HeatmapGridExpressionFunctionDefinition>(
+      'heatmap_grid',
+      {
+        // grid
+        strokeWidth: state.gridConfig.strokeWidth,
+        strokeColor: state.gridConfig.strokeColor,
+        // cells
+        isCellLabelVisible: state.gridConfig.isCellLabelVisible,
+        // Y-axis
+        isYAxisLabelVisible: state.gridConfig.isYAxisLabelVisible,
+        isYAxisTitleVisible: state.gridConfig.isYAxisTitleVisible ?? false,
+        yTitle: state.gridConfig.yTitle,
+        // X-axis
+        isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible,
+        isXAxisTitleVisible: state.gridConfig.isXAxisTitleVisible ?? false,
+        xTitle: state.gridConfig.xTitle,
+      }
+    );
+
+    const heatmapFn = buildExpressionFunction<HeatmapExpressionFunctionDefinition>('heatmap', {
+      xAccessor: state.xAccessor ?? '',
+      yAccessor: state.yAccessor ?? '',
+      valueAccessor: state.valueAccessor ?? '',
+      lastRangeIsRightOpen: state.palette?.params?.continuity
+        ? ['above', 'all'].includes(state.palette.params.continuity)
+        : true,
+      palette: state.palette?.params
+        ? paletteService
+            .get(CUSTOM_PALETTE)
+            .toExpression(computePaletteParams(state.palette?.params))
+        : paletteService.get(DEFAULT_PALETTE_NAME).toExpression(),
+      legend: buildExpression([legendFn]),
+      gridConfig: buildExpression([gridConfigFn]),
+    });
+
     return {
       type: 'expression',
-      chain: [
-        ...(datasourceExpression?.chain ?? []),
-        {
-          type: 'function',
-          function: FUNCTION_NAME,
-          arguments: {
-            xAccessor: [state.xAccessor ?? ''],
-            yAccessor: [state.yAccessor ?? ''],
-            valueAccessor: [state.valueAccessor ?? ''],
-            lastRangeIsRightOpen: [
-              state.palette?.params?.continuity
-                ? ['above', 'all'].includes(state.palette.params.continuity)
-                : true,
-            ],
-            palette: state.palette?.params
-              ? [
-                  paletteService
-                    .get(CUSTOM_PALETTE)
-                    .toExpression(
-                      computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
-                    ),
-                ]
-              : [paletteService.get(DEFAULT_PALETTE_NAME).toExpression()],
-            legend: [
-              {
-                type: 'expression',
-                chain: [
-                  {
-                    type: 'function',
-                    function: LEGEND_FUNCTION,
-                    arguments: {
-                      isVisible: [state.legend.isVisible],
-                      position: [state.legend.position],
-                      legendSize: state.legend.legendSize ? [state.legend.legendSize] : [],
-                    },
-                  },
-                ],
-              },
-            ],
-            gridConfig: [
-              {
-                type: 'expression',
-                chain: [
-                  {
-                    type: 'function',
-                    function: HEATMAP_GRID_FUNCTION,
-                    arguments: {
-                      // grid
-                      strokeWidth: state.gridConfig.strokeWidth
-                        ? [state.gridConfig.strokeWidth]
-                        : [],
-                      strokeColor: state.gridConfig.strokeColor
-                        ? [state.gridConfig.strokeColor]
-                        : [],
-                      // cells
-                      isCellLabelVisible: [state.gridConfig.isCellLabelVisible],
-                      // Y-axis
-                      isYAxisLabelVisible: [state.gridConfig.isYAxisLabelVisible],
-                      isYAxisTitleVisible: [state.gridConfig.isYAxisTitleVisible ?? false],
-                      yTitle: state.gridConfig.yTitle ? [state.gridConfig.yTitle] : [],
-                      // X-axis
-                      isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible
-                        ? [state.gridConfig.isXAxisLabelVisible]
-                        : [],
-                      isXAxisTitleVisible: [state.gridConfig.isXAxisTitleVisible ?? false],
-                      xTitle: state.gridConfig.xTitle ? [state.gridConfig.xTitle] : [],
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      ],
+      chain: [...(datasourceExpression?.chain ?? []), heatmapFn.toAst()],
     };
   },
 
@@ -405,73 +383,52 @@ export const getHeatmapVisualization = ({
     const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
 
-    if (!originalOrder) {
+    if (!originalOrder || !state.valueAccessor) {
       return null;
     }
 
+    const legendFn = buildExpressionFunction<HeatmapLegendExpressionFunctionDefinition>(
+      'heatmap_legend',
+      {
+        isVisible: false,
+        position: 'right',
+      }
+    );
+
+    const gridConfigFn = buildExpressionFunction<HeatmapGridExpressionFunctionDefinition>(
+      'heatmap_grid',
+      {
+        // grid
+        strokeWidth: 1,
+        // cells
+        isCellLabelVisible: false,
+        // Y-axis
+        isYAxisLabelVisible: false,
+        isYAxisTitleVisible: false,
+        yTitle: state.gridConfig.yTitle ?? '',
+        // X-axis
+        isXAxisLabelVisible: false,
+        isXAxisTitleVisible: false,
+        xTitle: state.gridConfig.xTitle ?? '',
+      }
+    );
+
+    const heatmapFn = buildExpressionFunction<HeatmapExpressionFunctionDefinition>('heatmap', {
+      xAccessor: state.xAccessor ?? '',
+      yAccessor: state.yAccessor ?? '',
+      valueAccessor: state.valueAccessor ?? '',
+      legend: buildExpression([legendFn]),
+      gridConfig: buildExpression([gridConfigFn]),
+      palette: state.palette?.params
+        ? paletteService
+            .get(CUSTOM_PALETTE)
+            .toExpression(computePaletteParams(state.palette?.params))
+        : paletteService.get(DEFAULT_PALETTE_NAME).toExpression(),
+    });
+
     return {
       type: 'expression',
-      chain: [
-        ...(datasourceExpression?.chain ?? []),
-        {
-          type: 'function',
-          function: FUNCTION_NAME,
-          arguments: {
-            xAccessor: [state.xAccessor ?? ''],
-            yAccessor: [state.yAccessor ?? ''],
-            valueAccessor: [state.valueAccessor ?? ''],
-            legend: [
-              {
-                type: 'expression',
-                chain: [
-                  {
-                    type: 'function',
-                    function: LEGEND_FUNCTION,
-                    arguments: {
-                      isVisible: [false],
-                      position: [],
-                    },
-                  },
-                ],
-              },
-            ],
-            palette: state.palette?.params
-              ? [
-                  paletteService
-                    .get(CUSTOM_PALETTE)
-                    .toExpression(
-                      computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
-                    ),
-                ]
-              : [paletteService.get(DEFAULT_PALETTE_NAME).toExpression()],
-            gridConfig: [
-              {
-                type: 'expression',
-                chain: [
-                  {
-                    type: 'function',
-                    function: HEATMAP_GRID_FUNCTION,
-                    arguments: {
-                      // grid
-                      strokeWidth: [1],
-                      // cells
-                      isCellLabelVisible: [false],
-                      // Y-axis
-                      isYAxisLabelVisible: [false],
-                      isYAxisTitleVisible: [state.gridConfig.isYAxisTitleVisible],
-                      yTitle: [state.gridConfig.yTitle ?? ''],
-                      // X-axis
-                      isXAxisLabelVisible: [false],
-                      isXAxisTitleVisible: [state.gridConfig.isXAxisTitleVisible],
-                      xTitle: [state.gridConfig.xTitle ?? ''],
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      ],
+      chain: [...(datasourceExpression?.chain ?? []), heatmapFn.toAst()],
     };
   },
 
@@ -524,5 +481,29 @@ export const getHeatmapVisualization = ({
           />,
         ]
       : undefined;
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as Array<
+      Suggestion<HeatmapVisualizationState, FormBasedPersistedState>
+    >;
+    const suggestion: Suggestion<HeatmapVisualizationState, FormBasedPersistedState> = {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState?.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...(context.configuration as HeatmapConfiguration),
+      },
+    };
+    return suggestion;
   },
 });

@@ -16,19 +16,26 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
+import {
+  getScopedActions,
+  isActiveTimeline,
+  isInTableScope,
+  isTimelineScope,
+} from '../../../helpers';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../common/containers/use_full_screen';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { TimelineId } from '../../../../common/types/timeline';
-import { timelineSelectors, timelineActions } from '../../store/timeline';
-import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
 import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../containers/use_timeline_data_filters';
+import { timelineSelectors } from '../../store/timeline';
+import { timelineDefaults } from '../../store/timeline/defaults';
+import { dataTableSelectors } from '../../../common/store/data_table';
+import { tableDefaults } from '../../../common/store/data_table/defaults';
 
 const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 
@@ -46,7 +53,7 @@ const OverlayContainer = styled.div`
 const FullScreenOverlayStyles = css`
   position: fixed;
   top: 0;
-  bottom: 0;
+  bottom: 2em;
   left: 0;
   right: 0;
   z-index: ${euiThemeVars.euiZLevel3};
@@ -70,44 +77,61 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 `;
 
 interface GraphOverlayProps {
-  timelineId: TimelineId;
+  scopeId: string;
   SessionView: JSX.Element | null;
   Navigation: JSX.Element | null;
 }
 
 const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
-  timelineId,
   SessionView,
   Navigation,
+  scopeId,
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();
 
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getScope = useMemo(() => {
+    if (isInTableScope(scopeId)) {
+      return dataTableSelectors.getTableByIdSelector();
+    } else if (isTimelineScope(scopeId)) {
+      return timelineSelectors.getTimelineByIdSelector();
+    }
+  }, [scopeId]);
+
+  const defaults = isInTableScope(scopeId) ? tableDefaults : timelineDefaults;
+
   const { graphEventId, sessionViewConfig } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+    (state) => (getScope && getScope(state, scopeId)) ?? defaults
   );
 
   const fullScreen = useMemo(
-    () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
-    [globalFullScreen, timelineId, timelineFullScreen]
+    () =>
+      isFullScreen({
+        globalFullScreen,
+        isActiveTimelines: isActiveTimeline(scopeId),
+        timelineFullScreen,
+      }),
+    [globalFullScreen, scopeId, timelineFullScreen]
   );
-
-  const isInTimeline = timelineId === TimelineId.active;
 
   useEffect(() => {
     return () => {
-      dispatch(timelineActions.updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
-      if (timelineId === TimelineId.active) {
+      const scopedActions = getScopedActions(scopeId);
+      if (scopedActions) {
+        dispatch(scopedActions.updateGraphEventId({ id: scopeId, graphEventId: '' }));
+      }
+      if (isActiveTimeline(scopeId)) {
         dispatch(inputsActions.setFullScreen({ id: InputsModelId.timeline, fullScreen: false }));
       } else {
         dispatch(inputsActions.setFullScreen({ id: InputsModelId.global, fullScreen: false }));
       }
     };
-  }, [dispatch, timelineId]);
+  }, [dispatch, scopeId]);
 
-  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(timelineId);
+  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(
+    isActiveTimeline(scopeId)
+  );
 
   const sessionContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -119,7 +143,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     }
   }, [fullScreen]);
 
-  if (!isInTimeline && sessionViewConfig !== null) {
+  if (!isActiveTimeline(scopeId) && sessionViewConfig !== null) {
     return (
       <OverlayContainer data-test-subj="overlayContainer" ref={sessionContainerRef}>
         <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
@@ -133,7 +157,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
         </EuiFlexGroup>
       </OverlayContainer>
     );
-  } else if (fullScreen && !isInTimeline) {
+  } else if (fullScreen && !isActiveTimeline(scopeId)) {
     return (
       <FullScreenOverlayContainer data-test-subj="overlayContainer">
         <EuiHorizontalRule margin="none" />
@@ -144,7 +168,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
         {graphEventId !== undefined ? (
           <StyledResolver
             databaseDocumentID={graphEventId}
-            resolverComponentInstanceID={timelineId}
+            resolverComponentInstanceID={scopeId}
             indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}
@@ -167,7 +191,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
         {graphEventId !== undefined ? (
           <StyledResolver
             databaseDocumentID={graphEventId}
-            resolverComponentInstanceID={timelineId}
+            resolverComponentInstanceID={scopeId}
             indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}

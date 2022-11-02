@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { GuidedOnboardingPlugin } from './plugin';
 
-export function plugin(ctx: PluginInitializerContext) {
-  return new GuidedOnboardingPlugin(ctx);
+export function plugin() {
+  return new GuidedOnboardingPlugin();
 }
 export type {
   GuidedOnboardingPluginSetup,
   GuidedOnboardingPluginStart,
-  GuidedOnboardingState,
-  UseCase,
+  GuidedOnboardingApi,
 } from './types';
+
+export { guidesConfig } from './constants/guides_config';

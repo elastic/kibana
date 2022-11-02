@@ -12,6 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SearchAddon } from './xterm_search';
 import { useEuiTheme } from '../../hooks';
+import { renderTruncatedMsg } from './ansi_helpers';
 
 import {
   IOLine,
@@ -29,7 +30,6 @@ import {
   DEFAULT_TTY_ROWS,
   DEFAULT_TTY_COLS,
   TTY_LINE_SPLITTER_REGEX,
-  TTY_LINES_PER_FRAME,
   TTY_LINES_PRE_SEEK,
 } from '../../../common/constants';
 
@@ -104,6 +104,15 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
           newMarkers.push(processLineInfo);
         }
 
+        if (process.io.max_bytes_per_process_exceeded) {
+          const marker = newMarkers.find(
+            (item) => item.event.process?.entity_id === process.entity_id
+          );
+          if (marker) {
+            marker.maxBytesExceeded = true;
+          }
+        }
+
         const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
         const combinedLines = [splitLines[0]];
 
@@ -159,6 +168,7 @@ export interface XtermPlayerDeps {
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
   isFetching?: boolean;
+  policiesUrl?: string;
 }
 
 export const useXtermPlayer = ({
@@ -170,17 +180,20 @@ export const useXtermPlayer = ({
   hasNextPage,
   fetchNextPage,
   isFetching,
+  policiesUrl,
 }: XtermPlayerDeps) => {
   const { euiTheme } = useEuiTheme();
   const { font, colors } = euiTheme;
   const [currentLine, setCurrentLine] = useState(0);
   const [playSpeed] = useState(DEFAULT_TTY_PLAYSPEED_MS); // potentially configurable
   const tty = lines?.[currentLine]?.event.process?.tty;
-
+  const processName = lines?.[currentLine]?.event.process?.name;
   const [terminal, searchAddon] = useMemo(() => {
     const term = new Terminal({
       theme: {
-        selection: colors.warning,
+        selectionBackground: colors.warning,
+        selectionForeground: colors.ink,
+        yellow: colors.warning,
       },
       fontFamily: font.familyCode,
       fontSize: DEFAULT_TTY_FONT_SIZE,
@@ -188,6 +201,8 @@ export const useXtermPlayer = ({
       convertEol: true,
       rows: DEFAULT_TTY_ROWS,
       cols: DEFAULT_TTY_COLS,
+      allowProposedApi: true,
+      allowTransparency: true,
     });
 
     const searchInstance = new SearchAddon();
@@ -204,7 +219,7 @@ export const useXtermPlayer = ({
     // even though we set scrollback: 0 above, xterm steals the wheel events and prevents the outer container from scrolling
     // this handler fixes that
     const onScroll = (event: WheelEvent) => {
-      if ((event?.target as HTMLDivElement)?.className === 'xterm-cursor-layer') {
+      if ((event?.target as HTMLDivElement)?.offsetParent?.classList.contains('xterm-screen')) {
         event.stopImmediatePropagation();
       }
     };
@@ -213,6 +228,7 @@ export const useXtermPlayer = ({
 
     return () => {
       window.removeEventListener('wheel', onScroll, true);
+      terminal.dispose();
     };
   }, [terminal, ref]);
 
@@ -226,6 +242,7 @@ export const useXtermPlayer = ({
 
       if (clear) {
         linesToPrint = lines.slice(Math.max(0, lineNumber - TTY_LINES_PRE_SEEK), lineNumber + 1);
+
         try {
           terminal.reset();
           terminal.clear();
@@ -234,24 +251,37 @@ export const useXtermPlayer = ({
           // there is some random race condition with the jump to feature that causes these calls to error out.
         }
       } else {
-        linesToPrint = lines.slice(lineNumber, lineNumber + TTY_LINES_PER_FRAME);
+        linesToPrint = lines.slice(lineNumber, lineNumber + 1);
       }
 
       linesToPrint.forEach((line, index) => {
         if (line?.value !== undefined) {
           terminal.write(line.value);
         }
+
+        const nextLine = lines[lineNumber + index + 1];
+        const maxBytesExceeded = line.event.process?.io?.max_bytes_per_process_exceeded;
+
+        // if next line is start of next event
+        // and process has exceeded max bytes
+        // render msg
+        if (!clear && (!nextLine || nextLine.event !== line.event) && maxBytesExceeded) {
+          const msg = renderTruncatedMsg(tty, policiesUrl, processName);
+          if (msg) {
+            terminal.write(msg);
+          }
+        }
       });
     },
-    [terminal, lines]
+    [lines, policiesUrl, processName, terminal, tty]
   );
 
   useEffect(() => {
-    const fontChanged = terminal.getOption('fontSize') !== fontSize;
+    const fontChanged = terminal.options.fontSize !== fontSize;
     const ttyChanged = tty && (terminal.rows !== tty?.rows || terminal.cols !== tty?.columns);
 
     if (fontChanged) {
-      terminal.setOption('fontSize', fontSize);
+      terminal.options.fontSize = fontSize;
     }
 
     if (tty?.rows && tty?.columns && ttyChanged) {
@@ -284,9 +314,9 @@ export const useXtermPlayer = ({
         if (!hasNextPage && currentLine === lines.length - 1) {
           setIsPlaying(false);
         } else {
-          const nextLine = Math.min(lines.length - 1, currentLine + TTY_LINES_PER_FRAME);
-          setCurrentLine(nextLine);
+          const nextLine = Math.min(lines.length - 1, currentLine + 1);
           render(nextLine, false);
+          setCurrentLine(nextLine);
         }
       }, playSpeed);
 

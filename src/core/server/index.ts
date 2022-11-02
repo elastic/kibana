@@ -29,14 +29,8 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
-import type { AppenderConfigType, LoggingServiceSetup } from '@kbn/core-logging-server';
+import type { AppenderConfigType } from '@kbn/core-logging-server';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
-import type {
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
-  AnalyticsServicePreboot,
-} from '@kbn/core-analytics-server';
 import type {
   ExecutionContextSetup,
   ExecutionContextStart,
@@ -46,31 +40,13 @@ import type {
   RequestHandler,
   KibanaResponseFactory,
   RouteMethod,
-  HttpServicePreboot,
   HttpServiceSetup,
-  HttpServiceStart,
 } from '@kbn/core-http-server';
-import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
-import type { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
-import {
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-  ElasticsearchServicePreboot,
-} from '@kbn/core-elasticsearch-server';
 import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
 import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
-import type {
-  SavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-} from '@kbn/core-saved-objects-server';
-import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
-import type { CoreUsageDataStart, CoreUsageDataSetup } from '@kbn/core-usage-data-server';
-import type { I18nServiceSetup } from '@kbn/core-i18n-server';
-import type { StatusServiceSetup } from '@kbn/core-status-server';
-import type { UiSettingsServiceSetup, UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { HttpResources } from './http_resources';
-import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
+import type { HttpResources } from '@kbn/core-http-resources-server';
+import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-server-internal';
 
 export type { PluginOpaqueId } from '@kbn/core-base-common';
 export type {
@@ -228,9 +204,8 @@ export type {
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
   HttpResourcesRequestHandler,
-} from './http_resources';
+} from '@kbn/core-http-resources-server';
 
-export type { IRenderOptions } from './rendering';
 export type {
   LoggingServiceSetup,
   LoggerContextConfigInput,
@@ -255,7 +230,6 @@ export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 export { PluginType } from '@kbn/core-base-common';
 
 export type {
-  DiscoveredPlugin,
   PrebootPlugin,
   Plugin,
   AsyncPlugin,
@@ -264,11 +238,12 @@ export type {
   PluginInitializer,
   PluginInitializerContext,
   PluginManifest,
-  PluginName,
   SharedGlobalConfig,
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
-} from './plugins';
+} from '@kbn/core-plugins-server';
+
+export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
 export type {
   SavedObject,
@@ -468,106 +443,12 @@ export type {
   PrebootCoreRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
 
-/**
- * Context passed to the `setup` method of `preboot` plugins.
- * @public
- */
-export interface CorePreboot {
-  /** {@link AnalyticsServicePreboot} */
-  analytics: AnalyticsServicePreboot;
-  /** {@link ElasticsearchServicePreboot} */
-  elasticsearch: ElasticsearchServicePreboot;
-  /** {@link HttpServicePreboot} */
-  http: HttpServicePreboot<RequestHandlerContext>;
-  /** {@link PrebootServicePreboot} */
-  preboot: PrebootServicePreboot;
-}
-
-/**
- * Context passed to the `setup` method of `standard` plugins.
- *
- * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
- *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
- * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
- *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
- * @public
- */
-export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
-  /** {@link AnalyticsServiceSetup} */
-  analytics: AnalyticsServiceSetup;
-  /** {@link CapabilitiesSetup} */
-  capabilities: CapabilitiesSetup;
-  /** {@link DocLinksServiceSetup} */
-  docLinks: DocLinksServiceSetup;
-  /** {@link ElasticsearchServiceSetup} */
-  elasticsearch: ElasticsearchServiceSetup;
-  /** {@link ExecutionContextSetup} */
-  executionContext: ExecutionContextSetup;
-  /** {@link HttpServiceSetup} */
-  http: HttpServiceSetup<RequestHandlerContext> & {
-    /** {@link HttpResources} */
-    resources: HttpResources;
-  };
-  /** {@link I18nServiceSetup} */
-  i18n: I18nServiceSetup;
-  /** {@link LoggingServiceSetup} */
-  logging: LoggingServiceSetup;
-  /** {@link MetricsServiceSetup} */
-  metrics: MetricsServiceSetup;
-  /** {@link SavedObjectsServiceSetup} */
-  savedObjects: SavedObjectsServiceSetup;
-  /** {@link StatusServiceSetup} */
-  status: StatusServiceSetup;
-  /** {@link UiSettingsServiceSetup} */
-  uiSettings: UiSettingsServiceSetup;
-  /** {@link DeprecationsServiceSetup} */
-  deprecations: DeprecationsServiceSetup;
-  /** {@link StartServicesAccessor} */
-  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
-  /** @internal {@link CoreUsageDataSetup} */
-  coreUsageData: CoreUsageDataSetup;
-}
-
-/**
- * Allows plugins to get access to APIs available in start inside async handlers.
- * Promise will not resolve until Core and plugin dependencies have completed `start`.
- * This should only be used inside handlers registered during `setup` that will only be executed
- * after `start` lifecycle.
- *
- * @public
- */
-export type StartServicesAccessor<
-  TPluginsStart extends object = object,
-  TStart = unknown
-> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
-
-/**
- * Context passed to the plugins `start` method.
- *
- * @public
- */
-export interface CoreStart {
-  /** {@link AnalyticsServiceStart} */
-  analytics: AnalyticsServiceStart;
-  /** {@link CapabilitiesStart} */
-  capabilities: CapabilitiesStart;
-  /** {@link DocLinksServiceStart} */
-  docLinks: DocLinksServiceStart;
-  /** {@link ElasticsearchServiceStart} */
-  elasticsearch: ElasticsearchServiceStart;
-  /** {@link ExecutionContextStart} */
-  executionContext: ExecutionContextStart;
-  /** {@link HttpServiceStart} */
-  http: HttpServiceStart;
-  /** {@link MetricsServiceStart} */
-  metrics: MetricsServiceStart;
-  /** {@link SavedObjectsServiceStart} */
-  savedObjects: SavedObjectsServiceStart;
-  /** {@link UiSettingsServiceStart} */
-  uiSettings: UiSettingsServiceStart;
-  /** @internal {@link CoreUsageDataStart} */
-  coreUsageData: CoreUsageDataStart;
-}
+export type {
+  CorePreboot,
+  CoreSetup,
+  CoreStart,
+  StartServicesAccessor,
+} from '@kbn/core-lifecycle-server';
 
 export type {
   CapabilitiesSetup,

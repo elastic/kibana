@@ -19,18 +19,19 @@ import {
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { MonitorTags } from './monitor_tags';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { LocationsStatus } from './locations_status';
-import { getMonitorAction, selectLatestPing } from '../../../state';
+import { getMonitorAction } from '../../../state';
 import { ConfigKey } from '../../../../../../common/runtime_types';
+import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 
 export const MonitorDetailsPanel = () => {
   const { euiTheme } = useEuiTheme();
-  const latestPing = useSelector(selectLatestPing);
+  const { latestPing } = useMonitorLatestPing();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
@@ -55,7 +56,7 @@ export const MonitorDetailsPanel = () => {
   return (
     <div css={wrapperStyle}>
       <EuiSpacer size="s" />
-      <EuiDescriptionList type="responsiveColumn" compressed={true}>
+      <EuiDescriptionList type="column" compressed={true}>
         <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
           {monitor && (
