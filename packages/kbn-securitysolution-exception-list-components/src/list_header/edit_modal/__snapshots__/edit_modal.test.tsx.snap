@@ -64,6 +64,7 @@ Object {
                       class="euiFormRow__labelWrapper"
                     >
                       <label
+                        aria-invalid="false"
                         class="euiFormLabel euiFormRow__label"
                         for="generated-id"
                         id="generated-id-label"
@@ -81,6 +82,7 @@ Object {
                           class="euiFormControlLayout__childrenWrapper"
                         >
                           <input
+                            aria-invalid="false"
                             class="euiFieldText euiFieldText--fullWidth"
                             data-test-subj="editModalNameTextField"
                             id="generated-id"

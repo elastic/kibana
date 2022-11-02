@@ -9,7 +9,7 @@ import React from 'react';
 import type { FC } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   SearchBar,
@@ -51,14 +51,13 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list, isRea
     handleCancelExceptionItemFlyout,
     handleConfirmExceptionFlyout,
   } = useListWithSearchComponent(list);
-
   return (
     <>
       {showAddExceptionFlyout ? (
         <AddExceptionFlyout
           rules={null}
           isBulkAction={false}
-          isEndpointItem={false}
+          isEndpointItem={listType === ExceptionListTypeEnum.ENDPOINT}
           sharedListToAddTo={[list]}
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
