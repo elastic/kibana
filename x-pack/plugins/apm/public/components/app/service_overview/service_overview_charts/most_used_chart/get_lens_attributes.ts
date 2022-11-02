@@ -21,9 +21,11 @@ const BUCKET_SIZE = 5;
 export function getLensAttributes({
   metric,
   filters,
+  kuery,
 }: {
   metric: MostUsedMetric;
   filters: QueryDslQueryContainer[];
+  kuery: string;
 }): TypedLensByValueInput['attributes'] {
   const metricId = metric.replaceAll('.', '-');
   const dataLayer: PersistedIndexPatternLayer = {
@@ -98,7 +100,7 @@ export function getLensAttributes({
           },
         },
       ],
-      query: { language: 'kuery', query: '' },
+      query: { language: 'kuery', query: kuery },
     },
   };
 }

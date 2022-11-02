@@ -24,12 +24,14 @@ export function MostUsedChart({
   title,
   start,
   end,
+  kuery,
   filters,
   metric,
 }: {
   title: string;
   start: string;
   end: string;
+  kuery: string;
   filters: QueryDslQueryContainer[];
   metric: MostUsedMetric;
   bucketSize?: number;
@@ -42,10 +44,11 @@ export function MostUsedChart({
   const lensAttributes = useMemo(
     () =>
       getLensAttributes({
+        kuery,
         filters,
         metric,
       }),
-    [filters, metric]
+    [kuery, filters, metric]
   );
 
   const openInLens = useCallback(() => {
@@ -64,7 +67,7 @@ export function MostUsedChart({
         }
       );
     }
-  }, [navigateToPrefilledEditor, lensAttributes, start, end]);
+  }, [navigateToPrefilledEditor, lensAttributes, start, end, metric]);
 
   const getOpenInLensAction = () => {
     return {

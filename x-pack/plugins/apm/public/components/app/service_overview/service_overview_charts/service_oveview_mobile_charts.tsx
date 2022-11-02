@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -33,15 +32,6 @@ interface Props {
   rowDirection: 'column' | 'row';
   nonLatencyChartHeight: number;
   isSingleColumn: boolean;
-}
-
-// NOTE: kqlQuery does the same
-function kueryToEsQuery(kuery: string) {
-  if (!kuery) {
-    return [];
-  }
-  const ast = fromKueryExpression(kuery);
-  return [toElasticsearchQuery(ast)];
 }
 
 export function ServiceOverviewMobileCharts({
@@ -82,9 +72,8 @@ export function ServiceOverviewMobileCharts({
       ...termQueryClient(SERVICE_NAME, serviceName),
       ...termQueryClient(TRANSACTION_TYPE, transactionType),
       ...environmentQuery(environment),
-      ...kueryToEsQuery(kuery),
     ];
-  }, [environment, transactionType, serviceName, kuery]);
+  }, [environment, transactionType, serviceName]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -182,6 +171,7 @@ export function ServiceOverviewMobileCharts({
               metric={MostUsedMetric.DEVICE_NAME}
               start={start}
               end={end}
+              kuery={kuery}
               filters={mostUsedChartFilters}
             />
           </EuiFlexItem>
@@ -192,6 +182,7 @@ export function ServiceOverviewMobileCharts({
               metric={MostUsedMetric.NCT}
               start={start}
               end={end}
+              kuery={kuery}
               filters={mostUsedChartFilters}
             />
           </EuiFlexItem>
@@ -207,6 +198,7 @@ export function ServiceOverviewMobileCharts({
               metric={MostUsedMetric.OS_VERSION}
               start={start}
               end={end}
+              kuery={kuery}
               filters={mostUsedChartFilters}
             />
           </EuiFlexItem>
@@ -217,6 +209,7 @@ export function ServiceOverviewMobileCharts({
               metric={MostUsedMetric.APP_VERSION}
               start={start}
               end={end}
+              kuery={kuery}
               filters={mostUsedChartFilters}
             />
           </EuiFlexItem>
