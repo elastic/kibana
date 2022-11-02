@@ -14,7 +14,7 @@ export const searchConfig: GuideConfig = {
     defaultMessage: 'Search my data',
   }),
   description: i18n.translate('guidedOnboarding.searchGuide.description', {
-    defaultMessage: `Build custom search experiences with your data using using Elastic’s out-of-the-box web crawler, connectors, and robust APIs. Gain deep insights from the built-in search analytics to curate results and optimize relevance. `,
+    defaultMessage: `Build custom search experiences with your data using Elastic’s out-of-the-box web crawler, connectors, and robust APIs. Gain deep insights from the built-in search analytics to curate results and optimize relevance.`,
   }),
   guideName: 'Enterprise Search',
   steps: [
@@ -44,9 +44,6 @@ export const searchConfig: GuideConfig = {
       title: i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.title', {
         defaultMessage: 'Build a search experience',
       }),
-      description: i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.description', {
-        defaultMessage: 'Take a tour of Elastic’s relevance refinement tools, including:',
-      }),
       descriptionList: [
         i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item1', {
           defaultMessage: 'Learn more about Elastic’s Search UI framework.',
@@ -55,7 +52,8 @@ export const searchConfig: GuideConfig = {
           defaultMessage: 'Try the Search UI tutorial for Elasticsearch.',
         }),
         i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item3', {
-          defaultMessage: 'Build a world-class search experience for your customers, employees, or users.',
+          defaultMessage:
+            'Build a world-class search experience for your customers, employees, or users.',
         }),
       ],
       location: {
