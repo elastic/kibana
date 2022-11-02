@@ -48,6 +48,7 @@ import {
 } from '@kbn/core-saved-objects-import-export-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
+import type { NodeInfo } from '@kbn/core-node-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
@@ -85,6 +86,7 @@ export interface SavedObjectsStartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
   pluginsInitialized?: boolean;
   docLinks: DocLinksServiceStart;
+  node: NodeInfo;
 }
 
 export class SavedObjectsService
@@ -185,6 +187,7 @@ export class SavedObjectsService
     elasticsearch,
     pluginsInitialized = true,
     docLinks,
+    node,
   }: SavedObjectsStartDeps): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
@@ -194,10 +197,12 @@ export class SavedObjectsService
 
     const client = elasticsearch.client;
 
+    const waitForMigrationCompletion = node.roles.backgroundTasks && !node.roles.ui;
     const migrator = this.createMigrator(
       this.config.migration,
       elasticsearch.client.asInternalUser,
-      docLinks
+      docLinks,
+      waitForMigrationCompletion
     );
 
     this.migrator$.next(migrator);
@@ -313,7 +318,8 @@ export class SavedObjectsService
   private createMigrator(
     soMigrationsConfig: SavedObjectsMigrationConfigType,
     client: ElasticsearchClient,
-    docLinks: DocLinksServiceStart
+    docLinks: DocLinksServiceStart,
+    waitForMigrationCompletion: boolean
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
@@ -323,6 +329,7 @@ export class SavedObjectsService
       kibanaIndex,
       client,
       docLinks,
+      waitForMigrationCompletion,
     });
   }
 

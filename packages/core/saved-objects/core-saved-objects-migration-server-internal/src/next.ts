@@ -40,6 +40,7 @@ import type {
   OutdatedDocumentsRefresh,
   CheckUnknownDocumentsState,
   CalculateExcludeFiltersState,
+  WaitForMigrationCompletionState,
 } from './state';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
@@ -60,6 +61,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   return {
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
+    WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
+      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
