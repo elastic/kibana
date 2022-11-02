@@ -43,18 +43,18 @@ export const run = async () => {
     writeTo: process.stdout,
   });
 
-  const { errorCount } = await verifyAllTestPackages(logger);
+  const { errors } = await verifyAllTestPackages(logger);
 
-  if (errorCount) {
-    logger.error(`${errorCount} packages failed validation. Exiting with error.`);
+  if (errors.length) {
+    logger.error(`${errors.length} packages failed validation. Exiting with error.`);
     process.exit(1);
   }
 };
 
 export const verifyAllTestPackages = async (
-  logger: ToolingLog | Logger
-): Promise<{ successCount: number; errorCount: number }> => {
-  let errorCount = 0;
+  logger?: ToolingLog | Logger
+): Promise<{ successCount: number; errors: Error[] }> => {
+  const errors = [];
   let successCount = 0;
   for (const dir of TEST_PACKAGE_DIRECTORIES) {
     const packageVersionPaths = getAllPackagesFromDir(path.join(__dirname, dir));
@@ -63,14 +63,14 @@ export const verifyAllTestPackages = async (
       const topLevelDir = packageVersionPaths[i];
       try {
         const packageInfo = await _generatePackageInfoFromPaths(packagePaths, topLevelDir);
-        logger.info(`Successfully parsed ${packageInfo.name}-${packageInfo.version}`);
+        logger?.info(`Successfully parsed ${packageInfo.name}-${packageInfo.version}`);
         successCount++;
       } catch (e) {
-        logger.error(`Error parsing ${topLevelDir} : ${e}`);
-        errorCount++;
+        logger?.error(`Error parsing ${topLevelDir} : ${e}`);
+        errors.push(e);
       }
     }
   }
 
-  return { successCount, errorCount };
+  return { successCount, errors };
 };
