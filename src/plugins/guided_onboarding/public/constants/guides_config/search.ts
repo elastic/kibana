@@ -25,7 +25,7 @@ export const searchConfig: GuideConfig = {
       }),
       descriptionList: [
         i18n.translate('guidedOnboarding.searchGuide.addDataStep.description1', {
-          defaultMessage: 'Select an ingestion method',
+          defaultMessage: 'Select an ingestion method.',
         }),
         i18n.translate('guidedOnboarding.searchGuide.addDataStep.description2', {
           defaultMessage: 'Create a new Elasticsearch index',
