@@ -323,6 +323,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataGrid.getDocCount()).to.be(1);
     });
 
+    it('should not notify about data view update when field popularity changed', async () => {
+      await PageObjects.common.sleep(8000);
+      await testSubjects.click('field-message-showDetails');
+      await testSubjects.click('discoverFieldListPanelEdit-message');
+      await testSubjects.click('toggleAdvancedSetting');
+
+      const popularityInput = await testSubjects.find('editorFieldCount');
+      await popularityInput.type('5');
+      await testSubjects.click('fieldSaveButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await openAlertResults(RULE_NAME, sourceDataViewId);
+
+      await PageObjects.common.sleep(8000);
+
+      expect(await toasts.getToastCount()).to.be.equal(1);
+    });
+
     it('should display warning about recently updated data view', async () => {
       await PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',

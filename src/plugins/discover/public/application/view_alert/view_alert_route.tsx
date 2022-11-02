@@ -10,7 +10,7 @@ import { useEffect, useMemo } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { sha256 } from 'js-sha256';
 import type { Rule } from '@kbn/alerting-plugin/common';
-import { getTime } from '@kbn/data-plugin/common';
+import { type DataViewSpec, getTime } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { DiscoverAppLocatorParams } from '../../locator';
@@ -19,11 +19,33 @@ import { getAlertUtils, QueryParams, SearchThresholdAlertParams } from './view_a
 
 type NonNullableEntry<T> = { [K in keyof T]: NonNullable<T[keyof T]> };
 
-const getCurrentChecksum = (params: SearchThresholdAlertParams) =>
-  sha256.create().update(JSON.stringify(params)).hex();
+const getDataViewParamsChecksum = (dataViewSpec: DataViewSpec) => {
+  const { title, timeFieldName, sourceFilters, runtimeFieldMap } = dataViewSpec;
+  return sha256
+    .create()
+    .update(JSON.stringify({ title, timeFieldName, sourceFilters, runtimeFieldMap }))
+    .hex();
+};
+
+/**
+ * Get rule params checksum skipping serialized data view object
+ */
+const getRuleParamsChecksum = (params: SearchThresholdAlertParams) => {
+  return sha256
+    .create()
+    .update(
+      JSON.stringify(params, (key: string, value: string) => (key === 'index' ? undefined : value))
+    )
+    .hex();
+};
 
 const isActualAlert = (queryParams: QueryParams): queryParams is NonNullableEntry<QueryParams> => {
-  return Boolean(queryParams.from && queryParams.to && queryParams.checksum);
+  return Boolean(
+    queryParams.from &&
+      queryParams.to &&
+      queryParams.ruleParamsChecksum &&
+      queryParams.dataViewChecksum
+  );
 };
 
 const buildTimeRangeFilter = (
@@ -55,7 +77,8 @@ export function ViewAlertRoute() {
     () => ({
       from: query.get('from'),
       to: query.get('to'),
-      checksum: query.get('checksum'),
+      ruleParamsChecksum: query.get('ruleParamsChecksum'),
+      dataViewChecksum: query.get('dataViewChecksum'),
     }),
     [query]
   );
@@ -92,30 +115,21 @@ export function ViewAlertRoute() {
         return;
       }
 
-      if (dataView.isPersisted()) {
-        const dataViewSavedObject = await core.savedObjects.client.get(
-          'index-pattern',
-          dataView.id!
-        );
-
-        const alertUpdatedAt = fetchedAlert.updatedAt;
-        const dataViewUpdatedAt = dataViewSavedObject.updatedAt!;
-        // data view updated after the last update of the alert rule
-        if (
-          openActualAlert &&
-          new Date(dataViewUpdatedAt).valueOf() > new Date(alertUpdatedAt).valueOf()
-        ) {
+      if (openActualAlert) {
+        const currentDataViewChecksum = getDataViewParamsChecksum(dataView.toSpec(false));
+        if (currentDataViewChecksum !== queryParams.dataViewChecksum) {
+          // data view params which might affect the displayed results were changed
           showDataViewUpdatedWarning();
         }
-      }
 
-      const calculatedChecksum = getCurrentChecksum(fetchedAlert.params);
-      // rule params changed
-      if (openActualAlert && calculatedChecksum !== queryParams.checksum) {
-        displayRuleChangedWarn();
-      } else if (openActualAlert && calculatedChecksum === queryParams.checksum) {
-        // documents might be updated or deleted
-        displayPossibleDocsDiffInfoAlert();
+        const currentRuleParamsChecksum = getRuleParamsChecksum(fetchedAlert.params);
+        if (currentRuleParamsChecksum !== queryParams.ruleParamsChecksum) {
+          // rule params changed
+          displayRuleChangedWarn();
+        } else {
+          // documents might be updated or deleted
+          displayPossibleDocsDiffInfoAlert();
+        }
       }
 
       const timeRange = openActualAlert
