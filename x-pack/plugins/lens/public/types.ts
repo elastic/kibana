@@ -31,6 +31,9 @@ import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { EuiButtonIconColor } from '@elastic/eui';
+import { SearchRequest } from '@kbn/data-plugin/public';
+import { estypes } from '@elastic/elasticsearch';
+import React from 'react';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -105,7 +108,6 @@ export interface EditorFrameProps {
 export type VisualizationMap = Record<string, Visualization>;
 export type DatasourceMap = Record<string, Datasource>;
 export type IndexPatternMap = Record<string, IndexPattern>;
-export type ExistingFieldsMap = Record<string, Record<string, boolean>>;
 
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
@@ -428,7 +430,13 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * The embeddable calls this function to display warnings about visualization on the dashboard
    */
-  getSearchWarningMessages?: (state: P, warning: SearchResponseWarning) => string[] | undefined;
+  getSearchWarningMessages?: (
+    state: P,
+    warning: SearchResponseWarning,
+    request: SearchRequest,
+    response: estypes.SearchResponse
+  ) => Array<string | React.ReactNode> | undefined;
+
   /**
    * Checks if the visualization created is time based, for example date histogram
    */
@@ -580,7 +588,6 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   state: T;
   activeData?: Record<string, Datatable>;
   indexPatterns: IndexPatternMap;
-  existingFields: Record<string, Record<string, boolean>>;
   hideTooltip?: boolean;
   invalid?: boolean;
   invalidMessage?: string;

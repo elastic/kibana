@@ -105,6 +105,9 @@ const toExpression = (
         type: 'function',
         function: 'legacyMetricVis',
         arguments: {
+          ...(state?.autoScaleMetricAlignment
+            ? { autoScaleMetricAlignment: [state?.autoScaleMetricAlignment] }
+            : {}),
           labelPosition: [state?.titlePosition || DEFAULT_TITLE_POSITION],
           font: [
             {
