@@ -11,19 +11,17 @@ import {
   kqlQuery,
   rangeQuery,
 } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   DEVICE_MODEL_NAME,
   HOST_OS_VERSION,
   NETWORK_CONNECTION_TYPE,
   SERVICE_NAME,
   SERVICE_VERSION,
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import {
-  getDocumentTypeFilterForTransactions,
-  getProcessorEventForTransactions,
-} from '../../lib/helpers/transactions';
 
 type MobileFiltersTypes =
   | 'device'
@@ -40,22 +38,26 @@ export async function getMobileFilters({
   kuery,
   apmEventClient,
   serviceName,
+  transactionType,
   environment,
   start,
   end,
-  searchAggregatedTransactions,
 }: {
   kuery: string;
   apmEventClient: APMEventClient;
   serviceName: string;
+  transactionType?: string;
   environment: string;
   start: number;
   end: number;
-  searchAggregatedTransactions: boolean;
 }): Promise<MobileFilters> {
   const response = await apmEventClient.search('get_mobile_filters', {
     apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+      events: [
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+        ProcessorEvent.transaction,
+      ],
     },
     body: {
       track_total_hits: false,
@@ -64,12 +66,10 @@ export async function getMobileFilters({
         bool: {
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
-            ...getDocumentTypeFilterForTransactions(
-              searchAggregatedTransactions
-            ),
           ],
         },
       },
