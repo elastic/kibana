@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { vislibColorMaps, ColorMap, ColorSchema } from './color_maps';
+import { vislibColorMaps } from './color_maps';
+import type { ColorMap, ColorSchema } from './types';
 
 export const truncatedColorMaps: ColorMap = {};
 

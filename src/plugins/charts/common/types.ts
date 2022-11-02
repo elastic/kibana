@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemas, LabelRotation } from './static';
-
-export interface ColorSchemaParams {
-  colorSchema: ColorSchemas;
-  invertColors: boolean;
-}
+import { LabelRotation } from './static';
 
 export interface Labels {
   color?: string;

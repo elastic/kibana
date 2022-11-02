@@ -8,9 +8,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
+import { ColorSchemas } from '@kbn/coloring';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import { ColorSchemas } from '@kbn/charts-plugin/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../types';
 import { toExpressionAst } from '../to_ast';

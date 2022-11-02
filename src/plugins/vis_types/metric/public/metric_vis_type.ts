@@ -7,7 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ColorSchemas, ColorMode } from '@kbn/charts-plugin/public';
+import { ColorSchemas } from '@kbn/coloring';
+import { ColorMode } from '@kbn/charts-plugin/public';
 import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { MetricVisOptions } from './components';

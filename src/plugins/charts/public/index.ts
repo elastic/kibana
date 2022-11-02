@@ -34,22 +34,7 @@ export type {
   CustomPaletteArguments,
   CustomPaletteState,
   SystemPaletteArguments,
-  ColorSchema,
-  RawColorSchema,
-  ColorMap,
-  ColorSchemaParams,
   Labels,
   Style,
 } from '../common';
-export {
-  paletteIds,
-  ColorSchemas,
-  vislibColorMaps,
-  colorSchemas,
-  getHeatmapColors,
-  truncatedColorMaps,
-  truncatedColorSchemas,
-  ColorMode,
-  LabelRotation,
-  defaultCountLabel,
-} from '../common';
+export { paletteIds, ColorMode, LabelRotation, defaultCountLabel } from '../common';

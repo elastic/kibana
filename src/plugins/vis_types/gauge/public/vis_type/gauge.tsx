@@ -8,8 +8,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { ColorSchemas } from '@kbn/coloring';
 
-import { ColorMode, ColorSchemas } from '@kbn/charts-plugin/public';
+import { ColorMode } from '@kbn/charts-plugin/public';
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 

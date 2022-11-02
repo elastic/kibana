@@ -9,7 +9,7 @@
 import { RangeValues } from '@kbn/vis-default-editor-plugin/public';
 import { heatmapVisType } from '@kbn/vis-type-heatmap-plugin/public';
 
-import { ColorSchemaParams } from '@kbn/charts-plugin/public';
+import { ColorSchemaParams } from '@kbn/coloring';
 import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { ValueAxis } from '@kbn/vis-type-xy-plugin/public';
 

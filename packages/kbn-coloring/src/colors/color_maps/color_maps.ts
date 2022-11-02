@@ -7,30 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-export enum ColorSchemas {
-  Blues = 'Blues',
-  Greens = 'Greens',
-  Greys = 'Greys',
-  Reds = 'Reds',
-  YellowToRed = 'Yellow to Red',
-  GreenToRed = 'Green to Red',
-}
-
-export interface ColorSchema {
-  value: ColorSchemas;
-  text: string;
-}
-
-export interface RawColorSchema {
-  id: ColorSchemas;
-  label: string;
-  value: Array<[number, number[]]>;
-}
-
-export interface ColorMap {
-  [key: string]: RawColorSchema;
-}
+import { ColorMap, ColorSchema, ColorSchemas } from './types';
 
 export const vislibColorMaps: ColorMap = {
   // Sequential

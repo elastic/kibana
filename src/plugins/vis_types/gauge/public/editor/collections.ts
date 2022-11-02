@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { colorSchemas } from '@kbn/charts-plugin/public';
+import { colorSchemas } from '@kbn/coloring';
 import { Alignment, GaugeType } from '../types';
 
 export const getGaugeTypes = () => [

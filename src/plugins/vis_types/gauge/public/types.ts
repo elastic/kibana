@@ -8,7 +8,8 @@
 
 import { $Values } from '@kbn/utility-types';
 import { Range } from '@kbn/expressions-plugin/public';
-import { ColorSchemaParams, Labels, Style } from '@kbn/charts-plugin/public';
+import type { ColorSchemaParams } from '@kbn/coloring';
+import { Labels, Style } from '@kbn/charts-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeGaugePluginSetup {}

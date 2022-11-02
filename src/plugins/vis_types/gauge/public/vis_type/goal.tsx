@@ -8,9 +8,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { ColorSchemas } from '@kbn/coloring';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import { ColorMode, ColorSchemas } from '@kbn/charts-plugin/public';
+import { ColorMode } from '@kbn/charts-plugin/public';
 import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 
 import { getGaugeOptions } from '../editor/components';

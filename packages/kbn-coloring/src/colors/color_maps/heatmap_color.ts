@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { isNumber } from 'lodash';
 
-import { vislibColorMaps, RawColorSchema } from './color_maps';
+import { vislibColorMaps } from './color_maps';
+import type { RawColorSchema } from './types';
 
 function enforceBounds(x: number) {
   if (x < 0) {
@@ -45,7 +46,7 @@ function interpolateLinearly(x: number, values: RawColorSchema['value']) {
 }
 
 export function getHeatmapColors(value: any, colorSchemaName: string) {
-  if (!_.isNumber(value) || value < 0 || value > 1) {
+  if (!isNumber(value) || value < 0 || value > 1) {
     throw new Error('heatmap_color expects a number from 0 to 1 as first parameter');
   }
 
