@@ -34,10 +34,16 @@ import { useLogViewContext } from '../../../hooks/use_log_view';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 import { LogsToolbar } from './page_toolbar';
 import { PageViewLogInContext } from './page_view_log_in_context';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const PAGE_THRESHOLD = 2;
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
+  const {
+    data: {
+      query: { queryString },
+    },
+  } = useKibanaContextForPlugin().services;
   const { resolvedLogView, logView, logViewId } = useLogViewContext();
   const { textScale, textWrap } = useLogViewConfigurationContext();
   const {
@@ -65,7 +71,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     updateDateRange,
     lastCompleteDateRangeExpressionUpdate,
   } = useLogPositionStateContext();
-  const { filterQuery, applyLogFilterQuery } = useLogFilterStateContext();
+  const { filterQuery } = useLogFilterStateContext();
 
   const {
     isReloading,
@@ -193,14 +199,14 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
 
   const setFilter = useCallback(
     (filter: Query, flyoutItemId: string, timeKey: TimeKey | undefined | null) => {
-      applyLogFilterQuery(filter);
+      queryString.setQuery(filter);
       if (timeKey) {
         jumpToTargetPosition(timeKey);
       }
       setSurroundingLogsId(flyoutItemId);
       stopLiveStreaming();
     },
-    [applyLogFilterQuery, jumpToTargetPosition, setSurroundingLogsId, stopLiveStreaming]
+    [jumpToTargetPosition, queryString, setSurroundingLogsId, stopLiveStreaming]
   );
 
   return (

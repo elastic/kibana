@@ -190,6 +190,7 @@ export function createSearchBar({
           showAutoRefreshOnly={props.showAutoRefreshOnly}
           showDatePicker={props.showDatePicker}
           showFilterBar={props.showFilterBar}
+          showQueryMenu={props.showQueryMenu}
           showQueryInput={props.showQueryInput}
           showSaveQuery={props.showSaveQuery}
           showSubmitButton={props.showSubmitButton}
