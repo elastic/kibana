@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { LoadWhenInView } from '@kbn/observability-plugin/public';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
 import { DurationSparklines } from './duration_sparklines';
 import { MonitorDurationTrend } from './duration_trend';
@@ -107,7 +108,9 @@ export const MonitorSummary = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <TestRunsTable paginable={false} from={from} to={to} />
+      <LoadWhenInView>
+        <TestRunsTable paginable={false} from={from} to={to} />
+      </LoadWhenInView>
     </>
   );
 };
