@@ -167,8 +167,8 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   timestamp_override_fallback_disabled: false,
   note: '# this is some markdown documentation',
   version: 1,
-  alert_grouping: {
-    groupBy: ['host.name'],
+  alert_suppression: {
+    group_by: ['host.name'],
   },
   new_terms_fields: ['host.name'],
   history_window_start: 'now-7d',

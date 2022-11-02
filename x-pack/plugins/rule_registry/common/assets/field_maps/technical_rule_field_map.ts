@@ -188,27 +188,27 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
-  [Fields.ALERT_THROTTLE_FIELDS]: {
+  [Fields.ALERT_SUPPRESSION_FIELDS]: {
     type: 'keyword',
     array: true,
     required: false,
   },
-  [Fields.ALERT_THROTTLE_VALUES]: {
+  [Fields.ALERT_SUPPRESSION_VALUES]: {
     type: 'keyword',
     array: true,
     required: false,
   },
-  [Fields.ALERT_THROTTLE_START]: {
+  [Fields.ALERT_SUPPRESSION_START]: {
     type: 'date',
     array: false,
     required: false,
   },
-  [Fields.ALERT_THROTTLE_END]: {
+  [Fields.ALERT_SUPPRESSION_END]: {
     type: 'date',
     array: false,
     required: false,
   },
-  [Fields.ALERT_THROTTLE_COUNT]: {
+  [Fields.ALERT_SUPPRESSION_COUNT]: {
     type: 'long',
     array: false,
     required: false,

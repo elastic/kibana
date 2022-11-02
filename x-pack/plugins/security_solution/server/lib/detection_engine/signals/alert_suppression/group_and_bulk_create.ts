@@ -27,24 +27,27 @@ export interface BucketHistory {
   endDate: Date;
 }
 
+/**
+ * Builds a filter that excludes documents from existing buckets.
+ */
 export const buildBucketHistoryFilter = ({
-  buckets,
+  bucketHistory,
   primaryTimestamp,
   secondaryTimestamp,
   from,
 }: {
-  buckets: BucketHistory[];
+  bucketHistory: BucketHistory[];
   primaryTimestamp: string;
   secondaryTimestamp: string | undefined;
   from: moment.Moment;
 }): estypes.QueryDslQueryContainer[] | undefined => {
-  if (buckets.length === 0) {
+  if (bucketHistory.length === 0) {
     return undefined;
   }
   return [
     {
       bool: {
-        must_not: buckets.map((bucket) => ({
+        must_not: bucketHistory.map((bucket) => ({
           bool: {
             filter: [
               ...Object.entries(bucket.key).map(([field, value]) => ({
@@ -66,7 +69,16 @@ export const buildBucketHistoryFilter = ({
   ];
 };
 
-// search_after through grouped documents and re-index using bulk endpoint.
+export const filterBucketHistory = ({
+  bucketHistory,
+  fromDate,
+}: {
+  bucketHistory: BucketHistory[];
+  fromDate: Date;
+}) => {
+  return bucketHistory.filter((bucket) => bucket.endDate > fromDate);
+};
+
 export const groupAndBulkCreate = async ({
   runOpts,
   services,
@@ -79,8 +91,10 @@ export const groupAndBulkCreate = async ({
   return withSecuritySpan('groupAndBulkCreate', async () => {
     const tuple = runOpts.tuple;
 
-    const filteredBucketHistory =
-      bucketHistory?.filter((bucket) => bucket.endDate > tuple.from.toDate()) ?? [];
+    const filteredBucketHistory = filterBucketHistory({
+      bucketHistory: bucketHistory ?? [],
+      fromDate: tuple.from.toDate(),
+    });
 
     const toReturn: GroupAndBulkCreateReturnType = {
       success: true,
@@ -109,7 +123,7 @@ export const groupAndBulkCreate = async ({
       }
 
       const bucketHistoryFilter = buildBucketHistoryFilter({
-        buckets: filteredBucketHistory,
+        bucketHistory: filteredBucketHistory,
         primaryTimestamp: runOpts.primaryTimestamp,
         secondaryTimestamp: runOpts.secondaryTimestamp,
         from: tuple.from,

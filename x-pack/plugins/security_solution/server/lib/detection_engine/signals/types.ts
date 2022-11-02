@@ -36,10 +36,10 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../common/detection_engine/schemas/alerts';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
-import type { buildGroupByFieldAggregation } from './alert_grouping/build_group_by_field_aggregation';
+import type { buildGroupByFieldAggregation } from './alert_suppression/build_group_by_field_aggregation';
 import type { RuleResponse } from '../../../../common/detection_engine/rule_schema';
 import type { EnrichEvents } from './enrichments/types';
-import type { BucketHistory } from './alert_grouping/group_and_bulk_create';
+import type { BucketHistory } from './alert_suppression/group_and_bulk_create';
 import type { RunOpts } from '../rule_types/types';
 
 export interface ThresholdResult {

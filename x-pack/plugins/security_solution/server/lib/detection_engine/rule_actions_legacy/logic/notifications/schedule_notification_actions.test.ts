@@ -62,7 +62,7 @@ describe('schedule_notification_actions', () => {
     relatedIntegrations: [],
     requiredFields: [],
     setup: '',
-    alertGrouping: undefined,
+    alertSuppression: undefined,
   };
 
   it('Should schedule actions with unflatted and legacy context', () => {

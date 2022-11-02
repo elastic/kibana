@@ -7,9 +7,9 @@
 
 import * as t from 'io-ts';
 
-export const AlertGrouping = t.exact(
+export type AlertSuppression = t.TypeOf<typeof AlertSuppression>;
+export const AlertSuppression = t.exact(
   t.type({
-    groupBy: t.array(t.string),
+    group_by: t.array(t.string),
   })
 );
-export type AlertGrouping = t.TypeOf<typeof AlertGrouping>;

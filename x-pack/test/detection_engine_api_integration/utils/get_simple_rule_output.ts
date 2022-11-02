@@ -71,7 +71,7 @@ const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): RuleResponse =>
   filters: undefined,
   saved_id: undefined,
   response_actions: undefined,
-  alert_grouping: undefined,
+  alert_suppression: undefined,
 });
 
 /**

@@ -183,7 +183,7 @@ export const requiredFieldsForActions = [
   'kibana.alert.rule.to',
   'kibana.alert.rule.uuid',
   'kibana.alert.rule.type',
-  'kibana.alert.throttle.count',
+  'kibana.alert.suppression.count',
   'kibana.alert.original_event.kind',
   'kibana.alert.original_event.module',
   // Endpoint exception fields

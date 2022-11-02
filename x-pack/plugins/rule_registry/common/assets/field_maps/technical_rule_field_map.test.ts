@@ -193,33 +193,33 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
-      "kibana.alert.system_status": Object {
-        "array": false,
-        "required": false,
-        "type": "keyword",
-      },
-      "kibana.alert.throttle.count": Object {
+      "kibana.alert.suppression.count": Object {
         "array": false,
         "required": false,
         "type": "long",
       },
-      "kibana.alert.throttle.end": Object {
+      "kibana.alert.suppression.end": Object {
         "array": false,
         "required": false,
         "type": "date",
       },
-      "kibana.alert.throttle.fields": Object {
+      "kibana.alert.suppression.fields": Object {
         "array": true,
         "required": false,
         "type": "keyword",
       },
-      "kibana.alert.throttle.start": Object {
+      "kibana.alert.suppression.start": Object {
         "array": false,
         "required": false,
         "type": "date",
       },
-      "kibana.alert.throttle.values": Object {
+      "kibana.alert.suppression.values": Object {
         "array": true,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.system_status": Object {
+        "array": false,
         "required": false,
         "type": "keyword",
       },

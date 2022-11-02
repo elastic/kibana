@@ -7,11 +7,11 @@
 
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
-  ALERT_THROTTLE_FIELDS,
-  ALERT_THROTTLE_VALUES,
-  ALERT_THROTTLE_START,
-  ALERT_THROTTLE_END,
-  ALERT_THROTTLE_COUNT,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_VALUES,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_COUNT,
 } from '@kbn/rule-data-utils';
 
 import type { BaseFields840, DetectionAlert840 } from '../8.4.0';
@@ -24,14 +24,14 @@ Then, update `../index.ts` to import from the new folder that has the latest sch
 new schemas to the union of all alert schemas, and re-export the new schemas as the `*Latest` schemas.
 */
 
-export interface ThrottledFields860 extends BaseFields840 {
-  [ALERT_THROTTLE_FIELDS]: string[];
-  [ALERT_THROTTLE_VALUES]: Array<string | number | null>;
-  [ALERT_THROTTLE_START]: Date;
-  [ALERT_THROTTLE_END]: Date;
-  [ALERT_THROTTLE_COUNT]: number;
+export interface SuppressionFields860 extends BaseFields840 {
+  [ALERT_SUPPRESSION_FIELDS]: string[];
+  [ALERT_SUPPRESSION_VALUES]: Array<string | number | null>;
+  [ALERT_SUPPRESSION_START]: Date;
+  [ALERT_SUPPRESSION_END]: Date;
+  [ALERT_SUPPRESSION_COUNT]: number;
 }
 
-export type ThrottledAlert860 = AlertWithCommonFields800<ThrottledFields860>;
+export type SuppressionAlert860 = AlertWithCommonFields800<SuppressionFields860>;
 
-export type DetectionAlert860 = DetectionAlert840 | ThrottledAlert860;
+export type DetectionAlert860 = DetectionAlert840 | SuppressionAlert860;

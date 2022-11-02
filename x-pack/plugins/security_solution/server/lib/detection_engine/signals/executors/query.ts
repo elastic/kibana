@@ -14,8 +14,8 @@ import type {
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { getFilter } from '../get_filter';
-import type { BucketHistory } from '../alert_grouping/group_and_bulk_create';
-import { groupAndBulkCreate } from '../alert_grouping/group_and_bulk_create';
+import type { BucketHistory } from '../alert_suppression/group_and_bulk_create';
+import { groupAndBulkCreate } from '../alert_suppression/group_and_bulk_create';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { UnifiedQueryRuleParams } from '../../rule_schema';
@@ -63,7 +63,7 @@ export const queryExecutor = async ({
     });
 
     const result =
-      ruleParams.alertGrouping?.groupBy != null
+      ruleParams.alertSuppression?.groupBy != null
         ? await groupAndBulkCreate({
             runOpts,
             services,
@@ -71,7 +71,7 @@ export const queryExecutor = async ({
             filter: esFilter,
             buildReasonMessage: buildReasonMessageForQueryAlert,
             bucketHistory,
-            groupByFields: ruleParams.alertGrouping.groupBy,
+            groupByFields: ruleParams.alertSuppression.groupBy,
           })
         : {
             ...(await searchAfterAndBulkCreate({

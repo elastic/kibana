@@ -12,11 +12,11 @@ import {
   ALERT_RULE_RULE_ID,
   ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
-  ALERT_THROTTLE_FIELDS,
-  ALERT_THROTTLE_VALUES,
-  ALERT_THROTTLE_START,
-  ALERT_THROTTLE_END,
-  ALERT_THROTTLE_COUNT,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_VALUES,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_COUNT,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
@@ -441,8 +441,8 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['throttling-data']),
           query: `host.name: "host-0"`,
-          alert_grouping: {
-            groupBy: ['host.name'],
+          alert_suppression: {
+            group_by: ['host.name'],
           },
           from: 'now-1h',
           interval: '1h',
@@ -457,12 +457,12 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).to.eql(1);
         expect(previewAlerts[0]._source).to.eql({
           ...previewAlerts[0]._source,
-          [ALERT_THROTTLE_FIELDS]: ['host.name'],
-          [ALERT_THROTTLE_VALUES]: ['host-0'],
+          [ALERT_SUPPRESSION_FIELDS]: ['host.name'],
+          [ALERT_SUPPRESSION_VALUES]: ['host-0'],
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
-          [ALERT_THROTTLE_START]: '2020-10-28T05:00:00.000Z',
-          [ALERT_THROTTLE_END]: '2020-10-28T05:00:02.000Z',
-          [ALERT_THROTTLE_COUNT]: 6,
+          [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
+          [ALERT_SUPPRESSION_COUNT]: 6,
         });
       });
 
@@ -470,8 +470,8 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['throttling-data']),
           query: `host.name: *`,
-          alert_grouping: {
-            groupBy: ['host.name'],
+          alert_suppression: {
+            group_by: ['host.name'],
           },
           from: 'now-1h',
           interval: '1h',
@@ -493,12 +493,12 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hostNames).to.eql(['host-0', 'host-1', 'host-2']);
         expect(previewAlerts[0]._source).to.eql({
           ...previewAlerts[0]._source,
-          [ALERT_THROTTLE_FIELDS]: ['host.name'],
-          [ALERT_THROTTLE_VALUES]: ['host-0'],
+          [ALERT_SUPPRESSION_FIELDS]: ['host.name'],
+          [ALERT_SUPPRESSION_VALUES]: ['host-0'],
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
-          [ALERT_THROTTLE_START]: '2020-10-28T05:00:00.000Z',
-          [ALERT_THROTTLE_END]: '2020-10-28T05:00:02.000Z',
-          [ALERT_THROTTLE_COUNT]: 6,
+          [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
+          [ALERT_SUPPRESSION_COUNT]: 6,
         });
       });
 
@@ -506,8 +506,8 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['throttling-data']),
           query: `host.name: *`,
-          alert_grouping: {
-            groupBy: ['host.name', 'source.ip'],
+          alert_suppression: {
+            group_by: ['host.name', 'source.ip'],
           },
           from: 'now-1h',
           interval: '1h',
@@ -528,12 +528,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]._source).to.eql({
           ...previewAlerts[0]._source,
-          [ALERT_THROTTLE_FIELDS]: ['host.name', 'source.ip'],
-          [ALERT_THROTTLE_VALUES]: ['host-0', '192.168.1.1'],
+          [ALERT_SUPPRESSION_FIELDS]: ['host.name', 'source.ip'],
+          [ALERT_SUPPRESSION_VALUES]: ['host-0', '192.168.1.1'],
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
-          [ALERT_THROTTLE_START]: '2020-10-28T05:00:00.000Z',
-          [ALERT_THROTTLE_END]: '2020-10-28T05:00:02.000Z',
-          [ALERT_THROTTLE_COUNT]: 3,
+          [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
+          [ALERT_SUPPRESSION_COUNT]: 3,
         });
       });
 
@@ -541,8 +541,8 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['throttling-data']),
           query: `host.name: *`,
-          alert_grouping: {
-            groupBy: ['host.name', 'source.ip'],
+          alert_suppression: {
+            group_by: ['host.name', 'source.ip'],
           },
           // The first invocation covers half of the source docs, the second invocation covers all documents.
           // We will check and make sure the second invocation correctly filters out the first half that
@@ -567,23 +567,23 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]._source).to.eql({
           ...previewAlerts[0]._source,
-          [ALERT_THROTTLE_FIELDS]: ['host.name', 'source.ip'],
-          [ALERT_THROTTLE_VALUES]: ['host-0', '192.168.1.1'],
+          [ALERT_SUPPRESSION_FIELDS]: ['host.name', 'source.ip'],
+          [ALERT_SUPPRESSION_VALUES]: ['host-0', '192.168.1.1'],
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
-          [ALERT_THROTTLE_START]: '2020-10-28T05:00:00.000Z',
-          [ALERT_THROTTLE_END]: '2020-10-28T05:00:02.000Z',
-          [ALERT_THROTTLE_COUNT]: 3,
+          [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
+          [ALERT_SUPPRESSION_COUNT]: 3,
         });
 
         expect(previewAlerts[1]._source).to.eql({
           ...previewAlerts[1]._source,
-          [ALERT_THROTTLE_FIELDS]: ['host.name', 'source.ip'],
-          [ALERT_THROTTLE_VALUES]: ['host-0', '192.168.1.1'],
+          [ALERT_SUPPRESSION_FIELDS]: ['host.name', 'source.ip'],
+          [ALERT_SUPPRESSION_VALUES]: ['host-0', '192.168.1.1'],
           // Note: the timestamps here are 1 hour after the timestamps for previewAlerts[0]
           [ALERT_ORIGINAL_TIME]: '2020-10-28T06:00:00.000Z',
-          [ALERT_THROTTLE_START]: '2020-10-28T06:00:00.000Z',
-          [ALERT_THROTTLE_END]: '2020-10-28T06:00:02.000Z',
-          [ALERT_THROTTLE_COUNT]: 3,
+          [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
+          [ALERT_SUPPRESSION_COUNT]: 3,
         });
       });
     });

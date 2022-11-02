@@ -436,7 +436,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
       }
     : {
         ...(ruleFields.groupByFields.length > 0
-          ? { alert_grouping: { groupBy: ruleFields.groupByFields } }
+          ? { alert_suppression: { groupBy: ruleFields.groupByFields } }
           : {}),
         index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,

@@ -40,6 +40,7 @@ import {
   THREAT_MATCH_EMPTIES,
   SAVED_QUERY_REQUIRED,
 } from './translations';
+import { OptionalFieldLabel } from '../optional_field_label';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -562,13 +563,14 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
       {
-        defaultMessage: 'Group Alerts By',
+        defaultMessage: 'Suppress Alerts By',
       }
     ),
+    labelAppend: OptionalFieldLabel,
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByFieldHelpText',
       {
-        defaultMessage: 'Select field(s) to group alerts by',
+        defaultMessage: 'Select field(s) to use for suppressing extra alerts',
       }
     ),
     validations: [

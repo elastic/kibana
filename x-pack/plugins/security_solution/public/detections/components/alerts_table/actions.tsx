@@ -22,10 +22,10 @@ import {
   ALERT_RULE_TYPE,
   ALERT_RULE_NOTE,
   ALERT_RULE_PARAMETERS,
-  ALERT_THROTTLE_START,
-  ALERT_THROTTLE_END,
-  ALERT_THROTTLE_VALUES,
-  ALERT_THROTTLE_COUNT,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_VALUES,
+  ALERT_SUPPRESSION_COUNT,
 } from '@kbn/rule-data-utils';
 
 import type { TGridModel } from '@kbn/timelines-plugin/public';
@@ -286,8 +286,8 @@ export const isNewTermsAlert = (ecsData: Ecs): boolean => {
   );
 };
 
-export const isThrottledAlert = (ecsData: Ecs): boolean => {
-  return getField(ecsData, ALERT_THROTTLE_COUNT) != null;
+const isSuppressedAlert = (ecsData: Ecs): boolean => {
+  return getField(ecsData, ALERT_SUPPRESSION_COUNT) != null;
 };
 
 export const buildAlertsKqlFilter = (
@@ -669,14 +669,14 @@ const createNewTermsTimeline = async (
   }
 };
 
-const getThrottledAlertData = (ecsData: Ecs | Ecs[]) => {
+const getSuppressedAlertData = (ecsData: Ecs | Ecs[]) => {
   const normalizedEcsData: Ecs = Array.isArray(ecsData) ? ecsData[0] : ecsData;
-  const from = getField(normalizedEcsData, ALERT_THROTTLE_START);
-  const to = getField(normalizedEcsData, ALERT_THROTTLE_END);
+  const from = getField(normalizedEcsData, ALERT_SUPPRESSION_START);
+  const to = getField(normalizedEcsData, ALERT_SUPPRESSION_END);
   const params = getField(normalizedEcsData, ALERT_RULE_PARAMETERS);
   // TODO: fix snake and camel case mixing in HTTP schema
-  const groupByFields: string[] = params.alert_grouping.groupBy;
-  const entities = getField(normalizedEcsData, ALERT_THROTTLE_VALUES);
+  const groupByFields: string[] = params.alert_suppression.groupBy;
+  const entities = getField(normalizedEcsData, ALERT_SUPPRESSION_VALUES);
   const dataProviderPartials = groupByFields.map((field, i) => {
     const fieldId = field.replace('.', '-');
     const value = entities[i];
@@ -704,7 +704,7 @@ const getThrottledAlertData = (ecsData: Ecs | Ecs[]) => {
   };
 };
 
-const createThrottledTimeline = async (
+const createSuppressedTimeline = async (
   ecsData: Ecs,
   createTimeline: ({ from, timeline, to }: CreateTimelineProps) => void,
   noteContent: string,
@@ -751,7 +751,7 @@ const createThrottledTimeline = async (
     const query = params.query ?? alertDoc.signal?.rule?.query ?? '';
     const indexNames = getField(alertDoc, ALERT_RULE_INDICES) ?? alertDoc.signal?.rule?.index ?? [];
 
-    const { from, to, dataProviders } = getThrottledAlertData(alertDoc);
+    const { from, to, dataProviders } = getSuppressedAlertData(alertDoc);
     const exceptionsFilter = await getExceptionFilter(ecsData);
 
     const allFilters = (templateValues.filters ?? augmentedFilters).concat(
@@ -917,8 +917,8 @@ export const sendAlertToTimelineAction = async ({
             },
             getExceptionFilter
           );
-        } else if (isThrottledAlert(ecsData)) {
-          return createThrottledTimeline(
+        } else if (isSuppressedAlert(ecsData)) {
+          return createSuppressedTimeline(
             ecsData,
             createTimeline,
             noteContent,
@@ -986,8 +986,8 @@ export const sendAlertToTimelineAction = async ({
     return createThresholdTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else if (isNewTermsAlert(ecsData)) {
     return createNewTermsTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
-  } else if (isThrottledAlert(ecsData)) {
-    return createThrottledTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
+  } else if (isSuppressedAlert(ecsData)) {
+    return createSuppressedTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(alertIds ?? [], ecsData._id);
     if (isEqlAlertWithGroupId(ecsData)) {

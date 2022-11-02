@@ -37,7 +37,6 @@ import {
 
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import {
-  AlertGrouping,
   AlertsIndex,
   AlertsIndexNamespace,
   BuildingBlockType,
@@ -85,6 +84,13 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
+
+export type AlertSuppressionCamel = t.TypeOf<typeof AlertSuppressionCamel>;
+const AlertSuppressionCamel = t.exact(
+  t.type({
+    groupBy: t.array(t.string),
+  })
+);
 
 export const baseRuleParams = t.exact(
   t.type({
@@ -169,7 +175,7 @@ const querySpecificRuleParams = t.exact(
     savedId: savedIdOrUndefined,
     dataViewId: t.union([DataViewId, t.undefined]),
     responseActions: ResponseActionRuleParamsOrUndefined,
-    alertGrouping: t.union([AlertGrouping, t.undefined]),
+    alertSuppression: t.union([AlertSuppressionCamel, t.undefined]),
   })
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
@@ -187,7 +193,7 @@ const savedQuerySpecificRuleParams = t.type({
   filters: t.union([RuleFilterArray, t.undefined]),
   savedId: saved_id,
   responseActions: ResponseActionRuleParamsOrUndefined,
-  alertGrouping: t.union([AlertGrouping, t.undefined]),
+  alertSuppression: t.union([AlertSuppressionCamel, t.undefined]),
 });
 export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
 export type SavedQuerySpecificRuleParams = t.TypeOf<typeof savedQuerySpecificRuleParams>;

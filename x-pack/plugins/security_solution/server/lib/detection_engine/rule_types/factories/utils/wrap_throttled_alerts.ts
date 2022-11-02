@@ -9,15 +9,15 @@ import objectHash from 'object-hash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import {
   ALERT_UUID,
-  ALERT_THROTTLE_FIELDS,
-  ALERT_THROTTLE_VALUES,
-  ALERT_THROTTLE_COUNT,
-  ALERT_THROTTLE_END,
-  ALERT_THROTTLE_START,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_VALUES,
+  ALERT_SUPPRESSION_COUNT,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
 } from '@kbn/rule-data-utils';
 import type {
   BaseFieldsLatest,
-  ThrottledFieldsLatest,
+  SuppressionFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../../common/detection_engine/schemas/alerts';
 import type { ConfigType } from '../../../../../config';
@@ -52,7 +52,7 @@ export const wrapThrottledAlerts = ({
   buildReasonMessage: BuildReasonMessage;
   groupByFields: string[];
   alertTimestampOverride: Date | undefined;
-}): Array<WrappedFieldsLatest<ThrottledFieldsLatest>> => {
+}): Array<WrappedFieldsLatest<SuppressionFieldsLatest>> => {
   return throttleBuckets.map((bucket) => {
     const id = objectHash([
       bucket.event._index,
@@ -79,11 +79,11 @@ export const wrapThrottledAlerts = ({
       _index: '',
       _source: {
         ...baseAlert,
-        [ALERT_THROTTLE_FIELDS]: groupByFields,
-        [ALERT_THROTTLE_VALUES]: bucket.values,
-        [ALERT_THROTTLE_START]: bucket.start,
-        [ALERT_THROTTLE_END]: bucket.end,
-        [ALERT_THROTTLE_COUNT]: bucket.count,
+        [ALERT_SUPPRESSION_FIELDS]: groupByFields,
+        [ALERT_SUPPRESSION_VALUES]: bucket.values,
+        [ALERT_SUPPRESSION_START]: bucket.start,
+        [ALERT_SUPPRESSION_END]: bucket.end,
+        [ALERT_SUPPRESSION_COUNT]: bucket.count,
         [ALERT_UUID]: id,
       },
     };
