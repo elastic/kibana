@@ -560,10 +560,10 @@ describe('heatmap', () => {
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [false],
-                        isYAxisTitleVisible: [true],
+                        isYAxisTitleVisible: [false],
                         // X-axis
                         isXAxisLabelVisible: [false],
-                        isXAxisTitleVisible: [true],
+                        isXAxisTitleVisible: [false],
                         xTitle: [''],
                         yTitle: [''],
                       },
