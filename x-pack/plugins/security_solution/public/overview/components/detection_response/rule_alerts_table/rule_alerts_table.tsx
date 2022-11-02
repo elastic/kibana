@@ -22,7 +22,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { HeaderSection } from '../../../../common/components/header_section';
 
-import { SEVERITY_COLOR } from '../utils';
+import { openAlertsFilter, SEVERITY_COLOR } from '../utils';
 import * as i18n from '../translations';
 import type { RuleAlertsItem } from './use_rule_alerts_items';
 import { useRuleAlertsItems } from './use_rule_alerts_items';
@@ -90,7 +90,11 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, openRu
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
     render: (alertCount: number, { name }) => (
-      <EuiLink disabled={alertCount === 0} onClick={() => openRuleInTimeline(name)}>
+      <EuiLink
+        data-test-subj="severityRuleAlertsTable-alertCountLink"
+        disabled={alertCount === 0}
+        onClick={() => openRuleInTimeline(name)}
+      >
         <FormattedCount count={alertCount} />
       </EuiLink>
     ),
@@ -114,7 +118,17 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
     skip: !toggleStatus,
   });
 
-  const { openRuleInTimeline } = useNavigateToTimeline();
+
+  const { openTimelineWithFilters } = useNavigateToTimeline();
+
+  const openRuleInTimeline = useCallback(
+    (ruleName: string) => {
+      openTimelineWithFilters([
+        [{ field: 'kibana.alert.rule.name', value: ruleName }, openAlertsFilter],
+      ]);
+    },
+    [openTimelineWithFilters]
+  );
 
   const navigateToAlerts = useCallback(() => {
     navigateTo({ deepLinkId: SecurityPageName.alerts });

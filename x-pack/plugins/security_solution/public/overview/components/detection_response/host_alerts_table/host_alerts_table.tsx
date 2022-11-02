@@ -28,7 +28,7 @@ import { HostDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import * as i18n from '../translations';
-import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
+import { ITEMS_PER_PAGE, openAlertsFilter, SEVERITY_COLOR } from '../utils';
 import type { HostAlertsItem } from './use_host_alerts_items';
 import { useHostAlertsItems } from './use_host_alerts_items';
 
@@ -43,7 +43,25 @@ type GetTableColumns = (
 const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuery';
 
 export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableProps) => {
-  const { openHostInTimeline } = useNavigateToTimeline();
+
+  const { openTimelineWithFilters } = useNavigateToTimeline();
+
+  const openHostInTimeline = useCallback(
+    ({ hostName, severity }: { hostName: string; severity?: string }) => {
+      const hostNameFilter = { field: 'host.name', value: hostName };
+      const severityFilter = severity
+        ? { field: 'kibana.alert.severity', value: severity }
+        : undefined;
+
+      openTimelineWithFilters(
+        severityFilter
+          ? [[hostNameFilter, openAlertsFilter, severityFilter]]
+          : [[hostNameFilter, openAlertsFilter]]
+      );
+    },
+    [openTimelineWithFilters]
+  );
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(
     DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID
   );
@@ -118,7 +136,11 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'hostSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { hostName }) => (
-      <EuiLink disabled={totalAlerts === 0} onClick={() => handleClick({ hostName })}>
+      <EuiLink
+        data-test-subj="hostSeverityAlertsTable-totalAlertsLink"
+        disabled={totalAlerts === 0}
+        onClick={() => handleClick({ hostName })}
+      >
         <FormattedCount count={totalAlerts} />
       </EuiLink>
     ),
@@ -129,6 +151,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
         <EuiLink
+          data-test-subj="hostSeverityAlertsTable-criticalLink"
           disabled={count === 0}
           onClick={() => handleClick({ hostName, severity: 'critical' })}
         >
