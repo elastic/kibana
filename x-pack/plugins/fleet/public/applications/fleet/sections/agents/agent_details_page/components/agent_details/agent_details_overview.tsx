@@ -196,9 +196,11 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
               </FlexItemWithMinWidth>
               <FlexItemWithMinWidth grow={7}>
-                <EuiDescriptionListDescription className="eui-textTruncate" title={tooltip}>
-                  {description}
-                </EuiDescriptionListDescription>
+                <EuiToolTip position="top" content={tooltip}>
+                  <EuiDescriptionListDescription className="eui-textTruncate">
+                    {description}
+                  </EuiDescriptionListDescription>
+                </EuiToolTip>
               </FlexItemWithMinWidth>
             </EuiFlexGroup>
           );
