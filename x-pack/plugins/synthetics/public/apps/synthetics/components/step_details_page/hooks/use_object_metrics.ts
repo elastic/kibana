@@ -38,6 +38,7 @@ export const useObjectMetrics = () => {
   const totalObjectsWeight = Object.values(objectTypeWeights).reduce((acc, val) => acc + val, 0);
 
   return {
+    loading: networkEvents?.loading ?? true,
     totalObjects,
     totalObjectsWeight: formatBytes(totalObjectsWeight),
     items: MIME_FILTERS.map(({ label, mimeType }) => ({

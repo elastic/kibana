@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingContent } from '@elastic/eui';
 import { useTheme } from '@kbn/observability-plugin/public';
+import styled from 'styled-components';
 import { colourPalette } from './network_waterfall/step_detail/waterfall/data_formatting';
+
 export const ColorPalette = ({
   label,
   mimeType,
   percent,
   value,
+  loading,
   labelWidth = 40,
   valueWidth = 60,
 }: {
   label: string;
-  labelWidth?: number;
-  valueWidth?: number;
   mimeType: string;
   percent: number;
   value: string;
+  loading: boolean;
+  labelWidth?: number;
+  valueWidth?: number;
 }) => {
   return (
     <EuiFlexGroup gutterSize="s">
@@ -30,10 +34,18 @@ export const ColorPalette = ({
         <EuiText size="s">{label}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        <ColorPaletteFlexItem mimeType={mimeType} percent={isNaN(percent) ? 0 : percent} />
+        <ColorPaletteFlexItem
+          mimeType={mimeType}
+          percent={isNaN(percent) ? 0 : percent}
+          loading={loading}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ width: valueWidth, justifySelf: 'flex-end' }}>
-        <EuiText size="s" style={{ fontWeight: 'bold' }} className="eui-textRight">
+        <EuiText
+          size="s"
+          style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}
+          className="eui-textRight"
+        >
           {value}
         </EuiText>
       </EuiFlexItem>
@@ -44,11 +56,27 @@ export const ColorPalette = ({
 export const ColorPaletteFlexItem = ({
   mimeType,
   percent,
+  loading,
 }: {
   mimeType: string;
   percent: number;
+  loading: boolean;
 }) => {
   const { eui } = useTheme();
+
+  const [value, setVal] = useState(0);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (value < percent) {
+        setVal(value + 1);
+      }
+    }, 10);
+  }, [percent, value]);
+
+  if (loading) {
+    return <LoadingLine lines={1} />;
+  }
 
   return (
     <EuiFlexGroup
@@ -63,10 +91,18 @@ export const ColorPaletteFlexItem = ({
           style={{
             backgroundColor: (colourPalette as Record<string, string>)[mimeType],
             height: 20,
-            width: `${percent}%`,
+            width: `${value}%`,
           }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+const LoadingLine = styled(EuiLoadingContent)`
+  &&& {
+    > span {
+      height: 20px;
+    }
+  }
+`;

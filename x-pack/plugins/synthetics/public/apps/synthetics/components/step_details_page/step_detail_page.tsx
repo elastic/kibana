@@ -17,8 +17,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
-import { ObjectCountList } from './components/object_count_list';
 import { ObjectWeightList } from './components/object_weight_list';
+import { ObjectCountList } from './components/object_count_list';
 import { StepImage } from './components/step_image';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
