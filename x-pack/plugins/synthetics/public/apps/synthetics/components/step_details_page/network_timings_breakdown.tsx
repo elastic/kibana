@@ -17,7 +17,7 @@ export const NetworkTimingsBreakdown = () => {
 
   const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
 
-  const { checkGroupId } = useParams<{ checkGroupId: string; stepIndex: string }>();
+  const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
 
   return (
     <>
@@ -42,6 +42,12 @@ export const NetworkTimingsBreakdown = () => {
               from: 'now-24h/h',
               to: 'now',
             },
+            filters: [
+              {
+                field: 'synthetics.step.index',
+                values: [stepIndex],
+              },
+            ],
           },
         ]}
       />
