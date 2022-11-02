@@ -426,7 +426,6 @@ export const termsOperation: OperationDefinition<
       selectedColumn,
       columnId,
       indexPattern,
-      existingFields,
       operationSupportMatrix,
       updateLayer,
       dimensionGroups,
@@ -549,7 +548,6 @@ export const termsOperation: OperationDefinition<
         <FieldInputs
           column={selectedColumn}
           indexPattern={indexPattern}
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           onChange={onFieldSelectChange}
           invalidFields={invalidFields}
@@ -568,7 +566,6 @@ The top values of a specified field ranked by the chosen metric.
     currentColumn,
     columnId,
     indexPattern,
-    existingFields,
     operationDefinitionMap,
     ReferenceEditor,
     paramEditorCustomProps,
@@ -808,7 +805,6 @@ The top values of a specified field ranked by the chosen metric.
               }}
               column={currentColumn.params.orderAgg}
               incompleteColumn={incompleteColumn}
-              existingFields={existingFields}
               onDeleteColumn={() => {
                 throw new Error('Should not be called');
               }}

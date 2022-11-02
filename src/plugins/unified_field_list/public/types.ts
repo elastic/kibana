@@ -19,3 +19,44 @@ export type AddFieldFilterHandler = (
   value: unknown,
   type: '+' | '-'
 ) => void;
+
+export enum ExistenceFetchStatus {
+  failed = 'failed',
+  succeeded = 'succeeded',
+  unknown = 'unknown',
+}
+
+export interface FieldListItem {
+  name: DataViewField['name'];
+  type?: DataViewField['type'];
+  displayName?: DataViewField['displayName'];
+}
+
+export enum FieldsGroupNames {
+  SpecialFields = 'SpecialFields',
+  SelectedFields = 'SelectedFields',
+  AvailableFields = 'AvailableFields',
+  EmptyFields = 'EmptyFields',
+  MetaFields = 'MetaFields',
+}
+
+export interface FieldsGroupDetails {
+  showInAccordion: boolean;
+  isInitiallyOpen: boolean;
+  title: string;
+  helpText?: string;
+  isAffectedByGlobalFilter: boolean;
+  isAffectedByTimeFilter: boolean;
+  hideDetails?: boolean;
+  defaultNoFieldsMessage?: string;
+  hideIfEmpty?: boolean;
+}
+
+export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails {
+  fields: T[];
+  fieldCount: number;
+}
+
+export type FieldListGroups<T extends FieldListItem> = {
+  [key in FieldsGroupNames]?: FieldsGroup<T>;
+};

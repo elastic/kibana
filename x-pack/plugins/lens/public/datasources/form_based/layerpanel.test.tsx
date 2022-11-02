@@ -181,8 +181,6 @@ describe('Layer Data Panel', () => {
           { id: '2', title: 'my-fake-restricted-pattern' },
           { id: '3', title: 'my-compatible-pattern' },
         ],
-        existingFields: {},
-        isFirstExistenceFetch: false,
         indexPatterns: {
           '1': {
             id: '1',
