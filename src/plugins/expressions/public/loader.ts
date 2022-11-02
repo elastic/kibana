@@ -203,12 +203,12 @@ export class ExpressionLoader {
       syncCursor: params?.syncCursor,
       syncTooltips: params.syncTooltips,
       executionContext: params.executionContext,
+      partial: params.partial,
     });
     this.subscription = this.execution
       .getData()
       .pipe(
         delay(0), // delaying until the next tick since we execute the expression in the constructor
-        filter(({ partial }) => params.partial || !partial),
         params.partial && params.throttle ? throttle(params.throttle) : identity
       )
       .subscribe((value) => this.dataSubject.next(value));

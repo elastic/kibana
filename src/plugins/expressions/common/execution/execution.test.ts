@@ -404,7 +404,7 @@ describe('Execution', () => {
       jest.useRealTimers();
     });
 
-    test('handles functions returning observables', () => {
+    test('handles partial results when functions return observables', () => {
       testScheduler.run(({ cold, expectObservable }) => {
         const arg = cold('     -a-b-c|', { a: 1, b: 2, c: 3 });
         const expected = '     -a-b-c|';
@@ -417,7 +417,7 @@ describe('Execution', () => {
         const executor = createUnitTestExecutor();
         executor.registerFunction(observable);
 
-        const result = executor.run('observable', null, {});
+        const result = executor.run('observable', null, { partial: true });
 
         expectObservable(result).toBe(expected, {
           a: { result: 1, partial: true },
@@ -427,7 +427,7 @@ describe('Execution', () => {
       });
     });
 
-    test('supports opting out of partial results', () => {
+    test('ignores partial results by default', () => {
       testScheduler.run(({ cold, expectObservable, flush }) => {
         const a = 1;
         const b = 2;
@@ -449,7 +449,7 @@ describe('Execution', () => {
           fn: (input) => spyFn(input),
         });
 
-        const result = executor.run('observable | spy', null, { partial: false });
+        const result = executor.run('observable | spy', null);
 
         expectObservable(result).toBe(expected, {
           c: { result: c, partial: false },
@@ -560,7 +560,7 @@ describe('Execution', () => {
           fn: (value) => spyFn(value),
         });
 
-        const result = executor.run('observable | flaky | spy', null, {});
+        const result = executor.run('observable | flaky | spy', null, { partial: true });
 
         expectObservable(result).toBe('abc|', {
           a: { partial: true, result: a },
@@ -694,7 +694,7 @@ describe('Execution', () => {
         const executor = createUnitTestExecutor();
         executor.registerFunction(observable);
 
-        const result = executor.run('add val={observable}', 1, {});
+        const result = executor.run('add val={observable}', 1, { partial: true });
 
         expectObservable(result).toBe(expected, {
           a: { partial: true, result: { type: 'num', value: 2 } },
@@ -740,7 +740,11 @@ describe('Execution', () => {
         executor.registerFunction(observable2);
         executor.registerFunction(max);
 
-        const result = executor.run('max val1={observable1} val2={observable2}', {});
+        const result = executor.run(
+          'max val1={observable1} val2={observable2}',
+          {},
+          { partial: true }
+        );
 
         expectObservable(result).toBe(expected, {
           a: { partial: true, result: { type: 'num', value: 1 } },
@@ -765,7 +769,7 @@ describe('Execution', () => {
         const executor = createUnitTestExecutor();
         executor.registerFunction(observable);
 
-        const result = executor.run('add val={observable}', 1, {});
+        const result = executor.run('add val={observable}', 1, { partial: true });
 
         expectObservable(result).toBe(expected, {
           a: expect.objectContaining({ result: { type: 'num', value: 2 } }),
@@ -823,7 +827,7 @@ describe('Execution', () => {
           fn: (input, args) => spyFn(input, args),
         });
 
-        const result = executor.run('spy arg={observable | flaky}', null, {});
+        const result = executor.run('spy arg={observable | flaky}', null, { partial: true });
 
         expectObservable(result).toBe('abcd|', {
           a: { partial: true, result: a },
@@ -882,7 +886,7 @@ describe('Execution', () => {
           fn: (input, args) => spyFn(input, args),
         });
 
-        const result = executor.run('spy arg={observable}', null, { partial: false });
+        const result = executor.run('spy arg={observable}', null);
 
         expectObservable(result).toBe(expected, {
           c: { partial: false, result: c },

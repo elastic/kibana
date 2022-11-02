@@ -164,7 +164,7 @@ export interface ExpressionExecutionParams {
 
   /**
    * Toggles the partial results support.
-   * @default true
+   * @default false
    */
   partial?: boolean;
 }

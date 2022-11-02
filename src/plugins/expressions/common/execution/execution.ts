@@ -364,7 +364,7 @@ export class Execution<
           return args$.pipe(
             tap((args) => this.execution.params.debug && Object.assign(head.debug, { args })),
             switchMap((args) => this.invokeFunction(fn, input, args)),
-            this.execution.params.partial ?? true ? noop() : last(),
+            this.execution.params.partial ? noop() : last(),
             switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
             tap((output) => this.execution.params.debug && Object.assign(head.debug, { output })),
             switchMap((output) => this.invokeChain<ChainOutput>(tail, output)),
