@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { SchemaType, IgnoreSchemaType } from '../types';
+import { SchemaType, IgnoreSchemaTypes } from '../types';
 
 interface Props {
   fieldName: string;
@@ -26,7 +26,7 @@ export const SchemaFieldTypeSelect: React.FC<Props> = ({
   ...rest
 }) => {
   const fieldTypeOptions = Object.values(SchemaType)
-    .filter((type) => !IgnoreSchemaType.includes(type))
+    .filter((type) => !IgnoreSchemaTypes.includes(type))
     .map((type) => ({ value: type, text: type }));
 
   return (
