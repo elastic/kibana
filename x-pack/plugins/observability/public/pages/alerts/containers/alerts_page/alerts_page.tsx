@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutSize } from '@elastic/eui';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { AnyQuery, BoolQuery } from '@kbn/es-query';
+import { Query, BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
@@ -35,7 +35,7 @@ import { ObservabilityAppServices } from '../../../../application/types';
 import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
 import { RuleStatsState } from './types';
 
-const getAlertStatusQuery = (status: string): AnyQuery[] => {
+const getAlertStatusQuery = (status: string): Query[] => {
   return status ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }] : [];
 };
 
