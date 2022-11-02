@@ -254,6 +254,11 @@ const actionNames: {
     cancelledText: 'update tags',
   },
   CANCEL: { inProgressText: 'Cancelling', completedText: 'cancelled', cancelledText: '' },
+  SETTINGS: {
+    inProgressText: 'Updating settings of',
+    completedText: 'updated settings',
+    cancelledText: 'update settings',
+  },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 
