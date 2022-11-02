@@ -6,13 +6,13 @@
  */
 
 import { getLegacyMetricVisualization } from './visualization';
+import { ColorMode } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LegacyMetricState } from '../../../common/types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { generateId } from '../../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { ColorMode } from '@kbn/charts-plugin/common';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../id_generator');

@@ -14,6 +14,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import {
+  ColorMode,
   PaletteRegistry,
   CustomizablePalette,
   CUSTOM_PALETTE,
@@ -21,7 +22,6 @@ import {
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
-import { ColorMode } from '@kbn/charts-plugin/common';
 import type { LegacyMetricState } from '../../../common/types';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';

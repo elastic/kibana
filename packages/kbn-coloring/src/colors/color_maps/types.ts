@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-export enum ColorSchemas {
-  Blues = 'Blues',
-  Greens = 'Greens',
-  Greys = 'Greys',
-  Reds = 'Reds',
-  YellowToRed = 'Yellow to Red',
-  GreenToRed = 'Green to Red',
-}
+import { ColorSchemas } from '../constants';
 
 export interface ColorSchema {
   value: ColorSchemas;

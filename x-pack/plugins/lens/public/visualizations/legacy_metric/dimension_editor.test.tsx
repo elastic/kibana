@@ -12,8 +12,8 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { MetricDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { ColorMode } from '@kbn/charts-plugin/public';
 import {
+  ColorMode,
   CustomizablePalette,
   PaletteOutput,
   PaletteRegistry,

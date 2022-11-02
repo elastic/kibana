@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { colorSchemas } from '@kbn/coloring';
+import { ColorMode, colorSchemas } from '@kbn/coloring';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
@@ -29,7 +29,6 @@ import {
   RangeOption,
   PercentageModeOption,
 } from '@kbn/vis-default-editor-plugin/public';
-import { ColorMode } from '@kbn/charts-plugin/public';
 import { MetricVisParam, VisParams } from '../types';
 
 const metricColorMode = [

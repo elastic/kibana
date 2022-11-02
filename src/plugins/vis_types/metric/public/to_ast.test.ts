@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemas } from '@kbn/coloring';
-import { ColorMode } from '@kbn/charts-plugin/public';
+import { ColorSchemas, ColorMode } from '@kbn/coloring';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { Vis } from '@kbn/visualizations-plugin/public';
 

@@ -6,16 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
 
-export const LabelRotation = Object.freeze({
-  Horizontal: 0,
-  Vertical: 90,
-  Angled: 75,
+export const ColorMode = Object.freeze({
+  Background: 'Background' as 'Background',
+  Labels: 'Labels' as 'Labels',
+  None: 'None' as 'None',
 });
-export type LabelRotation = $Values<typeof LabelRotation>;
 
-export const defaultCountLabel = i18n.translate('charts.countText', {
-  defaultMessage: 'Count',
-});
+export enum ColorSchemas {
+  Blues = 'Blues',
+  Greens = 'Greens',
+  Greys = 'Greys',
+  Reds = 'Reds',
+  YellowToRed = 'Yellow to Red',
+  GreenToRed = 'Green to Red',
+}
+
+export type ColorMode = $Values<typeof ColorMode>;

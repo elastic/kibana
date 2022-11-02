@@ -7,7 +7,6 @@
  */
 
 export type { ColorSchema, RawColorSchema, ColorMap, ColorSchemaParams } from './types';
-export { ColorSchemas } from './types';
 export { vislibColorMaps, colorSchemas } from './color_maps';
 export { getHeatmapColors } from './heatmap_color';
 export { truncatedColorMaps, truncatedColorSchemas } from './truncated_color_maps';

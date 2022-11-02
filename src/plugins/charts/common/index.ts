@@ -17,6 +17,6 @@ export type {
 export { palette, systemPalette } from './expressions/palette';
 
 export { paletteIds, defaultCustomColors } from './constants';
-export { ColorMode, LabelRotation, defaultCountLabel, MULTILAYER_TIME_AXIS_STYLE } from './static';
+export { LabelRotation, defaultCountLabel, MULTILAYER_TIME_AXIS_STYLE } from './static';
 
 export type { Labels, Style } from './types';

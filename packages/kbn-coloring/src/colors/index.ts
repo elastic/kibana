@@ -7,3 +7,4 @@
  */
 
 export * from './color_maps';
+export * from './constants';

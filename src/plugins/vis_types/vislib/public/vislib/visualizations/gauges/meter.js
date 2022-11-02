@@ -9,7 +9,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 
-import { getHeatmapColors } from '@kbn/charts-plugin/public';
+import { getHeatmapColors } from '@kbn/coloring';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
 

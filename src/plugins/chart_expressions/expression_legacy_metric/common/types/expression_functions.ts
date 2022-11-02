@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PaletteOutput } from '@kbn/coloring';
+import type { PaletteOutput, ColorMode } from '@kbn/coloring';
 import {
   Datatable,
   ExpressionFunctionDefinition,
@@ -14,7 +14,7 @@ import {
   Style,
 } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VisParams, visType, LabelPositionType, MetricAlignment } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 

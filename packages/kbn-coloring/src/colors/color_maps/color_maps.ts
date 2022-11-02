@@ -7,7 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ColorMap, ColorSchema, ColorSchemas } from './types';
+import type { ColorMap, ColorSchema } from './types';
+import { ColorSchemas } from '../constants';
 
 export const vislibColorMaps: ColorMap = {
   // Sequential
