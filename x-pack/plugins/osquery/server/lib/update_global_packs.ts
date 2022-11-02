@@ -14,6 +14,7 @@ import { has, map, mapKeys, set, unset } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import produce from 'immer';
+import type { Shard } from '../../common/schemas/common/utils';
 import { packSavedObjectType } from '../../common/types';
 import type { OsqueryAppContextService } from './osquery_app_context_services';
 import type { PackSavedObjectAttributes } from '../common/types';
@@ -39,7 +40,7 @@ export const updateGlobalPacksCreateCallback = async (
     : {};
 
   const packsContainingShardForPolicy: PackSavedObject[] = [];
-  const policyShards: Record<string, number> = {};
+  const policyShards: Shard = {};
   allPacks.saved_objects.map((pack) => {
     const shards = pack.attributes.shards;
 

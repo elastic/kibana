@@ -8,6 +8,7 @@
 import { isEmpty, pick, reduce, isArray, filter, uniq, map, mapKeys } from 'lodash';
 import { satisfies } from 'semver';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { Shard } from '../../../common/schemas/common/utils';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
@@ -90,7 +91,7 @@ export const getInitialPolicies = (
 export const updatePoliciesWithShards = (
   foundMatchingPolicies: AgentPolicy[],
   policiesList: string[],
-  shards?: Record<string, number>
+  shards?: Shard
 ): string[] => {
   if (shards && !isEmpty(shards)) {
     const ids = map(foundMatchingPolicies, 'id');
@@ -109,10 +110,10 @@ export const updatePoliciesWithShards = (
 // Find the agentPolicies that has name containing shard name
 export const findMatchingPoliciesAndShards = (
   agentPolicies: AgentPolicy[] | undefined,
-  shards?: Record<string, number>
+  shards?: Shard
 ) => {
   const foundMatchingPolicies: AgentPolicy[] = [];
-  const policyShards: Record<string, number> = {};
+  const policyShards: Shard = {};
   if (!isEmpty(shards)) {
     const agentPoliciesNames = map(agentPolicies, 'name');
     const agentPoliciesNameMap = mapKeys(agentPolicies, 'name');
