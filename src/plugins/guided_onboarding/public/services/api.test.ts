@@ -24,7 +24,9 @@ import {
   testIntegration,
   wrongIntegration,
   testGuideStep2InProgressState,
+  readyToCompleteGuideState,
 } from './api.mocks';
+import {GuideStatus} from "@kbn/guided-onboarding/src/types";
 
 describe('GuidedOnboarding ApiService', () => {
   let httpClient: jest.Mocked<HttpSetup>;
@@ -153,6 +155,17 @@ describe('GuidedOnboarding ApiService', () => {
         body: JSON.stringify(updatedState),
       });
     });
+
+    it('the completed state is being broadcast after the update', async () => {
+      const completedState = {
+        ...readyToCompleteGuideState,
+        isActive: false,
+        status: 'complete' as GuideStatus,
+      };
+      await apiService.updateGuideState(completedState, false);
+      const state = await firstValueFrom(apiService.fetchActiveGuideState$());
+      expect(state).toMatchObject(completedState);
+    });
   });
 
   describe('isGuideStepActive$', () => {
@@ -207,24 +220,6 @@ describe('GuidedOnboarding ApiService', () => {
   });
 
   describe('completeGuide', () => {
-    const readyToCompleteGuideState: GuideState = {
-      ...testGuideStep1ActiveState,
-      steps: [
-        {
-          ...testGuideStep1ActiveState.steps[0],
-          status: 'complete',
-        },
-        {
-          ...testGuideStep1ActiveState.steps[1],
-          status: 'complete',
-        },
-        {
-          ...testGuideStep1ActiveState.steps[2],
-          status: 'complete',
-        },
-      ],
-    };
-
     beforeEach(async () => {
       await apiService.updateGuideState(readyToCompleteGuideState, false);
     });

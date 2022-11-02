@@ -116,8 +116,8 @@ export class ApiService implements GuidedOnboardingApi {
       const response = await this.client.put<{ state: GuideState }>(`${API_BASE_PATH}/state`, {
         body: JSON.stringify(newState),
       });
-      // If the guide has been deactivated, we return undefined
-      this.onboardingGuideState$.next(newState.isActive ? newState : undefined);
+      // broadcast the newState
+      this.onboardingGuideState$.next(newState);
       this.isGuidePanelOpen$.next(panelState);
       return response;
     } catch (error) {
