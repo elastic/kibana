@@ -22,9 +22,9 @@ import type {
 } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
-import { InternalCorePreboot, InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import type { InternalCorePreboot, InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
 import { registerBundleRoutes } from './bundle_routes';
-import type { InternalCoreAppRequestHandlerContext } from './internal_types';
+import type { InternalCoreAppsServiceRequestHandlerContext } from './internal_types';
 
 /** @internal */
 interface CommonRoutesParams {
@@ -39,7 +39,7 @@ interface CommonRoutesParams {
 }
 
 /** @internal */
-export class CoreApp {
+export class CoreAppsService {
   private readonly logger: Logger;
   private readonly env: Env;
 
@@ -91,7 +91,7 @@ export class CoreApp {
 
   private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     const httpSetup = coreSetup.http;
-    const router = httpSetup.createRouter<InternalCoreAppRequestHandlerContext>('');
+    const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
 
     router.get({ path: '/', validate: false }, async (context, req, res) => {
