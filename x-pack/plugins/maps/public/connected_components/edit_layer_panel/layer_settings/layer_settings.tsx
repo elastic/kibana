@@ -249,7 +249,7 @@ export function LayerSettings(props: Props) {
       <>
         <EuiCallOut
           title={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupCalloutTitle', {
-            defaultMessage: 'Use drag and drop to populate layer group',
+            defaultMessage: 'Drag layers in and out of the group',
           })}
           iconType="layers"
         >
