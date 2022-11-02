@@ -86,13 +86,7 @@ export const HostsTable = () => {
           />
         </div>
       ) : (
-        <EuiInMemoryTable
-          pagination
-          sorting
-          items={items}
-          columns={HostsTableColumns}
-          tableLayout="auto"
-        />
+        <EuiInMemoryTable pagination sorting items={items} columns={HostsTableColumns} />
       )}
     </>
   );
