@@ -70,6 +70,8 @@ export const ChangePointDetectionPage: FC = () => {
     [updateRequestParams]
   );
 
+  const selectControlCss = { width: '200px' };
+
   return (
     <div data-test-subj="aiopsChangePointDetectionPage">
       <SearchBarWrapper
@@ -82,13 +84,13 @@ export const ChangePointDetectionPage: FC = () => {
       <EuiSpacer size="m" />
 
       <EuiFlexGroup alignItems={'center'}>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={selectControlCss}>
           <FunctionPicker value={requestParams.fn} onChange={setFn} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={selectControlCss}>
           <MetricFieldSelector value={requestParams.metricField} onChange={setMetricField} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={selectControlCss}>
           <SplitFieldSelector value={requestParams.splitField} onChange={setSplitField} />
         </EuiFlexItem>
 
