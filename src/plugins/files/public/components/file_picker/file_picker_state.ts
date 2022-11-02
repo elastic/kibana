@@ -56,7 +56,8 @@ export class FilePickerState {
   constructor(
     private readonly client: FilesClient,
     private readonly kind: string,
-    public readonly pageSize: number
+    public readonly pageSize: number,
+    private selectMultiple: boolean
   ) {
     this.subscriptions = [
       this.query$
@@ -105,8 +106,18 @@ export class FilePickerState {
     this.internalIsLoading$.next(value);
   }
 
+  /**
+   * If multiple selection is not configured, this will take the first file id
+   * if an array of file ids was provided.
+   */
   public selectFile = (fileId: string | string[]): void => {
-    (Array.isArray(fileId) ? fileId : [fileId]).forEach((id) => this.fileSet.add(id));
+    const fileIds = Array.isArray(fileId) ? fileId : [fileId];
+    if (!this.selectMultiple) {
+      this.fileSet.clear();
+      this.fileSet.add(fileIds[0]);
+    } else {
+      for (const id of fileIds) this.fileSet.add(id);
+    }
     this.sendNextSelectedFiles();
   };
 
@@ -216,11 +227,13 @@ interface CreateFilePickerArgs {
   client: FilesClient;
   kind: string;
   pageSize: number;
+  uploadMultiple: boolean;
 }
 export const createFilePickerState = ({
   pageSize,
   client,
   kind,
+  uploadMultiple,
 }: CreateFilePickerArgs): FilePickerState => {
-  return new FilePickerState(client, kind, pageSize);
+  return new FilePickerState(client, kind, pageSize, uploadMultiple);
 };
