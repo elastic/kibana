@@ -37,7 +37,6 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     sortable: true,
     truncateText: true,
     textOnly: true,
-    render: (name: string) => <EuiText size="s">{name}</EuiText>,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.operatingSystemColumnHeader', {
