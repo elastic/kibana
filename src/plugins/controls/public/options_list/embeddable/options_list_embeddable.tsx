@@ -163,43 +163,46 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               isEqual(a.selectedOptions, b.selectedOptions)
           )
         )
-        .subscribe(
-          async ({ selectedOptions: newSelectedOptions, existsSelected: newExistsSelected }) => {
-            const {
-              actions: {
-                clearValidAndInvalidSelections,
-                setValidAndInvalidSelections,
-                publishFilters,
-              },
-              dispatch,
-            } = this.reduxEmbeddableTools;
+        .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
+          const {
+            actions: {
+              clearValidAndInvalidSelections,
+              setValidAndInvalidSelections,
+              setExistsSelectionValidity,
+              publishFilters,
+            },
+            dispatch,
+          } = this.reduxEmbeddableTools;
 
-            if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
-              dispatch(clearValidAndInvalidSelections({}));
-            } else {
-              const { invalidSelections } =
-                this.reduxEmbeddableTools.getState().componentState ?? {};
-              const newValidSelections: string[] = [];
-              const newInvalidSelections: string[] = [];
-              for (const selectedOption of newSelectedOptions) {
-                if (invalidSelections?.includes(selectedOption)) {
-                  newInvalidSelections.push(selectedOption);
-                  continue;
-                }
-                newValidSelections.push(selectedOption);
+          if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
+            dispatch(clearValidAndInvalidSelections({}));
+          } else {
+            const { invalidSelections } = this.reduxEmbeddableTools.getState().componentState ?? {};
+            const { existsSelected } = this.reduxEmbeddableTools.getState().explicitInput ?? {};
+            const newValidSelections: string[] = [];
+            const newInvalidSelections: string[] = [];
+            for (const selectedOption of newSelectedOptions) {
+              if (invalidSelections?.includes(selectedOption)) {
+                newInvalidSelections.push(selectedOption);
+                continue;
               }
-
+              newValidSelections.push(selectedOption);
+            }
+            batch(() => {
+              if (existsSelected) {
+                dispatch(setExistsSelectionValidity(invalidSelections));
+              }
               dispatch(
                 setValidAndInvalidSelections({
                   validSelections: newValidSelections,
                   invalidSelections: newInvalidSelections,
                 })
               );
-            }
-            const newFilters = await this.buildFilter();
-            dispatch(publishFilters(newFilters));
+            });
           }
-        )
+          const newFilters = await this.buildFilter();
+          dispatch(publishFilters(newFilters));
+        })
     );
   };
 
@@ -274,7 +277,13 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     const {
       dispatch,
       getState,
-      actions: { setLoading, updateQueryResults, publishFilters, setSearchString },
+      actions: {
+        setLoading,
+        publishFilters,
+        setSearchString,
+        updateQueryResults,
+        setExistsSelectionValidity,
+      },
     } = this.reduxEmbeddableTools;
 
     const previousFieldName = this.field?.name;
@@ -287,9 +296,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     const {
       componentState: { searchString },
-      explicitInput: { selectedOptions, runPastTimeout },
+      explicitInput: { selectedOptions, runPastTimeout, existsSelected, exclude },
     } = getState();
-
     dispatch(setLoading(true));
     if (searchString.valid) {
       // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
@@ -316,10 +324,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           {
             field,
             query,
+            exclude,
             filters,
             dataView,
             timeRange,
             searchString: searchString.value,
+            existsSelected,
             runPastTimeout,
             selectedOptions,
           },
@@ -330,30 +340,39 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         isEmpty(invalidSelections) ||
         ignoreParentSettings?.ignoreValidations
       ) {
-        dispatch(
-          updateQueryResults({
-            availableOptions: suggestions,
-            invalidSelections: undefined,
-            validSelections: selectedOptions,
-            totalCardinality,
-          })
-        );
+        batch(() => {
+          if (existsSelected) {
+            dispatch(setExistsSelectionValidity(invalidSelections));
+          }
+          dispatch(
+            updateQueryResults({
+              availableOptions: suggestions,
+              invalidSelections: undefined,
+              validSelections: selectedOptions,
+              totalCardinality,
+            })
+          );
+        });
       } else {
         const valid: string[] = [];
         const invalid: string[] = [];
-
         for (const selectedOption of selectedOptions) {
           if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
-        dispatch(
-          updateQueryResults({
-            availableOptions: suggestions,
-            invalidSelections: invalid,
-            validSelections: valid,
-            totalCardinality,
-          })
-        );
+        batch(() => {
+          if (existsSelected) {
+            dispatch(setExistsSelectionValidity(invalidSelections));
+          }
+          dispatch(
+            updateQueryResults({
+              availableOptions: suggestions,
+              invalidSelections: invalid,
+              validSelections: valid,
+              totalCardinality,
+            })
+          );
+        });
       }
 
       // publish filter

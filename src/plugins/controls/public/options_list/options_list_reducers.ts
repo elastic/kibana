@@ -85,6 +85,16 @@ export const optionsListReducers = {
     state.componentState.invalidSelections = invalidSelections;
     state.componentState.validSelections = validSelections;
   },
+  setExistsSelectionValidity: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<OptionsListComponentState['invalidSelections']>
+  ) => {
+    if (action.payload?.includes('existsQuery')) {
+      state.componentState.existsSelectionInvalid = true;
+    } else {
+      state.componentState.existsSelectionInvalid = false;
+    }
+  },
   setLoading: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.output.loading = action.payload;
   },

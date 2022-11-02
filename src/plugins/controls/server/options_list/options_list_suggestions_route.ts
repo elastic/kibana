@@ -43,6 +43,7 @@ export const setupOptionsListSuggestionsRoute = (
             filters: schema.maybe(schema.any()),
             fieldSpec: schema.maybe(schema.any()),
             searchString: schema.maybe(schema.string()),
+            existsSelected: schema.maybe(schema.boolean()),
             selectedOptions: schema.maybe(schema.arrayOf(schema.string())),
           },
           { unknowns: 'allow' }
@@ -107,7 +108,6 @@ export const setupOptionsListSuggestionsRoute = (
           validation: builtValidationAggregation,
         }
       : {};
-
     const body: SearchRequest['body'] = {
       size: 0,
       ...timeoutSettings,
@@ -138,7 +138,6 @@ export const setupOptionsListSuggestionsRoute = (
     const totalCardinality = get(rawEsResult, 'aggregations.unique_terms.value');
     const suggestions = suggestionBuilder.parse(rawEsResult);
     const invalidSelections = validationBuilder.parse(rawEsResult);
-
     return {
       suggestions,
       totalCardinality,

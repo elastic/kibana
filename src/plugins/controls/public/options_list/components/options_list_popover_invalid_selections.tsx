@@ -20,12 +20,16 @@ export const OptionsListPopoverInvalidSelections = () => {
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { deselectOption },
+    actions: { selectExists, deselectOption },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
+  const existsSelectionInvalid = select((state) => state.componentState.existsSelectionInvalid);
+
+  const existsSelected = select((state) => state.explicitInput.existsSelected);
+  const exclude = select((state) => state.explicitInput.exclude);
 
   return (
     <>
@@ -37,19 +41,32 @@ export const OptionsListPopoverInvalidSelections = () => {
           )}
         </label>
       </EuiTitle>
-      <>
-        {invalidSelections?.map((ignoredSelection, index) => (
-          <EuiFilterSelectItem
-            data-test-subj={`optionsList-control-ignored-selection-${ignoredSelection}`}
-            checked={'on'}
-            className="optionsList__selectionInvalid"
-            key={index}
-            onClick={() => dispatch(deselectOption(ignoredSelection))}
-          >
-            {`${ignoredSelection}`}
-          </EuiFilterSelectItem>
-        ))}
-      </>
+      {existsSelected && existsSelectionInvalid ? (
+        <EuiFilterSelectItem
+          data-test-subj={`optionsList-control-ignored-selection-exists`}
+          checked={'on'}
+          className="optionsList__selectionInvalid"
+          onClick={() => dispatch(selectExists(false))}
+        >
+          {exclude
+            ? OptionsListStrings.controlAndPopover.getNegateExists()
+            : OptionsListStrings.controlAndPopover.getExists()}
+        </EuiFilterSelectItem>
+      ) : (
+        <>
+          {invalidSelections?.map((ignoredSelection, index) => (
+            <EuiFilterSelectItem
+              data-test-subj={`optionsList-control-ignored-selection-${ignoredSelection}`}
+              checked={'on'}
+              className="optionsList__selectionInvalid"
+              key={index}
+              onClick={() => dispatch(deselectOption(ignoredSelection))}
+            >
+              {`${ignoredSelection}`}
+            </EuiFilterSelectItem>
+          ))}
+        </>
+      )}
     </>
   );
 };

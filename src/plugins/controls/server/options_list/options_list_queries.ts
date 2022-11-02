@@ -26,12 +26,27 @@ interface EsBucket {
  * Validation aggregations
  */
 export const getValidationAggregationBuilder: () => OptionsListAggregationBuilder = () => ({
-  buildAggregation: ({ selectedOptions, fieldName }: OptionsListRequestBody) => {
-    const selectedOptionsFilters = selectedOptions?.reduce((acc, currentOption) => {
-      acc[currentOption] = { match: { [fieldName]: currentOption } };
-      return acc;
-    }, {} as { [key: string]: { match: { [key: string]: string } } });
-
+  buildAggregation: ({
+    selectedOptions,
+    fieldName,
+    existsSelected,
+    exclude,
+  }: OptionsListRequestBody) => {
+    let selectedOptionsFilters;
+    if (existsSelected) {
+      if (exclude) {
+        selectedOptionsFilters = {
+          existsQuery: { bool: { must_not: { exists: { field: fieldName } } } },
+        };
+      } else {
+        selectedOptionsFilters = { existsQuery: { exists: { field: fieldName } } };
+      }
+    } else if (selectedOptions) {
+      selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
+        acc[currentOption] = { match: { [fieldName]: currentOption } };
+        return acc;
+      }, {} as { [key: string]: { match: { [key: string]: string } } });
+    }
     return selectedOptionsFilters && !isEmpty(selectedOptionsFilters)
       ? {
           filters: {
@@ -44,6 +59,7 @@ export const getValidationAggregationBuilder: () => OptionsListAggregationBuilde
     const rawInvalidSuggestions = get(rawEsResult, 'aggregations.validation.buckets') as {
       [key: string]: { doc_count: number };
     };
+
     return rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
       ? Object.entries(rawInvalidSuggestions)
           ?.filter(([, value]) => value?.doc_count === 0)

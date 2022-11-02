@@ -39,11 +39,13 @@ class OptionsListService implements ControlsOptionsListService {
   private optionsListCacheResolver = (request: OptionsListRequest) => {
     const {
       query,
+      exclude,
       filters,
       timeRange,
       searchString,
       runPastTimeout,
       selectedOptions,
+      existsSelected,
       field: { name: fieldName },
       dataView: { title: dataViewTitle },
     } = request;
@@ -51,12 +53,14 @@ class OptionsListService implements ControlsOptionsListService {
       ...(timeRange ? JSON.stringify(this.getRoundedTimeRange(timeRange)) : []), // round timeRange to the minute to avoid cache misses
       Math.floor(Date.now() / 1000 / 60), // Only cache results for a minute in case data changes in ES index
       selectedOptions?.join(','),
+      existsSelected,
       JSON.stringify(filters),
       JSON.stringify(query),
       runPastTimeout,
       dataViewTitle,
       searchString,
       fieldName,
+      exclude,
     ].join('|');
   };
 
@@ -64,7 +68,7 @@ class OptionsListService implements ControlsOptionsListService {
     async (request: OptionsListRequest, abortSignal: AbortSignal) => {
       const index = request.dataView.title;
       const requestBody = this.getRequestBody(request);
-      return await this.http.fetch<OptionsListResponse>(
+      const response = await this.http.fetch<OptionsListResponse>(
         `/api/kibana/controls/optionsList/${index}`,
         {
           body: JSON.stringify(requestBody),
@@ -72,6 +76,7 @@ class OptionsListService implements ControlsOptionsListService {
           method: 'POST',
         }
       );
+      return response;
     },
     this.optionsListCacheResolver
   );
@@ -82,6 +87,7 @@ class OptionsListService implements ControlsOptionsListService {
     const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
     const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
     const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [])];
+
     return {
       ...passThroughProps,
       filters: esFilters,

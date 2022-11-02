@@ -26,11 +26,12 @@ export const OptionsListPopoverSuggestions = ({
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { replaceSelection, deselectOption, selectExists, selectOption },
+    actions: { replaceSelection, deselectOption, selectOption, selectExists },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
+  const existsSelectionInvalid = select((state) => state.componentState.existsSelectionInvalid);
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const availableOptions = select((state) => state.componentState.availableOptions);
 
@@ -73,7 +74,7 @@ export const OptionsListPopoverSuggestions = ({
 
   return (
     <>
-      {!hideExists && !(showOnlySelected && !existsSelected) && (
+      {!hideExists && !existsSelectionInvalid && (
         <EuiFilterSelectItem
           data-test-subj={`optionsList-control-selection-exists`}
           checked={existsSelected ? 'on' : undefined}
