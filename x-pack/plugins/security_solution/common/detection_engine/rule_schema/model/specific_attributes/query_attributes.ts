@@ -7,6 +7,11 @@
 
 import * as t from 'io-ts';
 
+/**
+ * Schema for fields relating to alert suppression, which enables limiting the number of alerts per entity.
+ * e.g. group_by: ['host.name'] would create only one alert per value of host.name. The created alert
+ * contains metadata about how many other candidate alerts with the same host.name value were suppressed.
+ */
 export type AlertSuppression = t.TypeOf<typeof AlertSuppression>;
 export const AlertSuppression = t.exact(
   t.type({
