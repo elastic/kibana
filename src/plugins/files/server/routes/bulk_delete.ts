@@ -15,7 +15,7 @@ const method = 'delete' as const;
 
 const rt = {
   body: schema.object({
-    ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+    ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 100 }),
   }),
 };
 

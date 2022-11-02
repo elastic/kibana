@@ -10,6 +10,7 @@ import { FileJSON } from '../common';
 import type {
   FindFilesHttpEndpoint,
   FileShareHttpEndpoint,
+  BulkDeleteHttpEndpoint,
   FileUnshareHttpEndpoint,
   FileGetShareHttpEndpoint,
   FilesMetricsHttpEndpoint,
@@ -58,6 +59,12 @@ interface GlobalEndpoints {
    * @param args - File filters
    */
   find: UnscopedClientMethodFrom<FindFilesHttpEndpoint>;
+  /**
+   * Bulk a delete a set of files given their IDs.
+   *
+   * @param args - Bulk delete args
+   */
+  bulkDelete: UnscopedClientMethodFrom<BulkDeleteHttpEndpoint>;
 }
 
 /**
