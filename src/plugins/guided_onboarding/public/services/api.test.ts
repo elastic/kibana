@@ -11,6 +11,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { GuideState } from '@kbn/guided-onboarding';
 import { firstValueFrom, Subscription } from 'rxjs';
 
+import { GuideStatus } from '@kbn/guided-onboarding';
 import { API_BASE_PATH } from '../../common/constants';
 import { ApiService } from './api';
 import {
@@ -26,7 +27,6 @@ import {
   testGuideStep2InProgressState,
   readyToCompleteGuideState,
 } from './api.mocks';
-import {GuideStatus} from "@kbn/guided-onboarding/src/types";
 
 describe('GuidedOnboarding ApiService', () => {
   let httpClient: jest.Mocked<HttpSetup>;
