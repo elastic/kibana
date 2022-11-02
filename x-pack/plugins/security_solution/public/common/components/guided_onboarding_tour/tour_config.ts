@@ -25,7 +25,14 @@ export const enum AlertsCasesTourSteps {
 
 export type StepConfig = Pick<
   EuiTourStepProps,
-  'step' | 'content' | 'anchorPosition' | 'title' | 'initialFocus' | 'anchor' | 'offset'
+  | 'step'
+  | 'content'
+  | 'anchorPosition'
+  | 'title'
+  | 'initialFocus'
+  | 'anchor'
+  | 'offset'
+  | 'repositionOnScroll'
 > & {
   anchor?: ElementTarget;
   dataTestSubj: string;
@@ -99,7 +106,8 @@ const alertsCasesConfig: StepConfig[] = [
     anchor: `[tour-step="${getTourAnchor(
       AlertsCasesTourSteps.reviewAlertDetailsFlyout,
       SecurityStepId.alertsCases
-    )}"] .euiTabs`,
+    )}"] span.euiTab__content`,
+    offset: 20,
     anchorPosition: 'leftUp',
     dataTestSubj: getTourAnchor(
       AlertsCasesTourSteps.reviewAlertDetailsFlyout,
@@ -134,6 +142,7 @@ const alertsCasesConfig: StepConfig[] = [
     anchorPosition: 'leftUp',
     dataTestSubj: getTourAnchor(AlertsCasesTourSteps.createCase, SecurityStepId.alertsCases),
     offset: 20,
+    repositionOnScroll: false,
   },
 ];
 
