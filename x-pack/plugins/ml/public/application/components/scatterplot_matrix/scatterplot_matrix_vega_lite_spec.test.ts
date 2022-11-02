@@ -18,6 +18,7 @@ import {
   getColorSpec,
   getScatterplotMatrixVegaLiteSpec,
   COLOR_OUTLIER,
+  COLOR_SELECTION,
   COLOR_RANGE_NOMINAL,
   DEFAULT_COLOR,
   USER_SELECTION,
@@ -29,12 +30,10 @@ describe('getColorSpec()', () => {
     const colorSpec = getColorSpec(euiThemeLight);
 
     expect(colorSpec).toEqual({
-      condition: {
-        test: {
-          or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
-        },
-        value: COLOR_OUTLIER,
-      },
+      condition: [
+        { selection: USER_SELECTION, value: COLOR_SELECTION },
+        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
+      ],
       value: DEFAULT_COLOR,
     });
   });
@@ -43,16 +42,14 @@ describe('getColorSpec()', () => {
     const colorSpec = getColorSpec(euiThemeLight, 'outlier_score');
 
     expect(colorSpec).toEqual({
-      condition: {
-        test: {
-          or: [
-            { selection: USER_SELECTION },
-            { selection: SINGLE_POINT_CLICK },
-            "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
-          ],
+      condition: [
+        { selection: USER_SELECTION, value: COLOR_SELECTION },
+        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
+        {
+          test: "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+          value: COLOR_OUTLIER,
         },
-        value: COLOR_OUTLIER,
-      },
+      ],
       value: euiThemeLight.euiColorMediumShade,
     });
   });
@@ -63,12 +60,10 @@ describe('getColorSpec()', () => {
     const colorSpec = getColorSpec(euiThemeLight, undefined, colorName, LEGEND_TYPES.NOMINAL);
 
     expect(colorSpec).toEqual({
-      condition: {
-        test: {
-          or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
-        },
-        value: COLOR_OUTLIER,
-      },
+      condition: [
+        { selection: USER_SELECTION, value: COLOR_SELECTION },
+        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
+      ],
       field: colorName,
       scale: {
         range: COLOR_RANGE_NOMINAL,
@@ -98,12 +93,10 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       type: 'circle',
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
-      condition: {
-        test: {
-          or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
-        },
-        value: COLOR_OUTLIER,
-      },
+      condition: [
+        { selection: USER_SELECTION, value: COLOR_SELECTION },
+        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
+      ],
       value: DEFAULT_COLOR,
     });
     expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
@@ -131,17 +124,15 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       type: 'circle',
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
-      condition: {
+      condition: [
+        { selection: USER_SELECTION, value: COLOR_SELECTION },
+        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
         // Note the escaped dot character
-        test: {
-          or: [
-            { selection: USER_SELECTION },
-            { selection: SINGLE_POINT_CLICK },
-            "(datum['ml\\.outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
-          ],
+        {
+          test: "(datum['ml\\.outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+          value: COLOR_OUTLIER,
         },
-        value: COLOR_OUTLIER,
-      },
+      ],
       value: euiThemeLight.euiColorMediumShade,
     });
     expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
@@ -182,12 +173,10 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       type: 'circle',
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
-      condition: {
-        test: {
-          or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
-        },
-        value: COLOR_OUTLIER,
-      },
+      condition: [
+        { selection: USER_SELECTION, value: COLOR_SELECTION },
+        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
+      ],
       field: 'the-color-field',
       scale: {
         range: COLOR_RANGE_NOMINAL,

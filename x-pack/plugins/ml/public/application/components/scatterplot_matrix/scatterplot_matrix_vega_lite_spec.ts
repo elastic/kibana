@@ -25,6 +25,7 @@ export const SINGLE_POINT_CLICK = 'single_point_click';
 
 export const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 export const COLOR_OUTLIER = euiPaletteNegative(2)[1];
+export const COLOR_SELECTION = euiPaletteColorBlind()[2];
 export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
 export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
 
@@ -38,16 +39,14 @@ export const getColorSpec = (
   // This returns a Vega spec using a conditional to return the color.
   if (typeof escapedOutlierScoreField === 'string') {
     return {
-      condition: {
-        value: COLOR_OUTLIER,
-        test: {
-          or: [
-            { selection: USER_SELECTION },
-            { selection: SINGLE_POINT_CLICK },
-            `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
-          ],
+      condition: [
+        { selection: USER_SELECTION, value: COLOR_SELECTION },
+        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
+        {
+          test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
+          value: COLOR_OUTLIER,
         },
-      },
+      ],
       value: euiTheme.euiColorMediumShade,
     };
   }
@@ -56,10 +55,10 @@ export const getColorSpec = (
   // this returns either a continuous or categorical color spec.
   if (color !== undefined && legendType !== undefined) {
     return {
-      condition: {
-        value: COLOR_OUTLIER,
-        test: { or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }] },
-      },
+      condition: [
+        { selection: USER_SELECTION, value: COLOR_SELECTION },
+        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
+      ],
       field: getEscapedVegaFieldName(color ?? '00FF00'),
       type: legendType,
       scale: {
@@ -69,10 +68,10 @@ export const getColorSpec = (
   }
 
   return {
-    condition: {
-      value: COLOR_OUTLIER,
-      test: { or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }] },
-    },
+    condition: [
+      { selection: USER_SELECTION, value: COLOR_SELECTION },
+      { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
+    ],
     value: DEFAULT_COLOR,
   };
 };
