@@ -17,7 +17,7 @@ import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { urlTrackerMock } from '../../__mocks__/url_tracker.mock';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from './services/discover_state_react';
+import { DiscoverMainProvider } from './services/discover_state_provider';
 
 setHeaderActionMenuMounter(jest.fn());
 setUrlTracker(urlTrackerMock);
@@ -25,7 +25,7 @@ setUrlTracker(urlTrackerMock);
 describe('DiscoverMainApp', () => {
   test('renders', () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.internalState.transitions.setDataView(dataViewMock);
+    stateContainer.actions.setDataView(dataViewMock);
     const props = {
       stateContainer,
     };

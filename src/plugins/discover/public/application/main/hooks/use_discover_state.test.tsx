@@ -13,7 +13,7 @@ import { setUrlTracker } from '../../../kibana_services';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import React, { ReactElement } from 'react';
-import { DiscoverMainProvider } from '../services/discover_state_react';
+import { DiscoverMainProvider } from '../services/discover_state_provider';
 import { dataViewMock } from '../../../__mocks__/data_view';
 setUrlTracker(urlTrackerMock);
 

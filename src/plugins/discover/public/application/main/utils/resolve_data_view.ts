@@ -112,8 +112,9 @@ export async function loadDataView(
 
   // fetch persisted data view
   const actualId = getDataViewId(fetchId, dataViewList, services.uiSettings.get('defaultIndex'));
+  const loaded = await services.dataViews.get(actualId);
   return {
-    loaded: await services.dataViews.get(actualId),
+    loaded,
     stateVal: fetchId,
     stateValFound: !!fetchId && actualId === fetchId,
   };
@@ -158,19 +159,20 @@ export function resolveDataView(
       });
       return ownDataView;
     }
-
-    toastNotifications.addWarning({
-      title: warningTitle,
-      text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
-        defaultMessage:
-          'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
-        values: {
-          loadedDataViewTitle: loadedDataView.getIndexPattern(),
-          loadedDataViewId: loadedDataView.id,
-        },
-      }),
-      'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
-    });
+    if (loadedDataView) {
+      toastNotifications.addWarning({
+        title: warningTitle,
+        text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
+          defaultMessage:
+            'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
+          values: {
+            loadedDataViewTitle: loadedDataView?.getIndexPattern(),
+            loadedDataViewId: loadedDataView?.id,
+          },
+        }),
+        'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
+      });
+    }
   }
 
   return loadedDataView;

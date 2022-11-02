@@ -14,7 +14,7 @@ import { Query } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../services/discover_state_react';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 
 setHeaderActionMenuMounter(jest.fn());

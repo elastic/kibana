@@ -25,7 +25,7 @@ export function useUrl({
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
       if (!search && !hash && pathname === '/') {
         if (!stateContainer.savedSearchState.get().id) {
-          stateContainer.actions.newSavedSearch();
+          stateContainer.actions.onNewSavedSearch();
         }
       }
     });

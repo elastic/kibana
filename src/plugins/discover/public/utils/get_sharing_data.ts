@@ -23,7 +23,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
-import { isEqualFilters } from '../application/main/services/discover_state';
+import {isEqualFilters} from "@kbn/discover-plugin/public/application/main/services/discover_state_utils";
 
 /**
  * Preparing data to share the current state as link or CSV/Report

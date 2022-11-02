@@ -32,7 +32,7 @@ import {
   DataDocuments$,
   RecordRawType,
 } from '../../services/discover_data_state_container';
-import { DiscoverMainProvider } from '../../services/discover_state_react';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({

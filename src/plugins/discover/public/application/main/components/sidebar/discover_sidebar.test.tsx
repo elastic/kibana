@@ -23,7 +23,7 @@ import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { AvailableFields$ } from '../../services/discover_data_state_container';
-import { DiscoverMainProvider } from '../../services/discover_state_react';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])

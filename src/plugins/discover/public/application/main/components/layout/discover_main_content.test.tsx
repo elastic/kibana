@@ -40,7 +40,7 @@ import {
   RecordRawType,
 } from '../../services/discover_data_state_container';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { DiscoverMainProvider } from '../../services/discover_state_react';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 
 jest.mock('@kbn/unified-histogram-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');

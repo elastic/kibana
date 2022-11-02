@@ -353,7 +353,7 @@ export function DiscoverSidebarComponent({
         {Boolean(showDataViewPicker) && (
           <DataViewPicker
             currentDataViewId={selectedDataView.id}
-            onChangeDataView={stateContainer.actions.changeDataView}
+            onChangeDataView={stateContainer.actions.onChangeDataView}
             onAddField={editField}
             onDataViewCreated={createNewDataView}
             trigger={{

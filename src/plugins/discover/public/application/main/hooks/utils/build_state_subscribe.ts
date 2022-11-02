@@ -33,12 +33,12 @@ export const buildStateSubscribe =
   }) =>
   async (nextState: AppState) => {
     const prevState = appStateContainer.getPrevious();
-    const savedSearchDiff = differenceWith(toPairs(prevState), toPairs(nextState), isEqual).filter(
+    const appStateDiff = differenceWith(toPairs(prevState), toPairs(nextState), isEqual).filter(
       (pair) => {
         return pair[0] !== 'filter' && pair[1] !== undefined;
       }
     );
-    if (savedSearchDiff.length === 0) {
+    if (appStateDiff.length === 0) {
       addLog('📦 AppStateContainer.subscribe update ignored');
       return;
     }

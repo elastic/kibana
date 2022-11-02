@@ -9,10 +9,12 @@ import { useEffect } from 'react';
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
-  createSearchSessionRestorationDataProvider,
   DiscoverStateContainer,
 } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
+import {
+    createSearchSessionRestorationDataProvider
+} from "@kbn/discover-plugin/public/application/main/services/discover_state_utils";
 
 export function useSearchSession({
   services,

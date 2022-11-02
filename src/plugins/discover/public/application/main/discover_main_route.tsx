@@ -7,15 +7,13 @@
  */
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { DataViewSavedObjectConflictError } from '@kbn/data-views-plugin/public';
-import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
+import { redirectWhenMissing, SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   AnalyticsNoDataPage,
   AnalyticsNoDataPageKibanaProvider,
 } from '@kbn/shared-ux-page-analytics-no-data';
-import { addLog } from '../../utils/add_log';
-import { DiscoverMainProvider } from './services/discover_state_react';
+import { DiscoverMainProvider } from './services/discover_state_provider';
 import { useSingleton } from './hooks/use_singleton';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
 import { DiscoverMainApp } from './discover_main_app';
@@ -96,27 +94,15 @@ export function DiscoverMainRoute(props: Props) {
   const checkDataAndLoadSavedSearch = useCallback(async () => {
     try {
       const isNewSavedSearch = !Boolean(id);
-      stateContainer.actions.stopSyncSubscribe();
+      stateContainer.actions.unsubscribe();
       await stateContainer.actions.loadDataViewList();
       if (isNewSavedSearch) {
-        addLog('[Main route] load new saved search');
-        await stateContainer.actions.loadNewSavedSearch(
-          props.historyLocationState?.dataViewSpec,
-          setError
-        );
+        await stateContainer.actions.loadNewSavedSearch(props.historyLocationState?.dataViewSpec);
       } else {
-        addLog('[Main route] load saved search', id);
-        await stateContainer.actions.loadSavedSearch(
-          id,
-          props.historyLocationState?.dataViewSpec,
-          setError
-        );
+        await stateContainer.actions.loadSavedSearch(id, props.historyLocationState?.dataViewSpec);
       }
-      setLoading(false);
     } catch (e) {
-      if (e instanceof DataViewSavedObjectConflictError) {
-        setError(e);
-      } else {
+      if (e instanceof SavedObjectNotFound) {
         redirectWhenMissing({
           history,
           navigateToApp: core.application.navigateToApp,
@@ -134,7 +120,11 @@ export function DiscoverMainRoute(props: Props) {
           },
           theme: core.theme,
         })(e);
+      } else {
+        setError(e);
       }
+    } finally {
+      setLoading(false);
     }
   }, [
     basePath,

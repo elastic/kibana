@@ -20,7 +20,7 @@ export function updateSavedSearch(
     services,
   }: {
     savedSearch: SavedSearch;
-    dataView: DataView;
+    dataView?: DataView;
     state: AppState;
     services: DiscoverServices;
   },

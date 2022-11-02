@@ -16,6 +16,7 @@ import {
   SavedSearchData,
 } from '../services/discover_data_state_container';
 import { FetchStatus } from '../../types';
+import {addLog} from "@kbn/discover-plugin/public/utils/add_log";
 
 /**
  * Sends COMPLETE message to the main$ observable with the information
@@ -81,6 +82,7 @@ export function sendErrorMsg(
   data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
   error: Error
 ) {
+  addLog('👁️ error message', error);
   const recordRawType = data$.getValue().recordRawType;
   data$.next({
     fetchStatus: FetchStatus.ERROR,

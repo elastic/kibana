@@ -23,7 +23,7 @@ describe('getStateDefaults', () => {
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
-          "default_column",
+          "bytes",
         ],
         "filters": undefined,
         "grid": undefined,
@@ -56,7 +56,7 @@ describe('getStateDefaults', () => {
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
-          "default_column",
+          "bytes",
         ],
         "filters": undefined,
         "grid": undefined,

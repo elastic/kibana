@@ -10,7 +10,6 @@ import { DiscoverAppStateContainer } from '../../services/discover_app_state_con
 import { SavedSearchContainer } from '../../services/discover_saved_search_container';
 import { getUrlTracker } from '../../../../kibana_services';
 import { DiscoverServices } from '../../../../build_services';
-import { addLog } from '../../../../utils/add_log';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
 import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 
@@ -58,7 +57,6 @@ export async function changeDataView(
     );
     getUrlTracker().setTrackingEnabled(trackingEnabled);
 
-    addLog('Change data view next app state', nextAppState);
     return { nextDataView, nextAppState };
   }
 }

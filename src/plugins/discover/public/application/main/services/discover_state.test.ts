@@ -6,50 +6,58 @@
  * Side Public License, v 1.
  */
 
-import {
-  getDiscoverStateContainer,
-  DiscoverStateContainer,
-  createSearchSessionRestorationDataProvider,
-} from './discover_state';
+import { DiscoverStateContainer, getDiscoverStateContainer } from './discover_state';
+import { waitFor } from '@testing-library/react';
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   savedSearchMock,
+  savedSearchMock as mockPersistedSavedSearch,
+  savedSearchMockNew as mockNewSavedSearch,
   savedSearchMockWithTimeField,
   savedSearchMockWithTimeFieldNew,
 } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
+import { createSearchSessionRestorationDataProvider } from './discover_state_utils';
+import { FetchStatus } from '../../types';
+import { dataViewMock } from '../../../__mocks__/data_view';
 
 let history: History;
 let state: DiscoverStateContainer;
 const getCurrentUrl = () => history.createHref(history.location);
 
-describe('Test discover state', () => {
-  let stopSync = () => {};
+jest.mock('@kbn/saved-search-plugin/public', () => ({
+  getSavedSearch: jest.fn((id) => {
+    if (id) {
+      return mockPersistedSavedSearch;
+    } else {
+      return mockNewSavedSearch;
+    }
+  }),
+  throwErrorOnSavedSearchUrlConflict: jest.fn(),
+  getEmptySavedSearch: jest.fn(() => mockNewSavedSearch),
+}));
 
+describe('Test discover state', () => {
   beforeEach(async () => {
     history = createBrowserHistory();
     history.push('/');
     state = getDiscoverStateContainer({
-      savedSearch: savedSearchMock,
       services: discoverServiceMock,
       history,
     });
     await state.setAppState({}, true);
-    const { start, stop } = state.appState.syncState();
-    start();
-    stopSync = stop;
+    state.actions.subscribe();
   });
   afterEach(() => {
-    stopSync();
-    stopSync = () => {};
+    state.actions.unsubscribe();
   });
   test('setting app state and syncing to URL', async () => {
     state.setAppState({ index: 'modified' });
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
+      `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())&_g=()"`
     );
   });
 
@@ -98,11 +106,8 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     state.savedSearchState.load = jest.fn(() => Promise.resolve(savedSearch));
-    await state.actions.loadSavedSearch(savedSearch.id!, undefined, jest.fn());
-    // await state.setAppState({});
-    const stopSync = state.appState.syncState().stop;
+    await state.actions.loadSavedSearch(savedSearch.id!, undefined);
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
-    stopSync();
   });
   test('Empty sort in URL should use saved search sort for state', async () => {
     history = createBrowserHistory();
@@ -114,9 +119,7 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     await state.setAppState({}, true);
-    const stopSync = state.appState.syncState().stop;
     expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
-    stopSync();
   });
   test('Empty sort in URL and saved search should sort by timestamp', async () => {
     history = createBrowserHistory();
@@ -127,9 +130,7 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     await state.setAppState({}, true);
-    const stopSync = state.appState.syncState().stop;
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
-    stopSync();
   });
 });
 
@@ -224,5 +225,103 @@ describe('createSearchSessionRestorationDataProvider', () => {
         value: 0,
       });
     });
+  });
+});
+
+describe('actions', () => {
+  beforeEach(async () => {
+    discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+      return { from: 'now-15d', to: 'now' };
+    });
+    history = createBrowserHistory();
+    state = getDiscoverStateContainer({
+      services: discoverServiceMock,
+      history,
+    });
+    state.actions.setDataView(dataViewMock);
+    // await state.setAppState({ index: dataViewMock.id }, true);
+
+    state.actions.subscribe();
+  });
+  afterEach(() => {
+    state.actions.unsubscribe();
+  });
+  test('fetch', async () => {
+    const dataState = state.dataState;
+    expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.UNINITIALIZED);
+
+    state.actions.fetch();
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+    });
+
+    expect(dataState.data$.totalHits$.value.result).toBe(0);
+    expect(dataState.data$.documents$.value.result).toEqual([]);
+  });
+  test('loadDataViewList', async () => {
+    expect(state.internalState.getState().dataViews.length).toBe(0);
+    await state.actions.loadDataViewList();
+    expect(state.internalState.getState().dataViews.length).toBe(3);
+  });
+  test('loadNewSavedSearch given an empty URL', async () => {
+    history.push('/');
+    const newSavedSearch = await state.actions.loadNewSavedSearch(undefined);
+    expect(newSavedSearch?.id).toBeUndefined();
+    state.flushToUrl();
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/#?_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
+    );
+    expect(state.savedSearchState.hasChanged$.getValue()).toBe(false);
+  });
+  test('loadNewSavedSearch given an empty URL II', async () => {
+    history.push('/');
+    const newSavedSearch = await state.actions.loadSavedSearch(undefined);
+    expect(newSavedSearch?.id).toBeUndefined();
+    state.flushToUrl();
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/#?_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
+    );
+    expect(state.savedSearchState.hasChanged$.getValue()).toBe(false);
+  });
+  test('loadNewSavedSearch with URL overwriting interval state', async () => {
+    history.push('/#?_a=(interval:month,columns:!(bytes))&_g=()');
+    const newSavedSearch = await state.actions.loadNewSavedSearch(undefined);
+    expect(newSavedSearch?.id).toBeUndefined();
+    state.flushToUrl();
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=()"`
+    );
+    expect(state.savedSearchState.hasChanged$.getValue()).toBe(true);
+  });
+  test('loadNewSavedSearch with URL overwriting interval state II', async () => {
+    history.push('/#?_a=(interval:month,columns:!(bytes))&_g=()');
+    const newSavedSearch = await state.actions.loadSavedSearch(undefined, undefined);
+    expect(newSavedSearch?.id).toBeUndefined();
+    state.flushToUrl();
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=()"`
+    );
+    expect(state.savedSearchState.hasChanged$.getValue()).toBe(true);
+  });
+  test('loadSavedSearch given an empty URL', async () => {
+    history.push('/');
+    const newSavedSearch = await state.actions.loadSavedSearch('the-saved-search-id', undefined);
+    expect(newSavedSearch?.id).toBe('the-saved-search-id');
+    state.flushToUrl();
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:auto,sort:!())"`
+    );
+    expect(state.savedSearchState.hasChanged$.getValue()).toBe(false);
+  });
+  test('loadSavedSearch given a URL with interval and columns', async () => {
+    history.push('/#?_a=(interval:month,columns:!(message))&_g=()');
+    const newSavedSearch = await state.actions.loadSavedSearch('the-saved-search-id', undefined);
+    expect(newSavedSearch?.id).toBe('the-saved-search-id');
+    state.flushToUrl();
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/#?_a=(columns:!(message),index:the-data-view-id,interval:month,sort:!())&_g=()"`
+    );
+    // URL overwriting state given by savedSearch leads hasChanged$.getValue() to be true
+    expect(state.savedSearchState.hasChanged$.getValue()).toBe(true);
   });
 });

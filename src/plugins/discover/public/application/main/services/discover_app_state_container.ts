@@ -10,7 +10,6 @@ import {
   createStateContainer,
   createStateContainerReactHelpers,
   IKbnUrlStateStorage,
-  ISyncStateRef,
   ReduxLikeStateContainer,
   syncState,
 } from '@kbn/kibana-utils-plugin/public';
@@ -19,26 +18,61 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
+import { setState } from './discover_state_utils';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { AppStateUrl, setState } from './discover_state';
 import { DiscoverServices } from '../../../build_services';
 import { VIEW_MODE } from '../../../components/view_mode_toggle';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { addLog } from '../../../utils/add_log';
 
 export const APP_STATE_URL_KEY = '_a';
+export interface AppStateUrl extends Omit<AppState, 'sort'> {
+  /**
+   * Necessary to take care of legacy links [fieldName,direction]
+   */
+  sort?: string[][] | [string, string];
+}
 
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<AppState> {
+  /**
+   * Returns the state before the actual state
+   */
   getPrevious: () => AppState;
-  syncState: () => ISyncStateRef;
+  /**
+   * Update current state with the given partial state
+   * @param newPartial
+   * @param replace - update in URL first
+   */
   update: (newPartial: AppState, replace?: boolean) => void;
+  /**
+   * Update URL state value, URL will be updated with a history.replace
+   * @param newPartial
+   * @param merge - merge newPartial with the current url state
+   */
   replace: (newPartial: AppState, merge?: boolean) => Promise<void>;
+  /**
+   * Update URL state value, URL will be updated with a history.push
+   * @param newPartial
+   * @param merge - merge newPartial with the current url state
+   */
   push: (newPartial: AppState) => Promise<void>;
-  reset: (savedSearch: SavedSearch) => void;
+  /**
+   * Update state with new state derived by the given SavedSearch
+   * @param savedSearch
+   */
+  resetBySavedSearch: (savedSearch: SavedSearch) => void;
+  /**
+   * Init default values and start syncing changes state <-> url
+   * @param currentSavedSearch
+   */
   initAndSync: (currentSavedSearch: SavedSearch) => () => void;
+  /**
+   * Used to detect if the URL contains state, when loading new or persisted saved searches
+   * In true, the given URL state needs to be merged with the state derived from saved search
+   */
   isEmptyURL: () => boolean;
 }
 
@@ -121,7 +155,7 @@ export const getDiscoverAppStateContainer = (
 
   const enhancedAppContainer = {
     ...appStateContainer,
-    reset: (nextSavedSearch: SavedSearch) => {
+    resetBySavedSearch: (nextSavedSearch: SavedSearch) => {
       const nextAppState = getInitialState(stateStorage, nextSavedSearch, services);
       addLog('🔗 [appState] reset appstate by savedsearch', { nextSavedSearch, nextAppState });
       appStateContainer.set(nextAppState);
@@ -218,7 +252,6 @@ export const getDiscoverAppStateContainer = (
 
   return {
     ...enhancedAppContainer,
-    syncState: initSyncState,
     initAndSync: initializeAndSync,
   };
 };
@@ -233,7 +266,7 @@ function getInitialState(
     savedSearch,
     services,
   });
-  return handleSourceColumnState(
+  const initialState = handleSourceColumnState(
     savedSearch.id
       ? { ...defaultAppState }
       : {
@@ -242,4 +275,8 @@ function getInitialState(
         },
     services.uiSettings
   );
+  if (appStateFromUrl && appStateFromUrl.interval) {
+    initialState.interval = appStateFromUrl.interval;
+  }
+  return initialState;
 }

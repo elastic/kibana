@@ -36,7 +36,7 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../services/discover_data_state_container';
-import { DiscoverMainProvider } from '../../services/discover_state_react';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { DiscoverLayoutProps } from './types';
 
 jest.mock('@kbn/unified-histogram-plugin/public', () => {

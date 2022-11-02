@@ -63,14 +63,16 @@ export function updateSearchSource(
     dataView,
     services,
   }: {
-    dataView: DataView;
+    dataView?: DataView;
     services: DiscoverServices;
   }
 ) {
   const { data } = services;
+  if (dataView) {
+    searchSource.setField('index', dataView);
+  }
 
   searchSource
-    .setField('index', dataView)
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
 }

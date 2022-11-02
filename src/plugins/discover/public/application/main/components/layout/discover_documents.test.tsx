@@ -22,7 +22,7 @@ import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { EsHitRecord } from '../../../../types';
 import { AppState } from '../../services/discover_app_state_container';
 import { DataDocuments$ } from '../../services/discover_data_state_container';
-import { DiscoverMainProvider } from '../../services/discover_state_react';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 setHeaderActionMenuMounter(jest.fn());

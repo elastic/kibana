@@ -59,8 +59,8 @@ export function useDiscoverState({
   });
 
   useEffect(() => {
-    stateContainer.actions.initSyncSubscribe();
-    return () => stateContainer.actions.stopSyncSubscribe();
+    stateContainer.actions.subscribe();
+    return () => stateContainer.actions.unsubscribe();
   }, [services, stateContainer]);
 
   /**

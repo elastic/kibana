@@ -180,7 +180,7 @@ export function DiscoverLayout({
     async (nextDataView: DataView) => {
       if (nextDataView.id) {
         await stateContainer.actions.loadDataViewList();
-        stateContainer.actions.changeDataView(nextDataView.id);
+        stateContainer.actions.onChangeDataView(nextDataView.id);
       }
     },
     [stateContainer]

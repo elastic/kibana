@@ -29,4 +29,5 @@ export const dataViewsMock = {
   createFilter: jest.fn(),
   create: jest.fn(),
   clearInstanceCache: jest.fn(),
+  refreshFields: jest.fn(),
 } as unknown as jest.Mocked<DataViewsContract>;

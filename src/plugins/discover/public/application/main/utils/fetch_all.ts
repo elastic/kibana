@@ -9,6 +9,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { addLog } from '../../../utils/add_log';
 import {
   DataCharts$,
   DataDocuments$,
@@ -74,6 +75,7 @@ export function fetchAll(
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
+      addLog('👁️ fetch_all error', error);
 
       data.search.showError(error);
       errorSubjects.forEach((subject) => sendErrorMsg(subject, error));

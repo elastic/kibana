@@ -15,11 +15,11 @@ describe('test useUrl', () => {
   test('resetSavedSearch is triggered once path it changed to /', () => {
     const { history } = createSearchSessionMock();
     history.push('/view');
-    const newSavedSearch = jest.fn();
+    const onNewSavedSearch = jest.fn();
     const stateContainer = {
       ...getDiscoverStateMock({ isTimeBased: true, isNew: true }),
       actions: {
-        newSavedSearch,
+        onNewSavedSearch,
       },
     } as unknown as DiscoverStateContainer;
     const props = {
@@ -28,9 +28,9 @@ describe('test useUrl', () => {
     };
     renderHook(() => useUrl(props));
     history.push('/new');
-    expect(newSavedSearch).toHaveBeenCalledTimes(0);
+    expect(onNewSavedSearch).toHaveBeenCalledTimes(0);
 
     history.push('/');
-    expect(newSavedSearch).toHaveBeenCalledTimes(1);
+    expect(onNewSavedSearch).toHaveBeenCalledTimes(1);
   });
 });

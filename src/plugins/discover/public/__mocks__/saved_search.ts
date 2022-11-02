@@ -14,6 +14,12 @@ import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 export const savedSearchMock = {
   id: 'the-saved-search-id',
   searchSource: createSearchSourceMock({ index: dataViewMock }),
+  columns: ['bytes'],
+  sort: [],
+} as unknown as SavedSearch;
+
+export const savedSearchMockNew = {
+  searchSource: createSearchSourceMock({}),
 } as unknown as SavedSearch;
 
 export const savedSearchMockWithTimeField = {

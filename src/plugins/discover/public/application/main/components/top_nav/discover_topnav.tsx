@@ -115,7 +115,7 @@ export const DiscoverTopNav = ({
       onSave: async (dataViewToSave) => {
         if (dataViewToSave.id) {
           await stateContainer.actions.loadDataViewList();
-          stateContainer.actions.changeDataView(dataViewToSave.id);
+          stateContainer.actions.onChangeDataView(dataViewToSave.id);
         }
       },
       allowAdHocDataView: true,
@@ -130,7 +130,7 @@ export const DiscoverTopNav = ({
       if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
         newDataView.timeFieldName = '@timestamp';
       }
-      stateContainer.actions.changeDataView(newDataView.id!);
+      stateContainer.actions.onChangeDataView(newDataView.id!);
     },
     [dataViews, stateContainer]
   );
@@ -178,7 +178,7 @@ export const DiscoverTopNav = ({
     onAddField: addField,
     onDataViewCreated: createNewDataView,
     onCreateDefaultAdHocDataView,
-    onChangeDataView: stateContainer.actions.changeDataView,
+    onChangeDataView: stateContainer.actions.onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews: adHocDataViewList,
   };
@@ -219,9 +219,8 @@ export const DiscoverTopNav = ({
       appName="discover"
       config={topNavMenu}
       indexPatterns={[dataView]}
-      onQueryChange={stateContainer.actions.onUpdateQuery}
       onQuerySubmit={stateContainer.actions.onSubmitQuery}
-      onSavedQueryIdChange={stateContainer.actions.updateSavedQueryId}
+      onSavedQueryIdChange={stateContainer.actions.onSavedQueryIdChange}
       query={query}
       setMenuMountPoint={setMenuMountPoint}
       savedQueryId={savedQuery}
