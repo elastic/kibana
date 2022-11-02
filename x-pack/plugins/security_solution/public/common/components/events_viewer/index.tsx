@@ -379,7 +379,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           >
             <UpdatedFlexGroup
               alignItems={alignItems}
-              data-test-subj="updated-flex-group"
+              data-test-subj="events-viewer-updated"
               gutterSize="m"
               justifyContent="flexEnd"
               $view={tableView}

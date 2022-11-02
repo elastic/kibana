@@ -27,7 +27,7 @@ export const INSPECT_HOSTS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
     tabId: '[data-test-subj="navigation-uncommonProcesses"]',
   },
   {
-    altInspectId: `[data-test-subj="events-viewer-panel"] ${INSPECT_BUTTON_ICON}`,
+    altInspectId: `[data-test-subj="events-viewer-updated"] ${INSPECT_BUTTON_ICON}`,
     id: '[data-test-subj="events-container-loading-false"]',
     title: 'Events Table',
     tabId: '[data-test-subj="navigation-events"]',
