@@ -33,7 +33,7 @@ export function MostUsedChart({
   filters,
   metric,
 }: {
-  title: string;
+  title: React.ReactNode;
   start: string;
   end: string;
   kuery?: string;
@@ -100,14 +100,7 @@ export function MostUsedChart({
       <EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h2>
-              {i18n.translate(`xpack.apm.serviceOverview.${metric}`, {
-                defaultMessage: title,
-                values: {
-                  title,
-                },
-              })}
-            </h2>
+            <h2>{title}</h2>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexItem>

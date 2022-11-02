@@ -166,7 +166,12 @@ export function ServiceOverviewMobileCharts({
           {/* Device */}
           <EuiFlexItem>
             <MostUsedChart
-              title="Most used device"
+              title={i18n.translate(
+                'xpack.apm.serviceOverview.mostUsed.device',
+                {
+                  defaultMessage: 'Most used device',
+                }
+              )}
               metric={DEVICE_MODEL_NAME}
               start={start}
               end={end}
@@ -177,7 +182,9 @@ export function ServiceOverviewMobileCharts({
           {/* NCT */}
           <EuiFlexItem>
             <MostUsedChart
-              title="Most used NCT"
+              title={i18n.translate('xpack.apm.serviceOverview.mostUsed.nct', {
+                defaultMessage: 'Most used NCT',
+              })}
               metric={NETWORK_CONNECTION_TYPE}
               start={start}
               end={end}
@@ -192,7 +199,12 @@ export function ServiceOverviewMobileCharts({
           {/* OS Version */}
           <EuiFlexItem>
             <MostUsedChart
-              title="Most used OS version"
+              title={i18n.translate(
+                'xpack.apm.serviceOverview.mostUsed.osVersion',
+                {
+                  defaultMessage: 'Most used OS version',
+                }
+              )}
               metric={HOST_OS_VERSION}
               start={start}
               end={end}
@@ -203,7 +215,12 @@ export function ServiceOverviewMobileCharts({
           {/* App version */}
           <EuiFlexItem>
             <MostUsedChart
-              title="Most used app version"
+              title={i18n.translate(
+                'xpack.apm.serviceOverview.mostUsed.appVersion',
+                {
+                  defaultMessage: 'Most used app version',
+                }
+              )}
               metric={SERVICE_VERSION}
               start={start}
               end={end}
