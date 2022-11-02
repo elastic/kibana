@@ -427,7 +427,6 @@ describe('heatmap', () => {
                       arguments: {
                         isVisible: [true],
                         position: [Position.Right],
-                        legendSize: [],
                       },
                     },
                   ],
@@ -441,11 +440,6 @@ describe('heatmap', () => {
                       type: 'function',
                       function: HEATMAP_GRID_FUNCTION,
                       arguments: {
-                        // grid
-                        strokeWidth: [],
-                        strokeColor: [],
-                        xTitle: [],
-                        yTitle: [],
                         // cells
                         isCellLabelVisible: [false],
                         // Y-axis
@@ -505,6 +499,7 @@ describe('heatmap', () => {
         ...exampleState(),
         layerId: 'first',
         xAccessor: 'x-accessor',
+        valueAccessor: 'value-accessor',
       };
 
       expect(
@@ -521,7 +516,7 @@ describe('heatmap', () => {
             arguments: {
               xAccessor: ['x-accessor'],
               yAccessor: [''],
-              valueAccessor: [''],
+              valueAccessor: ['value-accessor'],
               palette: [
                 {
                   type: 'expression',
@@ -545,7 +540,7 @@ describe('heatmap', () => {
                       function: LEGEND_FUNCTION,
                       arguments: {
                         isVisible: [false],
-                        position: [],
+                        position: ['right'],
                       },
                     },
                   ],
