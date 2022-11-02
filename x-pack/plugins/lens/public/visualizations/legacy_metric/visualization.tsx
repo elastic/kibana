@@ -128,6 +128,7 @@ const toExpression = (
   const legacyMetricVisFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>(
     'legacyMetricVis',
     {
+      autoScaleMetricAlignment: state?.autoScaleMetricAlignment,
       labelPosition: state?.titlePosition || DEFAULT_TITLE_POSITION,
       font: buildExpression([fontFn]),
       labelFont: buildExpression([labelFontFn]),
