@@ -120,7 +120,7 @@ describe('Guided setup', () => {
 
       await updateComponentWithState(
         component,
-        { ...mockActiveSearchGuideState, isActive: false },
+        { ...mockActiveTestGuideState, isActive: false },
         true
       );
 
@@ -134,7 +134,6 @@ describe('Guided setup', () => {
       // Enable the "test" guide
       await updateComponentWithState(component, mockActiveTestGuideState, true);
 
-      expect(exists('disabledGuideButton')).toBe(false);
       expect(exists('guideButton')).toBe(true);
       expect(find('guideButton').text()).toEqual('Setup guide');
     });
