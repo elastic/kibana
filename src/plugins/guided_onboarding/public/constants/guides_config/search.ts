@@ -14,7 +14,7 @@ export const searchConfig: GuideConfig = {
     defaultMessage: 'Search my data',
   }),
   description: i18n.translate('guidedOnboarding.searchGuide.description', {
-    defaultMessage: `We'll help you build world-class search experiences with your data, using Elastic's out-of-the-box web crawler, connectors, and our robust APIs. Gain deep insights from the built-in search analytics and use that data to inform changes to relevance.`,
+    defaultMessage: `Build custom search experiences with your data using using Elastic’s out-of-the-box web crawler, connectors, and robust APIs. Gain deep insights from the built-in search analytics to curate results and optimize relevance. `,
   }),
   guideName: 'Enterprise Search',
   steps: [
