@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { LayoutDirection } from '@elastic/charts';
 import { CustomPaletteParams, CUSTOM_PALETTE, PaletteRegistry } from '@kbn/coloring';
-import { TrendlineExpressionFunctionDefinition } from '@kbn/expression-metric-vis-plugin/common';
-import { EXPRESSION_METRIC_NAME } from '@kbn/expression-metric-vis-plugin/public';
+import type {
+  TrendlineExpressionFunctionDefinition,
+  MetricVisExpressionFunctionDefinition,
+} from '@kbn/expression-metric-vis-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { Ast } from '@kbn/interpreter';
 import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
@@ -129,38 +132,35 @@ export const toExpression = (
 
   const trendlineExpression = getTrendlineExpression(state, datasourceExpressionsByLayers);
 
+  const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
+    metric: state.metricAccessor,
+    secondaryMetric: state.secondaryMetricAccessor,
+    secondaryPrefix: state.secondaryPrefix,
+    max: showingBar(state) ? state.maxAccessor : undefined,
+    breakdownBy:
+      state.breakdownByAccessor && !state.collapseFn ? state.breakdownByAccessor : undefined,
+    trendline: trendlineExpression ? [trendlineExpression] : [],
+    subtitle: state.subtitle ?? undefined,
+    progressDirection: state.progressDirection as LayoutDirection,
+    color: state.color || getDefaultColor(state),
+    palette: state.palette?.params
+      ? [
+          paletteService
+            .get(CUSTOM_PALETTE)
+            .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
+        ]
+      : [],
+    maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
+    minTiles: maxPossibleTiles ?? undefined,
+    inspectorTableId: state.layerId,
+  });
+
   return {
     type: 'expression',
     chain: [
       ...(datasourceExpression?.chain ?? []),
       ...(collapseExpressionFunction ? [collapseExpressionFunction] : []),
-      {
-        type: 'function',
-        function: EXPRESSION_METRIC_NAME,
-        arguments: {
-          metric: state.metricAccessor ? [state.metricAccessor] : [],
-          secondaryMetric: state.secondaryMetricAccessor ? [state.secondaryMetricAccessor] : [],
-          secondaryPrefix:
-            typeof state.secondaryPrefix !== 'undefined' ? [state.secondaryPrefix] : [],
-          max: showingBar(state) ? [state.maxAccessor] : [],
-          breakdownBy:
-            state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
-          trendline: trendlineExpression ? [trendlineExpression] : [],
-          subtitle: state.subtitle ? [state.subtitle] : [],
-          progressDirection: state.progressDirection ? [state.progressDirection] : [],
-          color: [state.color || getDefaultColor(state)],
-          palette: state.palette?.params
-            ? [
-                paletteService
-                  .get(CUSTOM_PALETTE)
-                  .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
-              ]
-            : [],
-          maxCols: [state.maxCols ?? DEFAULT_MAX_COLUMNS],
-          minTiles: maxPossibleTiles ? [maxPossibleTiles] : [],
-          inspectorTableId: [state.layerId],
-        },
-      },
+      metricFn.toAst(),
     ],
   };
 };
