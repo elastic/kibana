@@ -542,11 +542,7 @@ export class SavedSearchEmbeddable
 
       const hasError = this.getOutput().error !== undefined;
 
-      if (
-        this.searchProps!.isLoading === false &&
-        props.searchProps.rows &&
-        props.searchProps.rows.length
-      ) {
+      if (this.searchProps!.isLoading === false && props.searchProps.rows !== undefined) {
         this.renderComplete.dispatchComplete();
         this.updateOutput({
           ...this.getOutput(),
