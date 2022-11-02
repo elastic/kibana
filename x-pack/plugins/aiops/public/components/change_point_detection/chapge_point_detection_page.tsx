@@ -187,15 +187,17 @@ export const ChangePointDetectionPage: FC = () => {
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiPagination
-            pageCount={pagination.pageCount}
-            activePage={pagination.activePage}
-            onPageClick={pagination.updatePagination}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {pagination.pageCount > 1 ? (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiPagination
+              pageCount={pagination.pageCount}
+              activePage={pagination.activePage}
+              onPageClick={pagination.updatePagination}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
     </div>
   );
 };
