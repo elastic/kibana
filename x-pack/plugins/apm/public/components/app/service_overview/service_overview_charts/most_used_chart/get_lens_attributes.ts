@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import {
   CountIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -32,7 +32,16 @@ export function getLensAttributes({
     columnOrder: ['termsColumn', 'countColumn'],
     columns: {
       termsColumn: {
-        label: `Top ${BUCKET_SIZE} values of ${metric}`,
+        label: i18n.translate(
+          'xpack.apm.serviceOverview.lensFlyout.topValues',
+          {
+            defaultMessage: 'Top {BUCKET_SIZE} values of {metric}',
+            values: {
+              BUCKET_SIZE,
+              metric,
+            },
+          }
+        ),
         dataType: 'string',
         operationType: 'terms',
         scale: 'ordinal',
@@ -48,7 +57,12 @@ export function getLensAttributes({
         },
       } as TermsIndexPatternColumn,
       countColumn: {
-        label: 'Count of records',
+        label: i18n.translate(
+          'xpack.apm.serviceOverview.lensFlyout.countRecords',
+          {
+            defaultMessage: 'Count of records',
+          }
+        ),
         dataType: 'number',
         operationType: 'count',
         scale: 'ratio',
