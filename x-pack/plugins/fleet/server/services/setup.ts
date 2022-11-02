@@ -86,6 +86,7 @@ async function createSetupSideEffects(
   logger.debug('Setting up Fleet Sever Hosts');
   await ensurePreconfiguredFleetServerHosts(
     soClient,
+    esClient,
     getPreconfiguredFleetServerHostFromConfig(appContextService.getConfig())
   );
 

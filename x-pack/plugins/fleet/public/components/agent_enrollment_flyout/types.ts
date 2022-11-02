@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentPolicy, FleetServerHost } from '../../types';
+import type { AgentPolicy } from '../../types';
 
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
 
@@ -18,8 +18,6 @@ export interface BaseProps {
    * The user selected policy to be used. If this value is `undefined` a value must be provided for `agentPolicies`.
    */
   agentPolicy?: AgentPolicy;
-
-  fleetServerHosts?: FleetServerHost[];
 
   isFleetServerPolicySelected?: boolean;
 
@@ -51,4 +49,5 @@ export interface InstructionProps extends BaseProps {
   setSelectionType: (type: SelectionType) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId: (key?: string) => void;
+  fleetServerHosts: string[];
 }

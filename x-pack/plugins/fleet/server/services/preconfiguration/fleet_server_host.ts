@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
 import { decodeCloudId, normalizeHostsForAgents } from '../../../common/services';
@@ -79,10 +79,11 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
 
 export async function ensurePreconfiguredFleetServerHosts(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   preconfiguredFleetServerHosts: FleetServerHost[]
 ) {
   await createOrUpdatePreconfiguredFleetServerHosts(soClient, preconfiguredFleetServerHosts);
-  await cleanPreconfiguredFleetServerHosts(soClient, preconfiguredFleetServerHosts);
+  await cleanPreconfiguredFleetServerHosts(soClient, esClient, preconfiguredFleetServerHosts);
 }
 
 export async function createOrUpdatePreconfiguredFleetServerHosts(
@@ -141,6 +142,7 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
 
 export async function cleanPreconfiguredFleetServerHosts(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   preconfiguredFleetServerHosts: FleetServerHost[]
 ) {
   const existingFleetServerHosts = await listFleetServerHosts(soClient);
@@ -166,7 +168,7 @@ export async function cleanPreconfiguredFleetServerHosts(
         }
       );
     } else {
-      await deleteFleetServerHost(soClient, existingFleetServerHost.id, {
+      await deleteFleetServerHost(soClient, esClient, existingFleetServerHost.id, {
         fromPreconfiguration: true,
       });
     }
