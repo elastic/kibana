@@ -36,10 +36,9 @@ export function MostUsedChart({
   title: string;
   start: string;
   end: string;
-  kuery: string;
+  kuery?: string;
   filters: Filter[];
   metric: MostUsedMetricTypes;
-  bucketSize?: number;
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const {

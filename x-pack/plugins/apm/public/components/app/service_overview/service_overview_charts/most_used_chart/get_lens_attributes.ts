@@ -14,7 +14,7 @@ import {
 } from '@kbn/lens-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../common/data_view_constants';
-import { MostUsedMetricTypes } from './';
+import { MostUsedMetricTypes } from '.';
 
 const BUCKET_SIZE = 5;
 

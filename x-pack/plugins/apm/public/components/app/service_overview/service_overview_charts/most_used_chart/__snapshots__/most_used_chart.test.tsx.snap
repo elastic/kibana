@@ -10,7 +10,6 @@ Object {
     },
   ],
   "state": Object {
-    "adHocDataViews": Object {},
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
@@ -25,16 +24,13 @@ Object {
                 "isBucketed": false,
                 "label": "Count of records",
                 "operationType": "count",
-                "params": Object {
-                  "emptyAsNull": true,
-                },
                 "scale": "ratio",
                 "sourceField": "___records___",
               },
               "termsColumn": Object {
                 "dataType": "string",
                 "isBucketed": true,
-                "label": "Top 2 values of host.os.version",
+                "label": "Top 5 values of host.os.version",
                 "operationType": "terms",
                 "params": Object {
                   "orderBy": Object {
@@ -42,18 +38,12 @@ Object {
                     "type": "column",
                   },
                   "orderDirection": "desc",
-                  "otherBucket": true,
-                  "parentFormat": Object {
-                    "id": "terms",
-                  },
-                  "size": 2,
+                  "size": 5,
                 },
                 "scale": "ordinal",
                 "sourceField": "host.os.version",
               },
             },
-            "incompleteColumns": Object {},
-            "sampling": 1,
           },
         },
       },
@@ -62,24 +52,28 @@ Object {
       Object {
         "meta": Object {},
         "query": Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "term": Object {
-                  "service.name": "opbeans-swift",
-                },
-              },
-              Object {
-                "term": Object {
-                  "transaction.type": "request",
-                },
-              },
-            ],
+          "term": Object {
+            "processor.event": "transaction",
+          },
+        },
+      },
+      Object {
+        "meta": Object {},
+        "query": Object {
+          "term": Object {
+            "service.name": "opbeans-swift",
+          },
+        },
+      },
+      Object {
+        "meta": Object {},
+        "query": Object {
+          "term": Object {
+            "transaction.type": "request",
           },
         },
       },
     ],
-    "internalReferences": Array [],
     "query": Object {
       "language": "kuery",
       "query": "",
@@ -92,12 +86,10 @@ Object {
           "layerType": "data",
           "legendDisplay": "hide",
           "metric": "countColumn",
-          "nestedLegend": false,
           "numberDisplay": "percent",
           "primaryGroups": Array [
             "termsColumn",
           ],
-          "showValuesInLegend": true,
         },
       ],
       "shape": "pie",
