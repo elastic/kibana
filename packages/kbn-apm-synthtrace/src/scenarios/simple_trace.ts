@@ -32,7 +32,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
 
       const instances = [...Array(numServices).keys()].map((index) =>
         apm
-          .service({ name: `opbeans-go-${index}`, environment: ENVIRONMENT, agentName: 'go' })
+          .service({ name: `synth-go-${index}`, environment: ENVIRONMENT, agentName: 'go' })
           .instance('instance')
       );
       const instanceSpans = (instance: Instance) => {
