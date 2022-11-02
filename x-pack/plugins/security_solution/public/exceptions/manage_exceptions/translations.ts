@@ -36,14 +36,14 @@ export const EXPORT_EXCEPTION_LIST = i18n.translate(
 );
 
 export const IMPORT_EXCEPTION_LIST_HEADER = i18n.translate(
-  'xpack.securitySolution.exceptionsTable.importExceptionListHeader',
+  'xpack.securitySolution.exceptionsTable.importExceptionListFlyoutHeader',
   {
     defaultMessage: 'Import shared exception list',
   }
 );
 
 export const IMPORT_EXCEPTION_LIST_BODY = i18n.translate(
-  'xpack.securitySolution.exceptionsTable.importExceptionListHeader',
+  'xpack.securitySolution.exceptionsTable.importExceptionListFlyoutBody',
   {
     defaultMessage: 'Select shared exception lists to import',
   }
