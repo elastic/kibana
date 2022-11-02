@@ -42,7 +42,11 @@ function calculateComputeUsageGBSeconds({
   totalMemory?: number | null;
   countInvocations?: number | null;
 }) {
-  if (!isFiniteNumber(faasBilledDuration) || !isFiniteNumber(totalMemory) || !isFiniteNumber(countInvocations)) {
+  if (
+    !isFiniteNumber(faasBilledDuration) ||
+    !isFiniteNumber(totalMemory) ||
+    !isFiniteNumber(countInvocations)
+  ) {
     return 0;
   }
 
