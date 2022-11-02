@@ -68,6 +68,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('asset tagging', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     before(async () => {
       await createSpace(testSpaceId);
     });
