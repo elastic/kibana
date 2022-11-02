@@ -461,6 +461,33 @@ describe('Execution', () => {
         expect(spyFn).toHaveBeenCalledWith(c);
       });
     });
+
+    it('throttles partial results', async () => {
+      testScheduler.run(({ cold, expectObservable }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const d = 4;
+        const observable = cold('a 5ms b 5ms c 10ms (d|)', { a, b, c, d });
+        const expected = '       a 19ms c 2ms (d|)';
+
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => observable,
+        });
+
+        const result = executor.run('observable', null, { partial: true, throttle: 20 });
+
+        expectObservable(result).toBe(expected, {
+          a: expect.objectContaining({ result: a }),
+          c: expect.objectContaining({ result: c }),
+          d: expect.objectContaining({ result: d }),
+        });
+      });
+    });
   });
 
   describe('when function throws', () => {

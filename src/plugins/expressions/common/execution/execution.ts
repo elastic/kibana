@@ -15,12 +15,16 @@ import {
   combineLatest,
   defer,
   from,
+  identity,
   isObservable,
   last,
   of,
+  takeWhile,
   throwError,
+  timer,
   Observable,
   ReplaySubject,
+  Subscription,
 } from 'rxjs';
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
@@ -100,8 +104,59 @@ function markPartial<T>() {
     });
 }
 
-function noop<T>() {
-  return (source: Observable<T>) => source;
+/**
+ * RxJS' `throttle` operator does not emit the last value immediately when the source observable is completed.
+ * Instead, it waits for the next throttle period to emit that.
+ * It might cause delays until we get the final value, even though it is already there.
+ * @see https://github.com/ReactiveX/rxjs/blob/master/src/internal/operators/throttle.ts#L121
+ */
+function throttle<T>(timeout: number) {
+  return (source: Observable<T>): Observable<T> =>
+    new Observable((subscriber) => {
+      let latest: T | undefined;
+      let hasValue = false;
+
+      const emit = () => {
+        if (hasValue) {
+          subscriber.next(latest);
+          hasValue = false;
+          latest = undefined;
+        }
+      };
+
+      let throttled: Subscription | undefined;
+      const timer$ = timer(0, timeout).pipe(
+        takeWhile(() => hasValue),
+        finalize(() => {
+          subscriber.remove(throttled!);
+          throttled = undefined;
+        })
+      );
+
+      subscriber.add(
+        source.subscribe({
+          next: (value) => {
+            latest = value;
+            hasValue = true;
+
+            if (!throttled) {
+              throttled = timer$.subscribe(emit);
+              subscriber.add(throttled);
+            }
+          },
+          error: (error) => subscriber.error(error),
+          complete: () => {
+            emit();
+            subscriber.complete();
+          },
+        })
+      );
+
+      subscriber.add(() => {
+        hasValue = false;
+        latest = undefined;
+      });
+    });
 }
 
 function takeUntilAborted<T>(signal: AbortSignal) {
@@ -240,7 +295,10 @@ export class Execution<
       switchMap((input) =>
         this.invokeChain<Output>(this.state.get().ast.chain, input).pipe(
           takeUntilAborted(this.abortController.signal),
-          markPartial()
+          markPartial(),
+          this.execution.params.partial && this.execution.params.throttle
+            ? throttle(this.execution.params.throttle)
+            : identity
         )
       ),
       catchError((error) => {
@@ -364,7 +422,7 @@ export class Execution<
           return args$.pipe(
             tap((args) => this.execution.params.debug && Object.assign(head.debug, { args })),
             switchMap((args) => this.invokeFunction(fn, input, args)),
-            this.execution.params.partial ? noop() : last(),
+            this.execution.params.partial ? identity : last(),
             switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
             tap((output) => this.execution.params.debug && Object.assign(head.debug, { output })),
             switchMap((output) => this.invokeChain<ChainOutput>(tail, output)),
