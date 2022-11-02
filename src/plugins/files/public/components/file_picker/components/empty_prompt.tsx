@@ -15,9 +15,10 @@ import { i18nTexts } from '../i18n_texts';
 
 interface Props {
   kind: string;
+  multiple: boolean;
 }
 
-export const UploadFilesPrompt: FunctionComponent<Props> = ({ kind }) => {
+export const EmptyPrompt: FunctionComponent<Props> = ({ kind, multiple }) => {
   const { state } = useFilePickerContext();
   return (
     <EuiEmptyPrompt
@@ -34,6 +35,7 @@ export const UploadFilesPrompt: FunctionComponent<Props> = ({ kind }) => {
         <UploadFile
           kind={kind}
           immediate
+          multiple={multiple}
           onDone={(file) => {
             state.selectFile(file.map(({ id }) => id));
             state.retry();
