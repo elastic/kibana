@@ -11683,7 +11683,7 @@
     "xpack.enterpriseSearch.nav.contentTitle": "内容",
     "xpack.enterpriseSearch.nav.elasticsearchTitle": "Elasticsearch",
     "xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle": "概览",
-    "xpack.enterpriseSearch.nav.searchExperiencesTitle": "搜索",
+    "xpack.enterpriseSearch.nav.searchTitle": "搜索",
     "xpack.enterpriseSearch.nav.searchIndicesTitle": "索引",
     "xpack.enterpriseSearch.nav.workplaceSearchTitle": "Workplace Search",
     "xpack.enterpriseSearch.notFound.action1": "返回到您的仪表板",
