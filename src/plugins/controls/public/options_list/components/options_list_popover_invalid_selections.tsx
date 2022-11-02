@@ -37,7 +37,7 @@ export const OptionsListPopoverInvalidSelections = () => {
       <EuiTitle size="xxs" className="optionsList-control-ignored-selection-title">
         <label>
           {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
-            invalidSelections?.length ?? 0
+            (invalidSelections?.length ?? 0) + (existsSelectionInvalid ? 1 : 0)
           )}
         </label>
       </EuiTitle>

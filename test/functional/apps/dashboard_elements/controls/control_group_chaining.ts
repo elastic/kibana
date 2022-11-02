@@ -27,10 +27,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const newDocuments: Array<{ index: string; id: string }> = [];
     let controlIds: string[];
 
-    const ensureAvailableOptionsEql = async (controlId: string, expectation: string[]) => {
+    const ensureAvailableOptionsEql = async (
+      controlId: string,
+      expectation: string[],
+      filterOutExists: boolean = true
+    ) => {
       await dashboardControls.optionsListOpenPopover(controlId);
       await retry.try(async () => {
-        expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql(expectation);
+        expect(
+          await dashboardControls.optionsListPopoverGetAvailableOptions(filterOutExists)
+        ).to.eql(expectation);
       });
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
     };
@@ -209,6 +215,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'woof'
       );
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+    });
+
+    it('Can make "does not exist" query invalid through previous controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSetIncludeSelections(false);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+
+      await dashboardControls.optionsListOpenPopover(controlIds[1]);
+      await dashboardControls.optionsListPopoverSelectOption('exists');
+      await dashboardControls.optionsListPopoverSetIncludeSelections(false);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[1]);
+
+      await ensureAvailableOptionsEql(
+        controlIds[1],
+        ['Max', 'Ignored selection', 'Does not exist (!)'],
+        false
+      );
     });
 
     describe('Hierarchical chaining off', async () => {
