@@ -22,7 +22,7 @@ const MAX_NUMBER_OF_SERVICES = 500;
 export async function getServicesItems({
   environment,
   kuery,
-  mlSetup,
+  mlClient,
   apmEventClient,
   searchAggregatedTransactions,
   searchAggregatedServiceMetrics,
@@ -34,7 +34,7 @@ export async function getServicesItems({
 }: {
   environment: string;
   kuery: string;
-  mlSetup?: MlClient;
+  mlClient?: MlClient;
   apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   searchAggregatedServiceMetrics: boolean;
@@ -75,7 +75,7 @@ export async function getServicesItems({
         ...commonParams,
         apmEventClient,
       }),
-      getHealthStatuses({ ...commonParams, mlSetup }).catch((err) => {
+      getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
         logger.error(err);
         return [];
       }),

@@ -33,18 +33,18 @@ export type ServiceAnomaliesResponse = Awaited<
   ReturnType<typeof getServiceAnomalies>
 >;
 export async function getServiceAnomalies({
-  mlSetup,
+  mlClient,
   environment,
   start,
   end,
 }: {
-  mlSetup?: MlClient;
+  mlClient?: MlClient;
   environment: string;
   start: number;
   end: number;
 }) {
   return withApmSpan('get_service_anomalies', async () => {
-    if (!mlSetup) {
+    if (!mlClient) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
     }
 
@@ -106,9 +106,9 @@ export async function getServiceAnomalies({
       // pass an empty array of job ids to anomaly search
       // so any validation is skipped
       withApmSpan('ml_anomaly_search', () =>
-        mlSetup.mlSystem.mlAnomalySearch(params, [])
+        mlClient.mlSystem.mlAnomalySearch(params, [])
       ),
-      getMLJobIds(mlSetup.anomalyDetectors, environment),
+      getMLJobIds(mlClient.anomalyDetectors, environment),
     ]);
 
     const typedAnomalyResponse: ESSearchResponse<unknown, typeof params> =

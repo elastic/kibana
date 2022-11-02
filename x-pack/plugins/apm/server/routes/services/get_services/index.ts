@@ -16,7 +16,7 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 export async function getServices({
   environment,
   kuery,
-  mlSetup,
+  mlClient,
   apmEventClient,
   searchAggregatedTransactions,
   searchAggregatedServiceMetrics,
@@ -28,7 +28,7 @@ export async function getServices({
 }: {
   environment: string;
   kuery: string;
-  mlSetup?: MlClient;
+  mlClient?: MlClient;
   apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   searchAggregatedServiceMetrics: boolean;
@@ -42,7 +42,7 @@ export async function getServices({
     const items = await getServicesItems({
       environment,
       kuery,
-      mlSetup,
+      mlClient,
       apmEventClient,
       searchAggregatedTransactions,
       searchAggregatedServiceMetrics,

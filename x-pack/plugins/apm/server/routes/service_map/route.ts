@@ -116,7 +116,7 @@ const serviceMapRoute = createApmServerRoute({
       savedObjects: { client: savedObjectsClient },
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
-    const [mlSetup, apmEventClient, serviceGroup, maxNumberOfServices] =
+    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] =
       await Promise.all([
         getMlClient(resources),
         getApmEventClient(resources),
@@ -139,7 +139,7 @@ const serviceMapRoute = createApmServerRoute({
       kuery: '',
     });
     return getServiceMap({
-      mlSetup,
+      mlClient,
       config,
       apmEventClient,
       serviceNames,

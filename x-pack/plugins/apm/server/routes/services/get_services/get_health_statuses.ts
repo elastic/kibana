@@ -15,25 +15,25 @@ import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
 
 interface AggregationParams {
   environment: string;
-  mlSetup?: MlClient;
+  mlClient?: MlClient;
   start: number;
   end: number;
 }
 
 export const getHealthStatuses = async ({
   environment,
-  mlSetup,
+  mlClient,
   start,
   end,
 }: AggregationParams): Promise<
   Array<{ serviceName: string; healthStatus: ServiceHealthStatus }>
 > => {
-  if (!mlSetup) {
+  if (!mlClient) {
     return [];
   }
 
   const anomalies = await getServiceAnomalies({
-    mlSetup,
+    mlClient,
     environment,
     start,
     end,

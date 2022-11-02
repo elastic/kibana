@@ -32,7 +32,7 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { APMConfig } from '../..';
 
 export interface IEnvOptions {
-  mlSetup?: MlClient;
+  mlClient?: MlClient;
   config: APMConfig;
   apmEventClient: APMEventClient;
   serviceNames?: string[];

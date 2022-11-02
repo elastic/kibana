@@ -128,7 +128,7 @@ const servicesRoute = createApmServerRoute({
     const savedObjectsClient = (await context.core).savedObjects.client;
     const coreContext = await resources.context.core;
 
-    const [mlSetup, apmEventClient, serviceGroup, randomSampler] =
+    const [mlClient, apmEventClient, serviceGroup, randomSampler] =
       await Promise.all([
         getMlClient(resources),
         getApmEventClient(resources),
@@ -154,7 +154,7 @@ const servicesRoute = createApmServerRoute({
     return getServices({
       environment,
       kuery,
-      mlSetup,
+      mlClient,
       apmEventClient,
       searchAggregatedTransactions,
       searchAggregatedServiceMetrics,
@@ -1108,9 +1108,9 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
       import('./../../../common/anomaly_detection/service_anomaly_timeseries').ServiceAnomalyTimeseries
     >;
   }> => {
-    const mlSetup = await getMlClient(resources);
+    const mlClient = await getMlClient(resources);
 
-    if (!mlSetup) {
+    if (!mlClient) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
     }
 
@@ -1125,7 +1125,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
         transactionType,
         start,
         end,
-        mlSetup,
+        mlClient,
         logger: resources.logger,
         environment,
       });
@@ -1182,7 +1182,7 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
       uiSettings: { client: uiSettingsClient },
     } = await resources.context.core;
 
-    const [mlSetup, apmEventClient, serviceGroup, maxNumberOfServices] =
+    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] =
       await Promise.all([
         getMlClient(resources),
         getApmEventClient(resources),
@@ -1193,7 +1193,7 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
       ]);
     return {
       services: await getSortedAndFilteredServices({
-        mlSetup,
+        mlClient,
         apmEventClient,
         start,
         end,

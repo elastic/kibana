@@ -51,7 +51,7 @@ export async function getServiceNamesFromTermsEnum({
 }
 
 export async function getSortedAndFilteredServices({
-  mlSetup,
+  mlClient,
   apmEventClient,
   start,
   end,
@@ -60,7 +60,7 @@ export async function getSortedAndFilteredServices({
   serviceGroup,
   maxNumberOfServices,
 }: {
-  mlSetup?: MlClient;
+  mlClient?: MlClient;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
@@ -71,7 +71,7 @@ export async function getSortedAndFilteredServices({
 }) {
   const [servicesWithHealthStatuses, selectedServices] = await Promise.all([
     getHealthStatuses({
-      mlSetup,
+      mlClient,
       start,
       end,
       environment,

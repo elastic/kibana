@@ -36,7 +36,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
     >;
     hasLegacyJobs: boolean;
   }> => {
-    const mlSetup = await getMlClient(resources);
+    const mlClient = await getMlClient(resources);
     const { context } = resources;
     const licensingContext = await context.licensing;
 
@@ -44,11 +44,11 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 
-    if (!mlSetup) {
+    if (!mlClient) {
       throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE);
     }
 
-    const jobs = await getMlJobsWithAPMGroup(mlSetup?.anomalyDetectors);
+    const jobs = await getMlJobsWithAPMGroup(mlClient?.anomalyDetectors);
 
     return {
       jobs,
@@ -74,7 +74,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
     const licensingContext = await context.licensing;
     const coreContext = await context.core;
 
-    const [mlSetup, indices] = await Promise.all([
+    const [mlClient, indices] = await Promise.all([
       getMlClient(resources),
       getApmIndices({
         savedObjectsClient: coreContext.savedObjects.client,
@@ -87,7 +87,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
     }
 
     await createAnomalyDetectionJobs({
-      mlSetup,
+      mlClient,
       indices,
       environments,
       logger,
@@ -143,7 +143,7 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
   handler: async (resources): Promise<{ update: boolean }> => {
     const { config, context } = resources;
     const coreContext = await context.core;
-    const [mlSetup, esClient, indices] = await Promise.all([
+    const [mlClient, esClient, indices] = await Promise.all([
       getMlClient(resources),
       resources.core
         .start()
@@ -160,7 +160,7 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
     const { logger } = resources;
 
     return {
-      update: await updateToV3({ mlSetup, logger, indices, esClient }),
+      update: await updateToV3({ mlClient, logger, indices, esClient }),
     };
   },
 });

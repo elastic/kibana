@@ -18,15 +18,15 @@ import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 export async function updateToV3({
   logger,
   indices,
-  mlSetup,
+  mlClient,
   esClient,
 }: {
   logger: Logger;
-  mlSetup?: MlClient;
+  mlClient?: MlClient;
   indices: ApmIndicesConfig;
   esClient: ElasticsearchClient;
 }) {
-  const allJobs = await getAnomalyDetectionJobs(mlSetup);
+  const allJobs = await getAnomalyDetectionJobs(mlClient);
 
   const v2Jobs = allJobs.filter((job) => job.version === 2);
 
@@ -57,7 +57,7 @@ export async function updateToV3({
     );
   }
 
-  await createAnomalyDetectionJobs({ mlSetup, indices, environments, logger });
+  await createAnomalyDetectionJobs({ mlClient, indices, environments, logger });
 
   return true;
 }

@@ -25,22 +25,22 @@ import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 import { ApmIndicesConfig } from '../../routes/settings/apm_indices/get_apm_indices';
 
 export async function createAnomalyDetectionJobs({
-  mlSetup,
+  mlClient,
   indices,
   environments,
   logger,
 }: {
-  mlSetup?: MlClient;
+  mlClient?: MlClient;
   indices: ApmIndicesConfig;
   environments: Environment[];
   logger: Logger;
 }) {
-  if (!mlSetup) {
+  if (!mlClient) {
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
   const uniqueMlJobEnvs = await getUniqueMlJobEnvs(
-    mlSetup,
+    mlClient,
     environments,
     logger
   );
@@ -56,7 +56,7 @@ export async function createAnomalyDetectionJobs({
     const apmMetricIndex = indices.metric;
     const responses = await Promise.all(
       uniqueMlJobEnvs.map((environment) =>
-        createAnomalyDetectionJob({ mlSetup, environment, apmMetricIndex })
+        createAnomalyDetectionJob({ mlClient, environment, apmMetricIndex })
       )
     );
 
@@ -75,18 +75,18 @@ export async function createAnomalyDetectionJobs({
 }
 
 async function createAnomalyDetectionJob({
-  mlSetup,
+  mlClient,
   environment,
   apmMetricIndex,
 }: {
-  mlSetup: Required<MlClient>;
+  mlClient: Required<MlClient>;
   environment: string;
   apmMetricIndex: string;
 }) {
   return withApmSpan('create_anomaly_detection_job', async () => {
     const randomToken = uuid().substr(-4);
 
-    return mlSetup.modules.setup({
+    return mlClient.modules.setup({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,
       prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
       groups: [APM_ML_JOB_GROUP],
@@ -119,12 +119,12 @@ async function createAnomalyDetectionJob({
 }
 
 async function getUniqueMlJobEnvs(
-  mlSetup: MlClient,
+  mlClient: MlClient,
   environments: Environment[],
   logger: Logger
 ) {
   // skip creation of duplicate ML jobs
-  const jobs = await getAnomalyDetectionJobs(mlSetup);
+  const jobs = await getAnomalyDetectionJobs(mlClient);
   const existingMlJobEnvs = jobs
     .filter((job) => job.version === 3)
     .map(({ environment }) => environment);

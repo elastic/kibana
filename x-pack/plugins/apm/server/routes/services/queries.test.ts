@@ -52,7 +52,7 @@ describe('services queries', () => {
   it('fetches the service items', async () => {
     mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getServicesItems({
-        mlSetup: undefined,
+        mlClient: undefined,
         apmEventClient: mockApmEventClient,
         searchAggregatedTransactions: false,
         searchAggregatedServiceMetrics: false,
