@@ -3,13 +3,14 @@
   "version": "kibana",
   "description": "Contains all the key functionality of Kibana's unified search experience.Contains all the key functionality of Kibana's unified search experience.",
   "owner": {
-    "name": "Whitelabelling",
-    "githubTeam": "shared-ux-tex"
+    "name": "Shared UX",
+    "githubTeam": "shared-ux-team"
   },
   "server": true,
   "ui": true,
-  "requiredPlugins": ["licensing"],
-  "requiredBundles": [],
+  "requiredPlugins": ["licensing", "management"],
+  "requiredBundles": ["kibanaReact"],
+  "optionalPlugins": ["share"],
   "enabledOnAnonymousPages": true,
   "configPath": [
     "whitelabelling"
