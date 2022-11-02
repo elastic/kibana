@@ -68,8 +68,6 @@ export function MobileFilters({
     });
   }
 
-  console.log('data', data);
-
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       {data.mobileFilters.map((filter) => {
