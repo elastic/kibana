@@ -27,8 +27,7 @@ describe('All hosts table', () => {
   it('it renders risk column', () => {
     visit(HOSTS_URL);
     kqlSearch('host.name: "siem-kibana" {enter}');
-    cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
-    cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
+
     cy.get('[data-test-subj="tableHeaderCell_node.risk_4"]').should('exist');
     cy.get(`${TABLE_CELL} .euiTableCellContent`).eq(4).should('have.text', 'Low');
   });
