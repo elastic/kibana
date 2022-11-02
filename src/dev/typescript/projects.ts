@@ -31,7 +31,7 @@ export const PROJECTS = [
   createProject('test/tsconfig.json', { name: 'kibana/test' }),
   createProject('x-pack/test/tsconfig.json', { name: 'x-pack/test' }),
   createProject('x-pack/performance/tsconfig.json', { name: 'x-pack/performance' }),
-  createProject('src/core/tsconfig.json'),
+  ...findProjects(['src/*/tsconfig.json']),
   createProject('.buildkite/tsconfig.json', {
     // this directory has additionally dependencies which scripts/type_check can't guarantee
     // are present or up-to-date, and users likely won't know how to manage either, so the
