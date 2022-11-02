@@ -12,9 +12,9 @@ import { useTourContext } from './tour';
 import { mockGlobalState, SUB_PLUGINS_REDUCER, TestProviders } from '../../mock';
 import { TimelineId } from '../../../../common/types';
 import { createStore } from '../../store';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
 import { createSecuritySolutionStorageMock } from '@kbn/timelines-plugin/public/mock/mock_local_storage';
+import { tGridReducer } from '../../store/data_table/reducer';
 
 jest.mock('./tour');
 const mockTourStep = jest

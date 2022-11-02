@@ -13,16 +13,35 @@ import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { TestProviders } from '../../../../common/mock';
+import {
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  TestProviders,
+} from '../../../../common/mock';
 import { usePreviewHistogram } from './use_preview_histogram';
 
 import { PreviewHistogram } from './preview_histogram';
 import { ALL_VALUES_ZEROS_TITLE } from '../../../../common/components/charts/translation';
+import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { useTimelineEvents } from '../../../../common/components/events_viewer/use_timelines_events';
+import { TableId } from '../../../../../common/types';
+import { tGridReducer } from '../../../../common/store/data_table/reducer';
+import { createStore } from '../../../../common/store';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/use_global_time');
 jest.mock('./use_preview_histogram');
 jest.mock('../../../../common/utils/normalize_time_range');
+jest.mock('../../../../common/components/events_viewer/use_timelines_events');
+
+const originalKibanaLib = jest.requireActual('../../../../common/lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
 const getMockIndexPattern = (): DataViewBase => ({
   fields,
@@ -49,6 +68,26 @@ describe('PreviewHistogram', () => {
     });
   });
 
+  const { storage } = createSecuritySolutionStorageMock();
+
+  const store = createStore(
+    {
+      ...mockGlobalState,
+      dataTable: {
+        ...mockGlobalState.dataTable,
+        tableById: {
+          [TableId.rulePreview]: {
+            ...mockGlobalState.dataTable.tableById[TableId.test],
+          },
+        },
+      },
+    },
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -66,8 +105,19 @@ describe('PreviewHistogram', () => {
     ]);
 
     test('it renders an empty histogram and table', async () => {
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          totalCount: 1,
+          pageInfo: {
+            activePage: 0,
+            fakeTotalCount: 1,
+          },
+          events: [],
+        },
+      ]);
       const wrapper = render(
-        <TestProviders>
+        <TestProviders store={store}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
             timeframeOptions={getLastMonthTimeframe()}
@@ -98,7 +148,7 @@ describe('PreviewHistogram', () => {
       ]);
 
       const wrapper = render(
-        <TestProviders>
+        <TestProviders store={store}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
             timeframeOptions={getLastMonthTimeframe()}
@@ -150,7 +200,7 @@ describe('PreviewHistogram', () => {
       );
 
       const wrapper = render(
-        <TestProviders>
+        <TestProviders store={store}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
             previewId={'test-preview-id'}

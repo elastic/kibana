@@ -28,8 +28,6 @@ const selectTGridById = (state: unknown, tableId: string): TGridModel => {
   );
 };
 
-export const getTGridByIdSelector = () => createSelector(selectTGridById, (tGrid) => tGrid);
-
 export const getManageDataTableById = () =>
   createSelector(
     selectTGridById,

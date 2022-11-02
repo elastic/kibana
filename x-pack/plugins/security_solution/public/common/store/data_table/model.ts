@@ -84,5 +84,6 @@ export type SubsetTGridModel = Readonly<
     | 'sessionViewConfig'
     | 'queryFields'
     | 'title'
+    | 'initialized'
   >
 >;

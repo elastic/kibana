@@ -137,6 +137,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       showCheckboxes,
       sort,
       title,
+      initialized,
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
@@ -165,20 +166,20 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const editorActionsRef = useRef<FieldEditorActions>(null);
 
   useEffect(() => {
-    // if ()
-    dispatch(
-      dataTableActions.createTGrid({
-        columns,
-        dataViewId: selectedDataViewId,
-        defaultColumns,
-        id: tableId,
-        indexNames: indexNames ?? selectedPatterns,
-        itemsPerPage,
-        showCheckboxes,
-        sort,
-      })
-    );
-
+    if (!initialized) {
+      dispatch(
+        dataTableActions.createTGrid({
+          columns,
+          dataViewId: selectedDataViewId,
+          defaultColumns,
+          id: tableId,
+          indexNames: indexNames ?? selectedPatterns,
+          itemsPerPage,
+          showCheckboxes,
+          sort,
+        })
+      );
+    }
     return () => {
       dispatch(inputsActions.deleteOneQuery({ id: tableId, inputId: InputsModelId.global }));
       if (editorActionsRef.current) {

@@ -54,6 +54,15 @@ jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
 }));
 
+const useAddToTimeline = () => ({
+  beginDrag: jest.fn(),
+  cancelDrag: jest.fn(),
+  dragToLocation: jest.fn(),
+  endDrag: jest.fn(),
+  hasDraggableLock: jest.fn(),
+  startDragToTimeline: jest.fn(),
+});
+
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
   const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
@@ -84,6 +93,7 @@ jest.mock('../../../../common/lib/kibana', () => {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
           getFieldBrowser: jest.fn(),
+          getUseAddToTimeline: () => useAddToTimeline,
         },
       },
     }),
