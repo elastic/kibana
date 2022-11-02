@@ -21,19 +21,24 @@ import {
 } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
-import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
-import { satisfies } from 'semver';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
-import { convertSOQueriesToPack, convertPackQueriesToSO } from './utils';
+import {
+  convertSOQueriesToPack,
+  convertPackQueriesToSO,
+  getInitialPolicies,
+  findMatchingPoliciesAndShards,
+  updatePoliciesWithShards,
+} from './utils';
 import { getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
 
@@ -132,54 +137,19 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         has(packagePolicy, `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`)
       );
 
-      const getPolicies = async () => {
-        if (policy_ids?.length) {
-          return policy_ids;
-        }
-
-        // otherwise we get all policies available
-        const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
-          satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
-        );
-
-        return uniq(map(supportedPackagePolicyIds, 'policy_id'));
-      };
-
-      let policiesList = await getPolicies();
+      let policiesList = getInitialPolicies(packagePolicies, policy_ids);
 
       const agentPolicies = await agentPolicyService?.getByIds(
         internalSavedObjectsClient,
         policiesList
       );
 
-      // Find the agentPolicies that has name containing shard name
-      const foundMatchingPolicies: AgentPolicy[] = [];
-      const policyShards: Record<string, number> = {};
-      if (!isEmpty(shards)) {
-        const agentPoliciesNames = map(agentPolicies, 'name');
-        const agentPoliciesNameMap = mapKeys(agentPolicies, 'name');
+      const { foundMatchingPolicies, policyShards } = findMatchingPoliciesAndShards(
+        agentPolicies,
+        shards
+      );
 
-        map(shards, (shard, shardName) => {
-          map(agentPoliciesNames, (agentPolicyName) => {
-            if (agentPolicyName.startsWith(shardName)) {
-              foundMatchingPolicies.push(agentPoliciesNameMap[agentPolicyName]);
-              policyShards[agentPoliciesNameMap[agentPolicyName].id] = shard;
-            }
-          });
-        });
-      }
-
-      // We check if any shards were passed - if not - we keep using the previous policiesList
-      if (shards && !isEmpty(shards)) {
-        const ids = map(foundMatchingPolicies, 'id');
-        // check if global was enabled - then use all policies + filtered policies depending on shards config
-        if (shards['*']) {
-          policiesList = uniq([...policiesList, ...ids]);
-        } else {
-          // use either the filtered policies depending on shards or no policies at all
-          policiesList = ids;
-        }
-      }
+      policiesList = updatePoliciesWithShards(foundMatchingPolicies, policiesList, shards);
 
       const agentPoliciesIdMap = mapKeys(agentPolicies, 'id');
 
@@ -295,6 +265,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           );
         }
       } else {
+        // TODO double check if policiesList shouldnt be changed into policyIds
         const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, policiesList));
         const agentPolicyIdsToUpdate = uniq(
           difference(currentAgentPolicyIds, agentPolicyIdsToRemove)

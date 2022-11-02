@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, reduce } from 'lodash';
+import { isEmpty, omit, reduce } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -97,8 +97,12 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   });
 
   useEffect(() => {
-    if (defaultValue?.shards?.['*']) {
-      setPackType('global');
+    if (!isEmpty(defaultValue?.shards)) {
+      if (defaultValue?.shards?.['*']) {
+        setPackType('global');
+      } else {
+        setPackType('shards');
+      }
     }
   }, [defaultValue, defaultValue?.shards]);
 

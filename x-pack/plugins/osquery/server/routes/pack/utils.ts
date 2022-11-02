@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { isEmpty, pick, reduce, isArray } from 'lodash';
+import { isEmpty, pick, reduce, isArray, filter, uniq, map, mapKeys } from 'lodash';
+import { satisfies } from 'semver';
+import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
@@ -67,3 +69,63 @@ export const convertSOQueriesToPack = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     {} as Record<string, any>
   );
+
+export const getInitialPolicies = (
+  packagePolicies: PackagePolicy[] | never[],
+  policyIds?: string[]
+) => {
+  if (policyIds?.length) {
+    return policyIds;
+  }
+
+  // otherwise we get all policies available
+  const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
+    satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
+  );
+
+  return uniq(map(supportedPackagePolicyIds, 'policy_id'));
+};
+
+// We check if any shards were passed - if not - we keep using the previous policiesList
+export const updatePoliciesWithShards = (
+  foundMatchingPolicies: AgentPolicy[],
+  policiesList: string[],
+  shards?: Record<string, number>
+): string[] => {
+  if (shards && !isEmpty(shards)) {
+    const ids = map(foundMatchingPolicies, 'id');
+    // check if global was enabled - then use all policies + filtered policies depending on shards config
+    if (shards['*']) {
+      return uniq([...policiesList, ...ids]);
+    } else {
+      // use either the filtered policies depending on shards or no policies at all
+      return ids;
+    }
+  }
+
+  return policiesList;
+};
+
+// Find the agentPolicies that has name containing shard name
+export const findMatchingPoliciesAndShards = (
+  agentPolicies: AgentPolicy[] | undefined,
+  shards?: Record<string, number>
+) => {
+  const foundMatchingPolicies: AgentPolicy[] = [];
+  const policyShards: Record<string, number> = {};
+  if (!isEmpty(shards)) {
+    const agentPoliciesNames = map(agentPolicies, 'name');
+    const agentPoliciesNameMap = mapKeys(agentPolicies, 'name');
+
+    map(shards, (shard, shardName) => {
+      map(agentPoliciesNames, (agentPolicyName) => {
+        if (agentPolicyName.startsWith(shardName)) {
+          foundMatchingPolicies.push(agentPoliciesNameMap[agentPolicyName]);
+          policyShards[agentPoliciesNameMap[agentPolicyName].id] = shard;
+        }
+      });
+    });
+  }
+
+  return { foundMatchingPolicies, policyShards };
+};
