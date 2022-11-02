@@ -11,13 +11,29 @@ import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButton, EuiImage, EuiSpacer, EuiText, EuiTourStep } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import styled from 'styled-components';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
+import { TimelineId } from '../../../../common/types';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useTourContext } from './tour';
-import { securityTourConfig, SecurityStepId } from './tour_config';
+import { AlertsCasesTourSteps, SecurityStepId, securityTourConfig } from './tour_config';
+
 interface SecurityTourStep {
   children?: React.ReactElement;
   step: number;
   stepId: SecurityStepId;
 }
+
+const isStepExternallyMounted = (stepId: SecurityStepId, step: number) =>
+  step === AlertsCasesTourSteps.createCase && stepId === SecurityStepId.alertsCases;
+
+const StyledTourStep = styled(EuiTourStep)<EuiTourStepProps & { stepId: SecurityStepId }>`
+  &.euiPopover__panel[data-popover-open] {
+    z-index: ${({ step, stepId }) =>
+      isStepExternallyMounted(stepId, step) ? '9000 !important' : '1000 !important'};
+  }
+`;
 
 export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) => {
   const { activeStep, incrementStep, isTourShown } = useTourContext();
@@ -25,12 +41,24 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
     () => securityTourConfig[stepId].find((config) => config.step === step),
     [step, stepId]
   );
+
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const showTimeline = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
+  );
+
   const onClick = useCallback(() => incrementStep(stepId), [incrementStep, stepId]);
-  // step === 5 && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
+
+  // step === AlertsCasesTourSteps.createCase && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
   // If we mount this step, we know we need to render it
   // we are also managing the context on the siem end in the background
-  const overrideContext = step === 5 && stepId === SecurityStepId.alertsCases;
-  if (tourStep == null || ((step !== activeStep || !isTourShown(stepId)) && !overrideContext)) {
+  const overrideContext = isStepExternallyMounted(stepId, step);
+
+  if (
+    tourStep == null ||
+    ((step !== activeStep || !isTourShown(stepId)) && !overrideContext) ||
+    showTimeline
+  ) {
     return children ? children : null;
   }
 
@@ -89,11 +117,13 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
   //  see type EuiTourStepAnchorProps
   return anchor != null ? (
     <>
-      <EuiTourStep {...commonProps} anchor={anchor} />
+      <StyledTourStep stepId={stepId} {...commonProps} anchor={anchor} />
       <>{children}</>
     </>
   ) : children != null ? (
-    <EuiTourStep {...commonProps}>{children}</EuiTourStep>
+    <StyledTourStep stepId={stepId} {...commonProps}>
+      {children}
+    </StyledTourStep>
   ) : null;
 };
 
