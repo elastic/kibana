@@ -22,7 +22,7 @@ import {
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../../../common/constants';
 import {
-  BulkAction,
+  BulkActionType,
   PerformBulkActionRequestBody,
   PerformBulkActionRequestQuery,
 } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
@@ -298,7 +298,7 @@ export const performBulkActionRoute = (
       const isDryRun = request.query.dry_run === 'true';
 
       // dry run is not supported for export, as it doesn't change ES state and has different response format(exported JSON file)
-      if (isDryRun && body.action === BulkAction.export) {
+      if (isDryRun && body.action === BulkActionType.export) {
         return siemResponse.error({
           body: `Export action doesn't support dry_run mode`,
           statusCode: 400,
@@ -335,7 +335,7 @@ export const performBulkActionRoute = (
 
         // handling this action before switch statement as bulkEditRules fetch rules within
         // rulesClient method, hence there is no need to use fetchRulesByQueryOrIds utility
-        if (body.action === BulkAction.edit && !isDryRun) {
+        if (body.action === BulkActionType.edit && !isDryRun) {
           const { rules, errors } = await bulkEditRules({
             rulesClient,
             filter: query,
@@ -385,7 +385,7 @@ export const performBulkActionRoute = (
         let deleted: RuleAlertType[] = [];
 
         switch (body.action) {
-          case BulkAction.enable:
+          case BulkActionType.enable:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -418,7 +418,7 @@ export const performBulkActionRoute = (
               .map(({ result }) => result)
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
-          case BulkAction.disable:
+          case BulkActionType.disable:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -452,7 +452,7 @@ export const performBulkActionRoute = (
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
 
-          case BulkAction.delete:
+          case BulkActionType.delete:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -483,7 +483,7 @@ export const performBulkActionRoute = (
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
 
-          case BulkAction.duplicate:
+          case BulkActionType.duplicate:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -514,7 +514,7 @@ export const performBulkActionRoute = (
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
 
-          case BulkAction.export:
+          case BulkActionType.export:
             const exported = await getExportByObjectIds(
               rulesClient,
               exceptionsClient,
@@ -535,7 +535,7 @@ export const performBulkActionRoute = (
 
           // will be processed only when isDryRun === true
           // during dry run only validation is getting performed and rule is not saved in ES
-          case BulkAction.edit:
+          case BulkActionType.edit:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
