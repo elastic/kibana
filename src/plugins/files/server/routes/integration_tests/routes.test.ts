@@ -202,7 +202,7 @@ describe('File HTTP API', () => {
     });
   });
 
-  it.only('bulk deletes files', async () => {
+  it('bulk deletes files', async () => {
     const [file1] = await Promise.all([createFile(), createFile(), createFile()]);
     {
       const { body: response } = await request
