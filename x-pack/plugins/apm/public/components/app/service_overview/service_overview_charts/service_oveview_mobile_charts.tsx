@@ -18,7 +18,16 @@ import { TransactionsTable } from '../../../shared/transactions_table';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-
+import { MostUsedChart } from './most_used_chart';
+import { LatencyMap } from './latency_map';
+import { MobileFilters } from './filters';
+import { useFiltersForMobileCharts } from './use_filters_for_mobile_charts';
+import {
+  DEVICE_MODEL_NAME,
+  HOST_OS_VERSION,
+  NETWORK_CONNECTION_TYPE,
+  SERVICE_VERSION,
+} from '../../../../../common/elasticsearch_fieldnames';
 interface Props {
   latencyChartHeight: number;
   rowDirection: 'column' | 'row';
@@ -34,10 +43,20 @@ export function ServiceOverviewMobileCharts({
 }: Props) {
   const { fallbackToTransactions, serviceName } = useApmServiceContext();
   const router = useApmRouter();
+  const filters = useFiltersForMobileCharts();
 
   const {
     query,
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      netConnectionType,
+      device,
+      osVersion,
+      appVersion,
+    },
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -51,6 +70,20 @@ export function ServiceOverviewMobileCharts({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <MobileFilters
+          start={start}
+          end={end}
+          environment={environment}
+          kuery={kuery}
+          filters={{
+            device,
+            osVersion,
+            appVersion,
+            netConnectionType,
+          }}
+        />
+      </EuiFlexItem>
       {fallbackToTransactions && (
         <EuiFlexItem>
           <AggregatedTransactionsBadge />
@@ -118,6 +151,82 @@ export function ServiceOverviewMobileCharts({
                 }
               />
             </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiPanel hasBorder={true}>
+          <LatencyMap filters={filters} />
+        </EuiPanel>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiFlexGroup direction={rowDirection} gutterSize="s">
+          {/* Device */}
+          <EuiFlexItem>
+            <MostUsedChart
+              title={i18n.translate(
+                'xpack.apm.serviceOverview.mostUsed.device',
+                {
+                  defaultMessage: 'Most used device',
+                }
+              )}
+              metric={DEVICE_MODEL_NAME}
+              start={start}
+              end={end}
+              kuery={kuery}
+              filters={filters}
+            />
+          </EuiFlexItem>
+          {/* NCT */}
+          <EuiFlexItem>
+            <MostUsedChart
+              title={i18n.translate('xpack.apm.serviceOverview.mostUsed.nct', {
+                defaultMessage: 'Most used NCT',
+              })}
+              metric={NETWORK_CONNECTION_TYPE}
+              start={start}
+              end={end}
+              kuery={kuery}
+              filters={filters}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup direction={rowDirection} gutterSize="s">
+          {/* OS Version */}
+          <EuiFlexItem>
+            <MostUsedChart
+              title={i18n.translate(
+                'xpack.apm.serviceOverview.mostUsed.osVersion',
+                {
+                  defaultMessage: 'Most used OS version',
+                }
+              )}
+              metric={HOST_OS_VERSION}
+              start={start}
+              end={end}
+              kuery={kuery}
+              filters={filters}
+            />
+          </EuiFlexItem>
+          {/* App version */}
+          <EuiFlexItem>
+            <MostUsedChart
+              title={i18n.translate(
+                'xpack.apm.serviceOverview.mostUsed.appVersion',
+                {
+                  defaultMessage: 'Most used app version',
+                }
+              )}
+              metric={SERVICE_VERSION}
+              start={start}
+              end={end}
+              kuery={kuery}
+              filters={filters}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
