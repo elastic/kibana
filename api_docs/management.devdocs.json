@@ -552,7 +552,13 @@
             "label": "history",
             "description": [],
             "signature": [
-              "ScopedHistory",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ScopedHistory",
+                "text": "ScopedHistory"
+              },
               "<unknown>"
             ],
             "path": "src/plugins/management/public/types.ts",
@@ -569,7 +575,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "src/plugins/management/public/types.ts",
