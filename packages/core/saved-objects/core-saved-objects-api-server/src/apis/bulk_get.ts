@@ -7,11 +7,14 @@
  */
 
 /**
+ * Object parameters for the bulk get operation
  *
  * @public
  */
 export interface SavedObjectsBulkGetObject {
+  /** ID of the object to get */
   id: string;
+  /** Type of the object to get */
   type: string;
   /** SavedObject fields to include in the response */
   fields?: string[];

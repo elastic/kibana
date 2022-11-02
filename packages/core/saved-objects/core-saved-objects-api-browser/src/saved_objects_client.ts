@@ -33,7 +33,12 @@ import type { SimpleSavedObject } from './simple_saved_object';
  */
 export interface SavedObjectsClientContract {
   /**
-   * Persists an object
+   * Creates an object
+   *
+   * @param {string} type - the type of object to create
+   * @param {string} attributes - the attributes of the object
+   * @param {string} options {@link  SavedObjectsCreateOptions}
+   * @returns The result of the create operation - the created saved object
    */
   create<T = unknown>(
     type: string,
@@ -42,7 +47,10 @@ export interface SavedObjectsClientContract {
   ): Promise<SimpleSavedObject<T>>;
 
   /**
-   * Creates multiple documents at once
+   * Creates multiple objects at once
+   *
+   * @param {string} objects - an array of objects containing type, attributes
+   * @param {string} options {@link  SavedObjectsBulkCreateOptions}
    * @returns The result of the create operation containing created saved objects.
    */
   bulkCreate(
@@ -52,6 +60,11 @@ export interface SavedObjectsClientContract {
 
   /**
    * Deletes an object
+   *
+   * @param {string} type - the type the of object to delete
+   * @param {string} id - the id of the object to delete
+   * @param {string} options {@link  SavedObjectsDeleteOptions}
+   * @param {string} options.force - required to delete objects shared to multiple spaces
    */
   delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
 
@@ -69,8 +82,8 @@ export interface SavedObjectsClientContract {
   /**
    * Search for objects
    *
-   * @param {object} [options={}]
-   * @property {string} options.type
+   * @param {object} [options={}] {@link  SavedObjectsFindOptions}
+   * @property {string} options.type - the type or array of types to find
    * @property {string} options.search
    * @property {string} options.searchFields - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
@@ -87,8 +100,8 @@ export interface SavedObjectsClientContract {
   /**
    * Fetches a single object
    *
-   * @param {string} type
-   * @param {string} id
+   * @param {string} type - the type of the object to get
+   * @param {string} id - the ID of the object to get
    * @returns The saved object for the given type and id.
    */
   get<T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>>;
@@ -110,8 +123,8 @@ export interface SavedObjectsClientContract {
   /**
    * Resolves a single object
    *
-   * @param {string} type
-   * @param {string} id
+   * @param {string} type - the type of the object to resolve
+   * @param {string} id - the ID of the object to resolve
    * @returns The resolve result for the saved object for the given type and id.
    *
    * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
@@ -144,13 +157,13 @@ export interface SavedObjectsClientContract {
   /**
    * Updates an object
    *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} attributes
-   * @param {object} options
+   * @param {string} type - the type of the object to update
+   * @param {string} id - the ID of the object to update
+   * @param {object} attributes - the attributes to update
+   * @param {object} options {@link SavedObjectsUpdateOptions}
    * @prop {integer} options.version - ensures version matches that of persisted object
    * @prop {object} options.migrationVersion - The optional migrationVersion of this document
-   * @returns
+   * @returns the udpated simple saved object
    */
   update<T = unknown>(
     type: string,
@@ -162,8 +175,8 @@ export interface SavedObjectsClientContract {
   /**
    * Update multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
-   * @returns The result of the update operation containing both failed and updated saved objects.
+   * @param {array} objects - an array of objects containing type, id, attributes, and references
+   * @returns the result of the bulk update operation containing both failed and updated saved objects.
    */
   bulkUpdate<T = unknown>(
     objects: SavedObjectsBulkUpdateObject[]

@@ -8,7 +8,12 @@
 
 import type { ResolvedSimpleSavedObject } from './resolve';
 
-/** @public */
+/**
+ * Return type of the Saved Objects `bulkResolve()` method.
+ *
+ * @public
+ */
 export interface SavedObjectsBulkResolveResponse<T = unknown> {
+  /** Array of {@link ResolvedSimpleSavedObject} that were resolved */
   resolved_objects: Array<ResolvedSimpleSavedObject<T>>;
 }

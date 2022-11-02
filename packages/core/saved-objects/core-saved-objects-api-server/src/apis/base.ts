@@ -24,9 +24,11 @@ export interface SavedObjectsBaseOptions {
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 
 /**
+ * Base return for saved object bulk operations
  *
  * @public
  */
 export interface SavedObjectsBulkResponse<T = unknown> {
+  /** array of saved objects */
   saved_objects: Array<SavedObject<T>>;
 }

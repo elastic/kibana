@@ -12,14 +12,19 @@ import type {
 } from '@kbn/core-saved-objects-common';
 
 /**
+ * Object parameters for the bulk create operation
  *
  * @public
  */
 export interface SavedObjectsBulkCreateObject<T = unknown> {
   id?: string;
+  /** the type of object to create */
   type: string;
+  /** the attributes for the object to create */
   attributes: T;
+  /** the version string for the object to create */
   version?: string;
+  /** array of references to other saved objects */
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
