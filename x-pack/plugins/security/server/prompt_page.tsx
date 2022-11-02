@@ -22,13 +22,13 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 
+import { ASSETS_DIR, FAVICONS_DIR, FONTS_DIR } from '@kbn/core-apps-server-internal';
 import { Fonts } from '@kbn/core-rendering-server-internal';
 import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-
 // Preload the alert icon used by `EuiEmptyPrompt` to ensure that it's loaded
 // in advance the first time this page is rendered server-side. If not, the
 // icon svg wouldn't contain any paths the first time the page was rendered.
@@ -80,13 +80,13 @@ export function PromptPage({
   const chunks = extractCriticalToChunks(renderToString(content));
   const emotionStyles = constructStyleTagsFromChunks(chunks);
 
-  const uiPublicURL = `${basePath.serverBasePath}/ui`;
+  const coreAssetsUrl = `${basePath.serverBasePath}/node_modules/${ASSETS_DIR}`;
   const regularBundlePath = `${basePath.serverBasePath}/${buildNumber}/bundles`;
   const styleSheetPaths = [
     `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
     `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename('v8')}`,
     `${basePath.serverBasePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-    `${basePath.serverBasePath}/ui/legacy_light_theme.css`,
+    `${coreAssetsUrl}/legacy_light_theme.css`,
   ];
 
   return (
@@ -98,10 +98,10 @@ export function PromptPage({
         {styleSheetPaths.map((path) => (
           <link href={path} rel="stylesheet" key={path} />
         ))}
-        <Fonts url={uiPublicURL} />
+        <Fonts url={FONTS_DIR} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
-        <link rel="alternate icon" type="image/png" href={`${uiPublicURL}/favicons/favicon.png`} />
-        <link rel="icon" type="image/svg+xml" href={`${uiPublicURL}/favicons/favicon.svg`} />
+        <link rel="alternate icon" type="image/png" href={`${FAVICONS_DIR}/favicon.png`} />
+        <link rel="icon" type="image/svg+xml" href={`${FAVICONS_DIR}/favicon.svg`} />
         {scriptPaths.map((path) => (
           <script src={basePath.prepend(path)} key={path} />
         ))}
