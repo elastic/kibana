@@ -149,10 +149,16 @@ export interface BaseState extends ControlState {
    * DocLinks for savedObjects. to reference online documentation
    */
   readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
+  readonly waitForMigrationCompletion: boolean;
 }
 
 export interface InitState extends BaseState {
   readonly controlState: 'INIT';
+}
+
+export interface WaitForMigrationCompletionState extends BaseState {
+  /** Wait until another instance completes the migration */
+  readonly controlState: 'WAIT_FOR_MIGRATION_COMPLETION';
 }
 
 export interface PostInitState extends BaseState {
@@ -430,6 +436,7 @@ export interface LegacyDeleteState extends LegacyBaseState {
 export type State = Readonly<
   | FatalState
   | InitState
+  | WaitForMigrationCompletionState
   | DoneState
   | WaitForYellowSourceState
   | CheckUnknownDocumentsState
