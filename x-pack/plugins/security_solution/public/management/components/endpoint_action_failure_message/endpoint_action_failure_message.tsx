@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { endpointActionResponseCodes } from '../endpoint_responder/endpoint_action_response_codes';
+import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_action_response_codes';
 import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
 
 interface EndpointActionFailureMessageProps {
