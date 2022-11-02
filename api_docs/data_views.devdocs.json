@@ -4908,10 +4908,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4938,8 +4938,10 @@
                 "id": "def-public.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -12255,10 +12257,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -12285,8 +12287,10 @@
                 "id": "def-server.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -20235,10 +20239,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20265,8 +20269,10 @@
                 "id": "def-common.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -25377,7 +25383,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; delete: (indexPatternId: string) => Promise<{}>; create: ({ id, name, title, ...restOfSpec }: ",
+          ">; delete: (indexPatternId: string) => Promise<{}>; create: (spec: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
