@@ -13,6 +13,7 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 describe('importQuerySchema', () => {
   test('it should validate proper schema', () => {
     const payload: ImportQuerySchema = {
+      as_new_list: false,
       overwrite: true,
       overwrite_exceptions: true,
     };
@@ -26,6 +27,7 @@ describe('importQuerySchema', () => {
 
   test('it should NOT validate a non boolean value for "overwrite"', () => {
     const payload: Omit<ImportQuerySchema, 'overwrite'> & { overwrite: string } = {
+      as_new_list: false,
       overwrite: 'wrong',
       overwrite_exceptions: true,
     };
@@ -43,6 +45,7 @@ describe('importQuerySchema', () => {
     const payload: Omit<ImportQuerySchema, 'overwrite_exceptions'> & {
       overwrite_exceptions: string;
     } = {
+      as_new_list: false,
       overwrite: true,
       overwrite_exceptions: 'wrong',
     };

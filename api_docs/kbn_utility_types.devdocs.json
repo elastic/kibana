@@ -456,16 +456,16 @@
             "pluginId": "@kbn/utility-types",
             "scope": "server",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.JsonArray",
-            "text": "JsonArray"
+            "section": "def-server.JsonObject",
+            "text": "JsonObject"
           },
           " | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "server",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.JsonObject",
-            "text": "JsonObject"
+            "section": "def-server.JsonArray",
+            "text": "JsonArray"
           },
           " | null"
         ],

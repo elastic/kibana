@@ -434,7 +434,7 @@ describe('data telemetry collection tasks', () => {
         }
       });
 
-      expect(await task?.executor({ search } as any)).toEqual({
+      expect(await task?.executor({ search, indices } as any)).toEqual({
         cardinality: {
           client: { geo: { country_iso_code: { rum: { '1d': 5 } } } },
           transaction: { name: { all_agents: { '1d': 3 }, rum: { '1d': 1 } } },

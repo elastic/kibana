@@ -84,8 +84,8 @@
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
 /src/plugins/dashboard/public/application/embeddable/viewport/print_media @elastic/kibana-app-services
-x-pack/plugins/files @elastic/kibana-app-services
-x-pack/examples/files_example @elastic/kibana-app-services
+/src/plugins/files @elastic/kibana-app-services
+/examples/files_example @elastic/kibana-app-services
 /x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 /test/plugin_functional/test_suites/panel_actions @elastic/kibana-app-services
 /test/plugin_functional/test_suites/data_plugin @elastic/kibana-app-services
@@ -205,6 +205,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/ml-ui
 /x-pack/test/screenshot_creation/apps/ml_docs @elastic/ml-ui
 /x-pack/test/screenshot_creation/services/ml_screenshots.ts @elastic/ml-ui
+/docs/api/machine-learning/ @elastic/mlr-docs
 
 # Additional plugins and packages maintained by the ML team.
 /x-pack/plugins/aiops/ @elastic/ml-ui
@@ -352,6 +353,8 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/functional/services/cases/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops
 /x-pack/test/api_integration/apis/cases/ @elastic/response-ops
+/docs/api/cases @elastic/mlr-docs
+/x-pack/plugins/cases/docs/openapi @elastic/mlr-docs
 
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
@@ -782,6 +785,12 @@ packages/core/integrations/core-integrations-browser-mocks @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-browser @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-browser-internal @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-browser-mocks @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-server @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-server-internal @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-server-mocks @elastic/kibana-core
+packages/core/logging/core-logging-browser-internal @elastic/kibana-core
+packages/core/logging/core-logging-browser-mocks @elastic/kibana-core
+packages/core/logging/core-logging-common-internal @elastic/kibana-core
 packages/core/logging/core-logging-server @elastic/kibana-core
 packages/core/logging/core-logging-server-internal @elastic/kibana-core
 packages/core/logging/core-logging-server-mocks @elastic/kibana-core
@@ -805,6 +814,9 @@ packages/core/plugins/core-plugins-base-server-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-browser @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-mocks @elastic/kibana-core
+packages/core/plugins/core-plugins-server @elastic/kibana-core
+packages/core/plugins/core-plugins-server-internal @elastic/kibana-core
+packages/core/plugins/core-plugins-server-mocks @elastic/kibana-core
 packages/core/preboot/core-preboot-server @elastic/kibana-core
 packages/core/preboot/core-preboot-server-internal @elastic/kibana-core
 packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core

@@ -28,12 +28,25 @@ const containsWildcard = (roles: string[]) => roles.includes(NODE_WILDCARD_CHAR)
  */
 export interface InternalNodeServicePreboot {
   /**
-   * Retrieve the Kibana instance uuid.
+   * The Kibana process can take on specialised roles via the `node.roles` config.
+   *
+   * The roles can be used by plugins to adjust their behavior based
+   * on the way the Kibana process has been configured.
    */
   roles: NodeRoles;
 }
 
-interface PrebootDeps {
+export interface InternalNodeServiceStart {
+  /**
+   * The Kibana process can take on specialised roles via the `node.roles` config.
+   *
+   * The roles can be used by plugins to adjust their behavior based
+   * on the way the Kibana process has been configured.
+   */
+  roles: NodeRoles;
+}
+
+export interface PrebootDeps {
   loggingSystem: ILoggingSystem;
 }
 
@@ -41,6 +54,7 @@ interface PrebootDeps {
 export class NodeService {
   private readonly configService: IConfigService;
   private readonly log: Logger;
+  private roles?: NodeRoles;
 
   constructor(core: CoreContext) {
     this.configService = core.configService;
@@ -52,11 +66,20 @@ export class NodeService {
     loggingSystem.setGlobalContext({ service: { node: { roles } } });
     this.log.info(`Kibana process configured with roles: [${roles.join(', ')}]`);
 
+    this.roles = NODE_ACCEPTED_ROLES.reduce((acc, curr) => {
+      return { ...acc, [camelCase(curr)]: roles.includes(curr) };
+    }, {} as NodeRoles);
+
     return {
-      roles: NODE_ACCEPTED_ROLES.reduce((acc, curr) => {
-        return { ...acc, [camelCase(curr)]: roles.includes(curr) };
-      }, {} as NodeRoles),
+      roles: this.roles,
     };
+  }
+
+  public start(): InternalNodeServiceStart {
+    if (this.roles == null) {
+      throw new Error('NodeService#start() can only be called after NodeService#preboot()');
+    }
+    return { roles: this.roles };
   }
 
   public stop() {
