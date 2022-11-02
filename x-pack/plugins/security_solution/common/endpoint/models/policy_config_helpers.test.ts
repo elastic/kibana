@@ -19,11 +19,6 @@ describe('Policy Config helpers', () => {
     it('does not enable supported fields', () => {
       const defaultPolicy: PolicyConfig = policyFactory();
 
-      const notSupported: PolicyConfig['windows']['memory_protection'] = {
-        mode: ProtectionModes.off,
-        supported: false,
-      };
-
       const inputPolicyWithoutSupportedProtections: PolicyConfig = {
         ...defaultPolicy,
         windows: {
@@ -39,26 +34,6 @@ describe('Policy Config helpers', () => {
         },
         linux: {
           ...defaultPolicy.linux,
-          memory_protection: notSupported,
-          behavior_protection: notSupported,
-        },
-      };
-
-      const expectedPolicyWithoutSupportedProtections: PolicyConfig = {
-        ...eventsOnlyPolicy,
-        windows: {
-          ...eventsOnlyPolicy.windows,
-          memory_protection: notSupported,
-          behavior_protection: notSupported,
-          ransomware: notSupported,
-        },
-        mac: {
-          ...eventsOnlyPolicy.mac,
-          memory_protection: notSupported,
-          behavior_protection: notSupported,
-        },
-        linux: {
-          ...eventsOnlyPolicy.linux,
           memory_protection: notSupported,
           behavior_protection: notSupported,
         },
@@ -111,6 +86,14 @@ describe('Policy Config helpers', () => {
       };
 
       expect(disableProtections(inputPolicy)).toEqual<PolicyConfig>(expectedPolicy);
+    });
+
+    describe('protection support', () => {
+      it('disables protection support if needed', () => {
+        expect(disableProtections(policyFactory(), true)).toEqual<PolicyConfig>(
+          expectedPolicyWithoutSupportedProtections
+        );
+      });
     });
   });
 });
@@ -171,5 +154,30 @@ export const eventsOnlyPolicy: PolicyConfig = {
       memory_protection: { message: '', enabled: false },
     },
     logging: { file: 'info' },
+  },
+};
+
+const notSupported: PolicyConfig['windows']['memory_protection'] = {
+  mode: ProtectionModes.off,
+  supported: false,
+};
+
+const expectedPolicyWithoutSupportedProtections: PolicyConfig = {
+  ...eventsOnlyPolicy,
+  windows: {
+    ...eventsOnlyPolicy.windows,
+    memory_protection: notSupported,
+    behavior_protection: notSupported,
+    ransomware: notSupported,
+  },
+  mac: {
+    ...eventsOnlyPolicy.mac,
+    memory_protection: notSupported,
+    behavior_protection: notSupported,
+  },
+  linux: {
+    ...eventsOnlyPolicy.linux,
+    memory_protection: notSupported,
+    behavior_protection: notSupported,
   },
 };
