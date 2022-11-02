@@ -40,104 +40,50 @@ function Wrapper({ children }: { children?: ReactNode }) {
 const renderOptions = { wrapper: Wrapper };
 
 describe('Most used chart with Lens', () => {
+  const props = {
+    metric: HOST_OS_VERSION as MostUsedMetricTypes,
+    filters: [
+      {
+        meta: {},
+        query: {
+          term: {
+            'processor.event': 'transaction',
+          },
+        },
+      },
+      {
+        meta: {},
+        query: {
+          term: {
+            'service.name': 'opbeans-swift',
+          },
+        },
+      },
+      {
+        meta: {},
+        query: {
+          term: {
+            'transaction.type': 'request',
+          },
+        },
+      },
+    ],
+  };
   test('gets lens attributes', () => {
-    const props = {
-      metric: HOST_OS_VERSION as MostUsedMetricTypes,
-      filters: [
-        {
-          meta: {},
-          query: {
-            term: {
-              'processor.event': 'transaction',
-            },
-          },
-        },
-        {
-          meta: {},
-          query: {
-            term: {
-              'service.name': 'opbeans-swift',
-            },
-          },
-        },
-        {
-          meta: {},
-          query: {
-            term: {
-              'transaction.type': 'request',
-            },
-          },
-        },
-      ],
-    };
-
     expect(getLensAttributes(props)).toMatchSnapshot();
   });
 
   test('Renders most used chart with Lens', () => {
     const start = '2022-10-30T20%3A52%3A47.080Z';
     const end = '2022-10-31T20%3A52%3A47.080Z';
-    const props = {
-      metric: HOST_OS_VERSION as MostUsedMetricTypes,
-      filters: [
-        {
-          meta: {},
-          query: {
-            term: {
-              'processor.event': 'transaction',
-            },
-          },
-        },
-        {
-          meta: {},
-          query: {
-            term: {
-              'service.name': 'opbeans-swift',
-            },
-          },
-        },
-        {
-          meta: {},
-          query: {
-            term: {
-              'transaction.type': 'request',
-            },
-          },
-        },
-      ],
-    };
+
     render(
       <MostUsedChart
         title="Most used os version"
         start={start}
         end={end}
         metric={HOST_OS_VERSION as MostUsedMetricTypes}
-        filters={[
-          {
-            meta: {},
-            query: {
-              term: {
-                'processor.event': 'transaction',
-              },
-            },
-          },
-          {
-            meta: {},
-            query: {
-              term: {
-                'service.name': 'opbeans-swift',
-              },
-            },
-          },
-          {
-            meta: {},
-            query: {
-              term: {
-                'transaction.type': 'request',
-              },
-            },
-          },
-        ]}
+        filters={props.filters}
       />,
       renderOptions
     );

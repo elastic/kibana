@@ -28,10 +28,14 @@ export function getLensAttributes({
   kuery?: string;
 }): TypedLensByValueInput['attributes'] {
   const metricId = metric.replaceAll('.', '-');
+
+  const columnA = 'termsColumn';
+  const columnB = 'countColumn';
+
   const dataLayer: PersistedIndexPatternLayer = {
-    columnOrder: ['termsColumn', 'countColumn'],
+    columnOrder: [columnA, columnB],
     columns: {
-      termsColumn: {
+      [columnA]: {
         label: i18n.translate(
           'xpack.apm.serviceOverview.lensFlyout.topValues',
           {
@@ -51,12 +55,12 @@ export function getLensAttributes({
           size: BUCKET_SIZE,
           orderBy: {
             type: 'column',
-            columnId: 'countColumn',
+            columnId: columnB,
           },
           orderDirection: 'desc',
         },
       } as TermsIndexPatternColumn,
-      countColumn: {
+      [columnB]: {
         label: i18n.translate(
           'xpack.apm.serviceOverview.lensFlyout.countRecords',
           {
@@ -88,8 +92,8 @@ export function getLensAttributes({
         layers: [
           {
             layerId: metricId,
-            primaryGroups: ['termsColumn'],
-            metric: 'countColumn',
+            primaryGroups: [columnA],
+            metric: columnB,
             categoryDisplay: 'default',
             legendDisplay: 'hide',
             numberDisplay: 'percent',

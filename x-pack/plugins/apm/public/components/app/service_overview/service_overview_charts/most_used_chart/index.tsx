@@ -97,12 +97,10 @@ export function MostUsedChart({
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h2>{title}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <h2>{title}</h2>
+        </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
         <EmbeddableComponent
