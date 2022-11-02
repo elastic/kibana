@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore
 class UnreachableError extends Error {
   constructor(val: never) {
     super(`Unreachable: ${val}`);

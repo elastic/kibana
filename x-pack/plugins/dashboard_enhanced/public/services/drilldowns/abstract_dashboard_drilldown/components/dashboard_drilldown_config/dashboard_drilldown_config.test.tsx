@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// @ts-ignore
+
 // Need to wait for https://github.com/elastic/eui/pull/3173/
 // to unit test this component
 // basic interaction is covered in end-to-end tests

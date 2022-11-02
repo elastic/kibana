@@ -8,6 +8,9 @@
 
 // TODO: implement this on the server
 
+// this is a skip for the errors created when typechecking with isolatedModules
+export {};
+
 // import { StartServicesAccessor } from '@kbn/core/server';
 // import { EventAnnotationStartDependencies } from '../plugin';
 

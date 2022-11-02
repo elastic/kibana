@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// @ts-ignore
 module.exports = function ({
   entries,
 }: {

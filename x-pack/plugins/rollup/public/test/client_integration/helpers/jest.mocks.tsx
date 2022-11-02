@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
   debounce: (fn: () => unknown) => fn,

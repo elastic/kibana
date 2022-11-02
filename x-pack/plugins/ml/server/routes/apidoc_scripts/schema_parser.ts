@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore
 function parse(content?: string) {
   const schema = typeof content === 'string' && content.trim();
 

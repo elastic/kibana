@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore
 jest.mock('../../hooks', () => {
   return {
     ...jest.requireActual('../../hooks'),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore
 jest.mock('../../..', () => ({
   EnginesLogic: { actions: { deleteEngine: jest.fn() } },
 }));

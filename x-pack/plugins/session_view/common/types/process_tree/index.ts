@@ -12,12 +12,12 @@ export interface AlertStatusEventEntityIdMap {
   };
 }
 
-export const enum EventKind {
+export enum EventKind {
   event = 'event',
   signal = 'signal',
 }
 
-export const enum EventAction {
+export enum EventAction {
   fork = 'fork',
   exec = 'exec',
   end = 'end',

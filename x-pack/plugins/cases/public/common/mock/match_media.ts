@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore
 window.matchMedia = jest.fn().mockImplementation((query) => ({
   matches: false,
   media: query,

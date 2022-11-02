@@ -32,7 +32,7 @@ export {
 } from '../common';
 
 export {
-  ControlGroupContainer,
+  type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
   type ControlGroupOutput,
@@ -40,13 +40,13 @@ export {
 
 export {
   OptionsListEmbeddableFactory,
-  OptionsListEmbeddable,
+  type OptionsListEmbeddable,
   type OptionsListEmbeddableInput,
 } from './options_list';
 
 export {
   RangeSliderEmbeddableFactory,
-  RangeSliderEmbeddable,
+  type RangeSliderEmbeddable,
   type RangeSliderEmbeddableInput,
 } from './range_slider';
 

@@ -16,7 +16,7 @@ import {
 } from './schema';
 
 // config definition
-export const enum CasesWebhookMethods {
+export enum CasesWebhookMethods {
   PATCH = 'patch',
   POST = 'post',
   PUT = 'put',

@@ -1199,6 +1199,8 @@
     "strict": true,
     // for now, don't use unknown in catch
     "useUnknownInCatchVariables": false,
+    // enabled to point out not supported features when emitting in an isolated module environment
+    "isolatedModules": true,
     // disabled for better IDE support, enabled when running the type_check script
     "composite": false,
     // enabled for improved performance
@@ -1262,6 +1264,6 @@
   "exclude": [
     "**/node_modules",
     "**/.*/",
-    "**/target/types"
+    "**/target"
   ]
 }

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// @ts-ignore
 jest.mock('../../../../contexts/editor_context/editor_registry', () => ({
   instance: {
     setInputEditor: () => {},

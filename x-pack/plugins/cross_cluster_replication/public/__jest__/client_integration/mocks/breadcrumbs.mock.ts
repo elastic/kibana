@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore
 jest.mock('../../../app/services/breadcrumbs', () => {
   const original = jest.requireActual('../../../app/services/breadcrumbs');
 

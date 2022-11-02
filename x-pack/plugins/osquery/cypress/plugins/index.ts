@@ -15,6 +15,9 @@
 // https://on.cypress.io/plugins-guide
 // ***********************************************************
 
+// this is a skip for the errors created when typechecking with isolatedModules
+export {};
+
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 

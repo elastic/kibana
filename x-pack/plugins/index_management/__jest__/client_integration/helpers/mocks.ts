@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore
 (window as any).Worker = class Worker {
   onmessage() {}
   postMessage() {}

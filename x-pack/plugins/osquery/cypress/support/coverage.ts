@@ -10,6 +10,7 @@
 // / <reference types="cypress" />
 // @ts-check
 
+// @ts-ignore
 const dayjs = require('dayjs');
 const duration = require('dayjs/plugin/duration');
 // const { filterSpecsFromCoverage } = require('./support-utils');
