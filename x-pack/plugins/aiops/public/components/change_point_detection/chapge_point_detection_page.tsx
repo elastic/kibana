@@ -23,7 +23,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
-import { css } from '@emotion/react';
 import { SearchBarWrapper } from './search_bar';
 import { useChangePontDetectionContext } from './change_point_detection_context';
 import { MetricFieldSelector } from './metric_field_selector';
@@ -81,6 +80,7 @@ export const ChangePointDetectionPage: FC = () => {
       />
 
       <EuiSpacer size="m" />
+
       <EuiFlexGroup alignItems={'center'}>
         <EuiFlexItem grow={false}>
           <FunctionPicker value={requestParams.fn} onChange={setFn} />
@@ -91,29 +91,25 @@ export const ChangePointDetectionPage: FC = () => {
         <EuiFlexItem grow={false}>
           <SplitFieldSelector value={requestParams.splitField} onChange={setSplitField} />
         </EuiFlexItem>
+
+        <EuiFlexItem css={{ visibility: progress === 100 ? 'hidden' : 'visible' }}>
+          <EuiProgress
+            label={
+              <FormattedMessage
+                id="xpack.aiops.changePointDetection.progressBarLabel"
+                defaultMessage="Fetching change points"
+              />
+            }
+            value={progress}
+            max={100}
+            valueText
+            size="m"
+          />
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-
-      <div
-        css={css`
-          visibility: ${progress === 100 ? 'hidden' : 'visible'};
-        `}
-      >
-        <EuiProgress
-          label={
-            <FormattedMessage
-              id="xpack.aiops.changePointDetection.progressBarLabel"
-              defaultMessage="Fetching change points"
-            />
-          }
-          value={progress}
-          max={100}
-          valueText
-          size="m"
-        />
-        <EuiSpacer size="m" />
-      </div>
 
       {annotations.length === 0 && progress === 100 ? (
         <EuiCallOut
@@ -135,7 +131,7 @@ export const ChangePointDetectionPage: FC = () => {
         </EuiCallOut>
       ) : null}
 
-      <EuiFlexGrid columns={annotations.length >= 2 ? 2 : 1} responsive gutterSize={'s'}>
+      <EuiFlexGrid columns={annotations.length >= 2 ? 2 : 1} responsive gutterSize={'m'}>
         {annotations.map((v) => {
           return (
             <EuiFlexItem key={v.group_field}>
