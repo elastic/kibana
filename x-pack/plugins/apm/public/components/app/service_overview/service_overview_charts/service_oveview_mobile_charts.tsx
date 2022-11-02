@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -50,7 +50,7 @@ export function ServiceOverviewMobileCharts({
       netConnectionType,
       device,
       osVersion,
-      appVersion
+      appVersion,
     },
   } = useApmParams('/services/{serviceName}/overview');
 
@@ -151,6 +151,12 @@ export function ServiceOverviewMobileCharts({
       </EuiFlexItem>
 
       <EuiFlexItem>
+        <EuiPanel hasBorder={true}>
+          <LatencyMap filters={filters} />
+        </EuiPanel>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
         <EuiFlexGroup direction={rowDirection} gutterSize="s">
           {/* Device */}
           <EuiFlexItem>
@@ -176,7 +182,6 @@ export function ServiceOverviewMobileCharts({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-
       <EuiFlexItem>
         <EuiFlexGroup direction={rowDirection} gutterSize="s">
           {/* OS Version */}
@@ -202,10 +207,6 @@ export function ServiceOverviewMobileCharts({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiPanel hasBorder={true}>
-          <LatencyMap filters={filters} />
-        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -6,8 +6,8 @@
  */
 import { EuiTitle, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../../../../../plugin';
@@ -32,7 +32,7 @@ export function MostUsedChart({
   start: string;
   end: string;
   kuery: string;
-  filters: QueryDslQueryContainer[];
+  filters: Filter[];
   metric: MostUsedMetric;
   bucketSize?: number;
 }) {
