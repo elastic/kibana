@@ -40,9 +40,11 @@ for (const deployment of prDeployments) {
       console.log(`Pull Request #${prNumber} is no longer open, will delete associated deployment`);
       deploymentsToPurge.push(deployment);
     } else if (
-      !Boolean(pullRequest.labels.filter((label: any) =>
-        /^ci:(deploy-cloud|cloud-deploy|cloud-redeploy)$/.test(label.name)
-      ).length)
+      !Boolean(
+        pullRequest.labels.filter((label: any) =>
+          /^ci:(deploy-cloud|cloud-deploy|cloud-redeploy)$/.test(label.name)
+        ).length
+      )
     ) {
       console.log(
         `Pull Request #${prNumber} no longer has a cloud deployment label, will delete associated deployment`
