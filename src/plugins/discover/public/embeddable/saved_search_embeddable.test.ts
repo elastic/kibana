@@ -21,6 +21,7 @@ import { ReactWrapper } from 'enzyme';
 import { SHOW_FIELD_STATISTICS } from '../../common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { VIEW_MODE } from '../components/view_mode_toggle';
+import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 
 let discoverComponent: ReactWrapper;
 
@@ -109,6 +110,47 @@ describe('saved search embeddable', () => {
   afterEach(() => {
     mountpoint.remove();
     jest.resetAllMocks();
+  });
+
+  it('should update input correctly', async () => {
+    const { embeddable } = createEmbeddable();
+    jest.spyOn(embeddable, 'updateOutput');
+
+    embeddable.render(mountpoint);
+    await waitOneTick();
+
+    const searchProps = discoverComponent.find(SavedSearchEmbeddableComponent).prop('searchProps');
+
+    debugger;
+    searchProps.onAddColumn!('bytes');
+    await waitOneTick();
+    expect(searchProps.columns).toEqual(['message', 'extension', 'bytes']);
+
+    searchProps.onRemoveColumn!('bytes');
+    await waitOneTick();
+    expect(searchProps.columns).toEqual(['message', 'extension']);
+
+    searchProps.onSetColumns!(['message', 'bytes', 'extension'], false);
+    await waitOneTick();
+    expect(searchProps.columns).toEqual(['message', 'bytes', 'extension']);
+
+    searchProps.onMoveColumn!('bytes', 2);
+    await waitOneTick();
+    expect(searchProps.columns).toEqual(['message', 'extension', 'bytes']);
+
+    expect(searchProps.rowHeightState).toEqual(30);
+    searchProps.onUpdateRowHeight!(40);
+    await waitOneTick();
+    expect(searchProps.rowHeightState).toEqual(40);
+
+    expect(searchProps.rowsPerPageState).toEqual(50);
+    searchProps.onUpdateRowsPerPage!(100);
+    await waitOneTick();
+    expect(searchProps.rowsPerPageState).toEqual(100);
+
+    searchProps.onFilter!({ name: 'customer_id', type: 'string', scripted: false }, [17], '+');
+    await waitOneTick();
+    expect(executeTriggerActions).toHaveBeenCalled();
   });
 
   it('should render saved search embeddable when successfully loading data', async () => {
