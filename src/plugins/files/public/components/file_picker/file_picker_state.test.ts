@@ -32,7 +32,7 @@ describe('FilePickerState', () => {
       client: filesClient,
       pageSize: 20,
       kind: 'test',
-      uploadMultiple: true,
+      selectMultiple: true,
     });
   });
   it('starts off empty', () => {
@@ -188,7 +188,7 @@ describe('FilePickerState', () => {
         client: filesClient,
         pageSize: 20,
         kind: 'test',
-        uploadMultiple: false,
+        selectMultiple: false,
       });
     });
     it('allows only one file to be selected', () => {

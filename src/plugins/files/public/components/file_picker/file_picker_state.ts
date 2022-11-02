@@ -227,13 +227,13 @@ interface CreateFilePickerArgs {
   client: FilesClient;
   kind: string;
   pageSize: number;
-  uploadMultiple: boolean;
+  selectMultiple: boolean;
 }
 export const createFilePickerState = ({
   pageSize,
   client,
   kind,
-  uploadMultiple,
+  selectMultiple,
 }: CreateFilePickerArgs): FilePickerState => {
-  return new FilePickerState(client, kind, pageSize, uploadMultiple);
+  return new FilePickerState(client, kind, pageSize, selectMultiple);
 };
