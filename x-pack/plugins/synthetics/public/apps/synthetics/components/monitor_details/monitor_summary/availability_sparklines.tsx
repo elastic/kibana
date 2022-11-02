@@ -8,16 +8,21 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes, useTheme } from '@kbn/observability-plugin/public';
-import { useParams } from 'react-router-dom';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
-export const AvailabilitySparklines = () => {
+interface AvailabilitySparklinesProps {
+  from: string;
+  to: string;
+}
+
+export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
   const {
     services: {
       observability: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const monitorId = useMonitorQueryId();
 
   const theme = useTheme();
 
@@ -31,7 +36,7 @@ export const AvailabilitySparklines = () => {
         attributes={[
           {
             seriesType: 'area',
-            time: { from: 'now-30d/d', to: 'now' },
+            time: props,
             name: 'Monitor availability',
             dataType: 'synthetics',
             selectedMetricField: 'monitor_availability',

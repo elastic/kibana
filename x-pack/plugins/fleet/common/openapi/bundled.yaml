@@ -154,6 +154,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_categories_response'
       operationId: get-package-categories
+    parameters:
+      - in: query
+        name: prerelease
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Whether to include prerelease packages in categories count (e.g. beta,
+          rc, preview) 
+      - in: query
+        name: experimental
+        deprecated: true
+        schema:
+          type: boolean
+          default: false
+      - in: query
+        name: include_policy_templates
+        schema:
+          type: boolean
+          default: false
   /epm/packages/limited:
     get:
       summary: Packages - Get limited list
@@ -196,6 +216,24 @@ paths:
           headers. If you don't need up-to-date installation info for a package,
           and are querying for a list of available packages, providing this flag
           can improve performance substantially.
+      - in: query
+        name: prerelease
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Whether to return prerelease versions of packages (e.g. beta, rc,
+          preview) 
+      - in: query
+        name: experimental
+        deprecated: true
+        schema:
+          type: boolean
+          default: false
+      - in: query
+        name: category
+        schema:
+          type: string
   /epm/packages/_bulk:
     post:
       summary: Packages - Bulk install
@@ -735,7 +773,7 @@ paths:
       parameters:
         - schema:
             type: array
-          name: agentsId
+          name: agentsIds
           in: query
           required: true
   /agents:
@@ -2292,7 +2330,7 @@ paths:
   /fleet_server_hosts:
     get:
       summary: Fleet Server Hosts - List
-      description: Return a list of Fleet server host
+      description: Return a list of Fleet server hosts
       tags: []
       responses:
         '200':
@@ -2617,6 +2655,8 @@ components:
           type: array
           items:
             type: string
+        prerelease_integrations_enabled:
+          type: boolean
       required:
         - fleet_server_hosts
         - id

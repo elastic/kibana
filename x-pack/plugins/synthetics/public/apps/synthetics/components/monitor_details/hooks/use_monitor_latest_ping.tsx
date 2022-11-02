@@ -7,7 +7,8 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getMonitorRecentPingsAction, selectLatestPing, selectPingsLoading } from '../../../state';
+import { ConfigKey } from '../../../../../../common/runtime_types';
+import { getMonitorLastRunAction, selectLastRunMetadata } from '../../../state';
 import { useSelectedLocation } from './use_selected_location';
 import { useSelectedMonitor } from './use_selected_monitor';
 
@@ -25,31 +26,34 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const monitorId = params?.monitorId ?? monitor?.id;
   const locationLabel = params?.locationLabel ?? location?.label;
 
-  const latestPing = useSelector(selectLatestPing);
-  const pingsLoading = useSelector(selectPingsLoading);
+  const { data: latestPing, loading } = useSelector(selectLastRunMetadata);
 
-  const isUpToDate =
-    latestPing &&
-    latestPing.monitor.id === monitorId &&
-    latestPing.observer?.geo?.name === locationLabel;
+  const latestPingId = latestPing?.monitor.id;
+
+  const isIdSame =
+    latestPingId === monitorId || latestPingId === monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID];
+
+  const isLocationSame = latestPing?.observer?.geo?.name === locationLabel;
+
+  const isUpToDate = isIdSame && isLocationSame;
 
   useEffect(() => {
     if (monitorId && locationLabel && !isUpToDate) {
-      dispatch(getMonitorRecentPingsAction.get({ monitorId, locationId: locationLabel }));
+      dispatch(getMonitorLastRunAction.get({ monitorId, locationId: locationLabel }));
     }
   }, [dispatch, monitorId, locationLabel, isUpToDate]);
 
   if (!monitorId || !locationLabel) {
-    return { loading: pingsLoading, latestPing: null };
+    return { loading, latestPing: undefined };
   }
 
   if (!latestPing) {
-    return { loading: pingsLoading, latestPing: null };
+    return { loading, latestPing: undefined };
   }
 
-  if (latestPing.monitor.id !== monitorId || latestPing.observer?.geo?.name !== locationLabel) {
-    return { loading: pingsLoading, latestPing: null };
+  if (!isIdSame || !isLocationSame) {
+    return { loading, latestPing: undefined };
   }
 
-  return { loading: pingsLoading, latestPing };
+  return { loading, latestPing };
 };

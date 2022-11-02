@@ -87,7 +87,12 @@ import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
-import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
+import {
+  getActiveDatasourceIdFromDoc,
+  getIndexPatternsObjects,
+  getSearchWarningMessages,
+  inferTimeField,
+} from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import { convertDataViewIntoLensIndexPattern } from '../data_views_service/loader';
 
@@ -531,21 +536,30 @@ export class Embeddable
 
   private handleWarnings(adapters?: Partial<DefaultInspectorAdapters>) {
     const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (!activeDatasourceId || !adapters?.requests) return;
+
+    if (!activeDatasourceId || !adapters?.requests) {
+      return;
+    }
+
     const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const warnings: React.ReactNode[] = [];
-    this.deps.data.search.showWarnings(adapters.requests, (warning) => {
-      const warningMessage = activeDatasource.getSearchWarningMessages?.(
-        docDatasourceState,
-        warning
-      );
 
-      warnings.push(...(warningMessage || []));
-      if (warningMessage && warningMessage.length) return true;
-    });
-    if (warnings && this.warningDomNode) {
-      render(<Warnings warnings={warnings} />, this.warningDomNode);
+    const requestWarnings = getSearchWarningMessages(
+      adapters.requests,
+      activeDatasource,
+      docDatasourceState,
+      {
+        searchService: this.deps.data.search,
+      }
+    );
+
+    if (requestWarnings.length && this.warningDomNode) {
+      render(
+        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <Warnings warnings={requestWarnings} />
+        </KibanaThemeProvider>,
+        this.warningDomNode
+      );
     }
   }
 
@@ -677,6 +691,7 @@ export class Embeddable
           renderMode={input.renderMode}
           syncColors={input.syncColors}
           syncTooltips={input.syncTooltips}
+          syncCursor={input.syncCursor}
           hasCompatibleActions={this.hasCompatibleActions}
           className={input.className}
           style={input.style}

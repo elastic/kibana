@@ -33,6 +33,9 @@ import { NoPrivilegesPage } from './app/no_privileges';
 import { SecurityPageName } from './app/types';
 import type { InspectResponse, StartedSubPlugins } from './types';
 import { CASES_SUB_PLUGIN_KEY } from './types';
+import { timelineActions } from './timelines/store/timeline';
+import { dataTableActions } from './common/store/data_table';
+import { TableId, TimelineId } from '../common/types';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -165,6 +168,14 @@ export const isDetectionsPath = (pathname: string): boolean => {
   });
 };
 
+export const isAlertDetailsPage = (pathname: string): boolean => {
+  return !!matchPath(pathname, {
+    path: `${ALERTS_PATH}/:detailName/:tabName`,
+    strict: false,
+    exact: true,
+  });
+};
+
 export const isThreatIntelligencePath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
     path: `(${THREAT_INTELLIGENCE_PATH})`,
@@ -273,3 +284,26 @@ export const getField = (ecsData: Ecs, field: string) => {
 
   return value;
 };
+
+export const isTimelineScope = (scopeId: string) =>
+  Object.values(TimelineId).includes(scopeId as unknown as TimelineId);
+export const isInTableScope = (scopeId: string) =>
+  Object.values(TableId).includes(scopeId as unknown as TableId);
+
+export const getScopedActions = (scopeId: string) => {
+  if (isTimelineScope(scopeId)) {
+    return timelineActions;
+  } else if (isInTableScope(scopeId)) {
+    return dataTableActions;
+  }
+};
+
+export const getScopedSelectors = (scopeId: string) => {
+  if (isTimelineScope(scopeId)) {
+    return timelineActions;
+  } else if (isInTableScope(scopeId)) {
+    return dataTableActions;
+  }
+};
+
+export const isActiveTimeline = (timelineId: string) => timelineId === TimelineId.active;

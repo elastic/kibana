@@ -10,15 +10,14 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import type { CasesStatusRequest, CasesStatusResponse } from '../../../common/api';
 import {
-  CasesStatusRequest,
-  CasesStatusResponse,
   excess,
   CasesStatusRequestRt,
   throwErrors,
   CasesStatusResponseRt,
 } from '../../../common/api';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import { constructQueryOptions } from '../utils';
 import { createCaseError } from '../../common/error';

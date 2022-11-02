@@ -121,7 +121,38 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "expressionMetricVis",
+        "id": "def-public.EXPRESSION_METRIC_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "EXPRESSION_METRIC_NAME",
+        "description": [],
+        "signature": [
+          "\"metricVis\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_metric/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionMetricVis",
+        "id": "def-public.EXPRESSION_METRIC_TRENDLINE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "EXPRESSION_METRIC_TRENDLINE_NAME",
+        "description": [],
+        "signature": [
+          "\"metricTrendline\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_metric/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {
@@ -362,6 +393,21 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.trendline",
+            "type": "Object",
+            "tags": [],
+            "label": "trendline",
+            "description": [],
+            "signature": [
+              "TrendlineResult",
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
             "id": "def-common.MetricArguments.subtitle",
             "type": "string",
             "tags": [],
@@ -424,7 +470,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<",
               {
                 "pluginId": "charts",
@@ -460,6 +512,17 @@
             "signature": [
               "number | undefined"
             ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.inspectorTableId",
+            "type": "string",
+            "tags": [],
+            "label": "inspectorTableId",
+            "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -676,6 +739,20 @@
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.trends",
+            "type": "Object",
+            "tags": [],
+            "label": "trends",
+            "description": [],
+            "signature": [
+              "Record<string, { x: number; y: number; }[]> | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -868,6 +945,21 @@
       },
       {
         "parentPluginId": "expressionMetricVis",
+        "id": "def-common.EXPRESSION_METRIC_TRENDLINE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "EXPRESSION_METRIC_TRENDLINE_NAME",
+        "description": [],
+        "signature": [
+          "\"metricTrendline\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_metric/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionMetricVis",
         "id": "def-common.MetricInput",
         "type": "Type",
         "tags": [],
@@ -951,7 +1043,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",

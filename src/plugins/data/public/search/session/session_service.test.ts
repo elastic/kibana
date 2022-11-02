@@ -407,6 +407,59 @@ describe('Session service', () => {
     await expect(() => sessionService.save()).rejects.toMatchInlineSnapshot(`[Error: Haha]`);
   });
 
+  test('save() triggers search polling to extend searches', async () => {
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getLocatorData: async () => ({
+        id: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+
+    sessionService.start();
+    const abort = jest.fn();
+    const poll = jest.fn(() => Promise.resolve());
+
+    const search1 = sessionService.trackSearch({ poll, abort });
+    search1.complete();
+
+    const search2 = sessionService.trackSearch({ poll, abort });
+    search2.error();
+
+    sessionService.trackSearch({ poll, abort });
+
+    expect(poll).toHaveBeenCalledTimes(0);
+
+    await sessionService.save();
+
+    expect(poll).toHaveBeenCalledTimes(2); // for completed and in-progress
+  });
+
+  test('save() calls onSavingSession()', async () => {
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getLocatorData: async () => ({
+        id: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+
+    sessionService.start();
+    const abort = jest.fn();
+    const poll = jest.fn(() => Promise.resolve());
+    const onSavingSession = jest.fn(() => Promise.resolve());
+
+    sessionService.trackSearch({ poll, abort, onSavingSession });
+
+    expect(onSavingSession).toHaveBeenCalledTimes(0);
+
+    await sessionService.save();
+
+    expect(onSavingSession).toHaveBeenCalledTimes(1);
+  });
+
   describe("user doesn't have access to search session", () => {
     beforeAll(() => {
       userHasAccessToSearchSessions = false;
