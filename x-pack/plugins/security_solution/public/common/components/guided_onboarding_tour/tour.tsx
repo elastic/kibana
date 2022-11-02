@@ -18,7 +18,7 @@ import { securityTourConfig, SecurityStepId } from './tour_config';
 export interface TourContextValue {
   activeStep: number;
   endTourStep: (stepId: SecurityStepId) => void;
-  incrementStep: (stepId: SecurityStepId, step?: number) => void;
+  incrementStep: (stepId: SecurityStepId) => void;
   isTourShown: (stepId: SecurityStepId) => boolean;
 }
 
