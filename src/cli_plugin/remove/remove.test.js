@@ -13,7 +13,7 @@ import sinon from 'sinon';
 import globby from 'globby';
 import del from 'del';
 
-import { Logger } from '../lib/logger';
+import { Logger } from '../../cli/logger';
 import { remove } from './remove';
 
 describe('kibana cli', function () {

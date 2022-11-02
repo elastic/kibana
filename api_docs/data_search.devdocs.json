@@ -1460,6 +1460,25 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.SearchResponseWarning",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchResponseWarning",
+        "description": [
+          "\nA warning object for a search response with warnings"
+        ],
+        "signature": [
+          "SearchResponseTimeoutWarning",
+          " | ",
+          "SearchResponseShardFailureWarning"
+        ],
+        "path": "src/plugins/data/public/search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []
