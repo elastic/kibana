@@ -96,7 +96,6 @@ export const parser: Plugin = function () {
             return {
               ...prev,
               [field]: {
-                //field,
                 value,
                 type,
               },
@@ -146,7 +145,11 @@ const OpenInsightInTimeline = (scopeId) => {
       <EuiCallOut title={label} iconType="timeline">
         {isQueryLoading === false ? <p>{`${totalCount} matching events`}</p> : null}
         <p>{description}</p>
-        <InvestigateInTimelineButton asEmptyButton={false} dataProviders={dataProviders}>
+        <InvestigateInTimelineButton
+          asEmptyButton={false}
+          dataProviders={dataProviders}
+          timeRange={oldestTimestamp}
+        >
           {label ??
             i18n.translate('xpack.securitySolution.markdown.insights.openInsightButtonLabel', {
               defaultMessage: 'Open Insight in Timeline',

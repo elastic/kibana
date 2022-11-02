@@ -81,8 +81,13 @@ export const useInsightQuery = ({ dataProviders, scopeId, alertData }: UseInsigh
       limit: 1,
       runtimeMappings: {},
     });
+  const [oldestEvent] = events;
+  const timestamp =
+    oldestEvent && oldestEvent.data && oldestEvent.data.find((d) => d.field === '@timestamp');
+  const oldestTimestamp = timestamp && timestamp.value && timestamp.value[0];
   return {
     isQueryLoading,
     totalCount,
+    oldestTimestamp,
   };
 };

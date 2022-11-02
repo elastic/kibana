@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
@@ -13,6 +13,7 @@ import { useDispatch } from 'react-redux';
 import { sourcererSelectors } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
 import { inputsActions } from '../../../store/inputs';
+import type { TimeRange } from '../../../store/inputs/model';
 import { updateProviders, setFilters } from '../../../../timelines/store/timeline/actions';
 import { sourcererActions } from '../../../store/actions';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
@@ -21,12 +22,14 @@ import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import { getDataProvider } from './use_action_cell_data_provider';
 
 export const InvestigateInTimelineButton: React.FunctionComponent<{
   asEmptyButton: boolean;
   dataProviders: DataProvider[] | null;
   filters?: Filter[] | null;
-}> = ({ asEmptyButton, children, dataProviders, filters, ...rest }) => {
+  timeRange?: string;
+}> = ({ asEmptyButton, children, dataProviders, filters, timeRange, ...rest }) => {
   const dispatch = useDispatch();
 
   const getDataViewsSelector = useMemo(
@@ -45,10 +48,10 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
     timelineType: hasTemplateProviders ? TimelineType.template : TimelineType.default,
   });
 
-  const configureAndOpenTimeline = React.useCallback(() => {
+  const configureAndOpenTimeline = useCallback(() => {
     if (dataProviders || filters) {
       // Reset the current timeline
-      clearTimeline();
+      clearTimeline({ timeRange });
       if (dataProviders) {
         // Update the timeline's providers to match the current prevalence field query
         dispatch(
@@ -79,7 +82,15 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
       // Unlock the time range from the global time range
       dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
     }
-  }, [dataProviders, clearTimeline, dispatch, defaultDataView.id, signalIndexName, filters]);
+  }, [
+    dataProviders,
+    clearTimeline,
+    dispatch,
+    defaultDataView.id,
+    signalIndexName,
+    filters,
+    timeRange,
+  ]);
 
   return asEmptyButton ? (
     <EuiButtonEmpty
