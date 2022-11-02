@@ -456,6 +456,9 @@ export class DiscoverPageObject extends FtrService {
     if (await this.isFieldSelected(field)) {
       return;
     }
+    if (['_score', '_id', '_index'].includes(field)) {
+      await this.testSubjects.click('fieldListGroupedMetaFields'); // expand Meta section
+    }
     await this.clickFieldListItemToggle(field);
     const isLegacyDefault = await this.useLegacyTable();
     if (isLegacyDefault) {

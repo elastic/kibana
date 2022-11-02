@@ -149,7 +149,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
           <ul className="unifiedFieldList__fieldsAccordion__fieldItems">
             {paginatedFields &&
               paginatedFields.map((field, index) => (
-                <Fragment key={field.name}>
+                <Fragment key={getFieldKey(field)}>
                   {renderFieldItem({ field, itemIndex: index, groupIndex, groupName, hideDetails })}
                 </Fragment>
               ))}
@@ -162,3 +162,6 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
 }
 
 export const FieldsAccordion = React.memo(InnerFieldsAccordion) as typeof InnerFieldsAccordion;
+
+export const getFieldKey = (field: FieldListItem): string =>
+  `${field.name}-${field.displayName}-${field.type}`;

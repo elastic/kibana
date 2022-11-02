@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
-import { FieldsAccordion, type FieldsAccordionProps } from './fields_accordion';
+import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
 import type { FieldListGroups, FieldListItem } from '../../types';
 import { ExistenceFetchStatus, FieldsGroupNames } from '../../types';
 import './field_list_grouped.scss';
@@ -189,7 +189,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
             <ul>
               {fieldGroupsToCollapse.flatMap(([key, { fields }]) =>
                 fields.map((field, index) => (
-                  <Fragment key={field.name}>
+                  <Fragment key={getFieldKey(field)}>
                     {renderFieldItem({
                       field,
                       itemIndex: index,
