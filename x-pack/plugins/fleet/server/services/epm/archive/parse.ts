@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import { readFile } from 'fs';
+
+import { promisify } from 'util';
+import path from 'path';
+
 import { merge } from '@kbn/std';
 import yaml from 'js-yaml';
 import { pick, uniq } from 'lodash';
@@ -32,6 +37,7 @@ import { pkgToPkgKey } from '../registry';
 
 import { unpackBufferEntries } from '.';
 
+const readFileAsync = promisify(readFile);
 const MANIFESTS: Record<string, Buffer> = {};
 const MANIFEST_NAME = 'manifest.yml';
 
@@ -136,9 +142,9 @@ export async function generatePackageInfoFromArchiveBuffer(
 ): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
   const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
-  entries.forEach(({ path, buffer }) => {
-    paths.push(path);
-    if (path.endsWith(MANIFEST_NAME) && buffer) MANIFESTS[path] = buffer;
+  entries.forEach(({ path: bufferPath, buffer }) => {
+    paths.push(bufferPath);
+    if (bufferPath.endsWith(MANIFEST_NAME) && buffer) MANIFESTS[bufferPath] = buffer;
   });
 
   return {
@@ -147,17 +153,33 @@ export async function generatePackageInfoFromArchiveBuffer(
   };
 }
 
-function parseAndVerifyArchive(paths: string[]): ArchivePackage {
+/*
+This is a util function for verifying packages from a directory not an archive.
+It is only to be called from test scripts.
+*/
+export async function _generatePackageInfoFromPaths(
+  paths: string[],
+  topLevelDir: string
+): Promise<ArchivePackage> {
+  await Promise.all(
+    paths.map(async (filePath) => {
+      if (filePath.endsWith(MANIFEST_NAME)) MANIFESTS[filePath] = await readFileAsync(filePath);
+    })
+  );
+  return parseAndVerifyArchive(paths, topLevelDir);
+}
+
+function parseAndVerifyArchive(paths: string[], topLevelDirOverride?: string): ArchivePackage {
   // The top-level directory must match pkgName-pkgVersion, and no other top-level files or directories may be present
-  const toplevelDir = paths[0].split('/')[0];
-  paths.forEach((path) => {
-    if (path.split('/')[0] !== toplevelDir) {
+  const toplevelDir = topLevelDirOverride || paths[0].split('/')[0];
+  paths.forEach((filePath) => {
+    if (!filePath.startsWith(toplevelDir)) {
       throw new PackageInvalidArchiveError('Package contains more than one top-level directory.');
     }
   });
 
   // The package must contain a manifest file ...
-  const manifestFile = `${toplevelDir}/${MANIFEST_NAME}`;
+  const manifestFile = path.join(toplevelDir, MANIFEST_NAME);
   const manifestBuffer = MANIFESTS[manifestFile];
   if (!paths.includes(manifestFile) || !manifestBuffer) {
     throw new PackageInvalidArchiveError(`Package must contain a top-level ${MANIFEST_NAME} file.`);
@@ -189,7 +211,7 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
 
   // Package name and version from the manifest must match those from the toplevel directory
   const pkgKey = pkgToPkgKey({ name: parsed.name, version: parsed.version });
-  if (toplevelDir !== pkgKey) {
+  if (!topLevelDirOverride && toplevelDir !== pkgKey) {
     throw new PackageInvalidArchiveError(
       `Name ${parsed.name} and version ${parsed.version} do not match top-level directory ${toplevelDir}`
     );
@@ -238,9 +260,9 @@ export function parseAndVerifyDataStreams(
   // pick all paths matching name-version/data_stream/DATASTREAM_PATH/...
   // from those, pick all unique data stream paths
   paths
-    .filter((path) => path.startsWith(`${pkgKey}/data_stream/`))
-    .forEach((path) => {
-      const parts = path.split('/');
+    .filter((filePath) => filePath.startsWith(`${pkgKey}/data_stream/`))
+    .forEach((filePath) => {
+      const parts = filePath.split('/');
       if (parts.length > 2 && parts[2]) dataStreamPaths.push(parts[2]);
     });
 
@@ -280,8 +302,8 @@ export function parseAndVerifyDataStreams(
     }
 
     let ingestPipeline;
-    const ingestPipelinePaths = paths.filter((path) =>
-      path.startsWith(`${pkgKey}/data_stream/${dataStreamPath}/elasticsearch/ingest_pipeline`)
+    const ingestPipelinePaths = paths.filter((filePath) =>
+      filePath.startsWith(`${pkgKey}/data_stream/${dataStreamPath}/elasticsearch/ingest_pipeline`)
     );
 
     if (
