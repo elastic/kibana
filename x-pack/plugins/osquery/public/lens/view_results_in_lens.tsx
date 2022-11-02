@@ -40,8 +40,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
-
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
     (event) => {
