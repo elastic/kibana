@@ -1,0 +1,30 @@
+{
+  "id": "assetInventory",
+  "owner": {
+    "name": "TBD"
+  },
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "xpack",
+    "assetInventory"
+  ],
+  "optionalPlugins": [
+  ],
+  "requiredPlugins": [
+    "alerting",
+    "cases",
+    "data",
+    "dataViews",
+    "features",
+    "inspector",
+    "unifiedSearch",
+    "usageCollection"
+  ],
+  "ui": true,
+  "server": true,
+  "requiredBundles": [
+    "kibanaReact",
+    "kibanaUtils"
+  ]
+}
