@@ -11,6 +11,7 @@ import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { unitOfTime } from 'moment';
 import moment from 'moment';
 import type { UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
@@ -90,7 +91,7 @@ export const getFileInfo = async (
     const { name, id, mimeType, size, status: actualStatus, created } = file.data;
     let fileHasChunks: boolean = true;
 
-    if (status === 'READY') {
+    if (actualStatus === 'READY') {
       fileHasChunks = await doesFileHaveChunks(esClient, fileId);
 
       if (!fileHasChunks) {
@@ -101,8 +102,7 @@ export const getFileInfo = async (
     }
 
     const status = fileHasChunks ? actualStatus : 'DELETED';
-
-    // TODO: add `ttl` to the return payload by retrieving the value from ILM?
+    const ttl = status === 'READY' ? await calculateFileTtl(esClient, created) : -1;
 
     return {
       name,
@@ -111,7 +111,7 @@ export const getFileInfo = async (
       size,
       created,
       status,
-      ttl: status === 'READY' ? await calculateFileTtl(esClient, created) : -1,
+      ttl,
     };
   } catch (error) {
     throw getFileRetrievalError(error, fileId);
@@ -150,43 +150,34 @@ const calculateFileTtl = async (
     return undefined;
   }
 
-  const daysLeft = moment(createdDate).diff(moment(createdDate).add(deleteMinAge), 'days');
+  const duration = parseDuration(String(deleteMinAge));
+  const expiresOn = moment(createdDate).add(duration.age, duration.unit);
+  const daysLeft = expiresOn.diff(moment(), 'days');
 
-  return undefined;
+  return daysLeft < 0 ? -1 : daysLeft;
 };
 
-// {
-//   "paul": {
-//     "version": 1,
-//     "modified_date": "2022-11-01T19:56:10.124Z",
-//     "policy": {
-//       "phases": {
-//         "hot": {
-//           "min_age": "0ms",
-//           "actions": {
-//             "set_priority": {
-//               "priority": 100
-//             },
-//             "rollover": {
-//               "max_primary_shard_size": "50gb",
-//               "max_age": "30d"
-//             }
-//           }
-//         },
-//         "delete": {
-//           "min_age": "5d",
-//           "actions": {
-//             "delete": {
-//               "delete_searchable_snapshot": true
-//             }
-//           }
-//         }
-//       }
-//     },
-//     "in_use_by": {
-//       "indices": [],
-//       "data_streams": [],
-//       "composable_templates": []
-//     }
-//   }
-// }
+interface ParsedDuration {
+  age: number;
+  unit: unitOfTime.DurationConstructor;
+}
+
+/**
+ * Parses time duration in the format of `{number}{unit}` (ex. `4d`)
+ * @param duration
+ */
+const parseDuration = (duration: string): ParsedDuration => {
+  const response: ParsedDuration = {
+    age: 0,
+    unit: 'd',
+  };
+
+  const matches = /(\d+)(\w)/.exec(duration);
+
+  if (matches) {
+    response.age = Number(matches[1]);
+    response.unit = matches[2] as unitOfTime.DurationConstructor;
+  }
+
+  return response;
+};
