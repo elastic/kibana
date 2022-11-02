@@ -52,8 +52,13 @@ export const optionsListReducers = {
     }
   },
   selectExists: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
-    state.explicitInput.existsSelected = action.payload;
-    state.explicitInput.selectedOptions = [];
+    if (action.payload) {
+      state.explicitInput.existsSelected = true;
+      state.explicitInput.selectedOptions = [];
+    } else {
+      state.explicitInput.existsSelected = false;
+      state.componentState.existsSelectionInvalid = false;
+    }
   },
   selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
@@ -85,16 +90,6 @@ export const optionsListReducers = {
     state.componentState.invalidSelections = invalidSelections;
     state.componentState.validSelections = validSelections;
   },
-  setExistsSelectionValidity: (
-    state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<OptionsListComponentState['invalidSelections']>
-  ) => {
-    if (action.payload?.includes('existsQuery')) {
-      state.componentState.existsSelectionInvalid = true;
-    } else {
-      state.componentState.existsSelectionInvalid = false;
-    }
-  },
   setLoading: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.output.loading = action.payload;
   },
@@ -109,7 +104,11 @@ export const optionsListReducers = {
     action: PayloadAction<
       Pick<
         OptionsListComponentState,
-        'availableOptions' | 'invalidSelections' | 'validSelections' | 'totalCardinality'
+        | 'availableOptions'
+        | 'invalidSelections'
+        | 'validSelections'
+        | 'totalCardinality'
+        | 'existsSelectionInvalid'
       >
     >
   ) => {

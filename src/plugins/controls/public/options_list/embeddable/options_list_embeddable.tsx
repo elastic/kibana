@@ -129,13 +129,14 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       map((newInput) => ({
         validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
+        existsSelected: newInput.existsSelected,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
         timeslice: newInput.timeslice,
+        exclude: newInput.exclude,
         filters: newInput.filters,
         query: newInput.query,
-        exclude: newInput.exclude,
       })),
       distinctUntilChanged(diffDataFetchProps)
     );
@@ -168,7 +169,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             actions: {
               clearValidAndInvalidSelections,
               setValidAndInvalidSelections,
-              setExistsSelectionValidity,
+              updateQueryResults,
               publishFilters,
             },
             dispatch,
@@ -178,7 +179,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             dispatch(clearValidAndInvalidSelections({}));
           } else {
             const { invalidSelections } = this.reduxEmbeddableTools.getState().componentState ?? {};
-            const { existsSelected } = this.reduxEmbeddableTools.getState().explicitInput ?? {};
             const newValidSelections: string[] = [];
             const newInvalidSelections: string[] = [];
             for (const selectedOption of newSelectedOptions) {
@@ -189,9 +189,11 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               newValidSelections.push(selectedOption);
             }
             batch(() => {
-              if (existsSelected) {
-                dispatch(setExistsSelectionValidity(invalidSelections));
-              }
+              dispatch(
+                updateQueryResults({
+                  existsSelectionInvalid: invalidSelections?.includes('existsQuery'),
+                })
+              );
               dispatch(
                 setValidAndInvalidSelections({
                   validSelections: newValidSelections,
@@ -277,13 +279,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     const {
       dispatch,
       getState,
-      actions: {
-        setLoading,
-        publishFilters,
-        setSearchString,
-        updateQueryResults,
-        setExistsSelectionValidity,
-      },
+      actions: { setLoading, publishFilters, setSearchString, updateQueryResults },
     } = this.reduxEmbeddableTools;
 
     const previousFieldName = this.field?.name;
@@ -336,43 +332,35 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           this.abortController.signal
         );
       if (
-        !selectedOptions ||
+        (!selectedOptions && !existsSelected) ||
         isEmpty(invalidSelections) ||
         ignoreParentSettings?.ignoreValidations
       ) {
-        batch(() => {
-          if (existsSelected) {
-            dispatch(setExistsSelectionValidity(invalidSelections));
-          }
-          dispatch(
-            updateQueryResults({
-              availableOptions: suggestions,
-              invalidSelections: undefined,
-              validSelections: selectedOptions,
-              totalCardinality,
-            })
-          );
-        });
+        dispatch(
+          updateQueryResults({
+            existsSelectionInvalid: undefined,
+            availableOptions: suggestions,
+            invalidSelections: undefined,
+            validSelections: selectedOptions,
+            totalCardinality,
+          })
+        );
       } else {
         const valid: string[] = [];
         const invalid: string[] = [];
-        for (const selectedOption of selectedOptions) {
+        for (const selectedOption of selectedOptions ?? []) {
           if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
-        batch(() => {
-          if (existsSelected) {
-            dispatch(setExistsSelectionValidity(invalidSelections));
-          }
-          dispatch(
-            updateQueryResults({
-              availableOptions: suggestions,
-              invalidSelections: invalid,
-              validSelections: valid,
-              totalCardinality,
-            })
-          );
-        });
+        dispatch(
+          updateQueryResults({
+            existsSelectionInvalid: invalidSelections?.includes('existsQuery'),
+            availableOptions: suggestions,
+            invalidSelections: invalid,
+            validSelections: valid,
+            totalCardinality,
+          })
+        );
       }
 
       // publish filter

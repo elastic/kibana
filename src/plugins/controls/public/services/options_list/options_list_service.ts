@@ -43,9 +43,9 @@ class OptionsListService implements ControlsOptionsListService {
       filters,
       timeRange,
       searchString,
+      existsSelected,
       runPastTimeout,
       selectedOptions,
-      existsSelected,
       field: { name: fieldName },
       dataView: { title: dataViewTitle },
     } = request;
@@ -53,9 +53,9 @@ class OptionsListService implements ControlsOptionsListService {
       ...(timeRange ? JSON.stringify(this.getRoundedTimeRange(timeRange)) : []), // round timeRange to the minute to avoid cache misses
       Math.floor(Date.now() / 1000 / 60), // Only cache results for a minute in case data changes in ES index
       selectedOptions?.join(','),
-      existsSelected,
       JSON.stringify(filters),
       JSON.stringify(query),
+      existsSelected,
       runPastTimeout,
       dataViewTitle,
       searchString,
@@ -76,6 +76,7 @@ class OptionsListService implements ControlsOptionsListService {
           method: 'POST',
         }
       );
+      console.log('response', response);
       return response;
     },
     this.optionsListCacheResolver
