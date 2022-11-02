@@ -67,6 +67,7 @@ export type TaskManagerStartContract = Pick<
     bulkRemoveIfExist: (ids: string[]) => Promise<SavedObjectsBulkDeleteResponse | undefined>;
   } & {
     supportsEphemeralTasks: () => boolean;
+    getRegisteredTypes: () => string[];
   };
 
 export class TaskManagerPlugin
@@ -285,6 +286,7 @@ export class TaskManagerPlugin
       ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
       supportsEphemeralTasks: () =>
         this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
+      getRegisteredTypes: () => this.definitions.getAllTypes(),
     };
   }
 
