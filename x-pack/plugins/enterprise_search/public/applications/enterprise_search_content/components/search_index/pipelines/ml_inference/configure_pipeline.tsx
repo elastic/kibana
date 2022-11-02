@@ -33,6 +33,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { MlModelSelectOption } from './model_select_option';
 import { PipelineSelectOption } from './pipeline_select_option';
+import { MODEL_REDACTED_VALUE, MODEL_SELECT_PLACEHOLDER } from './utils';
 
 const MODEL_SELECT_PLACEHOLDER_VALUE = 'model_placeholder$$';
 const PIPELINE_SELECT_PLACEHOLDER_VALUE = 'pipeline_placeholder$$';
@@ -79,17 +80,17 @@ export const ConfigurePipeline: React.FC = () => {
     useActions(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
 
-  const { destinationField, modelID, pipelineName, sourceField } = configuration;
+  const { destinationField, existingPipeline, modelID, pipelineName, sourceField } = configuration;
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
   const emptySourceFields = (sourceFields?.length ?? 0) === 0;
 
   const modelOptions: Array<EuiSuperSelectOption<string>> = [
     {
       disabled: true,
-      inputDisplay: i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.model.placeholder',
-        { defaultMessage: 'Select a model' }
-      ),
+      inputDisplay:
+        existingPipeline && pipelineName.length > 0
+          ? MODEL_REDACTED_VALUE
+          : MODEL_SELECT_PLACEHOLDER,
       value: MODEL_SELECT_PLACEHOLDER_VALUE,
     },
     ...supportedMLModels.map((model) => ({

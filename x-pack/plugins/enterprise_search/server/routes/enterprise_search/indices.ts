@@ -586,6 +586,78 @@ export function registerIndexRoutes({
     })
   );
 
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate/{pipelineName}',
+      validate: {
+        body: schema.object({
+          docs: schema.arrayOf(schema.any()),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { docs } = request.body;
+      const indexName = decodeURIComponent(request.params.indexName);
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+
+      const [indexExists, pipelinesResponse] = await Promise.all([
+        indexOrAliasExists(client, indexName),
+        client.asCurrentUser.ingest.getPipeline({
+          id: pipelineName,
+        }),
+      ]);
+      if (!indexExists) {
+        return createError({
+          errorCode: ErrorCode.INDEX_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.indices.pipelines.indexMissingError',
+            {
+              defaultMessage: 'The index {indexName} does not exist',
+              values: {
+                indexName,
+              },
+            }
+          ),
+          response,
+          statusCode: 404,
+        });
+      }
+      if (!(pipelineName in pipelinesResponse)) {
+        return createError({
+          errorCode: ErrorCode.PIPELINE_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.indices.pipelines.pipelineMissingError',
+            {
+              defaultMessage: 'The pipeline {pipelineName} does not exist',
+              values: {
+                pipelineName,
+              },
+            }
+          ),
+          response,
+          statusCode: 404,
+        });
+      }
+
+      const simulateRequest: IngestSimulateRequest = {
+        docs,
+        pipeline: pipelinesResponse[pipelineName],
+      };
+
+      const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
+
+      return response.ok({
+        body: simulateResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/errors',
