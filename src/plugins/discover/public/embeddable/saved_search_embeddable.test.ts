@@ -22,6 +22,8 @@ import { SHOW_FIELD_STATISTICS } from '../../common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { VIEW_MODE } from '../components/view_mode_toggle';
 
+let discoverComponent: ReactWrapper;
+
 jest.mock('react-dom', () => {
   const { mount } = jest.requireActual('enzyme');
   return {
@@ -125,6 +127,7 @@ describe('saved search embeddable', () => {
     const loadingOutput = embeddable.getOutput();
     expect(loadingOutput.loading).toBe(true);
     expect(loadingOutput.rendered).toBe(false);
+    expect(loadingOutput.error).toBe(undefined);
 
     embeddable.render(mountpoint);
     expect(render).toHaveBeenCalledTimes(1);
@@ -137,6 +140,7 @@ describe('saved search embeddable', () => {
     const loadedOutput = embeddable.getOutput();
     expect(loadedOutput.loading).toBe(false);
     expect(loadedOutput.rendered).toBe(true);
+    expect(loadedOutput.error).toBe(undefined);
   });
 
   it('should render saved search embeddable when empty data is returned', async () => {
@@ -155,6 +159,7 @@ describe('saved search embeddable', () => {
     const loadingOutput = embeddable.getOutput();
     expect(loadingOutput.loading).toBe(true);
     expect(loadingOutput.rendered).toBe(false);
+    expect(loadingOutput.error).toBe(undefined);
 
     embeddable.render(mountpoint);
     expect(render).toHaveBeenCalledTimes(1);
@@ -167,6 +172,7 @@ describe('saved search embeddable', () => {
     const loadedOutput = embeddable.getOutput();
     expect(loadedOutput.loading).toBe(false);
     expect(loadedOutput.rendered).toBe(true);
+    expect(loadedOutput.error).toBe(undefined);
   });
 
   it('should render in AGGREGATED_LEVEL view mode', async () => {
@@ -180,6 +186,7 @@ describe('saved search embeddable', () => {
     const loadingOutput = embeddable.getOutput();
     expect(loadingOutput.loading).toBe(true);
     expect(loadingOutput.rendered).toBe(false);
+    expect(loadingOutput.error).toBe(undefined);
 
     embeddable.render(mountpoint);
     expect(render).toHaveBeenCalledTimes(1);
@@ -192,6 +199,7 @@ describe('saved search embeddable', () => {
     const loadedOutput = embeddable.getOutput();
     expect(loadedOutput.loading).toBe(false);
     expect(loadedOutput.rendered).toBe(true);
+    expect(loadedOutput.error).toBe(undefined);
   });
 
   it('should emit error output in case of fetch error', async () => {
@@ -206,5 +214,10 @@ describe('saved search embeddable', () => {
     expect((embeddable.updateOutput as jest.Mock).mock.calls[1][0].error.message).toBe(
       'Fetch error'
     );
+    // check that loading state
+    const loadedOutput = embeddable.getOutput();
+    expect(loadedOutput.loading).toBe(false);
+    expect(loadedOutput.rendered).toBe(true);
+    expect(loadedOutput.error).not.toBe(undefined);
   });
 });
