@@ -19,7 +19,7 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Ecommerce Dashboard', async ({ page }) => {
+  .step('Go to Ecommerce Dashboard', async ({ page, log }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-Revenue-Dashboard'));
-    await waitForVisualizations(page, 12);
+    await waitForVisualizations(page, log, 11);
   });
