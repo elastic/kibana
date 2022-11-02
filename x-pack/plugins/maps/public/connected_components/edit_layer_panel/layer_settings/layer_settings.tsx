@@ -257,7 +257,7 @@ export function LayerSettings(props: Props) {
             <ul>
               <li>
                 {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToFront', {
-                  defaultMessage: 'To add your first layer, drag it onto the group name',
+                  defaultMessage: 'To add your first layer, drag it onto the group name.',
                 })}
               </li>
               <li>
