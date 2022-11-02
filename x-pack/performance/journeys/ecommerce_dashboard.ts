@@ -21,5 +21,5 @@ export const journey = new Journey({
 
   .step('Go to Ecommerce Dashboard', async ({ page }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-Revenue-Dashboard'));
-    await waitForVisualizations(page, 12);
+    await waitForVisualizations(page, 13);
   });

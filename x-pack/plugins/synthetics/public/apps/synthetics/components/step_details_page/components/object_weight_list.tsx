@@ -7,8 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { ColorPalette } from './color_palette';
 import { useObjectMetrics } from '../hooks/use_object_metrics';
-import { colourPalette } from './network_waterfall/step_detail/waterfall/data_formatting';
 
 export const ObjectWeightList = () => {
   const objectMetrics = useObjectMetrics();
@@ -18,12 +19,12 @@ export const ObjectWeightList = () => {
       <EuiFlexGroup>
         <EuiFlexItem grow>
           <EuiTitle size="xs">
-            <h3>Object weight</h3>
+            <h3>{OBJECT_WEIGHT_LABEL}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText>
-            Total size:{' '}
+          <EuiText size="s">
+            {TOTAL_SIZE_LABEL}:{' '}
             <span style={{ fontWeight: 'bold' }}>{objectMetrics.totalObjectsWeight}</span>
           </EuiText>
         </EuiFlexItem>
@@ -37,6 +38,7 @@ export const ObjectWeightList = () => {
               mimeType={mimeType}
               percent={weightPercent}
               value={weight}
+              loading={objectMetrics.loading}
             />
             <EuiSpacer size="m" />{' '}
           </>
@@ -46,56 +48,10 @@ export const ObjectWeightList = () => {
   );
 };
 
-export const ColorPalette = ({
-  label,
-  mimeType,
-  percent,
-  value,
-}: {
-  label: string;
-  mimeType: string;
-  percent: number;
-  value: string;
-}) => {
-  return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false} style={{ width: 50 }}>
-        <EuiText>{label}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <ColorPaletteFlexItem mimeType={mimeType} percent={percent} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: 80 }}>
-        <EuiText>{value}</EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+const OBJECT_WEIGHT_LABEL = i18n.translate('xpack.synthetics.stepDetails.objectWeight', {
+  defaultMessage: 'Object weight',
+});
 
-export const ColorPaletteFlexItem = ({
-  mimeType,
-  percent,
-}: {
-  mimeType: string;
-  percent: number;
-}) => {
-  return (
-    <EuiFlexGroup
-      gutterSize="none"
-      style={{
-        borderRadius: 8,
-        overflow: 'hidden',
-      }}
-    >
-      <EuiFlexItem grow={true} style={{ backgroundColor: '#D3DAE6' }}>
-        <span
-          style={{
-            backgroundColor: (colourPalette as Record<string, string>)[mimeType],
-            height: 24,
-            width: `${percent}%`,
-          }}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+const TOTAL_SIZE_LABEL = i18n.translate('xpack.synthetics.stepDetails.totalSize', {
+  defaultMessage: 'Total size',
+});

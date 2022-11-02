@@ -24,11 +24,14 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
+import { ObjectWeightList } from './components/object_weight_list';
 import { StepImage } from './components/step_image';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
+
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
 
 export const StepDetailPage = () => {
@@ -61,9 +64,9 @@ export const StepDetailPage = () => {
           name={data.details.journey.monitor.name!}
         />
       )}
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             {data?.details?.journey && currentStep && (
               <StepImage
                 ping={data?.details?.journey}
@@ -75,7 +78,7 @@ export const StepDetailPage = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             <EuiFlexGroup>
               <EuiFlexItem grow={1}>
                 <NetworkTimingsDonut />
@@ -87,14 +90,15 @@ export const StepDetailPage = () => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
           <EuiPanel>
             <StepMetrics />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             <EuiFlexGroup>
               <EuiFlexItem grow={1}>
                 <ObjectWeightList />
