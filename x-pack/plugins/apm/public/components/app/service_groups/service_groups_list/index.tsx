@@ -64,13 +64,11 @@ export function ServiceGroupsList() {
     useFetcher(
       (callApmApi) => {
         if (serviceGroups.length) {
-          return callApmApi('GET /internal/apm/service-group/alerts');
+          return callApmApi('GET /internal/apm/service-group/alerts'); // TODO combine this with services count
         }
       },
       [serviceGroups.length]
     );
-
-  console.log(servicesGroupAlerts);
 
   const isLoading =
     status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING;

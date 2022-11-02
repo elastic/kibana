@@ -45,7 +45,11 @@ export function ServiceGroupsCard({
         {alertsCount && (
           <div>
             <EuiBadge iconType="alert" color="danger">
-              {alertsCount} alerts
+              {i18n.translate('xpack.apm.serviceGroups.cardsList.alertCount', {
+                defaultMessage:
+                  '{alertsCount} {alertsCount, plural, one {alert} other {alerts}}',
+                values: { alertsCount },
+              })}
             </EuiBadge>
             <EuiSpacer size="s" />
           </div>
