@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
-import { EuiSelect, EuiStepProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSelect, EuiStepProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -49,6 +49,17 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
   submit,
 }) => {
   const { getHref } = useLink();
+
+  const fleetServerHostsOptions = useMemo(
+    () =>
+      fleetServerHosts.map((fleetServerHost) => {
+        return {
+          text: fleetServerHost.name,
+          value: fleetServerHost.id,
+        };
+      }),
+    [fleetServerHosts]
+  );
 
   if (status === 'success') {
     return (
@@ -106,26 +117,20 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
                 />
               </EuiText>
             }
+            append={
+              <EuiButtonEmpty onClick={() => setFleetServerHost(null)}>
+                <FormattedMessage
+                  id="xpack.fleet.fleetServerSetup.fleetServerHostsLabel"
+                  defaultMessage="Add new Fleet Server Hosts"
+                />
+              </EuiButtonEmpty>
+            }
             onChange={(e) =>
               setFleetServerHost(
                 fleetServerHosts.find((fleetServerHost) => fleetServerHost.id === e.target.value)
               )
             }
-            options={fleetServerHosts
-              .map((fleetServerHost) => {
-                return {
-                  text: fleetServerHost.name,
-                  value: fleetServerHost.id,
-                };
-              })
-              .concat([
-                {
-                  text: i18n.translate('xpack.fleet.fleetServerSetup.addOneLabel', {
-                    defaultMessage: 'Add a new host',
-                  }),
-                  value: '@@##ADD_FLEET_SERVER_HOST##@@',
-                },
-              ])}
+            options={fleetServerHostsOptions}
           />
           <EuiSpacer size="m" />
         </>
