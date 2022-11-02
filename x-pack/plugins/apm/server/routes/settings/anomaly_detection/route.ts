@@ -13,7 +13,7 @@ import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { ML_ERRORS } from '../../../../common/anomaly_detection';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
-import { getMlClient } from '../../../lib/helpers/get_ml_setup';
+import { getMlClient } from '../../../lib/helpers/get_ml_client';
 import { getAllEnvironments } from '../../environments/get_all_environments';
 import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { notifyFeatureUsage } from '../../../feature';

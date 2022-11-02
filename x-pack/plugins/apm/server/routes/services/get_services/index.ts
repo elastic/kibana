@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { MlClient } from '../../../lib/helpers/get_ml_setup';
+import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getServicesItems } from './get_services_items';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';

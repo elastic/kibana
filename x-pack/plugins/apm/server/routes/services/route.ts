@@ -21,7 +21,7 @@ import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/co
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getServiceInventorySearchSource } from '../../lib/helpers/get_service_inventory_search_source';
-import { getMlClient } from '../../lib/helpers/get_ml_setup';
+import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceAnnotations } from './annotations';
 import { getServices } from './get_services';
 import { getServiceAgent } from './get_service_agent';

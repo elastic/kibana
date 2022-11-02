@@ -10,7 +10,7 @@ import {
   getServiceHealthStatus,
   ServiceHealthStatus,
 } from '../../../../common/service_health_status';
-import { MlClient } from '../../../lib/helpers/get_ml_setup';
+import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
 
 interface AggregationParams {

@@ -6,7 +6,7 @@
  */
 
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import { MlClient } from '../helpers/get_ml_setup';
+import { MlClient } from '../helpers/get_ml_client';
 
 interface SharedFields {
   job_id: string;

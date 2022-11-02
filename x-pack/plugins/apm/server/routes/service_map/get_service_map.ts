@@ -16,7 +16,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { MlClient } from '../../lib/helpers/get_ml_setup';
+import { MlClient } from '../../lib/helpers/get_ml_client';
 import {
   DEFAULT_ANOMALIES,
   getServiceAnomalies,

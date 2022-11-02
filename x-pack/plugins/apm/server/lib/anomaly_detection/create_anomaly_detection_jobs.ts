@@ -19,7 +19,7 @@ import {
 import { Environment } from '../../../common/environment_rt';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { MlClient } from '../helpers/get_ml_setup';
+import { MlClient } from '../helpers/get_ml_client';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 import { ApmIndicesConfig } from '../../routes/settings/apm_indices/get_apm_indices';
