@@ -348,6 +348,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
       onChange={onChange}
       noMatchesMessage={<NoMatchesMessage searchValue={searchValue ?? ''} onNewItem={onNewItem} />}
       data-test-subj="cases-actions-tags-edit-selectable"
+      height="full"
     >
       {(list, search) => (
         <>
@@ -358,6 +359,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
             justifyContent="spaceBetween"
             responsive={false}
             direction="row"
+            css={{ flexGrow: 0 }}
           >
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">
