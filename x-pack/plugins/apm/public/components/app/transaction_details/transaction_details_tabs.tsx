@@ -27,6 +27,8 @@ import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { traceSamplesTab } from './trace_samples_tab';
 import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useCriticalPathFeatureEnabledSetting } from '../../../hooks/use_critical_path_feature_enabled_setting';
+import { aggregatedCriticalPathTab } from './aggregated_critical_path_tab';
 
 export interface TabContentProps {
   clearChartSelection: () => void;
@@ -46,12 +48,18 @@ const tabs = [
 export function TransactionDetailsTabs() {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
+  const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
+
+  const availableTabs = isCriticalPathFeatureEnabled
+    ? tabs.concat(aggregatedCriticalPathTab)
+    : tabs;
+
   const { urlParams } = useLegacyUrlParams();
   const history = useHistory();
 
   const [currentTab, setCurrentTab] = useState(traceSamplesTab.key);
   const { component: TabContent } =
-    tabs.find((tab) => tab.key === currentTab) ?? traceSamplesTab;
+    availableTabs.find((tab) => tab.key === currentTab) ?? traceSamplesTab;
 
   const { environment, kuery, transactionName } = query;
 
@@ -107,7 +115,7 @@ export function TransactionDetailsTabs() {
   return (
     <>
       <EuiTabs>
-        {tabs.map(({ dataTestSubj, key, label }) => (
+        {availableTabs.map(({ dataTestSubj, key, label }) => (
           <EuiTab
             data-test-subj={dataTestSubj}
             key={key}

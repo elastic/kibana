@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
@@ -23,6 +24,10 @@ import { getTraceItems } from './get_trace_items';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import {
+  CriticalPathResponse,
+  getAggregatedCriticalPath,
+} from './get_aggregated_critical_path';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -194,10 +199,49 @@ const findTracesRoute = createApmServerRoute({
   },
 });
 
+const aggregatedCriticalPathRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/traces/aggregated_critical_path',
+  params: t.type({
+    body: t.intersection([
+      t.type({
+        traceIds: t.array(t.string),
+        serviceName: t.union([nonEmptyStringRt, t.null]),
+        transactionName: t.union([nonEmptyStringRt, t.null]),
+      }),
+      rangeRt,
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{ criticalPath: CriticalPathResponse | null }> => {
+    const {
+      params: {
+        body: { traceIds, start, end, serviceName, transactionName },
+      },
+    } = resources;
+
+    const apmEventClient = await getApmEventClient(resources);
+
+    return getAggregatedCriticalPath({
+      traceIds,
+      start,
+      end,
+      apmEventClient,
+      serviceName,
+      transactionName,
+      logger: resources.logger,
+    });
+  },
+});
+
 export const traceRouteRepository = {
   ...tracesByIdRoute,
   ...tracesRoute,
   ...rootTransactionByTraceIdRoute,
   ...transactionByIdRoute,
   ...findTracesRoute,
+  ...aggregatedCriticalPathRoute,
 };
