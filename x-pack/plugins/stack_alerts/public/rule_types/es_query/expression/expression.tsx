@@ -11,11 +11,11 @@ import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { EsQueryAlertParams, SearchType } from '../types';
+import { EsQueryRuleParams, SearchType } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
 import { QueryFormTypeChooser } from './query_form_type_chooser';
-import { isSearchSourceAlert } from '../util';
+import { isSearchSourceRule } from '../util';
 import { EXPRESSION_ERROR_KEYS } from '../constants';
 
 function areSearchSourceExpressionPropsEqual(
@@ -32,11 +32,11 @@ const SearchSourceExpressionMemoized = memo<SearchSourceExpressionProps>(
   areSearchSourceExpressionPropsEqual
 );
 
-export const EsQueryAlertTypeExpression: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<EsQueryAlertParams>
+export const EsQueryRuleTypeExpression: React.FunctionComponent<
+  RuleTypeParamsExpressionProps<EsQueryRuleParams>
 > = (props) => {
   const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
-  const isSearchSource = isSearchSourceAlert(ruleParams);
+  const isSearchSource = isSearchSourceRule(ruleParams);
   const isManagementPage = useRef(!Object.keys(ruleParams).length).current;
 
   const formTypeSelected = useCallback(

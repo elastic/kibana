@@ -8,11 +8,11 @@
 import { defaultsDeep, isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult, builtInComparators } from '@kbn/triggers-actions-ui-plugin/public';
-import { EsQueryAlertParams, ExpressionErrors } from './types';
-import { isSearchSourceAlert } from './util';
+import { EsQueryRuleParams, ExpressionErrors } from './types';
+import { isSearchSourceRule } from './util';
 import { EXPRESSION_ERRORS } from './constants';
 
-export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationResult => {
+export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
   const { size, threshold, timeWindowSize, thresholdComparator } = ruleParams;
   const validationResult = { errors: {} };
   const errors: ExpressionErrors = defaultsDeep({}, EXPRESSION_ERRORS);
@@ -80,10 +80,10 @@ export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationRe
   }
 
   /**
-   * Skip esQuery and index params check if it is search source alert,
+   * Skip esQuery and index params check if it is search source rule,
    * since it should contain searchConfiguration instead of esQuery and index.
    */
-  const isSearchSource = isSearchSourceAlert(ruleParams);
+  const isSearchSource = isSearchSourceRule(ruleParams);
   if (isSearchSource) {
     if (!ruleParams.searchConfiguration) {
       errors.searchConfiguration.push(
@@ -148,7 +148,7 @@ export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationRe
   return validationResult;
 };
 
-export const hasExpressionValidationErrors = (ruleParams: EsQueryAlertParams) => {
+export const hasExpressionValidationErrors = (ruleParams: EsQueryRuleParams) => {
   const { errors: validationErrors } = validateExpression(ruleParams);
   return Object.keys(validationErrors).some(
     (key) => validationErrors[key] && validationErrors[key].length

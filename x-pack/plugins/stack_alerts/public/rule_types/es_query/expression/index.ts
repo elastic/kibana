@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsQueryAlertTypeExpression } from './expression';
+import { EsQueryRuleTypeExpression } from './expression';
 
 // eslint-disable-next-line import/no-default-export
-export default EsQueryAlertTypeExpression;
+export default EsQueryRuleTypeExpression;

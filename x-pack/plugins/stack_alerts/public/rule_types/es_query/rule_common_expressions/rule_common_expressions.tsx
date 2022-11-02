@@ -23,18 +23,18 @@ import {
   ThresholdExpression,
   ValueExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { CommonAlertParams } from '../types';
+import { CommonRuleParams } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { TestQueryRow, TestQueryRowProps } from '../test_query_row';
 import { QueryThresholdHelpPopover } from './threshold_help_popover';
 
 export interface RuleCommonExpressionsProps {
-  thresholdComparator?: CommonAlertParams['thresholdComparator'];
-  threshold?: CommonAlertParams['threshold'];
-  timeWindowSize: CommonAlertParams['timeWindowSize'];
-  timeWindowUnit: CommonAlertParams['timeWindowUnit'];
-  size: CommonAlertParams['size'];
-  excludeHitsFromPreviousRun: CommonAlertParams['excludeHitsFromPreviousRun'];
+  thresholdComparator?: CommonRuleParams['thresholdComparator'];
+  threshold?: CommonRuleParams['threshold'];
+  timeWindowSize: CommonRuleParams['timeWindowSize'];
+  timeWindowUnit: CommonRuleParams['timeWindowUnit'];
+  size: CommonRuleParams['size'];
+  excludeHitsFromPreviousRun: CommonRuleParams['excludeHitsFromPreviousRun'];
   errors: IErrorObject;
   hasValidationErrors: boolean;
   onChangeThreshold: Parameters<typeof ThresholdExpression>[0]['onChangeSelectedThreshold'];

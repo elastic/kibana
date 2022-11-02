@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EsQueryAlertParams, SearchType } from './types';
+import { EsQueryRuleParams, SearchType } from './types';
 import { validateExpression, hasExpressionValidationErrors } from './validation';
 
 describe('expression params validation', () => {
   test('if params are not set should return a proper error message', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> =
-      {} as EsQueryAlertParams<SearchType.esQuery>;
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> =
+      {} as EsQueryRuleParams<SearchType.esQuery>;
     expect(validateExpression(initialParams).errors.searchType.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.searchType[0]).toBe('Query type is required.');
   });
 
   test('if index property is invalid should return proper error message', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: [],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
       size: 100,
@@ -32,7 +32,7 @@ describe('expression params validation', () => {
   });
 
   test('if timeField property is not defined should return proper error message', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
       size: 100,
@@ -47,7 +47,7 @@ describe('expression params validation', () => {
   });
 
   test('if esQuery property is invalid JSON should return proper error message', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
       size: 100,
@@ -62,7 +62,7 @@ describe('expression params validation', () => {
   });
 
   test('if esQuery property is invalid should return proper error message', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
       esQuery: `{\n  \"aggs\":{\n    \"match_all\" : {}\n  }\n}`,
       size: 100,
@@ -84,7 +84,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       searchType: SearchType.searchSource,
-    } as EsQueryAlertParams<SearchType.searchSource>;
+    } as EsQueryRuleParams<SearchType.searchSource>;
     expect(validateExpression(initialParams).errors.searchConfiguration.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.searchConfiguration[0]).toBe(
       `Search source configuration is required.`
@@ -92,7 +92,7 @@ describe('expression params validation', () => {
   });
 
   test('if threshold0 property is not set should return proper error message', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
       size: 100,
@@ -108,7 +108,7 @@ describe('expression params validation', () => {
   });
 
   test('if threshold1 property is needed by thresholdComparator but not set should return proper error message', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
       size: 100,
@@ -124,7 +124,7 @@ describe('expression params validation', () => {
   });
 
   test('if threshold0 property greater than threshold1 property should return proper error message', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
       size: 100,
@@ -142,7 +142,7 @@ describe('expression params validation', () => {
   });
 
   test('if size property is < 0 should return proper error message', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
       size: -1,
@@ -159,7 +159,7 @@ describe('expression params validation', () => {
   });
 
   test('if size property is 0 should not return error message', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
       size: 0,
@@ -173,7 +173,7 @@ describe('expression params validation', () => {
   });
 
   test('if size property is > 10000 should return proper error message', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
       size: 25000,
@@ -190,7 +190,7 @@ describe('expression params validation', () => {
   });
 
   test('should not return error messages if all is correct', () => {
-    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
       esQuery: '{"query":{"match_all":{}}}',
       size: 250,

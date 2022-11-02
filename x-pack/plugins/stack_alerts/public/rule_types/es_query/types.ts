@@ -23,7 +23,7 @@ export enum SearchType {
   searchSource = 'searchSource',
 }
 
-export interface CommonAlertParams extends RuleTypeParams {
+export interface CommonRuleParams extends RuleTypeParams {
   size: number;
   thresholdComparator?: string;
   threshold: number[];
@@ -32,17 +32,22 @@ export interface CommonAlertParams extends RuleTypeParams {
   excludeHitsFromPreviousRun: boolean;
 }
 
-export type EsQueryAlertParams<T = SearchType> = T extends SearchType.searchSource
-  ? CommonAlertParams & OnlySearchSourceAlertParams
-  : CommonAlertParams & OnlyEsQueryAlertParams;
+export type EsQueryRuleParams<T = SearchType> = T extends SearchType.searchSource
+  ? CommonRuleParams & OnlySearchSourceRuleParams
+  : CommonRuleParams & OnlyEsQueryRuleParams;
 
-export interface OnlyEsQueryAlertParams {
+export interface OnlyEsQueryRuleParams {
   esQuery: string;
   index: string[];
   timeField: string;
+  aggType: string;
+  aggField?: string;
+  groupBy?: string;
+  termSize?: number;
+  termField?: string;
 }
 
-export interface OnlySearchSourceAlertParams {
+export interface OnlySearchSourceRuleParams {
   searchType?: 'searchSource';
   searchConfiguration?: SerializedSearchSourceFields;
   savedQueryId?: string;

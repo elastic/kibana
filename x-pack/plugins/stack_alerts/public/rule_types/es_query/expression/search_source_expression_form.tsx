@@ -16,7 +16,7 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { CommonAlertParams, EsQueryAlertParams, SearchType } from '../types';
+import { CommonRuleParams, EsQueryRuleParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps } from '../util';
@@ -33,12 +33,12 @@ interface LocalState {
   index: DataView;
   filter: Filter[];
   query: Query;
-  thresholdComparator: CommonAlertParams['thresholdComparator'];
-  threshold: CommonAlertParams['threshold'];
-  timeWindowSize: CommonAlertParams['timeWindowSize'];
-  timeWindowUnit: CommonAlertParams['timeWindowUnit'];
-  size: CommonAlertParams['size'];
-  excludeHitsFromPreviousRun: CommonAlertParams['excludeHitsFromPreviousRun'];
+  thresholdComparator: CommonRuleParams['thresholdComparator'];
+  threshold: CommonRuleParams['threshold'];
+  timeWindowSize: CommonRuleParams['timeWindowSize'];
+  timeWindowUnit: CommonRuleParams['timeWindowUnit'];
+  size: CommonRuleParams['size'];
+  excludeHitsFromPreviousRun: CommonRuleParams['excludeHitsFromPreviousRun'];
 }
 
 interface LocalStateAction {
@@ -64,7 +64,7 @@ interface SearchSourceParamsAction {
 
 interface SearchSourceExpressionFormProps {
   searchSource: ISearchSource;
-  ruleParams: EsQueryAlertParams<SearchType.searchSource>;
+  ruleParams: EsQueryRuleParams<SearchType.searchSource>;
   errors: IErrorObject;
   initialSavedQuery?: SavedQuery;
   setParam: (paramField: string, paramValue: unknown) => void;

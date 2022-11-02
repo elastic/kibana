@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { EsQueryAlertParams, SearchType } from './types';
+import { EsQueryRuleParams, SearchType } from './types';
 import { validateExpression } from './validation';
 
 const PLUGIN_ID = 'discover';
 const ES_QUERY_ALERT_TYPE = '.es-query';
 
-export function getAlertType(alerting: AlertingSetup): RuleTypeModel<EsQueryAlertParams> {
+export function getRuleType(alerting: AlertingSetup): RuleTypeModel<EsQueryRuleParams> {
   registerNavigation(alerting);
 
   return {
@@ -47,7 +47,7 @@ function registerNavigation(alerting: AlertingSetup) {
   alerting.registerNavigation(
     PLUGIN_ID,
     ES_QUERY_ALERT_TYPE,
-    (alert: SanitizedRule<EsQueryAlertParams<SearchType.searchSource>>) => {
+    (alert: SanitizedRule<EsQueryRuleParams<SearchType.searchSource>>) => {
       return `#/viewAlert/${alert.id}`;
     }
   );

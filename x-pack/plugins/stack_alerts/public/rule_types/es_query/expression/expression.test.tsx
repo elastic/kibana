@@ -13,8 +13,8 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { CommonAlertParams, EsQueryAlertParams, SearchType } from '../types';
-import { EsQueryAlertTypeExpression } from './expression';
+import { CommonRuleParams, EsQueryRuleParams, SearchType } from '../types';
+import { EsQueryRuleTypeExpression } from './expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Subject } from 'rxjs';
 import { ISearchSource } from '@kbn/data-plugin/common';
@@ -42,7 +42,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-const defaultEsQueryRuleParams: EsQueryAlertParams<SearchType.esQuery> = {
+const defaultEsQueryRuleParams: EsQueryRuleParams<SearchType.esQuery> = {
   size: 100,
   thresholdComparator: '>',
   threshold: [0],
@@ -54,7 +54,7 @@ const defaultEsQueryRuleParams: EsQueryAlertParams<SearchType.esQuery> = {
   searchType: SearchType.esQuery,
   excludeHitsFromPreviousRun: true,
 };
-const defaultSearchSourceRuleParams: EsQueryAlertParams<SearchType.searchSource> = {
+const defaultSearchSourceRuleParams: EsQueryRuleParams<SearchType.searchSource> = {
   size: 100,
   thresholdComparator: '>',
   threshold: [0],
@@ -136,9 +136,9 @@ dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
 (httpMock.post as jest.Mock).mockImplementation(() => Promise.resolve({ fields: [] }));
 
 const Wrapper: React.FC<{
-  ruleParams: EsQueryAlertParams<SearchType.searchSource> | EsQueryAlertParams<SearchType.esQuery>;
+  ruleParams: EsQueryRuleParams<SearchType.searchSource> | EsQueryRuleParams<SearchType.esQuery>;
 }> = ({ ruleParams }) => {
-  const [currentRuleParams, setCurrentRuleParams] = useState<CommonAlertParams>(ruleParams);
+  const [currentRuleParams, setCurrentRuleParams] = useState<CommonRuleParams>(ruleParams);
   const errors = {
     index: [],
     esQuery: [],
@@ -150,7 +150,7 @@ const Wrapper: React.FC<{
   };
 
   return (
-    <EsQueryAlertTypeExpression
+    <EsQueryRuleTypeExpression
       ruleInterval="1m"
       ruleThrottle="1m"
       alertNotifyWhen="onThrottleInterval"
@@ -160,7 +160,7 @@ const Wrapper: React.FC<{
       }}
       setRuleProperty={(name, params) => {
         if (name === 'params') {
-          setCurrentRuleParams(params as CommonAlertParams);
+          setCurrentRuleParams(params as CommonRuleParams);
         }
       }}
       errors={errors}
@@ -175,7 +175,7 @@ const Wrapper: React.FC<{
 };
 
 const setup = (
-  ruleParams: EsQueryAlertParams<SearchType.searchSource> | EsQueryAlertParams<SearchType.esQuery>
+  ruleParams: EsQueryRuleParams<SearchType.searchSource> | EsQueryRuleParams<SearchType.esQuery>
 ) => {
   return mountWithIntl(
     <KibanaContextProvider
@@ -191,9 +191,9 @@ const setup = (
   );
 };
 
-describe('EsQueryAlertTypeExpression', () => {
+describe('EsQueryRuleTypeExpression', () => {
   test('should render options by default', async () => {
-    const wrapper = setup({} as EsQueryAlertParams<SearchType.esQuery>);
+    const wrapper = setup({} as EsQueryRuleParams<SearchType.esQuery>);
     expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
     expect(findTestSubject(wrapper, 'queryFormType_searchSource').exists()).toBeTruthy();
     expect(findTestSubject(wrapper, 'queryFormType_esQuery').exists()).toBeTruthy();
@@ -201,7 +201,7 @@ describe('EsQueryAlertTypeExpression', () => {
   });
 
   test('should switch to QueryDSL form type on selection and return back on cancel', async () => {
-    let wrapper = setup({} as EsQueryAlertParams<SearchType.esQuery>);
+    let wrapper = setup({} as EsQueryRuleParams<SearchType.esQuery>);
     await act(async () => {
       findTestSubject(wrapper, 'queryFormType_esQuery').simulate('click');
     });
@@ -220,7 +220,7 @@ describe('EsQueryAlertTypeExpression', () => {
   });
 
   test('should switch to KQL or Lucene form type on selection and return back on cancel', async () => {
-    let wrapper = setup({} as EsQueryAlertParams<SearchType.searchSource>);
+    let wrapper = setup({} as EsQueryRuleParams<SearchType.searchSource>);
     await act(async () => {
       findTestSubject(wrapper, 'queryFormType_searchSource').simulate('click');
     });

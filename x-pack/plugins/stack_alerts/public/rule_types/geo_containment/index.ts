@@ -11,7 +11,7 @@ import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { validateExpression } from './validation';
 import { GeoContainmentAlertParams } from './types';
 
-export function getAlertType(): RuleTypeModel<GeoContainmentAlertParams> {
+export function getRuleType(): RuleTypeModel<GeoContainmentAlertParams> {
   return {
     id: '.geo-containment',
     description: i18n.translate('xpack.stackAlerts.geoContainment.descriptionText', {

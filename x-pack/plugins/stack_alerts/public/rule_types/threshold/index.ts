@@ -11,7 +11,7 @@ import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { validateExpression } from './validation';
 import { IndexThresholdAlertParams } from './types';
 
-export function getAlertType(): RuleTypeModel<IndexThresholdAlertParams> {
+export function getRuleType(): RuleTypeModel<IndexThresholdAlertParams> {
   return {
     id: '.index-threshold',
     description: i18n.translate('xpack.stackAlerts.threshold.ui.alertType.descriptionText', {

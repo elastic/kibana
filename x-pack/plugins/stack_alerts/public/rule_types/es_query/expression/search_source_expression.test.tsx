@@ -10,7 +10,7 @@ import React from 'react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { EsQueryAlertParams, SearchType } from '../types';
+import { EsQueryRuleParams, SearchType } from '../types';
 import { SearchSourceExpression } from './search_source_expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
@@ -38,7 +38,7 @@ export const uiSettingsMock = {
   get: jest.fn(),
 } as unknown as IUiSettingsClient;
 
-const defaultSearchSourceExpressionParams: EsQueryAlertParams<SearchType.searchSource> = {
+const defaultSearchSourceExpressionParams: EsQueryRuleParams<SearchType.searchSource> = {
   size: 100,
   thresholdComparator: '>',
   threshold: [0],
@@ -191,7 +191,7 @@ dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
   Promise.resolve({ total: 0, queries: [] })
 );
 
-const setup = (alertParams: EsQueryAlertParams<SearchType.searchSource>) => {
+const setup = (alertParams: EsQueryRuleParams<SearchType.searchSource>) => {
   const errors = {
     size: [],
     timeField: [],

@@ -20,7 +20,7 @@ import {
   ISearchStart,
 } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EsQueryAlertParams, SearchType } from '../types';
+import { EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -106,7 +106,7 @@ const dataViewMock = dataViewPluginMocks.createStartContract();
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 
-const defaultEsQueryExpressionParams: EsQueryAlertParams<SearchType.esQuery> = {
+const defaultEsQueryExpressionParams: EsQueryRuleParams<SearchType.esQuery> = {
   size: 100,
   thresholdComparator: '>',
   threshold: [0],
@@ -118,7 +118,7 @@ const defaultEsQueryExpressionParams: EsQueryAlertParams<SearchType.esQuery> = {
   excludeHitsFromPreviousRun: true,
 };
 
-describe('EsQueryAlertTypeExpression', () => {
+describe('EsQueryRuleTypeExpression', () => {
   beforeAll(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -135,7 +135,7 @@ describe('EsQueryAlertTypeExpression', () => {
     });
   });
 
-  async function setup(alertParams: EsQueryAlertParams<SearchType.esQuery>) {
+  async function setup(alertParams: EsQueryRuleParams<SearchType.esQuery>) {
     const errors = {
       index: [],
       esQuery: [],
@@ -172,7 +172,7 @@ describe('EsQueryAlertTypeExpression', () => {
     return wrapper;
   }
 
-  test('should render EsQueryAlertTypeExpression with expected components', async () => {
+  test('should render EsQueryRuleTypeExpression with expected components', async () => {
     const wrapper = await setup(defaultEsQueryExpressionParams);
     expect(wrapper.find('[data-test-subj="indexSelectPopover"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="sizeValueExpression"]').exists()).toBeTruthy();
@@ -197,7 +197,7 @@ describe('EsQueryAlertTypeExpression', () => {
     const wrapper = await setup({
       ...defaultEsQueryExpressionParams,
       timeField: null,
-    } as unknown as EsQueryAlertParams<SearchType.esQuery>);
+    } as unknown as EsQueryRuleParams<SearchType.esQuery>);
     const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
     expect(testQueryButton.exists()).toBeTruthy();
     expect(testQueryButton.prop('disabled')).toBe(true);
