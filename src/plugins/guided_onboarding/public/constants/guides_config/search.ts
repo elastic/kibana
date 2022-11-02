@@ -55,7 +55,7 @@ export const searchConfig: GuideConfig = {
           defaultMessage: 'Adaptive relevance and curations',
         }),
         i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item3', {
-          defaultMessage: 'Synonym management',
+          defaultMessage: 'Managing synonyms and query recommendations.',
         }),
       ],
       location: {
