@@ -76,6 +76,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Guided Onboarding tour in security
    */
   guidedOnboarding: false,
+
+  /**
+   * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
+   */
+  alertDetailsPageEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
