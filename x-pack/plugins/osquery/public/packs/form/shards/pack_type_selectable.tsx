@@ -59,8 +59,9 @@ export const PackTypeSelectable = memo(
       () => ({
         onClick: () => handleChange('global'),
         isSelected: packType === 'global',
+        isDisabled: isGlobalDisabled,
       }),
-      [packType, handleChange]
+      [packType, isGlobalDisabled, handleChange]
     );
     const advancedCardSelectable = useMemo(
       () => ({
@@ -106,6 +107,7 @@ export const PackTypeSelectable = memo(
                       defaultMessage: 'Global',
                     })}
                     onChange={noop}
+                    disabled={isGlobalDisabled}
                     checked={packType === 'global'}
                   />
                 }
@@ -115,7 +117,6 @@ export const PackTypeSelectable = memo(
                   defaultMessage: 'Use pack across all policies',
                 })}
                 selectable={globalCardSelectable}
-                isDisabled={isGlobalDisabled}
                 {...(packType === 'global' && { color: 'primary' })}
               />
             </EuiFlexItem>
