@@ -212,6 +212,8 @@ export const defineExplainLogRateSpikesRoute = (
 
           loaded += LOADED_FIELD_CANDIDATES;
 
+          const fieldCandidatesCount = fieldCandidates.length;
+
           push(
             updateLoadingStateAction({
               ccsWarning: false,
@@ -222,14 +224,14 @@ export const defineExplainLogRateSpikesRoute = (
                   defaultMessage:
                     'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
                   values: {
-                    fieldCandidatesCount: fieldCandidates.length,
+                    fieldCandidatesCount,
                   },
                 }
               ),
             })
           );
 
-          if (fieldCandidates.length === 0) {
+          if (fieldCandidatesCount === 0) {
             endWithUpdatedLoadingState();
           } else if (shouldStop) {
             logDebugMessage('shouldStop after fetching field candidates.');
@@ -244,14 +246,10 @@ export const defineExplainLogRateSpikesRoute = (
           // regarding a limit of abort signal listeners of more than 10.
           const MAX_CONCURRENT_QUERIES = 10;
 
-          const loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
-
-          const totalFieldCandidates = fieldCandidates.length;
-
           logDebugMessage('Fetch p-values.');
 
           const pValuesQueue = queue(async function (fieldCandidate: string) {
-            loaded += (1 / totalFieldCandidates) * loadingStepSizePValues;
+            loaded += (1 / fieldCandidatesCount) * PROGRESS_STEP_P_VALUES;
 
             let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
 
