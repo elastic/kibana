@@ -9,14 +9,7 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import {
-  Filter,
-  FilterStateStore,
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  Query,
-  AggregateQuery,
-} from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, Filter, FilterStateStore } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -36,73 +29,17 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { AppState } from './discover_app_state_container';
 import {
-  InternalStateContainer,
   getInternalStateContainer,
+  InternalStateContainer,
 } from './discover_internal_state_container';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
-import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
-import { VIEW_MODE } from '../../../components/view_mode_toggle';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getValidFilters } from '../../../utils/get_valid_filters';
-
-export interface AppState {
-  /**
-   * Columns displayed in the table
-   */
-  columns?: string[];
-  /**
-   * Array of applied filters
-   */
-  filters?: Filter[];
-  /**
-   * Data Grid related state
-   */
-  grid?: DiscoverGridSettings;
-  /**
-   * Hide chart
-   */
-  hideChart?: boolean;
-  /**
-   * id of the used data view
-   */
-  index?: string;
-  /**
-   * Used interval of the histogram
-   */
-  interval?: string;
-  /**
-   * Lucence or KQL query
-   */
-  query?: Query | AggregateQuery;
-  /**
-   * Array of the used sorting [[field,direction],...]
-   */
-  sort?: string[][];
-  /**
-   * id of the used saved query
-   */
-  savedQuery?: string;
-  /**
-   * Table view: Documents vs Field Statistics
-   */
-  viewMode?: VIEW_MODE;
-  /**
-   * Hide mini distribution/preview charts when in Field Statistics mode
-   */
-  hideAggregatedPreview?: boolean;
-  /**
-   * Document explorer row height option
-   */
-  rowHeight?: number;
-  /**
-   * Number of rows in the grid per page
-   */
-  rowsPerPage?: number;
-}
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
   /**
@@ -111,7 +48,7 @@ export interface AppStateUrl extends Omit<AppState, 'sort'> {
   sort?: string[][] | [string, string];
 }
 
-interface DiscoverStateContainerArgs {
+interface DiscoverStateContainerParams {
   /**
    * Browser history
    */
@@ -205,7 +142,7 @@ export function getDiscoverStateContainer({
   history,
   savedSearch,
   services,
-}: DiscoverStateContainerArgs): DiscoverStateContainer {
+}: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
   const defaultAppState = getStateDefaults({

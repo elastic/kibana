@@ -10,10 +10,10 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { fetchChart, updateSearchSource } from './fetch_chart';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
-import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { calculateBounds } from '@kbn/data-plugin/public';
 import { FetchDeps } from './fetch_all';
+import { AppState } from '../services/discover_app_state_container';
 
 function getDeps() {
   const deps = {
