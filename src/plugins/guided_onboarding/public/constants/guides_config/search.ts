@@ -55,7 +55,7 @@ export const searchConfig: GuideConfig = {
           defaultMessage: 'Try the Search UI tutorial for Elasticsearch.',
         }),
         i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item3', {
-          defaultMessage: 'Managing synonyms and query recommendations.',
+          defaultMessage: 'Build a world-class search experience for your customers, employees, or users.',
         }),
       ],
       location: {
