@@ -525,9 +525,7 @@
         "refresh_interval": "1s",
         "routing_partition_size": "1",
         "mapping": {
-          "total_fields": {
-            "limit": 1500
-          }
+          "total_fields": { "limit": 1500 }
         }
       }
     }

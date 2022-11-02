@@ -41,6 +41,7 @@ import * as babel from '@babel/core';
 import { addHook } from 'pirates';
 import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/utils';
 import sourceMapSupport from 'source-map-support';
+import { readHashOfPackageMap } from '@kbn/synthetic-package-map';
 
 import { Cache } from './cache';
 
@@ -83,6 +84,7 @@ function getBabelOptions(path: string) {
  */
 function determineCachePrefix() {
   const json = JSON.stringify({
+    synthPkgMapHash: readHashOfPackageMap(),
     babelVersion: babel.version,
     // get a config for a fake js, ts, and tsx file to make sure we
     // capture conditional config portions based on the file extension
@@ -135,7 +137,7 @@ export function registerNodeAutoTranspilation() {
 
   const cache = new Cache({
     pathRoot: REPO_ROOT,
-    dir: Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache_v3', UPSTREAM_BRANCH),
+    dir: Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache_v4', UPSTREAM_BRANCH),
     prefix: determineCachePrefix(),
     log: process.env.DEBUG_NODE_TRANSPILER_CACHE
       ? Fs.createWriteStream(Path.resolve(REPO_ROOT, 'node_auto_transpilation_cache.log'), {
