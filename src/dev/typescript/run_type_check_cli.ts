@@ -144,9 +144,16 @@ function createTypeCheckConfigs(projects: Project[], bazelPackages: BazelPackage
 export async function runTypeCheckCli() {
   run(
     async ({ log, flagsReader, procRunner }) => {
-      log.warning(
-        `Building types for all bazel packages. This can take a while depending on your changes and won't show any progress while it runs.`
-      );
+      if (flagsReader.boolean('clean-cache')) {
+        await asyncForEachWithLimit(PROJECTS, 10, async (proj) => {
+          await Fsp.rm(Path.resolve(proj.directory, 'target/types'), {
+            force: true,
+            recursive: true,
+          });
+        });
+        log.warning('Deleted all typescript caches');
+      }
+
       await runBazel(['build', '//packages:build_types', '--show_result=1'], {
         cwd: REPO_ROOT,
         logPrefix: '\x1b[94m[bazel]\x1b[39m',
@@ -237,13 +244,14 @@ export async function runTypeCheckCli() {
       `,
       flags: {
         string: ['project'],
-        boolean: ['cleanup'],
+        boolean: ['clean-cache', 'cleanup'],
         default: {
           cleanup: true,
         },
         help: `
           --project [path]        Path to a tsconfig.json file determines the project to check
           --help                  Show this message
+          --clean-cache           Delete any existing TypeScript caches before running type check
           --no-cleanup            Pass to avoid deleting the temporary tsconfig files written to disk
         `,
       },
