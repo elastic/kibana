@@ -144,7 +144,8 @@ export const sampleCase = {
   description: i18n.translate(
     'xpack.securitySolution.guided_onboarding.tour.createCase.description',
     {
-      defaultMessage: `This is where you'd document a malicious signal. You can include whatever information is relevant to the case and would be helpful for anyone else that needs to read up on it.`,
+      defaultMessage:
+        "This is where you'd document a malicious signal. You can include whatever information is relevant to the case and would be helpful for anyone else that needs to read up on it. `Markdown` **formatting** _is_ [supported](https://www.markdownguide.org/cheat-sheet/).",
     }
   ),
 };
