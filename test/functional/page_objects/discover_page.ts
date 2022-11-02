@@ -470,16 +470,16 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isFieldSelected(field: string) {
-    if (!(await this.testSubjects.exists('fieldList-selected'))) {
+    if (!(await this.testSubjects.exists('fieldListGroupedSelectedFields'))) {
       return false;
     }
-    const selectedList = await this.testSubjects.find('fieldList-selected');
+    const selectedList = await this.testSubjects.find('fieldListGroupedSelectedFields');
     return await this.testSubjects.descendantExists(`field-${field}`, selectedList);
   }
 
   public async clickFieldListItemRemove(field: string) {
     if (
-      !(await this.testSubjects.exists('fieldList-selected')) ||
+      !(await this.testSubjects.exists('fieldListGroupedSelectedFields')) ||
       !(await this.isFieldSelected(field))
     ) {
       return;
