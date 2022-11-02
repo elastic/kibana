@@ -23,17 +23,19 @@ const FilePickerCtx = createContext<FilePickerContextValue>(
 interface FilePickerContextProps {
   kind: string;
   pageSize: number;
+  multiple: boolean;
 }
 export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
   kind,
   pageSize,
+  multiple,
   children,
 }) => {
   const filesContext = useFilesContext();
   const { client } = filesContext;
   const state = useMemo(
-    () => createFilePickerState({ pageSize, client, kind }),
-    [pageSize, client, kind]
+    () => createFilePickerState({ pageSize, client, kind, uploadMultiple: multiple }),
+    [pageSize, client, kind, multiple]
   );
   useEffect(() => state.dispose, [state]);
   return (
