@@ -114,7 +114,7 @@ interface PipelinesValues {
   defaultPipelineValues: IngestPipelineParams;
   defaultPipelineValuesData: IngestPipelineParams | null;
   hasIndexIngestionPipeline: boolean;
-  index: CachedFetchIndexApiLogicValues['indexData'];
+  index: CachedFetchIndexApiLogicValues['fetchIndexApiData'];
   indexName: string;
   mlInferencePipelineProcessors: InferencePipeline[];
   pipelineName: string;
@@ -168,7 +168,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       FetchDefaultPipelineApiLogic,
       ['data as defaultPipelineValuesData'],
       CachedFetchIndexApiLogic,
-      ['indexData as index'],
+      ['fetchIndexApiData as index'],
       FetchMlInferencePipelineProcessorsApiLogic,
       ['data as mlInferencePipelineProcessors'],
     ],

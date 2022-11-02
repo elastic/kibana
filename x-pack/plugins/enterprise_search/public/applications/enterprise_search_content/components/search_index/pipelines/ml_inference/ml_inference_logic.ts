@@ -179,7 +179,7 @@ export const MLInferenceLogic = kea<
     ],
     values: [
       CachedFetchIndexApiLogic,
-      ['indexData as index'],
+      ['fetchIndexApiData as index'],
       MappingsApiLogic,
       ['data as mappingData', 'status as mappingStatus'],
       MLModelsApiLogic,

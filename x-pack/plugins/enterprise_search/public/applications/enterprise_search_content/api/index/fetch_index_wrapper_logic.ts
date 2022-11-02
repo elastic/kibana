@@ -20,12 +20,6 @@ import {
   FetchIndexApiResponse,
 } from './fetch_index_api_logic';
 
-// TODO to be named better later
-//
-// TODO add polling
-// TODO add error
-//
-
 export interface CachedFetchIndexApiLogicActions {
   apiError: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiError'];
   apiReset: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiReset'];

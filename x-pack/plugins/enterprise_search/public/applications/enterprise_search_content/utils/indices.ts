@@ -28,7 +28,7 @@ import {
 } from '../types';
 
 export function isConnectorIndex(
-  index: ElasticsearchIndexWithIngestion | null
+  index: ElasticsearchIndexWithIngestion | null | undefined
 ): index is ConnectorIndex {
   const connectorIndex = index as ConnectorIndex;
   return (
@@ -38,12 +38,12 @@ export function isConnectorIndex(
 }
 
 export function isCrawlerIndex(
-  index: ElasticsearchIndexWithIngestion | null
+  index: ElasticsearchIndexWithIngestion | null | undefined
 ): index is CrawlerIndex {
   return !!(index as CrawlerIndex)?.crawler;
 }
 
-export function isApiIndex(index: ElasticsearchIndexWithIngestion | null): boolean {
+export function isApiIndex(index: ElasticsearchIndexWithIngestion | null | undefined): boolean {
   if (!index) {
     return false;
   }
