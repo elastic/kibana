@@ -18,10 +18,12 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
+import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
+import { bulkRemoveIfExist } from './lib/bulk_remove_if_exist';
 import { setupSavedObjects } from './saved_objects';
 import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
@@ -33,6 +35,7 @@ import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask, ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
+
 export interface TaskManagerSetupContract {
   /**
    * @deprecated
@@ -59,7 +62,12 @@ export type TaskManagerStartContract = Pick<
 > &
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
-  } & { supportsEphemeralTasks: () => boolean };
+  } & {
+    bulkRemoveIfExist: (ids: string[]) => Promise<SavedObjectsBulkDeleteResponse | undefined>;
+  } & {
+    supportsEphemeralTasks: () => boolean;
+    getRegisteredTypes: () => string[];
+  };
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
@@ -248,6 +256,7 @@ export class TaskManagerPlugin
         taskStore.aggregate(opts),
       get: (id: string) => taskStore.get(id),
       remove: (id: string) => taskStore.remove(id),
+      bulkRemoveIfExist: (ids: string[]) => bulkRemoveIfExist(taskStore, ids),
       removeIfExists: (id: string) => removeIfExists(taskStore, id),
       schedule: (...args) => taskScheduling.schedule(...args),
       bulkSchedule: (...args) => taskScheduling.bulkSchedule(...args),
@@ -259,6 +268,7 @@ export class TaskManagerPlugin
       ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
       supportsEphemeralTasks: () =>
         this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
+      getRegisteredTypes: () => this.definitions.getAllTypes(),
     };
   }
 

@@ -88,7 +88,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         output = {
           type: 'json',
           content: {
-            code: 'ra_get-file_success',
+            code: 'ra_get-file_success_done',
             path: '/some/path/bad_file.txt',
             size: 1234,
             zip_size: 123,

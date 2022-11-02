@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
+import { AlwaysShowPattern } from '../../../common/types/indices';
 
 import type {
   CreateMlInferencePipelineResponse,
@@ -48,6 +49,7 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isIndexNotFoundException,
+  isPipelineIsInUseException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
 import { getPrefixedInferencePipelineProcessorName } from '../../utils/ml_inference_pipeline_utils';
@@ -62,7 +64,11 @@ export function registerIndexRoutes({
     { path: '/internal/enterprise_search/search_indices', validate: false },
     elasticsearchErrorHandler(log, async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
-      const indices = await fetchIndices(client, '*', false, true, 'search-');
+      const patterns: AlwaysShowPattern = {
+        alias_pattern: 'search-',
+        index_pattern: '.ent-search-engine-documents',
+      };
+      const indices = await fetchIndices(client, '*', false, true, patterns);
 
       return response.ok({
         body: indices,
@@ -697,7 +703,24 @@ export function registerIndexRoutes({
             response,
             statusCode: 404,
           });
+        } else if (isPipelineIsInUseException(error)) {
+          return createError({
+            errorCode: ErrorCode.PIPELINE_IS_IN_USE,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.indices.mlInference.pipelineProcessors.pipelineIsInUseError',
+              {
+                defaultMessage:
+                  "Inference pipeline is used in managed pipeline '{pipelineName}' of a different index",
+                values: {
+                  pipelineName: error.pipelineName,
+                },
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
         }
+
         // otherwise, let the default handler wrap it
         throw error;
       }
