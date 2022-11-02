@@ -18,7 +18,9 @@ import { TransactionsTable } from '../../../shared/transactions_table';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { LatencyMap } from './latency_map';
 import { MobileFilters } from './filters';
+import { useFiltersForMobileCharts } from './use_filters_for_mobile_charts';
 
 interface Props {
   latencyChartHeight: number;
@@ -35,6 +37,7 @@ export function ServiceOverviewMobileCharts({
 }: Props) {
   const { fallbackToTransactions, serviceName } = useApmServiceContext();
   const router = useApmRouter();
+  const filters = useFiltersForMobileCharts();
 
   const {
     query,
@@ -144,6 +147,11 @@ export function ServiceOverviewMobileCharts({
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPanel hasBorder={true}>
+          <LatencyMap filters={filters} />
+        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
