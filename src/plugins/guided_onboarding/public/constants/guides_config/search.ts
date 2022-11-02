@@ -6,24 +6,33 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { GuideConfig } from '../../types';
 
 export const searchConfig: GuideConfig = {
-  title: 'Search my data',
-  description: `We'll help you build world-class search experiences with your data, using Elastic's out-of-the-box web crawler, connectors, and our robust APIs. Gain deep insights from the built-in search analytics and use that data to inform changes to relevance.`,
+  title: i18n.translate('guidedOnboarding.searchGuide.title', {
+    defaultMessage: 'Search my data',
+  }),
+  description: i18n.translate('guidedOnboarding.searchGuide.description', {
+    defaultMessage: `Build custom search experiences with your data using Elastic’s out-of-the-box web crawler, connectors, and robust APIs. Gain deep insights from the built-in search analytics to curate results and optimize relevance.`,
+  }),
   guideName: 'Enterprise Search',
-  docs: {
-    text: 'Enterprise Search 101 Documentation',
-    url: 'example.com',
-  },
   steps: [
     {
       id: 'add_data',
-      title: 'Add data',
+      title: i18n.translate('guidedOnboarding.searchGuide.addDataStep.title', {
+        defaultMessage: 'Add data',
+      }),
       descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+        i18n.translate('guidedOnboarding.searchGuide.addDataStep.description1', {
+          defaultMessage: 'Select an ingestion method.',
+        }),
+        i18n.translate('guidedOnboarding.searchGuide.addDataStep.description2', {
+          defaultMessage: 'Create a new Elasticsearch index.',
+        }),
+        i18n.translate('guidedOnboarding.searchGuide.addDataStep.description3', {
+          defaultMessage: 'Configure your ingestion settings.',
+        }),
       ],
       location: {
         appID: 'enterpriseSearch',
@@ -31,35 +40,25 @@ export const searchConfig: GuideConfig = {
       },
     },
     {
-      id: 'browse_docs',
-      title: 'Browse your documents',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
-      location: {
-        appID: 'guidedOnboardingExample',
-        path: 'stepTwo',
-      },
-      manualCompletion: {
-        title: 'Manual completion step title',
-        description:
-          'Mark the step complete by opening the panel and clicking the button "Mark done"',
-        readyToCompleteOnNavigation: true,
-      },
-    },
-    {
       id: 'search_experience',
-      title: 'Build a search experience',
+      title: i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.title', {
+        defaultMessage: 'Build a search experience',
+      }),
       descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+        i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item1', {
+          defaultMessage: 'Learn more about Elastic’s Search UI framework.',
+        }),
+        i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item2', {
+          defaultMessage: 'Try the Search UI tutorial for Elasticsearch.',
+        }),
+        i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item3', {
+          defaultMessage:
+            'Build a world-class search experience for your customers, employees, or users.',
+        }),
       ],
       location: {
-        appID: 'guidedOnboardingExample',
-        path: 'stepThree',
+        appID: 'enterpriseSearch',
+        path: '/search_experiences',
       },
     },
   ],
