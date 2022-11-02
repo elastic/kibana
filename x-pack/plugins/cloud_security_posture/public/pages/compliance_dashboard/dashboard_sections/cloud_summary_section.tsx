@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { PartitionElementEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
-import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
+import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import { ChartPanel } from '../../../components/chart_panel';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
@@ -38,6 +38,7 @@ export const CloudSummarySection = ({
   complianceData: ComplianceDashboardData;
 }) => {
   const navToFindings = useNavigateFindings();
+  const { euiTheme } = useEuiTheme();
 
   const handleElementClick = (elements: PartitionElementEvent[]) => {
     const [element] = elements;
@@ -58,23 +59,21 @@ export const CloudSummarySection = ({
     navToFindings({ 'result.evaluation': RULE_FAILED });
   };
 
-  const stats = [
+  const counters: CspCounterCardProps[] = [
     {
-      title: 'tit',
-      description: 'desc',
+      title: <CompactFormattedNumber number={123} />,
+      description: 'Clusters Evaluated',
     },
     {
-      title: <CompactFormattedNumber number={300000000} />,
-      // title: Intl.NumberFormat('en-US', {
-      //   notation: 'compact',
-      //   maximumFractionDigits: 9,
-      // }).format(2500),
-      // description: 'desc',
+      title: <CompactFormattedNumber number={123456} />,
+      description: 'Resources Evaluated',
+      onClick: () => {},
     },
     {
-      title: 'tit',
-      description: 'desc',
-      color: 'danger',
+      title: <CompactFormattedNumber number={1234567890} />,
+      description: 'Failing Findings',
+      titleColor: 'danger',
+      onClick: () => {},
     },
   ];
 
@@ -82,26 +81,9 @@ export const CloudSummarySection = ({
     <EuiFlexGroup gutterSize="l" style={summarySectionWrapperStyle}>
       <EuiFlexItem grow={dashboardColumnsGrow.first}>
         <EuiFlexGroup direction="column">
-          {stats.map((stat) => (
+          {counters.map((counter) => (
             <EuiFlexItem>
-              <EuiCard
-                title={''}
-                hasBorder
-                titleElement="h6"
-                onClick={() => {}}
-                paddingSize="s"
-                css={{
-                  '.euiCard__title': {
-                    height: 0,
-                  },
-                }}
-              >
-                <EuiStat
-                  description={stat.description}
-                  title={stat.title}
-                  titleColor={stat.color}
-                />
-              </EuiCard>
+              <CspCounterCard counter={counter} />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
