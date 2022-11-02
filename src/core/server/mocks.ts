@@ -139,7 +139,7 @@ export type CustomRequestHandlerMock<T> = {
 };
 
 const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomRequestHandlerMock<T> => {
-  const mock = Object.entries(contextParts).reduce(
+  const mock = Object.entries(contextParts as any).reduce(
     (context, [key, value]) => {
       // @ts-expect-error type matching from inferred types is hard
       context[key] = isPromise(value) ? value : Promise.resolve(value);
