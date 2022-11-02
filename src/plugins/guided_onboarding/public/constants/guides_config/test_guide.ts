@@ -51,9 +51,8 @@ export const testGuideConfig: GuideConfig = {
     {
       id: 'step3',
       title: 'Step 3 (manual completion after click)',
-      descriptionList: [
+      description:
         'This step is completed by clicking a button on the page and then clicking the popover on the guide button in the header and marking the step done',
-      ],
       manualCompletion: {
         title: 'Manual completion step title',
         description:
