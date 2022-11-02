@@ -212,21 +212,20 @@ export const useDiscoverHistogram = ({
    * Breakdown
    */
 
-  const [field, setField] = useState(() => {
-    const fieldName = storage.get(HISTOGRAM_BREAKDOWN_FIELD_KEY);
-    return dataView.getFieldByName(fieldName);
-  });
-
   const onBreakdownFieldChange = useCallback(
     (breakdownField: DataViewField | undefined) => {
-      storage.set(HISTOGRAM_BREAKDOWN_FIELD_KEY, breakdownField?.name);
-      setField(breakdownField);
+      stateContainer.setAppState({ breakdownField: breakdownField?.name });
     },
-    [storage]
+    [stateContainer]
+  );
+
+  const field = useMemo(
+    () => (state.breakdownField ? dataView.getFieldByName(state.breakdownField) : undefined),
+    [dataView, state.breakdownField]
   );
 
   const breakdown = useMemo(
-    () => (isPlainRecord || !isTimeBased ? undefined : { field }),
+    () => (isPlainRecord || !isTimeBased || !field ? undefined : { field }),
     [field, isPlainRecord, isTimeBased]
   );
 
