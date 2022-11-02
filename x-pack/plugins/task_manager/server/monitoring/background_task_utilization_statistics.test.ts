@@ -7,7 +7,6 @@
 
 import uuid from 'uuid';
 import { Subject, Observable } from 'rxjs';
-import stats from 'stats-lite';
 import { take, bufferCount, skip, map } from 'rxjs/operators';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { asTaskRunEvent, TaskTiming, TaskPersistence } from '../task_events';
@@ -33,7 +32,7 @@ describe('Task Run Statistics', () => {
     jest.resetAllMocks();
   });
 
-  test('returns a running average of adhoc actual service_time', async () => {
+  test('returns a running count of adhoc actual service_time', async () => {
     const serviceTimes = [1000, 2000, 500, 300, 400, 15000, 20000, 200];
     const events$ = new Subject<TaskLifecycleEvent>();
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
@@ -53,12 +52,7 @@ describe('Task Run Statistics', () => {
       taskStat: AggregatedStat<SummarizedBackgroundTaskUtilizationStat>,
       window: number[]
     ) {
-      expect(taskStat.value.adhoc.ran.service_time.actual).toMatchObject({
-        p50: stats.percentile(window, 0.5),
-        p90: stats.percentile(window, 0.9),
-        p95: stats.percentile(window, 0.95),
-        p99: stats.percentile(window, 0.99),
-      });
+      expect(taskStat.value.adhoc.ran.service_time.actual).toEqual(sum(window));
     }
 
     return new Promise<void>((resolve) => {
@@ -97,7 +91,7 @@ describe('Task Run Statistics', () => {
     });
   });
 
-  test('returns a running average of adhoc adjusted service_time', async () => {
+  test('returns a running count of adhoc adjusted service_time', async () => {
     const serviceTimes = [1000, 2000, 500, 300, 400, 15000, 20000, 200];
     const events$ = new Subject<TaskLifecycleEvent>();
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
@@ -117,12 +111,7 @@ describe('Task Run Statistics', () => {
       taskStat: AggregatedStat<SummarizedBackgroundTaskUtilizationStat>,
       window: number[]
     ) {
-      expect(taskStat.value.adhoc.ran.service_time.adjusted).toMatchObject({
-        p50: stats.percentile(window, 0.5),
-        p90: stats.percentile(window, 0.9),
-        p95: stats.percentile(window, 0.95),
-        p99: stats.percentile(window, 0.99),
-      });
+      expect(taskStat.value.adhoc.ran.service_time.adjusted).toEqual(sum(window));
     }
 
     return new Promise<void>((resolve) => {
@@ -270,7 +259,7 @@ describe('Task Run Statistics', () => {
     });
   });
 
-  test('returns a running average of recurring actual service_time', async () => {
+  test('returns a running count of recurring actual service_time', async () => {
     const serviceTimes = [1000, 2000, 500, 300, 400, 15000, 20000, 200];
     const events$ = new Subject<TaskLifecycleEvent>();
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
@@ -290,12 +279,7 @@ describe('Task Run Statistics', () => {
       taskStat: AggregatedStat<SummarizedBackgroundTaskUtilizationStat>,
       window: number[]
     ) {
-      expect(taskStat.value.recurring.ran.service_time.actual).toMatchObject({
-        p50: stats.percentile(window, 0.5),
-        p90: stats.percentile(window, 0.9),
-        p95: stats.percentile(window, 0.95),
-        p99: stats.percentile(window, 0.99),
-      });
+      expect(taskStat.value.recurring.ran.service_time.actual).toEqual(sum(window));
     }
 
     return new Promise<void>((resolve) => {
@@ -334,7 +318,7 @@ describe('Task Run Statistics', () => {
     });
   });
 
-  test('returns a running average of recurring adjusted service_time', async () => {
+  test('returns a running count of recurring adjusted service_time', async () => {
     const serviceTimes = [1000, 2000, 500, 300, 400, 15000, 20000, 200];
     const events$ = new Subject<TaskLifecycleEvent>();
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
@@ -354,12 +338,7 @@ describe('Task Run Statistics', () => {
       taskStat: AggregatedStat<SummarizedBackgroundTaskUtilizationStat>,
       window: number[]
     ) {
-      expect(taskStat.value.recurring.ran.service_time.adjusted).toMatchObject({
-        p50: stats.percentile(window, 0.5),
-        p90: stats.percentile(window, 0.9),
-        p95: stats.percentile(window, 0.95),
-        p99: stats.percentile(window, 0.99),
-      });
+      expect(taskStat.value.recurring.ran.service_time.adjusted).toEqual(sum(window));
     }
 
     return new Promise<void>((resolve) => {
@@ -454,7 +433,7 @@ describe('Task Run Statistics', () => {
     });
   });
 
-  test('returns a running average of recurring tasks_per_min', async () => {
+  test('returns a running count of recurring tasks_per_min', async () => {
     const intervals = ['1h', '5m', '2h', '30m', '10m', '1m', '5h', '120m'];
     const events$ = new Subject<TaskLifecycleEvent>();
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
@@ -474,12 +453,7 @@ describe('Task Run Statistics', () => {
       taskStat: AggregatedStat<SummarizedBackgroundTaskUtilizationStat>,
       window: number[]
     ) {
-      expect(taskStat.value.recurring.tasks_per_min).toMatchObject({
-        p50: stats.percentile(window, 0.5),
-        p90: stats.percentile(window, 0.9),
-        p95: stats.percentile(window, 0.95),
-        p99: stats.percentile(window, 0.99),
-      });
+      expect(taskStat.value.recurring.tasks_per_min).toEqual(sum(window));
     }
 
     return new Promise<void>((resolve) => {

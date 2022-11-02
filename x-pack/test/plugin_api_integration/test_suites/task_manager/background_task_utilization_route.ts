@@ -22,18 +22,18 @@ interface MonitoringStats {
         };
         ran: {
           service_time: {
-            actual: Record<string, object>;
-            adjusted: Record<string, object>;
+            actual: number;
+            adjusted: number;
             task_counter: number;
           };
         };
       };
       recurring: {
-        tasks_per_min: Record<string, object>;
+        tasks_per_min: number;
         ran: {
           service_time: {
-            actual: Record<string, object>;
-            adjusted: Record<string, object>;
+            actual: number;
+            adjusted: number;
             task_counter: number;
           };
         };
@@ -83,21 +83,10 @@ export default function ({ getService }: FtrProviderContext) {
         },
       } = (await getBackgroundTaskUtilization()).stats;
       const serviceTime = ran.service_time;
-      expect(typeof tasks_per_min.p50).to.eql('number');
-      expect(typeof tasks_per_min.p90).to.eql('number');
-      expect(typeof tasks_per_min.p95).to.eql('number');
-      expect(typeof tasks_per_min.p99).to.eql('number');
+      expect(typeof tasks_per_min).to.eql('number');
 
-      expect(typeof serviceTime.actual.p50).to.eql('number');
-      expect(typeof serviceTime.actual.p90).to.eql('number');
-      expect(typeof serviceTime.actual.p95).to.eql('number');
-      expect(typeof serviceTime.actual.p99).to.eql('number');
-
-      expect(typeof serviceTime.adjusted.p50).to.eql('number');
-      expect(typeof serviceTime.adjusted.p90).to.eql('number');
-      expect(typeof serviceTime.adjusted.p95).to.eql('number');
-      expect(typeof serviceTime.adjusted.p99).to.eql('number');
-
+      expect(typeof serviceTime.actual).to.eql('number');
+      expect(typeof serviceTime.adjusted).to.eql('number');
       expect(typeof serviceTime.task_counter).to.eql('number');
     });
 
@@ -110,16 +99,8 @@ export default function ({ getService }: FtrProviderContext) {
       const serviceTime = ran.service_time;
       expect(typeof created.counter).to.eql('number');
 
-      expect(typeof serviceTime.actual.p50).to.eql('number');
-      expect(typeof serviceTime.actual.p90).to.eql('number');
-      expect(typeof serviceTime.actual.p95).to.eql('number');
-      expect(typeof serviceTime.actual.p99).to.eql('number');
-
-      expect(typeof serviceTime.adjusted.p50).to.eql('number');
-      expect(typeof serviceTime.adjusted.p90).to.eql('number');
-      expect(typeof serviceTime.adjusted.p95).to.eql('number');
-      expect(typeof serviceTime.adjusted.p99).to.eql('number');
-
+      expect(typeof serviceTime.actual).to.eql('number');
+      expect(typeof serviceTime.adjusted).to.eql('number');
       expect(typeof serviceTime.task_counter).to.eql('number');
     });
   });

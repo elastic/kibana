@@ -16,11 +16,7 @@ import { ConcreteTaskInstance } from '../task';
 import { isTaskRunEvent, TaskRun, TaskTiming } from '../task_events';
 import { MonitoredStat } from './monitoring_stats_stream';
 import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
-import {
-  AveragedStat,
-  calculateRunningAverage,
-  createRunningAveragedStat,
-} from './task_run_calcultors';
+import { createRunningAveragedStat } from './task_run_calcultors';
 
 export interface BackgroundTaskUtilizationStat extends JsonObject {
   adhoc: AdhocTaskStat;
@@ -54,18 +50,18 @@ export interface SummarizedBackgroundTaskUtilizationStat extends JsonObject {
     };
     ran: {
       service_time: {
-        actual: AveragedStat;
-        adjusted: AveragedStat;
+        actual: number;
+        adjusted: number;
         task_counter: number;
       };
     };
   };
   recurring: {
-    tasks_per_min: AveragedStat;
+    tasks_per_min: number;
     ran: {
       service_time: {
-        actual: AveragedStat;
-        adjusted: AveragedStat;
+        actual: number;
+        adjusted: number;
         task_counter: number;
       };
     };
@@ -170,18 +166,18 @@ export function summarizeUtilizationStat({ adhoc, recurring }: BackgroundTaskUti
         },
         ran: {
           service_time: {
-            actual: calculateRunningAverage(adhoc.ran.service_time.actual),
-            adjusted: calculateRunningAverage(adhoc.ran.service_time.adjusted),
+            actual: calculateSum(adhoc.ran.service_time.actual),
+            adjusted: calculateSum(adhoc.ran.service_time.adjusted),
             task_counter: calculateSum(adhoc.ran.service_time.task_counter),
           },
         },
       },
       recurring: {
-        tasks_per_min: calculateRunningAverage(recurring.tasks_per_min),
+        tasks_per_min: calculateSum(recurring.tasks_per_min),
         ran: {
           service_time: {
-            actual: calculateRunningAverage(recurring.ran.service_time.actual),
-            adjusted: calculateRunningAverage(recurring.ran.service_time.adjusted),
+            actual: calculateSum(recurring.ran.service_time.actual),
+            adjusted: calculateSum(recurring.ran.service_time.adjusted),
             task_counter: calculateSum(recurring.ran.service_time.task_counter),
           },
         },

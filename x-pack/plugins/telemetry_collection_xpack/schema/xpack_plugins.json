@@ -13340,72 +13340,20 @@
         "recurring_tasks": {
           "properties": {
             "actual_service_time": {
-              "properties": {
-                "p50": {
-                  "type": "long"
-                },
-                "p90": {
-                  "type": "long"
-                },
-                "p95": {
-                  "type": "long"
-                },
-                "p99": {
-                  "type": "long"
-                }
-              }
+              "type": "long"
             },
             "adjusted_service_time": {
-              "properties": {
-                "p50": {
-                  "type": "long"
-                },
-                "p90": {
-                  "type": "long"
-                },
-                "p95": {
-                  "type": "long"
-                },
-                "p99": {
-                  "type": "long"
-                }
-              }
+              "type": "long"
             }
           }
         },
         "adhoc_tasks": {
           "properties": {
             "actual_service_time": {
-              "properties": {
-                "p50": {
-                  "type": "long"
-                },
-                "p90": {
-                  "type": "long"
-                },
-                "p95": {
-                  "type": "long"
-                },
-                "p99": {
-                  "type": "long"
-                }
-              }
+              "type": "long"
             },
             "adjusted_service_time": {
-              "properties": {
-                "p50": {
-                  "type": "long"
-                },
-                "p90": {
-                  "type": "long"
-                },
-                "p95": {
-                  "type": "long"
-                },
-                "p99": {
-                  "type": "long"
-                }
-              }
+              "type": "long"
             }
           }
         },

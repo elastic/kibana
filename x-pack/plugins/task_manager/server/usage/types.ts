@@ -32,32 +32,12 @@ export interface TaskManagerUsage {
   };
   failed_tasks: number;
   recurring_tasks: {
-    actual_service_time: {
-      p50: number;
-      p90: number;
-      p95: number;
-      p99: number;
-    };
-    adjusted_service_time: {
-      p50: number;
-      p90: number;
-      p95: number;
-      p99: number;
-    };
+    actual_service_time: number;
+    adjusted_service_time: number;
   };
   adhoc_tasks: {
-    actual_service_time: {
-      p50: number;
-      p90: number;
-      p95: number;
-      p99: number;
-    };
-    adjusted_service_time: {
-      p50: number;
-      p90: number;
-      p95: number;
-      p99: number;
-    };
+    actual_service_time: number;
+    adjusted_service_time: number;
   };
   capacity: number;
 }

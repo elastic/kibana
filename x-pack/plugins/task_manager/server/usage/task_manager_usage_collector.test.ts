@@ -314,43 +314,18 @@ function getMockMonitoredUtilization(overrides = {}): MonitoredUtilization {
           },
           ran: {
             service_time: {
-              actual: {
-                p50: 1000,
-                p90: 2000,
-                p95: 2500,
-                p99: 3000,
-              },
-              adjusted: {
-                p50: 1000,
-                p90: 2000,
-                p95: 2500,
-                p99: 3000,
-              },
+              actual: 3000,
+              adjusted: 2500,
               task_counter: 10,
             },
           },
         },
         recurring: {
-          tasks_per_min: {
-            p50: 1000,
-            p90: 2000,
-            p95: 2500,
-            p99: 3000,
-          },
+          tasks_per_min: 2500,
           ran: {
             service_time: {
-              actual: {
-                p50: 1000,
-                p90: 2000,
-                p95: 2500,
-                p99: 3000,
-              },
-              adjusted: {
-                p50: 1000,
-                p90: 2000,
-                p95: 2500,
-                p99: 3000,
-              },
+              actual: 1000,
+              adjusted: 2000,
               task_counter: 10,
             },
           },

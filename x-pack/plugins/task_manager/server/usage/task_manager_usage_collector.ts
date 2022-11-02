@@ -68,36 +68,16 @@ export function createTaskManagerUsageCollector(
           0
         ),
         recurring_tasks: {
-          actual_service_time: {
-            p50: lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.actual.p50 ?? 0,
-            p90: lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.actual.p90 ?? 0,
-            p95: lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.actual.p95 ?? 0,
-            p99: lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.actual.p99 ?? 0,
-          },
-          adjusted_service_time: {
-            p50:
-              lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.adjusted.p50 ?? 0,
-            p90:
-              lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.adjusted.p90 ?? 0,
-            p95:
-              lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.adjusted.p95 ?? 0,
-            p99:
-              lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.adjusted.p99 ?? 0,
-          },
+          actual_service_time:
+            lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.actual ?? 0,
+          adjusted_service_time:
+            lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.adjusted ?? 0,
         },
         adhoc_tasks: {
-          actual_service_time: {
-            p50: lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.actual.p50 ?? 0,
-            p90: lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.actual.p90 ?? 0,
-            p95: lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.actual.p95 ?? 0,
-            p99: lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.actual.p99 ?? 0,
-          },
-          adjusted_service_time: {
-            p50: lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.adjusted.p50 ?? 0,
-            p90: lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.adjusted.p90 ?? 0,
-            p95: lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.adjusted.p95 ?? 0,
-            p99: lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.adjusted.p99 ?? 0,
-          },
+          actual_service_time:
+            lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.actual ?? 0,
+          adjusted_service_time:
+            lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.adjusted ?? 0,
         },
         capacity:
           lastMonitoredHealth?.stats.capacity_estimation?.value.observed
@@ -131,32 +111,12 @@ export function createTaskManagerUsageCollector(
       task_type_exclusion: { type: 'array', items: { type: 'keyword' } },
       failed_tasks: { type: 'long' },
       recurring_tasks: {
-        actual_service_time: {
-          p50: { type: 'long' },
-          p90: { type: 'long' },
-          p95: { type: 'long' },
-          p99: { type: 'long' },
-        },
-        adjusted_service_time: {
-          p50: { type: 'long' },
-          p90: { type: 'long' },
-          p95: { type: 'long' },
-          p99: { type: 'long' },
-        },
+        actual_service_time: { type: 'long' },
+        adjusted_service_time: { type: 'long' },
       },
       adhoc_tasks: {
-        actual_service_time: {
-          p50: { type: 'long' },
-          p90: { type: 'long' },
-          p95: { type: 'long' },
-          p99: { type: 'long' },
-        },
-        adjusted_service_time: {
-          p50: { type: 'long' },
-          p90: { type: 'long' },
-          p95: { type: 'long' },
-          p99: { type: 'long' },
-        },
+        actual_service_time: { type: 'long' },
+        adjusted_service_time: { type: 'long' },
       },
       capacity: { type: 'long' },
     },
