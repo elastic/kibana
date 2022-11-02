@@ -23,7 +23,7 @@ export const ObjectWeightList = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText>
+          <EuiText size="s">
             {TOTAL_SIZE_LABEL}:{' '}
             <span style={{ fontWeight: 'bold' }}>{objectMetrics.totalObjectsWeight}</span>
           </EuiText>
@@ -38,6 +38,7 @@ export const ObjectWeightList = () => {
               mimeType={mimeType}
               percent={weightPercent}
               value={weight}
+              loading={objectMetrics.loading}
             />
             <EuiSpacer size="m" />{' '}
           </>
