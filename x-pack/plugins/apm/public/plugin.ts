@@ -21,6 +21,7 @@ import type {
   DataPublicPluginStart,
   DataPublicPluginSetup,
 } from '@kbn/data-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -101,6 +102,7 @@ export interface ApmPluginStartDeps {
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
+  lens: LensPublicStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
