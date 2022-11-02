@@ -14,11 +14,15 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
+import { ObjectWeightList } from './components/object_weight_list';
+import { NetworkTimingsBreakdown } from './network_timings_breakdown';
 import { StepImage } from './components/step_image';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
+
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
 
 export const StepDetailPage = () => {
@@ -51,9 +55,9 @@ export const StepDetailPage = () => {
           name={data.details.journey.monitor.name!}
         />
       )}
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             {data?.details?.journey && currentStep && (
               <StepImage
                 ping={data?.details?.journey}
@@ -65,27 +69,30 @@ export const StepDetailPage = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             <EuiFlexGroup>
               <EuiFlexItem grow={1}>
                 {/* TODO: Add breakdown of network timings donut*/}
               </EuiFlexItem>
-              <EuiFlexItem grow={2} css={{ height: 150 }}>
-                {/* TODO: Add breakdown of network events*/}
+              <EuiFlexItem grow={2}>
+                <NetworkTimingsBreakdown />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel>{/* TODO: Add step metrics*/} </EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
+            {/* TODO: Add step metrics*/}{' '}
+          </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             <EuiFlexGroup>
-              <EuiFlexItem grow={1} css={{ height: 150 }}>
-                {/* TODO: Add breakdown of object list*/}
+              <EuiFlexItem grow={1}>
+                <ObjectWeightList />
               </EuiFlexItem>
               <EuiFlexItem grow={1}>{/* TODO: Add breakdown of object weight*/}</EuiFlexItem>
             </EuiFlexGroup>
