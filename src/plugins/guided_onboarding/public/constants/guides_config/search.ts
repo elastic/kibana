@@ -52,7 +52,7 @@ export const searchConfig: GuideConfig = {
           defaultMessage: 'Learn more about Elastic’s Search UI framework.',
         }),
         i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item2', {
-          defaultMessage: 'Adaptive relevance and curations',
+          defaultMessage: 'Try the Search UI tutorial for Elasticsearch.',
         }),
         i18n.translate('guidedOnboarding.searchGuide.searchExperienceStep.descriptionList.item3', {
           defaultMessage: 'Managing synonyms and query recommendations.',
