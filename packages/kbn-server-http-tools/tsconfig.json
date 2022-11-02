@@ -3,7 +3,7 @@
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "./target/types",
+    "outDir": "./target_types",
     "types": [
       "jest",
       "node"
