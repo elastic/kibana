@@ -413,6 +413,7 @@ export class VisualizeEmbeddable
    * @param {Element} domNode
    */
   public async render(domNode: HTMLElement) {
+    super.render(domNode);
     this.timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();
@@ -427,7 +428,6 @@ export class VisualizeEmbeddable
     this.warningDomNode = warningDiv;
 
     this.domNode = div;
-    super.render(this.domNode);
 
     render(
       <KibanaThemeProvider theme$={getTheme().theme$}>
