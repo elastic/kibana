@@ -170,7 +170,7 @@ describe('SecurityTourStep', () => {
     expect(mockCall.stepsTotal).toEqual(5);
   });
 
-  it('does render next button if step hideNextButton=false ', () => {
+  it('renders next button', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 3,
       incrementStep: jest.fn(),
@@ -188,6 +188,7 @@ describe('SecurityTourStep', () => {
        color="success"
        data-test-subj="onboarding--securityTourNextStepButton"
        onClick={[Function]}
+       onKeyDown={[Function]}
        size="s"
        tour-step="nextButton"
      >
