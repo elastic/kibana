@@ -299,6 +299,7 @@ describe('exception_list_client', () => {
         (): ReturnType<ExceptionListClient['importExceptionListAndItems']> => {
           return exceptionListClient.importExceptionListAndItems({
             exceptionsToImport: toReadable([getExceptionListItemSchemaMock()]),
+            generateNewListId: false,
             maxExceptionsImportSize: 10_000,
             overwrite: true,
           });
