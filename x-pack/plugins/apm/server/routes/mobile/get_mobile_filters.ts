@@ -12,7 +12,7 @@ import {
   rangeQuery,
 } from '@kbn/observability-plugin/server';
 import {
-  DEVICE_MODEL_IDENTIFIER,
+  DEVICE_MODEL_NAME,
   HOST_OS_VERSION,
   NETWORK_CONNECTION_TYPE,
   SERVICE_NAME,
@@ -76,7 +76,7 @@ export async function getMobileFilters({
       aggs: {
         devices: {
           terms: {
-            field: DEVICE_MODEL_IDENTIFIER,
+            field: DEVICE_MODEL_NAME,
             size: 10,
           },
         },
