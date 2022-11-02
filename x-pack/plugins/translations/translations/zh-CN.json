@@ -21594,8 +21594,6 @@
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.typeHeader": "处理器类型",
     "xpack.ml.trainedModels.modelsList.selectableMessage": "选择模型",
     "xpack.ml.trainedModels.modelsList.startDeployment.cancelButton": "取消",
-    "xpack.ml.trainedModels.modelsList.startDeployment.cloudWarningHeader": "将来，云部署会自动扩展以提供所需数量的处理器。",
-    "xpack.ml.trainedModels.modelsList.startDeployment.cloudWarningText": "但是，在本版本中，您必须在云控制台中手动增加 ML 节点的大小，以获得更多处理器。",
     "xpack.ml.trainedModels.modelsList.startDeployment.docLinkTitle": "了解详情",
     "xpack.ml.trainedModels.modelsList.startDeployment.maxNumOfProcessorsWarning": "产品的分配次数和每次分配的线程数应小于 ML 节点上处理器的总数。",
     "xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsHelp": "增加以提高所有请求的吞吐量。",
