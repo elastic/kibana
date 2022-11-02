@@ -108,7 +108,6 @@ export interface EditorFrameProps {
 export type VisualizationMap = Record<string, Visualization>;
 export type DatasourceMap = Record<string, Datasource>;
 export type IndexPatternMap = Record<string, IndexPattern>;
-export type ExistingFieldsMap = Record<string, Record<string, boolean>>;
 
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
@@ -589,7 +588,6 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   state: T;
   activeData?: Record<string, Datatable>;
   indexPatterns: IndexPatternMap;
-  existingFields: Record<string, Record<string, boolean>>;
   hideTooltip?: boolean;
   invalid?: boolean;
   invalidMessage?: string;

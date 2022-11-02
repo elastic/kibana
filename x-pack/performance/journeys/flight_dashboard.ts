@@ -21,5 +21,5 @@ export const journey = new Journey({
 
   .step('Go to Flights Dashboard', async ({ page, log }) => {
     await page.click(subj('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'));
-    await waitForVisualizations(page, log, 13);
+    await waitForVisualizations(page, log, 14);
   });
