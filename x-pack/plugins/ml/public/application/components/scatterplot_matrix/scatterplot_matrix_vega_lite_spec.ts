@@ -21,6 +21,7 @@ export const OUTLIER_SCORE_FIELD = 'outlier_score';
 
 const SCATTERPLOT_SIZE = 125;
 export const USER_SELECTION = 'user_selection';
+export const SINGLE_POINT_CLICK = 'single_point_click';
 
 export const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 export const COLOR_OUTLIER = euiPaletteNegative(2)[1];
@@ -42,6 +43,7 @@ export const getColorSpec = (
         test: {
           or: [
             { selection: USER_SELECTION },
+            { selection: SINGLE_POINT_CLICK },
             `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
           ],
         },
@@ -54,7 +56,10 @@ export const getColorSpec = (
   // this returns either a continuous or categorical color spec.
   if (color !== undefined && legendType !== undefined) {
     return {
-      condition: { selection: USER_SELECTION, value: COLOR_OUTLIER },
+      condition: {
+        value: COLOR_OUTLIER,
+        test: { or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }] },
+      },
       field: getEscapedVegaFieldName(color ?? '00FF00'),
       type: legendType,
       scale: {
@@ -63,7 +68,13 @@ export const getColorSpec = (
     };
   }
 
-  return { condition: { selection: USER_SELECTION, value: COLOR_OUTLIER }, value: DEFAULT_COLOR };
+  return {
+    condition: {
+      value: COLOR_OUTLIER,
+      test: { or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }] },
+    },
+    value: DEFAULT_COLOR,
+  };
 };
 
 // Escapes the characters .[] in field names with double backslashes
@@ -201,6 +212,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
         ? {
             selection: {
               [USER_SELECTION]: { type: 'interval', empty: 'none' },
+              [SINGLE_POINT_CLICK]: { type: 'single', empty: 'none' },
               mlOutlierScoreThreshold: {
                 type: 'single',
                 fields: ['cutoff'],
@@ -221,6 +233,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
             selection: {
               // Always allow user selection
               [USER_SELECTION]: { type: 'interval', empty: 'none' },
+              [SINGLE_POINT_CLICK]: { type: 'single', empty: 'none' },
             },
           }),
       width: SCATTERPLOT_SIZE,

@@ -21,14 +21,23 @@ import {
   COLOR_RANGE_NOMINAL,
   DEFAULT_COLOR,
   USER_SELECTION,
+  SINGLE_POINT_CLICK,
 } from './scatterplot_matrix_vega_lite_spec';
 
 describe('getColorSpec()', () => {
-  it('should return only user selection condition and the default color for non-outlier specs', () => {
+  it('should return only user selection conditions and the default color for non-outlier specs', () => {
     const colorSpec = getColorSpec(euiThemeLight);
 
     expect(colorSpec).toEqual({
-      condition: { selection: USER_SELECTION, value: COLOR_OUTLIER },
+      condition: {
+        test: {
+          or: [
+            { selection: USER_SELECTION },
+            { selection: SINGLE_POINT_CLICK },
+          ],
+        },
+        value: COLOR_OUTLIER,
+      },
       value: DEFAULT_COLOR,
     });
   });
@@ -41,6 +50,7 @@ describe('getColorSpec()', () => {
         test: {
           or: [
             { selection: USER_SELECTION },
+            { selection: SINGLE_POINT_CLICK },
             "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
           ],
         },
@@ -56,7 +66,15 @@ describe('getColorSpec()', () => {
     const colorSpec = getColorSpec(euiThemeLight, undefined, colorName, LEGEND_TYPES.NOMINAL);
 
     expect(colorSpec).toEqual({
-      condition: { selection: USER_SELECTION, value: COLOR_OUTLIER },
+      condition: {
+        test: {
+          or: [
+            { selection: USER_SELECTION },
+            { selection: SINGLE_POINT_CLICK },
+          ],
+        },
+        value: COLOR_OUTLIER,
+      },
       field: colorName,
       scale: {
         range: COLOR_RANGE_NOMINAL,
@@ -86,7 +104,15 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       type: 'circle',
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
-      condition: { selection: USER_SELECTION, value: COLOR_OUTLIER },
+      condition: {
+        test: {
+          or: [
+            { selection: USER_SELECTION },
+            { selection: SINGLE_POINT_CLICK },
+          ],
+        },
+        value: COLOR_OUTLIER,
+      },
       value: DEFAULT_COLOR,
     });
     expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
@@ -119,6 +145,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
         test: {
           or: [
             { selection: USER_SELECTION },
+            { selection: SINGLE_POINT_CLICK },
             "(datum['ml\\.outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
           ],
         },
@@ -164,7 +191,15 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       type: 'circle',
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
-      condition: { selection: USER_SELECTION, value: COLOR_OUTLIER },
+      condition: {
+        test: {
+          or: [
+            { selection: USER_SELECTION },
+            { selection: SINGLE_POINT_CLICK },
+          ],
+        },
+        value: COLOR_OUTLIER,
+      },
       field: 'the-color-field',
       scale: {
         range: COLOR_RANGE_NOMINAL,
