@@ -40,7 +40,7 @@ export function MLSingleMetricLink({
   );
 }
 
-export function useSingleMetricHref({
+function useSingleMetricHref({
   jobId,
   serviceName,
   transactionType,
@@ -55,17 +55,10 @@ export function useSingleMetricHref({
   } = useApmPluginContext();
   const { urlParams } = useLegacyUrlParams();
 
-  const timePickerRefreshIntervalDefaults =
-    core.uiSettings.get<TimePickerRefreshInterval>(
-      UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
-    );
-
   const {
     // hardcoding a custom default of 1 hour since the default kibana timerange of 15 minutes is shorter than the ML interval
     rangeFrom = 'now-1h',
     rangeTo = 'now',
-    refreshInterval = timePickerRefreshIntervalDefaults.value,
-    refreshPaused = timePickerRefreshIntervalDefaults.pause,
   } = urlParams;
 
   const entities =
@@ -83,7 +76,7 @@ export function useSingleMetricHref({
     pageState: {
       jobIds: [jobId],
       timeRange: { from: rangeFrom, to: rangeTo },
-      refreshInterval: { pause: refreshPaused, value: refreshInterval },
+      refreshInterval: { pause: true, value: 10000 },
       ...entities,
     },
   });
