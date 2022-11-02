@@ -10,6 +10,9 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiPanel } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { asPercent } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { getDurationFormatter } from '../../../../common/utils/formatters/duration';
@@ -284,31 +287,79 @@ export function AlertDetailsAppSectionTransactionDuration({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem />
-      <EuiFlexItem>
-        <ChartPointerEventContextProvider>
-          <TimeseriesChart
-            id="latencyChart"
-            height={200}
-            comparisonEnabled={comparisonEnabled}
-            offset={offset}
-            fetchStatus={status}
-            customTheme={comparisonChartTheme}
-            timeseries={timeseriesLatency}
-            yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-            anomalyTimeseries={
-              preferredAnomalyTimeseriesThroughput
-                ? {
-                    ...preferredAnomalyTimeseriesThroughput,
-                    color: anomalyTimeseriesColor,
-                  }
-                : undefined
-            }
-            timeZone={timeZone}
-          />
-          <EuiFlexItem>
-            <EuiFlexGroup direction="row" gutterSize="s">
-              <EuiFlexItem>
+      <ChartPointerEventContextProvider>
+        <EuiFlexItem>
+          <EuiPanel hasBorder={true}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h2>
+                    {i18n.translate(
+                      'xpack.apm.dependencyLatencyChart.chartTitle',
+                      {
+                        defaultMessage: 'Latency',
+                      }
+                    )}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <TimeseriesChart
+              id="latencyChart"
+              height={200}
+              comparisonEnabled={comparisonEnabled}
+              offset={offset}
+              fetchStatus={status}
+              customTheme={comparisonChartTheme}
+              timeseries={timeseriesLatency}
+              yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+              anomalyTimeseries={
+                preferredAnomalyTimeseriesThroughput
+                  ? {
+                      ...preferredAnomalyTimeseriesThroughput,
+                      color: anomalyTimeseriesColor,
+                    }
+                  : undefined
+              }
+              timeZone={timeZone}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiFlexItem>
+              <EuiPanel hasBorder={true}>
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xs">
+                      <h2>
+                        {i18n.translate(
+                          'xpack.apm.serviceOverview.throughtputChartTitle',
+                          { defaultMessage: 'Throughput' }
+                        )}
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      content={i18n.translate(
+                        'xpack.apm.serviceOverview.tpmHelp',
+                        {
+                          defaultMessage:
+                            'Throughput is measured in transactions per minute (tpm).',
+                        }
+                      )}
+                      position="right"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
                 <TimeseriesChart
                   id="throughput"
                   height={200}
@@ -328,8 +379,36 @@ export function AlertDetailsAppSectionTransactionDuration({
                   }
                   timeZone={timeZone}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel hasBorder={true}>
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xs">
+                      <h2>
+                        {i18n.translate('xpack.apm.errorRate', {
+                          defaultMessage: 'Failed transaction rate',
+                        })}
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      content={i18n.translate('xpack.apm.errorRate.tip', {
+                        defaultMessage:
+                          "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+                      })}
+                      position="right"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
                 <TimeseriesChart
                   id="errorRate"
                   height={200}
@@ -350,11 +429,11 @@ export function AlertDetailsAppSectionTransactionDuration({
                   }
                   timeZone={timeZone}
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </ChartPointerEventContextProvider>
-      </EuiFlexItem>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </ChartPointerEventContextProvider>
     </EuiFlexGroup>
   );
 }
