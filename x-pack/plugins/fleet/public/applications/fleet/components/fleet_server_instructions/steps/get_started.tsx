@@ -7,7 +7,8 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiButtonEmpty, EuiSelect, EuiStepProps } from '@elastic/eui';
+import type { EuiStepProps } from '@elastic/eui';
+import { EuiSelect, EuiButtonEmpty } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
