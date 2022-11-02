@@ -52,7 +52,6 @@ export default async function ({ readConfigFile }) {
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
         '--uiSettings.overrides.observability:enableNewSyntheticsView=true', // for OSS test management/_import_objects,
-        '--guidedOnboarding.ui=true', // Enable guided onboarding for infra/tour.ts tests
       ],
     },
     uiSettings: {
@@ -500,6 +499,33 @@ export default async function ({ readConfigFile }) {
             cluster: ['manage', 'manage_ccr'],
           },
         },
+        // There is an issue open for follower_index_user permissions not working correctly
+        // in kibana.
+        // https://github.com/elastic/kibana/issues/143720
+        // follower_index_user: {
+        //   elasticsearch: {
+        //     cluster: ['monitor', 'manage', 'manage_ccr', 'transport_client', 'read_ccr', 'all'],
+        //     indices: [
+        //       {
+        //         names: ['*'],
+        //         privileges: [
+        //           'write',
+        //           'monitor',
+        //           'manage_follow_index',
+        //           'manage_leader_index',
+        //           'read',
+        //           'view_index_metadata',
+        //         ],
+        //       },
+        //     ],
+        //   },
+        //   kibana: [
+        //     {
+        //       base: ['all'],
+        //       spaces: ['*'],
+        //     },
+        //   ],
+        // },
 
         manage_ilm: {
           elasticsearch: {

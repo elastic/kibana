@@ -12,6 +12,7 @@ export interface InferencePipeline {
   modelState: TrainedModelState;
   modelStateReason?: string;
   pipelineName: string;
+  pipelineReferences: string[];
   types: string[];
 }
 
@@ -37,9 +38,21 @@ export interface MlInferenceHistoryResponse {
 }
 
 export interface MlInferenceError {
-  message: string;
   doc_count: number;
+  message: string;
   timestamp: string | undefined; // Date string
+}
+
+export interface CreateMlInferencePipelineResponse {
+  addedToParentPipeline?: boolean;
+  created?: boolean;
+  id: string;
+}
+
+export interface AttachMlInferencePipelineResponse {
+  addedToParentPipeline?: boolean;
+  created?: boolean;
+  id: string;
 }
 
 /**
@@ -50,4 +63,11 @@ export interface MlInferenceError {
 export interface DeleteMlInferencePipelineResponse {
   deleted?: string;
   updated?: string;
+}
+
+export interface CreateMlInferencePipelineParameters {
+  destination_field?: string;
+  model_id: string;
+  pipeline_name: string;
+  source_field: string;
 }

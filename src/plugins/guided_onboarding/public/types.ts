@@ -9,6 +9,7 @@
 import { Observable } from 'rxjs';
 import { HttpSetup } from '@kbn/core/public';
 import type { GuideState, GuideId, GuideStepIds, StepStatus } from '@kbn/guided-onboarding';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuidedOnboardingPluginSetup {}
@@ -17,8 +18,8 @@ export interface GuidedOnboardingPluginStart {
   guidedOnboardingApi?: GuidedOnboardingApi;
 }
 
-export interface ClientConfigType {
-  ui: boolean;
+export interface AppPluginStartDependencies {
+  cloud?: CloudStart;
 }
 
 export interface GuidedOnboardingApi {
