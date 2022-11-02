@@ -49,11 +49,17 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
   );
 
   const onClickNext = useCallback(
-    () =>
-      // onClick should call incrementStep itself
-      onClick ? onClick() : incrementStep(stepId),
+    // onClick should call incrementStep itself
+    () => (onClick ? onClick() : incrementStep(stepId)),
     [incrementStep, onClick, stepId]
   );
+
+  // EUI bug, will remove once bug resolve. will link issue here as soon as i have it
+  const onKeyDown = useCallback((e) => {
+    if (e.key === 'Enter') {
+      e.stopPropagation();
+    }
+  }, []);
 
   // step === AlertsCasesTourSteps.createCase && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
   // If we mount this step, we know we need to render it
@@ -74,6 +80,7 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
     <EuiButton
       size="s"
       onClick={onClickNext}
+      onKeyDown={onKeyDown}
       color="success"
       data-test-subj="onboarding--securityTourNextStepButton"
       tour-step="nextButton"

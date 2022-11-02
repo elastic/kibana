@@ -40,7 +40,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
 
   return (
     <GuidedOnboardingTourStep
-      isTourAnchor={isTourAnchor}
+      isTourAnchor={isTourAnchor && !props.isDetails}
       step={AlertsCasesTourSteps.pointToAlertName}
       stepId={SecurityStepId.alertsCases}
     >
