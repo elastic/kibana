@@ -15,18 +15,23 @@ import {
   EuiPanel,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
 import { StepImage } from './components/step_image';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
 
 export const StepDetailPage = () => {
-  const { checkGroupId } = useParams<{ checkGroupId: string; stepIndex: string }>();
+  const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
 
   useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
   useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
 
   const { data, loading, isFailed, currentStep, stepLabels } = useJourneySteps(checkGroupId);
+
+  const activeStep = data?.steps?.find(
+    (step) => step.synthetics?.step?.index === Number(stepIndex)
+  );
 
   useStepDetailsBreadcrumbs([{ text: data?.details?.journey.monitor.name ?? '' }]);
 
@@ -88,7 +93,15 @@ export const StepDetailPage = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
-      <EuiPanel css={{ height: 500 }}>{/* TODO: Add breakdown of network events*/}</EuiPanel>
+      {data && (
+        <div>
+          <WaterfallChartContainer
+            checkGroup={checkGroupId}
+            stepIndex={Number(stepIndex)}
+            activeStep={activeStep}
+          />
+        </div>
+      )}
     </>
   );
 };

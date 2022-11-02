@@ -203,7 +203,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
     scopedActions,
   ]);
 
-  const { isTourShown, incrementStep } = useTourContext();
+  const { activeStep, isTourShown, incrementStep } = useTourContext();
 
   const isTourAnchor = useMemo(
     () =>
@@ -215,11 +215,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   const onExpandEvent = useCallback(() => {
-    if (isTourAnchor) {
+    const isStep2Active = activeStep === 2 && isTourShown(SecurityStepId.alertsCases);
+    if (isTourAnchor && isStep2Active) {
       incrementStep(SecurityStepId.alertsCases);
     }
     onEventDetailsPanelOpened();
-  }, [incrementStep, isTourAnchor, onEventDetailsPanelOpened]);
+  }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
 
   return (
     <ActionsContainer>
