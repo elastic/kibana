@@ -23,13 +23,13 @@ import {
   ruleExecutionStatusToRaw,
   isRuleSnoozed,
   processAlerts,
+  determineFlapping,
 } from '../lib';
 import {
   Rule,
   RuleExecutionStatus,
   RuleExecutionStatusErrorReasons,
   IntervalSchedule,
-  RawAlertInstance,
   RawRule,
   RawRuleExecutionStatus,
   RuleMonitoring,
@@ -517,12 +517,12 @@ export class TaskRunner<
       }
     });
 
-    const alertsToReturn: Record<string, RawAlertInstance> = {};
-    for (const id in activeAlerts) {
-      if (activeAlerts.hasOwnProperty(id)) {
-        alertsToReturn[id] = activeAlerts[id].toRaw();
-      }
-    }
+    // determine if flapping
+    const alertsToReturn = determineFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+      this.logger,
+      activeAlerts,
+      recoveredAlerts
+    );
 
     return {
       metrics: ruleRunMetricsStore.getMetrics(),

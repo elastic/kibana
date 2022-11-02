@@ -27,8 +27,12 @@ export type AlertInstanceState = t.TypeOf<typeof stateSchema>;
 const contextSchema = t.record(t.string, t.unknown);
 export type AlertInstanceContext = t.TypeOf<typeof contextSchema>;
 
+const flappingHistorySchema = t.array(t.boolean);
+export type AlertInstanceFlappingHistory = t.TypeOf<typeof flappingHistorySchema>;
+
 export const rawAlertInstance = t.partial({
   state: stateSchema,
   meta: metaSchema,
+  flappingHistory: flappingHistorySchema,
 });
 export type RawAlertInstance = t.TypeOf<typeof rawAlertInstance>;

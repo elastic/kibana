@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { cloneDeep, isEmpty } from 'lodash';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -13,6 +13,7 @@ import {
   rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
+  AlertInstanceFlappingHistory,
 } from '../../common';
 
 import { parseDuration } from '../lib';
@@ -45,13 +46,15 @@ export class Alert<
   private meta: AlertInstanceMeta;
   private state: State;
   private context: Context;
+  private flappingHistory: AlertInstanceFlappingHistory;
   private readonly id: string;
 
-  constructor(id: string, { state, meta = {} }: RawAlertInstance = {}) {
+  constructor(id: string, { state, meta = {}, flappingHistory = [] }: RawAlertInstance = {}) {
     this.id = id;
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
+    this.flappingHistory = cloneDeep(flappingHistory);
   }
 
   getId() {
@@ -172,6 +175,26 @@ export class Alert<
     return {
       state: this.state,
       meta: this.meta,
+      flappingHistory: this.flappingHistory,
     };
+  }
+
+  updateFlappingHistory(state: boolean) {
+    if (this.flappingHistoryAtCapacity()) {
+      this.flappingHistory.shift();
+    }
+    this.flappingHistory.push(state);
+  }
+
+  isFlapping(): boolean {
+    if (this.flappingHistoryAtCapacity()) {
+      const numStateChanges = this.flappingHistory.filter((f) => f).length;
+      return numStateChanges >= 4;
+    }
+    return false;
+  }
+
+  flappingHistoryAtCapacity(): boolean {
+    return this.flappingHistory.length === 20;
   }
 }

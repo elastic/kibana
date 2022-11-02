@@ -80,6 +80,7 @@ function processAlertsHelper<
           // Inject start time into alert state for new alerts
           const state = newAlerts[id].getState();
           newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
+          newAlerts[id].updateFlappingHistory(false);
         } else {
           // this alert did exist in previous run
           // calculate duration to date for active alerts
@@ -92,6 +93,9 @@ function processAlertsHelper<
             ...(state.start ? { start: state.start } : {}),
             ...(duration !== undefined ? { duration } : {}),
           });
+
+          const wasActive = existingAlerts[id].getLastScheduledActions()?.group !== 'recovered';
+          activeAlerts[id].updateFlappingHistory(!wasActive);
         }
       } else if (existingAlertIds.has(id)) {
         recoveredAlerts[id] = alerts[id];
@@ -106,6 +110,9 @@ function processAlertsHelper<
           ...(duration ? { duration } : {}),
           ...(state.start ? { end: currentTime } : {}),
         });
+
+        const wasActive = existingAlerts[id].getLastScheduledActions()?.group !== 'recovered';
+        recoveredAlerts[id].updateFlappingHistory(wasActive);
       }
     }
   }
