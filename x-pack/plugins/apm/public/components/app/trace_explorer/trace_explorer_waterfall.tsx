@@ -37,7 +37,6 @@ export function TraceExplorerWaterfall() {
     const nextSample = traceSamplesFetchResult.data?.traceSamples[0];
     const nextWaterfallItemId = '';
     replace(history, {
-      ...history.location,
       query: {
         traceId: nextSample?.traceId ?? '',
         transactionId: nextSample?.transactionId ?? '',
