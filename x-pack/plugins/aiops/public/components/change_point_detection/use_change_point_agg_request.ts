@@ -111,7 +111,10 @@ export function useChangePointResults(
 
   const fetchResults = useCallback(
     async (afterKey?: string, prevBucketsCount?: number) => {
-      if (!splitFieldCardinality) return;
+      if (!splitFieldCardinality) {
+        setProgress(100);
+        return;
+      }
 
       const requestPayload = getChangePointDetectionRequestBody(
         {
@@ -130,7 +133,10 @@ export function useChangePointResults(
         { rawResponse: ChangePointAggResponse }
       >(requestPayload);
 
-      if (result === null) return;
+      if (result === null) {
+        setProgress(100);
+        return;
+      }
 
       const buckets = result.rawResponse.aggregations.groupings.buckets;
 
