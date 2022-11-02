@@ -94,6 +94,18 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         },
       },
       {
+        id: 'monitor_complete',
+        label: i18n.translate('xpack.observability.expView.complete', {
+          defaultMessage: 'Complete',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+        columnType: FORMULA_COLUMN,
+        formula: 'unique_count(state.id, kql=\'monitor.status: "up"\')',
+        format: 'number',
+      },
+      {
         id: 'monitor_errors',
         label: i18n.translate('xpack.observability.expView.errors', {
           defaultMessage: 'Errors',
