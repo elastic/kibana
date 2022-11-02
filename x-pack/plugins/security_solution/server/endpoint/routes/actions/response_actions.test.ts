@@ -66,6 +66,7 @@ import {
 import { legacyMetadataSearchResponseMock } from '../metadata/support/test_support';
 import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
+import { CaseStatuses } from '@kbn/cases-components';
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;
@@ -694,6 +695,13 @@ describe('Response actions', () => {
             {
               id: `case-${counter++}`,
               title: 'case',
+              createdAt: '2022-10-31T11:49:48.806Z',
+              description: 'a description',
+              status: CaseStatuses.open,
+              totals: {
+                userComments: 1,
+                alerts: 1,
+              },
             },
           ];
         });

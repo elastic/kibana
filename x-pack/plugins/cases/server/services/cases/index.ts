@@ -28,7 +28,6 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import type {
-  GetCaseIdsByAlertIdAggs,
   CaseResponse,
   CasesFindRequest,
   CommentAttributes,
@@ -120,6 +119,15 @@ interface GetTagsArgs {
 interface GetReportersArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   filter?: KueryNode;
+}
+
+interface GetCaseIdsByAlertIdAggs {
+  references: {
+    doc_count: number;
+    caseIds: {
+      buckets: Array<{ key: string }>;
+    };
+  };
 }
 
 export class CasesService {
@@ -222,13 +230,13 @@ export class CasesService {
 
     const casesWithComments = new Map<string, CaseResponse>();
     for (const [id, caseInfo] of casesMap.entries()) {
-      const { alerts, nonAlerts } = commentTotals.get(id) ?? { alerts: 0, nonAlerts: 0 };
+      const { alerts, userComments } = commentTotals.get(id) ?? { alerts: 0, userComments: 0 };
 
       casesWithComments.set(
         id,
         flattenCaseSavedObject({
           savedObject: caseInfo,
-          totalComment: nonAlerts,
+          totalComment: userComments,
           totalAlerts: alerts,
         })
       );
