@@ -3116,6 +3116,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-logging-browser-internal@link:bazel-bin/packages/core/logging/core-logging-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-logging-browser-mocks@link:bazel-bin/packages/core/logging/core-logging-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-logging-common-internal@link:bazel-bin/packages/core/logging/core-logging-common-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
   version "0.0.0"
   uid ""
