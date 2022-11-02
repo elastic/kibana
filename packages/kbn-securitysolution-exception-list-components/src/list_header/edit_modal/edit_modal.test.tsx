@@ -7,12 +7,14 @@
  */
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import * as i18n from '../../translations';
 import { EditModal } from '.';
 
 const onSave = jest.fn();
 const onCancel = jest.fn();
 
 describe('EditModal', () => {
+  beforeEach(() => jest.clearAllMocks());
   it('should render the title and description from listDetails', () => {
     const wrapper = render(
       <EditModal
@@ -24,7 +26,7 @@ describe('EditModal', () => {
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.getByTestId('editModalTitle')).toHaveTextContent('list name');
   });
-  it('should call onSave', () => {
+  it('should call onSave when submitting the form', () => {
     const wrapper = render(
       <EditModal
         listDetails={{ name: 'list name', description: 'list description' }}
@@ -33,8 +35,10 @@ describe('EditModal', () => {
       />
     );
     fireEvent.submit(wrapper.getByTestId('editModalForm'));
+    expect(wrapper.getByTestId('editModalProgess')).toBeInTheDocument();
     expect(onSave).toBeCalled();
   });
+
   it('should call onCancel', () => {
     const wrapper = render(
       <EditModal
@@ -67,5 +71,37 @@ describe('EditModal', () => {
       name: 'New list name',
       description: 'New description name',
     });
+  });
+
+  it('should not call onSave when submitting the form with invalid values', () => {
+    const wrapper = render(
+      <EditModal
+        listDetails={{ name: 'list name', description: 'list description' }}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
+    const nameField = wrapper.getByTestId('editModalNameTextField');
+    fireEvent.change(nameField, {
+      target: { value: '' },
+    });
+    fireEvent.blur(nameField);
+    expect(nameField).toBeInvalid();
+    expect(wrapper.queryByTestId('editModalProgess')).not.toBeInTheDocument();
+    fireEvent.submit(wrapper.getByTestId('editModalForm'));
+    expect(onSave).not.toBeCalled();
+    expect(wrapper.getByText(i18n.LIST_NAME_REQUIRED_ERROR)).toBeTruthy();
+  });
+  it('should call onCanel when clicking on close button', () => {
+    const wrapper = render(
+      <EditModal
+        listDetails={{ name: 'list name', description: 'list description' }}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
+    const closeButton = wrapper.getByLabelText('Closes this modal window');
+    fireEvent.click(closeButton);
+    expect(onCancel).toBeCalled();
   });
 });
