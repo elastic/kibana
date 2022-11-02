@@ -15,6 +15,7 @@ import {
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  SEARCH_EXPERIENCES_PLUGIN,
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
@@ -127,5 +128,11 @@ export const useWorkplaceSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
 export const useEnterpriseSearchContentBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs([
     { text: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE, path: '/' },
+    ...breadcrumbs,
+  ]);
+
+export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([
+    { text: SEARCH_EXPERIENCES_PLUGIN.NAV_TITLE, path: '/' },
     ...breadcrumbs,
   ]);

@@ -5,28 +5,11 @@
  * 2.0.
  */
 
-import {
-  BulkAction,
-  BulkActionEditType,
-} from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
-import { computeDryRunPayload } from './compute_dry_run_payload';
+import { computeDryRunEditPayload } from './compute_dry_run_edit_payload';
 
-describe('computeDryRunPayload', () => {
-  test.each([
-    [BulkAction.export],
-    [BulkAction.duplicate],
-    [BulkAction.delete],
-    [BulkAction.enable],
-    [BulkAction.disable],
-  ])('should return payload undefined if action is %s', (action) => {
-    expect(computeDryRunPayload(action)).toBeUndefined();
-  });
-
-  test('should return payload undefined if bulkEdit action is not defined', () => {
-    expect(computeDryRunPayload(BulkAction.edit)).toBeUndefined();
-  });
-
+describe('computeDryRunEditPayload', () => {
   test.each([
     [BulkActionEditType.set_index_patterns, []],
     [BulkActionEditType.delete_index_patterns, []],
@@ -36,7 +19,7 @@ describe('computeDryRunPayload', () => {
     [BulkActionEditType.set_tags, []],
     [BulkActionEditType.set_timeline, { timeline_id: '', timeline_title: '' }],
   ])('should return correct payload for bulk edit action %s', (editAction, value) => {
-    const payload = computeDryRunPayload(BulkAction.edit, editAction);
+    const payload = computeDryRunEditPayload(editAction);
     expect(payload).toHaveLength(1);
     expect(payload?.[0].type).toEqual(editAction);
     expect(payload?.[0].value).toEqual(value);
