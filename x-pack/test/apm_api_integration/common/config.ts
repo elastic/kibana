@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
-import supertest from 'supertest';
-import { format, UrlObject } from 'url';
 import {
   ApmUsername,
   APM_TEST_PASSWORD,
 } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
-import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { FtrConfigProviderContext } from '@kbn/test';
+import supertest from 'supertest';
+import { format, UrlObject } from 'url';
+import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
-import { RegistryProvider } from './registry';
 import { bootstrapApmSynthtrace } from './bootstrap_apm_synthtrace';
-import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
+import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
+import { RegistryProvider } from './registry';
 
 export interface ApmFtrConfig {
   name: APMFtrConfigName;
@@ -43,7 +44,37 @@ async function getApmApiClient({
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-export function createTestConfig(config: ApmFtrConfig) {
+type ApmApiClientKey =
+  | 'noAccesUser'
+  | 'readUser'
+  | 'writeUser'
+  | 'annotationWriterUser'
+  | 'noMlAccessUser'
+  | 'manageOwnAgentKeysUser'
+  | 'createAndAllAgentKeysUser'
+  | 'monitorClusterAndIndicesUser';
+
+export interface CreateTest {
+  testFiles: string[];
+  servers: any;
+  servicesRequiredForTestAnalysis: string[];
+  services: InheritedServices & {
+    apmFtrConfig: () => ApmFtrConfig;
+    registry: ReturnType<typeof RegistryProvider>;
+    synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
+    apmApiClient: (
+      context: InheritedFtrProviderContext
+    ) => Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
+    ml: ReturnType<typeof MachineLearningAPIProvider>;
+  };
+  junit: { reportName: string };
+  esTestCluster: any;
+  kbnTestServer: any;
+}
+
+export function createTestConfig(
+  config: ApmFtrConfig
+): ({ readConfigFile }: FtrConfigProviderContext) => Promise<CreateTest> {
   const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -51,7 +82,7 @@ export function createTestConfig(config: ApmFtrConfig) {
       require.resolve('../../api_integration/config.ts')
     );
 
-    const services = xPackAPITestsConfig.get('services') as InheritedServices;
+    const services = xPackAPITestsConfig.get('services');
     const servers = xPackAPITestsConfig.get('servers');
     const kibanaServer = servers.kibana as UrlObject;
     const kibanaServerUrl = format(kibanaServer);
