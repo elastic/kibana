@@ -13,6 +13,7 @@ import type { RuleAlertType } from '../../../rule_schema';
 import type { BulkActionEditForRuleParams } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
+import { BulkEditSkipReason } from '../../api/rules/bulk_actions/route';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -37,9 +38,9 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
 
-      if (ruleParams.dataViewId != null && !action.overwrite_data_views) {
-        break;
-      }
+      const dataViewExistsAndNotOverriden =
+        ruleParams.dataViewId != null && !action.overwrite_data_views;
+      invariant(!dataViewExistsAndNotOverriden, BulkEditSkipReason.DataViewExistsAndNotOverriden);
 
       if (action.overwrite_data_views) {
         ruleParams.dataViewId = undefined;

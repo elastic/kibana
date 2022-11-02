@@ -116,6 +116,14 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
   return Array.from(errorsMap, ([_, normalizedError]) => normalizedError);
 };
 
+function isBulkEditError(error: BulkActionError | BulkEditError): error is BulkEditError {
+  return (error as BulkEditError).message !== undefined;
+}
+
+export enum BulkEditSkipReason {
+  DataViewExistsAndNotOverriden = 'DataViewExistsAndNotOverriden',
+}
+
 const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
@@ -126,18 +134,29 @@ const buildBulkResponse = (
     deleted = [],
   }: {
     isDryRun?: boolean;
-    errors?: BulkActionError[];
+    errors?: BulkActionError[] | BulkEditError[];
     updated?: RuleAlertType[];
     created?: RuleAlertType[];
     deleted?: RuleAlertType[];
   }
 ) => {
+  const skipped = (
+    errors.filter((error) => {
+      if (isBulkEditError(error)) {
+        return Object.values(BulkEditSkipReason).includes(error.message as BulkEditSkipReason);
+      }
+      return false;
+    }) as BulkEditError[]
+  ).map(({ rule }) => rule) as RuleAlertType[];
+
   const numSucceeded = updated.length + created.length + deleted.length;
-  const numFailed = errors.length;
+  const numSkipped = skipped.length;
+  const numFailed = errors.length - numSkipped;
   const summary = {
     failed: numFailed,
     succeeded: numSucceeded,
-    total: numSucceeded + numFailed,
+    skipped: numSkipped,
+    total: numSucceeded + numFailed + numFailed + numSkipped,
   };
 
   // if response is for dry_run, empty lists of rules returned, as rules are not actually updated and stored within ES
@@ -147,11 +166,13 @@ const buildBulkResponse = (
         updated: [],
         created: [],
         deleted: [],
+        skipped: [],
       }
     : {
         updated: updated.map((rule) => internalRuleToAPIResponse(rule)),
         created: created.map((rule) => internalRuleToAPIResponse(rule)),
         deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
+        skipped: skipped.map((rule) => internalRuleToAPIResponse(rule)),
       };
 
   if (numFailed > 0) {
@@ -366,7 +387,7 @@ export const performBulkActionRoute = (
             },
             abortSignal: abortController.signal,
           });
-
+          debugger;
           return buildBulkResponse(response, {
             updated: migrationOutcome.results
               .filter(({ result }) => result)
