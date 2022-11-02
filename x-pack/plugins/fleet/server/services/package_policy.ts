@@ -187,6 +187,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           savedObjectsClient: soClient,
           pkgName: packagePolicy.package.name,
           pkgVersion: packagePolicy.package.version,
+          prerelease: true,
         }));
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
@@ -508,6 +509,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
+        prerelease: true,
       });
 
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
@@ -801,6 +803,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectsClient: soClient,
         pkgName: packagePolicy!.package!.name,
         pkgVersion: pkgVersion ?? '',
+        prerelease: !!pkgVersion, // using prerelease only if version is specified
       });
     }
 
@@ -1129,6 +1132,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       pkgName,
       pkgVersion,
       skipArchive: true,
+      prerelease: true,
     });
     if (packageInfo) {
       return packageToPackagePolicy(packageInfo, '');
@@ -1146,6 +1150,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectsClient: soClient,
         pkgName: pkgInstall.name,
         pkgVersion: pkgInstall.version,
+        prerelease: true,
       });
 
       if (packageInfo) {
@@ -1594,6 +1599,7 @@ async function getPackageInfoForPackagePolicies(
         savedObjectsClient: soClient,
         pkgName: pkgInfo.name,
         pkgVersion: pkgInfo.version,
+        prerelease: true,
       });
 
       resultMap.set(pkgKey, pkgInfoData);

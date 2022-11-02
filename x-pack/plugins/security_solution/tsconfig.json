@@ -17,8 +17,10 @@
   ],
   "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/setup_node_env/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../../../src/plugins/files/tsconfig.json"},
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/inspector/tsconfig.json" },
     { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
@@ -46,7 +48,6 @@
     { "path": "../security/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../threat_intelligence/tsconfig.json" },
-    { "path": "../timelines/tsconfig.json" },
-    { "path": "../files/tsconfig.json"}
+    { "path": "../timelines/tsconfig.json" }
   ]
 }
