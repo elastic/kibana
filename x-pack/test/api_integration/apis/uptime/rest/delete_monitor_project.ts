@@ -315,7 +315,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const response = await supertest
           .delete(
-            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
               '{projectName}',
               project
             )}`
