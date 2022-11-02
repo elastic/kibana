@@ -12,6 +12,9 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function createRegisteredRuleTypeTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
+  // This test is intended to fail when new rule types are registered.
+  // To resolve, add the new rule type ID to this list. This will trigger
+  // a CODEOWNERS review by Response Ops.
   describe('check registered rule types', () => {
     it('should list all registered rule types', async () => {
       const registeredRuleTypes = await supertest
