@@ -76,7 +76,6 @@ class OptionsListService implements ControlsOptionsListService {
           method: 'POST',
         }
       );
-      console.log('response', response);
       return response;
     },
     this.optionsListCacheResolver

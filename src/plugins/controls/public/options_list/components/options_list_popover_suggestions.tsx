@@ -74,22 +74,24 @@ export const OptionsListPopoverSuggestions = ({
 
   return (
     <>
-      {!hideExists && !existsSelectionInvalid && (
-        <EuiFilterSelectItem
-          data-test-subj={`optionsList-control-selection-exists`}
-          checked={existsSelected ? 'on' : undefined}
-          key={'exists-option'}
-          onClick={() => {
-            dispatch(selectExists(!Boolean(existsSelected)));
-          }}
-        >
-          <span className="optionsList__existsFilter">
-            {exclude
-              ? OptionsListStrings.controlAndPopover.getNegateExists()
-              : OptionsListStrings.controlAndPopover.getExists()}
-          </span>
-        </EuiFilterSelectItem>
-      )}
+      {!hideExists &&
+        ((showOnlySelected && existsSelected) ||
+          (!showOnlySelected && !existsSelectionInvalid)) && (
+          <EuiFilterSelectItem
+            data-test-subj={`optionsList-control-selection-exists`}
+            checked={existsSelected ? 'on' : undefined}
+            key={'exists-option'}
+            onClick={() => {
+              dispatch(selectExists(!Boolean(existsSelected)));
+            }}
+          >
+            <span className="optionsList__existsFilter">
+              {exclude
+                ? OptionsListStrings.controlAndPopover.getNegateExists()
+                : OptionsListStrings.controlAndPopover.getExists()}
+            </span>
+          </EuiFilterSelectItem>
+        )}
       {suggestions?.map((suggestion, index) => (
         <EuiFilterSelectItem
           data-test-subj={`optionsList-control-selection-${suggestion}`}
