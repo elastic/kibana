@@ -52,7 +52,9 @@ export const App: FunctionComponent = () => {
       // TODO: Handle click
       onClickTitle={() => {}}
       // TODO: Handle delete
-      deleteItems={async () => {}}
+      deleteItems={async (items) => {
+        await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });
+      }}
       asManagementSection
     />
   );
