@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import type { CSSProperties } from 'react';
-import React, { memo, useMemo } from 'react';
-import { EuiButtonEmpty, EuiLoadingContent, EuiText } from '@elastic/eui';
+import React, { memo, useMemo, type CSSProperties } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiLoadingContent,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { FormattedError } from '../formatted_error';
-import { useGetFileInfo } from '../../hooks/endpoint/use_get_file_info';
+import { useGetFileInfo } from '../../hooks/response_actions/use_get_file_info';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
@@ -40,6 +45,7 @@ export interface ResponseActionFileDownloadLinkProps {
   agentId?: string;
   buttonTitle?: string;
   'data-test-subj'?: string;
+  textSize?: 's' | 'xs';
 }
 
 /**
@@ -49,7 +55,13 @@ export interface ResponseActionFileDownloadLinkProps {
  * NOTE: Currently displays only the link for the first host in the Action
  */
 export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLinkProps>(
-  ({ action, agentId, buttonTitle = DEFAULT_BUTTON_TITLE, 'data-test-subj': dataTestSubj }) => {
+  ({
+    action,
+    agentId,
+    buttonTitle = DEFAULT_BUTTON_TITLE,
+    'data-test-subj': dataTestSubj,
+    textSize = 's',
+  }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
 
@@ -97,31 +109,32 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     }
 
     return (
-      <>
-        <EuiButtonEmpty
-          href={downloadUrl}
-          iconType="download"
-          data-test-subj={getTestId('downloadButton')}
-          flush="left"
-          style={STYLE_INHERIT_FONT_FAMILY}
-          download
-        >
-          <EuiText size="s">{buttonTitle}</EuiText>
-        </EuiButtonEmpty>
-        <EuiText
-          size="s"
-          className="eui-displayInline"
-          data-test-subj={getTestId('passcodeMessage')}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo"
-            defaultMessage="(ZIP file passcode: {passcode})"
-            values={{
-              passcode: 'elastic',
-            }}
-          />
-        </EuiText>
-      </>
+      <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj={dataTestSubj}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            href={downloadUrl}
+            iconType="download"
+            data-test-subj={getTestId('downloadButton')}
+            flush="left"
+            style={STYLE_INHERIT_FONT_FAMILY}
+            download
+            size={textSize}
+          >
+            <EuiText size={textSize}>{buttonTitle}</EuiText>
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size={textSize} data-test-subj={getTestId('passcodeMessage')}>
+            <FormattedMessage
+              id="xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo"
+              defaultMessage="(ZIP file passcode: {passcode})"
+              values={{
+                passcode: 'elastic',
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );
