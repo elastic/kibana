@@ -18,11 +18,16 @@ import { TransactionsTable } from '../../../shared/transactions_table';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { MostUsedChart, MostUsedMetric } from './most_used_chart';
+import { MostUsedChart } from './most_used_chart';
 import { LatencyMap } from './latency_map';
 import { MobileFilters } from './filters';
 import { useFiltersForMobileCharts } from './use_filters_for_mobile_charts';
-
+import {
+  DEVICE_MODEL_NAME,
+  HOST_OS_VERSION,
+  NETWORK_CONNECTION_TYPE,
+  SERVICE_VERSION,
+} from '../../../../../common/elasticsearch_fieldnames';
 interface Props {
   latencyChartHeight: number;
   rowDirection: 'column' | 'row';
@@ -162,7 +167,7 @@ export function ServiceOverviewMobileCharts({
           <EuiFlexItem>
             <MostUsedChart
               title="Most used device"
-              metric={MostUsedMetric.DEVICE_NAME}
+              metric={DEVICE_MODEL_NAME}
               start={start}
               end={end}
               kuery={kuery}
@@ -173,7 +178,7 @@ export function ServiceOverviewMobileCharts({
           <EuiFlexItem>
             <MostUsedChart
               title="Most used NCT"
-              metric={MostUsedMetric.NCT}
+              metric={NETWORK_CONNECTION_TYPE}
               start={start}
               end={end}
               kuery={kuery}
@@ -188,7 +193,7 @@ export function ServiceOverviewMobileCharts({
           <EuiFlexItem>
             <MostUsedChart
               title="Most used OS version"
-              metric={MostUsedMetric.OS_VERSION}
+              metric={HOST_OS_VERSION}
               start={start}
               end={end}
               kuery={kuery}
@@ -199,7 +204,7 @@ export function ServiceOverviewMobileCharts({
           <EuiFlexItem>
             <MostUsedChart
               title="Most used app version"
-              metric={MostUsedMetric.APP_VERSION}
+              metric={SERVICE_VERSION}
               start={start}
               end={end}
               kuery={kuery}

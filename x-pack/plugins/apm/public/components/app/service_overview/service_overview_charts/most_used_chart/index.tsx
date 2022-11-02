@@ -12,13 +12,18 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLensAttributes } from './get_lens_attributes';
+import {
+  DEVICE_MODEL_NAME,
+  HOST_OS_VERSION,
+  NETWORK_CONNECTION_TYPE,
+  SERVICE_VERSION,
+} from '../../../../../../common/elasticsearch_fieldnames';
 
-export enum MostUsedMetric {
-  DEVICE_NAME = 'device.model.name',
-  NCT = 'network.connection.type',
-  APP_VERSION = 'agent.version',
-  OS_VERSION = 'host.os.version',
-}
+export type MostUsedMetricTypes =
+  | typeof DEVICE_MODEL_NAME
+  | typeof SERVICE_VERSION
+  | typeof HOST_OS_VERSION
+  | typeof NETWORK_CONNECTION_TYPE;
 
 export function MostUsedChart({
   title,
@@ -33,7 +38,7 @@ export function MostUsedChart({
   end: string;
   kuery: string;
   filters: Filter[];
-  metric: MostUsedMetric;
+  metric: MostUsedMetricTypes;
   bucketSize?: number;
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();

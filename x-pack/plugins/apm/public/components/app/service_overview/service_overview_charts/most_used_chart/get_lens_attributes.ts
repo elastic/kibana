@@ -14,18 +14,18 @@ import {
 } from '@kbn/lens-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../common/data_view_constants';
-import { MostUsedMetric } from './';
+import { MostUsedMetricTypes } from './';
 
 const BUCKET_SIZE = 5;
 
 export function getLensAttributes({
   metric,
   filters,
-  kuery,
+  kuery = '',
 }: {
-  metric: MostUsedMetric;
+  metric: MostUsedMetricTypes;
   filters: Filter[];
-  kuery: string;
+  kuery?: string;
 }): TypedLensByValueInput['attributes'] {
   const metricId = metric.replaceAll('.', '-');
   const dataLayer: PersistedIndexPatternLayer = {
