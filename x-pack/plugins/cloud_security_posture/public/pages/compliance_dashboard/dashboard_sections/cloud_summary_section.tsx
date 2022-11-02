@@ -10,6 +10,8 @@ import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { PartitionElementEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
+import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
+import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import { ChartPanel } from '../../../components/chart_panel';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
@@ -62,8 +64,12 @@ export const CloudSummarySection = ({
       description: 'desc',
     },
     {
-      title: 'tit',
-      description: 'desc',
+      title: <CompactFormattedNumber number={300000000} />,
+      // title: Intl.NumberFormat('en-US', {
+      //   notation: 'compact',
+      //   maximumFractionDigits: 9,
+      // }).format(2500),
+      // description: 'desc',
     },
     {
       title: 'tit',
