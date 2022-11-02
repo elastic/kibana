@@ -114,11 +114,13 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   const { pathname } = useLocation();
   const isTourEnabled = useIsExperimentalFeatureEnabled('guidedOnboarding');
 
-  if (isDetectionsPath(pathname) && isTourEnabled) {
-    return <RealTourContextProvider>{children}</RealTourContextProvider>;
-  }
+  const ContextProvider = useMemo(
+    () =>
+      isDetectionsPath(pathname) && isTourEnabled ? RealTourContextProvider : TourContext.Provider,
+    [isTourEnabled, pathname]
+  );
 
-  return <TourContext.Provider value={initialState}>{children}</TourContext.Provider>;
+  return <ContextProvider value={initialState}>{children}</ContextProvider>;
 };
 
 export const useTourContext = (): TourContextValue => {
