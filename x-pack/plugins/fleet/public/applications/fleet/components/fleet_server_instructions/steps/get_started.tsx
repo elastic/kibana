@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { EuiStepProps } from '@elastic/eui';
+import { EuiSelect, EuiStepProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -40,7 +40,9 @@ export function getGettingStartedStep(props: QuickStartCreateForm): EuiStepProps
 }
 
 const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> = ({
+  fleetServerHosts,
   fleetServerHost,
+  setFleetServerHost,
   status,
   error,
   inputs,
@@ -92,50 +94,92 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
       </EuiText>
 
       <EuiSpacer size="m" />
+      {fleetServerHosts.length > 0 ? (
+        <>
+          <EuiSelect
+            fullWidth
+            prepend={
+              <EuiText size="relative" color={''}>
+                <FormattedMessage
+                  id="xpack.fleet.fleetServerSetup.fleetServerHostsLabel"
+                  defaultMessage="Fleet Server Hosts"
+                />
+              </EuiText>
+            }
+            onChange={(e) =>
+              setFleetServerHost(
+                fleetServerHosts.find((fleetServerHost) => fleetServerHost.id === e.target.value)
+              )
+            }
+            options={fleetServerHosts
+              .map((fleetServerHost) => {
+                return {
+                  text: fleetServerHost.name,
+                  value: fleetServerHost.id,
+                };
+              })
+              .concat([
+                {
+                  text: i18n.translate('xpack.fleet.fleetServerSetup.addOneLabel', {
+                    defaultMessage: 'Add a new host',
+                  }),
+                  value: '@@##ADD_FLEET_SERVER_HOST##@@',
+                },
+              ])}
+          />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
 
       <EuiForm onSubmit={submit}>
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.fleet.fleetServerSetup.nameInputLabel"
-              defaultMessage="Name"
-            />
-          }
-          {...inputs.nameInput.formRowProps}
-        >
-          <EuiFieldText
-            data-test-subj="fleetServerSetup.nameInput"
-            fullWidth
-            placeholder={i18n.translate('xpack.fleet.fleetServerSetup.nameInputPlaceholder', {
-              defaultMessage: 'Specify name',
-            })}
-            {...inputs.nameInput.props}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage id="xpack.fleet.fleetServerSetup.hostUrlLabel" defaultMessage="URL" />
-          }
-        >
+        {!fleetServerHost ? (
           <>
-            <MultiRowInput
-              data-test-subj="fleetServerSetup.multiRowInput"
-              {...inputs.hostUrlsInput.props}
-              placeholder={i18n.translate(
-                'xpack.fleet.fleetServerSetup.fleetServerHostsInputPlaceholder',
-                {
-                  defaultMessage: 'Specify host URL',
-                }
-              )}
-            />
-            {status === 'error' && <EuiFormErrorText>{error}</EuiFormErrorText>}
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.fleetServerSetup.nameInputLabel"
+                  defaultMessage="Name"
+                />
+              }
+              {...inputs.nameInput.formRowProps}
+            >
+              <EuiFieldText
+                data-test-subj="fleetServerSetup.nameInput"
+                fullWidth
+                placeholder={i18n.translate('xpack.fleet.fleetServerSetup.nameInputPlaceholder', {
+                  defaultMessage: 'Specify name',
+                })}
+                {...inputs.nameInput.props}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.fleetServerSetup.hostUrlLabel"
+                  defaultMessage="URL"
+                />
+              }
+            >
+              <>
+                <MultiRowInput
+                  data-test-subj="fleetServerSetup.multiRowInput"
+                  {...inputs.hostUrlsInput.props}
+                  placeholder={i18n.translate(
+                    'xpack.fleet.fleetServerSetup.fleetServerHostsInputPlaceholder',
+                    {
+                      defaultMessage: 'Specify host URL',
+                    }
+                  )}
+                />
+                {status === 'error' && <EuiFormErrorText>{error}</EuiFormErrorText>}
+              </>
+            </EuiFormRow>
+
+            <EuiSpacer size="m" />
           </>
-        </EuiFormRow>
-
-        <EuiSpacer size="m" />
-
+        ) : null}
         <EuiButton
           isLoading={status === 'loading'}
           onClick={submit}
