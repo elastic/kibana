@@ -19,7 +19,7 @@ export interface GetBasicDataFromDetailsData {
   userName: string;
   ruleName: string;
   timestamp: string;
-  data: any;
+  data: TimelineEventsDetailsItem[] | null;
 }
 
 export const useBasicDataFromDetailsData = (

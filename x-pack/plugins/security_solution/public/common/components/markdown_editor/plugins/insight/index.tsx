@@ -91,11 +91,17 @@ export const parser: Plugin = function () {
         configuration = JSON.parse(configurationString);
         if (Array.isArray(configuration.providers)) {
           const providerConfig = configuration.providers.reduce((prev, next) => {
+            const { type, ...fieldKeyValue } = next;
+            const [[field, value]] = Object.entries(fieldKeyValue);
             return {
               ...prev,
-              [next.field]: next,
+              [field]: {
+                //field,
+                value,
+                type,
+              },
             };
-          }, {});
+          }, Object.create(null));
           configuration = { ...configuration, ...providerConfig };
           delete configuration.providers;
         }
@@ -125,18 +131,13 @@ const OpenInsightInTimeline = (scopeId) => {
     ...providers
   }: InsightComponentProps) => {
     const { data: alertData, alertId } = useContext(BasicAlertDataContext);
-    console.log(alertData, alertId);
-    const providerGlob = useMemo(() => {
-      return Object.values(providers);
-    }, [providers]);
     const { dataProviders } = useInsightDataProviders({
-      providers: providerGlob,
+      providers,
       scopeId,
       alertData,
       alertId,
     });
-    console.log({ dataProviders });
-    const { totalCount, isQueryLoading } = useInsightQuery({
+    const { totalCount, isQueryLoading, oldestTimestamp } = useInsightQuery({
       dataProviders,
       scopeId,
       alertData,
