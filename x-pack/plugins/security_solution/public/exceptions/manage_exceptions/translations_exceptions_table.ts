@@ -194,3 +194,10 @@ export const UPLOAD_ERROR = i18n.translate(
     defaultMessage: 'There was an error uploading the exception list.',
   }
 );
+
+export const IMPORT_EXCEPTION_LIST = i18n.translate(
+  'xpack.securitySolution.lists.importExceptionListButton',
+  {
+    defaultMessage: 'Import exception list',
+  }
+);

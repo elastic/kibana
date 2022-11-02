@@ -370,7 +370,7 @@ export const ExceptionListsTable = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType={'importAction'} onClick={() => setDisplayImportListFlyout(true)}>
-            {'Import exception list'}
+            {i18n.IMPORT_EXCEPTION_LIST}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

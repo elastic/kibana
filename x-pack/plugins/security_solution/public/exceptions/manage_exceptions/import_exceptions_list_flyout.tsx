@@ -132,16 +132,16 @@ export const ImportExceptionListFlyout = React.memo(
       <EuiFlyout ownFocus size="s" onClose={() => setDisplayImportListFlyout(false)}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>{'Import shared exception list'}</h2>
+            <h2>{i18n.IMPORT_EXCEPTION_LIST_HEADER}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiText>{'Select shared exception lists to import'}</EuiText>
+          <EuiText>{i18n.IMPORT_EXCEPTION_LIST_BODY}</EuiText>
           <EuiFilePicker
             id={filePickerId}
             multiple
             ref={filePickerRef}
-            initialPromptText="Select or drag and drop multiple files"
+            initialPromptText={i18n.IMPORT_PROMPT}
             onChange={handleFileChange}
             display={'large'}
             aria-label="Use aria labels when no actual label is in use"
@@ -181,7 +181,7 @@ export const ImportExceptionListFlyout = React.memo(
                 onClick={() => setDisplayImportListFlyout(false)}
                 flush="left"
               >
-                {'Close'}
+                {i18n.CLOSE_FLYOUT}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
