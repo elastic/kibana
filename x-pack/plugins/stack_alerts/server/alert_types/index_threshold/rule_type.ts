@@ -209,12 +209,25 @@ export function getRuleType(
         continue;
       }
 
+      logger.info(
+        `INDEX THRESHOLD RESULT ${ruleId} ${name} ${JSON.stringify(
+          params
+        )} isGroupAgg ${isGroupAgg} value ${value} threshold ${params.threshold}`
+      );
+
       // group aggregations use the bucket selector agg to compare conditions
       // within the ES query, so only 'met' results are returned, therefore we don't need
       // to use the compareFn
       const met = isGroupAgg ? true : compareFn(value, params.threshold);
 
+      logger.info(
+        `INDEX THRESHOLD RESULT ${ruleId} ${name} ${JSON.stringify(
+          params
+        )} isGroupAgg ${isGroupAgg} value ${value} threshold ${params.threshold} met ${met}`
+      );
+
       if (!met) {
+        logger.info(`threshold not met ${alertId}`);
         unmetGroupValues[alertId] = value;
         continue;
       }
