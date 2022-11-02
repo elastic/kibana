@@ -32,6 +32,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
     'elasticsearch',
     'appSearch',
     'workplaceSearch',
+    'searchExperiences',
   ];
 
   describe('catalogue', () => {

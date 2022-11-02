@@ -16,6 +16,7 @@ import {
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  SEARCH_EXPERIENCES_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 import { enableBehavioralAnalyticsSection } from '../../../../common/ui_settings_keys';
@@ -106,6 +107,16 @@ export const useEnterpriseSearchNav = () => {
             to: ELASTICSEARCH_PLUGIN.URL,
           }),
         },
+        {
+          id: 'searchExperiences',
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+            defaultMessage: 'Search Experiences',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: SEARCH_EXPERIENCES_PLUGIN.URL,
+          }),
+        },
         ...(productAccess.hasAppSearchAccess
           ? [
               {
@@ -135,7 +146,7 @@ export const useEnterpriseSearchNav = () => {
             ]
           : []),
       ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
         defaultMessage: 'Search',
       }),
     },

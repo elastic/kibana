@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export {
-  SetEnterpriseSearchChrome,
-  SetAnalyticsChrome,
-  SetEnterpriseSearchContentChrome,
-  SetElasticsearchChrome,
-  SetAppSearchChrome,
-  SetWorkplaceSearchChrome,
-  SetSearchExperiencesChrome,
-} from './set_chrome';
+export { SearchExperiencesGuide } from './search_experiences_guide';

@@ -11678,7 +11678,7 @@
     "xpack.enterpriseSearch.nav.contentTitle": "Contenu",
     "xpack.enterpriseSearch.nav.elasticsearchTitle": "Elasticsearch",
     "xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle": "Aperçu",
-    "xpack.enterpriseSearch.nav.searchExperiencesTitle": "Recherche",
+    "xpack.enterpriseSearch.nav.searchTitle": "Recherche",
     "xpack.enterpriseSearch.nav.searchIndicesTitle": "Index",
     "xpack.enterpriseSearch.nav.workplaceSearchTitle": "Workplace Search",
     "xpack.enterpriseSearch.notFound.action1": "Retour à votre tableau de bord",

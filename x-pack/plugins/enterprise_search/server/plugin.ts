@@ -30,6 +30,7 @@ import {
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  SEARCH_EXPERIENCES_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
@@ -110,6 +111,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       ANALYTICS_PLUGIN.ID,
       APP_SEARCH_PLUGIN.ID,
       WORKPLACE_SEARCH_PLUGIN.ID,
+      SEARCH_EXPERIENCES_PLUGIN.ID,
     ];
 
     if (customIntegrations) {
@@ -158,6 +160,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
+          searchExperiences: showEnterpriseSearch,
         },
         catalogue: {
           enterpriseSearch: showEnterpriseSearch,
@@ -166,6 +169,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
+          searchExperiences: showEnterpriseSearch,
         },
       };
     });

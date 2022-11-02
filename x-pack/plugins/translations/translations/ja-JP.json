@@ -11664,7 +11664,7 @@
     "xpack.enterpriseSearch.nav.contentTitle": "コンテンツ",
     "xpack.enterpriseSearch.nav.elasticsearchTitle": "Elasticsearch",
     "xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle": "概要",
-    "xpack.enterpriseSearch.nav.searchExperiencesTitle": "検索",
+    "xpack.enterpriseSearch.nav.searchTitle": "検索",
     "xpack.enterpriseSearch.nav.searchIndicesTitle": "インデックス",
     "xpack.enterpriseSearch.nav.workplaceSearchTitle": "Workplace Search",
     "xpack.enterpriseSearch.notFound.action1": "ダッシュボードに戻す",
