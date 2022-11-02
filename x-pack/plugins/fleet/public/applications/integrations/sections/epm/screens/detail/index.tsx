@@ -17,6 +17,7 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -36,9 +37,10 @@ import {
   useAuthz,
   usePermissionCheck,
   useIntegrationsStateContext,
+  useGetSettings,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import { ExperimentalFeaturesService } from '../../../../services';
+import { ExperimentalFeaturesService, isPackagePrerelease } from '../../../../services';
 import {
   useGetPackageInfoByKey,
   useLink,
@@ -107,7 +109,7 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { getFromIntegrations } = useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
-  const { getHref } = useLink();
+  const { getHref, getPath } = useLink();
   const canInstallPackages = useAuthz().integrations.installPackages;
   const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
@@ -153,6 +155,17 @@ export function Detail() {
     packageInfo.savedObject &&
     semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
+  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
+    boolean | undefined
+  >();
+
+  const { data: settings } = useGetSettings();
+
+  useEffect(() => {
+    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
+    setPrereleaseIntegrationsEnabled(isEnabled);
+  }, [settings?.item.prerelease_integrations_enabled]);
+
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
   const {
@@ -161,7 +174,34 @@ export function Detail() {
     isLoading: packageInfoLoading,
     isInitialRequest: packageIsInitialRequest,
     resendRequest: refreshPackageInfo,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion);
+  } = useGetPackageInfoByKey(pkgName, pkgVersion, {
+    prerelease: prereleaseIntegrationsEnabled,
+  });
+
+  const [latestGAVersion, setLatestGAVersion] = useState<string | undefined>();
+  const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
+
+  // fetch latest GA version (prerelease=false)
+  const { data: packageInfoLatestGAData } = useGetPackageInfoByKey(pkgName, '', {
+    prerelease: false,
+  });
+
+  useEffect(() => {
+    const pkg = packageInfoLatestGAData?.item;
+    const isGAVersion = pkg && !isPackagePrerelease(pkg.version);
+    if (isGAVersion) {
+      setLatestGAVersion(pkg.version);
+    }
+  }, [packageInfoLatestGAData?.item]);
+
+  // fetch latest Prerelease version (prerelease=true)
+  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKey(pkgName, '', {
+    prerelease: true,
+  });
+
+  useEffect(() => {
+    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
+  }, [packageInfoLatestPrereleaseData?.item.version]);
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUser();
@@ -326,6 +366,46 @@ export function Detail() {
     ]
   );
 
+  const showVersionSelect = useMemo(
+    () =>
+      prereleaseIntegrationsEnabled &&
+      latestGAVersion &&
+      latestPrereleaseVersion &&
+      latestGAVersion !== latestPrereleaseVersion &&
+      (!packageInfo?.version ||
+        packageInfo.version === latestGAVersion ||
+        packageInfo.version === latestPrereleaseVersion),
+    [prereleaseIntegrationsEnabled, latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
+  );
+
+  const versionOptions = useMemo(
+    () => [
+      {
+        value: latestPrereleaseVersion,
+        text: latestPrereleaseVersion,
+      },
+      {
+        value: latestGAVersion,
+        text: latestGAVersion,
+      },
+    ],
+    [latestPrereleaseVersion, latestGAVersion]
+  );
+
+  const versionLabel = i18n.translate('xpack.fleet.epm.versionLabel', {
+    defaultMessage: 'Version',
+  });
+
+  const onVersionChange = useCallback(
+    (version: string, packageName: string) => {
+      const path = getPath('integration_details_overview', {
+        pkgkey: `${packageName}-${version}`,
+      });
+      history.push(path);
+    },
+    [getPath, history]
+  );
+
   const headerRightContent = useMemo(
     () =>
       packageInfo ? (
@@ -334,12 +414,24 @@ export function Detail() {
           <EuiFlexGroup justifyContent="flexEnd" direction="row">
             {[
               {
-                label: i18n.translate('xpack.fleet.epm.versionLabel', {
-                  defaultMessage: 'Version',
-                }),
+                label: showVersionSelect ? undefined : versionLabel,
                 content: (
                   <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem>{packageInfo.version}</EuiFlexItem>
+                    <EuiFlexItem>
+                      {showVersionSelect ? (
+                        <EuiSelect
+                          data-test-subj="versionSelect"
+                          prepend={versionLabel}
+                          options={versionOptions}
+                          value={packageInfo.version}
+                          onChange={(event) =>
+                            onVersionChange(event.target.value, packageInfo.name)
+                          }
+                        />
+                      ) : (
+                        <div data-test-subj="versionText">{packageInfo.version}</div>
+                      )}
+                    </EuiFlexItem>
                     {updateAvailable ? (
                       <EuiFlexItem grow={false}>
                         <UpdateIcon />
@@ -416,6 +508,10 @@ export function Detail() {
       missingSecurityConfiguration,
       integrationInfo?.title,
       handleAddIntegrationPolicyClick,
+      onVersionChange,
+      showVersionSelect,
+      versionLabel,
+      versionOptions,
     ]
   );
 
@@ -605,7 +701,11 @@ export function Detail() {
       ) : (
         <Switch>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview}>
-            <OverviewPage packageInfo={packageInfo} integrationInfo={integrationInfo} />
+            <OverviewPage
+              packageInfo={packageInfo}
+              integrationInfo={integrationInfo}
+              latestGAVersion={latestGAVersion}
+            />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
             <SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />

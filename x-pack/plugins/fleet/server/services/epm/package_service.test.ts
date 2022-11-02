@@ -92,7 +92,7 @@ function getTest(
         method: mocks.packageClient.fetchFindLatestPackage.bind(mocks.packageClient),
         args: ['package name'],
         spy: jest.spyOn(epmRegistry, 'fetchFindLatestPackageOrThrow'),
-        spyArgs: ['package name'],
+        spyArgs: ['package name', undefined],
         spyResponse: { name: 'fetchFindLatestPackage test' },
         expectedReturnValue: { name: 'fetchFindLatestPackage test' },
       };

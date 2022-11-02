@@ -9,6 +9,8 @@ properties:
     type: array
     items:
       type: string
+  prerelease_integrations_enabled:   
+    type: boolean 
 required:
   - fleet_server_hosts
   - id
