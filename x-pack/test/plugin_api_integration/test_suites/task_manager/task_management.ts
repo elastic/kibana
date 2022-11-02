@@ -657,10 +657,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(task.enabled).to.eql(true);
       });
 
-      // disable the task
-      await bulkDisable([scheduledTask.id]);
-
       await retry.try(async () => {
+        // disable the task
+        await bulkDisable([scheduledTask.id]);
         const task = await currentTask(scheduledTask.id);
         expect(task.enabled).to.eql(false);
       });
