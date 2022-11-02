@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import { UploadFile } from '../../upload_file';
 import { useFilePickerContext } from '../context';
@@ -24,11 +24,6 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ kind, multiple }) => {
     <EuiEmptyPrompt
       data-test-subj="emptyPrompt"
       title={<h3>{i18nTexts.emptyStatePrompt}</h3>}
-      body={
-        <EuiText color="subdued" size="s">
-          <p>{i18nTexts.emptyStatePromptSubtitle}</p>
-        </EuiText>
-      }
       titleSize="s"
       actions={[
         // TODO: We can remove this once the entire modal is an upload area
