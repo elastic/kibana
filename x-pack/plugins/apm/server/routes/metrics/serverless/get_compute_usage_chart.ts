@@ -36,17 +36,19 @@ const GB = 1024 ** 3;
 function calculateComputeUsageGBSeconds({
   faasBilledDuration,
   totalMemory,
+  countInvocations,
 }: {
   faasBilledDuration?: number | null;
   totalMemory?: number | null;
+  countInvocations?: number | null;
 }) {
-  if (!isFiniteNumber(faasBilledDuration) || !isFiniteNumber(totalMemory)) {
+  if (!isFiniteNumber(faasBilledDuration) || !isFiniteNumber(totalMemory) || !isFiniteNumber(countInvocations)) {
     return 0;
   }
 
   const totalMemoryGB = totalMemory / GB;
   const faasBilledDurationSec = faasBilledDuration / 1000;
-  return totalMemoryGB * faasBilledDurationSec;
+  return totalMemoryGB * faasBilledDurationSec * countInvocations;
 }
 
 export async function getComputeUsageChart({
@@ -71,6 +73,7 @@ export async function getComputeUsageChart({
   const aggs = {
     avgFaasBilledDuration: { avg: { field: FAAS_BILLED_DURATION } },
     avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+    countInvocations: { value_count: { field: FAAS_BILLED_DURATION } },
   };
 
   const params = {
@@ -140,12 +143,14 @@ export async function getComputeUsageChart({
               overallValue: calculateComputeUsageGBSeconds({
                 faasBilledDuration: aggregations?.avgFaasBilledDuration.value,
                 totalMemory: aggregations?.avgTotalMemory.value,
+                countInvocations: aggregations?.countInvocations.value,
               }),
               color: theme.euiColorVis0,
               data: timeseriesData.buckets.map((bucket) => {
                 const computeUsage = calculateComputeUsageGBSeconds({
                   faasBilledDuration: bucket.avgFaasBilledDuration.value,
                   totalMemory: bucket.avgTotalMemory.value,
+                  countInvocations: bucket.countInvocations.value,
                 });
                 return {
                   x: bucket.key,
