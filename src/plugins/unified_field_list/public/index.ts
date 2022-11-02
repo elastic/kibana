@@ -13,6 +13,7 @@ export type {
   NumberStatsResult,
   TopValuesResult,
 } from '../common/types';
+export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list';
 export type {
   FieldTopValuesBucketProps,
   FieldTopValuesBucketParams,
@@ -52,4 +53,23 @@ export type {
   UnifiedFieldListPluginSetup,
   UnifiedFieldListPluginStart,
   AddFieldFilterHandler,
+  FieldListGroups,
+  FieldsGroupDetails,
 } from './types';
+export { ExistenceFetchStatus, FieldsGroupNames } from './types';
+
+export {
+  useExistingFieldsFetcher,
+  useExistingFieldsReader,
+  resetExistingFieldsCache,
+  type ExistingFieldsInfo,
+  type ExistingFieldsFetcherParams,
+  type ExistingFieldsFetcher,
+  type ExistingFieldsReader,
+} from './hooks/use_existing_fields';
+
+export {
+  useGroupedFields,
+  type GroupedFieldsParams,
+  type GroupedFieldsResult,
+} from './hooks/use_grouped_fields';

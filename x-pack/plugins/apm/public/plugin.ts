@@ -48,7 +48,6 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -108,10 +107,10 @@ const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
   defaultMessage: 'Services',
 });
 
-const allServicesTitle = i18n.translate(
-  'xpack.apm.navigation.allServicesTitle',
+const serviceGroupsTitle = i18n.translate(
+  'xpack.apm.navigation.serviceGroupsTitle',
   {
-    defaultMessage: 'All services',
+    defaultMessage: 'Service groups',
   }
 );
 
@@ -158,11 +157,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    const serviceGroupsEnabled = core.uiSettings.get<boolean>(
-      enableServiceGroups,
-      false
-    );
-
     // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
@@ -174,26 +168,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 label: 'APM',
                 sortKey: 400,
                 entries: [
-                  serviceGroupsEnabled
-                    ? {
-                        label: servicesTitle,
-                        app: 'apm',
-                        path: '/service-groups',
-                        matchPath(currentPath: string) {
-                          return [
-                            '/service-groups',
-                            '/services',
-                            '/service-map',
-                          ].some((testPath) =>
-                            currentPath.startsWith(testPath)
-                          );
-                        },
-                      }
-                    : {
-                        label: servicesTitle,
-                        app: 'apm',
-                        path: '/services',
-                      },
+                  {
+                    label: servicesTitle,
+                    app: 'apm',
+                    path: '/services',
+                    matchPath(currentPath: string) {
+                      return [
+                        '/service-groups',
+                        '/services',
+                        '/service-map',
+                      ].some((testPath) => currentPath.startsWith(testPath));
+                    },
+                  },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
                   {
                     label: dependenciesTitle,
@@ -213,15 +199,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                       }
                     },
                   },
-                  ...(serviceGroupsEnabled
-                    ? []
-                    : [
-                        {
-                          label: serviceMapTitle,
-                          app: 'apm',
-                          path: '/service-map',
-                        },
-                      ]),
                 ],
               },
             ];
@@ -302,18 +279,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: [
-        ...(serviceGroupsEnabled
-          ? [
-              {
-                id: 'service-groups-list',
-                title: servicesTitle,
-                path: '/service-groups',
-              },
-            ]
-          : []),
+        {
+          id: 'service-groups-list',
+          title: serviceGroupsTitle,
+          path: '/service-groups',
+        },
         {
           id: 'services',
-          title: serviceGroupsEnabled ? allServicesTitle : servicesTitle,
+          title: servicesTitle,
           path: '/services',
         },
         { id: 'traces', title: tracesTitle, path: '/traces' },

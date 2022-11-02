@@ -21,7 +21,8 @@
     "unifiedSearch",
     "dataViews",
     "advancedSettings",
-    "unifiedFieldList"
+    "unifiedFieldList",
+    "maps"
   ],
   "optionalPlugins": [
     "actions",
@@ -50,6 +51,7 @@
     "kibanaUtils",
     "ml",
     "observability",
-    "esUiShared"
+    "esUiShared",
+    "maps"
   ]
 }

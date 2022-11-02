@@ -139,3 +139,13 @@ export const EndpointActionFileDownloadSchema = {
 export type EndpointActionFileDownloadParams = TypeOf<
   typeof EndpointActionFileDownloadSchema.params
 >;
+
+/** Schema that validates the file info API */
+export const EndpointActionFileInfoSchema = {
+  params: schema.object({
+    action_id: schema.string({ minLength: 1 }),
+    agent_id: schema.string({ minLength: 1 }),
+  }),
+};
+
+export type EndpointActionFileInfoParams = TypeOf<typeof EndpointActionFileInfoSchema.params>;

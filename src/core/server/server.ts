@@ -80,6 +80,7 @@ import {
   config as pluginsConfig,
 } from '@kbn/core-plugins-server-internal';
 import { CoreApp } from './core_app';
+import { elasticApmConfig } from './root/elastic_config';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -383,6 +384,7 @@ export class Server {
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
       docLinks: docLinkStart,
+      node: await this.node.start(),
     });
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
@@ -457,6 +459,7 @@ export class Server {
       cspConfig,
       deprecationConfig,
       elasticsearchConfig,
+      elasticApmConfig,
       executionContextConfig,
       externalUrlConfig,
       httpConfig,

@@ -8,8 +8,8 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  DataView,
-  DataViewField,
+  type DataView,
+  type DataViewField,
   ES_FIELD_TYPES,
   getEsQueryConfig,
   KBN_FIELD_TYPES,
@@ -76,7 +76,7 @@ interface FieldStatsPropsBase {
   'data-test-subj'?: string;
   overrideMissingContent?: (params: {
     element: JSX.Element;
-    noDataFound?: boolean;
+    reason: 'no-data' | 'unsupported';
   }) => JSX.Element | null;
   overrideFooter?: (params: {
     element: JSX.Element;
@@ -336,7 +336,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     return overrideMissingContent
       ? overrideMissingContent({
-          noDataFound: false,
+          reason: 'unsupported',
           element: messageNoAnalysis,
         })
       : messageNoAnalysis;
@@ -370,7 +370,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     return overrideMissingContent
       ? overrideMissingContent({
-          noDataFound: true,
+          reason: 'no-data',
           element: messageNoData,
         })
       : messageNoData;
@@ -390,12 +390,14 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               defaultMessage: 'Top values',
             }),
             id: 'topValues',
+            'data-test-subj': `${dataTestSubject}-buttonGroup-topValuesButton`,
           },
           {
             label: i18n.translate('unifiedFieldList.fieldStats.fieldDistributionLabel', {
               defaultMessage: 'Distribution',
             }),
             id: 'histogram',
+            'data-test-subj': `${dataTestSubject}-buttonGroup-distributionButton`,
           },
         ]}
         onChange={(optionId: string) => {
