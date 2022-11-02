@@ -304,7 +304,9 @@ test('cleans up action_task_params object', async () => {
 
   await taskRunner.run();
 
-  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3', { refresh: false });
+  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3', {
+    refresh: false,
+  });
 });
 
 test('task runner should implement CancellableTask cancel method with logging warning message', async () => {
@@ -367,7 +369,9 @@ test('runs successfully when cleanup fails and logs the error', async () => {
 
   await taskRunner.run();
 
-  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3', { refresh: false });
+  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3', {
+    refresh: false,
+  });
   expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
     'Failed to cleanup action_task_params object [id="3"]: Fail'
   );
