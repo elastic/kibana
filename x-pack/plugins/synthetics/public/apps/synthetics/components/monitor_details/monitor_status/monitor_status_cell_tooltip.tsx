@@ -8,7 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 import { css } from '@emotion/react';
-import { useEuiTheme, EuiText } from '@elastic/eui';
+import { useEuiTheme, EuiText, EuiProgress } from '@elastic/eui';
 
 import {
   TooltipTable,
@@ -19,20 +19,29 @@ import {
   TooltipTableCell,
 } from '@elastic/charts';
 
+import { usePingStatusesIsLoading } from '../hooks/use_ping_statuses';
 import { MonitorStatusTimeBin, SUCCESS_VIZ_COLOR, DANGER_VIZ_COLOR } from './monitor_status_data';
 import * as labels from './labels';
 
 export const MonitorStatusCellTooltip = ({ timeBin }: { timeBin?: MonitorStatusTimeBin }) => {
   const { euiTheme } = useEuiTheme();
+  const isLoading = usePingStatusesIsLoading();
 
   if (!timeBin) {
     return <>{''}</>;
   }
 
-  const dateStr = moment(timeBin.start).format('LL');
-  const timeStartStr = moment(timeBin.start).format('HH:mm');
-  const timeEndStr = moment(timeBin.end).format('HH:mm');
-  const tooltipTitle = `${dateStr} @ ${timeStartStr} - ${timeEndStr}`;
+  const startM = moment(timeBin.start);
+  const endM = moment(timeBin.end);
+  const startDateStr = startM.format('LL');
+  const timeStartStr = startM.format('HH:mm');
+  const timeEndStr = endM.format('HH:mm');
+  const isDifferentDays = startM.dayOfYear() !== endM.dayOfYear();
+
+  // If start and end days are different, show date for both of the days
+  const endDateSegment = isDifferentDays ? `${endM.format('LL')} @ ` : '';
+  const tooltipTitle = `${startDateStr} @ ${timeStartStr} - ${endDateSegment}${timeEndStr}`;
+
   const availabilityStr =
     timeBin.ups + timeBin.downs > 0
       ? `${Math.round((timeBin.ups / (timeBin.ups + timeBin.downs)) * 100)}%`
@@ -45,7 +54,9 @@ export const MonitorStatusCellTooltip = ({ timeBin }: { timeBin?: MonitorStatusT
           {tooltipTitle}
         </EuiText>
       </TooltipHeader>
-      <TooltipDivider />
+
+      {isLoading ? <EuiProgress size="xs" /> : <TooltipDivider />}
+
       <div css={css({ border: 0, padding: euiTheme.size.xs })}>
         <TooltipTable>
           <TooltipTableBody>

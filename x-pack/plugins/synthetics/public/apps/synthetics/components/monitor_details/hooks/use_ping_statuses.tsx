@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { PingStatus } from '../../../../../../common/runtime_types';
 import {
   getMonitorPingStatusesAction,
   selectIsMonitorStatusesLoading,
@@ -21,10 +22,14 @@ export const usePingStatuses = ({
   from,
   to,
   size,
+  monitorInterval,
+  lastRefresh,
 }: {
-  from: string | number;
-  to: string | number;
+  from: number;
+  to: number;
   size: number;
+  monitorInterval: number;
+  lastRefresh: number;
 }) => {
   const { monitor } = useSelectedMonitor();
   const location = useSelectedLocation();
@@ -33,11 +38,22 @@ export const usePingStatuses = ({
     return selectPingStatusesForMonitorAndLocationAsc(monitor?.id ?? '', location?.label ?? '');
   }, [monitor?.id, location?.label]);
   const isLoading = useSelector(selectIsMonitorStatusesLoading);
-  const pingStatuses = useSelector(pingStatusesSelector());
+  const pingStatuses = useSelector(pingStatusesSelector()) as PingStatus[];
   const dispatch = useDispatch();
 
+  const lastCall = useRef({ monitorId: '', locationLabel: '', to: 0, from: 0, lastRefresh: 0 });
+  const toDiff = Math.abs(lastCall.current.to - to) / (1000 * 60);
+  const fromDiff = Math.abs(lastCall.current.from - from) / (1000 * 60);
+  const lastRefreshDiff = Math.abs(lastCall.current.lastRefresh - lastRefresh) / (1000 * 60);
+  const isDataChangedEnough =
+    toDiff >= monitorInterval ||
+    fromDiff >= monitorInterval ||
+    lastRefreshDiff >= 3 || // Minimum monitor interval
+    monitor?.id !== lastCall.current.monitorId ||
+    location?.label !== lastCall.current.locationLabel;
+
   useEffect(() => {
-    if (!isLoading && monitor?.id && location?.label && from && to && size) {
+    if (!isLoading && isDataChangedEnough && monitor?.id && location?.label && from && to && size) {
       dispatch(
         getMonitorPingStatusesAction.get({
           monitorId: monitor.id,
@@ -47,10 +63,25 @@ export const usePingStatuses = ({
           size,
         })
       );
-    }
-    // isLoading shouldn't be included in deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, monitor?.id, location?.label, from, to, size]);
 
-  return pingStatuses;
+      lastCall.current = {
+        monitorId: monitor.id,
+        locationLabel: location?.label,
+        to,
+        from,
+        lastRefresh,
+      };
+    }
+    // `isLoading` shouldn't be included in deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, monitor?.id, location?.label, from, to, size, isDataChangedEnough, lastRefresh]);
+
+  return pingStatuses.filter(({ timestamp }) => {
+    const timestampN = Number(new Date(timestamp));
+    return timestampN >= from && timestampN <= to;
+  });
+};
+
+export const usePingStatusesIsLoading = () => {
+  return useSelector(selectIsMonitorStatusesLoading) as boolean;
 };

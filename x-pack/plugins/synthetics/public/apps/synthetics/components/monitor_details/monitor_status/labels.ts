@@ -41,3 +41,10 @@ export const LAST_24_HOURS_LABEL = i18n.translate('xpack.synthetics.monitorDetai
 export const VIEW_HISTORY_LABEL = i18n.translate('xpack.synthetics.monitorDetails.viewHistory', {
   defaultMessage: 'View History',
 });
+
+export const BRUSH_AREA_MESSAGE = i18n.translate(
+  'xpack.synthetics.monitorDetails.brushArea.message',
+  {
+    defaultMessage: 'Brush an area for higher fidelity',
+  }
+);

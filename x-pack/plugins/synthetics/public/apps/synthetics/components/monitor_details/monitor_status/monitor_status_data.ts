@@ -8,6 +8,7 @@
 import datemath from '@elastic/datemath';
 import moment from 'moment';
 import { tint, VISUALIZATION_COLORS, EuiThemeComputed } from '@elastic/eui';
+import type { BrushEvent } from '@elastic/charts';
 import { PingStatus } from '../../../../../../common/runtime_types';
 
 export const SUCCESS_VIZ_COLOR = VISUALIZATION_COLORS[0];
@@ -29,6 +30,23 @@ export interface MonitorStatusTimeBin {
    * To color code the time bin on chart
    */
   value: number;
+}
+
+export interface MonitorStatusPanelProps {
+  /**
+   * Either epoch in millis or Kibana date range e.g. 'now-24h'
+   */
+  from: string | number;
+
+  /**
+   * Either epoch in millis or Kibana date range e.g. 'now'
+   */
+  to: string | number;
+
+  brushable: boolean; // Whether to allow brushing on the chart to allow zooming in on data.
+  periodCaption?: string; // e.g. Last 24 Hours
+  showViewHistoryButton?: boolean;
+  onBrushed?: (timeBounds: { from: number; to: number; fromUtc: string; toUtc: string }) => void;
 }
 
 export function getColorBands(euiTheme: EuiThemeComputed) {
@@ -129,6 +147,13 @@ export function dateToMilli(date: string | number | moment.Moment | undefined): 
   }
 
   return moment(d).valueOf();
+}
+
+export function getBrushData(e: BrushEvent) {
+  const [from, to] = [Number(e.x?.[0]), Number(e.x?.[1])];
+  const [fromUtc, toUtc] = [moment(from).format(), moment(to).format()];
+
+  return { from, to, fromUtc, toUtc };
 }
 
 function getStatusEffectiveValue(ups: number, downs: number): number {
