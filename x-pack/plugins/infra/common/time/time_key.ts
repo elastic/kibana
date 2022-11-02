@@ -9,11 +9,14 @@ import { ascending, bisector } from 'd3-array';
 import * as rt from 'io-ts';
 import { pick } from 'lodash';
 
+export const minimalTimeKeyRT = rt.type({
+  time: rt.number,
+  tiebreaker: rt.number,
+});
+export type MinimalTimeKey = rt.TypeOf<typeof minimalTimeKeyRT>;
+
 export const timeKeyRT = rt.intersection([
-  rt.type({
-    time: rt.number,
-    tiebreaker: rt.number,
-  }),
+  minimalTimeKeyRT,
   rt.partial({
     gid: rt.string,
     fromAutoReload: rt.boolean,

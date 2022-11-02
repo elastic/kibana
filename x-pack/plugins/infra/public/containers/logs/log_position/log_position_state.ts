@@ -8,10 +8,10 @@
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { createStateContainer, ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/public';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { identity, pipe } from 'fp-ts/lib/function';
 import produce from 'immer';
 import logger from 'redux-logger';
-import { TimeKey } from '../../../../common/time';
+import { MinimalTimeKey, TimeKey } from '../../../../common/time';
 import { datemathToEpochMillis } from '../../../utils/datemath';
 import { TimefilterState } from '../../../utils/timefilter_state_storage';
 import { LogPositionUrlState } from './use_log_position_url_state_sync';
@@ -33,13 +33,15 @@ export interface LogPositionState {
 export interface InitialLogPositionArguments {
   initialStateFromUrl: LogPositionUrlState | null;
   initialStateFromTimefilter: TimefilterState | null;
+  now?: Date;
 }
 
 export const createInitialLogPositionState = ({
   initialStateFromUrl,
   initialStateFromTimefilter,
+  now,
 }: InitialLogPositionArguments): LogPositionState => {
-  const nowTimestamp = Date.now();
+  const nowTimestamp = now?.valueOf() ?? Date.now();
 
   return pipe(
     {
@@ -52,8 +54,8 @@ export const createInitialLogPositionState = ({
         lastChangedCompletely: nowTimestamp,
       },
       timestamps: {
-        startTimestamp: datemathToEpochMillis('now-1d', 'down') ?? 0,
-        endTimestamp: datemathToEpochMillis('now', 'up') ?? 0,
+        startTimestamp: datemathToEpochMillis('now-1d', 'down', now) ?? 0,
+        endTimestamp: datemathToEpochMillis('now', 'up', now) ?? 0,
         lastChangedTimestamp: nowTimestamp,
       },
       refreshInterval: {
@@ -61,8 +63,11 @@ export const createInitialLogPositionState = ({
         value: 5000,
       },
     },
-    updateStateFromTimefilterState(initialStateFromTimefilter),
-    updateStateFromUrlState(initialStateFromUrl)
+    initialStateFromUrl != null
+      ? updateStateFromUrlState(initialStateFromUrl)
+      : initialStateFromTimefilter != null
+      ? updateStateFromTimefilterState(initialStateFromTimefilter)
+      : identity
   );
 };
 
@@ -78,13 +83,9 @@ export const createLogPositionStateContainer = (initialArguments: InitialLogPosi
     stopLiveStreaming: (state: LogPositionState) => () =>
       updateRefreshInterval({ pause: true })(state),
     jumpToTargetPosition: (state: LogPositionState) => (targetPosition: TimeKey | null) =>
-      produce(state, (draftState) => {
-        draftState.targetPosition = targetPosition;
-      }),
+      updateTargetPosition(targetPosition)(state),
     jumpToTargetPositionTime: (state: LogPositionState) => (time: number) =>
-      produce(state, (draftState) => {
-        draftState.targetPosition = { tiebreaker: 0, time };
-      }),
+      updateTargetPosition({ time })(state),
   });
 
 export const withLogger = <StateContainer extends ReduxLikeStateContainer<any>>(
@@ -94,16 +95,28 @@ export const withLogger = <StateContainer extends ReduxLikeStateContainer<any>>(
   return stateContainer;
 };
 
-export const updateTimeRange = (timeRange: Partial<TimeRange>) =>
+const updateTargetPosition = (targetPosition: Partial<MinimalTimeKey> | null) =>
+  produce<LogPositionState>((draftState) => {
+    if (targetPosition?.time != null) {
+      draftState.targetPosition = {
+        time: targetPosition.time,
+        tiebreaker: targetPosition.tiebreaker ?? 0,
+      };
+    } else {
+      draftState.targetPosition = null;
+    }
+  });
+
+const updateTimeRange = (timeRange: Partial<TimeRange>, now?: Date) =>
   produce<LogPositionState>((draftState) => {
     const newFrom = timeRange?.from;
     const newTo = timeRange?.to;
-    const nowTimestamp = Date.now();
+    const nowTimestamp = now?.valueOf() ?? Date.now();
 
     // Update expression and timestamps
     if (newFrom != null) {
       draftState.timeRange.expression.from = newFrom;
-      const newStartTimestamp = datemathToEpochMillis(newFrom, 'down');
+      const newStartTimestamp = datemathToEpochMillis(newFrom, 'down', now);
       if (newStartTimestamp != null) {
         draftState.timestamps.startTimestamp = newStartTimestamp;
         draftState.timestamps.lastChangedTimestamp = nowTimestamp;
@@ -111,7 +124,7 @@ export const updateTimeRange = (timeRange: Partial<TimeRange>) =>
     }
     if (newTo != null) {
       draftState.timeRange.expression.to = newTo;
-      const newEndTimestamp = datemathToEpochMillis(newTo, 'up');
+      const newEndTimestamp = datemathToEpochMillis(newTo, 'up', now);
       if (newEndTimestamp != null) {
         draftState.timestamps.endTimestamp = newEndTimestamp;
         draftState.timestamps.lastChangedTimestamp = nowTimestamp;
@@ -131,7 +144,7 @@ export const updateTimeRange = (timeRange: Partial<TimeRange>) =>
     }
   });
 
-export const updateRefreshInterval =
+const updateRefreshInterval =
   (refreshInterval: Partial<RefreshInterval>) => (state: LogPositionState) =>
     pipe(
       state,
@@ -164,14 +177,18 @@ export const getUrlState = (state: LogPositionState): LogPositionUrlState => ({
 });
 
 export const updateStateFromUrlState =
-  (urlState: LogPositionUrlState | null) =>
+  (urlState: LogPositionUrlState | null, now?: Date) =>
   (state: LogPositionState): LogPositionState =>
     pipe(
       state,
-      updateTimeRange({
-        from: urlState?.start,
-        to: urlState?.end,
-      }),
+      updateTargetPosition(urlState?.position ?? null),
+      updateTimeRange(
+        {
+          from: urlState?.start,
+          to: urlState?.end,
+        },
+        now
+      ),
       updateRefreshInterval({ pause: !urlState?.streamLive })
     );
 

@@ -11,20 +11,16 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
 import { useCallback, useState } from 'react';
 import { map } from 'rxjs/operators';
-import { timeKeyRT } from '../../../../common/time';
+import { minimalTimeKeyRT } from '../../../../common/time';
 import { datemathStringRT } from '../../../utils/datemath';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../utils/kbn_url_state_context';
 
-export const logPositionUrlStateRT = rt.intersection([
-  rt.type({
-    streamLive: rt.boolean,
-  }),
-  rt.partial({
-    position: rt.union([timeKeyRT, rt.null]),
-    start: datemathStringRT,
-    end: datemathStringRT,
-  }),
-]);
+export const logPositionUrlStateRT = rt.partial({
+  streamLive: rt.boolean,
+  position: rt.union([rt.partial(minimalTimeKeyRT.props), rt.null]),
+  start: datemathStringRT,
+  end: datemathStringRT,
+});
 
 export type LogPositionUrlState = rt.TypeOf<typeof logPositionUrlStateRT>;
 

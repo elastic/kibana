@@ -30,8 +30,12 @@ export const datemathStringRT = new rt.Type<string, string, unknown>(
   String
 );
 
-export function datemathToEpochMillis(value: string, round: 'down' | 'up' = 'down'): number | null {
-  const parsedValue = dateMath.parse(value, { roundUp: round === 'up' });
+export function datemathToEpochMillis(
+  value: string,
+  round: 'down' | 'up' = 'down',
+  forceNow?: Date
+): number | null {
+  const parsedValue = dateMath.parse(value, { roundUp: round === 'up', forceNow });
   if (!parsedValue || !parsedValue.isValid()) {
     return null;
   }
