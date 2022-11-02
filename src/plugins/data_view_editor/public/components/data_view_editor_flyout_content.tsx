@@ -224,15 +224,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <></>
   );
 
-  // TODO find good format for this
-  const getErrors = () => {
-    const errors = form.getErrors();
-    if (form.isSubmitted && errors.length > 0) {
-      return <>{errors}</>;
-    }
-    return <></>;
-  };
-
   return (
     <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
       <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
@@ -250,8 +241,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
             })}
           </EuiLink>
         )}
-        <Form form={form} className="indexPatternEditor__form">
-          {getErrors()}
+        <Form
+          form={form}
+          isInvalid={form.isSubmitted && form.isValid === false}
+          error={form.getErrors()}
+          className="indexPatternEditor__form"
+        >
           <UseField path="isAdHoc" />
           {indexPatternTypeSelect}
           <EuiSpacer size="l" />
