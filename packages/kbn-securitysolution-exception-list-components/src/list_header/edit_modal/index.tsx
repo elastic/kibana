@@ -31,15 +31,11 @@ interface EditModalProps {
 }
 
 const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel }) => {
-  const {
-    error,
-    modalFormId,
-    newListDetails,
-    showProgress,
-    setIsTouchedValue,
-    onChange,
-    onSubmit,
-  } = useEditModal({ listDetails, onSave });
+  const { error, modalFormId, newListDetails, showProgress, onBlur, onSubmit, onChange } =
+    useEditModal({
+      listDetails,
+      onSave,
+    });
   return (
     <EuiModal data-test-subj="EditModal" onClose={onCancel} initialFocus="[name=popswitch]">
       {showProgress && (
@@ -67,7 +63,7 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
             <EuiFieldText
               fullWidth
               isInvalid={!!error}
-              onBlur={setIsTouchedValue}
+              onBlur={onBlur}
               data-test-subj="editModalNameTextField"
               name="name"
               value={newListDetails.name}
@@ -82,6 +78,7 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
               name="description"
               value={newListDetails.description}
               onChange={onChange}
+              onBlur={onBlur}
             />
           </EuiFormRow>
         </EuiForm>
