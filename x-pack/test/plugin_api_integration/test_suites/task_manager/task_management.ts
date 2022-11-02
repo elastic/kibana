@@ -687,10 +687,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const hd = await historyDocs();
-        log.debug('historyDocs -');
-        log.debug(hd);
-        expect(hd.length).to.eql(1);
+        expect((await historyDocs()).length).to.eql(1);
 
         const task = await currentTask(scheduledTask.id);
         expect(task.enabled).to.eql(true);
