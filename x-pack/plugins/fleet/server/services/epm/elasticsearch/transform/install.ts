@@ -197,12 +197,6 @@ const processTransformAssetsPerModule = (
     }
   });
 
-  // @TODO: keep track of aliases assets
-  const aliasesRefs = transforms.map((t) => ({
-    id: t.content.dest.index,
-    type: 'alias',
-  }));
-
   const indexTemplatesRefs = destinationIndexTemplates.map((template) => ({
     id: template.installationName,
     type: ElasticsearchAssetType.indexTemplate,
@@ -249,18 +243,10 @@ const installTransformsAssets = async (
       indexTemplatesRefs,
       componentTemplatesRefs,
       transformRefs,
-      // @TODO: revert - this is arbitrary setting `pivot_transform` before `latest_transform`
-      transforms: unsortedTransforms,
+      transforms,
       destinationIndexTemplates,
       transformsSpecifications,
     } = processTransformAssetsPerModule(installablePackage, installNameSuffix, transformPaths);
-
-    // @TODO: remove - this is arbitrary setting `pivot_transform` before `latest_transform`
-    // @ts-ignore
-    const transforms = unsortedTransforms.sort((t1, t2) =>
-      // @ts-ignore
-      t2.transformModuleId?.localeCompare(t1.transformModuleId)
-    );
 
     // get and save refs associated with the transforms before installing
     esReferences = await updateEsAssetReferences(
@@ -310,13 +296,11 @@ const installTransformsAssets = async (
               componentTemplates,
               indexTemplate: {
                 templateName: destinationIndexTemplate.installationName,
-                // @ts-expect-error We don't need to pass data_stream property here
-                // as this template is applied to only an index and not a data stream
                 indexTemplate: {
                   template: {
                     settings: undefined,
                     mappings: undefined,
-                    // @TODO: move this to component level buildComponentTemplates
+                    // @ts-expect-error aliases is valid param
                     aliases: transformSpec?.get('destinationIndexAlias'),
                   },
                   priority: DEFAULT_TRANSFORM_TEMPLATES_PRIORITY,
@@ -479,13 +463,13 @@ async function handleTransformInstall({
 
   // start transform by default if not set in yml file
   // else, respect the setting
-  // if (startTransform === undefined || startTransform === true) {
-  //   await esClient.transform.startTransform(
-  //     { transform_id: transform.installationName },
-  //     { ignore: [409] }
-  //   );
-  //   logger.debug(`Started transform: ${transform.installationName}`);
-  // }
+  if (startTransform === undefined || startTransform === true) {
+    await esClient.transform.startTransform(
+      { transform_id: transform.installationName },
+      { ignore: [409] }
+    );
+    logger.debug(`Started transform: ${transform.installationName}`);
+  }
 
   return { id: transform.installationName, type: ElasticsearchAssetType.transform };
 }
