@@ -6,7 +6,7 @@
  */
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 
 interface FunctionPickerProps {
@@ -16,14 +16,7 @@ interface FunctionPickerProps {
 
 export const FunctionPicker: FC<FunctionPickerProps> = React.memo(({ value, onChange }) => {
   return (
-    <EuiFormRow
-      label={
-        <FormattedMessage
-          id="xpack.aiops.changePointDetection.selectFunctionLabel"
-          defaultMessage="Function"
-        />
-      }
-    >
+    <EuiFormRow>
       <EuiSelect
         options={[
           {
@@ -45,6 +38,9 @@ export const FunctionPicker: FC<FunctionPickerProps> = React.memo(({ value, onCh
         ]}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        prepend={i18n.translate('xpack.aiops.changePointDetection.selectFunctionLabel', {
+          defaultMessage: 'Function',
+        })}
       />
     </EuiFormRow>
   );

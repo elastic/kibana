@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSelect, type EuiSelectOption } from '@elastic/eui';
 import { useChangePontDetectionContext } from './change_point_detection_context';
 
@@ -23,15 +23,15 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ val
   }, [splitFieldsOptions]);
 
   return (
-    <EuiFormRow
-      label={
-        <FormattedMessage
-          id="xpack.aiops.changePointDetection.selectSpitFieldLabel"
-          defaultMessage="Split field"
-        />
-      }
-    >
-      <EuiSelect options={options} value={value} onChange={(e) => onChange(e.target.value)} />
+    <EuiFormRow>
+      <EuiSelect
+        prepend={i18n.translate('xpack.aiops.changePointDetection.selectSpitFieldLabel', {
+          defaultMessage: 'Split field',
+        })}
+        options={options}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </EuiFormRow>
   );
 });
