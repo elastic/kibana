@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import withResponseActionsRole from './with_response_actions_role.json';
 import withResponseActionsUser from './with_response_actions_user.json';
-import noResponseActionsRole from './without_response_actions_role.json';
 import noResponseActionsUser from './without_response_actions_user.json';
-export {
-  withResponseActionsRole,
-  withResponseActionsUser,
-  noResponseActionsRole,
-  noResponseActionsUser,
-};
+export { withResponseActionsUser, noResponseActionsUser };

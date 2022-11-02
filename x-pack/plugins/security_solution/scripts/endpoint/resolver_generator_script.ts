@@ -21,12 +21,9 @@ import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion } from './common/stack_services';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
-import {
-  withResponseActionsRole,
-  withResponseActionsUser,
-  noResponseActionsRole,
-  noResponseActionsUser,
-} from './common/roles_users';
+import { withResponseActionsUser, noResponseActionsUser } from './common/roles_users';
+import { withResponseActionsRole } from './common/roles_users/with_response_actions_role.json';
+import { noResponseActionsRole } from './common/roles_users/without_response_actions_role.json';
 
 main();
 
@@ -295,7 +292,8 @@ async function main() {
     },
     rbacUser: {
       alias: 'rbac',
-      describe: 'Creates 2 users with the following kibana permissions',
+      describe:
+        "Creates the 'WithResponseActions'  and 'NoResponseActions' users and roles, password=changeme. The former has the kibana permissions for response actions and the latter does not. Neither have the superuser role. ",
       type: 'boolean',
       default: false,
     },
@@ -397,15 +395,6 @@ async function main() {
       console.log('Failed to add role, noResponseActions');
     }
   }
-
-  /**
-
-    const noRARole = await addRole(kbnClient, {
-      name: 'noResponseActions',
-      ...noResponseActionsRole,
-    });
-    if (noRARole) {
-      console.log(`Successfully added ${noRARole.name} role`);*/
 
   let seed = argv.seed;
 
