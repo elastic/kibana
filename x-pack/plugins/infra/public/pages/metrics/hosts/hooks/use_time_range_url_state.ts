@@ -15,13 +15,13 @@ import {
   useSyncKibanaTimeFilterTime,
 } from '../../../../hooks/use_kibana_timefilter_time';
 
-export const stringTimeRangeRT = rt.type({
+export const StringTimeRangeRT = rt.type({
   startTime: rt.string,
   endTime: rt.string,
 });
-export type StringTimeRange = rt.TypeOf<typeof stringTimeRangeRT>;
+export type StringTimeRange = rt.TypeOf<typeof StringTimeRangeRT>;
 
-const urlTimeRangeRT = rt.union([stringTimeRangeRT, rt.undefined]);
+const UrlTimeRangeRT = rt.union([StringTimeRangeRT, rt.undefined]);
 
 const TIME_RANGE_URL_STATE_KEY = 'timeRange';
 const TIME_DEFAULTS = { from: 'now-15m', to: 'now' };
@@ -36,8 +36,8 @@ export const useTimeRangeUrlState = () => {
       endTime: end,
     },
     decodeUrlState: (value: unknown) =>
-      pipe(urlTimeRangeRT.decode(value), fold(constant(undefined), identity)),
-    encodeUrlState: urlTimeRangeRT.encode,
+      pipe(UrlTimeRangeRT.decode(value), fold(constant(undefined), identity)),
+    encodeUrlState: UrlTimeRangeRT.encode,
     urlStateKey: TIME_RANGE_URL_STATE_KEY,
     writeDefaultState: true,
   });

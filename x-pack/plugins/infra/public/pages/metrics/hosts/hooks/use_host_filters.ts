@@ -17,7 +17,8 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUrlState } from '../../../../utils/use_url_state';
 
-export const DEFAULT_HOSTS_FILTERS_STATE = [];
+export const DEFAULT_HOST_FILTERS_STATE: HostsFilters = [];
+const HOST_FILTERS_URL_STATE_KEY = 'filters';
 
 export const useHostFilters = () => {
   const { services } = useKibana<InfraClientStartDeps>();
@@ -28,10 +29,10 @@ export const useHostFilters = () => {
   const { filterManager } = queryManager;
 
   const [urlState, setUrlState] = useUrlState<HostsFilters>({
-    defaultState: DEFAULT_HOSTS_FILTERS_STATE,
+    defaultState: DEFAULT_HOST_FILTERS_STATE,
     decodeUrlState,
     encodeUrlState,
-    urlStateKey: 'filters',
+    urlStateKey: HOST_FILTERS_URL_STATE_KEY,
   });
 
   const [state, setState] = useState<HostsFilters>(urlState);
@@ -50,7 +51,7 @@ export const useHostFilters = () => {
   };
 };
 
-export const HostsFilterRT = rt.intersection([
+const HostsFilterRT = rt.intersection([
   rt.partial({
     $state: rt.type({
       store: enumeration('FilterStateStore', FilterStateStore),
@@ -78,7 +79,7 @@ export const HostsFilterRT = rt.intersection([
 
 const HostsFiltersRT = rt.array(HostsFilterRT);
 
-export type HostsFilters = rt.TypeOf<typeof HostsFiltersRT>;
+type HostsFilters = rt.TypeOf<typeof HostsFiltersRT>;
 const encodeUrlState = HostsFiltersRT.encode;
 const decodeUrlState = (value: unknown) =>
   pipe(HostsFiltersRT.decode(value), fold(constant([]), identity));

@@ -15,10 +15,11 @@ import createContainer from 'constate';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUrlState } from '../../../../utils/use_url_state';
 
-export const DEFAULT_HOSTS_FILTERS_STATE: HostsQueryState = {
+export const DEFAULT_HOST_QUERY_STATE: HostsQueryState = {
   language: 'kuery',
   expression: '',
 };
+const HOST_QUERY_URL_STATE_KEY = 'query';
 
 export const useHostsQuery = () => {
   const { services } = useKibana<InfraClientStartDeps>();
@@ -29,10 +30,10 @@ export const useHostsQuery = () => {
   const { queryString } = queryManager;
 
   const [urlState, setUrlState] = useUrlState<HostsQueryState>({
-    defaultState: DEFAULT_HOSTS_FILTERS_STATE,
+    defaultState: DEFAULT_HOST_QUERY_STATE,
     decodeUrlState,
     encodeUrlState,
-    urlStateKey: 'query',
+    urlStateKey: HOST_QUERY_URL_STATE_KEY,
   });
 
   const [state, setState] = useState<HostsQueryState>(urlState);
@@ -59,12 +60,12 @@ export const useHostsQuery = () => {
   };
 };
 
-export const HostsQueryStateRT = rt.type({
+const HostsQueryStateRT = rt.type({
   language: rt.string,
   expression: rt.string,
 });
 
-export type HostsQueryState = rt.TypeOf<typeof HostsQueryStateRT>;
+type HostsQueryState = rt.TypeOf<typeof HostsQueryStateRT>;
 const encodeUrlState = HostsQueryStateRT.encode;
 const decodeUrlState = (value: unknown) =>
   pipe(HostsQueryStateRT.decode(value), fold(constant(undefined), identity));
