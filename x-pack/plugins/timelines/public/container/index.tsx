@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AlertConsumers, STATUS_VALUES as Status } from '@kbn/rule-data-utils';
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -38,7 +38,7 @@ import type {
   TimelineRequestSortField,
 } from '../../common/search_strategy';
 import type { ESQuery } from '../../common/typed_json';
-import type { KueryFilterQueryKind } from '../../common/types/timeline';
+import type { KueryFilterQueryKind, AlertStatus } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
 import { TableId } from '../store/t_grid/types';
 import * as i18n from './translations';
@@ -86,7 +86,7 @@ export interface UseTimelineEventsProps {
   sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
-  filterStatus?: Status;
+  filterStatus?: AlertStatus;
 }
 
 const createFilter = (filterQuery: ESQuery | string | undefined) =>
