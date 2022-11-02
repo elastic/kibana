@@ -36,10 +36,10 @@ const bodySchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDurationSchema }),
   }),
-  throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
+  throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDurationSchema }))),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   actions: actionsSchema,
-  notify_when: schema.string({ validate: validateNotifyWhenType }),
+  notify_when: schema.maybe(schema.string({ validate: validateNotifyWhenType })),
 });
 
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
