@@ -14,6 +14,7 @@ import {
   merge,
   mergeMap,
   Observable,
+  skip,
   Subscription,
   takeUntil,
   timer,
@@ -135,7 +136,7 @@ export class FetcherTask {
           // Emitting again every 1 minute after the next attempt date in case we reach a deadlock in further checks (like Kibana is not healthy at the moment of sending).
           timer(getNextAttemptDate(lastReported), MINUTE).pipe(
             // Cancel this observable if lastReported$ emits again
-            takeUntil(this.lastReported$)
+            takeUntil(this.lastReported$.pipe(skip(1)))
           )
         )
       )

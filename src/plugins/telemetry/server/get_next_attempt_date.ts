@@ -8,7 +8,7 @@
 
 import { randomInt } from 'crypto';
 import moment from 'moment';
-import { REPORT_INTERVAL_BUFFER_MS } from '../common/constants';
+import { REPORT_INTERVAL_BUFFER_MS, REPORT_INTERVAL_MS } from '../common/constants';
 
 const REPORT_INTERVAL_BUFFER_S = REPORT_INTERVAL_BUFFER_MS / 1000;
 
@@ -19,9 +19,9 @@ const REPORT_INTERVAL_BUFFER_S = REPORT_INTERVAL_BUFFER_MS / 1000;
 export function getNextAttemptDate(fromMs: number): Date {
   const lastAttempt = moment(fromMs).utcOffset(0);
   const endOfLastAttemptDay = lastAttempt.clone().endOf('day');
-  const dayPlus24hours = lastAttempt.clone().add(24, 'hours');
-  const endOfNextDay = dayPlus24hours.clone().endOf('day');
-  const nextAttemptDate = dayPlus24hours
+  const dayPlusReportInterval = lastAttempt.clone().add(REPORT_INTERVAL_MS, 'milliseconds');
+  const endOfNextDay = dayPlusReportInterval.clone().endOf('day');
+  const nextAttemptDate = dayPlusReportInterval
     .clone()
     .add(randomInt(-REPORT_INTERVAL_BUFFER_S, REPORT_INTERVAL_BUFFER_S), 'seconds');
 
