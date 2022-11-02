@@ -34,17 +34,18 @@ export function determineFlapping<
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
     if (alert.isFlapping()) {
-      logger.info(`Alert:${id} is flapping`);
+      logger.info(`Alert:${id} is flapping.`);
     }
     alertsToReturn[id] = alert.toRaw();
   }
 
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
+    const { atCapacity } = alert.flappingHistoryAtCapacity();
     if (alert.isFlapping()) {
-      logger.info(`Alert:${id} is flapping`);
+      logger.info(`Alert:${id} is flapping.`);
       recoveredAlertsToReturn[id] = alert.toRawRecovered();
-    } else if (!alert.flappingHistoryAtCapacity()) {
+    } else if (!atCapacity) {
       recoveredAlertsToReturn[id] = alert.toRawRecovered();
     }
   }

@@ -8,6 +8,7 @@
 import sinon from 'sinon';
 import { Alert } from './alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
+import { last } from 'lodash';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -253,6 +254,7 @@ describe('updateLastScheduledActions()', () => {
           group: 'default',
         },
       },
+      flappingHistory: [],
     });
   });
 });
@@ -330,7 +332,7 @@ describe('hasContext()', () => {
 });
 
 describe('toJSON', () => {
-  test('only serializes state and meta', () => {
+  test('only serializes state, meta, and flappingHistory', () => {
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
       '1',
       {
@@ -341,16 +343,17 @@ describe('toJSON', () => {
             group: 'default',
           },
         },
+        flappingHistory: [false, true],
       }
     );
     expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"}}}'
+      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"}},"flappingHistory":[false,true]}'
     );
   });
 });
 
 describe('toRaw', () => {
-  test('returns unserialised underlying state and meta', () => {
+  test('returns unserialised underlying state, meta, and flappingHistory', () => {
     const raw = {
       state: { foo: true },
       meta: {
@@ -359,11 +362,133 @@ describe('toRaw', () => {
           group: 'default',
         },
       },
+      flappingHistory: [false, true, true],
     };
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
       '1',
       raw
     );
     expect(alertInstance.toRaw()).toEqual(raw);
+  });
+});
+
+describe('toRawRecovered', () => {
+  test('returns unserialised underlying flappingHistory', () => {
+    const raw = {
+      flappingHistory: [false, true, true],
+    };
+    const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
+      '1',
+      raw
+    );
+    expect(alertInstance.toRawRecovered()).toEqual(raw);
+  });
+});
+
+describe('setFlappingHistory', () => {
+  test('sets flappingHistory', () => {
+    const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
+      '1',
+      {
+        flappingHistory: [false, true, true],
+      }
+    );
+    alertInstance.setFlappingHistory([false]);
+    expect(alertInstance.getFlappingHistory()).toEqual([false]);
+  });
+});
+
+describe('getFlappingHistory', () => {
+  test('correctly sets flappingHistory in constructor', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      flappingHistory: [false, false],
+    });
+    expect(alert.getFlappingHistory()).toEqual([false, false]);
+  });
+});
+
+describe('updateFlappingHistory', () => {
+  test('correctly updates flappingHistory', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      flappingHistory: [false, false],
+    });
+    alert.updateFlappingHistory(true);
+    expect(alert.getFlappingHistory()).toEqual([false, false, true]);
+  });
+
+  test('correctly updates flappingHistory while maintaining a fixed size', () => {
+    const flappingHistory = new Array(20).fill(false);
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      flappingHistory,
+    });
+    alert.updateFlappingHistory(true);
+    const fh = alert.getFlappingHistory();
+    expect(fh.length).toEqual(20);
+    expect(last(fh)).toEqual(true);
+  });
+
+  test('correctly updates flappingHistory while maintaining if array is larger than fixed size', () => {
+    const flappingHistory = new Array(23).fill(false);
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      flappingHistory,
+    });
+    alert.updateFlappingHistory(true);
+    const fh = alert.getFlappingHistory();
+    expect(fh.length).toEqual(20);
+    expect(last(fh)).toEqual(true);
+  });
+});
+
+describe('isFlapping', () => {
+  test('returns true if at capacity and flap count exceeds the threshold', () => {
+    const flappingHistory = [true, true, true, true].concat(new Array(16).fill(false));
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      flappingHistory,
+    });
+    expect(alert.isFlapping()).toEqual(true);
+  });
+
+  test("returns false if at capacity and flap count doesn't exceed the threshold", () => {
+    const flappingHistory = [true, true].concat(new Array(20).fill(false));
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      flappingHistory,
+    });
+    expect(alert.isFlapping()).toEqual(false);
+  });
+
+  test('returns false if not at capacity', () => {
+    const flappingHistory = new Array(5).fill(true);
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      flappingHistory,
+    });
+    expect(alert.isFlapping()).toEqual(false);
+  });
+});
+
+describe('flappingHistoryAtCapacity', () => {
+  test('returns true if flappingHistory == set capacity', () => {
+    const flappingHistory = new Array(20).fill(false);
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      flappingHistory,
+    });
+    expect(alert.flappingHistoryAtCapacity().atCapacity).toEqual(true);
+    expect(alert.flappingHistoryAtCapacity().diff).toEqual(1);
+  });
+
+  test('returns true if flappingHistory > set capacity', () => {
+    const flappingHistory = new Array(25).fill(false);
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      flappingHistory,
+    });
+    expect(alert.flappingHistoryAtCapacity().atCapacity).toEqual(true);
+    expect(alert.flappingHistoryAtCapacity().diff).toEqual(6);
+  });
+
+  test('returns false if flappingHistory < set capacity', () => {
+    const flappingHistory = new Array(15).fill(false);
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      flappingHistory,
+    });
+    expect(alert.flappingHistoryAtCapacity().atCapacity).toEqual(false);
   });
 });

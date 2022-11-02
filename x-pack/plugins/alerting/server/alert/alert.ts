@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, isEmpty } from 'lodash';
+import { cloneDeep, drop, isEmpty } from 'lodash';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -195,21 +195,27 @@ export class Alert<
   }
 
   updateFlappingHistory(state: boolean) {
-    if (this.flappingHistoryAtCapacity()) {
-      this.flappingHistory.shift();
+    const { atCapacity, diff } = this.flappingHistoryAtCapacity();
+    if (atCapacity) {
+      this.flappingHistory = drop(this.flappingHistory, diff);
     }
     this.flappingHistory.push(state);
   }
 
   isFlapping(): boolean {
-    if (this.flappingHistoryAtCapacity()) {
+    const { atCapacity } = this.flappingHistoryAtCapacity();
+    if (atCapacity) {
       const numStateChanges = this.flappingHistory.filter((f) => f).length;
       return numStateChanges >= 4;
     }
     return false;
   }
 
-  flappingHistoryAtCapacity(): boolean {
-    return this.flappingHistory.length >= 20;
+  flappingHistoryAtCapacity() {
+    const len = this.flappingHistory.length;
+    return {
+      atCapacity: len >= 20,
+      diff: len + 1 - 20,
+    };
   }
 }
