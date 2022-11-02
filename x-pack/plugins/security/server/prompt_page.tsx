@@ -80,13 +80,14 @@ export function PromptPage({
   const chunks = extractCriticalToChunks(renderToString(content));
   const emotionStyles = constructStyleTagsFromChunks(chunks);
 
-  const uiPublicURL = `${basePath.serverBasePath}/ui`;
+  // const uiPublicURL = `${basePath.serverBasePath}/ui`;
+  const coreAssetsUrl = `${basePath.serverBasePath}/node_modules/@kbn/core-apps-server-internal/assets`;
   const regularBundlePath = `${basePath.serverBasePath}/${buildNumber}/bundles`;
   const styleSheetPaths = [
     `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
     `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename('v8')}`,
     `${basePath.serverBasePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-    `${basePath.serverBasePath}/ui/legacy_light_theme.css`,
+    `${coreAssetsUrl}/legacy_light_theme.css`,
   ];
 
   return (
@@ -98,10 +99,14 @@ export function PromptPage({
         {styleSheetPaths.map((path) => (
           <link href={path} rel="stylesheet" key={path} />
         ))}
-        <Fonts url={uiPublicURL} />
+        <Fonts url={coreAssetsUrl} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
-        <link rel="alternate icon" type="image/png" href={`${uiPublicURL}/favicons/favicon.png`} />
-        <link rel="icon" type="image/svg+xml" href={`${uiPublicURL}/favicons/favicon.svg`} />
+        <link
+          rel="alternate icon"
+          type="image/png"
+          href={`${coreAssetsUrl}/favicons/favicon.png`}
+        />
+        <link rel="icon" type="image/svg+xml" href={`${coreAssetsUrl}/favicons/favicon.svg`} />
         {scriptPaths.map((path) => (
           <script src={basePath.prepend(path)} key={path} />
         ))}

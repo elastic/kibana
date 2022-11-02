@@ -15,5 +15,9 @@ export type {
 // only used by integration tests
 export { FileHashCache, registerRouteForBundle } from './src';
 
-// exporting assets
+// Once built and everything;s extracted to bazel-bin (after bootstrap), node modules structure exposes assets outside of src folder,
+// this references after-build heirarchy
 export const ASSETS_DIR = Path.resolve(__dirname, '../assets');
+export const FAVICONS_DIR = `${ASSETS_DIR}/favicons`;
+export const THEMES_DIR = `${ASSETS_DIR}`;
+export const FONTS_DIR = `${ASSETS_DIR}/fonts`;
