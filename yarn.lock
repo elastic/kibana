@@ -2788,6 +2788,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-apps-server-internal@link:bazel-bin/packages/core/apps/core-apps-server-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
   version "0.0.0"
   uid ""

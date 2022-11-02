@@ -13,15 +13,15 @@ import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-serv
  * Request handler context used by core's coreApp routes.
  * @internal
  */
-export interface InternalCoreAppRequestHandlerContext extends RequestHandlerContextBase {
+export interface InternalCoreAppsServiceRequestHandlerContext extends RequestHandlerContextBase {
   core: Promise<{
     uiSettings: UiSettingsRequestHandlerContext;
   }>;
 }
 
 /**
- * Router bound to the {@link InternalCoreAppRequestHandlerContext}.
+ * Router bound to the {@link InternalCoreAppsServiceRequestHandlerContext}.
  * Used by core's coreApp routes.
  * @internal
  */
-export type InternalCoreAppRouter = IRouter<InternalCoreAppRequestHandlerContext>;
+export type InternalCoreAppsServiceRouter = IRouter<InternalCoreAppsServiceRequestHandlerContext>;

@@ -13,7 +13,7 @@ import agent from 'elastic-apm-node';
 
 import type { RequestHandler } from '@kbn/core-http-server';
 import { fstat, close } from './fs';
-import { IFileHashCache } from './file_hash_cache';
+import type { IFileHashCache } from './file_hash_cache';
 import { getFileHash } from './file_hash';
 import { selectCompressedFile } from './select_compressed_file';
 

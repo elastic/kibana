@@ -7,10 +7,10 @@
  */
 
 import { join } from 'path';
-import { PackageInfo } from '@kbn/config';
+import type { PackageInfo } from '@kbn/config';
 import { fromRoot } from '@kbn/utils';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
-import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import { distDir as UiSharedDepsSrcDistDir } from '@kbn/ui-shared-deps-src';
 import type { IRouter } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { FileHashCache } from './file_hash_cache';
@@ -53,7 +53,7 @@ export function registerBundleRoutes({
   registerRouteForBundle(router, {
     publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
     routePath: `/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
-    bundlesPath: UiSharedDepsSrc.distDir,
+    bundlesPath: UiSharedDepsSrcDistDir,
     fileHashCache,
     isDist,
   });

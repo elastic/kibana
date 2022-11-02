@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { CoreApp } from './core_app';
+export { CoreAppsService } from './src';
+export type {
+  InternalCoreAppsServiceRequestHandlerContext,
+  InternalCoreAppsServiceRouter,
+} from './src';
+// only used by integration tests
+export { FileHashCache, registerRouteForBundle } from './src';
