@@ -44,7 +44,12 @@ export interface Props {
   entityName: string;
   isReadonly?: boolean;
   services: Pick<Services, 'TagSelector' | 'TagList'>;
-  onSave?: (args: { title: string; description?: string; tags: string[] }) => Promise<void>;
+  onSave?: (args: {
+    id: string;
+    title: string;
+    description?: string;
+    tags: string[];
+  }) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -65,6 +70,7 @@ export const InspectorFlyoutContent: FC<Props> = ({
     if (form.isValid) {
       setIsSubmitting(true);
       await onSave?.({
+        id: item.id,
         title: form.title.value,
         description: form.description.value,
         tags: form.tags.value,
@@ -72,7 +78,7 @@ export const InspectorFlyoutContent: FC<Props> = ({
       setIsSubmitting(false);
     }
     setIsSubmitted(true);
-  }, [form, onSave]);
+  }, [form, onSave, item.id]);
 
   const onClickCancel = useCallback(() => {
     onCancel();

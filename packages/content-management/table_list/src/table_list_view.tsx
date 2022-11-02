@@ -210,6 +210,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
       openInspector({
         item: {
+          id: item.id,
           title: item.attributes.title,
           description: item.attributes.description,
           tags,
