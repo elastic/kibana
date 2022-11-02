@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { LayerType } from '../../../../common';
 import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
@@ -610,20 +611,19 @@ export function LayerPanel(
                         cursor: default !important;
                         border-color: transparent !important;
                         margin-top: ${group.accessors.length ? 8 : 0}px !important;
+                        background-color: ${euiThemeVars.euiColorLightShade} !important;
+                        box-shadow: none !important;
                       `}
                     >
                       <EuiText
                         size="s"
                         className="lnsLayerPanel__triggerText"
                         data-test-subj="lns-fakeDimension"
+                        color={'subdued'}
                       >
-                        <EuiFlexItem grow={true}>
-                          <span>
-                            <span className="lnsLayerPanel__triggerTextLabel">
-                              {group.fakeFinalAccessor.label}
-                            </span>
-                          </span>
-                        </EuiFlexItem>
+                        <span className="lnsLayerPanel__triggerTextLabel">
+                          {group.fakeFinalAccessor.label}
+                        </span>
                       </EuiText>
                     </div>
                   )}
