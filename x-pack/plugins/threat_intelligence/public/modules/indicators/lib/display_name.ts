@@ -56,12 +56,13 @@ const mappingsArray: Mappings = [
  * Generates Painless condition checking if given `type` is matched
  */
 const fieldTypeCheck = (type: string) =>
-  `if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='${type.toLowerCase()}')`;
+  `if (doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='${type.toLowerCase()}')`;
 
 /**
  * Generates Painless condition checking if given `field` has value
  */
-const fieldValueCheck = (field: string) => `if (doc['${field}'].value!=null)`;
+const fieldValueCheck = (field: string) =>
+  `if (doc['${field}'].size()!=0 && doc['${field}'].value!=null)`;
 
 /**
  * Converts Mapping to Painless script, computing `threat.indicator.name` value for given indicator types.
