@@ -261,7 +261,7 @@ export const ESBucketScriptAggRT = rt.type({
         lang: rt.keyof({ painless: null, expression: null }),
       }),
     }),
-    rt.partial({ gap_policy: rt.keyof({ skip: null, insert_zeros: null, keep_values: null }) }),
+    rt.partial({ gap_policy: rt.keyof({ skip: null, insert_zeros: null }) }),
   ]),
 });
 
