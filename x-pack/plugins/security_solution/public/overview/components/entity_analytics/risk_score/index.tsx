@@ -42,6 +42,7 @@ import * as commonI18n from '../common/translations';
 import { usersActions } from '../../../../users/store';
 import { useNavigateToTimeline } from '../../detection_response/hooks/use_navigate_to_timeline';
 import type { TimeRange } from '../../../../common/store/inputs/model';
+import { openAlertsFilter } from '../../detection_response/utils';
 
 const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
@@ -110,7 +111,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
         field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
         value: entityName,
       };
-      openTimelineWithFilters([[filter]], timeRange);
+      openTimelineWithFilters([[filter, openAlertsFilter]], timeRange);
     },
     [riskEntity, openTimelineWithFilters]
   );
