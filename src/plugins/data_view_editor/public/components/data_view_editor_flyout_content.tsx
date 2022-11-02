@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback, useContext } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -53,7 +53,7 @@ import {
   RollupBetaWarning,
 } from '.';
 import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
-import { DataViewEditorServiceContext } from './data_view_flyout_content_container';
+import { DataViewEditorService } from '../data_view_editor_service';
 
 export interface Props {
   /**
@@ -68,6 +68,7 @@ export interface Props {
   editData?: DataView;
   showManagementLink?: boolean;
   allowAdHoc: boolean;
+  dataViewEditorService: DataViewEditorService;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -85,12 +86,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
   editData,
   allowAdHoc,
   showManagementLink,
+  dataViewEditorService,
 }: Props) => {
   const {
     services: { application, dataViews, uiSettings, overlays },
   } = useKibana<DataViewEditorContext>();
-
-  const { dataViewEditorService } = useContext(DataViewEditorServiceContext);
 
   const canSave = dataViews.getCanSaveSync();
 
@@ -118,7 +118,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
         return;
       }
 
-      // todo export asObservable references instead of full subjects
       const indexPatternStub: DataViewSpec = {
         title: removeSpaces(formData.title),
         timeFieldName: formData.timestampField?.value,
@@ -165,8 +164,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const isLoadingSources = useObservable(dataViewEditorService.isLoadingSources$, true);
   const existingDataViewNames = useObservable(dataViewEditorService.dataViewNames$);
-  const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
   const rollupIndex = useObservable(dataViewEditorService.rollupIndex$);
+  const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
 
   useEffect(() => {
     dataViewEditorService.setIndexPattern(title);

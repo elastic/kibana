@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
@@ -14,11 +14,6 @@ import { DataViewSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
 import { DataViewEditorContext, DataViewEditorProps } from '../types';
 import { DataViewEditorService } from '../data_view_editor_service';
-
-// @ts-expect-error
-export const DataViewEditorServiceContext = React.createContext<{
-  dataViewEditorService: DataViewEditorService;
-}>();
 
 const DataViewFlyoutContentContainer = ({
   onSave,
@@ -32,6 +27,18 @@ const DataViewFlyoutContentContainer = ({
   const {
     services: { dataViews, notifications, http },
   } = useKibana<DataViewEditorContext>();
+
+  const dataViewEditorService = useRef(
+    new DataViewEditorService({
+      services: { http, dataViews },
+      initialValues: {
+        name: editData?.name,
+        type: editData?.type as INDEX_PATTERN_TYPE,
+        indexPattern: editData?.getIndexPattern(),
+      },
+      requireTimestampField,
+    })
+  );
 
   const onSaveClick = async (dataViewSpec: DataViewSpec, persist: boolean = true) => {
     try {
@@ -69,28 +76,16 @@ const DataViewFlyoutContentContainer = ({
     }
   };
 
-  const dataViewEditorService = new DataViewEditorService({
-    services: { http, dataViews },
-    initialValues: {
-      name: editData?.name,
-      type: editData?.type as INDEX_PATTERN_TYPE,
-      indexPattern: editData?.getIndexPattern(),
-    },
-    requireTimestampField,
-  });
-
-  // todo examine removing the provider
   return (
-    <DataViewEditorServiceContext.Provider value={{ dataViewEditorService }}>
-      <IndexPatternEditorFlyoutContent
-        onSave={onSaveClick}
-        onCancel={onCancel}
-        defaultTypeIsRollup={defaultTypeIsRollup}
-        editData={editData}
-        showManagementLink={showManagementLink}
-        allowAdHoc={allowAdHocDataView || false}
-      />
-    </DataViewEditorServiceContext.Provider>
+    <IndexPatternEditorFlyoutContent
+      onSave={onSaveClick}
+      onCancel={onCancel}
+      defaultTypeIsRollup={defaultTypeIsRollup}
+      editData={editData}
+      showManagementLink={showManagementLink}
+      allowAdHoc={allowAdHocDataView || false}
+      dataViewEditorService={dataViewEditorService.current}
+    />
   );
 };
 
