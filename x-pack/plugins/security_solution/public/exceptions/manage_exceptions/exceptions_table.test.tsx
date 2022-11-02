@@ -8,18 +8,18 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../common/mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
-import { useUserData } from '../../../../detections/components/user_info';
+import { useUserData } from '../../detections/components/user_info';
 
 import { ExceptionListsTable } from './exceptions_table';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { useHistory } from 'react-router-dom';
-import { generateHistoryMock } from '../../../../common/utils/route/mocks';
+import { generateHistoryMock } from '../../common/utils/route/mocks';
 
-jest.mock('../../../../detections/components/user_info');
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../detections/components/user_info');
+jest.mock('../../common/lib/kibana');
 jest.mock('./use_all_exception_lists');
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('react-router-dom', () => {
@@ -39,7 +39,7 @@ jest.mock('@kbn/i18n-react', () => {
   };
 });
 
-jest.mock('../../../../detections/containers/detection_engine/lists/use_lists_config', () => ({
+jest.mock('../../detections/containers/detection_engine/lists/use_lists_config', () => ({
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
 
@@ -90,26 +90,25 @@ describe('ExceptionListsTable', () => {
     ]);
   });
 
-  it('does not render delete option if list is "endpoint_list"', async () => {
+  it('renders delete option as disabled if list is "endpoint_list"', async () => {
     const wrapper = mount(
       <TestProviders>
         <ExceptionListsTable />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(0).text()).toEqual(
-      'endpoint_list'
-    );
 
-    expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(1).text()).toEqual(
-      'not_endpoint_list'
-    );
+    wrapper
+      .find('[data-test-subj="exceptionsListCardOverflowActions"] button')
+      .at(0)
+      .simulate('click');
+
     expect(wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button')).toHaveLength(1);
     expect(
       wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
-    ).toBeFalsy();
+    ).toBeTruthy();
   });
 
-  it('does not render delete option if user is read only', async () => {
+  it('renders delete option as disabled if user is read only', async () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         loading: false,
@@ -123,10 +122,12 @@ describe('ExceptionListsTable', () => {
         <ExceptionListsTable />
       </TestProviders>
     );
-
-    expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(1).text()).toEqual(
-      'not_endpoint_list'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button')).toHaveLength(0);
+    wrapper
+      .find('[data-test-subj="exceptionsListCardOverflowActions"] button')
+      .at(0)
+      .simulate('click');
+    expect(
+      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
+    ).toBeTruthy();
   });
 });
