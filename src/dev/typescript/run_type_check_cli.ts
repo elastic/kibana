@@ -117,7 +117,6 @@ function createTypeCheckConfigs(projects: Project[], bazelPackages: BazelPackage
       compilerOptions: {
         ...parsed.compilerOptions,
         composite: true,
-        incremental: true,
         rootDir: '.',
         paths: undefined,
       },
