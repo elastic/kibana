@@ -5,40 +5,53 @@
  * 2.0.
  */
 
-import { AbstractSource } from '../source';
+import { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
+import { RasterTileSource } from 'maplibre-gl';
+import { AbstractSource } from '../source';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
+// @ts-ignore
 import { WmsClient } from './wms_client';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
-
+import { IRasterSource, RasterTileSourceData } from '../raster_source';
+import { WMSSourceDescriptor } from '../../../../common/descriptor_types';
 export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
   defaultMessage: 'Web Map Service',
 });
 
-export class WMSSource extends AbstractSource {
+export class WMSSource extends AbstractSource implements IRasterSource {
   static type = SOURCE_TYPES.WMS;
-
-  static createDescriptor({ serviceUrl, layers, styles }) {
+  readonly _descriptor: WMSSourceDescriptor;
+  static createDescriptor({ serviceUrl, layers, styles }: Partial<WMSSourceDescriptor>) {
     return {
       type: WMSSource.type,
       serviceUrl,
       layers,
       styles,
-    };
+    } as WMSSourceDescriptor;
+  }
+  constructor(sourceDescriptor: WMSSourceDescriptor) {
+    super(sourceDescriptor);
+    this._descriptor = sourceDescriptor;
+  }
+  async hasLegendDetails(): Promise<boolean> {
+    return false;
   }
 
-  isSourceStale(mbSource, sourceData) {
+  renderLegendDetails(): ReactElement<any> | null {
+    return null;
+  }
+
+  isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData) {
     if (!sourceData.url) {
       return false;
     }
     return mbSource.tiles?.[0] !== sourceData.url;
   }
-
   async canSkipSourceUpdate() {
     return false;
   }
-
   async getImmutableProperties() {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
