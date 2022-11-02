@@ -127,7 +127,7 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
               ? {
                   position: 'relative',
                   [autoScaleParams.autoScaleMetricAlignment]:
-                    (1 - scale) * parentDimensions.width * scale * -1,
+                    (1 - scale) * parentDimensions.width * scale * -1, // The difference of width after scaled
                 }
               : {}),
           }}
