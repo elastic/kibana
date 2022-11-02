@@ -6,10 +6,7 @@
  */
 
 import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import {
-  BulkAction,
-  BulkActionEditType,
-} from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 /**
@@ -18,14 +15,7 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
  * @param {BulkActionEditType | undefined} editAction
  * @returns {BulkActionEditPayload[] | undefined}
  */
-export const computeDryRunPayload = (
-  action: BulkAction,
-  editAction?: BulkActionEditType
-): BulkActionEditPayload[] | undefined => {
-  if (action !== BulkAction.edit || !editAction) {
-    return undefined;
-  }
-
+export function computeDryRunEditPayload(editAction: BulkActionEditType): BulkActionEditPayload[] {
   switch (editAction) {
     case BulkActionEditType.add_index_patterns:
     case BulkActionEditType.delete_index_patterns:
@@ -74,4 +64,11 @@ export const computeDryRunPayload = (
     default:
       assertUnreachable(editAction);
   }
-};
+
+  return [
+    {
+      type: editAction,
+      value: [],
+    },
+  ];
+}
