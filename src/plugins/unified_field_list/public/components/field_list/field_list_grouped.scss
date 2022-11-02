@@ -2,7 +2,7 @@
  * 1. Don't cut off the shadow of the field items
  */
 
-.lnsIndexPatternFieldList {
+.unifiedFieldList__fieldListGrouped {
   @include euiOverflowShadow;
   @include euiScrollBar;
   margin-left: -$euiSize; /* 1 */
@@ -11,7 +11,7 @@
   overflow: auto;
 }
 
-.lnsIndexPatternFieldList__accordionContainer {
+.unifiedFieldList__fieldListGrouped__container {
   padding-top: $euiSizeS;
   position: absolute;
   top: 0;
