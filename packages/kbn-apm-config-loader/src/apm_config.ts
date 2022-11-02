@@ -8,14 +8,12 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const apmConfigSchema = schema.object({
-  apm: schema.object(
-    {
-      active: schema.maybe(schema.boolean()),
-      serverUrl: schema.maybe(schema.uri()),
-      secretToken: schema.maybe(schema.string()),
-      globalLabels: schema.object({}, { unknowns: 'allow' }),
-    },
-    { unknowns: 'allow' }
-  ),
-});
+export const apmConfigSchema = schema.object(
+  {
+    active: schema.maybe(schema.boolean()),
+    serverUrl: schema.maybe(schema.uri()),
+    secretToken: schema.maybe(schema.string()),
+    globalLabels: schema.object({}, { unknowns: 'allow' }),
+  },
+  { unknowns: 'allow' }
+);
