@@ -365,7 +365,14 @@ export interface ActionListApiResponse {
 export type UploadedFileInfo = Pick<
   FileJSON,
   'name' | 'id' | 'mimeType' | 'size' | 'status' | 'created'
->;
+> & {
+  /**
+   * Time to Live. The duration (in days) until the file expires and is cleaned up. `-1` will be set
+   * if file has already expired (note: the file's `status` should be checked first to determine if
+   * a file is still available).
+   */
+  ttl?: number;
+};
 
 export interface ActionFileInfoApiResponse {
   data: UploadedFileInfo;

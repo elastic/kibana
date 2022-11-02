@@ -11,6 +11,7 @@ import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import moment from 'moment';
 import type { UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
 import {
@@ -86,7 +87,7 @@ export const getFileInfo = async (
   try {
     const fileClient = getFileClient(esClient, logger);
     const file = await fileClient.get({ id: fileId });
-    const { name, id, mimeType, size, status, created } = file.data;
+    const { name, id, mimeType, size, status: actualStatus, created } = file.data;
     let fileHasChunks: boolean = true;
 
     if (status === 'READY') {
@@ -99,6 +100,8 @@ export const getFileInfo = async (
       }
     }
 
+    const status = fileHasChunks ? actualStatus : 'DELETED';
+
     // TODO: add `ttl` to the return payload by retrieving the value from ILM?
 
     return {
@@ -107,7 +110,8 @@ export const getFileInfo = async (
       mimeType,
       size,
       created,
-      status: fileHasChunks ? status : 'DELETED',
+      status,
+      ttl: status === 'READY' ? await calculateFileTtl(esClient, created) : -1,
     };
   } catch (error) {
     throw getFileRetrievalError(error, fileId);
@@ -133,3 +137,56 @@ const doesFileHaveChunks = async (
 
   return Boolean((chunks.hits?.total as SearchTotalHits)?.value);
 };
+
+const calculateFileTtl = async (
+  esClient: ElasticsearchClient,
+  createdDate: string
+): Promise<number | undefined> => {
+  const policyName = 'paul'; // FIXME:PT get const from fleet
+  const ilmPolicy = await esClient.ilm.getLifecycle({ name: policyName }, { ignore: [404] });
+  const deleteMinAge = ilmPolicy[policyName]?.policy.phases?.delete?.min_age;
+
+  if (!deleteMinAge) {
+    return undefined;
+  }
+
+  const daysLeft = moment(createdDate).diff(moment(createdDate).add(deleteMinAge), 'days');
+
+  return undefined;
+};
+
+// {
+//   "paul": {
+//     "version": 1,
+//     "modified_date": "2022-11-01T19:56:10.124Z",
+//     "policy": {
+//       "phases": {
+//         "hot": {
+//           "min_age": "0ms",
+//           "actions": {
+//             "set_priority": {
+//               "priority": 100
+//             },
+//             "rollover": {
+//               "max_primary_shard_size": "50gb",
+//               "max_age": "30d"
+//             }
+//           }
+//         },
+//         "delete": {
+//           "min_age": "5d",
+//           "actions": {
+//             "delete": {
+//               "delete_searchable_snapshot": true
+//             }
+//           }
+//         }
+//       }
+//     },
+//     "in_use_by": {
+//       "indices": [],
+//       "data_streams": [],
+//       "composable_templates": []
+//     }
+//   }
+// }
