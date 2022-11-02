@@ -339,7 +339,7 @@ describe('pie_visualization', () => {
       expect(getConfig(stateWithCollapsed).groups[1].supportsMoreColumns).toBeTruthy();
     });
 
-    it('counts multiple metrics toward the dimension limits', () => {
+    it('counts multiple metrics toward the dimension limits when not mosaic', () => {
       const colIds = new Array(PartitionChartsMeta.pie.maxBuckets - 1)
         .fill(undefined)
         .map((_, i) => String(i + 1));
@@ -350,6 +350,7 @@ describe('pie_visualization', () => {
 
       const state = getExampleState();
       state.layers[0].primaryGroups = colIds;
+      state.layers[0].allowMultipleMetrics = true;
 
       const getConfig = (_state: PieVisualizationState) =>
         pieVisualization.getConfiguration({
@@ -358,12 +359,36 @@ describe('pie_visualization', () => {
           layerId: state.layers[0].layerId,
         });
 
-      expect(getConfig(state).groups[0].supportsMoreColumns).toBeTruthy();
+      expect(getConfig(state).groups[1].supportsMoreColumns).toBeTruthy();
 
       const stateWithMultipleMetrics = cloneDeep(state);
       stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
 
-      expect(getConfig(stateWithMultipleMetrics).groups[0].supportsMoreColumns).toBeFalsy();
+      expect(getConfig(stateWithMultipleMetrics).groups[1].supportsMoreColumns).toBeFalsy();
+    });
+
+    it('does NOT count multiple metrics toward the dimension limits when mosaic', () => {
+      const frame = mockFrame();
+      frame.datasourceLayers[LAYER_ID]!.getTableSpec = () => [];
+
+      const state = getExampleState();
+      state.shape = 'mosaic';
+      state.layers[0].primaryGroups = [];
+      state.layers[0].allowMultipleMetrics = false; // always true for mosaic
+
+      const getConfig = (_state: PieVisualizationState) =>
+        pieVisualization.getConfiguration({
+          state: _state,
+          frame,
+          layerId: state.layers[0].layerId,
+        });
+
+      expect(getConfig(state).groups[1].supportsMoreColumns).toBeTruthy();
+
+      const stateWithMultipleMetrics = cloneDeep(state);
+      stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
+
+      expect(getConfig(stateWithMultipleMetrics).groups[1].supportsMoreColumns).toBeTruthy();
     });
 
     it('reports too many metric dimensions if multiple not enabled', () => {

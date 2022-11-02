@@ -105,7 +105,7 @@ export function suggestions({
     return [];
   }
 
-  const metricColumns = metrics.map(({ columnId }) => columnId);
+  const metricColumnIds = metrics.map(({ columnId }) => columnId);
 
   const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
 
@@ -134,13 +134,13 @@ export function suggestions({
                 ...state.layers[0],
                 layerId: table.layerId,
                 primaryGroups: groups.map((col) => col.columnId),
-                metrics: metricColumns,
+                metrics: metricColumnIds,
                 layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
                 primaryGroups: groups.map((col) => col.columnId),
-                metrics: metricColumns,
+                metrics: metricColumnIds,
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
@@ -199,7 +199,7 @@ export function suggestions({
                 ...state.layers[0],
                 layerId: table.layerId,
                 primaryGroups: groups.map((col) => col.columnId),
-                metrics: metricColumns,
+                metrics: metricColumnIds,
                 categoryDisplay:
                   state.layers[0].categoryDisplay === CategoryDisplay.INSIDE
                     ? CategoryDisplay.DEFAULT
@@ -209,7 +209,7 @@ export function suggestions({
             : {
                 layerId: table.layerId,
                 primaryGroups: groups.map((col) => col.columnId),
-                metrics: metricColumns,
+                metrics: metricColumnIds,
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
@@ -247,20 +247,22 @@ export function suggestions({
                 layerId: table.layerId,
                 primaryGroups: groups[0] ? [groups[0].columnId] : [],
                 secondaryGroups: groups[1] ? [groups[1].columnId] : [],
-                metrics: metricColumns,
+                metrics: metricColumnIds,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 layerType: layerTypes.DATA,
+                allowMultipleMetrics: false,
               }
             : {
                 layerId: table.layerId,
                 primaryGroups: groups[0] ? [groups[0].columnId] : [],
                 secondaryGroups: groups[1] ? [groups[1].columnId] : [],
-                metrics: metricColumns,
+                metrics: metricColumnIds,
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
+                allowMultipleMetrics: false,
               },
         ],
       },
@@ -287,7 +289,7 @@ export function suggestions({
                 ...state.layers[0],
                 layerId: table.layerId,
                 primaryGroups: groups.map((col) => col.columnId),
-                metrics: metricColumns,
+                metrics: metricColumnIds,
                 secondaryGroups: [],
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 layerType: layerTypes.DATA,
@@ -295,7 +297,7 @@ export function suggestions({
             : {
                 layerId: table.layerId,
                 primaryGroups: groups.map((col) => col.columnId),
-                metrics: metricColumns,
+                metrics: metricColumnIds,
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
@@ -312,7 +314,9 @@ export function suggestions({
   return [...results]
     .map((suggestion) => ({
       ...suggestion,
-      score: shouldHideSuggestion ? 0 : suggestion.score + 0.05 * groups.length,
+      score: shouldHideSuggestion
+        ? 0
+        : suggestion.score + 0.05 * groups.length + 0.01 * metricColumnIds.length,
     }))
     .sort((a, b) => b.score - a.score)
     .map((suggestion) => ({

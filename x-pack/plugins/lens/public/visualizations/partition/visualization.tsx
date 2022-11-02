@@ -181,11 +181,23 @@ export const getPieVisualization = ({
         filterOperations: bucketedOperations,
       };
 
+      // We count multiple metrics as a bucket dimension.
+      //
+      // However, if this is a mosaic chart, we don't support multiple metrics
+      // so if there is more than one metric we got here via a chart switch from
+      // a subtype that supports multi-metrics e.g. pie.
+      //
+      // The user will be prompted to remove the extra metric dimensions and we don't
+      // count multiple metrics as a bucket dimension so that the rest of the dimension
+      // groups UI behaves correctly.
+      const multiMetricsBucketDimensionCount =
+        layer.metrics.length > 1 && state.shape !== 'mosaic' ? 1 : 0;
+
       const totalNonCollapsedAccessors =
         accessors.reduce(
           (total, { columnId }) => total + (isCollapsed(columnId, layer) ? 0 : 1),
           0
-        ) + (layer.metrics.length > 1 ? 1 : 0);
+        ) + multiMetricsBucketDimensionCount;
 
       const fakeFinalAccessor =
         layer.metrics.length > 1
