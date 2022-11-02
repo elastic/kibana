@@ -66,7 +66,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
         toastLifeTimeMs: 3000,
       });
       refreshApp();
-      application?.navigateToApp('synthetics', { path: `` });
+      application?.navigateToApp('synthetics', { path: 'monitors' });
     }
   }, [application, data, loading, refreshApp, serviceLocations]);
 
