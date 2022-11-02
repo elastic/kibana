@@ -53,7 +53,7 @@ export class LogViewsClient implements ILogViewsClient {
 
   public async getResolvedLogView(logViewId: string): Promise<ResolvedLogView> {
     const logView = await this.getLogView(logViewId);
-    const resolvedLogView = await this.resolveLogView(logView.attributes);
+    const resolvedLogView = await this.resolveLogView(logView.id, logView.attributes);
     return resolvedLogView;
   }
 
@@ -118,8 +118,11 @@ export class LogViewsClient implements ILogViewsClient {
     return data;
   }
 
-  public async resolveLogView(logViewAttributes: LogViewAttributes): Promise<ResolvedLogView> {
-    return await resolveLogView(logViewAttributes, this.dataViews, this.config);
+  public async resolveLogView(
+    logViewId: string,
+    logViewAttributes: LogViewAttributes
+  ): Promise<ResolvedLogView> {
+    return await resolveLogView(logViewId, logViewAttributes, this.dataViews, this.config);
   }
 }
 
