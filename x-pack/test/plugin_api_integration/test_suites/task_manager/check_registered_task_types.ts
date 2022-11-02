@@ -41,6 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
         .filter((t: string) => !TEST_TYPES.includes(t))
         .sort();
       expect(types).to.eql([
+        'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
@@ -124,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:endpoint-meta-telemetry',
         'security:telemetry-configuration',
         'security:telemetry-detection-rules',
+        'security:telemetry-filterlist-artifact',
         'security:telemetry-lists',
         'security:telemetry-prebuilt-rule-alerts',
         'security:telemetry-timelines',
