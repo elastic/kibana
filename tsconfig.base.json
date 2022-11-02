@@ -1224,6 +1224,11 @@
     // We have to enable this option explicitly since `esModuleInterop` doesn't enable it automatically when ES2015 or
     // ESNext module format is used.
     "allowSyntheticDefaultImports": true,
+    // Several packages use .js files to provide types without requiring transpilation. In order for TS to support this
+    // regardless of where the pacakge is imported, we need to enable `allowJs` globally. In specific packages we might
+    // want to disable parsing of JS files, in which case `allowJs` should be set to `false` locally. These packages will
+    // not be able to import packages which include JS code, or import packages which depend on JS code.
+    "allowJs": true,
     // Emits __importStar and __importDefault helpers for runtime babel ecosystem compatibility.
     "esModuleInterop": true,
     // Resolve modules in the same way as Node.js. Aka make `require` works the
