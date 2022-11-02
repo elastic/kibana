@@ -38,7 +38,7 @@ export const sampleAttributeCoreWebVital = {
               'x-axis-column-layer0': {
                 dataType: 'string',
                 isBucketed: true,
-                label: 'Top values of Operating system',
+                label: 'Operating system',
                 operationType: 'terms',
                 params: {
                   missingBucket: false,

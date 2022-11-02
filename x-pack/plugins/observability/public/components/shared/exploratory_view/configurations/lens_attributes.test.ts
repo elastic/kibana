@@ -21,7 +21,7 @@ import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } fro
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
 
 describe('Lens Attribute', () => {
   mockAppDataView();
@@ -470,11 +470,9 @@ describe('Lens Attribute', () => {
         layerConfig: layerConfig1,
         sourceField: USER_AGENT_NAME,
         layerId: 'layer0',
-        indexPattern: mockDataView,
-        labels: layerConfig.seriesConfig.labels,
       });
 
-      expect(lnsAttr.visualization?.layers).toEqual([
+      expect((lnsAttr.visualization as XYState)?.layers).toEqual([
         {
           accessors: ['y-axis-column-layer0-0'],
           layerId: 'layer0',
@@ -501,7 +499,7 @@ describe('Lens Attribute', () => {
           'breakdown-column-layer0': {
             dataType: 'string',
             isBucketed: true,
-            label: 'Top values of Browser family',
+            label: 'Browser family',
             operationType: 'terms',
             params: {
               missingBucket: false,

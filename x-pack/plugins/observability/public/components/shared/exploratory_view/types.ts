@@ -32,6 +32,7 @@ export const ReportViewTypes = {
   cwv: 'core-web-vitals',
   mdd: 'device-data-distribution',
   smt: 'single-metric',
+  htm: 'heatmap',
 } as const;
 
 type ValueOf<T> = T[keyof T];
