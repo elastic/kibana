@@ -135,7 +135,11 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'hostSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { hostName }) => (
-      <EuiLink disabled={totalAlerts === 0} onClick={() => handleClick({ hostName })}>
+      <EuiLink
+        data-test-subj="hostSeverityAlertsTable-totalAlertsLink"
+        disabled={totalAlerts === 0}
+        onClick={() => handleClick({ hostName })}
+      >
         <FormattedCount count={totalAlerts} />
       </EuiLink>
     ),
@@ -146,6 +150,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
         <EuiLink
+          data-test-subj="hostSeverityAlertsTable-criticalLink"
           disabled={count === 0}
           onClick={() => handleClick({ hostName, severity: 'critical' })}
         >

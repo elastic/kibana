@@ -90,7 +90,11 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, openRu
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
     render: (alertCount: number, { name }) => (
-      <EuiLink disabled={alertCount === 0} onClick={() => openRuleInTimeline(name)}>
+      <EuiLink
+        data-test-subj="severityRuleAlertsTable-alertCountLink"
+        disabled={alertCount === 0}
+        onClick={() => openRuleInTimeline(name)}
+      >
         <FormattedCount count={alertCount} />
       </EuiLink>
     ),
