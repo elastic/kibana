@@ -79,7 +79,6 @@ export const verifyAllTestPackages = async (
         const { packageInfo } = await generatePackageInfoFromArchiveBuffer(
           buffer,
           'application/zip'
-          // zipPath
         );
         logger?.info(`Successfully parsed zip pkg ${packageInfo.name}-${packageInfo.version}`);
         successCount++;
