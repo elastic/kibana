@@ -60,6 +60,7 @@ describe('service node queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
+        environment: ENVIRONMENT_ALL.value,
       })
     );
 
