@@ -228,9 +228,17 @@ export function buildComponentTemplates(params: {
   templateName: string;
   registryElasticsearch: RegistryElasticsearch | undefined;
   packageName: string;
+  pipelineName?: string;
   defaultSettings: IndexTemplate['template']['settings'];
 }) {
-  const { templateName, registryElasticsearch, packageName, defaultSettings, mappings } = params;
+  const {
+    templateName,
+    registryElasticsearch,
+    packageName,
+    defaultSettings,
+    mappings,
+    pipelineName,
+  } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
 
@@ -256,6 +264,7 @@ export function buildComponentTemplates(params: {
         ...templateSettings,
         index: {
           ...templateSettings.index,
+          ...(pipelineName ? { default_pipeline: pipelineName } : {}),
           mapping: {
             ...templateSettings?.mapping,
             total_fields: {
@@ -392,12 +401,12 @@ export function prepareTemplate({
     mappings,
     packageName,
     templateName,
+    pipelineName,
     registryElasticsearch: dataStream.elasticsearch,
   });
 
   const template = getTemplate({
     templateIndexPattern,
-    pipelineName,
     packageName,
     composedOfTemplates: Object.keys(componentTemplates),
     templatePriority,
