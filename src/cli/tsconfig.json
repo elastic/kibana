@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true
+  },
+  "include": [
+    "keystore/**/*",
+    "serve/**/*",
+    "*.js",
+  ],
+  "kbn_references": [
+    { "path": "../core/tsconfig.json" },
+    { "path": "../setup_node_env/tsconfig.json" },
+  ]
+}
