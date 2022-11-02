@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
+import { RULE_TAGS_TEMPLATE } from '../../../../../common/opsgenie';
 import * as i18n from './translations';
 import { EditActionCallback } from '../types';
 
@@ -16,6 +17,14 @@ interface TagsProps {
   onChange: EditActionCallback;
   values: string[];
 }
+
+const options = [
+  {
+    label: RULE_TAGS_TEMPLATE,
+    key: RULE_TAGS_TEMPLATE,
+    'data-test-subj': 'opsgenie-tags-rule-tags',
+  },
+];
 
 const TagsComponent: React.FC<TagsProps> = ({ onChange, values }) => {
   const tagOptions = useMemo(() => values.map((value) => getTagAsOption(value)), [values]);
@@ -51,7 +60,7 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange, values }) => {
       <EuiComboBox
         fullWidth
         isClearable
-        noSuggestions
+        options={options}
         selectedOptions={tagOptions}
         onCreateOption={onCreateOption}
         onChange={onTagsChange}

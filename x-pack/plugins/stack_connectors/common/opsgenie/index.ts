@@ -10,4 +10,6 @@ export enum OpsgenieSubActions {
   CloseAlert = 'closeAlert',
 }
 
+export const RULE_TAGS_TEMPLATE = `{{rule.tags}}`;
+
 export const OpsgenieConnectorTypeId = '.opsgenie';
