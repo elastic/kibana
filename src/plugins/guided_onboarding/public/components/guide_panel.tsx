@@ -154,7 +154,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
 
   // TODO handle loading, error state
   // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
-  if (!guideConfig) {
+  if (!guideConfig || !guideState || !guideState.isActive) {
     // TODO button show/hide logic https://github.com/elastic/kibana/issues/141129
     return null;
   }
