@@ -404,11 +404,11 @@ export const getHeatmapVisualization = ({
         isCellLabelVisible: false,
         // Y-axis
         isYAxisLabelVisible: false,
-        isYAxisTitleVisible: state.gridConfig.isYAxisTitleVisible,
+        isYAxisTitleVisible: false,
         yTitle: state.gridConfig.yTitle ?? '',
         // X-axis
         isXAxisLabelVisible: false,
-        isXAxisTitleVisible: state.gridConfig.isXAxisTitleVisible,
+        isXAxisTitleVisible: false,
         xTitle: state.gridConfig.xTitle ?? '',
       }
     );
