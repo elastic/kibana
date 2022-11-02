@@ -21,6 +21,7 @@ import {
 } from '../../../common/service_groups';
 import { getServicesCounts } from './get_services_counts';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getServiceGroupAlerts } from './get_service_group_alerts';
 
 const serviceGroupsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-groups',
@@ -189,6 +190,37 @@ const serviceGroupServicesRoute = createApmServerRoute({
   },
 });
 
+const serviceGroupAlertsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-group/alerts',
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources): ReturnType<typeof getServiceGroupAlerts> => {
+    const { context } = resources;
+    const {
+      savedObjects: { client: savedObjectsClient },
+    } = await context.core;
+    const serviceGroups = await getServiceGroups({
+      savedObjectsClient,
+    });
+    const ruleRegistryPluginStart =
+      await resources.plugins.ruleRegistry.start();
+    const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(
+      resources.request
+    );
+    const authorizedAlertsIndices =
+      await alertsClient.getAuthorizedAlertsIndices(['apm']);
+    if (!authorizedAlertsIndices || authorizedAlertsIndices.length === 0) {
+      return { serviceGroupAlertsCount: {} };
+    }
+    return await getServiceGroupAlerts({
+      serviceGroups,
+      authorizedAlertsIndices,
+      context,
+    });
+  },
+});
+
 export const serviceGroupRouteRepository = {
   ...serviceGroupsRoute,
   ...serviceGroupRoute,
@@ -196,4 +228,5 @@ export const serviceGroupRouteRepository = {
   ...serviceGroupDeleteRoute,
   ...serviceGroupServicesRoute,
   ...serviceGroupsWithServiceCountRoute,
+  ...serviceGroupAlertsRoute,
 };

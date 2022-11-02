@@ -15,10 +15,15 @@ import { useDefaultEnvironment } from '../../../../hooks/use_default_environment
 interface Props {
   items: SavedServiceGroup[];
   servicesCounts: Record<string, number>;
+  serviceGroupAlertsCount: Record<string, number>;
   isLoading: boolean;
 }
 
-export function ServiceGroupsListItems({ items, servicesCounts }: Props) {
+export function ServiceGroupsListItems({
+  items,
+  servicesCounts,
+  serviceGroupAlertsCount,
+}: Props) {
   const router = useApmRouter();
   const { query } = useApmParams('/service-groups');
 
@@ -30,6 +35,7 @@ export function ServiceGroupsListItems({ items, servicesCounts }: Props) {
         <ServiceGroupsCard
           serviceGroup={item}
           servicesCount={servicesCounts[item.id]}
+          alertsCount={serviceGroupAlertsCount[item.id]}
           href={router.link('/services', {
             query: {
               ...query,

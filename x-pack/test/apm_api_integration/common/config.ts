@@ -13,7 +13,10 @@ import {
   APM_TEST_PASSWORD,
 } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
-import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
+import {
+  InheritedFtrProviderContext,
+  // InheritedServices
+} from './ftr_provider_context';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
 import { RegistryProvider } from './registry';
@@ -42,6 +45,16 @@ async function getApmApiClient({
 }
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
+//
+// export type CreateTestConfig = ({ readConfigFile }: FtrConfigProviderContext) => Promise<{
+//   testFiles: string[];
+//   servers: any;
+//   servicesRequiredForTestAnalysis: ['apmFtrConfig', 'registry'];
+//   services: InheritedServices & {};
+//   junit: { reportName: string };
+//   esTestCluster: { license: ApmFtrConfig['license'] };
+//   kbnTestServer: {serverArgs: string[]};
+// }>;
 
 export function createTestConfig(config: ApmFtrConfig) {
   const { license, name, kibanaConfig } = config;
@@ -51,7 +64,7 @@ export function createTestConfig(config: ApmFtrConfig) {
       require.resolve('../../api_integration/config.ts')
     );
 
-    const services = xPackAPITestsConfig.get('services') as InheritedServices;
+    const services = xPackAPITestsConfig.get('services');
     const servers = xPackAPITestsConfig.get('servers');
     const kibanaServer = servers.kibana as UrlObject;
     const kibanaServerUrl = format(kibanaServer);

@@ -60,6 +60,18 @@ export function ServiceGroupsList() {
     [start, end, serviceGroups.length]
   );
 
+  const { data: servicesGroupAlerts = { serviceGroupAlertsCount: {} } } =
+    useFetcher(
+      (callApmApi) => {
+        if (serviceGroups.length) {
+          return callApmApi('GET /internal/apm/service-group/alerts');
+        }
+      },
+      [serviceGroups.length]
+    );
+
+  console.log(servicesGroupAlerts);
+
   const isLoading =
     status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING;
 
@@ -189,7 +201,7 @@ export function ServiceGroupsList() {
                   >
                     {i18n.translate(
                       'xpack.apm.serviceGroups.beta.feedback.link',
-                      { defaultMessage: 'Send feedback' }
+                      { defaultMessage: 'Give feedback' }
                     )}
                   </EuiLink>
                 </EuiFlexItem>
@@ -201,6 +213,9 @@ export function ServiceGroupsList() {
                   <ServiceGroupsListItems
                     items={items}
                     servicesCounts={servicesCountData.servicesCounts}
+                    serviceGroupAlertsCount={
+                      servicesGroupAlerts.serviceGroupAlertsCount
+                    }
                     isLoading={isLoading}
                   />
                 ) : (

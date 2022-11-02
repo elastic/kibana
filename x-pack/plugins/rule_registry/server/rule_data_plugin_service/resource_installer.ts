@@ -339,6 +339,11 @@ export class ResourceInstaller {
       namespace,
     };
 
+    const dynamic = componentTemplates.reduce<estypes.MappingDynamicMapping>(
+      (dynamicMapping, componentTemplate) => componentTemplate?.mappings?.dynamic ?? dynamicMapping,
+      false
+    );
+
     // TODO: need a way to update this template if/when we decide to make changes to the
     // built in index template. Probably do it as part of updateIndexMappingsForAsset?
     // (Before upgrading any indices, find and upgrade all namespaced index templates - component templates
@@ -376,7 +381,7 @@ export class ResourceInstaller {
             auto_expand_replicas: '0-1',
           },
           mappings: {
-            dynamic: false,
+            dynamic,
             _meta: indexMetadata,
           },
           aliases:

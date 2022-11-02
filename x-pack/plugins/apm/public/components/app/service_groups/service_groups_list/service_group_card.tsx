@@ -6,11 +6,13 @@
  */
 import {
   EuiAvatar,
+  EuiBadge,
   EuiCard,
   EuiCardProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -25,6 +27,7 @@ interface Props {
   onClick?: () => void;
   href?: string;
   servicesCount?: number;
+  alertsCount?: number;
 }
 
 export function ServiceGroupsCard({
@@ -33,15 +36,26 @@ export function ServiceGroupsCard({
   onClick,
   href,
   servicesCount,
+  alertsCount,
 }: Props) {
   const cardProps: EuiCardProps = {
     style: { width: 286 },
     icon: (
-      <EuiAvatar
-        name={serviceGroup.groupName}
-        color={serviceGroup.color || SERVICE_GROUP_COLOR_DEFAULT}
-        size="l"
-      />
+      <>
+        {alertsCount && (
+          <div>
+            <EuiBadge iconType="alert" color="danger">
+              {alertsCount} alerts
+            </EuiBadge>
+            <EuiSpacer size="s" />
+          </div>
+        )}
+        <EuiAvatar
+          name={serviceGroup.groupName}
+          color={serviceGroup.color || SERVICE_GROUP_COLOR_DEFAULT}
+          size="l"
+        />
+      </>
     ),
     title: serviceGroup.groupName,
     description: (
