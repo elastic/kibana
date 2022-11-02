@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import type { AlertConsumers } from '@kbn/rule-data-utils';
+import type { AlertConsumers, STATUS_VALUES as Status } from '@kbn/rule-data-utils';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -13,7 +12,6 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 
@@ -69,14 +67,6 @@ type LoadPage = (newActivePage: number) => void;
 type TimelineRequest<T extends KueryFilterQueryKind> = TimelineEventsAllRequestOptions;
 
 type TimelineResponse<T extends KueryFilterQueryKind> = TimelineEventsAllStrategyResponse;
-
-export const status = t.keyof({
-  open: null,
-  closed: null,
-  acknowledged: null,
-  'in-progress': null,
-});
-export type Status = t.TypeOf<typeof status>;
 
 export interface UseTimelineEventsProps {
   alertConsumers?: AlertConsumers[];
