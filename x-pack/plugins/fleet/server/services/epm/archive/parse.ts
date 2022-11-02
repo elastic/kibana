@@ -295,52 +295,19 @@ export function parseAndVerifyDataStreams(
       elasticsearch,
       ...restOfProps
     } = manifest;
+
     if (!(dataStreamTitle && type)) {
       throw new PackageInvalidArchiveError(
         `Invalid manifest for data stream '${dataStreamPath}': one or more fields missing of 'title', 'type'`
       );
     }
 
-    let ingestPipeline;
-    const ingestPipelinePaths = paths.filter((filePath) =>
-      filePath.startsWith(`${pkgKey}/data_stream/${dataStreamPath}/elasticsearch/ingest_pipeline`)
-    );
-
-    if (
-      ingestPipelinePaths.length &&
-      (ingestPipelinePaths.some((ingestPipelinePath) =>
-        ingestPipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_YML)
-      ) ||
-        ingestPipelinePaths.some((ingestPipelinePath) =>
-          ingestPipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON)
-        ))
-    ) {
-      ingestPipeline = DEFAULT_INGEST_PIPELINE_VALUE;
-    }
-
+    const ingestPipeline = parseDefaultIngestPipeline({ pkgKey, dataStreamPath, paths });
     const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
-
-    const parsedElasticsearchEntry: Record<string, any> = {};
-
-    if (ingestPipeline) {
-      parsedElasticsearchEntry['ingest_pipeline.name'] = DEFAULT_INGEST_PIPELINE_VALUE;
-    }
-
-    if (elasticsearch?.privileges) {
-      parsedElasticsearchEntry.privileges = elasticsearch.privileges;
-    }
-
-    if (elasticsearch?.index_template?.mappings) {
-      parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
-        elasticsearch.index_template.mappings
-      );
-    }
-
-    if (elasticsearch?.index_template?.settings) {
-      parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
-        elasticsearch.index_template.settings
-      );
-    }
+    const parsedElasticsearchEntry = parseDataStreamElasticsearchEntry(
+      elasticsearch,
+      ingestPipeline
+    );
 
     // Build up the stream object here so we can conditionally insert nullable fields. The package registry omits undefined
     // fields, so we're mimicking that behavior here.
@@ -533,4 +500,57 @@ export function parseAndVerifyInputs(manifestInputs: any, location: string): Reg
     });
   }
   return inputs;
+}
+
+export function parseDataStreamElasticsearchEntry(
+  elasticsearch: Record<string, any>,
+  ingestPipeline?: string
+) {
+  const parsedElasticsearchEntry: Record<string, any> = {};
+
+  if (ingestPipeline) {
+    parsedElasticsearchEntry['ingest_pipeline.name'] = ingestPipeline;
+  }
+
+  if (elasticsearch?.privileges) {
+    parsedElasticsearchEntry.privileges = elasticsearch.privileges;
+  }
+
+  if (elasticsearch?.source_mode) {
+    parsedElasticsearchEntry.source_mode = elasticsearch.source_mode;
+  }
+
+  if (elasticsearch?.index_template?.mappings) {
+    parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
+      elasticsearch.index_template.mappings
+    );
+  }
+
+  if (elasticsearch?.index_template?.settings) {
+    parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
+      elasticsearch.index_template.settings
+    );
+  }
+
+  return parsedElasticsearchEntry;
+}
+
+const isDefaultPipelineFile = (pipelinePath: string) =>
+  pipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_YML) ||
+  pipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON);
+
+export function parseDefaultIngestPipeline(opts: {
+  pkgKey: string;
+  paths: string[];
+  dataStreamPath: string;
+}) {
+  const { pkgKey, paths, dataStreamPath } = opts;
+  const ingestPipelineDirPath = `${pkgKey}/data_stream/${dataStreamPath}/elasticsearch/ingest_pipeline`;
+  const defaultIngestPipelinePaths = paths.filter(
+    (path) => path.startsWith(ingestPipelineDirPath) && isDefaultPipelineFile(path)
+  );
+
+  if (!defaultIngestPipelinePaths.length) return undefined;
+
+  return DEFAULT_INGEST_PIPELINE_VALUE;
 }
