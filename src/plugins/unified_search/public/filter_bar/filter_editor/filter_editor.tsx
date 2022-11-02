@@ -262,6 +262,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       <div role="region" aria-label="" className={cx(filtersBuilderMaxHeight, 'eui-yScroll')}>
         <FiltersBuilder
           filters={filters}
+          timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
           dataView={selectedIndexPattern!}
           onChange={(filtersBuilder: Filter[]) => {
             this.setState({ filters: filtersBuilder });
