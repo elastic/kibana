@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { LicensedEmailService } from './licensed_email_service';
 import type { ILicense } from '@kbn/licensing-plugin/server';
@@ -18,8 +18,8 @@ const emailServiceMock: EmailService = {
   sendPlainTextEmail: jest.fn(),
 };
 
-const validLicense = licenseMock.createLicenseMock();
-const invalidLicense = licenseMock.createLicenseMock();
+const validLicense = licensingMock.createLicenseMock();
+const invalidLicense = licensingMock.createLicenseMock();
 invalidLicense.type = 'basic';
 invalidLicense.check = jest.fn(() => ({
   state: 'invalid',

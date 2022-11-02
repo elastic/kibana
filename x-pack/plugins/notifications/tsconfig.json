@@ -13,7 +13,9 @@
     "public/**/*",
     "common/**/*"
   ],
-  "references": [
-    { "path": "../actions/tsconfig.json" }
+  "kbn_references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../actions/tsconfig.json" },
+    { "path": "../licensing/tsconfig.json" }
   ]
 }

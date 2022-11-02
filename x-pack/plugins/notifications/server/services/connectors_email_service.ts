@@ -6,8 +6,7 @@
  */
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type { RelatedSavedObjects } from '@kbn/actions-plugin/server/lib/related_saved_objects';
-import type { EmailService, PlainTextEmail, RelatedSavedObject } from './types';
+import type { EmailService, PlainTextEmail } from './types';
 
 export class ConnectorsEmailService implements EmailService {
   constructor(
@@ -25,13 +24,11 @@ export class ConnectorsEmailService implements EmailService {
         message: params.message,
       },
       ...(params.context?.relatedObjects?.length && {
-        relatedSavedObjects: this._getRelatedSavedObjects(params.context!.relatedObjects!),
+        relatedSavedObjects: params.context!.relatedObjects!.map(
+          ({ id, type, spaceId: namespace }) => ({ id, type, namespace })
+        ),
       }),
     }));
     return await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
-  }
-
-  private _getRelatedSavedObjects(relatedObjects: RelatedSavedObject[]): RelatedSavedObjects {
-    return relatedObjects.map(({ id, type, spaceId: namespace }) => ({ id, type, namespace }));
   }
 }
