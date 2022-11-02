@@ -12,7 +12,6 @@ import DateMath from '@kbn/datemath';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
-import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 import { useTimeRangeUrlState } from './use_time_range_url_state';
 import { useHostsQueryContext } from './use_host_query';
 import { useHostFiltersContext } from './use_host_filters';
@@ -26,16 +25,11 @@ export const useUnifiedSearch = () => {
     data: { query: queryManager },
   } = services;
 
-  const { timeRange: selectedTimeRange, setTimeRange: setSelectedTimeRange } =
-    useTimeRangeUrlState();
+  const { setTimeRange: setSelectedTimeRange, getTime, setTime } = useTimeRangeUrlState();
 
   const { applyFilterQuery } = useHostsQueryContext();
   const { applyFilters } = useHostFiltersContext();
 
-  const [getTime, setTime] = useKibanaTimefilterTime({
-    from: selectedTimeRange.startTime,
-    to: selectedTimeRange.endTime,
-  });
   const { queryString, filterManager } = queryManager;
 
   const currentDate = new Date();

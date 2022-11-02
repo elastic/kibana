@@ -27,7 +27,7 @@ const TIME_RANGE_URL_STATE_KEY = 'timeRange';
 const TIME_DEFAULTS = { from: 'now-15m', to: 'now' };
 
 export const useTimeRangeUrlState = () => {
-  const [getTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
+  const [getTime, setTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
   const { from: start, to: end } = getTime();
 
   const [timeRange, setTimeRange] = useUrlState({
@@ -45,6 +45,8 @@ export const useTimeRangeUrlState = () => {
   useSyncKibanaTimeFilterTime(TIME_DEFAULTS, { from: timeRange.startTime, to: timeRange.endTime });
 
   return {
+    getTime,
+    setTime,
     timeRange,
     setTimeRange,
   };
