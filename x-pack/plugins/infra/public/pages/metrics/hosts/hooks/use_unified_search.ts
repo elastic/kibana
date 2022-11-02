@@ -69,12 +69,11 @@ export const useUnifiedSearch = () => {
           endTime: dateRange.to,
           isInvalid: false,
         });
+        setTime({
+          ...getTime(),
+          ...dateRange,
+        });
       }
-
-      setTime({
-        ...getTime(),
-        ...dateRange,
-      });
 
       if (query) {
         applyFilterQuery({
