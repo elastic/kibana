@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
@@ -65,7 +64,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   onEventDetailsPanelOpened,
   onRowSelected,
   onRuleChange,
-  refetch,
   showCheckboxes,
   showNotes,
   timelineId,
@@ -205,7 +203,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
     scopedActions,
   ]);
 
-  const { isTourShown, incrementStep } = useTourContext();
+  const { activeStep, isTourShown, incrementStep } = useTourContext();
 
   const isTourAnchor = useMemo(
     () =>
@@ -217,11 +215,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   const onExpandEvent = useCallback(() => {
-    if (isTourAnchor) {
+    const isStep2Active = activeStep === 2 && isTourShown(SecurityStepId.alertsCases);
+    if (isTourAnchor && isStep2Active) {
       incrementStep(SecurityStepId.alertsCases);
     }
     onEventDetailsPanelOpened();
-  }, [incrementStep, isTourAnchor, onEventDetailsPanelOpened]);
+  }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
 
   return (
     <ActionsContainer>
@@ -298,7 +297,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
           ecsRowData={ecsData}
           scopeId={timelineId}
           disabled={isContextMenuDisabled}
-          refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />
         {isDisabled === false ? (
