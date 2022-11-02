@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiInMemoryTable,
-  EuiLoadingContent,
-} from '@elastic/eui';
+import { EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
@@ -23,6 +19,10 @@ import { unit } from '../../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../../shared/item_badge';
 import { ServiceNodeMetricOverviewLink } from '../../../../../shared/links/apm/service_node_metric_overview_link';
+import {
+  ITableColumn,
+  ManagedTable,
+} from '../../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 
@@ -40,7 +40,7 @@ enum AgentExplorerInstanceFieldName {
 
 export function getInstanceColumns(
   serviceName = ''
-): Array<EuiBasicTableColumn<AgentExplorerInstance>> {
+): Array<ITableColumn<AgentExplorerInstance>> {
   return [
     {
       field: AgentExplorerInstanceFieldName.InstanceName,
@@ -60,7 +60,7 @@ export function getInstanceColumns(
                   'xpack.apm.agentExplorerInstanceTable.explainServiceNodeNameMissing',
                   {
                     defaultMessage:
-                      'We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.',
+                      'We could not identify the service node. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.',
                   }
                 ),
               }
@@ -153,34 +153,19 @@ export function AgentInstancesDetails({
   }
 
   return (
-    <EuiInMemoryTable
-      tableCaption={i18n.translate(
-        'xpack.apm.agentExplorerInstanceTable.table.caption',
+    <ManagedTable
+      columns={getInstanceColumns(serviceName)}
+      items={items}
+      noItemsMessage={i18n.translate(
+        'xpack.apm.storageExplorer.table.noResults',
         {
-          defaultMessage: 'Agent Explorer',
+          defaultMessage: 'No data found',
         }
       )}
-      items={items}
-      columns={getInstanceColumns(serviceName)}
-      pagination={{
-        pageSizeOptions: [25, 50, 100],
-      }}
-      sorting={{
-        sort: {
-          field: AgentExplorerFieldName.AgentVersion,
-          direction: 'desc',
-        },
-      }}
-      data-test-subj="agentExplorerTable"
-      message={
-        isLoading
-          ? i18n.translate('xpack.apm.storageExplorer.table.loading', {
-              defaultMessage: 'Loading...',
-            })
-          : i18n.translate('xpack.apm.storageExplorer.table.noResults', {
-              defaultMessage: 'No data found',
-            })
-      }
+      initialSortField={AgentExplorerFieldName.AgentVersion}
+      initialSortDirection="desc"
+      isLoading={isLoading}
+      initialPageSize={25}
     />
   );
 }

@@ -159,8 +159,6 @@ export const settings = {
             environmentRt,
             t.type({
               kuery: t.string,
-              rangeFrom: t.string,
-              rangeTo: t.string,
             }),
             t.partial({
               agentLanguage: t.string,

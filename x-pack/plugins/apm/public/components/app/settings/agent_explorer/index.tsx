@@ -67,10 +67,10 @@ export function AgentExplorer() {
   const history = useHistory();
 
   const {
-    query: { serviceName, agentLanguage, rangeFrom, rangeTo },
+    query: { serviceName, agentLanguage },
   } = useApmParams('/settings/agent-explorer');
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { start, end } = useTimeRange({ rangeFrom: 'now-24h', rangeTo: 'now' });
   const agents = useAgentExplorerFetcher({ start, end });
 
   const isLoading = agents.status === FETCH_STATUS.LOADING;
@@ -189,7 +189,9 @@ export function AgentExplorer() {
       <EuiFlexItem>
         <AgentList
           isLoading={isLoading}
-          items={agents.data?.items ?? []}
+          items={
+            agents.data?.items.filter((agent) => agent.instances > 0) ?? []
+          }
           noItemsMessage={noItemsMessage}
         />
       </EuiFlexItem>

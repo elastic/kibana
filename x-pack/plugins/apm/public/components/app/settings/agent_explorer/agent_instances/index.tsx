@@ -16,30 +16,22 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer';
-import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
-import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { ApmRoutes } from '../../../../routing/apm_route_config';
-import { ServiceLink } from '../../../../shared/service_link';
-import { StickyProperties } from '../../../../shared/sticky_properties';
-import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
-import { AgentExplorerDocsLink } from '../agent_explorer_docs_link';
 import { ResponsiveFlyout } from '../../../transaction_details/waterfall_with_summary/waterfall_container/waterfall/responsive_flyout';
 import { AgentExplorerItem } from '../agent_list';
+import { AgentContextualInformation } from './agent_contextual_information';
 import { AgentInstancesDetails } from './agent_instances_details';
 
 function useAgentInstancesFetcher({ serviceName }: { serviceName?: string }) {
   const {
-    query: { environment, rangeFrom, rangeTo, kuery },
+    query: { environment, kuery },
   } = useApmParams('/settings/agent-explorer');
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { start, end } = useTimeRange({ rangeFrom: 'now-24h', rangeTo: 'now' });
 
   return useProgressiveFetcher(
     (callApmApi) => {
@@ -66,106 +58,6 @@ function useAgentInstancesFetcher({ serviceName }: { serviceName?: string }) {
     },
     [start, end, serviceName, environment, kuery]
   );
-}
-
-function formatString(value?: string | null) {
-  return value || NOT_AVAILABLE_LABEL;
-}
-
-export function AgentContextualInformation({
-  agentName,
-  serviceName,
-  agentDocsPageUrl,
-  instances,
-  query,
-}: {
-  agentName?: AgentName;
-  serviceName?: string;
-  agentDocsPageUrl?: string;
-  instances?: number;
-  query: TypeOf<ApmRoutes, '/settings/agent-explorer'>['query'];
-}) {
-  const stickyProperties = [
-    {
-      label: i18n.translate('xpack.apm.agentInstancesDetails.serviceLabel', {
-        defaultMessage: 'Service',
-      }),
-      fieldName: AgentExplorerFieldName.ServiceName,
-      val: (
-        <TruncateWithTooltip
-          data-test-subj="apmAgentExplorerListServiceLink"
-          text={formatString(serviceName)}
-          content={
-            <ServiceLink
-              agentName={agentName}
-              query={{
-                kuery: query.kuery,
-                serviceGroup: '',
-                rangeFrom: query.rangeFrom,
-                rangeTo: query.rangeTo,
-                environment: query.environment,
-                comparisonEnabled: true,
-              }}
-              serviceName={serviceName ?? ''}
-            />
-          }
-        />
-      ),
-      width: '25%',
-    },
-    {
-      label: i18n.translate('xpack.apm.agentInstancesDetails.agentNameLabel', {
-        defaultMessage: 'Agent Name',
-      }),
-      fieldName: AgentExplorerFieldName.AgentName,
-      val: (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem className="eui-textTruncate">
-            <span className="eui-textTruncate">{agentName}</span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      width: '25%',
-    },
-    {
-      label: i18n.translate('xpack.apm.agentInstancesDetails.intancesLabel', {
-        defaultMessage: 'Instances',
-      }),
-      fieldName: 'instances',
-      val: (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem className="eui-textTruncate">
-            <span className="eui-textTruncate">{instances}</span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      width: '25%',
-    },
-    {
-      label: i18n.translate(
-        'xpack.apm.agentInstancesDetails.agentDocsUrlLabel',
-        {
-          defaultMessage: 'Agent documentation',
-        }
-      ),
-      fieldName: AgentExplorerFieldName.AgentDocsPageUrl,
-      val: (
-        <TruncateWithTooltip
-          data-test-subj="apmAgentExplorerListDocsLink"
-          text={formatString(`${agentName} agent docs`)}
-          content={
-            <AgentExplorerDocsLink
-              agentName={agentName as AgentName}
-              repositoryUrl={agentDocsPageUrl}
-            />
-          }
-        />
-      ),
-      width: '25%',
-    },
-  ];
-
-  return <StickyProperties stickyProperties={stickyProperties} />;
 }
 
 interface Props {

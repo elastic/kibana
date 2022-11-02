@@ -6,11 +6,9 @@
  */
 
 import {
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +22,7 @@ import { unit } from '../../../../../utils/style';
 import { AgentIcon } from '../../../../shared/agent_icon';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../shared/item_badge';
+import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../agent_explorer_docs_link';
 import { AgentInstances } from '../agent_instances';
@@ -42,7 +41,7 @@ export function getAgentsColumns({
 }: {
   selectedAgent?: AgentExplorerItem;
   onAgentSelected: (agent: AgentExplorerItem) => void;
-}): Array<EuiBasicTableColumn<AgentExplorerItem>> {
+}): Array<ITableColumn<AgentExplorerItem>> {
   return [
     {
       field: AgentExplorerFieldName.ServiceName,
@@ -109,7 +108,7 @@ export function getAgentsColumns({
           defaultMessage: 'Environment',
         }
       ),
-      width: `${unit * 15}px`,
+      width: `${unit * 16}px`,
       sortable: true,
       render: (_, { environments }) => (
         <EnvironmentBadge environments={environments ?? []} />
@@ -123,12 +122,12 @@ export function getAgentsColumns({
           defaultMessage: 'Instances',
         }
       ),
-      width: `${unit * 10}px`,
+      width: `${unit * 8}px`,
       sortable: true,
     },
     {
       field: AgentExplorerFieldName.AgentName,
-      width: `${unit * 10}px`,
+      width: `${unit * 12}px`,
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentNameColumnLabel',
         { defaultMessage: 'Agent Name' }
@@ -141,7 +140,7 @@ export function getAgentsColumns({
         'xpack.apm.agentExplorerTable.agentVersionColumnLabel',
         { defaultMessage: 'Agent Version' }
       ),
-      width: `${unit * 10}px`,
+      width: `${unit * 8}px`,
       render: (_, { agentVersion }) => (
         <ItemsBadge
           items={agentVersion ?? []}
@@ -162,7 +161,7 @@ export function getAgentsColumns({
         'xpack.apm.agentExplorerTable.agentDocsColumnLabel',
         { defaultMessage: 'Agent Docs' }
       ),
-      width: `${unit * 10}px`,
+      width: `${unit * 8}px`,
       render: (_, { agentName, agentDocsPageUrl }) => (
         <EuiToolTip content={formatString(`${agentName} agent docs`)}>
           <AgentExplorerDocsLink
@@ -208,30 +207,14 @@ export function AgentList({ items, noItemsMessage, isLoading }: Props) {
       {showFlyout && (
         <AgentInstances agent={selectedAgent} onClose={onCloseFlyout} />
       )}
-      <EuiInMemoryTable
-        tableCaption={i18n.translate('xpack.apm.agentExplorer.table.caption', {
-          defaultMessage: 'Agent Explorer',
-        })}
-        items={items}
+      <ManagedTable
         columns={agentColumns}
-        pagination={{
-          pageSizeOptions: [25, 50, 100],
-        }}
-        sorting={{
-          sort: {
-            field: AgentExplorerFieldName.Instances,
-            direction: 'desc',
-          },
-        }}
-        loading={isLoading}
-        data-test-subj="agentExplorerTable"
-        message={
-          isLoading
-            ? i18n.translate('xpack.apm.agentExplorer.table.loading', {
-                defaultMessage: 'Loading...',
-              })
-            : noItemsMessage
-        }
+        items={items}
+        noItemsMessage={noItemsMessage}
+        initialSortField={AgentExplorerFieldName.Instances}
+        initialSortDirection="desc"
+        isLoading={isLoading}
+        initialPageSize={25}
       />
     </>
   );

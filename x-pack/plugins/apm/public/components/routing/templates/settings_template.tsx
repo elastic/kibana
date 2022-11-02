@@ -94,8 +94,6 @@ function getTabs({
       href: router.link('/settings/agent-explorer', {
         query: {
           environment: ENVIRONMENT_ALL.value,
-          rangeFrom: 'now-24h',
-          rangeTo: 'now',
           kuery: '',
         },
       }),

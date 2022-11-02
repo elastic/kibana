@@ -20,7 +20,6 @@ describe('simple trace', () => {
       name: 'opbeans-java',
       environment: 'production',
       agentName: 'java',
-      agentVersion: '1.0.0',
     });
     const javaInstance = javaService.instance('instance-1').containerId('instance-1');
 
@@ -77,7 +76,6 @@ describe('simple trace', () => {
     expect(transaction).toEqual({
       '@timestamp': 1609459200000,
       'agent.name': 'java',
-      'agent.version': '1.0.0',
       'container.id': 'instance-1',
       'event.outcome': 'success',
       'host.name': 'instance-1',
@@ -86,7 +84,6 @@ describe('simple trace', () => {
       'service.environment': 'production',
       'service.name': 'opbeans-java',
       'service.node.name': 'instance-1',
-      'service.language.name': 'java',
       'timestamp.us': 1609459200000000,
       'trace.id': '00000000000000000000000000000241',
       'transaction.duration.us': 1000000,
@@ -103,7 +100,6 @@ describe('simple trace', () => {
     expect(span).toEqual({
       '@timestamp': 1609459200050,
       'agent.name': 'java',
-      'agent.version': '1.0.0',
       'container.id': 'instance-1',
       'event.outcome': 'success',
       'host.name': 'instance-1',
@@ -113,7 +109,6 @@ describe('simple trace', () => {
       'service.environment': 'production',
       'service.name': 'opbeans-java',
       'service.node.name': 'instance-1',
-      'service.language.name': 'java',
       'span.duration.us': 900000,
       'span.id': '0000000000000302',
       'span.name': 'GET apm-*/_search',

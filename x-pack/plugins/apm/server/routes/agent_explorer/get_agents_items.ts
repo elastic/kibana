@@ -11,6 +11,7 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server/utils/queries';
+import { map, uniq } from 'lodash';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -64,11 +65,6 @@ export async function getAgentsItems({
             {
               exists: {
                 field: AGENT_VERSION,
-              },
-            },
-            {
-              exists: {
-                field: SERVICE_NODE_NAME,
               },
             },
             ...rangeQuery(start, end),
@@ -131,30 +127,20 @@ export async function getAgentsItems({
 
   return (
     response.aggregations?.sample.services.buckets.map((bucket) => {
-      const agent = bucket.serviceNodes.buckets.reduce(
-        (acc, serviceNode) => ({
-          agentName: serviceNode.sample.top[0].metrics[AGENT_NAME] as AgentName,
-          agentVersion: Array.from(
-            new Set([
-              ...acc.agentVersion,
-              serviceNode.sample.top[0].metrics[AGENT_VERSION] as string,
-            ])
-          ),
-        }),
-        { agentVersion: [] } as {
-          agentName?: AgentName;
-          agentVersion: string[];
-        }
-      );
+      const agents = bucket.serviceNodes.buckets.map((serviceNode) => ({
+        name: serviceNode.sample.top[0].metrics[AGENT_NAME] as AgentName,
+        version: serviceNode.sample.top[0].metrics[AGENT_VERSION] as string,
+      }));
 
       return {
         serviceName: bucket.key as string,
         environments: bucket.environments.buckets.map(
           (env) => env.key as string
         ),
-        agentName: agent.agentName,
-        agentVersion: agent.agentVersion,
-        instances: bucket.instances.value as number,
+        agentName: map(agents, 'name')?.[0],
+        agentVersion: uniq(map(agents, 'version')),
+        // service.node.name is set by the server only if a container.id or host.name are set. Otherwise should be explicitly set by agents.
+        instances: (bucket.instances.value as number) || 0,
       };
     }) ?? []
   );
