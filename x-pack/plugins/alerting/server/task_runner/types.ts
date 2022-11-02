@@ -8,6 +8,7 @@
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
   AlertInstanceContext,
@@ -82,5 +83,5 @@ export interface ExecutionHandlerOptions<
   ruleConsumer: string;
   executionId: string;
   ruleLabel: string;
-  request: KibanaRequest;
+  actionsClient: PublicMethodsOf<ActionsClient>;
 }

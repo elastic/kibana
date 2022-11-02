@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
@@ -46,7 +46,6 @@ export class ExecutionHandler<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  public request: KibanaRequest;
   private logger: Logger;
   private alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
   private rule: SanitizedRule<Params>;
@@ -69,7 +68,7 @@ export class ExecutionHandler<
   private ephemeralActionsToSchedule: number;
   private CHUNK_SIZE = 1000;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
-  private actionsClient?: PublicMethodsOf<ActionsClient>;
+  private actionsClient: PublicMethodsOf<ActionsClient>;
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private mutedAlertIdsSet?: Set<string>;
 
@@ -85,7 +84,7 @@ export class ExecutionHandler<
     ruleConsumer,
     executionId,
     ruleLabel,
-    request,
+    actionsClient,
   }: ExecutionHandlerOptions<
     Params,
     ExtractedParams,
@@ -106,18 +105,12 @@ export class ExecutionHandler<
     this.ruleConsumer = ruleConsumer;
     this.executionId = executionId;
     this.ruleLabel = ruleLabel;
-    this.request = request;
+    this.actionsClient = actionsClient;
     this.ephemeralActionsToSchedule = taskRunnerContext.maxEphemeralActionsPerRule;
-  }
-
-  public async init() {
     this.ruleTypeActionGroups = new Map(
-      this.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
+      ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
-    this.mutedAlertIdsSet = new Set(this.rule.mutedInstanceIds);
-    this.actionsClient = await this.taskRunnerContext.actionsPlugin.getActionsClientWithRequest(
-      this.request
-    );
+    this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
   }
 
   public async run(
@@ -261,27 +254,27 @@ export class ExecutionHandler<
 
     for (const action of this.rule.actions) {
       for (const [alertId, alert] of Object.entries(alerts)) {
-        if (this.isAlertExecutable({ alertId, alert, recovered })) {
-          const actionGroup = recovered
-            ? this.ruleType.recoveryActionGroup.id
-            : alert.getScheduledActionOptions()?.actionGroup!;
+        const actionGroup = recovered
+          ? this.ruleType.recoveryActionGroup.id
+          : alert.getScheduledActionOptions()?.actionGroup!;
+
+        if (!this.ruleTypeActionGroups!.has(actionGroup)) {
+          this.logger.error(
+            `Invalid action group "${actionGroup}" for rule "${this.ruleType.id}".`
+          );
+          continue;
+        }
+
+        if (action.group === actionGroup && this.isAlertExecutable({ alertId, alert, recovered })) {
           const state = recovered ? {} : alert.getScheduledActionOptions()?.state!;
 
-          if (!this.ruleTypeActionGroups!.has(actionGroup)) {
-            this.logger.error(
-              `Invalid action group "${actionGroup}" for rule "${this.ruleType.id}".`
-            );
-            continue;
-          }
-          if (action.group === actionGroup) {
-            executables.push({
-              action,
-              alert,
-              alertId,
-              actionGroup,
-              state,
-            });
-          }
+          executables.push({
+            action,
+            alert,
+            alertId,
+            actionGroup,
+            state,
+          });
         }
       }
     }

@@ -439,11 +439,9 @@ export class TaskRunner<
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,
-      request: fakeRequest,
       alertingEventLogger: this.alertingEventLogger,
+      actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
     });
-
-    await executionHandler.init();
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
       await rulesClient.clearExpiredSnoozes({ id: rule.id });
