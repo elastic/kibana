@@ -28,7 +28,7 @@
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },
     { "path":  "../../../src/plugins/guided_onboarding/tsconfig.json" },
-    { "path": "../files/tsconfig.json" },
+    { "path": "../../../src/plugins/files/tsconfig.json" },
 
     // optionalPlugins from ./kibana.json
     { "path": "../security/tsconfig.json" },
