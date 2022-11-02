@@ -39,7 +39,7 @@ export const MonitorStatusPanel = ({
   showViewHistoryButton = false,
   onBrushed,
 }: MonitorStatusPanelProps) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { monitor } = useSelectedMonitor();
   const monitorInterval = Math.max(3, monitor?.schedule ? scheduleToMinutes(monitor?.schedule) : 3);
@@ -120,7 +120,7 @@ export const MonitorStatusPanel = ({
                 id="monitor-details-monitor-status-chart"
                 colorScale={{
                   type: 'bands',
-                  bands: getColorBands(euiTheme),
+                  bands: getColorBands(euiTheme, colorMode),
                 }}
                 data={timeBins}
                 xAccessor={(timeBin) => timeBin.end}

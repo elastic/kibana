@@ -7,7 +7,14 @@
 
 import datemath from '@elastic/datemath';
 import moment from 'moment';
-import { tint, VISUALIZATION_COLORS, EuiThemeComputed } from '@elastic/eui';
+import {
+  tint,
+  transparentize,
+  VISUALIZATION_COLORS,
+  EuiThemeComputed,
+  EuiThemeColorModeStandard,
+  COLOR_MODES_STANDARD,
+} from '@elastic/eui';
 import type { BrushEvent } from '@elastic/charts';
 import { PingStatus } from '../../../../../../common/runtime_types';
 
@@ -49,21 +56,23 @@ export interface MonitorStatusPanelProps {
   onBrushed?: (timeBounds: { from: number; to: number; fromUtc: string; toUtc: string }) => void;
 }
 
-export function getColorBands(euiTheme: EuiThemeComputed) {
+export function getColorBands(euiTheme: EuiThemeComputed, colorMode: EuiThemeColorModeStandard) {
+  const colorTransitionFn = colorMode === COLOR_MODES_STANDARD.dark ? transparentize : tint;
+
   return [
     { color: DANGER_VIZ_COLOR, start: -Infinity, end: -1 },
     { color: DANGER_VIZ_COLOR, start: -1, end: -0.75 },
-    { color: tint(DANGER_VIZ_COLOR, 0.25), start: -0.75, end: -0.5 },
-    { color: tint(DANGER_VIZ_COLOR, 0.5), start: -0.5, end: -0.25 },
-    { color: tint(DANGER_VIZ_COLOR, 0.75), start: -0.25, end: -0.000000001 },
+    { color: colorTransitionFn(DANGER_VIZ_COLOR, 0.25), start: -0.75, end: -0.5 },
+    { color: colorTransitionFn(DANGER_VIZ_COLOR, 0.5), start: -0.5, end: -0.25 },
+    { color: colorTransitionFn(DANGER_VIZ_COLOR, 0.75), start: -0.25, end: -0.000000001 },
     {
       color: getSkippedVizColor(euiTheme),
       start: -0.000000001,
       end: 0.000000001,
     },
-    { color: tint(SUCCESS_VIZ_COLOR, 0.5), start: 0.000000001, end: 0.25 },
-    { color: tint(SUCCESS_VIZ_COLOR, 0.35), start: 0.25, end: 0.5 },
-    { color: tint(SUCCESS_VIZ_COLOR, 0.2), start: 0.5, end: 0.8 },
+    { color: colorTransitionFn(SUCCESS_VIZ_COLOR, 0.5), start: 0.000000001, end: 0.25 },
+    { color: colorTransitionFn(SUCCESS_VIZ_COLOR, 0.35), start: 0.25, end: 0.5 },
+    { color: colorTransitionFn(SUCCESS_VIZ_COLOR, 0.2), start: 0.5, end: 0.8 },
     { color: SUCCESS_VIZ_COLOR, start: 0.8, end: 1 },
     { color: SUCCESS_VIZ_COLOR, start: 1, end: Infinity },
   ];
