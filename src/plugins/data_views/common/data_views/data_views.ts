@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
@@ -939,21 +939,20 @@ export class DataViewsService {
     skipFetchFields = false,
     displayErrors = true
   ): Promise<DataView> {
+    const doCreate = () => this.createFromSpec(spec, skipFetchFields, displayErrors);
+
     if (spec.id) {
-      const cachedDataView = spec.id ? await this.dataViewCache.get(spec.id) : undefined;
+      const cachedDataView = await this.dataViewCache.get(spec.id);
 
       if (cachedDataView) {
         return cachedDataView;
       }
+
+      return this.dataViewCache.set(spec.id, doCreate());
     }
 
-    const dataView = await this.createFromSpec(spec, skipFetchFields, displayErrors);
-
-    if (dataView.id) {
-      return this.dataViewCache.set(dataView.id, Promise.resolve(dataView));
-    }
-
-    return dataView;
+    const dataView = await doCreate();
+    return this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
   }
 
   /**

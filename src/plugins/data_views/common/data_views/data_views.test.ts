@@ -151,13 +151,26 @@ describe('IndexPatterns', () => {
 
   test('does cache ad-hoc data views', async () => {
     const id = '1';
+
+    // @ts-ignore add spy for private method
+    const createFromSpecSpy = jest.spyOn(indexPatterns, 'createFromSpec');
     const dataView = await indexPatterns.create({ id });
     const gettedDataView = await indexPatterns.get(id);
 
     expect(dataView).toBe(gettedDataView);
 
-    const dataView2 = await indexPatterns.create({ id });
-    expect(dataView2).toBe(gettedDataView);
+    // run creating in parallel
+    await Promise.allSettled([
+      indexPatterns.create({ id }),
+      indexPatterns.create({ id }),
+      indexPatterns.create({ id }),
+    ]);
+
+    // one more check
+    await indexPatterns.create({ id });
+
+    expect(createFromSpecSpy).toHaveBeenCalledTimes(1);
+    expect(createFromSpecSpy).toHaveBeenCalledWith({ id: '1' }, false, true);
   });
 
   test('allowNoIndex flag preserves existing fields when index is missing', async () => {
