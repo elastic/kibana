@@ -154,8 +154,7 @@ const processTransformAssetsPerModule = (
     }
 
     if (fileName === TRANSFORM_SPECS_TYPES.TRANSFORM) {
-      const alias = { [content.dest.index]: {} };
-      content.dest.index = `${content.dest.index}-${installNameSuffix}`;
+      const alias = { [`${content.dest.index}.all`]: {}, [`${content.dest.index}.latest`]: {} };
 
       transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
       transformsSpecifications.get(transformModuleId)?.set('destinationIndexAlias', alias);
@@ -286,6 +285,7 @@ const installTransformsAssets = async (
               // Adding destination pipeline here because else these templates will be overridden
               // by index setting
               ...(pipelineId ? { default_pipeline: pipelineId } : {}),
+              aliases: transformSpec?.get('destinationIndexAlias'),
             },
           });
 
@@ -296,12 +296,11 @@ const installTransformsAssets = async (
               componentTemplates,
               indexTemplate: {
                 templateName: destinationIndexTemplate.installationName,
+                // @ts-expect-error data_stream property is not needed here
                 indexTemplate: {
                   template: {
                     settings: undefined,
                     mappings: undefined,
-                    // @ts-expect-error aliases is valid param
-                    aliases: transformSpec?.get('destinationIndexAlias'),
                   },
                   priority: DEFAULT_TRANSFORM_TEMPLATES_PRIORITY,
                   index_patterns: [

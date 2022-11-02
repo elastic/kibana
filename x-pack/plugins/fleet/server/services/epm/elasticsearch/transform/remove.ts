@@ -21,7 +21,11 @@ export const stopTransforms = async (transformIds: string[], esClient: Elasticse
   }
 };
 
-export const deleteTransforms = async (esClient: ElasticsearchClient, transformIds: string[]) => {
+export const deleteTransforms = async (
+  esClient: ElasticsearchClient,
+  transformIds: string[],
+  deleteDestinationIndices = false
+) => {
   const logger = appContextService.getLogger();
   if (transformIds.length) {
     logger.info(`Deleting currently installed transform ids ${transformIds}`);
@@ -40,20 +44,19 @@ export const deleteTransforms = async (esClient: ElasticsearchClient, transformI
         { ignore: [404] }
       );
       logger.info(`Deleted: ${transformId}`);
-      if (transformResponse?.transforms) {
-        // @TODO: remove deletion of destination index in 8.6
+      if (deleteDestinationIndices && transformResponse?.transforms) {
         // expect this to be 1
-        // for (const transform of transformResponse.transforms) {
-        //   await esClient.transport.request(
-        //     {
-        //       method: 'DELETE',
-        //       path: `/${transform?.dest?.index}`,
-        //     },
-        //     {
-        //       ignore: [404],
-        //     }
-        //   );
-        // }
+        for (const transform of transformResponse.transforms) {
+          await esClient.transport.request(
+            {
+              method: 'DELETE',
+              path: `/${transform?.dest?.index}`,
+            },
+            {
+              ignore: [404],
+            }
+          );
+        }
       } else {
         logger.warn(`cannot find transform for ${transformId}`);
       }
