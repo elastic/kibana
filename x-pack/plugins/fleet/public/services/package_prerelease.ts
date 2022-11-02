@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export const ALERTS_PAGE_ID = 'alerts-o11y';
-export const ALERTS_PER_PAGE = 50;
-export const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
+export function isPackagePrerelease(version: string): boolean {
+  // derive from semver
+  return version.startsWith('0') || version.includes('-');
+}
