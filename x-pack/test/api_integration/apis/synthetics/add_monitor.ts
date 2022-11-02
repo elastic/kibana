@@ -6,7 +6,6 @@
  */
 import uuid from 'uuid';
 import { omit } from 'lodash';
-import expect from '@kbn/expect';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { ConfigKey, DataStream, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
@@ -17,8 +16,8 @@ import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_upti
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddNewMonitors', function () {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
+import expect from '../../../../private/var/tmp/_bazel_shahzad-16/974662a0be78d7012b40ce12cff92960/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('getSyntheticsMonitors', function () {
