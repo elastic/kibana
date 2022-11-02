@@ -209,12 +209,6 @@ export function getRuleType(
         continue;
       }
 
-      logger.info(
-        `INDEX THRESHOLD RESULT ${ruleId} ${name} ${JSON.stringify(
-          params
-        )} isGroupAgg ${isGroupAgg} value ${value} threshold ${params.threshold}`
-      );
-
       // group aggregations use the bucket selector agg to compare conditions
       // within the ES query, so only 'met' results are returned, therefore we don't need
       // to use the compareFn
@@ -223,7 +217,9 @@ export function getRuleType(
       logger.info(
         `INDEX THRESHOLD RESULT ${ruleId} ${name} ${JSON.stringify(
           params
-        )} isGroupAgg ${isGroupAgg} value ${value} threshold ${params.threshold} met ${met}`
+        )} alertId ${alertId} isGroupAgg ${isGroupAgg} value ${value} threshold ${
+          params.threshold
+        } met ${met}`
       );
 
       if (!met) {
@@ -243,9 +239,10 @@ export function getRuleType(
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
+      logger.info(`actionContext ${JSON.stringify(actionContext)}`);
       const alert = alertFactory.create(alertId);
       alert.scheduleActions(ActionGroupId, actionContext);
-      logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+      logger.info(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
 
     alertFactory.alertLimit.setLimitReached(result.truncated);
