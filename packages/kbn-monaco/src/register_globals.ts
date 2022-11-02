@@ -12,11 +12,9 @@ import { EsqlLang } from './esql';
 import { monaco } from './monaco_imports';
 import { registerLanguage } from './helpers';
 
-// @ts-ignore
+import jsonWorkerSrc from '!!raw-loader!../../target_workers/json.editor.worker.js';
 import xJsonWorkerSrc from '!!raw-loader!../../target_workers/xjson.editor.worker.js';
-// @ts-ignore
 import defaultWorkerSrc from '!!raw-loader!../../target_workers/default.editor.worker.js';
-// @ts-ignore
 import painlessWorkerSrc from '!!raw-loader!../../target_workers/painless.editor.worker.js';
 
 /**
@@ -32,6 +30,7 @@ registerLanguage(EsqlLang);
 const mapLanguageIdToWorker: { [key: string]: any } = {
   [XJsonLang.ID]: xJsonWorkerSrc,
   [PainlessLang.ID]: painlessWorkerSrc,
+  [monaco.languages.json.jsonDefaults.languageId]: jsonWorkerSrc,
 };
 
 // @ts-ignore
