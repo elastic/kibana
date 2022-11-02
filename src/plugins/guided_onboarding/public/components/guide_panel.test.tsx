@@ -109,10 +109,21 @@ describe('Guided setup', () => {
   });
 
   describe('Button component', () => {
-    // TODO check for the correct button behavior once https://github.com/elastic/kibana/issues/141129 is implemented
-    test.skip('should be disabled in there is no active guide', async () => {
+    test('should be hidden in there is no guide state', async () => {
       const { exists } = testBed;
-      expect(exists('disabledGuideButton')).toBe(true);
+      expect(exists('guideButton')).toBe(false);
+      expect(exists('guidePanel')).toBe(false);
+    });
+
+    test('should be hidden if the guide is not active', async () => {
+      const { component, exists } = testBed;
+
+      await updateComponentWithState(
+        component,
+        { ...mockActiveSearchGuideState, isActive: false },
+        true
+      );
+
       expect(exists('guideButton')).toBe(false);
       expect(exists('guidePanel')).toBe(false);
     });
