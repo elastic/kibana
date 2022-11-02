@@ -68,65 +68,70 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
     <EuiErrorBoundary>
       <SourceProvider sourceId="default">
         <AlertPrefillProvider>
-          <WaffleOptionsProvider>
-            <WaffleTimeProvider>
-              <WaffleFiltersProvider>
-                <InfraMLCapabilitiesProvider>
-                  <HelpCenterContent
-                    feedbackLink="https://discuss.elastic.co/c/metrics"
-                    appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
-                      defaultMessage: 'Metrics',
-                    })}
-                  />
+          <InfraMLCapabilitiesProvider>
+            <HelpCenterContent
+              feedbackLink="https://discuss.elastic.co/c/metrics"
+              appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+                defaultMessage: 'Metrics',
+              })}
+            />
 
-                  {setHeaderActionMenu && theme$ && (
-                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-                      <EuiHeaderLinks gutterSize="xs">
-                        <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-                          {settingsTabTitle}
-                        </EuiHeaderLink>
-                        <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
-                        <MetricsAlertDropdown />
-                        <EuiHeaderLink
-                          href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
-                          color="primary"
-                          iconType="indexOpen"
-                        >
-                          {ADD_DATA_LABEL}
-                        </EuiHeaderLink>
-                      </EuiHeaderLinks>
-                    </HeaderMenuPortal>
-                  )}
-                  <Switch>
-                    <Route path={'/inventory'} component={SnapshotPage} />
-                    <Route
-                      path={'/explorer'}
-                      render={(props) => (
-                        <WithSource>
-                          {({ configuration, createDerivedIndexPattern }) => (
-                            <MetricsExplorerOptionsContainer>
-                              <WithMetricsExplorerOptionsUrlState />
-                              {configuration ? (
-                                <PageContent
-                                  configuration={configuration}
-                                  createDerivedIndexPattern={createDerivedIndexPattern}
-                                />
-                              ) : (
-                                <SourceLoadingPage />
-                              )}
-                            </MetricsExplorerOptionsContainer>
-                          )}
-                        </WithSource>
-                      )}
-                    />
-                    <Route path="/detail/:type/:node" component={MetricDetail} />
-                    <Route path={'/hosts'} component={HostsPage} />
-                    <Route path={'/settings'} component={MetricsSettingsPage} />
-                  </Switch>
-                </InfraMLCapabilitiesProvider>
-              </WaffleFiltersProvider>
-            </WaffleTimeProvider>
-          </WaffleOptionsProvider>
+            {setHeaderActionMenu && theme$ && (
+              <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+                <EuiHeaderLinks gutterSize="xs">
+                  <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+                    {settingsTabTitle}
+                  </EuiHeaderLink>
+                  <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                  <MetricsAlertDropdown />
+                  <EuiHeaderLink
+                    href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
+                    color="primary"
+                    iconType="indexOpen"
+                  >
+                    {ADD_DATA_LABEL}
+                  </EuiHeaderLink>
+                </EuiHeaderLinks>
+              </HeaderMenuPortal>
+            )}
+            <Switch>
+              <Route
+                path={'/inventory'}
+                render={() => (
+                  <WaffleOptionsProvider>
+                    <WaffleTimeProvider>
+                      <WaffleFiltersProvider>
+                        <SnapshotPage />
+                      </WaffleFiltersProvider>
+                    </WaffleTimeProvider>
+                  </WaffleOptionsProvider>
+                )}
+              />
+              <Route
+                path={'/explorer'}
+                render={(props) => (
+                  <WithSource>
+                    {({ configuration, createDerivedIndexPattern }) => (
+                      <MetricsExplorerOptionsContainer>
+                        <WithMetricsExplorerOptionsUrlState />
+                        {configuration ? (
+                          <PageContent
+                            configuration={configuration}
+                            createDerivedIndexPattern={createDerivedIndexPattern}
+                          />
+                        ) : (
+                          <SourceLoadingPage />
+                        )}
+                      </MetricsExplorerOptionsContainer>
+                    )}
+                  </WithSource>
+                )}
+              />
+              <Route path="/detail/:type/:node" component={MetricDetail} />
+              <Route path={'/hosts'} component={HostsPage} />
+              <Route path={'/settings'} component={MetricsSettingsPage} />
+            </Switch>
+          </InfraMLCapabilitiesProvider>
         </AlertPrefillProvider>
       </SourceProvider>
     </EuiErrorBoundary>
