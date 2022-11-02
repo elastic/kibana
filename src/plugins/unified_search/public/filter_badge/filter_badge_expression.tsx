@@ -42,7 +42,7 @@ export function FilterExpressionBadge({ filter, isRootLevel }: FilterBadgeExpres
   const { dataViews, filterLabelStatus, isRootCombinedFilterNegate } =
     useContext(FilterBadgeContextType);
   const conditionalOperationType = getBooleanRelationType(filter);
-  const shouldShowBrakets = isRootCombinedFilterNegate ? isRootCombinedFilterNegate : !isRootLevel;
+  const shouldShowBrakets = isRootCombinedFilterNegate || !isRootLevel;
 
   const paddingLeft = useEuiPaddingCSS('left').xs;
   const paddingRight = useEuiPaddingCSS('right').xs;

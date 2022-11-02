@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
@@ -25,10 +25,6 @@ export interface FilterBadgeProps {
   hideAlias?: boolean;
   filterLabelStatus: FilterLabelStatus;
 }
-
-const flexGroupMargin = css`
-  margin: 0;
-`;
 
 function FilterBadge({
   filter,
@@ -96,14 +92,14 @@ function FilterBadge({
             isRootCombinedFilterNegate: filter.meta.negate,
           }}
         >
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs" className={flexGroupMargin}>
+          <div>
             {isCombinedFilter(filter) ? prefix : null}
             <FilterBadgeGroup
               filters={[filter]}
               booleanRelation={rootLevelConditionType}
               isRootLevel={true}
             />
-          </EuiFlexGroup>
+          </div>
         </FilterBadgeContextType.Provider>
       )}
     </EuiBadge>
