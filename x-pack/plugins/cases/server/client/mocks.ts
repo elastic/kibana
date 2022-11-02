@@ -6,14 +6,33 @@
  */
 
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import type { CasesClient } from '.';
+import { createAuthorizationMock } from '../authorization/mock';
+import {
+  connectorMappingsServiceMock,
+  createAlertServiceMock,
+  createAttachmentServiceMock,
+  createCaseServiceMock,
+  createConfigureServiceMock,
+  createLicensingServiceMock,
+  createUserActionServiceMock,
+  createNotificationServiceMock,
+} from '../services/mocks';
 import type { AttachmentsSubClient } from './attachments/client';
 import type { CasesSubClient } from './cases/client';
 import type { ConfigureSubClient } from './configure/client';
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
 import type { UserActionsSubClient } from './user_actions/client';
+import {
+  createExternalReferenceAttachmentTypeRegistryMock,
+  createPersistableStateAttachmentTypeRegistryMock,
+} from '../attachment_framework/mocks';
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
@@ -103,4 +122,39 @@ export const createCasesClientFactory = (): CasesClientFactoryMock => {
   };
 
   return factory as unknown as CasesClientFactoryMock;
+};
+
+export const createCasesClientMockArgs = () => {
+  return {
+    services: {
+      alertsService: createAlertServiceMock(),
+      attachmentService: createAttachmentServiceMock(),
+      caseService: createCaseServiceMock(),
+      caseConfigureService: createConfigureServiceMock(),
+      connectorMappingsService: connectorMappingsServiceMock(),
+      userActionService: createUserActionServiceMock(),
+      licensingService: createLicensingServiceMock(),
+      notificationService: createNotificationServiceMock(),
+    },
+    authorization: createAuthorizationMock(),
+    logger: loggingSystemMock.createLogger(),
+    unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+    actionsClient: actionsClientMock.create(),
+    user: {
+      username: 'damaged_raccoon',
+      email: 'damaged_raccoon@elastic.co',
+      full_name: 'Damaged Raccoon',
+      profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+    },
+    externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
+    persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    securityStartPlugin: securityMock.createStart(),
+    lensEmbeddableFactory: jest.fn().mockReturnValue(
+      makeLensEmbeddableFactory(
+        () => ({}),
+        () => ({}),
+        {}
+      )
+    ),
+  };
 };

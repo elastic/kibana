@@ -12,6 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import type {
   SavedObject,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
@@ -21,6 +22,7 @@ import { nodeBuilder } from '@kbn/es-query';
 import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 import type {
   CaseAssignees,
+  CaseAttributes,
   CasePatchRequest,
   CaseResponse,
   CasesPatchRequest,
@@ -455,34 +457,11 @@ export const update = async (
       user,
     });
 
-    const casesAndAssigneesToNotifyForAssignment = returnUpdatedCase.reduce((acc, updatedCase) => {
-      const originalCaseSO = casesMap.get(updatedCase.id);
-
-      if (!originalCaseSO) {
-        return acc;
-      }
-
-      const alreadyAssignedToCase = originalCaseSO.attributes.assignees ?? [];
-      const comparedAssignees = arraysDifference(
-        alreadyAssignedToCase,
-        updatedCase.assignees ?? []
-      );
-
-      if (comparedAssignees && comparedAssignees.addedItems.length > 0) {
-        const theCase = {
-          ...originalCaseSO,
-          attributes: { ...originalCaseSO.attributes, ...updatedCase },
-        };
-
-        const assigneesWithoutCurrentUser = comparedAssignees.addedItems.filter(
-          (assignee) => assignee.uid !== user.profile_uid
-        );
-
-        acc.push({ theCase, assignees: assigneesWithoutCurrentUser });
-      }
-
-      return acc;
-    }, [] as Array<{ assignees: CaseAssignees; theCase: CaseSavedObject }>);
+    const casesAndAssigneesToNotifyForAssignment = getCasesAndAssigneesToNotifyForAssignment(
+      updatedCases,
+      casesMap,
+      user
+    );
 
     if (casesAndAssigneesToNotifyForAssignment.length > 0) {
       await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
@@ -547,4 +526,42 @@ const patchCases = async ({
   });
 
   return updatedCases;
+};
+
+const getCasesAndAssigneesToNotifyForAssignment = (
+  updatedCases: SavedObjectsBulkUpdateResponse<CaseAttributes>,
+  casesMap: Map<string, CaseSavedObject>,
+  user: CasesClientArgs['user']
+) => {
+  return updatedCases.saved_objects.reduce((acc, updatedCase) => {
+    const originalCaseSO = casesMap.get(updatedCase.id);
+
+    if (!originalCaseSO) {
+      return acc;
+    }
+
+    const alreadyAssignedToCase = originalCaseSO.attributes.assignees;
+    const comparedAssignees = arraysDifference(
+      alreadyAssignedToCase,
+      updatedCase.attributes.assignees ?? []
+    );
+
+    if (comparedAssignees && comparedAssignees.addedItems.length > 0) {
+      const theCase = {
+        ...originalCaseSO,
+        ...updatedCase,
+        attributes: { ...originalCaseSO.attributes, ...updatedCase?.attributes },
+        references: originalCaseSO.references,
+        version: updatedCase?.version ?? originalCaseSO.version,
+      };
+
+      const assigneesWithoutCurrentUser = comparedAssignees.addedItems.filter(
+        (assignee) => assignee.uid !== user.profile_uid
+      );
+
+      acc.push({ theCase, assignees: assigneesWithoutCurrentUser });
+    }
+
+    return acc;
+  }, [] as Array<{ assignees: CaseAssignees; theCase: CaseSavedObject }>);
 };

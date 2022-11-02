@@ -64,7 +64,7 @@ export class EmailNotificationService implements NotificationService {
   }
 
   public async notifyAssignees({ assignees, theCase }: NotifyArgs) {
-    if (!this.notifications.isEmailServiceAvailable) {
+    if (!this.notifications.isEmailServiceAvailable()) {
       this.logger.warn('Could not notifying assignees. Email service is not available.');
       return;
     }
@@ -90,6 +90,7 @@ export class EmailNotificationService implements NotificationService {
             {
               id: theCase.id,
               type: CASE_SAVED_OBJECT,
+              // FIX: Should the spaceId be ["default"] if namespaces are undefined?
               spaceIds: theCase.namespaces?.map(namespaceToSpaceId) ?? [],
             },
           ],

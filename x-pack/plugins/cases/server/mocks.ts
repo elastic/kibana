@@ -6,10 +6,10 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { CaseSavedObject } from '../../../common/types';
-import type { CommentAttributes } from '../../../../common/api';
-import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../../../../common/api';
-import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import type { CaseSavedObject } from './common/types';
+import type { CasePostRequest, CommentAttributes } from '../common/api';
+import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../common/constants';
 
 export const mockCases: CaseSavedObject[] = [
   {
@@ -401,3 +401,19 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     version: 'WzYsMV0=',
   },
 ];
+
+export const newCase: CasePostRequest = {
+  title: 'My new case',
+  description: 'A description',
+  tags: ['new', 'case'],
+  connector: {
+    id: 'none',
+    name: 'none',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
+  settings: {
+    syncAlerts: true,
+  },
+  owner: SECURITY_SOLUTION_OWNER,
+};

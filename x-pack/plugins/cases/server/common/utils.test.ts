@@ -16,7 +16,6 @@ import type {
   CommentRequestUserType,
 } from '../../common/api';
 import { CaseSeverity, CommentType, ConnectorTypes } from '../../common/api';
-import { mockCaseComments, mockCases } from '../routes/api/__fixtures__/mock_saved_objects';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -36,6 +35,7 @@ import {
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
+import { mockCases, mockCaseComments } from '../mocks';
 
 interface CommentReference {
   ids: string[];
