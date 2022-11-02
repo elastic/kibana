@@ -91,6 +91,15 @@ import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
 import { runRule } from '../../../lib/run_rule';
+import { bulkDeleteRules } from '../../../lib/rule_api';
+import {
+  getFailedNotificationText,
+  getSuccessfulNotificationText,
+  singleRuleTitle,
+  multipleRuleTitle,
+  getConfirmButtonText,
+  getConfirmModalText,
+} from '../../../components/translations';
 
 const ENTER_KEY = 13;
 
@@ -1009,26 +1018,62 @@ export const RulesList = ({
     return table;
   };
 
+  const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsDeleteModalVisibility(rulesToDelete.length > 0 || Boolean(rulesToDeleteFilter));
+  }, [rulesToDelete, rulesToDeleteFilter]);
+
+  const onDeleteCancel = () => {
+    setIsDeleteModalVisibility(false);
+    clearRulesToDelete();
+  };
+  const onDeleteConfirm = useCallback(async () => {
+    setIsDeleteModalVisibility(false);
+    setIsDeletingRules(true);
+
+    const { errors, total } = await bulkDeleteRules({
+      filter: rulesToDeleteFilter,
+      ids: rulesToDelete,
+      http,
+    });
+    setIsDeletingRules(false);
+
+    const numErrors = errors.length;
+    const numSuccesses = total - numErrors;
+    if (numSuccesses > 0) {
+      toasts.addSuccess(
+        getSuccessfulNotificationText(numSuccesses, singleRuleTitle, multipleRuleTitle)
+      );
+    }
+    if (numErrors > 0) {
+      toasts.addDanger(getFailedNotificationText(numErrors, singleRuleTitle, multipleRuleTitle));
+    }
+    await refreshRules();
+    clearRulesToDelete();
+    onClearSelection();
+  }, [http, rulesToDelete, rulesToDeleteFilter, setIsDeletingRules, toasts]);
+
+  const numberRulesToDelete = rulesToDelete.length || numberOfSelectedItems;
+
   return (
     <section data-test-subj="rulesList">
-      <RulesDeleteModalConfirmation
-        onDeleted={async () => {
-          clearRulesToDelete();
-          onClearSelection();
-          await refreshRules();
-        }}
-        onErrors={async () => {
-          await refreshRules();
-          clearRulesToDelete();
-        }}
-        onCancel={() => {
-          clearRulesToDelete();
-        }}
-        numberOfSelectedItems={numberOfSelectedItems}
-        idsToDelete={rulesToDelete}
-        rulesToDeleteFilter={rulesToDeleteFilter}
-        setIsDeletingRules={setIsDeletingRules}
-      />
+      {isDeleteModalFlyoutVisible && (
+        <RulesDeleteModalConfirmation
+          onConfirm={onDeleteConfirm}
+          onCancel={onDeleteCancel}
+          confirmButtonText={getConfirmButtonText(
+            numberRulesToDelete,
+            singleRuleTitle,
+            multipleRuleTitle
+          )}
+          confirmModalText={getConfirmModalText(
+            numberRulesToDelete,
+            singleRuleTitle,
+            multipleRuleTitle
+          )}
+        />
+      )}
       <BulkSnoozeModal
         rulesToSnooze={rulesToSnooze}
         rulesToUnsnooze={rulesToUnsnooze}
