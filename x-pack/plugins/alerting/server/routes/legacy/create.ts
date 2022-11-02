@@ -18,7 +18,7 @@ import {
 } from '../../types';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { RouteOptions } from '..';
-import { countUsageOfPredefinedIds, actionsSchema, rewriteActions } from '../lib';
+import { countUsageOfPredefinedIds } from '../lib';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 export const bodySchema = schema.object({
@@ -32,7 +32,15 @@ export const bodySchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDurationSchema }),
   }),
-  actions: actionsSchema,
+  actions: schema.arrayOf(
+    schema.object({
+      group: schema.string(),
+      id: schema.string(),
+      actionTypeId: schema.maybe(schema.string()),
+      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+    }),
+    { defaultValue: [] }
+  ),
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
@@ -71,7 +79,7 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
 
         try {
           const alertRes: SanitizedRule<RuleTypeParams> = await rulesClient.create<RuleTypeParams>({
-            data: { ...alert, notifyWhen, actions: rewriteActions(alert?.actions) },
+            data: { ...alert, notifyWhen },
             options: { id: params?.id },
           });
           return res.ok({
