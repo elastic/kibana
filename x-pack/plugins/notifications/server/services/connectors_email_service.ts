@@ -32,21 +32,6 @@ export class ConnectorsEmailService implements EmailService {
   }
 
   private _getRelatedSavedObjects(relatedObjects: RelatedSavedObject[]): RelatedSavedObjects {
-    const relatedSavedObjects: RelatedSavedObjects = [];
-
-    relatedObjects.forEach((relatedObject) => {
-      // FIXME we temporarily map each related SO to multiple ones (one per space)
-      // we can remove this workaround after the following PR is merged:
-      // https://github.com/elastic/kibana/pull/144111/
-      relatedObject.spaceIds.forEach((spaceId) => {
-        relatedSavedObjects.push({
-          id: relatedObject.id,
-          type: relatedObject.type,
-          namespace: spaceId,
-        });
-      });
-    });
-
-    return relatedSavedObjects;
+    return relatedObjects.map(({ id, type, spaceId: namespace }) => ({ id, type, namespace }));
   }
 }

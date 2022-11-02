@@ -22,7 +22,7 @@ export interface IEmailServiceProvider<T, U> {
 export interface RelatedSavedObject {
   id: string;
   type: string;
-  spaceIds: string[];
+  spaceId: string;
 }
 
 export interface PlainTextEmail {
