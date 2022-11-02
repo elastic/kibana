@@ -31,10 +31,7 @@ describe('getColorSpec()', () => {
     expect(colorSpec).toEqual({
       condition: {
         test: {
-          or: [
-            { selection: USER_SELECTION },
-            { selection: SINGLE_POINT_CLICK },
-          ],
+          or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
         },
         value: COLOR_OUTLIER,
       },
@@ -68,10 +65,7 @@ describe('getColorSpec()', () => {
     expect(colorSpec).toEqual({
       condition: {
         test: {
-          or: [
-            { selection: USER_SELECTION },
-            { selection: SINGLE_POINT_CLICK },
-          ],
+          or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
         },
         value: COLOR_OUTLIER,
       },
@@ -106,10 +100,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
       condition: {
         test: {
-          or: [
-            { selection: USER_SELECTION },
-            { selection: SINGLE_POINT_CLICK },
-          ],
+          or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
         },
         value: COLOR_OUTLIER,
       },
@@ -193,10 +184,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
       condition: {
         test: {
-          or: [
-            { selection: USER_SELECTION },
-            { selection: SINGLE_POINT_CLICK },
-          ],
+          or: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
         },
         value: COLOR_OUTLIER,
       },
