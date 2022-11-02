@@ -39,6 +39,7 @@ interface InputControlVisProps {
   hasChanges: () => boolean;
   hasValues: () => boolean;
   refreshControl: (controlIndex: number, query: any) => Promise<void>;
+  isDarkMode?: boolean;
 }
 
 export class InputControlVis extends Component<InputControlVisProps> {
@@ -83,6 +84,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
             fetchOptions={(query) => {
               this.props.refreshControl(index, query);
             }}
+            isDarkMode={this.props.isDarkMode}
           />
         );
       } else if (isRangeControl(control)) {
