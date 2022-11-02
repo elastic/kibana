@@ -8,6 +8,7 @@
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
 import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import type { RuleAlertType } from '../../../rule_schema';
+import { BulkEditSkipReason } from '../../api/rules/bulk_actions/route';
 
 describe('addItemsToArray', () => {
   test('should add single item to array', () => {
@@ -224,17 +225,14 @@ describe('ruleParamsModifier', () => {
 
     test('should return undefined index patterns on remove action if rule has dataViewId only', () => {
       const testDataViewId = 'test-data-view-id';
-      const editedRuleParams = ruleParamsModifier(
-        { dataViewId: testDataViewId } as RuleAlertType['params'],
-        [
+      expect(() =>
+        ruleParamsModifier({ dataViewId: testDataViewId } as RuleAlertType['params'], [
           {
             type: BulkActionEditType.delete_index_patterns,
             value: ['index-2-*'],
           },
-        ]
-      );
-      expect(editedRuleParams).not.toHaveProperty('index');
-      expect(editedRuleParams).toHaveProperty('dataViewId', testDataViewId);
+        ])
+      ).toThrowError(BulkEditSkipReason.DataViewExistsAndNotOverriden);
     });
 
     test('should set dataViewId to undefined if overwrite_data_views=true on set_index_patterns action', () => {
@@ -332,6 +330,51 @@ describe('ruleParamsModifier', () => {
       ).toThrow(
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
       );
+    });
+
+    test('should throw DataViewExistsAndNotOverriden error on adding index pattern if rule is configured with dataView and dataView is not overwritten', () => {
+      expect(() =>
+        ruleParamsModifier(
+          { ...ruleParamsMock, dataViewId: 'mock-data-view-*' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditType.add_index_patterns,
+              value: ['my-index-*'],
+              overwrite_data_views: false,
+            },
+          ]
+        )
+      ).toThrow(BulkEditSkipReason.DataViewExistsAndNotOverriden);
+    });
+
+    test('should throw DataViewExistsAndNotOverriden error on deleting index pattern if rule is configured with dataView and dataView is not overwritten', () => {
+      expect(() =>
+        ruleParamsModifier(
+          { ...ruleParamsMock, dataViewId: 'mock-data-view-*' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditType.delete_index_patterns,
+              value: ['my-index-*'],
+              overwrite_data_views: false,
+            },
+          ]
+        )
+      ).toThrow(BulkEditSkipReason.DataViewExistsAndNotOverriden);
+    });
+
+    test('should throw DataViewExistsAndNotOverriden error on overwriting index pattern if rule is configured with dataView and dataView is not overwritten', () => {
+      expect(() =>
+        ruleParamsModifier(
+          { ...ruleParamsMock, dataViewId: 'mock-data-view-*' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditType.set_index_patterns,
+              value: ['my-index-*'],
+              overwrite_data_views: false,
+            },
+          ]
+        )
+      ).toThrow(BulkEditSkipReason.DataViewExistsAndNotOverriden);
     });
   });
 

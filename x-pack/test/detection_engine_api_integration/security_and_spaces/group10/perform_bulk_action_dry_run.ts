@@ -73,9 +73,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ action: BulkActionType.delete })
         .expect(200);
 
-      expect(body.attributes.summary).toEqual({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
       // dry_run mode shouldn't return any rules in results
-      expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+      expect(body.attributes.results).toEqual({
+        updated: [],
+        skipped: [],
+        created: [],
+        deleted: [],
+      });
 
       // Check that rule wasn't deleted
       await fetchRule(ruleId).expect(200);
@@ -89,9 +94,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ action: BulkActionType.enable })
         .expect(200);
 
-      expect(body.attributes.summary).toEqual({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
       // dry_run mode shouldn't return any rules in results
-      expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+      expect(body.attributes.results).toEqual({
+        updated: [],
+        skipped: [],
+        created: [],
+        deleted: [],
+      });
 
       // Check that the updates have not been persisted
       const { body: ruleBody } = await fetchRule(ruleId).expect(200);
@@ -106,9 +116,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ action: BulkActionType.disable })
         .expect(200);
 
-      expect(body.attributes.summary).toEqual({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
       // dry_run mode shouldn't return any rules in results
-      expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+      expect(body.attributes.results).toEqual({
+        updated: [],
+        skipped: [],
+        created: [],
+        deleted: [],
+      });
 
       // Check that the updates have not been persisted
       const { body: ruleBody } = await fetchRule(ruleId).expect(200);
@@ -124,9 +139,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ action: BulkActionType.disable })
         .expect(200);
 
-      expect(body.attributes.summary).toEqual({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
       // dry_run mode shouldn't return any rules in results
-      expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+      expect(body.attributes.results).toEqual({
+        updated: [],
+        skipped: [],
+        created: [],
+        deleted: [],
+      });
 
       // Check that the rule wasn't duplicated
       const { body: rulesResponse } = await findRules().expect(200);
@@ -152,9 +172,14 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.summary).toEqual({ failed: 0, succeeded: 1, total: 1 });
+        expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
         // dry_run mode shouldn't return any rules in results
-        expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+        expect(body.attributes.results).toEqual({
+          updated: [],
+          skipped: [],
+          created: [],
+          deleted: [],
+        });
 
         // Check that the updates have not been persisted
         const { body: ruleBody } = await fetchRule(ruleId).expect(200);
@@ -183,8 +208,13 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(500);
 
-        expect(body.attributes.summary).toEqual({ failed: 1, succeeded: 0, total: 1 });
-        expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+        expect(body.attributes.summary).toEqual({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
+        expect(body.attributes.results).toEqual({
+          updated: [],
+          skipped: [],
+          created: [],
+          deleted: [],
+        });
 
         expect(body.attributes.errors).toHaveLength(1);
         expect(body.attributes.errors[0]).toEqual({
@@ -224,8 +254,18 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(500);
 
-            expect(body.attributes.summary).toEqual({ failed: 1, succeeded: 0, total: 1 });
-            expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+            expect(body.attributes.summary).toEqual({
+              failed: 1,
+              skipped: 0,
+              succeeded: 0,
+              total: 1,
+            });
+            expect(body.attributes.results).toEqual({
+              updated: [],
+              skipped: [],
+              created: [],
+              deleted: [],
+            });
 
             expect(body.attributes.errors).toHaveLength(1);
             expect(body.attributes.errors[0]).toEqual({

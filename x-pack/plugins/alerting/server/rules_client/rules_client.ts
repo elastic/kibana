@@ -55,6 +55,10 @@ import {
 } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import {
+  BulkActionSkipResult,
+  BulkEditSkipReason,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/response_schema';
+import {
   Rule,
   PartialRule,
   RawRule,
@@ -140,6 +144,7 @@ import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 import { getActiveScheduledSnoozes } from '../lib/is_rule_snoozed';
 import { isSnoozeExpired } from '../lib';
+import { shouldSkipAttributesUpdate } from './lib/should_skip_attributes_update';
 import { isDetectionEngineAADRuleType } from '../saved_objects/migrations/utils';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
@@ -294,8 +299,11 @@ export type BulkEditOperation =
       value?: undefined;
     };
 
-type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
-
+type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<{
+  modifiedParams: Params;
+  isParamsUpdateSkipped: boolean;
+  skipReasons: BulkEditSkipReason[];
+}>;
 export interface BulkEditOptionsFilter<Params extends RuleTypeParams> {
   filter?: string | KueryNode;
   operations: BulkEditOperation[];
@@ -2219,6 +2227,7 @@ export class RulesClient {
     options: BulkEditOptions<Params>
   ): Promise<{
     rules: Array<SanitizedRule<Params>>;
+    skipped: BulkActionSkipResult[];
     errors: BulkOperationError[];
     total: number;
   }> {
@@ -2311,7 +2320,7 @@ export class RulesClient {
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
 
-    const { apiKeysToInvalidate, results, errors } = await retryIfBulkEditConflicts(
+    const { apiKeysToInvalidate, results, errors, skipped } = await retryIfBulkEditConflicts(
       this.logger,
       `rulesClient.update('operations=${JSON.stringify(options.operations)}, paramsModifier=${
         options.paramsModifier ? '[Function]' : undefined
@@ -2371,7 +2380,7 @@ export class RulesClient {
       }
     }
 
-    return { rules: updatedRules, errors, total };
+    return { rules: updatedRules, skipped, errors, total };
   }
 
   private async bulkEditOcc<Params extends RuleTypeParams>({
@@ -2387,6 +2396,7 @@ export class RulesClient {
     rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
     resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
     errors: BulkOperationError[];
+    skipped: BulkActionSkipResult[];
   }> {
     const rulesFinder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
@@ -2399,6 +2409,7 @@ export class RulesClient {
       );
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+    const skipped: BulkActionSkipResult[] = [];
     const errors: BulkOperationError[] = [];
     const apiKeysToInvalidate: string[] = [];
     const apiKeysMap = new Map<string, { oldApiKey?: string; newApiKey?: string }>();
@@ -2408,6 +2419,9 @@ export class RulesClient {
       await pMap(
         response.saved_objects,
         async (rule) => {
+          let isAttributesUpdateSkipped = true;
+          const attributesUpdateSkipReasons: BulkEditSkipReason[] = [];
+
           try {
             if (rule.attributes.apiKey) {
               apiKeysMap.set(rule.id, { oldApiKey: rule.attributes.apiKey });
@@ -2440,6 +2454,13 @@ export class RulesClient {
             let hasUpdateApiKeyOperation = false;
 
             for (const operation of operations) {
+              // Check if the update should be skipped for the current action.
+              // If it should, save the skip reasons in attributesUpdateSkipReasons
+              // and continue to the next operation before without
+              // the `isAttributesUpdateSkipped` flag to false.
+              if (shouldSkipAttributesUpdate(operation, attributes, attributesUpdateSkipReasons)) {
+                continue;
+              }
               switch (operation.field) {
                 case 'actions':
                   await this.validateActions(ruleType, { ...attributes, actions: operation.value });
@@ -2485,6 +2506,7 @@ export class RulesClient {
                 default:
                   attributes = applyBulkEditOperation(operation, attributes);
               }
+              isAttributesUpdateSkipped = false;
             }
 
             // validate schedule interval
@@ -2503,9 +2525,17 @@ export class RulesClient {
               }
             }
 
-            const ruleParams = paramsModifier
+            const {
+              modifiedParams: ruleParams,
+              isParamsUpdateSkipped,
+              skipReasons: paramUpdateSkipReasons,
+            } = paramsModifier
               ? await paramsModifier(attributes.params as Params)
-              : attributes.params;
+              : {
+                  modifiedParams: attributes.params as Params,
+                  isParamsUpdateSkipped: true,
+                  skipReasons: [],
+                };
 
             // validate rule params
             const validatedAlertTypeParams = validateRuleTypeParams(
@@ -2573,16 +2603,23 @@ export class RulesClient {
               updatedAttributes.mapped_params = mappedParams;
             }
 
-            rules.push({
-              ...rule,
-              references,
-              attributes: updatedAttributes,
-            });
+            if (isAttributesUpdateSkipped && isParamsUpdateSkipped) {
+              skipped.push({
+                id: rule.id,
+                name: rule.attributes.name,
+                skip_reasons: [...attributesUpdateSkipReasons, ...paramUpdateSkipReasons],
+              });
+            } else {
+              rules.push({
+                ...rule,
+                references,
+                attributes: updatedAttributes,
+              });
+            }
           } catch (error) {
             errors.push({
               message: error.message,
               rule: {
-                ...rule.attributes,
                 id: rule.id,
                 name: rule.attributes?.name,
               },
@@ -2634,7 +2671,13 @@ export class RulesClient {
       }
     });
 
-    return { apiKeysToInvalidate, resultSavedObjects: result.saved_objects, errors, rules };
+    return {
+      apiKeysToInvalidate,
+      resultSavedObjects: result.saved_objects,
+      errors,
+      rules,
+      skipped,
+    };
   }
 
   private getShouldScheduleTask = async (scheduledTaskId: string | null | undefined) => {

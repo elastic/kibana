@@ -130,6 +130,19 @@ export const waitForBulkEditActionToFinish = ({ rulesCount }: { rulesCount: numb
   cy.contains(TOASTER_BODY, `You've successfully updated ${rulesCount} rule`);
 };
 
+export const waitForBulkEditActionToFinishWithSkippedRules = ({
+  rulesCount,
+}: {
+  rulesCount: number;
+}) => {
+  cy.get(BULK_ACTIONS_PROGRESS_BTN).should('be.disabled');
+  if (rulesCount === 1) {
+    cy.contains(TOASTER_BODY, `${rulesCount} rule was skipped`);
+  } else {
+    cy.contains(TOASTER_BODY, `${rulesCount} rules were skipped`);
+  }
+};
+
 export const checkPrebuiltRulesCannotBeModified = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_BODY).contains(
     `${rulesCount} prebuilt Elastic rules (editing prebuilt rules is not supported)`

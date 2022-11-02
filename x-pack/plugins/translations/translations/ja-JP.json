@@ -25410,8 +25410,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.errorToastDescription": "{rulesCount, plural, other {#個のルール}}を複製できませんでした。",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.successToastDescription": "{totalRules, plural, other  {{totalRules}ルール}}を正常に複製しました",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.warningCalloutMessage": "{rulesCount, plural, other {# 個の選択したルール}}に変更を適用しようとしています。以前にタイムラインテンプレートをこれらのルールに適用している場合は、上書きされるか、（［なし］を選択した場合は）［なし］にリセットされます。",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.errorToastDescription": "{rulesCount, plural, other {#個のルール}}を更新できませんでした。",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successToastDescription": "{rulesCount, plural, other {#個のルール}}を正常に更新しました。Kibanaデータビューを使用してルールに変更を適用することを選択しなかった場合は、これらのツールが更新されず、データビューを使用し続けます。",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.elasticRulesEditDescription": "{rulesCount, plural, other {# 個の既製のElasticルール}}（既製のルールは編集できません）",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.elasticRulesExportDescription": "{rulesCount, plural, other {# 個の既製のElasticルール}}（既製のルールはエクスポートできません）",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.enable.errorToastDescription": "{rulesCount, plural, other {#個のルール}}を有効にできませんでした。",

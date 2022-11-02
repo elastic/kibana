@@ -25443,8 +25443,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.errorToastDescription": "无法复制 {rulesCount, plural, other {# 个规则}}。",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.successToastDescription": "已成功复制 {totalRules, plural, other {{totalRules} 个规则}}",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.warningCalloutMessage": "您即将对 {rulesCount, plural, other {# 个选定规则}}应用更改。如果之前已将时间线模板应用于这些规则，则会将其覆盖或重置为无（如果您选择了“无”）。",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.errorToastDescription": "无法更新 {rulesCount, plural, other {# 个规则}}。",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successToastDescription": "您已成功更新 {rulesCount, plural, other {# 个规则}}。如果未选择使用 Kibana 数据视图对规则应用更改，则不会更新那些规则并继续使用数据视图。",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.elasticRulesEditDescription": "{rulesCount, plural, other {# 个预构建的 Elastic 规则}}（不支持编辑预构建的规则）",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.elasticRulesExportDescription": "{rulesCount, plural, other {# 个预构建的 Elastic 规则}}（不支持导出预构建的规则）",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.enable.errorToastDescription": "无法启用 {rulesCount, plural, other {# 个规则}}。",

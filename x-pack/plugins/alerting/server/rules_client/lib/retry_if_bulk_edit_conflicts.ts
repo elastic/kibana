@@ -9,6 +9,7 @@ import pMap from 'p-map';
 import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { BulkActionSkipResult } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/response_schema';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkOperationError } from '../rules_client';
 import { RawRule } from '../../types';
@@ -22,12 +23,14 @@ type BulkEditOperation = (filter: KueryNode | null) => Promise<{
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
+  skipped: BulkActionSkipResult[];
 }>;
 
 interface ReturnRetry {
   apiKeysToInvalidate: string[];
   results: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
+  skipped: BulkActionSkipResult[];
 }
 
 /**
@@ -52,7 +55,8 @@ export const retryIfBulkEditConflicts = async (
   retries: number = RETRY_IF_CONFLICTS_ATTEMPTS,
   accApiKeysToInvalidate: string[] = [],
   accResults: Array<SavedObjectsUpdateResponse<RawRule>> = [],
-  accErrors: BulkOperationError[] = []
+  accErrors: BulkOperationError[] = [],
+  accSkipped: BulkActionSkipResult[] = []
 ): Promise<ReturnRetry> => {
   // run the operation, return if no errors or throw if not a conflict error
   try {
@@ -61,6 +65,7 @@ export const retryIfBulkEditConflicts = async (
       resultSavedObjects,
       errors: localErrors,
       rules: localRules,
+      skipped,
     } = await bulkEditOperation(filter);
 
     const conflictErrorMap = resultSavedObjects.reduce<Map<string, { message: string }>>(
@@ -82,6 +87,7 @@ export const retryIfBulkEditConflicts = async (
         apiKeysToInvalidate,
         results,
         errors,
+        skipped,
       };
     }
 
@@ -102,6 +108,7 @@ export const retryIfBulkEditConflicts = async (
         apiKeysToInvalidate,
         results,
         errors: [...errors, ...conflictErrors],
+        skipped,
       };
     }
 
@@ -138,9 +145,10 @@ export const retryIfBulkEditConflicts = async (
           results: [...acc.results, ...item.results],
           apiKeysToInvalidate: [...acc.apiKeysToInvalidate, ...item.apiKeysToInvalidate],
           errors: [...acc.errors, ...item.errors],
+          skipped: [...acc.skipped, ...item.skipped],
         };
       },
-      { results: [], apiKeysToInvalidate: [], errors: [] }
+      { results: [], apiKeysToInvalidate: [], errors: [], skipped: [] }
     );
   } catch (err) {
     throw err;

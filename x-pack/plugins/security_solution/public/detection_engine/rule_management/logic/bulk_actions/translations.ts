@@ -70,12 +70,12 @@ export function explainBulkEditSuccess(
         x.type === BulkActionEditType.delete_index_patterns
     )
   ) {
-    return `${i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded)}. ${
-      i18n.RULES_BULK_EDIT_SUCCESS_INDEX_EDIT_DESCRIPTION
+    return `${i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded, summary.skipped)}${
+      summary.skipped > 0 ? ` ${i18n.RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL}` : ''
     }`;
   }
 
-  return i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded);
+  return i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded, summary.skipped);
 }
 
 export function summarizeBulkError(action: BulkActionType): string {
@@ -125,7 +125,7 @@ export function explainBulkError(action: BulkActionType, error: HTTPError): stri
       return i18n.RULES_BULK_DISABLE_FAILURE_DESCRIPTION(summary.failed);
 
     case BulkActionType.edit:
-      return i18n.RULES_BULK_EDIT_FAILURE_DESCRIPTION(summary.failed);
+      return i18n.RULES_BULK_EDIT_FAILURE_DESCRIPTION(summary.failed, summary.skipped);
   }
 }
 

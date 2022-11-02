@@ -72,6 +72,7 @@ import {
   assertRuleScheduleValues,
   assertUpdateScheduleWarningExists,
   assertDefaultValuesAreAppliedToScheduleFields,
+  checkOverwriteDataViewCheckbox,
 } from '../../tasks/rules_bulk_edit';
 
 import { hasIndexPatterns, getDetails } from '../../tasks/rule_details';
@@ -103,11 +104,12 @@ import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
 
 const RULE_NAME = 'Custom rule for bulk actions';
+const RULE_NAME_WITH_DATA_VIEW = 'Custom rule with data view for bulk actions';
 
 const prePopulatedIndexPatterns = ['index-1-*', 'index-2-*'];
 const prePopulatedTags = ['test-default-tag-1', 'test-default-tag-2'];
 
-const expectedNumberOfCustomRulesToBeEdited = 6;
+const expectedNumberOfCustomRulesToBeEdited = 7;
 const expectedNumberOfMachineLearningRulesToBeEdited = 1;
 
 const timelineTemplate = getIndicatorMatchTimelineTemplate();
@@ -147,6 +149,16 @@ describe('Detection rules, bulk edit', () => {
     createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...defaultRuleData }, '4');
     createThresholdRule({ ...getNewThresholdRule(), ...defaultRuleData }, '5');
     createNewTermsRule({ ...getNewTermsRule(), ...defaultRuleData }, '6');
+    // Rule to be selected manually only during the index-pattern test block
+    createCustomRule(
+      {
+        ...getNewRule(),
+        name: RULE_NAME_WITH_DATA_VIEW,
+        ...defaultRuleData,
+        dataSource: { dataView: 'data-view-1-*', type: 'dataView' },
+      },
+      '7'
+    );
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
@@ -310,7 +322,7 @@ describe('Detection rules, bulk edit', () => {
       waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
       cy.get(TOASTER_BODY).should(
-        'have.text',
+        'contain.text',
         `You've successfully updated ${expectedNumberOfCustomRulesToBeEdited} rules`
       );
     });
@@ -379,6 +391,7 @@ describe('Detection rules, bulk edit', () => {
       cy.get(MODAL_CONFIRMATION_BTN).click();
 
       typeIndexPatterns(indexPattersToBeAdded);
+      checkOverwriteDataViewCheckbox();
       submitBulkEditForm();
 
       waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
@@ -409,6 +422,7 @@ describe('Detection rules, bulk edit', () => {
 
       openBulkEditAddIndexPatternsForm();
       typeIndexPatterns(indexPattersToBeAdded);
+      checkOverwriteDataViewCheckbox();
       submitBulkEditForm();
 
       waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
@@ -427,14 +441,27 @@ describe('Detection rules, bulk edit', () => {
 
       openBulkEditAddIndexPatternsForm();
       typeIndexPatterns(indexPattersToBeAdded);
+      checkOverwriteDataViewCheckbox();
       submitBulkEditForm();
 
       waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+    });
 
-      cy.get(TOASTER_BODY).should(
-        'have.text',
-        `You've successfully updated ${expectedNumberOfNotMLRules} rules. If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.`
-      );
+    it('Display success toast after editing the index pattern, with skipped rules and explanation', () => {
+      const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
+
+      // select only rules that are not ML
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      unselectRuleByName(getMachineLearningRule().name);
+
+      openBulkEditAddIndexPatternsForm();
+      typeIndexPatterns(indexPattersToBeAdded);
+      submitBulkEditForm();
+
+      // 1 rule is skipped because it uses data views and dataView override is not checked
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules - 1 });
+
+      cy.get(TOASTER_BODY).should('contain.text', `1 rule was skipped.`);
     });
 
     it('Overwrite index patterns in custom rules', () => {
@@ -448,6 +475,8 @@ describe('Detection rules, bulk edit', () => {
 
       // check overwrite index patterns checkbox, ensure warning message is displayed and type index patterns
       checkOverwriteIndexPatternsCheckbox();
+      // check overwrite rules configured with data views, otherwise one rule will be skipped
+      checkOverwriteDataViewCheckbox();
       cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
         'have.text',
         `You’re about to overwrite index patterns for ${expectedNumberOfNotMLRules} selected rules, press Save to apply changes.`
@@ -473,9 +502,12 @@ describe('Detection rules, bulk edit', () => {
 
       openBulkEditDeleteIndexPatternsForm();
       typeIndexPatterns(indexPatternsToDelete);
+
       submitBulkEditForm();
 
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+      // 1 rule is skipped because it uses data views
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules - 1 });
+      cy.get(TOASTER_BODY).should('contain.text', `1 rule was skipped.`);
 
       // check if rule has been updated
       goToTheRuleDetailsOf(RULE_NAME);
@@ -492,7 +524,9 @@ describe('Detection rules, bulk edit', () => {
       submitBulkEditForm();
 
       // error toast should be displayed that that rules edit failed
-      cy.contains(TOASTER_BODY, `${expectedNumberOfNotMLRules} rules failed to update.`);
+      cy.contains(TOASTER_BODY, `${expectedNumberOfNotMLRules - 1} rules failed to update.`);
+      // 1 rule is skipped because it uses data views
+      cy.contains(TOASTER_BODY, `1 rule was skipped`);
 
       // on error toast button click display error that index patterns can't be empty
       clickErrorToastBtn();

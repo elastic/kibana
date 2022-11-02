@@ -66,7 +66,9 @@ const BulkActionEditPayloadTags = t.type({
   value: RuleTagArray,
 });
 
-type BulkActionEditPayloadIndexPatterns = t.TypeOf<typeof BulkActionEditPayloadIndexPatterns>;
+export type BulkActionEditPayloadIndexPatterns = t.TypeOf<
+  typeof BulkActionEditPayloadIndexPatterns
+>;
 const BulkActionEditPayloadIndexPatterns = t.intersection([
   t.type({
     type: t.union([

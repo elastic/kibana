@@ -26,6 +26,7 @@ import {
   checkOverwriteIndexPatternsCheckbox,
   openBulkEditAddIndexPatternsForm,
   openBulkEditDeleteIndexPatternsForm,
+  waitForBulkEditActionToFinishWithSkippedRules,
 } from '../../tasks/rules_bulk_edit';
 
 import { hasIndexPatterns, getDetails, assertDetailsNotExist } from '../../tasks/rule_details';
@@ -87,14 +88,16 @@ describe('Detection rules, bulk edit, data view', () => {
     waitForRulesTableToBeLoaded();
   });
 
-  it('Add index patterns to custom rules with configured data view', () => {
+  it('Add index patterns to custom rules with configured data view: all rules are skipped', () => {
     selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
     openBulkEditAddIndexPatternsForm();
     typeIndexPatterns(expectedIndexPatterns);
     submitBulkEditForm();
 
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    waitForBulkEditActionToFinishWithSkippedRules({
+      rulesCount: expectedNumberOfCustomRulesToBeEdited,
+    });
 
     // check if rule still has data view and index patterns field does not exist
     goToRuleDetails();
@@ -102,7 +105,7 @@ describe('Detection rules, bulk edit, data view', () => {
     assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
   });
 
-  it('Add index patterns to custom rules with configured data view when data view checkbox is checked', () => {
+  it('Add index patterns to custom rules with configured data view when data view checkbox is checked: rules are updated', () => {
     selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
     openBulkEditAddIndexPatternsForm();
@@ -123,7 +126,7 @@ describe('Detection rules, bulk edit, data view', () => {
     assertDetailsNotExist(DATA_VIEW_DETAILS);
   });
 
-  it('Overwrite index patterns in custom rules with configured data view', () => {
+  it('Overwrite index patterns in custom rules with configured data view: rules are skipped', () => {
     selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
     openBulkEditAddIndexPatternsForm();
@@ -131,7 +134,9 @@ describe('Detection rules, bulk edit, data view', () => {
     checkOverwriteIndexPatternsCheckbox();
     submitBulkEditForm();
 
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    waitForBulkEditActionToFinishWithSkippedRules({
+      rulesCount: expectedNumberOfCustomRulesToBeEdited,
+    });
 
     // check if rule still has data view and index patterns field does not exist
     goToRuleDetails();
@@ -139,7 +144,7 @@ describe('Detection rules, bulk edit, data view', () => {
     assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
   });
 
-  it('Overwrite index patterns in custom rules with configured data view when data view checkbox is checked', () => {
+  it('Overwrite index patterns in custom rules with configured data view when data view checkbox is checked: rules are updated', () => {
     selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
     openBulkEditAddIndexPatternsForm();
@@ -157,7 +162,7 @@ describe('Detection rules, bulk edit, data view', () => {
     assertDetailsNotExist(DATA_VIEW_DETAILS);
   });
 
-  it('Delete index patterns in custom rules with configured data view', () => {
+  it('Delete index patterns in custom rules with configured data view: rules are skipped', () => {
     selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
     openBulkEditDeleteIndexPatternsForm();
@@ -168,7 +173,9 @@ describe('Detection rules, bulk edit, data view', () => {
 
     submitBulkEditForm();
 
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    waitForBulkEditActionToFinishWithSkippedRules({
+      rulesCount: expectedNumberOfCustomRulesToBeEdited,
+    });
 
     // check if rule still has data view and index patterns field does not exist
     goToRuleDetails();
