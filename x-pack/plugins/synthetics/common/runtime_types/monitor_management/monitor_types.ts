@@ -82,6 +82,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
     [ConfigKey.CONFIG_ID]: t.string,
+    [ConfigKey.CONFIG_HASH]: t.string,
     [ConfigKey.JOURNEY_ID]: t.string,
     [ConfigKey.PROJECT_ID]: t.string,
     [ConfigKey.ORIGINAL_SPACE]: t.string,

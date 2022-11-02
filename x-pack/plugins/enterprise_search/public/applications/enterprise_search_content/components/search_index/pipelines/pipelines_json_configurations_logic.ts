@@ -25,9 +25,9 @@ interface IndexPipelinesConfigurationsActions {
   selectPipeline: (pipeline: string) => { pipeline: string };
 }
 
-interface IndexPipelinesConfigurationsValues {
+export interface IndexPipelinesConfigurationsValues {
   indexName: string;
-  indexPipelinesData: FetchCustomPipelineApiLogicResponse;
+  indexPipelinesData: FetchCustomPipelineApiLogicResponse | undefined;
   pipelineNames: string[];
   pipelines: Record<string, IngestPipeline>;
   selectedPipeline: IngestPipeline | undefined;
@@ -50,6 +50,18 @@ export const IndexPipelinesConfigurationsLogic = kea<
       ['data as indexPipelinesData'],
     ],
   },
+  events: ({ actions, values }) => ({
+    afterMount: () => {
+      if (!values.indexPipelinesData || values.indexPipelinesData.length === 0) {
+        return;
+      }
+      const pipelineNames = Object.keys(values.indexPipelinesData).sort();
+      const defaultPipeline = pipelineNames.includes(values.indexName)
+        ? values.indexName
+        : pipelineNames[0];
+      actions.selectPipeline(defaultPipeline);
+    },
+  }),
   listeners: ({ actions, values }) => ({
     fetchIndexPipelinesDataSuccess: (pipelines) => {
       const names = Object.keys(pipelines ?? {}).sort();
@@ -59,6 +71,7 @@ export const IndexPipelinesConfigurationsLogic = kea<
       }
     },
   }),
+  path: ['enterprise_search', 'content', 'pipelines_json_configurations'],
   reducers: () => ({
     selectedPipelineId: [
       '',

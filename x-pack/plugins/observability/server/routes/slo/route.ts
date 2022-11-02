@@ -13,10 +13,12 @@ import {
   KibanaSavedObjectsSLORepository,
   GetSLO,
   UpdateSLO,
+  DefaultSLIClient,
 } from '../../services/slo';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
+  KQLCustomTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
 import { IndicatorTypes } from '../../types/models';
@@ -31,6 +33,7 @@ import { createObservabilityServerRoute } from '../create_observability_server_r
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'slo.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
   'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+  'slo.kql.custom': new KQLCustomTransformGenerator(),
 };
 
 const createSLORoute = createObservabilityServerRoute({
@@ -101,8 +104,10 @@ const getSLORoute = createObservabilityServerRoute({
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
     const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const getSLO = new GetSLO(repository);
+    const sliClient = new DefaultSLIClient(esClient);
+    const getSLO = new GetSLO(repository, sliClient);
 
     const response = await getSLO.execute(params.path.id);
 

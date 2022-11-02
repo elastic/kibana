@@ -89,6 +89,7 @@ const createRequest = ({ type, id, initialNamespaces }: BulkCreateTestCase) => (
 export function bulkCreateTestSuiteFactory(context: FtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
   const supertest = context.getService('supertestWithoutAuth');
+  const log = context.getService('log');
 
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody =
@@ -113,6 +114,9 @@ export function bulkCreateTestSuiteFactory(context: FtrProviderContext) {
             const { type, id } = testCase;
             expect(object.type).to.eql(type);
             expect(object.id).to.eql(id);
+            log.info(
+              `object type: ${object.type}, id: ${object.id}, namespaces: ${object.namespaces}`
+            );
             let expectedMetadata;
             if (testCase.fail409Param === 'unresolvableConflict') {
               expectedMetadata = { isNotOverwritable: true };
@@ -216,11 +220,34 @@ export function bulkCreateTestSuiteFactory(context: FtrProviderContext) {
                 'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
             },
           ]);
+          await testDataLoader.createLegacyUrlAliases([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+            },
+            {
+              spaceName: 'space_x',
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+            },
+            {
+              spaceName: 'space_y',
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+              disabled: true,
+            },
+          ]);
         });
 
         after(async () => {
+          await testDataLoader.deleteAllSavedObjectsFromKibanaIndex();
           await testDataLoader.deleteFtrSpaces();
-          await testDataLoader.deleteFtrSavedObjectsData();
         });
 
         const attrs = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };

@@ -22,6 +22,7 @@ export const APP_ICON = 'securityAnalyticsApp' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
 export const ADD_DATA_PATH = `/app/integrations/browse/security`;
+export const ADD_THREAT_INTELLIGENCE_DATA_PATH = `/app/integrations/browse/threat_intel`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern' as const;
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -152,6 +153,7 @@ export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
+export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
@@ -258,16 +260,12 @@ export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/n
  * Detection engine routes
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine' as const;
-export const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules` as const;
-export const DETECTION_ENGINE_PREPACKAGED_URL =
-  `${DETECTION_ENGINE_RULES_URL}/prepackaged` as const;
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges` as const;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index` as const;
 
+export const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules` as const;
 export const DETECTION_ENGINE_RULES_URL_FIND = `${DETECTION_ENGINE_RULES_URL}/_find` as const;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const;
-export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
-  `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status` as const;
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
@@ -279,6 +277,7 @@ export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
 export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
+export const RISK_SCORE_RESTART_TRANSFORMS = `${INTERNAL_RISK_SCORE_URL}/transforms/restart`;
 export const DEV_TOOL_PREBUILT_CONTENT =
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
 export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
@@ -293,18 +292,13 @@ export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/creat
 export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
 export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
 export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
-
 /**
  * Internal detection engine routes
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
-export const INTERNAL_DETECTION_ENGINE_RULES_URL = '/internal/detection_engine/rules' as const;
-export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
-  `${INTERNAL_DETECTION_ENGINE_URL}/fleet/integrations/installed` as const;
 export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
-export const DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL =
-  `${INTERNAL_DETECTION_ENGINE_RULES_URL}/exceptions/_find_references` as const;
+
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
@@ -454,6 +448,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
 
+// TODO: https://github.com/elastic/kibana/pull/142950
 /**
  * Error codes that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
  */

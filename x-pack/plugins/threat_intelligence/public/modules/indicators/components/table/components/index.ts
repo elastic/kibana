@@ -8,5 +8,6 @@
 export * from './actions_row_cell';
 export * from './cell_actions';
 export * from './cell_renderer';
+export * from './cell_popover_renderer';
 export * from './field_browser';
 export * from './open_flyout_button';

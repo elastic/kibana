@@ -92,6 +92,9 @@ export type HeatmapInput = Datatable;
 export interface HeatmapExpressionProps {
   data: Datatable;
   args: HeatmapArguments;
+  syncTooltips: boolean;
+  syncCursor: boolean;
+  canNavigateToLens?: boolean;
 }
 
 export interface HeatmapRender {
@@ -105,4 +108,18 @@ export type HeatmapExpressionFunctionDefinition = ExpressionFunctionDefinition<
   HeatmapInput,
   HeatmapArguments,
   ExpressionValueRender<HeatmapExpressionProps>
+>;
+
+export type HeatmapLegendExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof EXPRESSION_HEATMAP_LEGEND_NAME,
+  null,
+  HeatmapLegendConfig,
+  HeatmapLegendConfigResult
+>;
+
+export type HeatmapGridExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof EXPRESSION_HEATMAP_GRID_NAME,
+  null,
+  HeatmapGridConfig,
+  HeatmapGridConfigResult
 >;

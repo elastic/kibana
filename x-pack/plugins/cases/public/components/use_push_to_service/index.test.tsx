@@ -10,7 +10,8 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { render, screen } from '@testing-library/react';
 
 import '../../common/mock/match_media';
-import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
+import type { ReturnUsePushToService, UsePushToService } from '.';
+import { usePushToService } from '.';
 import { noPushCasesPermissions, readCasesPermissions, TestProviders } from '../../common/mock';
 import { CaseStatuses, ConnectorTypes } from '../../../common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';

@@ -6,10 +6,11 @@
  */
 
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBetaBadge, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
+import type { Filter } from '@kbn/es-query';
+import { isActiveTimeline } from '../../../../helpers';
 import type { DataProvider } from '../../../../../common/types';
-import { TimelineId } from '../../../../../common/types/timeline';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { getDataProvider } from '../table/use_action_cell_data_provider';
 import { useAlertPrevalenceFromProcessTree } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
@@ -22,19 +23,23 @@ import {
   PROCESS_ANCESTRY_COUNT,
   PROCESS_ANCESTRY_EMPTY,
   PROCESS_ANCESTRY_ERROR,
+  PROCESS_ANCESTRY_FILTER,
 } from './translations';
+import { BETA } from '../../../translations';
 
 interface Props {
   data: TimelineEventsDetailsItem;
   eventId: string;
   index: TimelineEventsDetailsItem;
   originalDocumentId: TimelineEventsDetailsItem;
-  timelineId?: string;
+  scopeId?: string;
 }
 
 interface Cache {
   alertIds: string[];
 }
+
+const dataProviderLimit = 5;
 
 /**
  * Fetches and displays alerts that were generated in the associated process'
@@ -65,7 +70,7 @@ interface Cache {
  * state inside the component rather than to add it to Redux.
  */
 export const RelatedAlertsByProcessAncestry = React.memo<Props>(
-  ({ data, originalDocumentId, index, eventId, timelineId }) => {
+  ({ data, originalDocumentId, index, eventId, scopeId }) => {
     const [showContent, setShowContent] = useState(false);
     const [cache, setCache] = useState<Partial<Cache>>({});
 
@@ -80,7 +85,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
         return (
           <ActualRelatedAlertsByProcessAncestry
             eventId={eventId}
-            timelineId={timelineId}
+            scopeId={scopeId}
             alertIds={cache.alertIds}
           />
         );
@@ -91,11 +96,13 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
           index={index}
           originalDocumentId={originalDocumentId}
           eventId={eventId}
-          timelineId={timelineId}
+          isActiveTimelines={isActiveTimeline(scopeId ?? '')}
           onCacheLoad={setCache}
         />
       );
-    }, [showContent, cache, data, eventId, timelineId, index, originalDocumentId]);
+    }, [showContent, cache.alertIds, data, index, originalDocumentId, eventId, scopeId]);
+
+    const betaBadge = useMemo(() => <EuiBetaBadge size="s" label={BETA} color="subdued" />, []);
 
     return (
       <InsightAccordion
@@ -109,6 +116,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
         }
         renderContent={renderContent}
         onToggle={onToggle}
+        extraAction={betaBadge}
       />
     );
   }
@@ -124,9 +132,9 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
   eventId: string;
   index: TimelineEventsDetailsItem;
   originalDocumentId: TimelineEventsDetailsItem;
-  timelineId?: string;
+  isActiveTimelines: boolean;
   onCacheLoad: (cache: Cache) => void;
-}> = ({ data, originalDocumentId, index, timelineId, onCacheLoad, eventId }) => {
+}> = ({ data, originalDocumentId, index, isActiveTimelines, onCacheLoad, eventId }) => {
   const { values: wrappedProcessEntityId } = data;
   const { values: indices } = index;
   const { values: wrappedDocumentId } = originalDocumentId;
@@ -134,7 +142,7 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
   const processEntityId = Array.isArray(wrappedProcessEntityId) ? wrappedProcessEntityId[0] : '';
   const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
     processEntityId,
-    timelineId: timelineId ?? TimelineId.active,
+    isActiveTimeline: isActiveTimelines,
     documentId,
     indices: indices ?? [],
   });
@@ -165,20 +173,57 @@ FetchAndNotifyCachedAlertsByProcessAncestry.displayName =
 const ActualRelatedAlertsByProcessAncestry: React.FC<{
   alertIds: string[];
   eventId: string;
-  timelineId?: string;
-}> = ({ alertIds, eventId, timelineId }) => {
+  scopeId?: string;
+}> = ({ alertIds, eventId, scopeId }) => {
+  const shouldUseFilters = alertIds && alertIds.length && alertIds.length >= dataProviderLimit;
   const dataProviders = useMemo(() => {
     if (alertIds && alertIds.length) {
-      return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
-        const id = `${timelineId}-${eventId}-event.id-${index}-${alertId}`;
-        result.push(getDataProvider('_id', id, alertId));
-        return result;
-      }, []);
+      if (shouldUseFilters) {
+        return null;
+      } else {
+        return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
+          const id = `${scopeId}-${eventId}-event.id-${index}-${alertId}`;
+          result.push(getDataProvider('_id', id, alertId));
+          return result;
+        }, []);
+      }
     }
     return null;
-  }, [alertIds, eventId, timelineId]);
+  }, [alertIds, shouldUseFilters, scopeId, eventId]);
 
-  if (!dataProviders) {
+  const filters: Filter[] | null = useMemo(() => {
+    if (shouldUseFilters) {
+      return [
+        {
+          meta: {
+            alias: PROCESS_ANCESTRY_FILTER,
+            type: 'phrases',
+            key: '_id',
+            params: [...alertIds],
+            negate: false,
+            disabled: false,
+            value: alertIds.join(),
+          },
+          query: {
+            bool: {
+              should: alertIds.map((id) => {
+                return {
+                  match_phrase: {
+                    _id: id,
+                  },
+                };
+              }),
+              minimum_should_match: 1,
+            },
+          },
+        },
+      ];
+    } else {
+      return null;
+    }
+  }, [alertIds, shouldUseFilters]);
+
+  if (!dataProviders && !filters) {
     return null;
   }
 
@@ -189,6 +234,7 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
       <InvestigateInTimelineButton
         asEmptyButton={false}
         dataProviders={dataProviders}
+        filters={filters}
         data-test-subj="investigate-ancestry-in-timeline"
       >
         {ACTION_INVESTIGATE_IN_TIMELINE}

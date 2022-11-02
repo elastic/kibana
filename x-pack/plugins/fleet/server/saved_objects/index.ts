@@ -18,6 +18,7 @@ import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
@@ -69,6 +70,7 @@ const getSavedObjectTypes = (
       properties: {
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
+        prerelease_integrations_enabled: { type: 'boolean' },
       },
     },
     migrations: {
@@ -341,6 +343,22 @@ const getSavedObjectTypes = (
         name: { type: 'keyword' },
         is_default: { type: 'boolean' },
         host: { type: 'keyword' },
+      },
+    },
+  },
+  [FLEET_SERVER_HOST_SAVED_OBJECT_TYPE]: {
+    name: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        name: { type: 'keyword' },
+        is_default: { type: 'boolean' },
+        host_urls: { type: 'keyword', index: false },
+        is_preconfigured: { type: 'boolean' },
       },
     },
   },

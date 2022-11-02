@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "../../../typings/**/*",
@@ -13,11 +12,12 @@
     "scripts/**/*",
     "server/**/*",
     "typings/**/*",
+    "jest.config.js",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json",
-    "server/**/*.json"
+    "server/**/*.json",
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },

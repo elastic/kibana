@@ -155,6 +155,9 @@ describe('IndexPatterns', () => {
     const gettedDataView = await indexPatterns.get(id);
 
     expect(dataView).toBe(gettedDataView);
+
+    const dataView2 = await indexPatterns.create({ id });
+    expect(dataView2).toBe(gettedDataView);
   });
 
   test('allowNoIndex flag preserves existing fields when index is missing', async () => {
@@ -224,11 +227,11 @@ describe('IndexPatterns', () => {
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
-    pattern.title = 'foo2';
+    pattern.setIndexPattern('foo2');
     await indexPatterns.updateSavedObject(pattern);
 
     // This should not be able to recover
-    samePattern.title = 'foo3';
+    samePattern.setIndexPattern('foo3');
 
     let result;
     try {
@@ -241,18 +244,18 @@ describe('IndexPatterns', () => {
   });
 
   test('create', async () => {
-    const title = 'kibana-*';
+    const indexPattern = 'kibana-*';
     indexPatterns.refreshFields = jest.fn();
 
-    const indexPattern = await indexPatterns.create({ title }, true);
-    expect(indexPattern).toBeInstanceOf(DataView);
-    expect(indexPattern.title).toBe(title);
+    const dataView = await indexPatterns.create({ title: indexPattern }, true);
+    expect(dataView).toBeInstanceOf(DataView);
+    expect(dataView.getIndexPattern()).toBe(indexPattern);
     expect(indexPatterns.refreshFields).not.toBeCalled();
 
-    await indexPatterns.create({ title });
+    await indexPatterns.create({ title: indexPattern });
     expect(indexPatterns.refreshFields).toBeCalled();
-    expect(indexPattern.id).toBeDefined();
-    expect(indexPattern.isPersisted()).toBe(false);
+    expect(dataView.id).toBeDefined();
+    expect(dataView.isPersisted()).toBe(false);
   });
 
   test('createSavedObject', async () => {
@@ -267,14 +270,14 @@ describe('IndexPatterns', () => {
       version,
       attributes: {
         ...savedObject.attributes,
-        title: dataView.title,
+        title: dataView.getIndexPattern(),
       },
     });
 
     const indexPattern = await indexPatterns.createSavedObject(dataView);
     expect(indexPattern).toBeInstanceOf(DataView);
     expect(indexPattern.id).toBe(dataView.id);
-    expect(indexPattern.title).toBe(title);
+    expect(indexPattern.getIndexPattern()).toBe(title);
     expect(indexPattern.isPersisted()).toBe(true);
   });
 

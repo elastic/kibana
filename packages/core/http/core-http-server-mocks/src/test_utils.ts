@@ -35,7 +35,7 @@ const createConfigService = () => {
         cors: {
           enabled: false,
         },
-        compression: { enabled: true },
+        compression: { enabled: true, brotli: { enabled: false } },
         xsrf: {
           disableProtection: true,
           allowlist: [],

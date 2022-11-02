@@ -30,6 +30,7 @@ export const EMPTY_EXECUTION_KPI_RESULT = {
   success: 0,
   unknown: 0,
   failure: 0,
+  warning: 0,
   activeAlerts: 0,
   newAlerts: 0,
   recoveredAlerts: 0,
@@ -60,6 +61,7 @@ export interface IExecutionLog {
   schedule_delay_ms: number;
   timed_out: boolean;
   rule_id: string;
+  space_ids: string[];
   rule_name: string;
 }
 

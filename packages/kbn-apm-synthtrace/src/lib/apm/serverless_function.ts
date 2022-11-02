@@ -7,7 +7,6 @@
  */
 
 import { Entity } from '../entity';
-import { generateShortId } from '../utils/generate_id';
 import { ApmFields } from './apm_fields';
 import { ServerlessInstance } from './serverless_instance';
 
@@ -27,13 +26,15 @@ export function serverlessFunction({
   serviceName,
   environment,
   agentName,
+  architecture = 'arm',
 }: {
   functionName: string;
   environment: string;
   agentName: string;
   serviceName?: string;
+  architecture?: string;
 }) {
-  const faasId = `arn:aws:lambda:us-west-2:${generateShortId()}:function:${functionName}`;
+  const faasId = `arn:aws:lambda:us-west-2:001:function:${functionName}`;
   return new ServerlessFunction({
     'service.name': serviceName || faasId,
     'faas.id': faasId,
@@ -41,5 +42,6 @@ export function serverlessFunction({
     'service.environment': environment,
     'agent.name': agentName,
     'service.runtime.name': 'AWS_lambda',
+    'host.architecture': architecture,
   });
 }

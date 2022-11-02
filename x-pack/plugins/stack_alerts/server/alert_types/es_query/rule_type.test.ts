@@ -27,7 +27,7 @@ import { Comparator } from '../../../common/comparator_types';
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
-const ruleType = getRuleType(logger, coreSetup);
+const ruleType = getRuleType(coreSetup);
 
 describe('ruleType', () => {
   it('rule type creation structure is the expected value', async () => {
@@ -678,5 +678,6 @@ async function invokeExecutor({
       throttle: null,
       notifyWhen: null,
     },
+    logger,
   });
 }

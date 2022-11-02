@@ -8,13 +8,14 @@
 /* eslint-disable max-classes-per-file */
 
 import { SavedObject } from '@kbn/core/server';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
+import { Subject } from 'rxjs';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
@@ -170,7 +171,7 @@ export class SyntheticsService {
 
                 if (service.isAllowed) {
                   service.setupIndexTemplates();
-                  service.syncErrors = await service.pushConfigs();
+                  await service.pushConfigs();
                 }
               } catch (e) {
                 sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
@@ -179,7 +180,7 @@ export class SyntheticsService {
                   type: 'runTaskError',
                   code: e?.code,
                   status: e.status,
-                  kibanaVersion: service.server.kibanaVersion,
+                  stackVersion: service.server.stackVersion,
                 });
                 throw e;
               }
@@ -225,7 +226,7 @@ export class SyntheticsService {
         type: 'scheduleTaskError',
         code: e?.code,
         status: e.status,
-        kibanaVersion: this.server.kibanaVersion,
+        stackVersion: this.server.stackVersion,
       });
 
       this.logger?.error(
@@ -306,65 +307,44 @@ export class SyntheticsService {
     }
   }
 
-  async pushConfigs(configs?: HeartbeatConfig[], isEdit?: boolean) {
-    const monitorConfigs = configs ?? (await this.getMonitorConfigs());
-    const monitors = this.formatConfigs(monitorConfigs);
+  async pushConfigs() {
+    const service = this;
+    const subject = new Subject<SyntheticsMonitorWithId[]>();
 
-    if (monitors.length === 0) {
-      this.logger.debug('No monitor found which can be pushed to service.');
-      return null;
-    }
+    subject.subscribe(async (monitorConfigs) => {
+      const monitors = this.formatConfigs(monitorConfigs);
 
-    this.apiKey = await this.getApiKey();
+      if (monitors.length === 0) {
+        this.logger.debug('No monitor found which can be pushed to service.');
+        return null;
+      }
 
-    if (!this.apiKey) {
-      return null;
-    }
+      this.apiKey = await this.getApiKey();
 
-    const data = {
-      monitors,
-      output: await this.getOutput(this.apiKey),
-      isEdit: !!isEdit,
-    };
+      if (!this.apiKey) {
+        return null;
+      }
 
-    this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
+      const data = {
+        monitors,
+        output: await this.getOutput(this.apiKey),
+      };
 
-    try {
-      this.syncErrors = await this.apiClient.put(data);
-      return this.syncErrors;
-    } catch (e) {
-      this.logger.error(e);
-      throw e;
-    }
+      this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
+
+      try {
+        service.syncErrors = await this.apiClient.put(data);
+      } catch (e) {
+        this.logger.error(e);
+        throw e;
+      }
+    });
+
+    await this.getMonitorConfigs(subject);
   }
 
-  async runOnceConfigs(configs?: HeartbeatConfig[]) {
-    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
-    if (monitors.length === 0) {
-      return;
-    }
-
-    this.apiKey = await this.getApiKey();
-
-    if (!this.apiKey) {
-      return null;
-    }
-
-    const data = {
-      monitors,
-      output: await this.getOutput(this.apiKey),
-    };
-
-    try {
-      return await this.apiClient.runOnce(data);
-    } catch (e) {
-      this.logger.error(e);
-      throw e;
-    }
-  }
-
-  async triggerConfigs(request?: KibanaRequest, configs?: HeartbeatConfig[]) {
-    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+  async runOnceConfigs(configs: HeartbeatConfig[]) {
+    const monitors = this.formatConfigs(configs);
     if (monitors.length === 0) {
       return;
     }
@@ -401,81 +381,92 @@ export class SyntheticsService {
     };
     const result = await this.apiClient.delete(data);
     if (this.syncErrors && this.syncErrors?.length > 0) {
-      this.syncErrors = await this.pushConfigs();
+      await this.pushConfigs();
     }
     return result;
   }
 
   async deleteAllConfigs() {
-    const configs = await this.getMonitorConfigs();
-    return await this.deleteConfigs(configs);
+    const subject = new Subject<SyntheticsMonitorWithId[]>();
+
+    subject.subscribe(async (monitors) => {
+      await this.deleteConfigs(monitors);
+    });
+
+    await this.getMonitorConfigs(subject);
   }
 
-  async getMonitorConfigs() {
-    const savedObjectsClient = this.server.savedObjectsClient;
+  async getMonitorConfigs(subject: Subject<SyntheticsMonitorWithId[]>) {
+    const soClient = this.server.savedObjectsClient;
     const encryptedClient = this.server.encryptedSavedObjects.getClient();
 
-    if (!savedObjectsClient?.find) {
+    if (!soClient?.find) {
       return [] as SyntheticsMonitorWithId[];
     }
 
-    const { saved_objects: encryptedMonitors } = await savedObjectsClient.find<SyntheticsMonitor>({
+    const finder = soClient.createPointInTimeFinder({
       type: syntheticsMonitorType,
+      perPage: 500,
       namespaces: ['*'],
-      perPage: 10000,
     });
 
     const start = performance.now();
 
-    const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = (
-      await Promise.all(
-        encryptedMonitors.map(
-          (monitor) =>
-            new Promise((resolve) => {
-              encryptedClient
-                .getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-                  syntheticsMonitor.name,
-                  monitor.id,
-                  {
-                    namespace: monitor.namespaces?.[0],
-                  }
-                )
-                .then((decryptedMonitor) => resolve(decryptedMonitor))
-                .catch((e) => {
-                  this.logger.error(e);
-                  sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
-                    reason: 'Failed to decrypt monitor',
-                    message: e?.message,
-                    type: 'runTaskError',
-                    code: e?.code,
-                    status: e.status,
-                    kibanaVersion: this.server.kibanaVersion,
+    for await (const result of finder.find()) {
+      const encryptedMonitors = result.saved_objects;
+
+      const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = (
+        await Promise.all(
+          encryptedMonitors.map(
+            (monitor) =>
+              new Promise((resolve) => {
+                encryptedClient
+                  .getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+                    syntheticsMonitor.name,
+                    monitor.id,
+                    {
+                      namespace: monitor.namespaces?.[0],
+                    }
+                  )
+                  .then((decryptedMonitor) => resolve(decryptedMonitor))
+                  .catch((e) => {
+                    this.logger.error(e);
+                    sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+                      reason: 'Failed to decrypt monitor',
+                      message: e?.message,
+                      type: 'runTaskError',
+                      code: e?.code,
+                      status: e.status,
+                      stackVersion: this.server.stackVersion,
+                    });
+                    resolve(null);
                   });
-                  resolve(null);
-                });
-            })
+              })
+          )
         )
-      )
-    ).filter((monitor) => monitor !== null) as Array<SavedObject<SyntheticsMonitorWithSecrets>>;
+      ).filter((monitor) => monitor !== null) as Array<SavedObject<SyntheticsMonitorWithSecrets>>;
 
-    const end = performance.now();
-    const duration = end - start;
+      const end = performance.now();
+      const duration = end - start;
 
-    this.logger.debug(`Decrypted ${monitors.length} monitors. Took ${duration} milliseconds`, {
-      event: {
-        duration,
-      },
-      monitors: monitors.length,
-    });
-
-    return (monitors ?? []).map((monitor) => {
-      const attributes = monitor.attributes as unknown as MonitorFields;
-      return formatHeartbeatRequest({
-        monitor: normalizeSecrets(monitor).attributes,
-        monitorId: monitor.id,
-        customHeartbeatId: attributes[ConfigKey.CUSTOM_HEARTBEAT_ID],
+      this.logger.debug(`Decrypted ${monitors.length} monitors. Took ${duration} milliseconds`, {
+        event: {
+          duration,
+        },
+        monitors: monitors.length,
       });
-    });
+
+      subject.next(
+        (monitors ?? []).map((monitor) => {
+          const attributes = monitor.attributes as unknown as MonitorFields;
+          return formatHeartbeatRequest({
+            monitor: normalizeSecrets(monitor).attributes,
+            monitorId: monitor.id,
+            customHeartbeatId: attributes[ConfigKey.CUSTOM_HEARTBEAT_ID],
+          });
+        })
+      );
+    }
   }
 
   formatConfigs(configs: SyntheticsMonitorWithId[]) {

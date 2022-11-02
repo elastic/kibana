@@ -10,6 +10,7 @@ import React from 'react';
 import SearchBar from './search_bar';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -83,6 +84,9 @@ function wrapSearchBarInContext(testProps: any) {
     intl: null as any,
   };
 
+  const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
+  (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
+
   const services = {
     uiSettings: startMock.uiSettings,
     savedObjects: startMock.savedObjects,
@@ -111,6 +115,7 @@ function wrapSearchBarInContext(testProps: any) {
             }),
         },
       },
+      dataViewEditor: dataViewEditorMock,
       dataViews: {
         getIdsWithTitle: jest.fn(() => []),
       },
@@ -133,6 +138,7 @@ describe('SearchBar', () => {
   const FILTER_BAR = '[data-test-subj="unifiedFilterBar"]';
   const QUERY_BAR = '.kbnQueryBar';
   const QUERY_INPUT = '[data-test-subj="unifiedQueryInput"]';
+  const QUERY_MENU_BUTTON = '[data-test-subj="showQueryBarMenu"]';
   const EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
 
   beforeEach(() => {
@@ -206,7 +212,6 @@ describe('SearchBar', () => {
         screenTitle: 'test screen',
         onQuerySubmit: noop,
         query: kqlQuery,
-        showQueryBar: false,
         showQueryInput: false,
       })
     );
@@ -214,6 +219,20 @@ describe('SearchBar', () => {
     expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
     expect(component.find(FILTER_BAR).length).toBeFalsy();
     expect(component.find(QUERY_INPUT).length).toBeFalsy();
+  });
+
+  it('Should NOT render the query menu button, if disabled', () => {
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        query: kqlQuery,
+        showQueryMenu: false,
+      })
+    );
+
+    expect(component.find(QUERY_MENU_BUTTON).length).toBeFalsy();
   });
 
   it('Should render query bar and filter bar', () => {

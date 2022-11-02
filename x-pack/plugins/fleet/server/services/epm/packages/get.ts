@@ -49,8 +49,14 @@ export async function getPackages(
     excludeInstallStatus?: boolean;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, experimental, category, excludeInstallStatus = false } = options;
-  const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
+  const {
+    savedObjectsClient,
+    category,
+    excludeInstallStatus = false,
+    prerelease = false,
+  } = options;
+
+  const registryItems = await Registry.fetchList({ category, prerelease }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
     );
@@ -87,11 +93,12 @@ export async function getPackages(
 // Get package names for packages which cannot have more than one package policy on an agent policy
 export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
+  prerelease?: boolean;
 }): Promise<string[]> {
-  const { savedObjectsClient } = options;
+  const { savedObjectsClient, prerelease } = options;
   const allPackages = await getPackages({
     savedObjectsClient,
-    experimental: true,
+    prerelease,
   });
   const installedPackages = allPackages.filter(
     (pkg) => pkg.status === installationStatuses.Installed
@@ -126,6 +133,7 @@ export async function getPackageInfo({
   pkgVersion,
   skipArchive = false,
   ignoreUnverified = false,
+  prerelease,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -133,10 +141,11 @@ export async function getPackageInfo({
   /** Avoid loading the registry archive into the cache (only use for performance reasons). Defaults to `false` */
   skipArchive?: boolean;
   ignoreUnverified?: boolean;
+  prerelease?: boolean;
 }): Promise<PackageInfo> {
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackageOrUndefined(pkgName),
+    Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),
   ]);
 
   if (!savedObject && !latestPackage) {
@@ -152,13 +161,12 @@ export async function getPackageInfo({
   // If same version is available in registry and skipArchive is true, use the info from the registry (faster),
   // otherwise build it from the archive
   let paths: string[];
-  let packageInfo: RegistryPackage | ArchivePackage | undefined = skipArchive
-    ? await Registry.fetchInfo(pkgName, resolvedPkgVersion).catch(() => undefined)
-    : undefined;
-
+  const registryInfo = await Registry.fetchInfo(pkgName, resolvedPkgVersion).catch(() => undefined);
+  let packageInfo;
   // We need to get input only packages from source to get all fields
   // see https://github.com/elastic/package-registry/issues/864
-  if (packageInfo && packageInfo.type !== 'input') {
+  if (registryInfo && skipArchive && registryInfo.type !== 'input') {
+    packageInfo = registryInfo;
     // Fix the paths
     paths =
       packageInfo.assets?.map((path) =>
@@ -170,7 +178,6 @@ export async function getPackageInfo({
       pkgVersion: resolvedPkgVersion,
       savedObjectsClient,
       installedPkg: savedObject?.attributes,
-      getPkgInfoFromArchive: packageInfo?.type === 'input',
       ignoreUnverified,
     }));
   }
@@ -235,13 +242,12 @@ interface PackageResponse {
 }
 type GetPackageResponse = PackageResponse | undefined;
 
-// gets package from install_source if it exists otherwise gets from registry
+// gets package from install_source
 export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
   installedPkg?: Installation;
   savedObjectsClient: SavedObjectsClientContract;
-  getPkgInfoFromArchive?: boolean;
   ignoreUnverified?: boolean;
 }): Promise<PackageResponse> {
   const logger = appContextService.getLogger();
@@ -250,7 +256,6 @@ export async function getPackageFromSource(options: {
     pkgVersion,
     installedPkg,
     savedObjectsClient,
-    getPkgInfoFromArchive = true,
     ignoreUnverified = false,
   } = options;
   let res: GetPackageResponse;
@@ -280,11 +285,12 @@ export async function getPackageFromSource(options: {
         logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
       }
     }
-    // for packages not in cache or package storage and installed from registry, check registry
+    // install source is now archive in all cases
+    // See https://github.com/elastic/kibana/issues/115032
     if (!res && pkgInstallSource === 'registry') {
       try {
-        res = await Registry.getRegistryPackage(pkgName, pkgVersion);
-        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from registry`);
+        res = await Registry.getPackage(pkgName, pkgVersion);
+        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion}`);
       } catch (error) {
         if (error instanceof PackageFailedVerificationError) {
           throw error;
@@ -294,12 +300,8 @@ export async function getPackageFromSource(options: {
       }
     }
   } else {
-    // else package is not installed or installed and missing from cache and storage and installed from registry
-    res = await Registry.getRegistryPackage(pkgName, pkgVersion, {
-      getPkgInfoFromArchive,
-      ignoreUnverified,
-    });
-    logger.debug(`retrieved uninstalled package ${pkgName}-${pkgVersion} from registry`);
+    res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+    logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
   }
   if (!res) {
     throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);

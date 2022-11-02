@@ -7,6 +7,7 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
+import { networkEventsReducer, NetworkEventsState } from './network_events';
 import { monitorDetailsReducer, MonitorDetailsState } from './monitor_details';
 import { uiReducer, UiState } from './ui';
 import { indexStatusReducer, IndexStatusState } from './index_status';
@@ -26,6 +27,7 @@ export interface SyntheticsAppState {
   monitorDetails: MonitorDetailsState;
   overview: MonitorOverviewState;
   browserJourney: BrowserJourneyState;
+  networkEvents: NetworkEventsState;
 }
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
@@ -37,4 +39,5 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   monitorDetails: monitorDetailsReducer,
   overview: monitorOverviewReducer,
   browserJourney: browserJourneyReducer,
+  networkEvents: networkEventsReducer,
 });

@@ -6,10 +6,16 @@
  */
 
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
-import { connectorIndex } from '../../../__mocks__/view_index.mock';
+import { apiIndex, connectorIndex } from '../../../__mocks__/view_index.mock';
+
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { UpdatePipelineApiLogic } from '../../../api/connector/update_pipeline_api_logic';
+import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
+import { DetachMlInferencePipelineApiLogic } from '../../../api/pipelines/detach_ml_inference_pipeline';
 
 import { PipelinesLogic } from './pipelines_logic';
 
@@ -40,6 +46,10 @@ describe('PipelinesLogic', () => {
   const { mount } = new LogicMounter(PipelinesLogic);
   const { mount: mountFetchIndexApiLogic } = new LogicMounter(FetchIndexApiLogic);
   const { mount: mountUpdatePipelineLogic } = new LogicMounter(UpdatePipelineApiLogic);
+  const { mount: mountFetchCustomPipelineApiLogic } = new LogicMounter(FetchCustomPipelineApiLogic);
+  const { mount: mountDetachMlInferencePipelineApiLogic } = new LogicMounter(
+    DetachMlInferencePipelineApiLogic
+  );
   const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   const newPipeline = {
@@ -50,7 +60,9 @@ describe('PipelinesLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mountDetachMlInferencePipelineApiLogic();
     mountFetchIndexApiLogic();
+    mountFetchCustomPipelineApiLogic();
     mountUpdatePipelineLogic();
     mount();
   });
@@ -193,6 +205,66 @@ describe('PipelinesLogic', () => {
           connectorId: '2',
           pipeline: DEFAULT_PIPELINE_VALUES,
         });
+      });
+    });
+    describe('fetchCustomPipelineSuccess', () => {
+      it('should support api indices with custom ingest pipelines', () => {
+        PipelinesLogic.actions.fetchIndexApiSuccess({
+          ...apiIndex,
+        });
+        const indexName = apiIndex.name;
+        const indexPipelines: Record<string, IngestPipeline> = {
+          [indexName]: {
+            processors: [],
+            version: 1,
+          },
+          [`${indexName}@custom`]: {
+            processors: [],
+            version: 1,
+          },
+          [`${indexName}@ml-inference`]: {
+            processors: [],
+            version: 1,
+          },
+        };
+        PipelinesLogic.actions.fetchCustomPipelineSuccess(indexPipelines);
+
+        expect(PipelinesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          canSetPipeline: false,
+          canUseMlInferencePipeline: true,
+          customPipelineData: indexPipelines,
+          hasIndexIngestionPipeline: true,
+          index: {
+            ...apiIndex,
+          },
+          indexName,
+          pipelineName: indexName,
+        });
+      });
+    });
+    describe('detachMlPipelineSuccess', () => {
+      it('re-fetches pipeline data', async () => {
+        jest.spyOn(PipelinesLogic.actions, 'fetchMlInferenceProcessors');
+        jest.spyOn(PipelinesLogic.actions, 'fetchCustomPipeline');
+        FetchIndexApiLogic.actions.apiSuccess(connectorIndex);
+        DetachMlInferencePipelineApiLogic.actions.apiSuccess({
+          updated: 'mock-pipeline-name',
+        });
+        await nextTick();
+        expect(PipelinesLogic.actions.fetchMlInferenceProcessors).toHaveBeenCalledWith({
+          indexName: connectorIndex.name,
+        });
+        expect(PipelinesLogic.actions.fetchCustomPipeline).toHaveBeenCalledWith({
+          indexName: connectorIndex.name,
+        });
+      });
+    });
+    describe('detachMlPipelineError', () => {
+      it('calls flashAPIErrors', () => {
+        DetachMlInferencePipelineApiLogic.actions.apiError('error' as any);
+        expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });
