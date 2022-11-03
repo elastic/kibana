@@ -64,7 +64,6 @@ export const useFleetServerHost = (): FleetServerHostForm => {
 
   useEffect(() => {
     const fleetServerHosts = data?.items ?? [];
-    console.log(fleetServerHosts);
     const defaultHost = fleetServerHosts.find((item) => item.is_default === true);
     if (defaultHost) {
       setFleetServerHost(defaultHost);
