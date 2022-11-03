@@ -22,6 +22,7 @@ import type {
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { EntityAnalyticsHoverActions } from '../common/entity_hover_actions';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
@@ -37,9 +38,23 @@ export const getRiskScoreColumns = (
     render: (entityName: string) => {
       if (entityName != null && entityName.length > 0) {
         return riskEntity === RiskScoreEntity.host ? (
-          <HostDetailsLink hostName={entityName} hostTab={HostsTableType.risk} />
+          <>
+            <HostDetailsLink hostName={entityName} hostTab={HostsTableType.risk} />
+            <EntityAnalyticsHoverActions
+              idPrefix={`hosts-risk-table-${entityName}`}
+              fieldName={'host.name'}
+              fieldValue={entityName}
+            />
+          </>
         ) : (
-          <UserDetailsLink userName={entityName} userTab={UsersTableType.risk} />
+          <>
+            <UserDetailsLink userName={entityName} userTab={UsersTableType.risk} />
+            <EntityAnalyticsHoverActions
+              idPrefix={`users-risk-table-${entityName}`}
+              fieldName={'user.name'}
+              fieldValue={entityName}
+            />
+          </>
         );
       }
       return getEmptyTagValue();
