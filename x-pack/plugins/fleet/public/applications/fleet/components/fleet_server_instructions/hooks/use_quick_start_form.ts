@@ -129,6 +129,7 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     }
   }, [
     validate,
+    fleetServerHost,
     inputs.nameInput.value,
     inputs.hostUrlsInput.value,
     inputs.isDefaultInput.value,

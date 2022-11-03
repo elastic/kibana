@@ -93,7 +93,7 @@ export const useFleetServerHost = (): FleetServerHostForm => {
 
       return res.data.item;
     },
-    [data?.items, refreshGetFleetServerHosts]
+    [refreshGetFleetServerHosts]
   );
 
   return {
