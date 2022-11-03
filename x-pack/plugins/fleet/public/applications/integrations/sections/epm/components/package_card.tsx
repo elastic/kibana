@@ -95,6 +95,7 @@ export function PackageCard({
       packageKey={name}
       isTourVisible={isGuidedOnboardingActive}
       tourType={'integrationCard'}
+      tourOffset={10}
     >
       <TrackApplicationView viewId={testid}>
         <Card
