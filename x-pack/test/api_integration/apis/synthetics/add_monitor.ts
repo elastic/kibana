@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import expect from '@kbn/expect';
 import uuid from 'uuid';
 import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
@@ -14,6 +15,7 @@ import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { format as formatUrl } from 'url';
+
 import supertest from 'supertest';
 import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { FtrProviderContext } from '../../ftr_provider_context';
