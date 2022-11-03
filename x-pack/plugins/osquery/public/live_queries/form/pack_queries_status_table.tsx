@@ -49,6 +49,17 @@ const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 const StyledEuiBasicTable = styled(EuiBasicTable)`
   .euiTableRow.euiTableRow-isExpandedRow > td > div {
     padding: 0;
+    border: 1px solid #d3dae6;
+  }
+  div.euiDataGrid__virtualized::-webkit-scrollbar {
+    display: none;
+  }
+  .euiDataGrid > div {
+    .euiDataGrid__scrollOverlay {
+      box-shadow: none;
+    }
+    border-left: 0px;
+    border-right: 0px;
   }
 `;
 
