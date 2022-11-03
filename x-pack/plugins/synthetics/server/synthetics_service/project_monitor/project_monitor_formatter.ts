@@ -286,7 +286,7 @@ export class ProjectMonitorFormatter {
             reason: i18n.translate(
               'xpack.synthetics.service.projectMonitors.failedToCreateXMonitors',
               {
-                defaultMessage: 'Failed to create {length} monitors.',
+                defaultMessage: 'Failed to create {length} monitors',
                 values: {
                   length: monitors.length,
                 },
@@ -301,7 +301,7 @@ export class ProjectMonitorFormatter {
       this.server.logger.error(e);
       this.failedMonitors.push({
         reason: i18n.translate('xpack.synthetics.service.projectMonitors.failedToCreateXMonitors', {
-          defaultMessage: 'Failed to create {length} monitors.',
+          defaultMessage: 'Failed to create {length} monitors',
           values: {
             length: monitors.length,
           },
