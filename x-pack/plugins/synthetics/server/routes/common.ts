@@ -29,6 +29,8 @@ export const QuerySchema = schema.object({
 
 export type MonitorsQuery = TypeOf<typeof QuerySchema>;
 
+export const SEARCH_FIELDS = ['name', 'tags.text', 'locations.id.text', 'urls', 'project_id.text'];
+
 export const getMonitors = (
   request: MonitorsQuery,
   syntheticsService: SyntheticsService,

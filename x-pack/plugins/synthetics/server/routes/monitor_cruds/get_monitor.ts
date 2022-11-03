@@ -12,7 +12,7 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types'
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { getMonitors, QuerySchema } from '../common';
+import { getMonitors, QuerySchema, SEARCH_FIELDS } from '../common';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -98,7 +98,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
   validate: {
     query: QuerySchema,
   },
-  handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient }): Promise<any> => {
     const { sortField, sortOrder, query } = request.query;
     const finder = savedObjectsClient.createPointInTimeFinder<SyntheticsMonitor>({
       type: syntheticsMonitorType,
@@ -106,6 +106,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       sortOrder,
       perPage: 500,
       search: `${query}*`,
+      searchFields: SEARCH_FIELDS,
     });
 
     const allMonitorIds: string[] = [];
