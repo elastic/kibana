@@ -7,6 +7,7 @@
  */
 
 import { AggregateQuery, Query } from '@kbn/es-query';
+import { addLog } from '../../../utils/add_log';
 import {
   DataCharts$,
   DataDocuments$,
@@ -16,7 +17,6 @@ import {
   SavedSearchData,
 } from '../services/discover_data_state_container';
 import { FetchStatus } from '../../types';
-import {addLog} from "@kbn/discover-plugin/public/utils/add_log";
 
 /**
  * Sends COMPLETE message to the main$ observable with the information
