@@ -6175,7 +6175,6 @@
     "visualizations.listing.table.typeColumnName": "Type",
     "visualizations.listingPageTitle": "Bibliothèque Visualize",
     "visualizations.missedDataView.dataViewReconfigure": "Recréez-la dans la page de gestion des vues de données.",
-    "visualizations.missedDataView.editInVisualizeEditor": "Effectuer des modifications dans l'éditeur Visualize pour corriger l'erreur",
     "visualizations.newChart.conditionalMessage.advancedSettingsLink": "Paramètres avancés.",
     "visualizations.newChart.libraryMode.new": "nouveau",
     "visualizations.newChart.libraryMode.old": "âge",

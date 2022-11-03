@@ -29,7 +29,6 @@ import {
   IContainer,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
-  ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import {
   ExpressionAstExpression,
@@ -401,6 +400,25 @@ export class VisualizeEmbeddable
       this.abortController.abort();
     }
     this.renderComplete.dispatchError();
+
+    if (isFallbackDataView(this.vis.data.indexPattern)) {
+      error = new Error(
+        i18n.translate('visualizations.missedDataView.errorMessage', {
+          defaultMessage: `Could not find the {type}: {id}`,
+          values: {
+            id: this.vis.data.indexPattern.id ?? '-',
+            type: this.vis.data.savedSearchId
+              ? i18n.translate('visualizations.noSearch.label', {
+                  defaultMessage: 'search',
+                })
+              : i18n.translate('visualizations.noDataView.label', {
+                  defaultMessage: 'data view',
+                }),
+          },
+        })
+      );
+    }
+
     this.updateOutput({
       ...this.getOutput(),
       rendered: true,
@@ -515,13 +533,12 @@ export class VisualizeEmbeddable
     if (isFallbackDataView(this.vis.data.indexPattern)) {
       return (
         <VisualizationMissedSavedObjectError
-          viewMode={this.input.viewMode ?? ViewMode.VIEW}
           renderMode={this.input.renderMode ?? 'view'}
           savedObjectMeta={{
-            savedObjectId: this.vis.data.indexPattern.id,
             savedObjectType: this.vis.data.savedSearchId ? 'search' : DATA_VIEW_SAVED_OBJECT_TYPE,
           }}
           application={getApplication()}
+          message={typeof error === 'string' ? error : error.message}
         />
       );
     }
