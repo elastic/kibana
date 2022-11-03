@@ -16,5 +16,7 @@ export const migrateSettingsToV860: SavedObjectMigrationFn<Settings, Settings> =
   // @ts-expect-error has_seen_fleet_migration_notice property does not exists anymore
   delete settingsDoc.attributes.has_seen_fleet_migration_notice;
 
+  settingsDoc.attributes.prerelease_integrations_enabled = false;
+
   return settingsDoc;
 };

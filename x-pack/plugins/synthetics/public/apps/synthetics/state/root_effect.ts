@@ -6,6 +6,7 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
+import { fetchNetworkEventsEffect } from './network_events/effects';
 import { fetchSyntheticsMonitorEffect } from './monitor_details';
 import { fetchIndexStatusEffect } from './index_status';
 import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
@@ -32,5 +33,6 @@ export const rootEffect = function* root(): Generator {
     fork(browserJourneyEffects),
     fork(fetchOverviewStatusEffect),
     fork(quietFetchOverviewStatusEffect),
+    fork(fetchNetworkEventsEffect),
   ]);
 };

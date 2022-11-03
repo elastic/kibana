@@ -35,7 +35,7 @@ export const OverviewPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const { refreshApp } = useSyntheticsRefreshContext();
+  const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
   const { query } = useGetUrlParams();
   const { search } = useLocation();
 
@@ -66,7 +66,7 @@ export const OverviewPage: React.FC = () => {
   // fetch overview for all other page state changes
   useEffect(() => {
     dispatch(fetchMonitorOverviewAction.get(pageState));
-  }, [dispatch, pageState]);
+  }, [dispatch, pageState, lastRefresh]);
 
   const {
     enablement: { isEnabled },
