@@ -48,14 +48,7 @@ import { AddToCaseWrapper } from '../cases/add_to_cases';
 const DataContext = createContext<ResultEdges>([]);
 
 const StyledEuiDataGrid = styled(EuiDataGrid)`
-  ${(props) => {
-    const height = props.rowCount * 50;
-
-    return `{
-      height: ${height > 250 ? height : height + 50}px;
-      max-height: 500px;
-    }`;
-  }}
+  max-height: 500px;
 `;
 
 export interface ResultsTableComponentProps {
