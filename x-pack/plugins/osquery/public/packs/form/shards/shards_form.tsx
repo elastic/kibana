@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
@@ -24,11 +25,11 @@ interface ShardsFormProps {
   index: number;
   isLastItem: boolean;
   control: ShardsFormReturn['control'];
-  watch: ShardsFormReturn['watch'];
   onDelete?: UseFieldArrayRemove;
+  options: Array<EuiComboBoxOptionOption<string>>;
 }
 
-export const ShardsForm = ({ onDelete, index, isLastItem, control, watch }: ShardsFormProps) => {
+export const ShardsForm = ({ onDelete, index, isLastItem, control, options }: ShardsFormProps) => {
   const handleDeleteClick = useCallback(() => {
     if (onDelete) {
       onDelete(index);
@@ -44,9 +45,8 @@ export const ShardsForm = ({ onDelete, index, isLastItem, control, watch }: Shar
               <ShardsPolicyField
                 index={index}
                 control={control}
-                isLastItem={isLastItem}
                 hideLabel={index !== 0}
-                watch={watch}
+                options={options}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

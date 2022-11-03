@@ -6,6 +6,7 @@
  */
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useController } from 'react-hook-form';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAgentPolicies } from '../../../agent_policies';
@@ -16,9 +17,15 @@ interface ShardsPolicyFieldComponent {
   control: ShardsFormReturn['control'];
   euiFieldProps?: Record<string, unknown>;
   hideLabel?: boolean;
+  options: Array<EuiComboBoxOptionOption<string>>;
 }
 
-const ShardsPolicyFieldComponent = ({ index, control, hideLabel }: ShardsPolicyFieldComponent) => {
+const ShardsPolicyFieldComponent = ({
+  index,
+  control,
+  hideLabel,
+  options,
+}: ShardsPolicyFieldComponent) => {
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
   const policyFieldValidator = useCallback(
@@ -45,18 +52,9 @@ const ShardsPolicyFieldComponent = ({ index, control, hideLabel }: ShardsPolicyF
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);
 
-  const options = useMemo(
-    () =>
-      Object.entries(agentPoliciesById ?? {}).map(([agentPolicyId, agentPolicy]) => ({
-        key: agentPolicyId,
-        label: agentPolicy.name,
-      })),
-    [agentPoliciesById]
-  );
-
-  const [selectedOptions, setSelected] = useState<Array<{ label: string; value: string }>>([]);
+  const [selectedOptions, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
   const handleChange = useCallback(
-    (newSelectedOptions) => {
+    (newSelectedOptions: EuiComboBoxOptionOption[]) => {
       setSelected(newSelectedOptions);
       onChange(newSelectedOptions[0]);
     },

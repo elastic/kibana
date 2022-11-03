@@ -227,6 +227,24 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [setPackType]
   );
 
+  const options = useMemo(
+    () =>
+      Object.entries(agentPoliciesById ?? {}).map(([agentPolicyId, agentPolicy]) => ({
+        key: agentPolicyId,
+        label: agentPolicy.name,
+      })),
+    [agentPoliciesById]
+  );
+
+  const availableOptions = useMemo(() => {
+    const currentShardsFieldValues = map(shards, (shard, key) => key);
+    const currentPolicyIdsFieldValues = map(policyIds, (policy) => policy);
+
+    const currentValues = [...currentShardsFieldValues, ...currentPolicyIdsFieldValues];
+
+    return options.filter(({ key }) => !currentValues.includes(key));
+  }, [shards, policyIds, options]);
+
   return (
     <>
       <FormProvider {...hooksForm}>
@@ -254,7 +272,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <PolicyIdComboBoxField />
+                <PolicyIdComboBoxField options={availableOptions} />
               </EuiFlexItem>
             </EuiFlexGroup>
 
@@ -267,7 +285,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                   buttonContent="Partial deployment (shards)"
                 >
                   <EuiSpacer size="xs" />
-                  <PackShardsField />
+                  <PackShardsField options={availableOptions} />
                 </StyledEuiAccordion>
               </EuiFlexItem>
             </EuiFlexGroup>

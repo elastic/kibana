@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import type { InternalFieldErrors } from 'react-hook-form';
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
@@ -24,7 +25,12 @@ export const defaultShardData = {
   },
   percentage: 100,
 };
-export const PackShardsField = React.memo(() => {
+
+interface PackShardsFieldProps {
+  options: Array<EuiComboBoxOptionOption<string>>;
+}
+
+export const PackShardsField = React.memo(({ options }: PackShardsFieldProps) => {
   const {
     watch: watchRoot,
     register: registerRoot,
@@ -119,7 +125,7 @@ export const PackShardsField = React.memo(() => {
             onDelete={remove}
             isLastItem={index === array.length - 1}
             control={control}
-            watch={watch}
+            options={options}
           />
         </div>
       ))}

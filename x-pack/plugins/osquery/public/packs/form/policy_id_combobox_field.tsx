@@ -32,10 +32,12 @@ const AgentPolicyDescriptionColumn = styled(EuiFlexItem)`
 
 interface PolicyIdComboBoxFieldProps {
   euiFieldProps?: EuiComboBoxProps<string>;
+  options: Array<EuiComboBoxOptionOption<string>>;
 }
 
 const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   euiFieldProps,
+  options,
 }) => {
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
@@ -47,15 +49,6 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
     defaultValue: [],
     rules: {},
   });
-
-  const options = useMemo(
-    () =>
-      Object.entries(agentPoliciesById ?? {}).map(([agentPolicyId, agentPolicy]) => ({
-        key: agentPolicyId,
-        label: agentPolicy.name,
-      })),
-    [agentPoliciesById]
-  );
 
   const selectedOptions = useMemo(() => {
     if (agentPoliciesById) {
