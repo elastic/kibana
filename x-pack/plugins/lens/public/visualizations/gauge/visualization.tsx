@@ -244,6 +244,7 @@ export const getGaugeVisualization = ({
               defaultMessage: 'Value',
             }),
           },
+          isMetricDimension: true,
           accessors: metricAccessor
             ? [
                 palette
@@ -282,6 +283,7 @@ export const getGaugeVisualization = ({
               defaultMessage: 'Value',
             }),
           },
+          isMetricDimension: true,
           accessors: state.minAccessor ? [{ columnId: state.minAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.minAccessor,
@@ -308,6 +310,7 @@ export const getGaugeVisualization = ({
               defaultMessage: 'Value',
             }),
           },
+          isMetricDimension: true,
           accessors: state.maxAccessor ? [{ columnId: state.maxAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.maxAccessor,
@@ -334,6 +337,7 @@ export const getGaugeVisualization = ({
               defaultMessage: 'Value',
             }),
           },
+          isMetricDimension: true,
           accessors: state.goalAccessor ? [{ columnId: state.goalAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.goalAccessor,
