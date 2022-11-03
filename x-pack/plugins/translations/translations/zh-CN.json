@@ -23304,7 +23304,6 @@
     "xpack.observability.alerts.ruleStats.loadError": "无法加载规则统计信息",
     "xpack.observability.alerts.ruleStats.muted": "已暂停",
     "xpack.observability.alerts.ruleStats.ruleCount": "规则计数",
-    "xpack.observability.alerts.searchBarPlaceholder": "搜索告警（例如 kibana.alert.evaluation.threshold > 75）",
     "xpack.observability.alerts.workflowStatusFilter.acknowledgedButtonLabel": "已确认",
     "xpack.observability.alerts.workflowStatusFilter.closedButtonLabel": "已关闭",
     "xpack.observability.alerts.workflowStatusFilter.openButtonLabel": "打开",

@@ -6,16 +6,12 @@
  */
 
 import React, { useState } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import { translations } from '../../../config';
-import { ObservabilityAppServices } from '../../../application/types';
-import { useAlertDataView } from '../../../hooks/use_alert_data_view';
-
-type QueryLanguageType = 'lucene' | 'kuery';
-
-const NO_INDEX_PATTERNS: DataView[] = [];
+import { NO_INDEX_PATTERNS } from './constants';
+import { SEARCH_BAR_PLACEHOLDER } from './translations';
+import { AlertsSearchBarProps, QueryLanguageType } from './types';
+import { useAlertDataView } from '../../hooks/use_alert_data_view';
+import { TriggersAndActionsUiServices } from '../../..';
 
 export function AlertsSearchBar({
   appName,
@@ -24,22 +20,12 @@ export function AlertsSearchBar({
   onQueryChange,
   rangeFrom,
   rangeTo,
-}: {
-  appName: string;
-  featureIds: ValidFeatureId[];
-  rangeFrom?: string;
-  rangeTo?: string;
-  query?: string;
-  onQueryChange: ({}: {
-    dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
-    query?: string;
-  }) => void;
-}) {
+}: AlertsSearchBarProps) {
   const {
     unifiedSearch: {
       ui: { SearchBar },
     },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { value: dataView, loading, error } = useAlertDataView(featureIds);
@@ -48,7 +34,7 @@ export function AlertsSearchBar({
     <SearchBar
       appName={appName}
       indexPatterns={loading || error ? NO_INDEX_PATTERNS : [dataView!]}
-      placeholder={translations.alertsSearchBar.placeholder}
+      placeholder={SEARCH_BAR_PLACEHOLDER}
       query={{ query: query ?? '', language: queryLanguage }}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}
@@ -64,3 +50,6 @@ export function AlertsSearchBar({
     />
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export { AlertsSearchBar as default };

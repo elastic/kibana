@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-export * from './alerts_flyout';
-export * from './render_cell_value';
-export * from './severity_badge';
-export * from './workflow_status_filter';
-export * from './filter_for_value';
-export * from './parse_alert';
-export * from './alerts_status_filter';
+import { i18n } from '@kbn/i18n';
+
+export const SEARCH_BAR_PLACEHOLDER = i18n.translate(
+  'xpack.triggersActionsUI.alertsSearchBar.placeholder',
+  {
+    defaultMessage: 'Search alerts (e.g. kibana.alert.evaluation.threshold > 75)',
+  }
+);
