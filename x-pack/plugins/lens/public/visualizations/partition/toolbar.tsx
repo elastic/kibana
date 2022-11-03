@@ -32,7 +32,7 @@ import {
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { shouldShowPaletteOnDimension } from './visualization';
+import { isCollapsed } from './visualization';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -314,9 +314,13 @@ export function DimensionEditor(
     return null;
   }
 
+  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
+    (id) => !isCollapsed(id, currentLayer)
+  );
+
   return (
     <>
-      {shouldShowPaletteOnDimension(props.accessor, currentLayer) && (
+      {props.accessor === firstNonCollapsedColumnId && (
         <PalettePicker
           palettes={props.paletteService}
           activePalette={props.state.palette}

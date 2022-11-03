@@ -21,6 +21,7 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { CollapseFunction } from '../../../common/expressions';
+import { PaletteOutput } from '@kbn/coloring';
 
 jest.mock('../../id_generator');
 
@@ -164,6 +165,34 @@ describe('pie_visualization', () => {
 
       expect(newState.layers[0].collapseFns).not.toHaveProperty('3');
     });
+    it('removes custom palette if removing final slice-by dimension in multi-metric chart', () => {
+      const state = getExampleState();
+
+      state.layers[0].primaryGroups = ['1', '2'];
+      state.layers[0].allowMultipleMetrics = true;
+      state.layers[0].metrics = ['3', '4'];
+      state.palette = {} as PaletteOutput;
+
+      let newState = pieVisualization.removeDimension({
+        layerId: LAYER_ID,
+        columnId: '1',
+        prevState: state,
+        frame: mockFrame(),
+      });
+
+      expect(newState.layers[0].primaryGroups).toEqual(['2']);
+      expect(newState.palette).toBeDefined();
+
+      newState = pieVisualization.removeDimension({
+        layerId: LAYER_ID,
+        columnId: '2',
+        prevState: newState,
+        frame: mockFrame(),
+      });
+
+      expect(newState.layers[0].primaryGroups).toEqual([]);
+      expect(newState.palette).toBeUndefined();
+    });
   });
 
   describe('#getConfiguration', () => {
@@ -230,84 +259,6 @@ describe('pie_visualization', () => {
               "triggerIcon": undefined,
             },
           ],
-        ]
-      `);
-    });
-
-    it('assigns palette to multiple metric accessors if no bucket dimension', () => {
-      const colIds = ['1', '2', '3', '4'];
-
-      const frame = mockFrame();
-      frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
-        colIds.map((id) => ({ columnId: id, fields: [] }));
-
-      const state = getExampleState();
-      state.layers[0].primaryGroups = [];
-      state.layers[0].metrics = colIds;
-      state.layers[0].allowMultipleMetrics = true;
-
-      expect(
-        pieVisualization.getConfiguration({
-          state,
-          frame,
-          layerId: state.layers[0].layerId,
-        }).groups[0].accessors
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "columnId": "1",
-            "palette": Array [
-              "red",
-              "black",
-            ],
-            "triggerIcon": "colorBy",
-          },
-          Object {
-            "columnId": "2",
-            "palette": Array [
-              "red",
-              "black",
-            ],
-            "triggerIcon": "colorBy",
-          },
-          Object {
-            "columnId": "3",
-            "palette": Array [
-              "red",
-              "black",
-            ],
-            "triggerIcon": "colorBy",
-          },
-          Object {
-            "columnId": "4",
-            "palette": Array [
-              "red",
-              "black",
-            ],
-            "triggerIcon": "colorBy",
-          },
-        ]
-      `);
-
-      state.layers[0].primaryGroups.push(state.layers[0].metrics.pop() as string);
-
-      expect(
-        pieVisualization.getConfiguration({
-          state,
-          frame,
-          layerId: state.layers[0].layerId,
-        }).groups[0].accessors
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "columnId": "1",
-          },
-          Object {
-            "columnId": "2",
-          },
-          Object {
-            "columnId": "3",
-          },
         ]
       `);
     });

@@ -67,27 +67,16 @@ const numberMetricOperations = (op: OperationMetadata) =>
 export const isCollapsed = (columnId: string, layer: PieLayerState) =>
   Boolean(layer.collapseFns?.[columnId]);
 
-export const shouldShowPaletteOnDimension = (columnId: string, currentLayer: PieLayerState) => {
-  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
-    (id) => !isCollapsed(id, currentLayer)
-  );
-
-  return (
-    columnId === firstNonCollapsedColumnId ||
-    (!firstNonCollapsedColumnId &&
-      currentLayer.metrics.includes(columnId) &&
-      currentLayer.allowMultipleMetrics)
-  );
-};
-
 const applyPaletteToAccessorConfigs = (
   columns: AccessorConfig[],
   layer: PieLayerState,
   palette: PieVisualizationState['palette'],
   paletteService: PaletteRegistry
 ) => {
+  const firstNonCollapsedColumnId = layer.primaryGroups.find((id) => !isCollapsed(id, layer));
+
   columns.forEach((accessorConfig) => {
-    if (shouldShowPaletteOnDimension(accessorConfig.columnId, layer)) {
+    if (firstNonCollapsedColumnId === accessorConfig.columnId) {
       accessorConfig.triggerIcon = 'colorBy';
       accessorConfig.palette = paletteService
         .get(palette?.name || 'default')
@@ -364,28 +353,43 @@ export const getPieVisualization = ({
     };
   },
   removeDimension({ prevState, layerId, columnId }) {
+    const newState = { ...prevState };
+
+    const layerToChange = prevState.layers.find((l) => l.layerId === layerId);
+
+    if (!layerToChange) {
+      return prevState;
+    }
+
+    if (
+      layerToChange.primaryGroups.includes(columnId) &&
+      layerToChange.primaryGroups.length === 1 &&
+      layerToChange.allowMultipleMetrics &&
+      layerToChange.metrics.length
+    ) {
+      // we don't support palette selection for multiple metrics without a slice-by dimension
+      // so revert to default if the last slice-by is removed
+      delete newState.palette;
+    }
+
+    let newLayer = { ...layerToChange };
+
+    if (layerToChange.collapseFns?.[columnId]) {
+      const newCollapseFns = { ...layerToChange.collapseFns };
+      delete newCollapseFns[columnId];
+      newLayer.collapseFns = newCollapseFns;
+    }
+
+    newLayer = {
+      ...newLayer,
+      primaryGroups: newLayer.primaryGroups.filter((c) => c !== columnId),
+      secondaryGroups: newLayer.secondaryGroups?.filter((c) => c !== columnId) ?? undefined,
+      metrics: newLayer.metrics.filter((c) => c !== columnId),
+    };
+
     return {
-      ...prevState,
-      layers: prevState.layers.map((l) => {
-        if (l.layerId !== layerId) {
-          return l;
-        }
-
-        const newLayer = { ...l };
-
-        if (l.collapseFns?.[columnId]) {
-          const newCollapseFns = { ...l.collapseFns };
-          delete newCollapseFns[columnId];
-          newLayer.collapseFns = newCollapseFns;
-        }
-
-        return {
-          ...newLayer,
-          primaryGroups: newLayer.primaryGroups.filter((c) => c !== columnId),
-          secondaryGroups: newLayer.secondaryGroups?.filter((c) => c !== columnId) ?? undefined,
-          metrics: l.metrics.filter((c) => c !== columnId),
-        };
-      }),
+      ...newState,
+      layers: newState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
   },
   renderDimensionEditor(domElement, props) {
