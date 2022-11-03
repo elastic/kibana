@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SecuritySolutionPluginRouter } from '@kbn/security-solution-plugin/server/types';
 import * as t from 'io-ts';
 import uuid from 'uuid';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
