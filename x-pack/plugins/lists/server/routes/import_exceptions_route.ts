@@ -58,6 +58,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
 
         const importsSummary = await exceptionListsClient.importExceptionListAndItems({
           exceptionsToImport: request.body.file,
+          generateNewListId: request.query.as_new_list,
           maxExceptionsImportSize: config.maxExceptionsImportSize,
           overwrite: request.query.overwrite,
         });

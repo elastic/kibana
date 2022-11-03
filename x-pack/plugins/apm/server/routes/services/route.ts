@@ -414,7 +414,7 @@ const serviceNodeMetadataRoute = createApmServerRoute({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
-    query: t.intersection([kueryRt, rangeRt]),
+    query: t.intersection([kueryRt, rangeRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -423,7 +423,7 @@ const serviceNodeMetadataRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
-    const { kuery, start, end } = params.query;
+    const { kuery, start, end, environment } = params.query;
 
     return getServiceNodeMetadata({
       kuery,
@@ -432,6 +432,7 @@ const serviceNodeMetadataRoute = createApmServerRoute({
       serviceNodeName,
       start,
       end,
+      environment,
     });
   },
 });

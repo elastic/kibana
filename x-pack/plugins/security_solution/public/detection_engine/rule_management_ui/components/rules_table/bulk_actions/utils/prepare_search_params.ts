@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryOrIds } from '../../../../../rule_management/logic';
 import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
 
@@ -23,7 +24,10 @@ type PrepareSearchFilterProps =
  * @param filterOptions {@link FilterOptions} find filter
  * @returns either list of ids or KQL search query
  */
-export const prepareSearchParams = ({ dryRunResult, ...props }: PrepareSearchFilterProps) => {
+export const prepareSearchParams = ({
+  dryRunResult,
+  ...props
+}: PrepareSearchFilterProps): QueryOrIds => {
   // if selectedRuleIds present, filter out rules that failed during dry run
   if ('selectedRuleIds' in props) {
     const failedRuleIdsSet = new Set(dryRunResult?.ruleErrors.flatMap(({ ruleIds }) => ruleIds));
