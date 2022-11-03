@@ -50,7 +50,6 @@ export function DashboardApp({
    * Unpack & set up dashboard services
    */
   const {
-    screenshotMode: { isScreenshotMode },
     coreContext: { executionContext },
     embeddable: { getStateTransfer },
     notifications: { toasts },
@@ -151,22 +150,16 @@ export function DashboardApp({
           )}
 
           {getLegacyConflictWarning?.()}
-          <div
-            className={`dashboardViewport ${
-              isScreenshotMode() ? 'dashboardViewport--screenshotMode' : ''
-            }`}
-          >
-            <DashboardContainerRenderer
-              savedObjectId={savedDashboardId}
-              onDashboardContainerLoaded={(finishedContainer) => {
-                setDashboardContainer(finishedContainer);
-              }}
-              getInitialInput={() => {
-                return { savedObjectId: savedDashboardId };
-              }}
-              getCreationOptions={async () => getCreationOptions()}
-            />
-          </div>
+          <DashboardContainerRenderer
+            savedObjectId={savedDashboardId}
+            onDashboardContainerLoaded={(finishedContainer) => {
+              setDashboardContainer(finishedContainer);
+            }}
+            getInitialInput={() => {
+              return { savedObjectId: savedDashboardId };
+            }}
+            getCreationOptions={async () => getCreationOptions()}
+          />
         </>
       )}
     </>

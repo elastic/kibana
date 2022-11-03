@@ -9,11 +9,18 @@
 import './_dashboard_container.scss';
 
 import uuid from 'uuid';
+import classNames from 'classnames';
+import { EuiLoadingElastic } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
+import {
+  DashboardContainerFactory,
+  DashboardContainerFactoryDefinition,
+  DashboardCreationOptions,
+} from './embeddable/dashboard_container_factory';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardReduxState } from './types';
 import { DashboardContainerInput } from '../../common';
@@ -21,11 +28,6 @@ import { pluginServices } from '../services/plugin_services';
 import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 import { DashboardContainer } from './embeddable/dashboard_container';
 import { dashboardContainerReducers } from './state/dashboard_container_reducers';
-import {
-  DashboardContainerFactory,
-  DashboardContainerFactoryDefinition,
-  DashboardCreationOptions,
-} from './embeddable/dashboard_container_factory';
 
 export interface DashboardContainerRendererProps {
   savedObjectId?: string;
@@ -42,9 +44,15 @@ export const DashboardContainerRenderer = ({
   onControlGroupInputLoaded,
   onDashboardContainerLoaded,
 }: DashboardContainerRendererProps) => {
+  const {
+    embeddable,
+    screenshotMode: { isScreenshotMode },
+  } = pluginServices.getServices();
+
   const dashboardRoot = useRef(null);
   const [dashboardIdToBuild, setDashboardIdToBuild] = useState<string | undefined>(savedObjectId);
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // check if dashboard container is expecting id change... if not, update dashboard ID to build to force it to rebuild the container.
@@ -61,7 +69,6 @@ export const DashboardContainerRenderer = ({
     let canceled = false;
     let destroyContainer: () => void;
 
-    const { embeddable } = pluginServices.getServices();
     (async () => {
       const creationOptions = await getCreationOptions?.();
       const dashboardFactory = embeddable.getEmbeddableFactory(
@@ -83,6 +90,7 @@ export const DashboardContainerRenderer = ({
         return;
       }
 
+      setLoading(false);
       if (dashboardRoot.current) {
         container.render(dashboardRoot.current);
       }
@@ -99,7 +107,16 @@ export const DashboardContainerRenderer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardIdToBuild]);
 
-  return <div ref={dashboardRoot} />;
+  const viewportClasses = classNames(
+    'dashboardViewport',
+    { 'dashboardViewport--screenshotMode': isScreenshotMode() },
+    { 'dashboardViewport--loading': loading }
+  );
+  return (
+    <div className={viewportClasses}>
+      {loading ? <EuiLoadingElastic size="xxl" /> : <div ref={dashboardRoot} />}
+    </div>
+  );
 };
 
 export const useDashboardContainerContext = () =>
