@@ -35,7 +35,7 @@ interface EventDetailsPanelProps {
   isFlyoutView?: boolean;
   runtimeMappings: MappingRuntimeFields;
   tabType: TimelineTabs;
-  timelineId: string;
+  scopeId: string;
   isReadOnly?: boolean;
 }
 
@@ -48,7 +48,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   isFlyoutView,
   runtimeMappings,
   tabType,
-  timelineId,
+  scopeId,
   isReadOnly,
 }) => {
   const currentSpaceId = useSpaceId();
@@ -80,6 +80,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     () =>
       isFlyoutView || isHostIsolationPanelOpen ? (
         <FlyoutHeader
+          eventId={expandedEvent.eventId}
           isHostIsolationPanelOpen={isHostIsolationPanelOpen}
           isAlert={isAlert}
           isolateAction={isolateAction}
@@ -90,6 +91,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         />
       ) : (
         <ExpandableEventTitle
+          eventId={expandedEvent.eventId}
           isAlert={isAlert}
           loading={loading}
           ruleName={ruleName}
@@ -97,6 +99,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         />
       ),
     [
+      expandedEvent.eventId,
       handleOnEventClosed,
       isAlert,
       isFlyoutView,
@@ -129,7 +132,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           loading={loading}
           rawEventData={rawEventData}
           showAlertDetails={showAlertDetails}
-          timelineId={timelineId}
+          scopeId={scopeId}
           isReadOnly={isReadOnly}
         />
       );
@@ -166,7 +169,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             isDraggable={isDraggable}
             loading={loading}
             rawEventData={rawEventData}
-            timelineId={timelineId}
+            scopeId={scopeId}
             timelineTabType={tabType}
             handleOnEventClosed={handleOnEventClosed}
           />
@@ -193,7 +196,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     rawEventData,
     showAlertDetails,
     tabType,
-    timelineId,
+    scopeId,
   ]);
 
   if (!expandedEvent?.eventId) {
@@ -214,7 +217,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         isReadOnly={isReadOnly}
         loadingEventDetails={loading}
         onAddIsolationStatusClick={showHostIsolationPanel}
-        timelineId={timelineId}
+        scopeId={scopeId}
       />
     </>
   );
@@ -225,6 +228,6 @@ export const EventDetailsPanel = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.expandedEvent, nextProps.expandedEvent) &&
-    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.scopeId === nextProps.scopeId &&
     prevProps.isDraggable === nextProps.isDraggable
 );

@@ -13,6 +13,8 @@ import {
   EuiButton,
   EuiBetaBadge,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import useResizeObserver from 'use-resize-observer';
 import { throttle } from 'lodash';
 import { ProcessEvent } from '../../../common/types/process_tree';
@@ -23,6 +25,8 @@ import {
   DEFAULT_TTY_ROWS,
   DEFAULT_TTY_COLS,
   DEFAULT_TTY_FONT_SIZE,
+  POLICIES_PAGE_PATH,
+  SECURITY_APP_ID,
 } from '../../../common/constants';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
@@ -35,6 +39,7 @@ export interface TTYPlayerDeps {
   isFullscreen: boolean;
   onJumpToEvent(event: ProcessEvent): void;
   autoSeekToEntityId?: string;
+  canAccessEndpointManagement?: boolean;
 }
 
 export const TTYPlayer = ({
@@ -44,6 +49,7 @@ export const TTYPlayer = ({
   isFullscreen,
   onJumpToEvent,
   autoSeekToEntityId,
+  canAccessEndpointManagement,
 }: TTYPlayerDeps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { ref: scrollRef, height: containerHeight = 1 } = useResizeObserver<HTMLDivElement>({});
@@ -53,7 +59,16 @@ export const TTYPlayer = ({
   const { lines, processStartMarkers } = useIOLines(data?.pages);
   const [fontSize, setFontSize] = useState(DEFAULT_TTY_FONT_SIZE);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentAutoSeekEntityId, setCurrentAutoSeekEntityId] = useState('');
+  const { getUrlForApp } = useKibana<CoreStart>().services.application;
+  const policiesUrl = useMemo(
+    () =>
+      canAccessEndpointManagement
+        ? getUrlForApp(SECURITY_APP_ID, { path: POLICIES_PAGE_PATH })
+        : '',
+    [canAccessEndpointManagement, getUrlForApp]
+  );
 
   const { search, currentLine, seekToLine } = useXtermPlayer({
     ref,
@@ -64,6 +79,7 @@ export const TTYPlayer = ({
     hasNextPage,
     fetchNextPage,
     isFetching,
+    policiesUrl,
   });
 
   const currentProcessEvent = lines[Math.min(lines.length - 1, currentLine)]?.event;
@@ -113,11 +129,18 @@ export const TTYPlayer = ({
 
   const styles = useStyles(tty, show);
 
+  const clearSearch = useCallback(() => {
+    if (searchQuery) {
+      setSearchQuery('');
+    }
+  }, [searchQuery]);
+
   const onSeekLine = useMemo(() => {
     return throttle((line: number) => {
+      clearSearch();
       seekToLine(line);
     }, 100);
-  }, [seekToLine]);
+  }, [clearSearch, seekToLine]);
 
   const onTogglePlayback = useCallback(() => {
     // if at the end, seek to beginning
@@ -126,6 +149,12 @@ export const TTYPlayer = ({
     }
     setIsPlaying(!isPlaying);
   }, [currentLine, isPlaying, lines.length, seekToLine]);
+
+  useEffect(() => {
+    if (isPlaying) {
+      clearSearch();
+    }
+  }, [clearSearch, isPlaying]);
 
   return (
     <div css={styles.container}>
@@ -140,6 +169,8 @@ export const TTYPlayer = ({
               seekToLine={seekToLine}
               xTermSearchFn={search}
               setIsPlaying={setIsPlaying}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
             />
           </EuiFlexItem>
 
@@ -157,11 +188,17 @@ export const TTYPlayer = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="refresh" display="empty" size="m" disabled={true} />
+            <EuiButtonIcon
+              iconType="refresh"
+              display="empty"
+              size="m"
+              disabled={true}
+              aria-label="disabled"
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="eye" disabled={true} size="m" />
+            <EuiButtonIcon iconType="eye" disabled={true} size="m" aria-label="disabled" />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>

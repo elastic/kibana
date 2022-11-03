@@ -8,10 +8,14 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import { GuidedOnboardingTourStep } from '../../../../../common/components/guided_onboarding_tour/tour_step';
+import { isDetectionsAlertsTable } from '../../../../../common/components/top_n/helpers';
+import { useTourContext } from '../../../../../common/components/guided_onboarding_tour';
+import { SecurityStepId } from '../../../../../common/components/guided_onboarding_tour/tour_config';
+import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
@@ -21,11 +25,7 @@ import { PinEventAction } from './pin_event_action';
 import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import {
-  setActiveTabTimeline,
-  updateTimelineGraphEventId,
-  updateTimelineSessionViewConfig,
-} from '../../../../store/timeline/actions';
+import { setActiveTabTimeline } from '../../../../store/timeline/actions';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
@@ -35,7 +35,7 @@ import type {
   OnPinEvent,
   TimelineEventsType,
 } from '../../../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { TableId, TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
@@ -64,7 +64,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   onEventDetailsPanelOpened,
   onRowSelected,
   onRuleChange,
-  refetch,
   showCheckboxes,
   showNotes,
   timelineId,
@@ -74,6 +73,10 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const timelineType = useShallowEqualSelector(
+    (state) =>
+      (isTimelineScope(timelineId) ? getTimeline(state, timelineId) : timelineDefaults).timelineType
+  );
   const { startTransaction } = useStartTransaction();
 
   const isEnterprisePlus = useLicense().isEnterprise();
@@ -108,9 +111,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
       }),
     [eventIdToNoteIds, eventId, isEventPinned, onPinEvent, onUnPinEvent]
   );
-  const timelineType = useShallowEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
-  );
   const eventType = getEventType(ecsData);
 
   const isContextMenuDisabled = useMemo(() => {
@@ -123,11 +123,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
   const { setGlobalFullScreen } = useGlobalFullScreen();
   const { setTimelineFullScreen } = useTimelineFullScreen();
+  const scopedActions = getScopedActions(timelineId);
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
 
     const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
-    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
+    if (scopedActions) {
+      dispatch(scopedActions.updateGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
+    }
     if (timelineId === TimelineId.active) {
       if (dataGridIsFullScreen) {
         setTimelineFullScreen(true);
@@ -140,8 +143,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
   }, [
     startTransaction,
-    dispatch,
+    scopedActions,
     timelineId,
+    dispatch,
     ecsData._id,
     setTimelineFullScreen,
     setGlobalFullScreen,
@@ -185,7 +189,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
       }
     }
     if (sessionViewConfig !== null) {
-      dispatch(updateTimelineSessionViewConfig({ id: timelineId, sessionViewConfig }));
+      if (scopedActions) {
+        dispatch(scopedActions.updateSessionViewConfig({ id: timelineId, sessionViewConfig }));
+      }
     }
   }, [
     startTransaction,
@@ -194,7 +200,27 @@ const ActionsComponent: React.FC<ActionProps> = ({
     setTimelineFullScreen,
     dispatch,
     setGlobalFullScreen,
+    scopedActions,
   ]);
+
+  const { activeStep, isTourShown, incrementStep } = useTourContext();
+
+  const isTourAnchor = useMemo(
+    () =>
+      isTourShown(SecurityStepId.alertsCases) &&
+      eventType === 'signal' &&
+      isDetectionsAlertsTable(timelineId) &&
+      ariaRowindex === 1,
+    [isTourShown, ariaRowindex, eventType, timelineId]
+  );
+
+  const onExpandEvent = useCallback(() => {
+    const isStep2Active = activeStep === 2 && isTourShown(SecurityStepId.alertsCases);
+    if (isTourAnchor && isStep2Active) {
+      incrementStep(SecurityStepId.alertsCases);
+    }
+    onEventDetailsPanelOpened();
+  }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
 
   return (
     <ActionsContainer>
@@ -215,19 +241,25 @@ const ActionsComponent: React.FC<ActionProps> = ({
           </EventsTdContent>
         </div>
       )}
-      <div key="expand-event">
-        <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-          <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
-            <EuiButtonIcon
-              aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
-              data-test-subj="expand-event"
-              iconType="expand"
-              onClick={onEventDetailsPanelOpened}
-              size="s"
-            />
-          </EuiToolTip>
-        </EventsTdContent>
-      </div>
+      <GuidedOnboardingTourStep
+        isTourAnchor={isTourAnchor}
+        step={2}
+        stepId={SecurityStepId.alertsCases}
+      >
+        <div key="expand-event">
+          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+            <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
+              <EuiButtonIcon
+                aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                data-test-subj="expand-event"
+                iconType="expand"
+                onClick={onExpandEvent}
+                size="s"
+              />
+            </EuiToolTip>
+          </EventsTdContent>
+        </div>
+      </GuidedOnboardingTourStep>
       <>
         {timelineId !== TimelineId.active && (
           <InvestigateInTimelineAction
@@ -263,9 +295,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
           columnValues={columnValues}
           key="alert-context-menu"
           ecsRowData={ecsData}
-          timelineId={timelineId}
+          scopeId={timelineId}
           disabled={isContextMenuDisabled}
-          refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />
         {isDisabled === false ? (
@@ -290,7 +321,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           </div>
         ) : null}
         {sessionViewConfig !== null &&
-        (isEnterprisePlus || timelineId === TimelineId.kubernetesPageSessions) ? (
+        (isEnterprisePlus || timelineId === TableId.kubernetesPageSessions) ? (
           <div>
             <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>

@@ -23,6 +23,8 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { ErrorDetailsPage } from './components/error_details/error_details_page';
+import { StepTitle } from './components/step_details_page/step_title';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
 import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
@@ -45,6 +47,8 @@ import {
   MONITOR_ERRORS_ROUTE,
   MONITOR_HISTORY_ROUTE,
   MONITOR_ROUTE,
+  ERROR_DETAILS_ROUTE,
+  STEP_DETAIL_ROUTE,
   OVERVIEW_ROUTE,
 } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
@@ -57,6 +61,7 @@ import { MonitorDetailsLastRun } from './components/monitor_details/monitor_deta
 import { MonitorSummary } from './components/monitor_details/monitor_summary/monitor_summary';
 import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
 import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
+import { StepDetailPage } from './components/step_details_page/step_detail_page';
 
 type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -281,6 +286,41 @@ const getRoutes = (
             text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
           },
         ],
+      },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.stepDetailsRoute.title', {
+        defaultMessage: 'Step details | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: STEP_DETAIL_ROUTE,
+      component: () => <StepDetailPage />,
+      dataTestSubj: 'syntheticsMonitorEditPage',
+      pageHeader: {
+        pageTitle: <StepTitle />,
+        rightSideItems: [],
+        breadcrumbs: [
+          {
+            text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
+          },
+        ],
+      },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.errorDetailsRoute.title', {
+        defaultMessage: 'Error details | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: ERROR_DETAILS_ROUTE,
+      component: () => <ErrorDetailsPage />,
+      dataTestSubj: 'syntheticsMonitorEditPage',
+      pageHeader: {
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.synthetics.editMonitor.errorDetailsRoute.title"
+            defaultMessage="Error details"
+          />
+        ),
       },
     },
   ];

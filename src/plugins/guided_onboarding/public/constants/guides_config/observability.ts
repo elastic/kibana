@@ -6,21 +6,34 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import type { GuideConfig } from '../../types';
 
 export const observabilityConfig: GuideConfig = {
-  title: 'Observe my Kubernetes infrastructure',
-  description: `We'll help you quickly gain visibility into your Kubernetes environment using Elastic's out-of-the-box integration. Gain deep insights from your logs, metrics, and traces, and proactively detect issues and take action to resolve issues.`,
+  title: i18n.translate('guidedOnboarding.observabilityGuide.title', {
+    defaultMessage: 'Observe my Kubernetes infrastructure',
+  }),
+  description: i18n.translate('guidedOnboarding.observabilityGuide.description', {
+    defaultMessage: `We'll help you quickly get visibility into your Kubernetes environment with our Elastic integration. Gain deep insights from your logs, metrics, and traces to proactively detect issues and take action to resolve them.`,
+  }),
+  guideName: 'Kubernetes',
   docs: {
-    text: 'Kubernetes documentation',
-    url: 'example.com', // TODO update link to correct docs page
+    text: i18n.translate('guidedOnboarding.observabilityGuide.documentationLink', {
+      defaultMessage: 'Learn more',
+    }),
+    url: 'https://docs.elastic.co/en/integrations/kubernetes',
   },
   steps: [
     {
       id: 'add_data',
-      title: 'Add data',
+      title: i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.title', {
+        defaultMessage: 'Add and verify your data',
+      }),
       integration: 'kubernetes',
-      descriptionList: ['Start by adding your data by setting up the Kubernetes integration.'],
+      description: i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.description', {
+        defaultMessage: 'Start by adding your data by setting up the Kubernetes integration.',
+      }),
       location: {
         appID: 'integrations',
         path: '/detail/kubernetes/overview',
@@ -28,21 +41,51 @@ export const observabilityConfig: GuideConfig = {
     },
     {
       id: 'view_dashboard',
-      title: 'Explore Kubernetes metrics',
-      descriptionList: ['Stream, visualize, and analyze your Kubernetes infrastructure metrics.'],
+      title: i18n.translate('guidedOnboarding.observabilityGuide.viewDashboardStep.title', {
+        defaultMessage: 'Explore Kubernetes metrics',
+      }),
+      description: i18n.translate(
+        'guidedOnboarding.observabilityGuide.viewDashboardStep.description',
+        {
+          defaultMessage: 'Stream, visualize, and analyze your Kubernetes infrastructure metrics.',
+        }
+      ),
       location: {
         appID: 'dashboards',
         path: '#/view/kubernetes-e0195ce0-bcaf-11ec-b64f-7dd6e8e82013',
       },
+      manualCompletion: {
+        title: i18n.translate(
+          'guidedOnboarding.observabilityGuide.viewDashboardStep.manualCompletionPopoverTitle',
+          {
+            defaultMessage: 'Explore Kubernetes dashboards',
+          }
+        ),
+        description: i18n.translate(
+          'guidedOnboarding.observabilityGuide.viewDashboardStep.manualCompletionPopoverDescription',
+          {
+            defaultMessage: `Take your time to explore these pre-built dashboards included with the Kubernetes integration. When you’re ready, click the Setup guide button to continue.`,
+          }
+        ),
+        readyToCompleteOnNavigation: true,
+      },
     },
     {
       id: 'tour_observability',
-      title: 'Tour Elastic Observability',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
+      title: i18n.translate('guidedOnboarding.observabilityGuide.tourObservabilityStep.title', {
+        defaultMessage: 'Tour Elastic Observability',
+      }),
+      description: i18n.translate(
+        'guidedOnboarding.observabilityGuide.tourObservabilityStep.description',
+        {
+          defaultMessage:
+            'Get familiar with the rest of Elastic Observability and explore even more integrations.',
+        }
+      ),
+      location: {
+        appID: 'observability',
+        path: '/overview',
+      },
     },
   ],
 };

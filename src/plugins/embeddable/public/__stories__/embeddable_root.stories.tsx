@@ -65,7 +65,7 @@ Default.args = {
   loading: false,
 };
 
-export const DefaultWithError = Default as Meta<DefaultProps>;
+export const DefaultWithError = Default.bind({}) as Meta<DefaultProps>;
 
 DefaultWithError.args = {
   ...Default.args,

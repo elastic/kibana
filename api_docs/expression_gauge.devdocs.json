@@ -106,7 +106,13 @@
             "text": "Accessors"
           },
           " | undefined, paletteParams?: ",
-          "CustomPaletteParams",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
           " | undefined, isRespectRanges?: boolean | undefined) => number"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
@@ -165,7 +171,13 @@
             "label": "paletteParams",
             "description": [],
             "signature": [
-              "CustomPaletteParams",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
@@ -217,7 +229,13 @@
             "text": "Accessors"
           },
           " | undefined, paletteParams?: ",
-          "CustomPaletteParams",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
           " | undefined, isRespectRanges?: boolean | undefined) => any"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
@@ -276,7 +294,13 @@
             "label": "paletteParams",
             "description": [],
             "signature": [
-              "CustomPaletteParams",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
@@ -536,7 +560,13 @@
               "; colorMode: ",
               "GaugeColorMode",
               "; palette?: ",
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<",
               {
                 "pluginId": "charts",
@@ -772,9 +802,21 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<",
-              "CustomPaletteParams",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
@@ -883,7 +925,13 @@
             "text": "SerializedFieldFormat"
           },
           "<{}, ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -914,7 +962,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
@@ -950,7 +1004,13 @@
           "; colorMode: ",
           "GaugeColorMode",
           "; palette?: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<",
           {
             "pluginId": "charts",
@@ -1030,7 +1090,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
@@ -1079,7 +1145,13 @@
           "; chartsThemeService: ",
           "Theme",
           "; paletteService: ",
-          "PaletteRegistry",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteRegistry",
+            "text": "PaletteRegistry"
+          },
           "; renderComplete: () => void; uiState: ",
           {
             "pluginId": "visualizations",

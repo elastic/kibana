@@ -36,6 +36,7 @@ import type {
   IndexPatternField,
   IndexPattern,
   IndexPatternRef,
+  DatasourceLayerSettingsProps,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -64,7 +65,7 @@ import {
 
 import {
   getFiltersInLayer,
-  getTSDBRollupWarningMessages,
+  getShardFailuresWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
@@ -80,17 +81,24 @@ import {
   operationDefinitionMap,
   TermsIndexPatternColumn,
 } from './operations';
-import { getReferenceRoot } from './operations/layer_helpers';
-import { FormBasedPrivateState, FormBasedPersistedState } from './types';
-import { mergeLayer } from './state_helpers';
-import { Datasource, VisualizeEditorContext } from '../../types';
+import {
+  copyColumn,
+  getColumnOrder,
+  getReferenceRoot,
+  reorderByGroups,
+} from './operations/layer_helpers';
+import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
+import { mergeLayer, mergeLayers } from './state_helpers';
+import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
-import { DraggingIdentifier } from '../../drag_drop';
+import type { DraggingIdentifier } from '../../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
+import { LayerSettingsPanel } from './layer_settings';
+import { FormBasedLayer } from '../..';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -99,7 +107,7 @@ export function columnToOperation(
   uniqueLabel?: string,
   dataView?: IndexPattern
 ): OperationDescriptor {
-  const { dataType, label, isBucketed, scale, operationType, timeShift } = column;
+  const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
   const fieldTypes =
     'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
   return {
@@ -113,6 +121,7 @@ export function columnToOperation(
         ? 'version'
         : undefined,
     hasTimeShift: Boolean(timeShift),
+    hasReducedTimeRange: Boolean(reducedTimeRange),
     interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
       ? column.params.interval
       : undefined,
@@ -180,12 +189,16 @@ export function getFormBasedDatasource({
       return extractReferences(state);
     },
 
-    insertLayer(state: FormBasedPrivateState, newLayerId: string) {
+    insertLayer(
+      state: FormBasedPrivateState,
+      newLayerId: string,
+      linkToLayers: string[] | undefined
+    ) {
       return {
         ...state,
         layers: {
           ...state.layers,
-          [newLayerId]: blankLayer(state.currentIndexPatternId),
+          [newLayerId]: blankLayer(state.currentIndexPatternId, linkToLayers),
         },
       };
     },
@@ -207,19 +220,47 @@ export function getFormBasedDatasource({
     removeLayer(state: FormBasedPrivateState, layerId: string) {
       const newLayers = { ...state.layers };
       delete newLayers[layerId];
+      const removedLayerIds: string[] = [layerId];
+
+      // delete layers linked to this layer
+      Object.keys(newLayers).forEach((id) => {
+        const linkedLayers = newLayers[id]?.linkToLayers;
+        if (linkedLayers && linkedLayers.includes(layerId)) {
+          delete newLayers[id];
+          removedLayerIds.push(id);
+        }
+      });
 
       return {
-        ...state,
-        layers: newLayers,
+        removedLayerIds,
+        newState: {
+          ...state,
+          layers: newLayers,
+        },
       };
     },
 
     clearLayer(state: FormBasedPrivateState, layerId: string) {
+      const newLayers = { ...state.layers };
+
+      const removedLayerIds: string[] = [];
+      // delete layers linked to this layer
+      Object.keys(newLayers).forEach((id) => {
+        const linkedLayers = newLayers[id]?.linkToLayers;
+        if (linkedLayers && linkedLayers.includes(layerId)) {
+          delete newLayers[id];
+          removedLayerIds.push(id);
+        }
+      });
+
       return {
-        ...state,
-        layers: {
-          ...state.layers,
-          [layerId]: blankLayer(state.currentIndexPatternId),
+        removedLayerIds,
+        newState: {
+          ...state,
+          layers: {
+            ...newLayers,
+            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
+          },
         },
       };
     },
@@ -241,26 +282,123 @@ export function getFormBasedDatasource({
       });
     },
 
-    initializeDimension(state, layerId, indexPatterns, { columnId, groupId, staticValue }) {
+    initializeDimension(
+      state,
+      layerId,
+      indexPatterns,
+      { columnId, groupId, staticValue, autoTimeField, visualizationGroups }
+    ) {
       const indexPattern = indexPatterns[state.layers[layerId]?.indexPatternId];
-      if (staticValue == null) {
-        return state;
+      let ret = state;
+
+      if (staticValue != null) {
+        ret = mergeLayer({
+          state,
+          layerId,
+          newLayer: insertNewColumn({
+            layer: state.layers[layerId],
+            op: 'static_value',
+            columnId,
+            field: undefined,
+            indexPattern,
+            visualizationGroups,
+            initialParams: { params: { value: staticValue } },
+            targetGroup: groupId,
+          }),
+        });
       }
 
-      return mergeLayer({
-        state,
-        layerId,
-        newLayer: insertNewColumn({
-          layer: state.layers[layerId],
-          op: 'static_value',
-          columnId,
-          field: undefined,
-          indexPattern,
-          visualizationGroups: [],
-          initialParams: { params: { value: staticValue } },
-          targetGroup: groupId,
-        }),
+      if (autoTimeField && indexPattern.timeFieldName) {
+        ret = mergeLayer({
+          state,
+          layerId,
+          newLayer: insertNewColumn({
+            layer: state.layers[layerId],
+            op: 'date_histogram',
+            columnId,
+            field: indexPattern.fields.find((field) => field.name === indexPattern.timeFieldName),
+            indexPattern,
+            visualizationGroups,
+            targetGroup: groupId,
+          }),
+        });
+      }
+
+      return ret;
+    },
+
+    syncColumns({ state, links, indexPatterns, getDimensionGroups }) {
+      let modifiedLayers: Record<string, FormBasedLayer> = state.layers;
+
+      links.forEach((link) => {
+        const source: DataViewDragDropOperation = {
+          ...link.from,
+          dataView: indexPatterns[modifiedLayers[link.from.layerId]?.indexPatternId],
+          filterOperations: () => true,
+        };
+
+        const target: DataViewDragDropOperation = {
+          ...link.to,
+          dataView: indexPatterns[modifiedLayers[link.to.layerId]?.indexPatternId],
+          filterOperations: () => true,
+        };
+
+        modifiedLayers = copyColumn({
+          layers: modifiedLayers,
+          target,
+          source,
+        });
+
+        const updatedColumnOrder = reorderByGroups(
+          getDimensionGroups(target.layerId),
+          getColumnOrder(modifiedLayers[target.layerId]),
+          target.groupId,
+          target.columnId
+        );
+
+        modifiedLayers = {
+          ...modifiedLayers,
+          [target.layerId]: {
+            ...modifiedLayers[target.layerId],
+            columnOrder: updatedColumnOrder,
+            columns: modifiedLayers[target.layerId].columns,
+          },
+        };
       });
+
+      const newState = mergeLayers({
+        state,
+        newLayers: modifiedLayers,
+      });
+
+      links
+        .filter((link) =>
+          isColumnOfType<TermsIndexPatternColumn>(
+            'terms',
+            newState.layers[link.from.layerId].columns[link.from.columnId]
+          )
+        )
+        .forEach(({ from, to }) => {
+          const fromColumn = newState.layers[from.layerId].columns[
+            from.columnId
+          ] as TermsIndexPatternColumn;
+          if (fromColumn.params.orderBy.type === 'column') {
+            const fromOrderByColumnId = fromColumn.params.orderBy.columnId;
+            const orderByColumnLink = links.find(
+              ({ from: { columnId } }) => columnId === fromOrderByColumnId
+            );
+
+            if (orderByColumnLink) {
+              // order the synced column by the dimension which is linked to the column that the original column was ordered by
+              const toColumn = newState.layers[to.layerId].columns[
+                to.columnId
+              ] as TermsIndexPatternColumn;
+              toColumn.params.orderBy = { type: 'column', columnId: orderByColumnLink.to.columnId };
+            }
+          }
+        });
+
+      return newState;
     },
 
     getSelectedFields(state) {
@@ -276,8 +414,34 @@ export function getFormBasedDatasource({
       return fields;
     },
 
-    toExpression: (state, layerId, indexPatterns) =>
-      toExpression(state, layerId, indexPatterns, uiSettings),
+    toExpression: (state, layerId, indexPatterns, searchSessionId) =>
+      toExpression(state, layerId, indexPatterns, uiSettings, searchSessionId),
+
+    renderLayerSettings(
+      domElement: Element,
+      props: DatasourceLayerSettingsProps<FormBasedPrivateState>
+    ) {
+      render(
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+                unifiedSearch,
+                discover,
+              }}
+            >
+              <LayerSettingsPanel {...props} />
+            </KibanaContextProvider>
+          </I18nProvider>
+        </KibanaThemeProvider>,
+        domElement
+      );
+    },
 
     renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<FormBasedPrivateState>) {
       const { onChangeIndexPattern, ...otherProps } = props;
@@ -453,6 +617,22 @@ export function getFormBasedDatasource({
 
     getDropProps,
     onDrop,
+    getSupportedActionsForLayer(layerId, state, _, openLayerSettings) {
+      if (!openLayerSettings) {
+        return [];
+      }
+      return [
+        {
+          displayName: i18n.translate('xpack.lens.indexPattern.layerSettingsAction', {
+            defaultMessage: 'Layer settings',
+          }),
+          execute: openLayerSettings,
+          icon: 'gear',
+          isCompatible: Boolean(state.layers[layerId]),
+          'data-test-subj': 'lnsLayerSettings',
+        },
+      ];
+    },
 
     getCustomWorkspaceRenderer: (
       state: FormBasedPrivateState,
@@ -497,9 +677,18 @@ export function getFormBasedDatasource({
     onRefreshIndexPattern,
     onIndexPatternChange(state, indexPatterns, indexPatternId, layerId) {
       if (layerId) {
+        const layersToChange = [
+          layerId,
+          ...Object.entries(state.layers)
+            .map(([possiblyLinkedId, layer]) =>
+              layer.linkToLayers?.includes(layerId) ? possiblyLinkedId : ''
+            )
+            .filter(Boolean),
+        ];
+
         return changeLayerIndexPattern({
           indexPatternId,
-          layerId,
+          layerIds: layersToChange,
           state,
           replaceIfPossible: true,
           storage,
@@ -620,6 +809,7 @@ export function getFormBasedDatasource({
           }
           return null;
         },
+        hasDefaultTimeField: () => Boolean(indexPatterns[layer.indexPatternId].timeFieldName),
       };
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers, indexPatterns) {
@@ -707,8 +897,8 @@ export function getFormBasedDatasource({
         ),
       ];
     },
-    getSearchWarningMessages: (state, warning) => {
-      return [...getTSDBRollupWarningMessages(state, warning)];
+    getSearchWarningMessages: (state, warning, request, response) => {
+      return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
     },
     getDeprecationMessages: () => {
       const deprecatedMessages: React.ReactNode[] = [];
@@ -799,10 +989,12 @@ export function getFormBasedDatasource({
   return formBasedDatasource;
 }
 
-function blankLayer(indexPatternId: string) {
+function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedLayer {
   return {
     indexPatternId,
+    linkToLayers,
     columns: {},
     columnOrder: [],
+    sampling: 1,
   };
 }

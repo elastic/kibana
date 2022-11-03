@@ -36,6 +36,7 @@ import { IndexNameLogic } from '../index_name_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
 
+import { DeleteInferencePipelineButton } from './delete_inference_pipeline_button';
 import { TrainedModelHealth } from './ml_model_health';
 import { PipelinesLogic } from './pipelines_logic';
 
@@ -45,7 +46,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
   const { ingestionMethod } = useValues(IndexViewLogic);
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const { deleteMlPipeline } = useActions(PipelinesLogic);
+  const { deleteMlPipeline, detachMlPipeline } = useActions(PipelinesLogic);
   const showConfirmDeleteModal = () => {
     setShowConfirmDelete(true);
     setIsPopOverOpen(false);
@@ -110,18 +111,30 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   <EuiFlexItem>
                     <div>
                       <EuiButtonEmpty
-                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-deletePipeline`}
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
                         size="s"
                         flush="both"
-                        iconType="trash"
+                        iconType="unlink"
                         color="text"
-                        onClick={showConfirmDeleteModal}
+                        onClick={() => {
+                          detachMlPipeline({ indexName, pipelineName });
+                          setIsPopOverOpen(false);
+                        }}
                       >
                         {i18n.translate(
-                          'xpack.enterpriseSearch.inferencePipelineCard.action.delete',
-                          { defaultMessage: 'Delete pipeline' }
+                          'xpack.enterpriseSearch.inferencePipelineCard.action.detach',
+                          { defaultMessage: 'Detach pipeline' }
                         )}
                       </EuiButtonEmpty>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div>
+                      <DeleteInferencePipelineButton
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-deletePipeline`}
+                        onClick={showConfirmDeleteModal}
+                        pipeline={pipeline}
+                      />
                     </div>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -160,15 +173,15 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                     </EuiToolTip>
                   </EuiFlexItem>
                 )}
-                {(modelType.length > 0 ? [modelType] : modelTypes).map((type) => (
-                  <EuiFlexItem grow={false} key={type}>
-                    <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem>
-                        <EuiBadge color="hollow">{type}</EuiBadge>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ))}
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem>
+                      <span>
+                        <EuiBadge color="hollow">{modelType}</EuiBadge>
+                      </span>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

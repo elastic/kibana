@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   TRACE_ID,
   TRANSACTION_ID,
+  TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../common/data_view_constants';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
@@ -19,6 +20,7 @@ import { getApmDataViewTitle } from './get_apm_data_view_title';
 
 import { APMRouteHandlerResources } from '../typings';
 import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type CreateDataViewResponse = Promise<
   | { created: boolean; dataView: DataView }
@@ -29,10 +31,12 @@ export async function createStaticDataView({
   dataViewService,
   resources,
   setup,
+  apmEventClient,
 }: {
   dataViewService: DataViewsService;
   resources: APMRouteHandlerResources;
   setup: Setup;
+  apmEventClient: APMEventClient;
 }): CreateDataViewResponse {
   const { config } = resources;
 
@@ -50,7 +54,7 @@ export async function createStaticDataView({
 
     // Discover and other apps will throw errors if an data view exists without having matching indices.
     // The following ensures the data view is only created if APM data is found
-    const hasData = await hasHistoricalAgentData(setup);
+    const hasData = await hasHistoricalAgentData(apmEventClient);
 
     if (!hasData) {
       return {
@@ -170,6 +174,17 @@ function createAndSaveStaticDataView({
           params: {
             urlTemplate: 'apm/link-to/transaction/{{value}}',
             labelTemplate: '{{value}}',
+          },
+        },
+        [TRANSACTION_DURATION]: {
+          id: 'duration',
+          params: {
+            inputFormat: 'microseconds',
+            outputFormat: 'asMilliseconds',
+            showSuffix: true,
+            useShortSuffix: true,
+            outputPrecision: 2,
+            includeSpaceWithSuffix: true,
           },
         },
       },

@@ -9,9 +9,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useQuery } from '@tanstack/react-query';
 import { EuiDataGridSorting } from '@elastic/eui';
-import { useInspector } from '../../../hooks/use_inspector';
+import { useInspector, useKibana } from '../../../hooks';
 import { Indicator } from '../../../../common/types/indicator';
-import { useKibana } from '../../../hooks/use_kibana';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import { createFetchIndicators, FetchParams, Pagination } from '../services/fetch_indicators';
 

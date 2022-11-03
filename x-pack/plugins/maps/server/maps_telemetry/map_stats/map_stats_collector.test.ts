@@ -84,6 +84,12 @@ test('returns expected telemetry data from saved objects', () => {
         min: 1,
         total: 1,
       },
+      layer_group: {
+        avg: 0.2,
+        max: 1,
+        min: 1,
+        total: 1,
+      },
     },
     scalingOptions: {
       limit: {
@@ -151,6 +157,11 @@ test('returns expected telemetry data from saved objects', () => {
           max: 1,
           min: 1,
         },
+        LAYER_GROUP: {
+          avg: 0.2,
+          max: 1,
+          min: 1,
+        },
         TILE: {
           avg: 0.6,
           max: 1,
@@ -163,8 +174,8 @@ test('returns expected telemetry data from saved objects', () => {
         },
       },
       layersCount: {
-        avg: 2,
-        max: 3,
+        avg: 2.2,
+        max: 4,
         min: 1,
       },
     },

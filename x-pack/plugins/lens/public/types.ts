@@ -31,6 +31,9 @@ import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { EuiButtonIconColor } from '@elastic/eui';
+import { SearchRequest } from '@kbn/data-plugin/public';
+import { estypes } from '@elastic/elasticsearch';
+import React from 'react';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -105,7 +108,6 @@ export interface EditorFrameProps {
 export type VisualizationMap = Record<string, Visualization>;
 export type DatasourceMap = Record<string, Datasource>;
 export type IndexPatternMap = Record<string, IndexPattern>;
-export type ExistingFieldsMap = Record<string, Record<string, boolean>>;
 
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
@@ -233,6 +235,15 @@ export interface GetDropPropsArgs<T = unknown> {
   indexPatterns: IndexPatternMap;
 }
 
+interface DimensionLink {
+  from: { columnId: string; groupId: string; layerId: string };
+  to: {
+    columnId?: string;
+    groupId: string;
+    layerId: string;
+  };
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -254,10 +265,10 @@ export interface Datasource<T = unknown, P = unknown> {
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
   getUnifiedSearchErrors?: (state: T) => Error[];
 
-  insertLayer: (state: T, newLayerId: string) => T;
+  insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
   createEmptyLayer: (indexPatternId: string) => T;
-  removeLayer: (state: T, layerId: string) => T;
-  clearLayer: (state: T, layerId: string) => T;
+  removeLayer: (state: T, layerId: string) => { newState: T; removedLayerIds: string[] };
+  clearLayer: (state: T, layerId: string) => { newState: T; removedLayerIds: string[] };
   cloneLayer: (
     state: T,
     layerId: string,
@@ -278,12 +289,24 @@ export interface Datasource<T = unknown, P = unknown> {
     value: {
       columnId: string;
       groupId: string;
+      visualizationGroups: VisualizationDimensionGroupConfig[];
       staticValue?: unknown;
+      autoTimeField?: boolean;
     }
   ) => T;
 
+  syncColumns: (args: {
+    state: T;
+    links: Array<DimensionLink & { to: { columnId: string } }>;
+    getDimensionGroups: (layerId: string) => VisualizationDimensionGroupConfig[];
+    indexPatterns: IndexPatternMap;
+  }) => T;
   getSelectedFields?: (state: T) => string[];
 
+  renderLayerSettings?: (
+    domElement: Element,
+    props: DatasourceLayerSettingsProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
   renderDataPanel: (
     domElement: Element,
     props: DatasourceDataPanelProps<T>
@@ -343,7 +366,8 @@ export interface Datasource<T = unknown, P = unknown> {
   toExpression: (
     state: T,
     layerId: string,
-    indexPatterns: IndexPatternMap
+    indexPatterns: IndexPatternMap,
+    searchSessionId?: string
   ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (
@@ -406,7 +430,13 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * The embeddable calls this function to display warnings about visualization on the dashboard
    */
-  getSearchWarningMessages?: (state: P, warning: SearchResponseWarning) => string[] | undefined;
+  getSearchWarningMessages?: (
+    state: P,
+    warning: SearchResponseWarning,
+    request: SearchRequest,
+    response: estypes.SearchResponse
+  ) => Array<string | React.ReactNode> | undefined;
+
   /**
    * Checks if the visualization created is time based, for example date histogram
    */
@@ -441,6 +471,13 @@ export interface Datasource<T = unknown, P = unknown> {
    * Get all the used DataViews from state
    */
   getUsedDataViews: (state: T) => string[];
+
+  getSupportedActionsForLayer?: (
+    layerId: string,
+    state: T,
+    setState: StateSetter<T>,
+    openLayerSettings?: () => void
+  ) => LayerAction[];
 }
 
 export interface DatasourceFixAction<T> {
@@ -489,6 +526,13 @@ export interface DatasourcePublicAPI {
    *       or 6 if the "Other" bucket is enabled)
    */
   getMaxPossibleNumValues: (columnId: string) => number | null;
+  hasDefaultTimeField: () => boolean;
+}
+
+export interface DatasourceLayerSettingsProps<T = unknown> {
+  layerId: string;
+  state: T;
+  setState: StateSetter<T>;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -544,7 +588,6 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   state: T;
   activeData?: Record<string, Datatable>;
   indexPatterns: IndexPatternMap;
-  existingFields: Record<string, Record<string, boolean>>;
   hideTooltip?: boolean;
   invalid?: boolean;
   invalidMessage?: string;
@@ -569,6 +612,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
+  isMetricDimension?: boolean;
   layerType: LayerType | undefined;
   supportStaticValue: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
@@ -593,6 +637,7 @@ export interface DragDropOperation {
   filterOperations: (operation: OperationMetadata) => boolean;
   indexPatternId?: string;
   isNewColumn?: boolean;
+  isMetricDimension?: boolean;
   prioritizedOperation?: string;
 }
 
@@ -619,7 +664,7 @@ export interface DatasourceDimensionDropProps<T> {
       forceRender?: boolean;
     }
   >;
-  dimensionGroups: VisualizationDimensionGroupConfig[];
+  targetLayerDimensionGroups: VisualizationDimensionGroupConfig[];
 }
 
 export type DatasourceDimensionDropHandlerProps<S> = DatasourceDimensionDropProps<S> & {
@@ -675,6 +720,7 @@ export interface OperationMetadata {
  */
 export interface OperationDescriptor extends Operation {
   hasTimeShift: boolean;
+  hasReducedTimeRange: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
@@ -696,10 +742,18 @@ export interface VisualizationToolbarProps<T = unknown> {
   state: T;
 }
 
+export type VisualizationLayerSettingsProps<T = unknown> = VisualizationConfigProps<T> & {
+  setState(newState: T | ((currState: T) => T)): void;
+  panelRef: MutableRefObject<HTMLDivElement | null>;
+};
+
 export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
   groupId: string;
   accessor: string;
+  datasource: DatasourcePublicAPI | undefined;
   setState(newState: T | ((currState: T) => T)): void;
+  addLayer: (layerType: LayerType) => void;
+  removeLayer: (layerId: string) => void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
@@ -741,6 +795,8 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
   supportStaticValue?: boolean;
+  // used by text based datasource to restrict the field selection only to number fields for the metric dimensions
+  isMetricDimension?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
   formatSelectorOptions?: FormatSelectorOptions; // only relevant if supportFieldFormat is true
@@ -977,7 +1033,9 @@ export interface Visualization<T = unknown, P = unknown> {
       columnId: string;
       groupId: string;
       staticValue?: unknown;
+      autoTimeField?: boolean;
     }>;
+    canAddViaMenu?: boolean;
   }>;
   /**
    * returns a list of custom actions supported by the visualization layer.
@@ -986,10 +1044,22 @@ export interface Visualization<T = unknown, P = unknown> {
   getSupportedActionsForLayer?: (
     layerId: string,
     state: T,
-    setState: StateSetter<T>
+    setState: StateSetter<T>,
+    openLayerSettings?: () => void
   ) => LayerAction[];
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
+
+  /**
+   * Get the layers this one should be linked to (currently that means just keeping the data view in sync)
+   */
+  getLayersToLinkTo?: (state: T, newLayerId: string) => string[];
+
+  /**
+   * Returns a set of dimensions that should be kept in sync
+   */
+  getLinkedDimensions?: (state: T) => DimensionLink[];
+
   /* returns the type of removal operation to perform for the specific layer in the current state */
   getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';
 
@@ -997,6 +1067,7 @@ export interface Visualization<T = unknown, P = unknown> {
    * For consistency across different visualizations, the dimension configuration UI is standardized
    */
   getConfiguration: (props: VisualizationConfigProps<T>) => {
+    hidden?: boolean;
     groups: VisualizationDimensionGroupConfig[];
   };
 
@@ -1053,6 +1124,11 @@ export interface Visualization<T = unknown, P = unknown> {
   getDropProps?: (
     dropProps: GetDropPropsArgs
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
+
+  renderLayerSettings?: (
+    domElement: Element,
+    props: VisualizationLayerSettingsProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
 
   /**
    * Additional editor that gets rendered inside the dimension popover.
@@ -1148,6 +1224,7 @@ export interface Visualization<T = unknown, P = unknown> {
    */
   onIndexPatternChange?: (state: T, indexPatternId: string, layerId?: string) => T;
   onIndexPatternRename?: (state: T, oldIndexPatternId: string, newIndexPatternId: string) => T;
+  getLayersToRemoveOnIndexPatternChange?: (state: T) => string[];
   /**
    * Gets custom display options for showing the visualization.
    */

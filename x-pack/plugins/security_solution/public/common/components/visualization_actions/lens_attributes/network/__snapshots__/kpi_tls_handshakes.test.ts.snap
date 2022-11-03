@@ -135,36 +135,16 @@ Object {
         },
         "query": Object {
           "bool": Object {
-            "filter": Array [
+            "minimum_should_match": 1,
+            "should": Array [
               Object {
-                "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
-                          Object {
-                            "exists": Object {
-                              "field": "source.ip",
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
-                          Object {
-                            "exists": Object {
-                              "field": "destination.ip",
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                "exists": Object {
+                  "field": "source.ip",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "destination.ip",
                 },
               },
             ],
@@ -202,6 +182,7 @@ Object {
     },
     "visualization": Object {
       "accessor": "21052b6b-5504-4084-a2e2-c17f772345cf",
+      "autoScaleMetricAlignment": "left",
       "layerId": "1f48a633-8eee-45ae-9471-861227e9ca03",
       "layerType": "data",
     },
