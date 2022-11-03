@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-import type { PolicyConfig, SupportedFields } from '../types';
+import type { PolicyConfig } from '../types';
 import { ProtectionModes } from '../types';
 
 /**
  * Returns a copy of the passed `PolicyConfig` with all protections set to disabled.
  *
  * @param policy
- * @param disableSupport Set to true to disable support flags
  * @returns
  */
-export const disableProtections = (policy: PolicyConfig, disableSupport = false): PolicyConfig => {
-  const supportedField: SupportedFields | {} = disableSupport ? { supported: false } : {};
-
-  const result = disableCommonProtections(policy, supportedField);
+export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
+  const result = disableCommonProtections(policy);
 
   return {
     ...result,
     windows: {
       ...result.windows,
-      ...getDisabledWindowsSpecificProtections(result, supportedField),
+      ...getDisabledWindowsSpecificProtections(result),
       popup: {
         ...result.windows.popup,
         ...getDisabledWindowsSpecificPopups(result),
@@ -33,7 +30,7 @@ export const disableProtections = (policy: PolicyConfig, disableSupport = false)
   };
 };
 
-const disableCommonProtections = (policy: PolicyConfig, supportedFields: SupportedFields | {}) => {
+const disableCommonProtections = (policy: PolicyConfig) => {
   let policyOutput = policy;
 
   for (const key in policyOutput) {
@@ -44,7 +41,7 @@ const disableCommonProtections = (policy: PolicyConfig, supportedFields: Support
         ...policyOutput,
         [os]: {
           ...policyOutput[os],
-          ...getDisabledCommonProtectionsForOS(policyOutput, os, supportedFields),
+          ...getDisabledCommonProtectionsForOS(policyOutput, os),
           popup: {
             ...policyOutput[os].popup,
             ...getDisabledCommonPopupsForOS(policyOutput, os),
@@ -56,19 +53,13 @@ const disableCommonProtections = (policy: PolicyConfig, supportedFields: Support
   return policyOutput;
 };
 
-const getDisabledCommonProtectionsForOS = (
-  policy: PolicyConfig,
-  os: keyof PolicyConfig,
-  supportedFields: SupportedFields | {}
-) => ({
+const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: keyof PolicyConfig) => ({
   behavior_protection: {
     ...policy[os].behavior_protection,
-    ...supportedFields,
     mode: ProtectionModes.off,
   },
   memory_protection: {
     ...policy[os].memory_protection,
-    ...supportedFields,
     mode: ProtectionModes.off,
   },
   malware: {
@@ -93,13 +84,9 @@ const getDisabledCommonPopupsForOS = (policy: PolicyConfig, os: keyof PolicyConf
   },
 });
 
-const getDisabledWindowsSpecificProtections = (
-  policy: PolicyConfig,
-  supportedField: SupportedFields | {}
-) => ({
+const getDisabledWindowsSpecificProtections = (policy: PolicyConfig) => ({
   ransomware: {
     ...policy.windows.ransomware,
-    ...supportedField,
     mode: ProtectionModes.off,
   },
   attack_surface_reduction: {
