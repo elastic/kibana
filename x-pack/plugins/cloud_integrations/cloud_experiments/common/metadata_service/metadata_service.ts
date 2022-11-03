@@ -48,13 +48,13 @@ export class MetadataService {
   public setup(initialUserMetadata: UserMetadata) {
     this._userMetadata$.next(initialUserMetadata);
 
-    // Calculate `in_trial` based on the `trial_end_date`.
+    // Calculate `inTrial` based on the `trialEndDate`.
     // Elastic Cloud allows customers to end their trials earlier or even extend it in some cases, but this is a good compromise for now.
     const trialEndDate = initialUserMetadata.trialEndDate;
     if (trialEndDate) {
       this.scheduleUntil(
         () => ({ inTrial: Date.now() <= new Date(trialEndDate).getTime() }),
-        // Stop recalculating in_trial when the user is no-longer in trial
+        // Stop recalculating inTrial when the user is no-longer in trial
         (metadata) => metadata.inTrial === false
       );
     }
