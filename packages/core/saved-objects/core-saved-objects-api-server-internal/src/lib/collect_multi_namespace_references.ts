@@ -7,8 +7,8 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObject } from '@kbn/core-saved-objects-common';
-import {
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
@@ -28,8 +28,8 @@ import {
 import { findLegacyUrlAliases } from './legacy_url_aliases';
 import { getRootFields } from './included_fields';
 import { getSavedObjectFromSource, rawDocExistsInNamespace } from './internal_utils';
-import { CreatePointInTimeFinderFn } from './point_in_time_finder';
-import { RepositoryEsClient } from './repository_es_client';
+import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
+import type { RepositoryEsClient } from './repository_es_client';
 import { findSharedOriginObjects } from './find_shared_origin_objects';
 
 /**

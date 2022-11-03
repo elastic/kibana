@@ -7,7 +7,7 @@
  */
 
 import { toPath } from 'lodash';
-import { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
 import { IndexMapping } from '../types';
 
 function getPropertyMappingFromObjectMapping(

@@ -12,8 +12,8 @@
 
 import crypto from 'crypto';
 import { cloneDeep, mapValues } from 'lodash';
-import { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
-import {
+import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
+import type {
   IndexMapping,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';

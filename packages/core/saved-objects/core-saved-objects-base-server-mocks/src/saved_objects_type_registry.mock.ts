@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 
 const createRegistryMock = (): jest.Mocked<
   ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>

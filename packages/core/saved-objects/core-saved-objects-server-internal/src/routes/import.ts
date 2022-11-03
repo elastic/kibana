@@ -9,10 +9,10 @@
 import { Readable } from 'stream';
 import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
-import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsImportError } from '@kbn/core-saved-objects-import-export-server-internal';
-import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import { InternalSavedObjectRouter } from '../internal_types';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';
 
 interface RouteDependencies {

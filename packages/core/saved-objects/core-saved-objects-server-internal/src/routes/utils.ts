@@ -16,9 +16,9 @@ import {
   createConcatStream,
 } from '@kbn/utils';
 import Boom from '@hapi/boom';
-import { RequestHandlerWrapper } from '@kbn/core-http-server';
-import { SavedObject } from '@kbn/core-saved-objects-common';
-import { SavedObjectsExportResultDetails } from '@kbn/core-saved-objects-server';
+import type { RequestHandlerWrapper } from '@kbn/core-http-server';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsExportResultDetails } from '@kbn/core-saved-objects-server';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([

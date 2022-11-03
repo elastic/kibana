@@ -7,7 +7,7 @@
  */
 
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import {
+import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
   SavedObjectsPointInTimeFinderClient,
@@ -48,7 +48,7 @@ const createPointInTimeFinderMock = ({
 const createPointInTimeFinderClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
   return {
     find: jest.fn(),
-    openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
+    openPointInTimeForType: jest.fn(),
     closePointInTime: jest.fn(),
   };
 };

@@ -7,7 +7,7 @@
  */
 
 import { mergeWith } from 'lodash';
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,

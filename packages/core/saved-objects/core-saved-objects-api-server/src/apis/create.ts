@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsMigrationVersion, SavedObjectReference } from '@kbn/core-saved-objects-common';
-import { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
+import type {
+  SavedObjectsMigrationVersion,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-common';
+import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
  * Options for the saved objects create operation

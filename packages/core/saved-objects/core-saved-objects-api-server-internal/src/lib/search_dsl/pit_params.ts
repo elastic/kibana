@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server';
 
 export function getPitParams(pit: SavedObjectsPitParams) {
   return {

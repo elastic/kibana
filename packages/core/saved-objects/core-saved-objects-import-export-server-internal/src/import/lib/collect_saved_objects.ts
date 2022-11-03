@@ -14,11 +14,11 @@ import {
   createPromiseFromStreams,
 } from '@kbn/utils';
 
-import { SavedObject, SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import type { SavedObject, SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import { SavedObjectsImportError } from '../errors';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 import { createLimitStream } from './create_limit_stream';
-import { ImportStateMap } from './types';
+import type { ImportStateMap } from './types';
 
 interface CollectSavedObjectsOptions {
   readStream: Readable;

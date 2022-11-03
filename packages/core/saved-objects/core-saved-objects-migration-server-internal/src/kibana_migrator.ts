@@ -13,11 +13,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 import Semver from 'semver';
-import { Logger } from '@kbn/logging';
-import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import {
+import type { Logger } from '@kbn/logging';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectsRawDoc,
   ISavedObjectTypeRegistry,

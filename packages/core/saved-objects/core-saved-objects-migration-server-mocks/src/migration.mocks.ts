@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
 } from '@kbn/core-saved-objects-server';

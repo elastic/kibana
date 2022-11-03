@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsBaseOptions } from './base';
+import type { SavedObjectsBaseOptions } from './base';
 
 /**
  * Options for the close point-in-time operation

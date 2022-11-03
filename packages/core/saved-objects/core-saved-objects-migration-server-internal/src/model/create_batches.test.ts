@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import * as Either from 'fp-ts/lib/Either';
-import { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { createBatches } from './create_batches';
 
 describe('createBatches', () => {

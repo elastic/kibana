@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '@kbn/logging';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { SavedObject } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
   SavedObjectsExportablePredicate,
   ISavedObjectTypeRegistry,
   SavedObjectsExportTransform,

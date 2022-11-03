@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
 import { validateRetries } from './validate_retries';
 import { SavedObjectsImportError } from '../errors';
 

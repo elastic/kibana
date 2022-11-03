@@ -7,9 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
-import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import { InternalSavedObjectRouter } from '../internal_types';
+import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {

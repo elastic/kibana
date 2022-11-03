@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreService } from '@kbn/core-base-browser-internal';
-import { HttpStart } from '@kbn/core-http-browser';
-import { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
+import type { CoreService } from '@kbn/core-base-browser-internal';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 import { SavedObjectsClient } from './saved_objects_client';
 
 export class SavedObjectsService implements CoreService<void, SavedObjectsStart> {

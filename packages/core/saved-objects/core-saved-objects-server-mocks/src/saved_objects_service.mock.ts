@@ -7,14 +7,14 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
-import {
+import type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
-import {
+import type {
   SavedObjectsService,
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,

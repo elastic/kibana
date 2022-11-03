@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 
 const createSerializerMock = () => {
   const mock: jest.Mocked<ISavedObjectsSerializer> = {

@@ -9,7 +9,7 @@
 import { mockGetConvertedObjectId } from './document_migrator.test.mock';
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { SavedObjectUnsanitizedDoc, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectUnsanitizedDoc, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectTypeRegistry,
   LEGACY_URL_ALIAS_TYPE,

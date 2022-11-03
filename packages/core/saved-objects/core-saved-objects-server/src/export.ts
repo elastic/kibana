@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Readable } from 'stream';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
-import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
+import type { Readable } from 'stream';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
 
 /**
  * Utility class used to export savedObjects.

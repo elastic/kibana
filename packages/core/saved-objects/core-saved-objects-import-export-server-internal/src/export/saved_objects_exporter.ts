@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
-import { Logger } from '@kbn/logging';
-import { SavedObject } from '@kbn/core-saved-objects-common';
-import {
+import type { Logger } from '@kbn/logging';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import {
+import type {
   ISavedObjectsExporter,
   ISavedObjectTypeRegistry,
   SavedObjectsExportResultDetails,

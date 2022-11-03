@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { withTimeout } from '@kbn/std';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectTypeExcludeFromUpgradeFilterHook } from '@kbn/core-saved-objects-server';
-import { RetryableEsClientError } from '.';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '@kbn/core-saved-objects-server';
+import type { RetryableEsClientError } from '.';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 
 export interface CalculateExcludeFiltersParams {

@@ -7,7 +7,7 @@
  */
 
 import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
-import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 
 const create = () => {
   const mock: jest.Mocked<ISavedObjectsRepository> = {

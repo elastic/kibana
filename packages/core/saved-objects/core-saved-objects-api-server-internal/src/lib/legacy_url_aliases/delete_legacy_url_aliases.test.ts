@@ -14,7 +14,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { deleteLegacyUrlAliases } from './delete_legacy_url_aliases';
-import { DeleteLegacyUrlAliasesParams } from './delete_legacy_url_aliases';
+import type { DeleteLegacyUrlAliasesParams } from './delete_legacy_url_aliases';
 
 type SetupParams = Pick<
   DeleteLegacyUrlAliasesParams,

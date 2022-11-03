@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { createIndexMap } from './build_index_map';
 

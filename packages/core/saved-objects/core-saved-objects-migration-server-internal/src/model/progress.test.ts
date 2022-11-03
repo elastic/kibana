@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MigrationLog } from '../types';
+import type { MigrationLog } from '../types';
 import {
   createInitialProgress,
   incrementProcessedProgress,

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Optional } from 'utility-types';
+import type { Optional } from 'utility-types';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { SavedObjectsClientProvider } from './scoped_client_provider';

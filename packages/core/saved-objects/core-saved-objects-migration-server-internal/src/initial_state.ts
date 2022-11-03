@@ -7,15 +7,15 @@
  */
 
 import * as Option from 'fp-ts/Option';
-import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import { Logger } from '@kbn/logging';
-import { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import {
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { Logger } from '@kbn/logging';
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type {
   IndexMapping,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { InitState } from './state';
+import type { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
 
 /**

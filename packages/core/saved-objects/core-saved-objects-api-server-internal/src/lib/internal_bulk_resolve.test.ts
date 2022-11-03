@@ -13,8 +13,8 @@ import {
 } from './internal_bulk_resolve.test.mock';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SavedObject } from '@kbn/core-saved-objects-common';
-import {
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBaseOptions,
 } from '@kbn/core-saved-objects-api-server';

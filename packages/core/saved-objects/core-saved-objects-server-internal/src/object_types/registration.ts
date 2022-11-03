@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectTypeRegistry,
   LEGACY_URL_ALIAS_TYPE,

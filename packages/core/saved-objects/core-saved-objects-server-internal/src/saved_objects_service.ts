@@ -8,18 +8,18 @@
 
 import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
-import { Logger } from '@kbn/logging';
-import { ServiceStatus } from '@kbn/core-status-common';
-import { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import {
+import type { Logger } from '@kbn/logging';
+import type { ServiceStatus } from '@kbn/core-status-common';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from '@kbn/core-elasticsearch-server-internal';
-import {
+import type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
   SavedObjectsRepositoryFactory,
@@ -49,8 +49,8 @@ import {
   SavedObjectsExporter,
   SavedObjectsImporter,
 } from '@kbn/core-saved-objects-import-export-server-internal';
-import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';

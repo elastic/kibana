@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 export async function importDashboards(
   savedObjectsClient: SavedObjectsClientContract,

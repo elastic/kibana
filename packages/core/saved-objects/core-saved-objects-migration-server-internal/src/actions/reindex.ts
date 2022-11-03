@@ -9,8 +9,8 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
   SavedObjectsRequestHandlerContext,
   ISavedObjectTypeRegistry,
   SavedObjectsClientProviderOptions,
 } from '@kbn/core-saved-objects-server';
-import { InternalSavedObjectsServiceStart } from './saved_objects_service';
+import type { InternalSavedObjectsServiceStart } from './saved_objects_service';
 
 /**
  * The {@link SavedObjectsRequestHandlerContext} implementation.

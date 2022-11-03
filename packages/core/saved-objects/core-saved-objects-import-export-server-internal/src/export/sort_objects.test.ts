@@ -8,7 +8,7 @@
 
 import { range } from 'lodash';
 import { sortObjects } from './sort_objects';
-import { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 
 describe('sortObjects()', () => {
   test('should return on empty array', () => {

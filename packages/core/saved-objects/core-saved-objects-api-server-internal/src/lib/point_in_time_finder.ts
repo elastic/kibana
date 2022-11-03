@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/logging';
-import {
+import type { Logger } from '@kbn/logging';
+import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsCreatePointInTimeFinderDependencies,

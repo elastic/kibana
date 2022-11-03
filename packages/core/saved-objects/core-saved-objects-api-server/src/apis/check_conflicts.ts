@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 /**
  * Object parameters for the check conficts operation

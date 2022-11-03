@@ -7,8 +7,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { SavedObject } from '@kbn/core-saved-objects-common';
-import { ImportStateMap } from './types';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { ImportStateMap } from './types';
 
 /**
  * Takes an array of saved objects and returns an importStateMap of randomly-generated new IDs.

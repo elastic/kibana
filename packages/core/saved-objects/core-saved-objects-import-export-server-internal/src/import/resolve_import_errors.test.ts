@@ -23,15 +23,15 @@ import {
 
 import { Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type {
   SavedObject,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectReference,
   SavedObjectsImportWarning,
 } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
   SavedObjectsType,
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createOriginQuery } from './utils';
+import type { createOriginQuery } from './utils';
 
 export const mockCreateOriginQuery = jest.fn() as jest.MockedFunction<typeof createOriginQuery>;
 jest.mock('./utils', () => ({

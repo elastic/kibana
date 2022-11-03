@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 
 const createType = (type: Partial<SavedObjectsType>): SavedObjectsType => ({

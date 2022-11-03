@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
-import { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
+import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
+import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
 
 /**
  * Request handler context used by core's savedObjects routes.

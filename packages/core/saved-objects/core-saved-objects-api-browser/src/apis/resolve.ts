@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 import { SimpleSavedObject } from '../simple_saved_object';
 
 /**

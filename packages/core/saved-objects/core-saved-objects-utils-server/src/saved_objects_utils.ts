@@ -8,7 +8,7 @@
 
 import uuidv1 from 'uuid/v1';
 import uuidv5 from 'uuid/v5';
-import {
+import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';

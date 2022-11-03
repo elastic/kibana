@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsCreateOptions } from './create';
+import type { SavedObjectsCreateOptions } from './create';
 
 /**
  * Per-object parameters for bulk create operation

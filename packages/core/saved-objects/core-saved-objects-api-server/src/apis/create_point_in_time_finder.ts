@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsFindOptions, SavedObjectsFindResponse } from './find';
+import type { SavedObjectsFindOptions, SavedObjectsFindResponse } from './find';
 import { ISavedObjectsRepository } from '../saved_objects_repository';
 
 /**

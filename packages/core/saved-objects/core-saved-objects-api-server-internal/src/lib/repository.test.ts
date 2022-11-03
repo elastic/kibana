@@ -20,11 +20,11 @@ import {
   mockGetSearchDsl,
 } from './repository.test.mock';
 
-import { Payload } from '@hapi/boom';
+import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
-import {
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsUpdateObjectsSpacesResponse,
@@ -48,7 +48,7 @@ import {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core-saved-objects-api-server';
-import {
+import type {
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
   SavedObjectUnsanitizedDoc,

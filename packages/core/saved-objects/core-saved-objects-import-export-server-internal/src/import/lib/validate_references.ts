@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsImportError } from '../errors';
-import { ImportStateMap } from './types';
+import type { ImportStateMap } from './types';
 
 const REF_TYPES_TO_VALIDATE = ['index-pattern', 'search'];
 

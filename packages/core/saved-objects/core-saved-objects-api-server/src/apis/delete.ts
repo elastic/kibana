@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
+import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
  *

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
-import { InternalSavedObjectRouter } from '../internal_types';
+import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
 
 export const registerMigrateRoute = (

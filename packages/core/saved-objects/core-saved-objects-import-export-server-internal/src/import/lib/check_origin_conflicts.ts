@@ -8,15 +8,15 @@
 
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type {
   SavedObject,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getObjectKey } from '@kbn/core-saved-objects-base-server-internal';
-import { ImportStateMap } from './types';
+import type { ImportStateMap } from './types';
 import { createOriginQuery } from './utils';
 
 interface CheckOriginConflictsParams {

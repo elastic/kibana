@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
-import { internalBulkResolve } from './internal_bulk_resolve';
-import * as InternalUtils from './internal_utils';
-import { preflightCheckForCreate } from './preflight_check_for_create';
-import { updateObjectsSpaces } from './update_objects_spaces';
-import { deleteLegacyUrlAliases } from './legacy_url_aliases';
+import type { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
+import type { internalBulkResolve } from './internal_bulk_resolve';
+import type * as InternalUtils from './internal_utils';
+import type { preflightCheckForCreate } from './preflight_check_for_create';
+import type { updateObjectsSpaces } from './update_objects_spaces';
+import type { deleteLegacyUrlAliases } from './legacy_url_aliases';
 
 export const mockCollectMultiNamespaceReferences = jest.fn() as jest.MockedFunction<
   typeof collectMultiNamespaceReferences

@@ -66,11 +66,11 @@ export { refreshIndex } from './refresh_index';
 export type { ReindexResponse, ReindexParams } from './reindex';
 export { reindex } from './reindex';
 
-import { IncompatibleMappingException } from './wait_for_reindex_task';
+import type { IncompatibleMappingException } from './wait_for_reindex_task';
 
 export { waitForReindexTask } from './wait_for_reindex_task';
 
-import { AliasNotFound, RemoveIndexNotAConcreteIndex } from './update_aliases';
+import type { AliasNotFound, RemoveIndexNotAConcreteIndex } from './update_aliases';
 
 export type { AliasAction, UpdateAliasesParams } from './update_aliases';
 export { updateAliases } from './update_aliases';
@@ -84,8 +84,8 @@ export type {
 } from './update_and_pickup_mappings';
 export { updateAndPickupMappings } from './update_and_pickup_mappings';
 
-import { UnknownDocsFound } from './check_for_unknown_docs';
-import { IncompatibleClusterRoutingAllocation } from './initialize_action';
+import type { UnknownDocsFound } from './check_for_unknown_docs';
+import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
 import { ClusterShardLimitExceeded } from './create_index';
 
 export type {

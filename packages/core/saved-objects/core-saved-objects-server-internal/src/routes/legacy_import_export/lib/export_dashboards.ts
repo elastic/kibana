@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { collectReferencesDeep } from './collect_references_deep';
 
 export async function exportDashboards(

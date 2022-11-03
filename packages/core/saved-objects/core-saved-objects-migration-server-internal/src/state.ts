@@ -7,17 +7,17 @@
  */
 
 import * as Option from 'fp-ts/lib/Option';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { DocLinks } from '@kbn/doc-links';
-import {
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { DocLinks } from '@kbn/doc-links';
+import type {
   SavedObjectsRawDoc,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '@kbn/core-saved-objects-server';
-import { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { ControlState } from './state_action_machine';
-import { AliasAction } from './actions';
-import { TransformErrorObjects } from './core';
-import { MigrationLog, Progress } from './types';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { ControlState } from './state_action_machine';
+import type { AliasAction } from './actions';
+import type { TransformErrorObjects } from './core';
+import type { MigrationLog, Progress } from './types';
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */

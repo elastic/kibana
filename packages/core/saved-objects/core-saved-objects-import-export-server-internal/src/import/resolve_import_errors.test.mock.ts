@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { checkReferenceOrigins } from './lib/check_reference_origins';
-import { validateRetries } from './lib/validate_retries';
-import { createObjectsFilter } from './lib/create_objects_filter';
-import { collectSavedObjects } from './lib/collect_saved_objects';
-import { regenerateIds } from './lib/regenerate_ids';
-import { validateReferences } from './lib/validate_references';
-import { checkConflicts } from './lib/check_conflicts';
-import { checkOriginConflicts } from './lib/check_origin_conflicts';
-import { getImportStateMapForRetries } from './lib/get_import_state_map_for_retries';
-import { splitOverwrites } from './lib/split_overwrites';
-import { createSavedObjects } from './lib/create_saved_objects';
-import { executeImportHooks } from './lib/execute_import_hooks';
+import type { checkReferenceOrigins } from './lib/check_reference_origins';
+import type { validateRetries } from './lib/validate_retries';
+import type { createObjectsFilter } from './lib/create_objects_filter';
+import type { collectSavedObjects } from './lib/collect_saved_objects';
+import type { regenerateIds } from './lib/regenerate_ids';
+import type { validateReferences } from './lib/validate_references';
+import type { checkConflicts } from './lib/check_conflicts';
+import type { checkOriginConflicts } from './lib/check_origin_conflicts';
+import type { getImportStateMapForRetries } from './lib/get_import_state_map_for_retries';
+import type { splitOverwrites } from './lib/split_overwrites';
+import type { createSavedObjects } from './lib/create_saved_objects';
+import type { executeImportHooks } from './lib/execute_import_hooks';
 
 export const mockCheckReferenceOrigins = jest.fn() as jest.MockedFunction<
   typeof checkReferenceOrigins

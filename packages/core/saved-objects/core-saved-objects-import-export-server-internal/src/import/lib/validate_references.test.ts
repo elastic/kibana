@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-import { ValidateReferencesParams } from './validate_references';
+import type { ValidateReferencesParams } from './validate_references';
 import { validateReferences } from './validate_references';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 

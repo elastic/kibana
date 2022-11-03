@@ -10,9 +10,9 @@ import pMap from 'p-map';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import intersection from 'lodash/intersection';
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import {
+import type {
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateObjectsSpacesResponse,
@@ -30,7 +30,10 @@ import {
   type DecoratedError,
   SavedObjectsUtils,
 } from '@kbn/core-saved-objects-utils-server';
-import { IndexMapping, SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import type {
+  IndexMapping,
+  SavedObjectsSerializer,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   getBulkOperationError,
@@ -41,8 +44,8 @@ import {
   isRight,
 } from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
-import { RepositoryEsClient } from './repository_es_client';
-import { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
+import type { RepositoryEsClient } from './repository_es_client';
+import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
 import { deleteLegacyUrlAliases } from './legacy_url_aliases';
 
 /**

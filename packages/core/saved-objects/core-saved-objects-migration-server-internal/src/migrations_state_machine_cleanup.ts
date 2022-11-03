@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as Actions from './actions';
-import { State } from './state';
+import type { State } from './state';
 
 export async function cleanup(client: ElasticsearchClient, state?: State) {
   if (!state) return;

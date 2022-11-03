@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Logger, LogMeta } from '@kbn/logging';
-import { SavedObjectsMigrationLogger } from '@kbn/core-saved-objects-server';
+import type { Logger, LogMeta } from '@kbn/logging';
+import type { SavedObjectsMigrationLogger } from '@kbn/core-saved-objects-server';
 
 /*
  * This file provides a helper class for ensuring that all logging

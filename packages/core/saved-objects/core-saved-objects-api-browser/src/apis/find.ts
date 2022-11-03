@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsFindOptions as SavedObjectFindOptionsServer } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsBatchResponse } from './base';
+import type { SavedObjectsFindOptions as SavedObjectFindOptionsServer } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsBatchResponse } from './base';
 
 export type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
 

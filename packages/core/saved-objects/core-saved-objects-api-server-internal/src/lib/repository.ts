@@ -8,17 +8,17 @@
 
 import { omit, isObject } from 'lodash';
 import Boom from '@hapi/boom';
-import { Payload } from '@hapi/boom';
+import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as esKuery from '@kbn/es-query';
-import { Logger } from '@kbn/logging';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,
 } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObject } from '@kbn/core-saved-objects-common';
-import {
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
   SavedObjectsBaseOptions,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsDeleteByNamespaceOptions,
@@ -128,7 +128,7 @@ import {
   PreflightCheckForCreateResult,
 } from './preflight_check_for_create';
 import { deleteLegacyUrlAliases } from './legacy_url_aliases';
-import {
+import type {
   BulkDeleteParams,
   ExpectedBulkDeleteResult,
   BulkDeleteItemErrorResult,

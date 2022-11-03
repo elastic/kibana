@@ -10,8 +10,8 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { AcknowledgeResponse } from '.';
 import {
   catchRetryableEsClientErrors,

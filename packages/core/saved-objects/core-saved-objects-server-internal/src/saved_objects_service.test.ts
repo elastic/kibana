@@ -25,9 +25,9 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
-import { SavedObjectsClientFactoryProvider } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsClientFactoryProvider } from '@kbn/core-saved-objects-server';
 import { configServiceMock } from '@kbn/config-mocks';
-import { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
+import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 

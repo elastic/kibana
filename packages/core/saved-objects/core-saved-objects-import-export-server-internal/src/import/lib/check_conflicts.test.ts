@@ -7,12 +7,12 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import {
+import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { checkConflicts } from './check_conflicts';
 
