@@ -11,15 +11,15 @@ import useIntersection from 'react-use/lib/useIntersection';
 
 export interface LoadWhenInViewProps {
   children: JSX.Element;
-  minHeight?: string | number;
-  placeholder: string;
+  initialHeight?: string | number;
+  placeholderTitle: string;
 }
 
 // eslint-disable-next-line import/no-default-export
 export default function LoadWhenInView({
   children,
-  placeholder,
-  minHeight = 100,
+  placeholderTitle,
+  initialHeight = 100,
 }: LoadWhenInViewProps) {
   const intersectionRef = React.useRef(null);
   const intersection = useIntersection(intersectionRef, {
@@ -36,13 +36,17 @@ export default function LoadWhenInView({
     }
   }, [intersection, intersection?.intersectionRatio]);
 
-  return (
+  return isVisible ? (
+    children
+  ) : (
     <div
-      {...(!isVisible ? { region: undefined, 'aria-label': placeholder } : {})}
+      data-test-subj="renderOnlyInViewPlaceholderContainer"
       ref={intersectionRef}
-      style={!isVisible && minHeight ? { height: minHeight } : {}}
+      role="region"
+      aria-label={placeholderTitle}
+      style={{ height: initialHeight }}
     >
-      {!isVisible ? <EuiLoadingContent /> : children}
+      <EuiLoadingContent />
     </div>
   );
 }

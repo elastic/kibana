@@ -32,14 +32,17 @@ export function RumDashboard() {
       </EuiFlexItem>
       <EuiFlexItem>
         <LoadWhenInView
-          minHeight={300}
-          placeholder={I18LABELS.pageLoadDurationByRegion}
+          initialHeight={300}
+          placeholderTitle={I18LABELS.pageLoadDurationByRegion}
         >
           <VisitorBreakdownsPanel />
         </LoadWhenInView>
       </EuiFlexItem>
       <EuiFlexItem>
-        <LoadWhenInView minHeight={300} placeholder={I18LABELS.jsErrors}>
+        <LoadWhenInView
+          initialHeight={300}
+          placeholderTitle={I18LABELS.jsErrors}
+        >
           <ImpactfulMetrics />
         </LoadWhenInView>
       </EuiFlexItem>

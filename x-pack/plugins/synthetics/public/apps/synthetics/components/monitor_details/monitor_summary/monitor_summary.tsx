@@ -108,7 +108,7 @@ export const MonitorSummary = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <LoadWhenInView placeholder={LAST_10_TEST_RUNS}>
+      <LoadWhenInView placeholderTitle={LAST_10_TEST_RUNS}>
         <TestRunsTable paginable={false} from={from} to={to} />
       </LoadWhenInView>
     </>
