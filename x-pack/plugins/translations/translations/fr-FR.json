@@ -31139,7 +31139,6 @@
     "xpack.synthetics.monitorManagement.monitorSync.failure.reasonLabel": "Raison",
     "xpack.synthetics.monitorManagement.monitorSync.failure.statusLabel": "Statut",
     "xpack.synthetics.monitorManagement.monitorSync.failure.title": "Impossible de synchroniser les moniteurs avec le service Synthetics",
-    "xpack.synthetics.monitorManagement.myFirstMonitor": "Mon premier moniteur",
     "xpack.synthetics.monitorManagement.nameRequired": "Le nom de l’emplacement est requis",
     "xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermission": "Vous n'êtes pas autorisé à accéder à Fleet. Des autorisations Fleet sont nécessaires pour créer de nouveaux emplacements privés.",
     "xpack.synthetics.monitorManagement.needPermissions": "Permissions requises",

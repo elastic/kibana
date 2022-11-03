@@ -32,7 +32,7 @@ export const OverviewPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const { refreshApp } = useSyntheticsRefreshContext();
+  const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
 
   const { loading, pageState } = useSelector(selectOverviewState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
@@ -52,7 +52,7 @@ export const OverviewPage: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchMonitorOverviewAction.get(pageState));
-  }, [dispatch, pageState]);
+  }, [dispatch, pageState, lastRefresh]);
 
   const {
     enablement: { isEnabled },

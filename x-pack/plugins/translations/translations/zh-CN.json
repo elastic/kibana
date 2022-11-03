@@ -31150,7 +31150,6 @@
     "xpack.synthetics.monitorManagement.monitorSync.failure.reasonLabel": "原因",
     "xpack.synthetics.monitorManagement.monitorSync.failure.statusLabel": "状态",
     "xpack.synthetics.monitorManagement.monitorSync.failure.title": "监测无法与 Synthetics 服务同步",
-    "xpack.synthetics.monitorManagement.myFirstMonitor": "我的第一个监测",
     "xpack.synthetics.monitorManagement.nameRequired": "“位置名称”必填",
     "xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermission": "您无权访问 Fleet。需要 Fleet 权限才能创建新的专用位置。",
     "xpack.synthetics.monitorManagement.needPermissions": "需要权限",

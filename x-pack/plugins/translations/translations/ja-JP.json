@@ -31115,7 +31115,6 @@
     "xpack.synthetics.monitorManagement.monitorSync.failure.reasonLabel": "理由",
     "xpack.synthetics.monitorManagement.monitorSync.failure.statusLabel": "ステータス",
     "xpack.synthetics.monitorManagement.monitorSync.failure.title": "モニターをSyntheticsサービスと同期できませんでした",
-    "xpack.synthetics.monitorManagement.myFirstMonitor": "最初のモニター",
     "xpack.synthetics.monitorManagement.nameRequired": "場所名は必須です",
     "xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermission": "Fleet へのアクセスが許可されていません。新しい非公開の場所を作成するには、Fleet権限が必要です。",
     "xpack.synthetics.monitorManagement.needPermissions": "権限が必要です",
