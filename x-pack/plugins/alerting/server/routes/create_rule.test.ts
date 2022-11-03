@@ -67,7 +67,6 @@ describe('createRuleRoute', () => {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
-    running: false,
   };
 
   const ruleToCreate: AsApiContract<CreateOptions<{ bar: boolean }>['data']> = {
@@ -103,7 +102,6 @@ describe('createRuleRoute', () => {
         connector_type_id: 'test',
       },
     ],
-    running: false,
   };
 
   it('creates a rule with proper parameters', async () => {

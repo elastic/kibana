@@ -446,7 +446,6 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
-        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -665,7 +664,6 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
-        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1093,7 +1091,6 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
-        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1293,7 +1290,6 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
-        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1462,7 +1458,6 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
-        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1629,7 +1624,6 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
-        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1762,7 +1756,6 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
-        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1895,7 +1888,6 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
-        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -2061,7 +2053,6 @@ describe('create()', () => {
             },
           },
         },
-        running: false,
         mapped_params: {
           risk_score: 42,
           severity: '20-low',
@@ -2418,7 +2409,6 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
-        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -2521,7 +2511,6 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
-        running: false,
       },
       {
         id: 'mock-saved-object-id',

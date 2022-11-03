@@ -385,7 +385,6 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'isSnoozedUntil'
     | 'lastRun'
     | 'nextRun'
-    | 'running'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -624,7 +623,6 @@ export class RulesClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
-      running: false,
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
     };
@@ -2657,7 +2655,6 @@ export class RulesClient {
             duration: 0,
           }),
         }),
-        running: false,
         nextRun: getNextRunString(schedule.interval),
         enabled: true,
         updatedBy: username,

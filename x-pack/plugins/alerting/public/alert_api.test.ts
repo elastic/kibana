@@ -131,7 +131,6 @@ describe('loadRule', () => {
         "params": Object {
           "x": 42,
         },
-        "running": false,
         "schedule": Object {
           "interval": "1s",
         },
@@ -290,7 +289,6 @@ function getApiRule() {
       last_execution_date: RuleExecuteDate.toISOString(),
       last_duration: 1194,
     },
-    running: false,
   };
 }
 
@@ -332,6 +330,5 @@ function getRule(): Rule<{ x: number }> {
       lastExecutionDate: RuleExecuteDate,
       lastDuration: 1194,
     },
-    running: false,
   };
 }

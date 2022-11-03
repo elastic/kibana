@@ -63,7 +63,6 @@ describe('resolveRuleRoute', () => {
     },
     outcome: 'aliasMatch',
     alias_target_id: '2',
-    running: false,
   };
 
   const resolveResult: AsApiContract<ResolvedSanitizedRule<{ bar: boolean }>> = {
@@ -101,7 +100,6 @@ describe('resolveRuleRoute', () => {
       },
     ],
     outcome: 'aliasMatch',
-    running: false,
   };
 
   it('resolves a rule with proper parameters', async () => {

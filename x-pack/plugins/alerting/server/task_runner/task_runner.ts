@@ -199,7 +199,6 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
-      running?: boolean;
     }
   ) {
     const client = this.context.internalSavedObjectsRepository;
@@ -858,7 +857,6 @@ export class TaskRunner<
         alertsCount: {},
       },
       monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-      running: false,
       nextRun:
         nextRunString && new Date(nextRunString).getTime() > date.getTime() ? nextRunString : null,
     });

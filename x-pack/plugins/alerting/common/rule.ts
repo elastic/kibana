@@ -134,7 +134,6 @@ export interface Rule<Params extends RuleTypeParams = never> {
   isSnoozedUntil?: Date | null;
   lastRun?: RuleLastRun | null;
   nextRun?: Date | null;
-  running: boolean;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
