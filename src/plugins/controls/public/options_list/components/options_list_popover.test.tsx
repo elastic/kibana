@@ -167,6 +167,6 @@ describe('Options list popover', () => {
     });
     clickShowOnlySelections(popover);
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    expect(availableOptionsDiv.children().at(0).text()).toBe('Exists (*)');
+    expect(availableOptionsDiv.children().at(0).text()).toBe('Exists');
   });
 });
