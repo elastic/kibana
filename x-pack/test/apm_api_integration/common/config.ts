@@ -18,7 +18,11 @@ import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
 import { bootstrapApmSynthtrace } from './bootstrap_apm_synthtrace';
-import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
+import {
+  FtrProviderContext,
+  InheritedFtrProviderContext,
+  InheritedServices,
+} from './ftr_provider_context';
 import { RegistryProvider } from './registry';
 
 export interface ApmFtrConfig {
@@ -45,7 +49,7 @@ async function getApmApiClient({
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
 type ApmApiClientKey =
-  | 'noAccesUser'
+  | 'noAccessUser'
   | 'readUser'
   | 'writeUser'
   | 'annotationWriterUser'
@@ -60,12 +64,12 @@ export interface CreateTest {
   servicesRequiredForTestAnalysis: string[];
   services: InheritedServices & {
     apmFtrConfig: () => ApmFtrConfig;
-    registry: ReturnType<typeof RegistryProvider>;
+    registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
     synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
     apmApiClient: (
       context: InheritedFtrProviderContext
     ) => Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
-    ml: ReturnType<typeof MachineLearningAPIProvider>;
+    ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
   };
   junit: { reportName: string };
   esTestCluster: any;
