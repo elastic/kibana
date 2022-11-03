@@ -21,8 +21,8 @@ export const exceptionListTypeOrUndefined = t.union([exceptionListType, t.undefi
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
 export type ExceptionListTypeOrUndefined = t.TypeOf<typeof exceptionListTypeOrUndefined>;
 export enum ExceptionListTypeEnum {
-  DETECTION = 'detection',
-  RULE_DEFAULT = 'rule_default',
+  DETECTION = 'detection', // shared exception list type
+  RULE_DEFAULT = 'rule_default', // rule default, cannot be shared
   ENDPOINT = 'endpoint',
   ENDPOINT_TRUSTED_APPS = 'endpoint',
   ENDPOINT_EVENTS = 'endpoint_events',

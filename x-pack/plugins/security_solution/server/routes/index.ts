@@ -72,6 +72,7 @@ import {
   readPrebuiltDevToolContentRoute,
   restartTransformRoute,
 } from '../lib/risk_score/routes';
+import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -93,6 +94,7 @@ export const initRoutes = (
   registerLegacyRuleActionsRoutes(router, logger);
   registerPrebuiltRulesRoutes(router, config, security);
   registerRuleExceptionsRoutes(router);
+  registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
   registerRuleMonitoringRoutes(router);
   registerRulePreviewRoutes(

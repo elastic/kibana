@@ -9,8 +9,10 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { createRuleExceptionsRoute } from './create_rule_exceptions/route';
 import { findRuleExceptionReferencesRoute } from './find_exception_references/route';
+// import { createSharedExceptionListRoute } from './create_shared_exception_list/route';
 
 export const registerRuleExceptionsRoutes = (router: SecuritySolutionPluginRouter) => {
   createRuleExceptionsRoute(router);
   findRuleExceptionReferencesRoute(router);
+  // createSharedExceptionListRoute(router);
 };

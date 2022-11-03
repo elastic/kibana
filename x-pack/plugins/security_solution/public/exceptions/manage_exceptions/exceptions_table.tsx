@@ -424,7 +424,13 @@ export const ExceptionListsTable = React.memo(() => {
       </EuiFlexGroup>
 
       {displayCreateSharedListFlyout && (
-        <CreateSharedListFlyout handleCloseFlyout={() => setDisplayCreateSharedListFlyout(false)} />
+        <CreateSharedListFlyout
+          handleRefresh={handleRefresh}
+          http={http}
+          addSuccess={addSuccess}
+          addError={addError}
+          handleCloseFlyout={() => setDisplayCreateSharedListFlyout(false)}
+        />
       )}
 
       {displayAddExceptionItemFlyout && (

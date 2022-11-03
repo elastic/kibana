@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useCallback, useRef, useEffect } from 'react';
 import {
   EuiFlyout,
   EuiTitle,
@@ -21,11 +21,30 @@ import {
   EuiButton,
   EuiFlexItem,
 } from '@elastic/eui';
+import type { HttpSetup } from '@kbn/core-http-browser';
+
+import { useCreateSharedExceptionListWithOptionalSignal } from './use_create_shared_list';
 
 export const CreateSharedListFlyout = memo(
-  ({ handleCloseFlyout }: { handleCloseFlyout: () => void }) => {
+  ({
+    handleRefresh,
+    http,
+    handleCloseFlyout,
+    addSuccess,
+    addError,
+  }: {
+    handleRefresh: () => void;
+    http: HttpSetup;
+    addSuccess: (toastOrTitle: ToastInput, options?: unknown) => Toast;
+    addError: (error: unknown, options: ErrorToastOptions) => Toast;
+    handleCloseFlyout: () => void;
+  }) => {
     const [listName, setListName] = useState('');
     const [description, setDescription] = useState('');
+
+    const { start: createSharedExceptionList, ...createSharedExceptionListState } =
+      useCreateSharedExceptionListWithOptionalSignal();
+    const ctrl = useRef(new AbortController());
 
     const onListNameChange = (e) => {
       setListName(e.target.value);
@@ -33,6 +52,70 @@ export const CreateSharedListFlyout = memo(
     const onDescriptionChange = (e) => {
       setDescription(e.target.value);
     };
+
+    const hanadleCreateSharedExceptionList = useCallback(() => {
+      if (!createSharedExceptionListState.loading && listName !== '') {
+        ctrl.current = new AbortController();
+
+        createSharedExceptionList({
+          http,
+          signal: ctrl.current.signal,
+          name: listName,
+          description,
+        });
+      }
+    }, [
+      createSharedExceptionList,
+      createSharedExceptionListState.loading,
+      description,
+      http,
+      listName,
+    ]);
+
+    const handleCreateSuccess = useCallback(
+      (response) => {
+        addSuccess({
+          text: `list with name ${listName} was created!`,
+          title: `created list`,
+        });
+        handleRefresh();
+
+        handleCloseFlyout();
+      },
+      [addSuccess, handleCloseFlyout, handleRefresh, listName]
+    );
+
+    const handleCreateError = useCallback(
+      (errors) => {
+        errors.forEach((error) => {
+          if (!error.error.message.includes('AbortError')) {
+            addError(error.error.message, { title: 'creation error' });
+          }
+        });
+      },
+      [addError]
+    );
+
+    useEffect(() => {
+      if (!createSharedExceptionListState.loading) {
+        console.error('NOT LOADING');
+        if (createSharedExceptionListState?.result?.name) {
+          console.error('HAS NAME');
+          handleCreateSuccess(createSharedExceptionListState.result);
+        } else if (createSharedExceptionListState?.result?.errors) {
+          handleCreateError(createSharedExceptionListState?.result?.errors);
+        }
+        console.error('FAILED');
+      } else {
+        console.error('LOADING');
+      }
+    }, [
+      createSharedExceptionListState.loading,
+      createSharedExceptionListState.result,
+      handleCreateError,
+      handleCreateSuccess,
+    ]);
+
     return (
       <EuiFlyout
         ownFocus
@@ -72,7 +155,7 @@ export const CreateSharedListFlyout = memo(
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="exception-lists-form-create-shared"
-                onClick={() => console.error({ listName, description })}
+                onClick={hanadleCreateSharedExceptionList}
                 disabled={listName === ''}
               >
                 {'Create shared exception list'}
