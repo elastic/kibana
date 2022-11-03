@@ -368,7 +368,9 @@ describe('metric_visualization', () => {
                     "type": "expression",
                   },
                 ],
-                "palette": Array [],
+                "percentageMode": Array [
+                  false,
+                ],
                 "showLabels": Array [
                   true,
                 ],
