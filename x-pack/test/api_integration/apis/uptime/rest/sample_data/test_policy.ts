@@ -19,7 +19,7 @@ export const getTestSyntheticsPolicy = (
   version: 'WzE2MjYsMV0=',
   name: 'test-monitor-name-Test private location 0-default',
   namespace: namespace || 'testnamespace',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.10.3' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.11.2' },
   enabled: true,
   policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
   inputs: [
@@ -308,17 +308,17 @@ export const getTestProjectSyntheticsPolicy = (
     configId: string;
     id: string;
   } = {
-    name: 'check if title is present-Test private location 0',
-    inputs: {},
-    configId: '',
-    id: '',
-  }
+      name: 'check if title is present-Test private location 0',
+      inputs: {},
+      configId: '',
+      id: '',
+    }
 ): PackagePolicy => ({
   id: '4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
   version: 'WzEzMDksMV0=',
   name: '4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-Test private location 0',
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.10.3' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.11.2' },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   inputs: [
