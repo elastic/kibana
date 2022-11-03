@@ -6,7 +6,11 @@
  */
 
 import { SavedObject } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+  SavedObjectsFindResponse,
+} from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { SLO, sloSchema, StoredSLO } from '../../types/models';
@@ -23,6 +27,23 @@ function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
     attributes: sloSchema.encode(slo),
     type: SO_SLO_TYPE,
     references: [],
+  };
+}
+
+function aFindResponse(slo: SLO): SavedObjectsFindResponse<StoredSLO> {
+  return {
+    page: 1,
+    per_page: 25,
+    total: 1,
+    saved_objects: [
+      {
+        id: slo.id,
+        attributes: sloSchema.encode(slo),
+        type: SO_SLO_TYPE,
+        references: [],
+        score: 1,
+      },
+    ],
   };
 }
 
@@ -84,5 +105,48 @@ describe('KibanaSavedObjectsSLORepository', () => {
     await repository.deleteById(SOME_SLO.id);
 
     expect(soClientMock.delete).toHaveBeenCalledWith(SO_SLO_TYPE, SOME_SLO.id);
+  });
+
+  describe('find', () => {
+    const DEFAULT_PAGINATION = { page: 1, perPage: 25 };
+
+    it('includes the filter on name when provided', async () => {
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+      const result = await repository.find({ nameFilter: 'availability' }, DEFAULT_PAGINATION);
+
+      expect(result).toEqual({
+        page: 1,
+        perPage: 25,
+        total: 1,
+        results: [SOME_SLO],
+      });
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: 25,
+        filter: `slo.attributes.name: availability`,
+      });
+    });
+
+    it('does not include the filter when no criteria provided', async () => {
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+      const result = await repository.find({}, DEFAULT_PAGINATION);
+
+      expect(result).toEqual({
+        page: 1,
+        perPage: 25,
+        total: 1,
+        results: [SOME_SLO],
+      });
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: 25,
+      });
+    });
   });
 });

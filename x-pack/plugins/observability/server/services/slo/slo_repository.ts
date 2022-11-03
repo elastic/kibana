@@ -16,10 +16,27 @@ import { StoredSLO, SLO, sloSchema } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLONotFound } from '../../errors';
 
+export interface Criteria {
+  nameFilter?: string;
+}
+
+export interface Pagination {
+  page: number;
+  perPage: number;
+}
+
+export interface Paginated<T> {
+  page: number;
+  perPage: number;
+  total: number;
+  results: T[];
+}
+
 export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
+  find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
@@ -56,6 +73,31 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       throw err;
     }
   }
+
+  async find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>> {
+    const filterKuery = buildFilterKuery(criteria);
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: pagination.page,
+      perPage: pagination.perPage,
+      filter: filterKuery,
+    });
+
+    return {
+      total: response.total,
+      page: response.page,
+      perPage: response.per_page,
+      results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
+    };
+  }
+}
+
+function buildFilterKuery(criteria: Criteria): string | undefined {
+  const filters: string[] = [];
+  if (!!criteria.nameFilter) {
+    filters.push(`slo.attributes.name: ${criteria.nameFilter}`);
+  }
+  return filters.length > 0 ? filters.join(' and ') : undefined;
 }
 
 function toStoredSLO(slo: SLO): StoredSLO {
