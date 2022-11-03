@@ -9,6 +9,7 @@
 import { EuiComboBox, EuiComboBoxOptionOption, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { UnifiedHistogramBreakdownContext } from '../types';
 
@@ -47,7 +48,9 @@ export const BreakdownFieldSelector = ({
 
   return (
     <EuiComboBox
-      prepend="Breakdown by"
+      prepend={i18n.translate('unifiedHistogram.breakdownFieldSelectorLabel', {
+        defaultMessage: 'Break down by',
+      })}
       singleSelection={{ asPlainText: true }}
       options={fieldOptions}
       selectedOptions={selectedFields}

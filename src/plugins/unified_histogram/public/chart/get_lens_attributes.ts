@@ -8,6 +8,7 @@
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import type {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -52,10 +53,20 @@ export const getLensAttributes = ({
     count_column: {
       dataType: 'number',
       isBucketed: false,
-      label: 'Count of records',
+      label: i18n.translate('unifiedHistogram.countColumnLabel', {
+        defaultMessage: 'Count of records',
+      }),
       operationType: 'count',
       scale: 'ratio',
       sourceField: '___records___',
+      params: {
+        format: {
+          id: 'number',
+          params: {
+            decimals: 0,
+          },
+        },
+      },
     } as CountIndexPatternColumn,
   };
 
@@ -65,7 +76,10 @@ export const getLensAttributes = ({
       breakdown_column: {
         dataType: 'string',
         isBucketed: true,
-        label: `Top 3 values of ${breakdownField.name}`,
+        label: i18n.translate('unifiedHistogram.breakdownColumnLabel', {
+          defaultMessage: 'Top 3 values of {fieldName}',
+          values: { fieldName: breakdownField?.displayName },
+        }),
         operationType: 'terms',
         scale: 'ordinal',
         sourceField: breakdownField.name,
@@ -139,17 +153,17 @@ export const getLensAttributes = ({
         axisTitlesVisibilitySettings: {
           x: false,
           yLeft: false,
-          yRight: true,
+          yRight: false,
         },
         gridlinesVisibilitySettings: {
           x: true,
           yLeft: true,
-          yRight: true,
+          yRight: false,
         },
         tickLabelsVisibilitySettings: {
           x: true,
           yLeft: true,
-          yRight: true,
+          yRight: false,
         },
       },
     },
