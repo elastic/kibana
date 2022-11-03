@@ -151,8 +151,6 @@ export const useDetailPanel = ({
     }
   }, [scopedActions, tabType, expandedDetail, scopeId, shouldShowDetailsPanel, dispatch]);
 
-  console.log(isFlyoutView);
-  console.log(shouldShowDetailsPanel);
   const DetailsPanel = useMemo(
     () =>
       shouldShowDetailsPanel ? (
