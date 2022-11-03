@@ -5371,7 +5371,9 @@
             "label": "fetchFindLatestPackage",
             "description": [],
             "signature": [
-              "(packageName: string) => Promise<",
+              "(packageName: string, options?: ",
+              "FetchFindLatestPackageOptions",
+              " | undefined) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -5407,6 +5409,22 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.fetchFindLatestPackage.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "FetchFindLatestPackageOptions",
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

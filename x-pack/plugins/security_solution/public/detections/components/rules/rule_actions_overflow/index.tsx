@@ -12,11 +12,10 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { noop } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
-import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -65,7 +64,7 @@ const RuleActionsOverflowComponent = ({
   const { navigateToApp } = useKibana().services.application;
   const toasts = useAppToasts();
   const { startTransaction } = useStartTransaction();
-  const { executeBulkAction } = useExecuteBulkAction();
+  const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
 
   const onRuleDeletedCallback = useCallback(() => {
@@ -88,9 +87,8 @@ const RuleActionsOverflowComponent = ({
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
                 const result = await executeBulkAction({
-                  action: BulkAction.duplicate,
-                  onSuccess: noop,
-                  search: { ids: [rule.id] },
+                  type: BulkActionType.duplicate,
+                  ids: [rule.id],
                 });
                 const createdRules = result?.attributes.results.created;
                 if (createdRules?.length) {
@@ -117,7 +115,7 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
                 closePopover();
-                const response = await bulkExport({ search: { ids: [rule.id] } });
+                const response = await bulkExport({ ids: [rule.id] });
                 if (response) {
                   await downloadExportedRules({
                     response,
@@ -137,10 +135,11 @@ const RuleActionsOverflowComponent = ({
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 closePopover();
                 await executeBulkAction({
-                  action: BulkAction.delete,
-                  onSuccess: onRuleDeletedCallback,
-                  search: { ids: [rule.id] },
+                  type: BulkActionType.delete,
+                  ids: [rule.id],
                 });
+
+                onRuleDeletedCallback();
               }}
             >
               {i18nActions.DELETE_RULE}
