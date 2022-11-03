@@ -7,6 +7,8 @@
 
 import { useEffect, useCallback, useState, useMemo } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   ChangePointAnnotation,
   ChangePointDetectionRequestParams,
@@ -86,6 +88,10 @@ export function useChangePointResults(
   requestParams: ChangePointDetectionRequestParams,
   query: QueryDslQueryContainer
 ) {
+  const {
+    notifications: { toasts },
+  } = useAiopsAppContext();
+
   const { dataView } = useDataSource();
 
   const [results, setResults] = useState<ChangePointAnnotation[]>([]);
@@ -111,72 +117,83 @@ export function useChangePointResults(
 
   const fetchResults = useCallback(
     async (afterKey?: string, prevBucketsCount?: number) => {
-      if (!splitFieldCardinality) {
-        setProgress(100);
-        return;
-      }
+      try {
+        if (!splitFieldCardinality) {
+          setProgress(100);
+          return;
+        }
 
-      const requestPayload = getChangePointDetectionRequestBody(
-        {
-          index: dataView.getIndexPattern(),
-          fn: requestParams.fn,
-          timeInterval: requestParams.interval,
-          metricField: requestParams.metricField,
-          timeField: dataView.timeFieldName!,
-          splitField: requestParams.splitField,
-          afterKey,
-        },
-        query
-      );
-      const result = await runRequest<
-        typeof requestPayload,
-        { rawResponse: ChangePointAggResponse }
-      >(requestPayload);
-
-      if (result === null) {
-        setProgress(100);
-        return;
-      }
-
-      const buckets = result.rawResponse.aggregations.groupings.buckets;
-
-      setProgress(
-        Math.round(((buckets.length + (prevBucketsCount ?? 0)) / splitFieldCardinality) * 100)
-      );
-
-      const groups = buckets
-        .map((v) => {
-          const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
-          const timeAsString = v.change_point_request.bucket?.key;
-          return {
-            group_field: v.key.splitFieldTerm,
-            type: changePointType,
-            p_value: v.change_point_request.type[changePointType].p_value,
-            timestamp: timeAsString,
-            label: changePointType,
-            reason: v.change_point_request.type[changePointType].reason,
-          } as ChangePointAnnotation;
-        })
-        // Filter out change point results without p_value
-        .filter((v): v is ChangePointAnnotation => !!v && Number.isFinite(v.p_value));
-
-      setResults((prev) => {
-        return (
-          (prev ?? [])
-            .concat(groups)
-            // Lower p_value indicates a bigger change point, hence the acs sorting
-            .sort((a, b) => a.p_value - b.p_value)
+        const requestPayload = getChangePointDetectionRequestBody(
+          {
+            index: dataView.getIndexPattern(),
+            fn: requestParams.fn,
+            timeInterval: requestParams.interval,
+            metricField: requestParams.metricField,
+            timeField: dataView.timeFieldName!,
+            splitField: requestParams.splitField,
+            afterKey,
+          },
+          query
         );
-      });
+        const result = await runRequest<
+          typeof requestPayload,
+          { rawResponse: ChangePointAggResponse }
+        >(requestPayload);
 
-      if (result.rawResponse.aggregations.groupings.after_key?.splitFieldTerm) {
-        fetchResults(
-          result.rawResponse.aggregations.groupings.after_key.splitFieldTerm,
-          buckets.length + (prevBucketsCount ?? 0)
+        if (result === null) {
+          setProgress(100);
+          return;
+        }
+
+        const buckets = result.rawResponse.aggregations.groupings.buckets;
+
+        setProgress(
+          Math.min(
+            Math.round(((buckets.length + (prevBucketsCount ?? 0)) / splitFieldCardinality) * 100),
+            100
+          )
         );
+
+        const groups = buckets
+          .map((v) => {
+            const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
+            const timeAsString = v.change_point_request.bucket?.key;
+            return {
+              group_field: v.key.splitFieldTerm,
+              type: changePointType,
+              p_value: v.change_point_request.type[changePointType].p_value,
+              timestamp: timeAsString,
+              label: changePointType,
+              reason: v.change_point_request.type[changePointType].reason,
+            } as ChangePointAnnotation;
+          })
+          // Filter out change point results without p_value
+          .filter((v): v is ChangePointAnnotation => !!v && Number.isFinite(v.p_value));
+
+        setResults((prev) => {
+          return (
+            (prev ?? [])
+              .concat(groups)
+              // Lower p_value indicates a bigger change point, hence the acs sorting
+              .sort((a, b) => a.p_value - b.p_value)
+          );
+        });
+
+        if (result.rawResponse.aggregations.groupings.after_key?.splitFieldTerm) {
+          await fetchResults(
+            result.rawResponse.aggregations.groupings.after_key.splitFieldTerm,
+            buckets.length + (prevBucketsCount ?? 0)
+          );
+        }
+      } catch (e) {
+        toasts.addError(e, {
+          title: i18n.translate('xpack.aiops.changePointDetection.fetchErrorTitle', {
+            defaultMessage: 'Failed to fetch change points',
+          }),
+        });
       }
     },
-    [runRequest, requestParams, query, dataView, splitFieldCardinality]
+    [runRequest, requestParams, query, dataView, splitFieldCardinality, toasts]
   );
 
   useEffect(() => {
