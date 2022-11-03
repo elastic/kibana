@@ -189,7 +189,7 @@ export const getPieVisualization = ({
         ) + multiMetricsBucketDimensionCount;
 
       const fakeFinalAccessor =
-        layer.metrics.length > 1
+        layer.metrics.length > 1 && layer.allowMultipleMetrics
           ? {
               label: i18n.translate('xpack.lens.pie.multiMetricAccessorLabel', {
                 defaultMessage: '{number} metrics',

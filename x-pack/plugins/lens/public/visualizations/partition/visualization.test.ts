@@ -375,6 +375,7 @@ describe('pie_visualization', () => {
       (type) => {
         const state = { ...getExampleState(), type };
         state.layers[0].metrics.push('1', '2');
+        state.layers[0].allowMultipleMetrics = true;
         expect(
           pieVisualization.getConfiguration({
             state,
@@ -382,6 +383,16 @@ describe('pie_visualization', () => {
             layerId: state.layers[0].layerId,
           }).groups[1].fakeFinalAccessor
         ).toEqual({ label: '2 metrics' });
+
+        // but not when multiple metrics aren't allowed
+        state.layers[0].allowMultipleMetrics = false;
+        expect(
+          pieVisualization.getConfiguration({
+            state,
+            frame: mockFrame(),
+            layerId: state.layers[0].layerId,
+          }).groups[1].fakeFinalAccessor
+        ).toBeUndefined();
       }
     );
   });
