@@ -12,13 +12,12 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { SecurityPageName } from '../../../../app/types';
 import { getEditRuleUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import type { BulkAction } from '../../api/api';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
-import { showBulkErrorToast } from './show_bulk_error_toast';
-import { showBulkSuccessToast } from './show_bulk_success_toast';
+import { useShowBulkErrorToast } from './use_show_bulk_error_toast';
+import { useShowBulkSuccessToast } from './use_show_bulk_success_toast';
 import { useGuessRuleIdsForBulkAction } from './use_guess_rule_ids_for_bulk_action';
 
 export const goToRuleEditPage = (
@@ -36,8 +35,9 @@ interface UseExecuteBulkActionOptions {
 }
 
 export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
-  const toasts = useAppToasts();
   const { mutateAsync } = useBulkActionMutation();
+  const showBulkSuccessToast = useShowBulkSuccessToast();
+  const showBulkErrorToast = useShowBulkErrorToast();
   const guessRuleIdsForBulkAction = useGuessRuleIdsForBulkAction();
   const rulesTableContext = useRulesTableContextOptional();
   const setLoadingRules = rulesTableContext?.actions.setLoadingRules;
@@ -54,17 +54,24 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
         sendTelemetry(bulkAction.type, response);
 
         if (!options?.suppressSuccessToast) {
-          showBulkSuccessToast(toasts, bulkAction.type, response.attributes.summary);
+          showBulkSuccessToast(bulkAction.type, response.attributes.summary);
         }
 
         return response;
       } catch (error) {
-        showBulkErrorToast(toasts, bulkAction.type, error);
+        showBulkErrorToast(bulkAction.type, error);
       } finally {
         setLoadingRules?.({ ids: [], action: null });
       }
     },
-    [options?.suppressSuccessToast, guessRuleIdsForBulkAction, setLoadingRules, mutateAsync, toasts]
+    [
+      options?.suppressSuccessToast,
+      guessRuleIdsForBulkAction,
+      setLoadingRules,
+      mutateAsync,
+      showBulkSuccessToast,
+      showBulkErrorToast,
+    ]
   );
 
   return { executeBulkAction };

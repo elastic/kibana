@@ -5,18 +5,22 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import type { BulkActionSummary } from '..';
-import type { UseAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { explainBulkSuccess, summarizeBulkSuccess } from './translations';
 
-export function showBulkSuccessToast(
-  toasts: UseAppToasts,
-  action: BulkActionType,
-  summary: BulkActionSummary
-): void {
-  toasts.addSuccess({
-    title: summarizeBulkSuccess(action),
-    text: explainBulkSuccess(action, summary),
-  });
+export function useShowBulkSuccessToast() {
+  const toasts = useAppToasts();
+
+  return useCallback(
+    (action: BulkActionType, summary: BulkActionSummary) => {
+      toasts.addSuccess({
+        title: summarizeBulkSuccess(action),
+        text: explainBulkSuccess(action, summary),
+      });
+    },
+    [toasts]
+  );
 }
