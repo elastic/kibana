@@ -9,8 +9,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
+  titleColumnName: i18n.translate('filesManagement.table.titleColumnName', {
+    defaultMessage: 'Name',
+  }),
   tableListTitle: i18n.translate('filesManagement.table.title', { defaultMessage: 'Files' }),
   entityName: i18n.translate('filesManagement.entityName.title', { defaultMessage: 'file' }),
+  retry: i18n.translate('filesManagement.button.retry', {
+    defaultMessage: 'Retry',
+  }),
   entityNamePlural: i18n.translate('filesManagement.entityNamePlural.title', {
     defaultMessage: 'files',
   }),
@@ -22,5 +28,11 @@ export const i18nTexts = {
   }),
   size: i18n.translate('filesManagement.table.sizeColumnName', {
     defaultMessage: 'Size',
+  }),
+  diagnosticsFlyoutTitle: i18n.translate('filesManagement.diagnostics.flyoutTitle', {
+    defaultMessage: 'Diagnostics',
+  }),
+  failedToFetchDiagnostics: i18n.translate('filesManagement.diagnostics.errorMessage', {
+    defaultMessage: 'Could not fetch diagnostics',
   }),
 };

@@ -16,8 +16,11 @@ import {
   TableListViewKibanaProvider,
   TableListViewKibanaDependencies,
 } from '@kbn/content-management-table-list';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { StartDependencies } from './types';
 import { App } from './app';
+
+const queryClient = new QueryClient();
 
 export const mountManagementSection = (
   coreStart: CoreStart,
@@ -26,19 +29,21 @@ export const mountManagementSection = (
 ) => {
   ReactDOM.render(
     <I18nProvider>
-      <TableListViewKibanaProvider
-        {...{
-          core: coreStart as unknown as TableListViewKibanaDependencies['core'],
-          toMountPoint,
-          FormattedRelative,
-        }}
-      >
-        <KibanaContextProvider
-          services={{ filesClient: startDeps.files.filesClientFactory.asUnscoped() }}
+      <QueryClientProvider client={queryClient}>
+        <TableListViewKibanaProvider
+          {...{
+            core: coreStart as unknown as TableListViewKibanaDependencies['core'],
+            toMountPoint,
+            FormattedRelative,
+          }}
         >
-          <App />
-        </KibanaContextProvider>
-      </TableListViewKibanaProvider>
+          <KibanaContextProvider
+            services={{ filesClient: startDeps.files.filesClientFactory.asUnscoped() }}
+          >
+            <App />
+          </KibanaContextProvider>
+        </TableListViewKibanaProvider>
+      </QueryClientProvider>
     </I18nProvider>,
     element
   );

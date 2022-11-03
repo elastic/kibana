@@ -16,29 +16,36 @@ import { EmptyPrompt } from './components';
 
 type FilesUserContentSchema = UserContentCommonSchema;
 
+function naivelyFuzzify(query: string): string {
+  return query.includes('*') ? query : `*${query}*`;
+}
+
 export const App: FunctionComponent = () => {
   const {
     services: { filesClient },
   } = useKibana();
   return (
     <TableListView<FilesUserContentSchema>
+      titleColumnName={i18nTexts.titleColumnName}
       emptyPrompt={<EmptyPrompt />}
       entityName={i18nTexts.entityName}
       entityNamePlural={i18nTexts.entityNamePlural}
       findItems={(searchQuery) =>
-        filesClient.find({ name: searchQuery || undefined }).then(({ files, total }) => ({
-          hits: files.map((file) => ({
-            id: file.id,
-            updatedAt: file.updated,
-            references: [],
-            type: 'file',
-            attributes: {
-              title: file.name,
-              size: file.size,
-            },
-          })),
-          total,
-        }))
+        filesClient
+          .find({ name: searchQuery ? naivelyFuzzify(searchQuery) : undefined })
+          .then(({ files, total }) => ({
+            hits: files.map((file) => ({
+              id: file.id,
+              updatedAt: file.updated,
+              references: [],
+              type: 'file',
+              attributes: {
+                title: file.name + (file.extension ? `.${file.extension}` : ''),
+                size: file.size,
+              },
+            })),
+            total,
+          }))
       }
       customTableColumn={{
         name: i18nTexts.size,
