@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { withReportPerformanceMetric, PerfArgs } from './reportPerformance';
+export { withReportPerformanceMetric, PerfArgs } from './report_performance';
 
 export {
   FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
   FILE_UPLOAD_PERFORMANCE_EVENT_NAME,
-} from './eventNames';
+} from './event_names';
