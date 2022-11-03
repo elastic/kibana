@@ -282,3 +282,5 @@ enabled:
   - x-pack/performance/journeys/warmup.ts
   - x-pack/performance/journeys/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys/ecommerce_dashboard_tsvb_gauge_only.ts
+  - x-pack/performance/journeys/web_logs_dashboard_vega_only.ts
+  

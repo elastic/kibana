@@ -113,6 +113,7 @@ while read -r journey; do
 
 done <<< "$journeys"
 
+<<<<<<< HEAD
 # remove trap, we're manually shutting down
 trap - EXIT;
 
@@ -132,6 +133,15 @@ while is_running $esPid; do
     sleep 5;
   fi
 done
+=======
+echo "--- Upload journey step screenshots"
+JOURNEY_SCREENSHOTS_DIR="${KIBANA_DIR}/data/journey_screenshots"
+if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
+  cd "$JOURNEY_SCREENSHOTS_DIR"
+  buildkite-agent artifact upload "**/*fullscreen*.png"
+  cd "$KIBANA_DIR"
+fi
+>>>>>>> upstream
 
 echo "--- report/record failed journeys"
 if [ "${failedJourneys[*]}" != "" ]; then
