@@ -330,11 +330,11 @@ export const CodeEditor: React.FC<Props> = ({
       });
 
       // Register themes
-    //   monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
-    //   monaco.editor.defineTheme(
-    //     'euiColorsTransparent',
-    //     useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
-    //   );
+      //   monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
+      //   monaco.editor.defineTheme(
+      //     'euiColorsTransparent',
+      //     useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+      //   );
     },
     [
       overrideEditorWillMount,
