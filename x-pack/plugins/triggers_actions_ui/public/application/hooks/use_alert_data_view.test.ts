@@ -6,25 +6,33 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { AsyncState } from 'react-use/lib/useAsync';
-import { kibanaStartMock } from '../utils/kibana_react.mock';
-import { observabilityAlertFeatureIds } from '../config';
 import { useAlertDataView } from './use_alert_data_view';
 
-const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+const mockUseKibanaReturnValue = createStartServicesMock();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
 }));
 
 describe('useAlertDataView', () => {
   const mockedDataView = 'dataView';
+  const observabilityAlertFeatureIds: ValidFeatureId[] = [
+    AlertConsumers.APM,
+    AlertConsumers.INFRASTRUCTURE,
+    AlertConsumers.LOGS,
+    AlertConsumers.UPTIME,
+  ];
 
   beforeEach(() => {
-    mockUseKibanaReturnValue.services.http.get.mockImplementation(async () => ({
+    mockUseKibanaReturnValue.http.get.mockImplementation(async () => ({
       index_name: [
         '.alerts-observability.uptime.alerts-*',
         '.alerts-observability.metrics.alerts-*',
@@ -32,8 +40,8 @@ describe('useAlertDataView', () => {
         '.alerts-observability.apm.alerts-*',
       ],
     }));
-    mockUseKibanaReturnValue.services.data.dataViews.create.mockImplementation(
-      async () => mockedDataView
+    mockUseKibanaReturnValue.data.dataViews.create.mockImplementation(
+      async () => mockedDataView as any as DataView
     );
   });
 
@@ -77,7 +85,7 @@ describe('useAlertDataView', () => {
 
   it('returns error with no data when error happens', async () => {
     const error = new Error('http error');
-    mockUseKibanaReturnValue.services.http.get.mockImplementation(async () => {
+    mockUseKibanaReturnValue.http.get.mockImplementation(async () => {
       throw error;
     });
 

@@ -13,9 +13,10 @@ export type Start = jest.Mocked<ReturnType<DataViewsPlugin['start']>>;
 
 const createSetupContract = (): Setup => ({});
 
-const createStartContract = (): Start => {
+const createStartContract = () => {
   return {
     find: jest.fn((search) => [{ id: search, title: search }]),
+    create: jest.fn(() => {}),
     createField: jest.fn(() => {}),
     createFieldList: jest.fn(() => []),
     ensureDefaultIndexPattern: jest.fn(),

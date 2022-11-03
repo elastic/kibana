@@ -25,7 +25,7 @@ const createSetupContract = (): Setup => {
   };
 };
 
-const createStartContract = (): Start => {
+const createStartContract = () => {
   const queryStartMock = queryServiceMock.createStartContract();
   const dataViews = dataViewPluginMocks.createStartContract();
 
