@@ -130,9 +130,7 @@ describe('useAdHocDataViews', () => {
       updatedDataView = await hook.result.current.updateAdHocDataViewId(mockDataView);
     });
 
-    expect(dataViewsCreateMock).toHaveBeenCalledWith({
-      id: undefined,
-    });
+    expect(mockDiscoverServices.dataViews.clearInstanceCache).toHaveBeenCalledWith(mockDataView.id);
     expect(updatedDataView!.id).toEqual('updated-mock-id');
   });
 });

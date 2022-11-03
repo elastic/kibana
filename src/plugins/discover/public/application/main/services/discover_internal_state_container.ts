@@ -20,7 +20,11 @@ export interface InternalState {
 
 interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
-  setDataViewsAdHoc: (state: InternalState) => (dataViews: DataView[]) => InternalState;
+  appendAdHocDataView: (state: InternalState) => (dataView: DataView) => InternalState;
+  removeAdHocDataViewById: (state: InternalState) => (id: string) => InternalState;
+  replaceAdHocDataViewWithId: (
+    state: InternalState
+  ) => (id: string, dataView: DataView) => InternalState;
 }
 
 export type InternalStateContainer = ReduxLikeStateContainer<
@@ -42,10 +46,21 @@ export function getInternalStateContainer() {
         ...prevState,
         dataView: nextDataView,
       }),
-      setDataViewsAdHoc: (prevState: InternalState) => (dataViewsAdHoc: DataView[]) => ({
+      appendAdHocDataView: (prevState: InternalState) => (dataViewAdHoc: DataView) => ({
         ...prevState,
-        dataViewsAdHoc,
+        dataViewsAdHoc: prevState.dataViewsAdHoc.concat(dataViewAdHoc),
       }),
+      removeAdHocDataViewById: (prevState: InternalState) => (id: string) => ({
+        ...prevState,
+        dataViewsAdHoc: prevState.dataViewsAdHoc.filter((dataView) => dataView.id !== id),
+      }),
+      replaceAdHocDataViewWithId:
+        (prevState: InternalState) => (prevId: string, newDataView: DataView) => ({
+          ...prevState,
+          dataViewsAdHoc: prevState.dataViewsAdHoc.map((dataView) =>
+            dataView.id === prevId ? newDataView : dataView
+          ),
+        }),
     },
     {},
     { freeze: (state) => state }

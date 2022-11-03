@@ -61,6 +61,8 @@ export const DiscoverTopNav = ({
   const adHocDataViewList = useInternalStateSelector((state) => state.dataViewsAdHoc);
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
+  // eslint-disable-next-line no-console
+  console.log('adHocDataViewList', adHocDataViewList);
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
     [dataView]
@@ -128,13 +130,16 @@ export const DiscoverTopNav = ({
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
       onSave: async (dataViewToSave) => {
+        if (!dataViewToSave.isPersisted()) {
+          stateContainer.actions.appendAdHocDataView(dataViewToSave);
+        }
         if (dataViewToSave.id) {
           onChangeDataView(dataViewToSave.id);
         }
       },
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, onChangeDataView]);
+  }, [dataViewEditor, onChangeDataView, stateContainer.actions]);
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (pattern: string) => {
@@ -144,9 +149,11 @@ export const DiscoverTopNav = ({
       if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
         newDataView.timeFieldName = '@timestamp';
       }
+
+      stateContainer.actions.appendAdHocDataView(newDataView);
       onChangeDataView(newDataView.id!);
     },
-    [dataViews, onChangeDataView]
+    [dataViews, onChangeDataView, stateContainer.actions]
   );
 
   const topNavMenu = useMemo(

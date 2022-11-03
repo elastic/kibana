@@ -7,19 +7,15 @@
  */
 
 import { useCallback } from 'react';
+import uuid from 'uuid/v4';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import { getUiActions } from '../../../kibana_services';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { DiscoverStateContainer } from '../services/discover_state';
 import { useFiltersValidation } from './use_filters_validation';
+import { updateFiltersReferences } from '../utils/update_filter_references';
 
 export const useAdHocDataViews = ({
   savedSearch,
@@ -46,50 +42,40 @@ export const useAdHocDataViews = ({
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = useCallback(
-    async (dataViewToUpdate: DataView) => {
-      const adHocDataViewList = stateContainer.internalState.getState().dataViewsAdHoc;
-      const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
+    async (prevDataView: DataView) => {
+      const newDataView = await dataViews.create({ ...prevDataView.toSpec(), id: uuid() });
+      dataViews.clearInstanceCache(prevDataView.id);
 
-      dataViews.clearInstanceCache(dataViewToUpdate.id);
-      const nextAdHocDataViewList = adHocDataViewList.filter(
-        (d: DataView) => d.id && dataViewToUpdate.id && d.id !== dataViewToUpdate.id
-      );
-      stateContainer.internalState.transitions.setDataViewsAdHoc(nextAdHocDataViewList);
+      updateFiltersReferences(prevDataView, newDataView);
 
-      const uiActions = await getUiActions();
-      const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-      const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
-
-      // execute shouldn't be awaited, this is important for pending history push cancellation
-      action?.execute({
-        trigger,
-        fromDataView: dataViewToUpdate.id,
-        toDataView: newDataView.id,
-        usedDataViews: [],
-      } as ActionExecutionContext);
-      stateContainer.actions.setDataView(newDataView);
+      stateContainer.actions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
       await stateContainer.replaceUrlAppState({ index: newDataView.id });
+
       setUrlTracking(newDataView);
       return newDataView;
     },
     [dataViews, setUrlTracking, stateContainer]
   );
 
-  const { openConfirmSavePrompt, updateSavedSearch } =
-    useConfirmPersistencePrompt(updateAdHocDataViewId);
+  const { openConfirmSavePrompt, updateSavedSearch } = useConfirmPersistencePrompt(stateContainer);
   const persistDataView = useCallback(async () => {
     const currentDataView = savedSearch.searchSource.getField('index')!;
-    if (currentDataView && !currentDataView.isPersisted()) {
-      const createdDataView = await openConfirmSavePrompt(currentDataView);
-
-      // update saved search with saved data view
-      if (createdDataView && savedSearch.id) {
-        const currentState = stateContainer.appState.getState();
-        await updateSavedSearch({ savedSearch, dataView: createdDataView, state: currentState });
-      }
-      return createdDataView;
+    if (!currentDataView || currentDataView.isPersisted()) {
+      return currentDataView;
     }
-    return currentDataView;
+
+    const createdDataView = await openConfirmSavePrompt(currentDataView);
+    if (!createdDataView) {
+      return currentDataView; // persistance cancelled
+    }
+
+    if (savedSearch.id) {
+      // update saved search with saved data view
+      const currentState = stateContainer.appState.getState();
+      await updateSavedSearch({ savedSearch, dataView: createdDataView, state: currentState });
+    }
+
+    return createdDataView;
   }, [stateContainer, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
 
   return { persistDataView, updateAdHocDataViewId };

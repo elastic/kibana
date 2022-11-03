@@ -63,7 +63,8 @@ export function useDiscoverState({
     });
     container.actions.setDataView(dataView);
     return container;
-  }, [history, savedSearch, services, dataView]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [history, savedSearch, services]);
 
   const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
