@@ -158,9 +158,8 @@ export class ProjectMonitorFormatterLegacy {
     if (normalizedUpdateMonitors.length > 0) {
       let updateMessage = '';
       if (updatedCount > 0) {
-        updateMessage = `${updatedCount} monitor${
-          updatedCount > 1 ? 's' : ''
-        } updated successfully.`;
+        updateMessage = `${updatedCount} monitor${updatedCount > 1 ? 's' : ''
+          } updated successfully.`;
       }
 
       const noChanges = normalizedUpdateMonitors.length - updatedCount;
@@ -202,7 +201,7 @@ export class ProjectMonitorFormatterLegacy {
         privateLocations: this.privateLocations,
         projectId: this.projectId,
         namespace: this.spaceId,
-        version: this.server.kibanaVersion,
+        version: this.server.stackVersion,
       });
 
       if (errors.length) {
@@ -306,9 +305,8 @@ export class ProjectMonitorFormatterLegacy {
         if (newMonitors && newMonitors.length === monitors.length) {
           this.createdMonitors.push(...monitors.map((monitor) => monitor[ConfigKey.JOURNEY_ID]!));
           this.handleStreamingMessage({
-            message: `${monitors.length} monitor${
-              monitors.length > 1 ? 's' : ''
-            } created successfully.`,
+            message: `${monitors.length} monitor${monitors.length > 1 ? 's' : ''
+              } created successfully.`,
           });
         } else {
           this.failedMonitors.push({
