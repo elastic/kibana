@@ -61,7 +61,12 @@ export const casesContextReducer: React.Reducer<CasesContextState, CasesContextS
     case CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT: {
       return {
         ...state,
-        createCaseFlyout: { ...state.createCaseFlyout, isFlyoutOpen: true, props: action.payload },
+        createCaseFlyout: {
+          ...state.createCaseFlyout,
+          autoSubmit: false,
+          isFlyoutOpen: true,
+          props: action.payload,
+        },
       };
     }
     case CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT: {

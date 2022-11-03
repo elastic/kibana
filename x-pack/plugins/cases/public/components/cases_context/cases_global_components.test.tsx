@@ -36,6 +36,7 @@ describe('Cases context UI', () => {
           isFlyoutOpen: true,
           autoSubmit: false,
           props: {
+            autoSubmit: false,
             attachments: [],
           },
         },

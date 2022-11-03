@@ -37,6 +37,7 @@ const defaultProps = {
   onClose,
   onSuccess,
   owner: 'securitySolution',
+  autoSubmit: false,
 };
 
 describe('CreateCaseFlyout', () => {

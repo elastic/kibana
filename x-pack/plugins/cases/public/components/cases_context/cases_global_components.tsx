@@ -14,7 +14,10 @@ export const CasesGlobalComponents = React.memo(({ state }: { state: CasesContex
   return (
     <>
       {state.createCaseFlyout.isFlyoutOpen && state.createCaseFlyout.props !== undefined
-        ? getCreateCaseFlyoutLazyNoProvider(state.createCaseFlyout.props)
+        ? getCreateCaseFlyoutLazyNoProvider({
+            ...state.createCaseFlyout.props,
+            autoSubmit: state.createCaseFlyout.autoSubmit,
+          })
         : null}
       {state.selectCaseModal.isModalOpen && state.selectCaseModal.props !== undefined
         ? getAllCasesSelectorModalNoProviderLazy(state.selectCaseModal.props)

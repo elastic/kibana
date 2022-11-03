@@ -57,11 +57,13 @@ const MySpinner = styled(EuiLoadingSpinner)`
 `;
 
 export interface CreateCaseFormFieldsProps {
+  autoSubmit: boolean;
   connectors: ActionConnector[];
   isLoadingConnectors: boolean;
   withSteps: boolean;
 }
-export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
+export interface CreateCaseFormProps
+  extends Pick<Partial<CreateCaseFormFieldsProps>, 'autoSubmit' | 'withSteps'> {
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
   afterCaseCreated?: (
@@ -75,11 +77,11 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ connectors, isLoadingConnectors, withSteps }) => {
+  ({ autoSubmit, connectors, isLoadingConnectors, withSteps }) => {
     const { isSubmitting, submit } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
 
-    const { owner, autoSubmit } = useCasesContext();
+    const { owner } = useCasesContext();
 
     useEffect(() => {
       if (autoSubmit) submit();
@@ -183,6 +185,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
   ({
     withSteps = true,
     afterCaseCreated,
+    autoSubmit = false,
     onCancel,
     onSuccess,
     timelineIntegration,
@@ -197,6 +200,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         initialValue={initialValue}
       >
         <CreateCaseFormFields
+          autoSubmit={autoSubmit}
           connectors={empty}
           isLoadingConnectors={false}
           withSteps={withSteps}

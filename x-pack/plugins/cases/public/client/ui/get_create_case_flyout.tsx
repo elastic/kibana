@@ -29,6 +29,7 @@ export const getCreateCaseFlyoutLazy = ({
   afterCaseCreated,
   onClose,
   onSuccess,
+  autoSubmit,
   attachments,
 }: GetCreateCaseFlyoutPropsInternal) => (
   <CasesProvider
@@ -43,6 +44,7 @@ export const getCreateCaseFlyoutLazy = ({
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CreateCaseFlyoutLazy
         afterCaseCreated={afterCaseCreated}
+        autoSubmit={autoSubmit}
         onClose={onClose}
         onSuccess={onSuccess}
         attachments={attachments}
