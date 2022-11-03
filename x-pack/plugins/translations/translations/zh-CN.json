@@ -970,7 +970,6 @@
     "dashboard.listing.unsaved.discardTitle": "放弃更改",
     "dashboard.listing.unsaved.editTitle": "继续编辑",
     "dashboard.listing.unsaved.loading": "正在加载",
-    "dashboard.migratedChanges": "某些面板已成功更新到最新版本。",
     "dashboard.noMatchRoute.bannerTitleText": "未找到页面",
     "dashboard.panel.AddToLibrary": "保存到库",
     "dashboard.panel.clonedToast": "克隆的面板",

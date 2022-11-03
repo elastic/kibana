@@ -970,7 +970,6 @@
     "dashboard.listing.unsaved.discardTitle": "Abandonner les modifications",
     "dashboard.listing.unsaved.editTitle": "Poursuivre les modifications",
     "dashboard.listing.unsaved.loading": "Chargement",
-    "dashboard.migratedChanges": "Certains des panneaux ont été mis à jour vers la version la plus récente.",
     "dashboard.noMatchRoute.bannerTitleText": "Page introuvable",
     "dashboard.panel.AddToLibrary": "Enregistrer dans la bibliothèque",
     "dashboard.panel.clonedToast": "Panneau cloné",

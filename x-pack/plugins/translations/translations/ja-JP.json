@@ -968,7 +968,6 @@
     "dashboard.listing.unsaved.discardTitle": "変更を破棄",
     "dashboard.listing.unsaved.editTitle": "編集を続行",
     "dashboard.listing.unsaved.loading": "読み込み中",
-    "dashboard.migratedChanges": "一部のパネルは正常に最新バージョンに更新されました。",
     "dashboard.noMatchRoute.bannerTitleText": "ページが見つかりません",
     "dashboard.panel.AddToLibrary": "ライブラリに保存",
     "dashboard.panel.clonedToast": "クローンパネル",

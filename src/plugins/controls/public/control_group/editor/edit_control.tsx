@@ -73,8 +73,6 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       let factory = getControlFactory(panel.type);
       if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
 
-      const controlGroup = embeddable.getRoot() as ControlGroupContainer;
-
       let inputToReturn: Partial<DataControlInput> = {};
 
       let removed = false;
