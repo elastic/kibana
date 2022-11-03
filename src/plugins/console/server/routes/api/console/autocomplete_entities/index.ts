@@ -11,9 +11,12 @@ import https from 'https';
 import { Buffer } from 'buffer';
 import { parse } from 'query-string';
 import Boom from '@hapi/boom';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SemVer } from 'semver';
 import type { RouteDependencies } from '../../..';
 import { sanitizeHostname } from '../../../../lib/utils';
 import type { ESConfigForProxy } from '../../../../types';
+import { getRequestConfig } from '../proxy/create_handler';
 
 interface Settings {
   indices: boolean;
@@ -22,11 +25,13 @@ interface Settings {
   dataStreams: boolean;
 }
 
+type Config = ESConfigForProxy & { headers: KibanaRequest['headers'] } & { kibanaVersion: SemVer };
+
 const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
 // Limit the response size to 10MB, because the response can be very large and sending it to the client
 // can cause the browser to hang.
 
-const getMappings = async (settings: Settings, config: ESConfigForProxy) => {
+const getMappings = async (settings: Settings, config: Config) => {
   if (settings.fields) {
     const mappings = await getEntity('/_mapping', config);
     return mappings;
@@ -35,7 +40,7 @@ const getMappings = async (settings: Settings, config: ESConfigForProxy) => {
   return {};
 };
 
-const getAliases = async (settings: Settings, config: ESConfigForProxy) => {
+const getAliases = async (settings: Settings, config: Config) => {
   if (settings.indices) {
     const aliases = await getEntity('/_alias', config);
     return aliases;
@@ -44,7 +49,7 @@ const getAliases = async (settings: Settings, config: ESConfigForProxy) => {
   return {};
 };
 
-const getDataStreams = async (settings: Settings, config: ESConfigForProxy) => {
+const getDataStreams = async (settings: Settings, config: Config) => {
   if (settings.dataStreams) {
     const dataStreams = await getEntity('/_data_stream', config);
     return dataStreams;
@@ -53,7 +58,7 @@ const getDataStreams = async (settings: Settings, config: ESConfigForProxy) => {
   return {};
 };
 
-const getLegacyTemplates = async (settings: Settings, config: ESConfigForProxy) => {
+const getLegacyTemplates = async (settings: Settings, config: Config) => {
   if (settings.templates) {
     const legacyTemplates = await getEntity('/_template', config);
     return legacyTemplates;
@@ -62,7 +67,7 @@ const getLegacyTemplates = async (settings: Settings, config: ESConfigForProxy) 
   return {};
 };
 
-const getIndexTemplates = async (settings: Settings, config: ESConfigForProxy) => {
+const getIndexTemplates = async (settings: Settings, config: Config) => {
   if (settings.templates) {
     const indexTemplates = await getEntity('/_index_template', config);
     return indexTemplates;
@@ -71,7 +76,7 @@ const getIndexTemplates = async (settings: Settings, config: ESConfigForProxy) =
   return {};
 };
 
-const getComponentTemplates = async (settings: Settings, config: ESConfigForProxy) => {
+const getComponentTemplates = async (settings: Settings, config: Config) => {
   if (settings.templates) {
     const componentTemplates = await getEntity('/_component_template', config);
     return componentTemplates;
@@ -80,15 +85,18 @@ const getComponentTemplates = async (settings: Settings, config: ESConfigForProx
   return {};
 };
 
-const getEntity = (path: string, config: ESConfigForProxy) => {
+const getEntity = (path: string, config: Config) => {
   return new Promise((resolve, reject) => {
-    const { hosts } = config;
+    const { hosts, kibanaVersion } = config;
     for (let idx = 0; idx < hosts.length; idx++) {
       const host = hosts[idx];
-      const { hostname, port, protocol } = new URL(host);
+      const uri = new URL(host + path);
+      const { protocol, hostname, port } = uri;
+      const { headers } = getRequestConfig(config.headers, config, uri.toString(), kibanaVersion);
       const client = protocol === 'https:' ? https : http;
       const options = {
         method: 'GET',
+        headers: { ...headers },
         host: sanitizeHostname(hostname),
         port: port === '' ? undefined : parseInt(port, 10),
         protocol,
@@ -145,15 +153,20 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
       }
 
       const legacyConfig = await deps.proxy.readLegacyESConfig();
+      const configWithHeaders = {
+        ...legacyConfig,
+        headers: request.headers,
+        kibanaVersion: deps.kibanaVersion,
+      };
 
       // Wait for all requests to complete, in case one of them fails return the successfull ones
       const results = await Promise.allSettled([
-        getMappings(settings, legacyConfig),
-        getAliases(settings, legacyConfig),
-        getDataStreams(settings, legacyConfig),
-        getLegacyTemplates(settings, legacyConfig),
-        getIndexTemplates(settings, legacyConfig),
-        getComponentTemplates(settings, legacyConfig),
+        getMappings(settings, configWithHeaders),
+        getAliases(settings, configWithHeaders),
+        getDataStreams(settings, configWithHeaders),
+        getLegacyTemplates(settings, configWithHeaders),
+        getIndexTemplates(settings, configWithHeaders),
+        getComponentTemplates(settings, configWithHeaders),
       ]);
 
       const [mappings, aliases, dataStreams, legacyTemplates, indexTemplates, componentTemplates] =
