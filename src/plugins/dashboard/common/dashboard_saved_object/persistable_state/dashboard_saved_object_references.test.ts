@@ -13,7 +13,10 @@ import {
   ExtractDeps,
 } from './dashboard_saved_object_references';
 
-import { createExtract, createInject } from './dashboard_container_references';
+import {
+  createExtract,
+  createInject,
+} from '../../dashboard_container/persistable_state/dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();

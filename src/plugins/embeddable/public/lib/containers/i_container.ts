@@ -42,7 +42,7 @@ export interface EmbeddableContainerSettings<TContainerInput> {
   /**
    *
    */
-  readyToInitializeChildren$: Observable<TContainerInput>;
+  readyToInitializeChildren$?: Observable<TContainerInput>;
 }
 
 export interface IContainer<

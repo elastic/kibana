@@ -34,10 +34,9 @@ export const dashboardSavedObjectServiceFactory: DashboardSavedObjectServiceFact
   } = coreStart;
 
   return {
-    loadDashboardStateFromSavedObject: ({ id, getScopedHistory }) =>
+    loadDashboardStateFromSavedObject: ({ id }) =>
       loadDashboardStateFromSavedObject({
         id,
-        getScopedHistory,
         savedObjectsClient,
         ...requiredServices,
       }),

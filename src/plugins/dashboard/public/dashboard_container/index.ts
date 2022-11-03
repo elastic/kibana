@@ -10,6 +10,6 @@ export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
 export { DashboardContainer } from './embeddable/dashboard_container';
 export {
-  DashboardContainerFactory,
+  type DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
 } from './embeddable/dashboard_container_factory';
