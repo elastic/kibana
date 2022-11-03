@@ -31,6 +31,7 @@
     { "path": "../../../src/plugins/embeddable/tsconfig.json"},
     { "path": "../../../src/plugins/presentation_util/tsconfig.json"},
     { "path": "../../../src/plugins/field_formats/tsconfig.json"},
+    { "path": "../../../src/plugins/chart_expressions/expression_partition_vis/tsconfig.json"},
     { "path": "../../../src/plugins/chart_expressions/expression_heatmap/tsconfig.json"},
     { "path": "../../../src/plugins/chart_expressions/expression_gauge/tsconfig.json"},
     { "path": "../../../src/plugins/chart_expressions/expression_legacy_metric/tsconfig.json"},
