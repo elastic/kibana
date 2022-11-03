@@ -202,6 +202,3 @@ const SYNTHETICS_SEND_TIMINGS_LABEL = i18n.translate('xpack.synthetics.send', {
 const SYNTHETICS_RECEIVE_TIMINGS_LABEL = i18n.translate('xpack.synthetics.receive', {
   defaultMessage: 'Receive',
 });
-const SYNTHETICS_TOTAL_TIMINGS_LABEL = i18n.translate('xpack.synthetics.total', {
-  defaultMessage: 'Total',
-});
