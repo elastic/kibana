@@ -118,8 +118,8 @@ describe('Cloud Experiments server plugin', () => {
         expect(launchDarklyInstanceMock.updateUserMetadata).toHaveBeenCalledWith({
           userId: '1c2412b751f056aef6e340efa5637d137442d489a4b1e3117071e7c87f8523f2',
           kibanaVersion: coreMock.createPluginInitializerContext().env.packageInfo.version,
-          is_elastic_staff_owned: true,
-          trial_end_date: expect.any(String),
+          isElasticStaff: true,
+          trialEndDate: expect.any(String),
         });
       })
     );
@@ -165,7 +165,7 @@ describe('Cloud Experiments server plugin', () => {
       );
     });
 
-    test('triggers a userMetadataUpdate for `has_data`', async () => {
+    test('triggers a userMetadataUpdate for `hasData`', async () => {
       plugin.setup(coreMock.createSetup(), {
         cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
       });
@@ -177,7 +177,7 @@ describe('Cloud Experiments server plugin', () => {
       await new Promise((resolve) => setTimeout(resolve, 200)); // Waiting for scheduler and debounceTime to complete (don't know why fakeScheduler didn't work here).
       expect(launchDarklyInstanceMock.updateUserMetadata).toHaveBeenCalledWith(
         expect.objectContaining({
-          has_data: true,
+          hasData: true,
         })
       );
     });
