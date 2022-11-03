@@ -39,7 +39,6 @@ export const OptionsListPopoverSuggestions = ({
   const existsSelected = select((state) => state.explicitInput.existsSelected);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const hideExists = select((state) => state.explicitInput.hideExists);
-  const exclude = select((state) => state.explicitInput.exclude);
 
   const loading = select((state) => state.output.loading);
 
@@ -90,9 +89,7 @@ export const OptionsListPopoverSuggestions = ({
             }}
           >
             <span className="optionsList__existsFilter">
-              {exclude
-                ? OptionsListStrings.controlAndPopover.getNegateExists()
-                : OptionsListStrings.controlAndPopover.getExists()}
+              {OptionsListStrings.controlAndPopover.getExists()}
             </span>
           </EuiFilterSelectItem>
         )}

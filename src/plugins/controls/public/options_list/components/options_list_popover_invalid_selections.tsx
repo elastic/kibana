@@ -48,9 +48,7 @@ export const OptionsListPopoverInvalidSelections = () => {
           className="optionsList__selectionInvalid"
           onClick={() => dispatch(selectExists(false))}
         >
-          {exclude
-            ? OptionsListStrings.controlAndPopover.getNegateExists()
-            : OptionsListStrings.controlAndPopover.getExists()}
+          {OptionsListStrings.controlAndPopover.getExists(+Boolean(exclude))}
         </EuiFilterSelectItem>
       ) : (
         <>

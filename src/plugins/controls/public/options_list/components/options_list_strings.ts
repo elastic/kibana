@@ -22,6 +22,10 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.control.negate', {
         defaultMessage: 'NOT',
       }),
+    getExcludeExists: () =>
+      i18n.translate('controls.optionsList.control.excludeExists', {
+        defaultMessage: 'DOES NOT',
+      }),
   },
   editor: {
     getAllowMultiselectTitle: () =>
@@ -122,13 +126,10 @@ export const OptionsListStrings = {
       }),
   },
   controlAndPopover: {
-    getExists: () =>
+    getExists: (negate: number = +false) =>
       i18n.translate('controls.optionsList.controlAndPopover.exists', {
-        defaultMessage: 'Exists (*)',
-      }),
-    getNegateExists: () =>
-      i18n.translate('controls.optionsList.controlAndPopover.negateExists', {
-        defaultMessage: 'Does not exist (!)',
+        defaultMessage: '{negate, plural, one {Exist} other {Exists}}',
+        values: { negate },
       }),
   },
 };

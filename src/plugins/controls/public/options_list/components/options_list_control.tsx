@@ -11,13 +11,7 @@ import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
-import {
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiPopover,
-  EuiTextColor,
-  useResizeObserver,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListStrings } from './options_list_strings';
@@ -84,23 +78,23 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       validSelectionsCount: validSelections?.length,
       selectionDisplayNode: (
         <>
+          {exclude && (
+            <span className="optionsList__negateLabel">
+              {existsSelected
+                ? OptionsListStrings.control.getExcludeExists()
+                : OptionsListStrings.control.getNegate()}
+            </span>
+          )}
           {existsSelected ? (
             <span
               className={`optionsList__existsFilter ${
                 existsSelectionInvalid && 'optionsList__filterInvalid'
               }`}
             >
-              {exclude
-                ? OptionsListStrings.controlAndPopover.getNegateExists()
-                : OptionsListStrings.controlAndPopover.getExists()}
+              {OptionsListStrings.controlAndPopover.getExists(+Boolean(exclude))}
             </span>
           ) : (
             <>
-              {!existsSelected && exclude && (
-                <EuiTextColor color="danger">
-                  <b>{OptionsListStrings.control.getNegate()}</b>{' '}
-                </EuiTextColor>
-              )}
               {validSelections && (
                 <span>{validSelections?.join(OptionsListStrings.control.getSeparator())}</span>
               )}
