@@ -13,19 +13,24 @@ import type { ShardsFormReturn } from './shards_form';
 
 interface ShardsPolicyFieldComponent {
   index: number;
-  isLastItem: boolean;
   control: ShardsFormReturn['control'];
   euiFieldProps?: Record<string, unknown>;
   hideLabel?: boolean;
 }
 
-const ShardsPolicyFieldComponent = ({
-  index,
-  control,
-  isLastItem,
-  hideLabel,
-}: ShardsPolicyFieldComponent) => {
+const ShardsPolicyFieldComponent = ({ index, control, hideLabel }: ShardsPolicyFieldComponent) => {
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
+
+  const policyFieldValidator = useCallback(
+    (policy: { key: string; label: string }) =>
+      !policy
+        ? i18n.translate('xpack.osquery.pack.form.shardsPolicyFieldMissingErrorMessage', {
+            defaultMessage: 'Policy is a required field',
+          })
+        : undefined,
+
+    []
+  );
 
   const {
     field: { onChange, value },
@@ -33,19 +38,9 @@ const ShardsPolicyFieldComponent = ({
   } = useController({
     control,
     name: `shardsArray.${index}.policy`,
-    rules: !isLastItem
-      ? {
-          required: {
-            message: i18n.translate(
-              'xpack.osquery.pack.form.shardsPolicyFieldMissingErrorMessage',
-              {
-                defaultMessage: 'Policy is a required field',
-              }
-            ),
-            value: true,
-          },
-        }
-      : {},
+    rules: {
+      validate: policyFieldValidator,
+    },
   });
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);

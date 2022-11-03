@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, map, omit, reduce, uniq } from 'lodash';
+import { filter, isEmpty, map, omit, reduce, uniq } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -134,7 +134,17 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       return { '*': 100 };
     }
 
-    return shards;
+    return reduce(
+      shards,
+      (acc, shard, key) => {
+        if (!isEmpty(key)) {
+          return { ...acc, [key]: shard };
+        }
+
+        return acc;
+      },
+      {}
+    );
   }, [packType, shards]);
 
   const onSubmit = useCallback(
@@ -145,7 +155,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         queries,
         ...restPayload
       }: PackFormData) => {
-        const mappedShards = !isEmpty(shards) ? map(shards, (shard, key) => key) : [];
+        const mappedShards = !isEmpty(shards)
+          ? (filter(
+              map(shards, (shard, key) => {
+                if (!isEmpty(key)) {
+                  return key;
+                }
+              })
+            ) as string[])
+          : [];
         const policies = uniq([...payloadPolicyIds, ...mappedShards]);
 
         return {

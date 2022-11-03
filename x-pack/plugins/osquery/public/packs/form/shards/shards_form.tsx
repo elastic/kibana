@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import type { UseFieldArrayAppend, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
+import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 import type { ShardsArray } from '../../../../common/schemas/common/utils';
 import { ShardsPolicyField } from './shards_policy_field';
 import { ShardsPercentageField } from './shards_percentage_field';
@@ -23,34 +23,17 @@ export type ShardsFormReturn = UseFormReturn<{ shardsArray: ShardsArray }>;
 interface ShardsFormProps {
   index: number;
   isLastItem: boolean;
-  append: UseFieldArrayAppend<{ shardsArray: ShardsArray }>;
   control: ShardsFormReturn['control'];
   watch: ShardsFormReturn['watch'];
   onDelete?: UseFieldArrayRemove;
 }
 
-export const ShardsForm = ({
-  onDelete,
-  index,
-  isLastItem,
-  append,
-  control,
-  watch,
-}: ShardsFormProps) => {
+export const ShardsForm = ({ onDelete, index, isLastItem, control, watch }: ShardsFormProps) => {
   const handleDeleteClick = useCallback(() => {
     if (onDelete) {
       onDelete(index);
     }
   }, [index, onDelete]);
-
-  const handleAddClick = useCallback(() => {
-    if (append) {
-      append({ policy: '', percentage: 100 });
-    }
-  }, [append]);
-
-  const { shardsArray } = watch();
-  const currentPolicyName = shardsArray[index].policy;
 
   return (
     <>
@@ -63,6 +46,7 @@ export const ShardsForm = ({
                 control={control}
                 isLastItem={isLastItem}
                 hideLabel={index !== 0}
+                watch={watch}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -75,31 +59,18 @@ export const ShardsForm = ({
 
             <EuiFlexItem grow={false}>
               <StyledButtonWrapper index={index}>
-                {isLastItem && currentPolicyName ? (
-                  <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'xpack.osquery.pack.form.addShardsRowButtonAriaLabel',
-                      {
-                        defaultMessage: 'Add new row',
-                      }
-                    )}
-                    iconType="plus"
-                    color="text"
-                    onClick={handleAddClick}
-                  />
-                ) : (
-                  <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'xpack.osquery.pack.form.deleteShardsRowButtonAriaLabel',
-                      {
-                        defaultMessage: 'Delete shards row',
-                      }
-                    )}
-                    iconType="trash"
-                    color="text"
-                    onClick={handleDeleteClick}
-                  />
-                )}
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.osquery.pack.form.deleteShardsRowButtonAriaLabel',
+                    {
+                      defaultMessage: 'Delete shards row',
+                    }
+                  )}
+                  iconType="trash"
+                  color="text"
+                  disabled={isLastItem}
+                  onClick={handleDeleteClick}
+                />
               </StyledButtonWrapper>
             </EuiFlexItem>
           </EuiFlexGroup>

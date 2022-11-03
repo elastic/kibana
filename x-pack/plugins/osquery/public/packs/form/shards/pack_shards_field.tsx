@@ -6,16 +6,24 @@
  */
 
 import React, { useEffect } from 'react';
+import type { InternalFieldErrors } from 'react-hook-form';
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
-import { isEmpty } from 'lodash';
+import { isEmpty, last, reject } from 'lodash';
 import { useAgentPolicies } from '../../../agent_policies';
 import type { ShardsArray } from '../../../../common/schemas/common';
 import { convertShardsToArray, convertShardsToObject } from '../../../../common/schemas/common';
 import { ShardsForm } from './shards_form';
 
+export const defaultShardData = {
+  policy: {
+    label: '',
+    key: '',
+  },
+  percentage: 100,
+};
 export const PackShardsField = React.memo(() => {
   const {
     watch: watchRoot,
@@ -34,16 +42,8 @@ export const PackShardsField = React.memo(() => {
     shouldUnregister: true,
     defaultValues: {
       shardsArray: !isEmpty(convertShardsToArray(rootShards, agentPoliciesById))
-        ? convertShardsToArray(rootShards, agentPoliciesById)
-        : [
-            {
-              policy: {
-                label: '',
-                key: '',
-              },
-              percentage: 100,
-            },
-          ],
+        ? [...convertShardsToArray(rootShards, agentPoliciesById), defaultShardData]
+        : [defaultShardData],
     },
   });
   const { fields, remove, append } = useFieldArray({
@@ -51,26 +51,35 @@ export const PackShardsField = React.memo(() => {
     name: 'shardsArray',
   });
 
-  const valuesRoot = watchRoot();
   const formValue = watch();
 
   const shardsArrayState = getFieldState('shardsArray', formState);
 
-  // TODO fix this behaviour - now doesn't work
   useEffect(() => {
     registerRoot('shards', {
       validate: () => {
-        if (valuesRoot.shards.error) {
-          return true;
-        }
-        // const nonEmptyErrors = reject(shardsArrayState.error, isEmpty) as InternalFieldErrors[];
-        //
-        // console.log({ nonEmptyErrors });
-        //
-        // return !nonEmptyErrors.length;
+        const nonEmptyErrors = reject(shardsArrayState.error, isEmpty) as InternalFieldErrors[];
+
+        return !nonEmptyErrors.length;
       },
     });
-  }, [shardsArrayState.error, errorsRoot, registerRoot, valuesRoot]);
+  }, [shardsArrayState.error, errorsRoot, registerRoot]);
+
+  useEffect(() => {
+    const subscription = watch((data, payload) => {
+      if (data?.shardsArray) {
+        const lastShardIndex = data?.shardsArray?.length - 1;
+        if (payload.name?.startsWith(`shardsArray.${lastShardIndex}.`)) {
+          const lastShard = last(data.shardsArray);
+          if (lastShard?.policy?.key) {
+            append(defaultShardData);
+          }
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [formValue, append, watch]);
 
   useEffect(() => {
     const parsedShards = convertShardsToObject(formValue.shardsArray);
@@ -109,7 +118,6 @@ export const PackShardsField = React.memo(() => {
             index={index}
             onDelete={remove}
             isLastItem={index === array.length - 1}
-            append={append}
             control={control}
             watch={watch}
           />
