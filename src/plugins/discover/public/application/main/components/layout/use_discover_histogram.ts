@@ -109,14 +109,6 @@ export const useDiscoverHistogram = ({
    * Other callbacks
    */
 
-  const onChartHiddenChange = useCallback(
-    (chartHidden: boolean) => {
-      storage.set(CHART_HIDDEN_KEY, chartHidden);
-      stateContainer.setAppState({ hideChart: chartHidden });
-    },
-    [stateContainer, storage]
-  );
-
   const onTimeIntervalChange = useCallback(
     (newInterval: string) => {
       stateContainer.setAppState({ interval: newInterval });
@@ -197,6 +189,19 @@ export const useDiscoverHistogram = ({
   /**
    * Chart
    */
+
+  const onChartHiddenChange = useCallback(
+    (chartHidden: boolean) => {
+      // Clear the Lens request adapter when the chart is hidden
+      if (chartHidden) {
+        inspectorAdapters.lensRequests = undefined;
+      }
+
+      storage.set(CHART_HIDDEN_KEY, chartHidden);
+      stateContainer.setAppState({ hideChart: chartHidden });
+    },
+    [inspectorAdapters, stateContainer, storage]
+  );
 
   const onChartLoad = useCallback(
     (event: UnifiedHistogramChartLoadEvent) => {
