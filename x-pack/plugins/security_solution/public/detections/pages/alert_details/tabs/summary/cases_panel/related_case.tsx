@@ -34,8 +34,14 @@ const StyledIcon = styled(EuiIcon)`
   margin-right: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const RelatedCasesList = ({ relatedCases }: { relatedCases: RelatedCases }) => {
-  // Sort related cases, showing the most recently created first
+export const RelatedCasesList = ({
+  relatedCases,
+  maximumVisible,
+}: {
+  relatedCases: RelatedCases;
+  maximumVisible?: number;
+}) => {
+  // Sort related cases, showing the most recently created first.
   const sortedRelatedCases = useMemo(
     () =>
       relatedCases
@@ -47,9 +53,18 @@ export const RelatedCasesList = ({ relatedCases }: { relatedCases: RelatedCases 
     [relatedCases]
   );
 
+  // If a maximum visible count is provided, only show cases up to that amount
+  const visibleCases = useMemo(
+    () =>
+      maximumVisible && maximumVisible > 0
+        ? sortedRelatedCases.slice(0, maximumVisible)
+        : sortedRelatedCases,
+    [maximumVisible, sortedRelatedCases]
+  );
+
   return (
     <>
-      {sortedRelatedCases?.map(({ id, title, description, status, totals }) => (
+      {visibleCases?.map(({ id, title, description, status, totals }) => (
         <EuiFlexItem key={id}>
           <CaseDetailsLink detailName={id} title={title}>
             {title}

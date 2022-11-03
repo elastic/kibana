@@ -14,7 +14,7 @@ export const getMitreComponentParts = (searchHit?: SearchHit) => {
     ? searchHit?.fields['kibana.alert.rule.parameters']
     : null;
   const threat = ruleParameters ? (ruleParameters[0]?.threat as Threats) : null;
-  return threat
+  return threat && threat.length > 0
     ? buildThreatDescription({
         label: threat[0].framework,
         threat,

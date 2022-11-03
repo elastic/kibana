@@ -17,7 +17,7 @@ export const CASES_PANEL_TITLE = i18n.translate(
 export const CASES_PANEL_SUBTITLE = (caseCount: number) =>
   i18n.translate('xpack.securitySolution.alerts.alertDetails.summary.cases.subTitle', {
     values: { caseCount },
-    defaultMessage: '{caseCount} cases found with this alert',
+    defaultMessage: 'Showing the {caseCount} most recently created cases containing this alert',
   });
 
 export const CASES_PANEL_CASE_STATUS = i18n.translate(

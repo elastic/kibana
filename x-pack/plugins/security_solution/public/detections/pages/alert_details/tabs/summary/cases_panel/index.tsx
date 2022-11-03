@@ -45,6 +45,8 @@ const StyledCasesFlexGroup = styled(EuiFlexGroup)`
   overflow-y: scroll;
 `;
 
+const CASES_PANEL_CASES_COUNT_MAX = 25;
+
 const CasesPanelLoading = () => (
   <EuiEmptyPrompt
     icon={<EuiLoadingSpinner size="l" />}
@@ -121,24 +123,31 @@ export const CasesPanel = React.memo<CasesPanelProps>(
       ]
     );
 
+    // Sort by most recently created being first
+    const relatedCasesCount = relatedCases ? relatedCases.length : 0;
+    const visibleCaseCount = useMemo(
+      () => Math.min(relatedCasesCount, CASES_PANEL_CASES_COUNT_MAX),
+      [relatedCasesCount]
+    );
+    const hasRelatedCases = relatedCasesCount > 0;
+
     if (loading) return <CasesPanelLoading />;
 
     if (error || relatedCases === undefined) return <CasesPanelError />;
-
-    // Sort by most recently created being first
-    const relatedCasesCount = relatedCases.length;
-    const hasRelatedCases = relatedCases && relatedCasesCount > 0;
 
     return (
       <SummaryPanel
         actionsClassName={CASES_PANEL_ACTIONS_CLASS}
         title={CASES_PANEL_TITLE}
-        description={hasRelatedCases ? CASES_PANEL_SUBTITLE(relatedCasesCount) : null}
+        description={hasRelatedCases ? CASES_PANEL_SUBTITLE(visibleCaseCount) : undefined}
         renderActionsPopover={hasRelatedCases ? renderCasesActions : undefined}
       >
         {hasRelatedCases ? (
           <StyledCasesFlexGroup direction="column" data-test-subj="case-panel">
-            <RelatedCasesList relatedCases={relatedCases} />
+            <RelatedCasesList
+              maximumVisible={CASES_PANEL_CASES_COUNT_MAX}
+              relatedCases={relatedCases}
+            />
           </StyledCasesFlexGroup>
         ) : (
           <EuiEmptyPrompt
