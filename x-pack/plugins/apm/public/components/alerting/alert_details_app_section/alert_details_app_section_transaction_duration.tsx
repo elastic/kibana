@@ -53,7 +53,9 @@ export function AlertDetailsAppSectionTransactionDuration({
 }: AlertDetailsAppSectionProps) {
   const params = rule.params;
   const environment = String(params.environment);
-  const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
+  const latencyAggregationType = getAggsTypeFromRule(
+    params.aggregationType as string
+  );
   const serviceName = String(params.serviceName);
   const transactionType = String(params.transactionType);
   const comparisonEnabled = false;
@@ -88,7 +90,7 @@ export function AlertDetailsAppSectionTransactionDuration({
                 end,
                 transactionType,
                 transactionName: undefined,
-                latencyAggregationType: 'p95',
+                latencyAggregationType,
                 offset:
                   comparisonEnabled && isTimeComparison(offset)
                     ? offset
