@@ -40,14 +40,20 @@ export interface AlertDetailsAppSectionProps {
   rule: Rule<RuleTypeParams>;
   timeZone: string;
 }
+
+const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType => {
+  if (ruleAggType === '95th') return LatencyAggregationType.p95;
+  if (ruleAggType === '99th') return LatencyAggregationType.p99;
+  return LatencyAggregationType.avg;
+};
+
 export function AlertDetailsAppSectionTransactionDuration({
   rule,
   timeZone,
 }: AlertDetailsAppSectionProps) {
   const params = rule.params;
   const environment = String(params.environment);
-  const latencyAggregationType =
-    params.aggregationType as LatencyAggregationType;
+  const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
   const serviceName = String(params.serviceName);
   const transactionType = String(params.transactionType);
   const comparisonEnabled = false;
@@ -60,9 +66,8 @@ export function AlertDetailsAppSectionTransactionDuration({
     currentPeriod: [],
     previousPeriod: [],
   };
-
   /* Latency Chart */
-  const { data, error, status } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (
         serviceName &&
@@ -83,7 +88,7 @@ export function AlertDetailsAppSectionTransactionDuration({
                 end,
                 transactionType,
                 transactionName: undefined,
-                latencyAggregationType,
+                latencyAggregationType: 'p95',
                 offset:
                   comparisonEnabled && isTimeComparison(offset)
                     ? offset
