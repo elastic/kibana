@@ -181,12 +181,15 @@ export function DiscoverLayout({
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const onDataViewCreated = useCallback(
     (nextDataView: DataView) => {
+      if (!nextDataView.isPersisted()) {
+        stateContainer.actions.appendAdHocDataView(nextDataView);
+      }
       if (nextDataView.id) {
         onChangeDataView(nextDataView.id);
       }
       savedSearchRefetch$.next('reset');
     },
-    [onChangeDataView, savedSearchRefetch$]
+    [onChangeDataView, savedSearchRefetch$, stateContainer]
   );
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);

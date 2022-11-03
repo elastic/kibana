@@ -128,6 +128,12 @@ export interface DiscoverStateContainer {
      * Set the currently selected data view
      */
     setDataView: (dataView: DataView) => void;
+    /**
+     * Manage AdHoc data views
+     */
+    appendAdHocDataView: (dataView: DataView) => void;
+    removeAdHocDataViewById: (id: string) => void;
+    replaceAdHocDataViewWithId: (id: string, dataView: DataView) => void;
   };
 }
 
@@ -210,16 +216,14 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const setDataView = (dataView: DataView) => {
+  const setDataView = (dataView: DataView) =>
     internalStateContainer.transitions.setDataView(dataView);
-    if (!dataView.isPersisted()) {
-      const adHocDataViewList = internalStateContainer.getState().dataViewsAdHoc;
-      const existing = adHocDataViewList.find((prevDataView) => prevDataView.id === dataView.id);
-      if (!existing) {
-        internalStateContainer.transitions.setDataViewsAdHoc([...adHocDataViewList, dataView]);
-      }
-    }
-  };
+  const appendAdHocDataView = (dataView: DataView) =>
+    internalStateContainer.transitions.appendAdHocDataView(dataView);
+  const replaceAdHocDataViewWithId = (id: string, dataView: DataView) =>
+    internalStateContainer.transitions.replaceAdHocDataViewWithId(id, dataView);
+  const removeAdHocDataViewById = (id: string) =>
+    internalStateContainer.transitions.removeAdHocDataViewById(id);
 
   return {
     kbnUrlStateStorage: stateStorage,
@@ -302,6 +306,9 @@ export function getDiscoverStateContainer({
     },
     actions: {
       setDataView,
+      appendAdHocDataView,
+      replaceAdHocDataViewWithId,
+      removeAdHocDataViewById,
     },
   };
 }
