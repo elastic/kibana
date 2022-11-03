@@ -5,29 +5,19 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useState, useCallback, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import createContainer from 'constate';
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
-import type { InfraClientStartDeps } from '../../../../types';
 import { useUrlState } from '../../../../utils/use_url_state';
 
 export const DEFAULT_HOST_FILTERS_STATE: HostsFilters = [];
 const HOST_FILTERS_URL_STATE_KEY = 'filters';
 
 export const useHostFilters = () => {
-  const { services } = useKibana<InfraClientStartDeps>();
-  const {
-    data: { query: queryManager },
-  } = services;
-
-  const { filterManager } = queryManager;
-
   const [urlState, setUrlState] = useUrlState<HostsFilters>({
     defaultState: DEFAULT_HOST_FILTERS_STATE,
     decodeUrlState,
@@ -38,8 +28,6 @@ export const useHostFilters = () => {
   const [state, setState] = useState<HostsFilters>(urlState);
 
   useEffect(() => setUrlState(state), [setUrlState, state]);
-
-  useEffect(() => filterManager.setFilters(state), [filterManager, state]);
 
   const applyFilters = useCallback((filters: HostsFilters) => {
     setState(filters);
@@ -83,5 +71,3 @@ type HostsFilters = rt.TypeOf<typeof HostsFiltersRT>;
 const encodeUrlState = HostsFiltersRT.encode;
 const decodeUrlState = (value: unknown) =>
   pipe(HostsFiltersRT.decode(value), fold(constant([]), identity));
-
-export const [HostFiltersProvider, useHostFiltersContext] = createContainer(useHostFilters);

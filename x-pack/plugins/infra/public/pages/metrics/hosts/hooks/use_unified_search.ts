@@ -13,8 +13,8 @@ import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useTimeRangeUrlState } from './use_time_range_url_state';
-import { useHostsQueryContext } from './use_host_query';
-import { useHostFiltersContext } from './use_host_filters';
+import { useHostsQuery } from './use_host_query';
+import { useHostFilters } from './use_host_filters';
 
 const DEFAULT_FROM_MINUTES_VALUE = 15;
 
@@ -27,10 +27,18 @@ export const useUnifiedSearch = () => {
 
   const { setTimeRange: setSelectedTimeRange, getTime, setTime } = useTimeRangeUrlState();
 
-  const { applyFilterQuery } = useHostsQueryContext();
-  const { applyFilters } = useHostFiltersContext();
+  const { applyFilterQuery, filterQuery } = useHostsQuery();
+  const { applyFilters, filters: urlFilters } = useHostFilters();
 
   const { queryString, filterManager } = queryManager;
+
+  queryString.setQuery({
+    ...queryString.getQuery(),
+    query: filterQuery.expression,
+    language: filterQuery.language,
+  });
+
+  filterManager.setFilters(urlFilters);
 
   const currentDate = new Date();
   const fromTS =
@@ -59,8 +67,8 @@ export const useUnifiedSearch = () => {
   const submitFilterChange = useCallback(
     (query?: Query, dateRange?: TimeRange, filters?: Filter[]) => {
       if (filters) {
-        applyFilters(filters);
-        filterManager.setFilters([...filterManager.getFilters(), ...filters]);
+        filterManager.setFilters(filters);
+        applyFilters(filterManager.getFilters());
       }
 
       if (dateRange) {
