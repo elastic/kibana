@@ -70,16 +70,16 @@ export interface RequestParams {
 }
 
 export interface RequestStatistics {
-  [key: string]: RequestStatistic;
+  indexFilter: RequestStatistic;
 }
 
 export interface RequestStatistic {
   label: string;
   description?: string;
-  value: unknown;
+  value: string;
 }
 
 export interface Response {
-  json?: object;
+  json?: { rawResponse?: object };
   time?: number;
 }

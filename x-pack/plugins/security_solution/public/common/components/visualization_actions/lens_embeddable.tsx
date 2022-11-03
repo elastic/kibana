@@ -11,7 +11,6 @@ import { useDispatch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
-import { getOr } from 'lodash/fp';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -21,6 +20,7 @@ import { inputsSelectors } from '../../store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
+import { getRequestsAndResponses } from './utils';
 
 const LensComponentWrapper = styled.div<{ height?: string }>`
   height: ${({ height }) => height ?? 'auto'};
@@ -38,20 +38,20 @@ const LensComponentWrapper = styled.div<{ height?: string }>`
 type Responses = string[] | undefined;
 type Requests = string[] | undefined;
 
+interface Action {
+  type: 'setData';
+  responses: string[] | undefined;
+  requests: string[] | undefined;
+  isLoading: boolean;
+}
+
 interface State {
   responses: Responses;
   requests: Requests;
   isLoading: boolean;
 }
 
-export interface Action {
-  type: 'setData';
-  responses: Responses;
-  requests: Requests;
-  isLoading: boolean;
-}
-
-function reducer(state: State, action: Action) {
+const reducer = (state: State, action: Action) => {
   switch (action.type) {
     case 'setData':
       return {
@@ -63,7 +63,7 @@ function reducer(state: State, action: Action) {
     default:
       return state;
   }
-}
+};
 
 const initialState = {
   requests: undefined,
@@ -143,25 +143,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     if (!adapters) {
       return;
     }
-    const data = adapters?.requests?.getRequests().reduce(
-      (acc: { requests: string[]; responses: string[] }, d: Request) => {
-        return {
-          requests: [
-            ...acc.requests,
-            JSON.stringify(
-              { body: d?.json, index: getOr('', 'stats.indexFilter.value', d).split(',') },
-              null,
-              2
-            ),
-          ],
-          responses: [
-            ...acc.responses,
-            JSON.stringify(getOr({}, 'response.json.rawResponse', d), null, 2),
-          ],
-        };
-      },
-      { requests: [], responses: [] }
-    );
+    const data = getRequestsAndResponses(adapters?.requests?.getRequests());
     dispatchData({
       type: 'setData',
       requests: data.requests,
