@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import stats from 'stats-lite';
-import { getDefaultMonitoring } from '../lib/monitoring';
+import { getDefaultMonitoring, getExecutionDurationPercentiles } from '../lib/monitoring';
 import { RuleMonitoring, RuleMonitoringHistory } from '../types';
 
 export class RuleMonitoringService {
@@ -93,21 +92,6 @@ export class RuleMonitoringService {
 
   private buildExecutionDurationPercentiles = () => {
     const { history } = this.monitoring.run;
-    const durationSamples = history.reduce<number[]>((duration, historyItem) => {
-      if (typeof historyItem.duration === 'number') {
-        return [...duration, historyItem.duration];
-      }
-      return duration;
-    }, []);
-
-    if (durationSamples.length) {
-      return {
-        p50: stats.percentile(durationSamples as number[], 0.5),
-        p95: stats.percentile(durationSamples as number[], 0.95),
-        p99: stats.percentile(durationSamples as number[], 0.99),
-      };
-    }
-
-    return {};
+    return getExecutionDurationPercentiles(history);
   };
 }

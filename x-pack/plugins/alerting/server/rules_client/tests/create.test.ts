@@ -19,7 +19,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
-import { getDefaultRuleMonitoring } from '../../task_runner/task_runner';
+import { getDefaultMonitoring } from '../../lib/monitoring';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
@@ -421,11 +421,22 @@ describe('create()', () => {
           "versionApiKeyLastmodified": "v8.0.0",
         },
         "monitoring": Object {
-          "execution": Object {
+          "run": Object {
             "calculated_metrics": Object {
               "success_ratio": 0,
             },
             "history": Array [],
+            "last_run": Object {
+              "metrics": Object {
+                "duration": 0,
+                "gap_duration_s": null,
+                "total_alerts_created": null,
+                "total_alerts_detected": null,
+                "total_indexing_duration_ms": null,
+                "total_search_duration_ms": null,
+              },
+              "timestamp": "2019-02-12T21:01:22.479Z",
+            },
           },
         },
         "muteAll": false,
@@ -435,6 +446,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -628,11 +640,22 @@ describe('create()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "monitoring": Object {
-          "execution": Object {
+          "run": Object {
             "calculated_metrics": Object {
               "success_ratio": 0,
             },
             "history": Array [],
+            "last_run": Object {
+              "metrics": Object {
+                "duration": 0,
+                "gap_duration_s": null,
+                "total_alerts_created": null,
+                "total_alerts_detected": null,
+                "total_indexing_duration_ms": null,
+                "total_search_duration_ms": null,
+              },
+              "timestamp": "2019-02-12T21:01:22.479Z",
+            },
           },
         },
         "muteAll": false,
@@ -642,6 +665,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1056,7 +1080,7 @@ describe('create()', () => {
           status: 'pending',
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         snoozeSchedule: [],
@@ -1069,6 +1093,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1255,7 +1280,7 @@ describe('create()', () => {
           status: 'pending',
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         snoozeSchedule: [],
@@ -1268,6 +1293,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1423,7 +1449,7 @@ describe('create()', () => {
           status: 'pending',
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         snoozeSchedule: [],
@@ -1436,6 +1462,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1601,7 +1628,8 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1733,7 +1761,8 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1865,7 +1894,8 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -2013,13 +2043,25 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: {
-          execution: {
+          run: {
             history: [],
             calculated_metrics: {
               success_ratio: 0,
             },
+            last_run: {
+              timestamp: '2019-02-12T21:01:22.479Z',
+              metrics: {
+                duration: 0,
+                gap_duration_s: null,
+                total_alerts_created: null,
+                total_alerts_detected: null,
+                total_indexing_duration_ms: null,
+                total_search_duration_ms: null,
+              },
+            },
           },
         },
+        running: false,
         mapped_params: {
           risk_score: 42,
           severity: '20-low',
@@ -2375,7 +2417,8 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -2477,7 +2520,8 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',

@@ -54,6 +54,7 @@ describe('common_transformations', () => {
           message: 'this is just a test',
         },
       },
+      running: false,
     };
     expect(transformRule(apiRule)).toMatchInlineSnapshot(`
       Object {
@@ -105,6 +106,7 @@ describe('common_transformations', () => {
             ],
           },
         },
+        "running": false,
         "schedule": Object {
           "interval": "1s",
         },
@@ -152,6 +154,7 @@ describe('common_transformations', () => {
         last_execution_date: dateExecuted.toISOString(),
         status: 'error',
       },
+      running: false,
     };
     expect(transformRule(apiRule)).toMatchInlineSnapshot(`
       Object {
@@ -184,6 +187,7 @@ describe('common_transformations', () => {
         "name": "some-name",
         "notifyWhen": "onActiveAlert",
         "params": Object {},
+        "running": false,
         "schedule": Object {
           "interval": "1s",
         },

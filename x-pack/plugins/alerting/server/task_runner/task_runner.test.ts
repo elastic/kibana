@@ -197,8 +197,8 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
     );
-    mockedRuleTypeSavedObject.monitoring!.execution.history = [];
-    mockedRuleTypeSavedObject.monitoring!.execution.calculated_metrics.success_ratio = 0;
+    mockedRuleTypeSavedObject.monitoring!.run.history = [];
+    mockedRuleTypeSavedObject.monitoring!.run.calculated_metrics.success_ratio = 0;
 
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
     (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
@@ -1549,7 +1549,7 @@ describe('Task Runner', () => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
       const executeRuleDebugLogger = logger.debug.mock.calls[3][0];
       expect(executeRuleDebugLogger as string).toMatchInlineSnapshot(
-        `"Executing Rule foo:test:1 has resulted in Error: Saved object [alert/1] not found"`
+        `"Updating rule task for test rule with id 1 - {\\"lastExecutionDate\\":\\"1970-01-01T00:00:00.000Z\\",\\"status\\":\\"error\\",\\"error\\":{\\"reason\\":\\"read\\",\\"message\\":\\"Saved object [alert/1] not found\\"}} - {\\"outcome\\":\\"failed\\",\\"warning\\":\\"read\\",\\"outcomeMsg\\":\\"Saved object [alert/1] not found\\",\\"alertsCount\\":{}}"`
       );
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -1631,7 +1631,7 @@ describe('Task Runner', () => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
       const ruleExecuteDebugLog = logger.debug.mock.calls[3][0];
       expect(ruleExecuteDebugLog as string).toMatchInlineSnapshot(
-        `"Executing Rule test space:test:1 has resulted in Error: Saved object [alert/1] not found"`
+        `"Updating rule task for test rule with id 1 - {\\"lastExecutionDate\\":\\"1970-01-01T00:00:00.000Z\\",\\"status\\":\\"error\\",\\"error\\":{\\"reason\\":\\"read\\",\\"message\\":\\"Saved object [alert/1] not found\\"}} - {\\"outcome\\":\\"failed\\",\\"warning\\":\\"read\\",\\"outcomeMsg\\":\\"Saved object [alert/1] not found\\",\\"alertsCount\\":{}}"`
       );
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -2198,7 +2198,7 @@ describe('Task Runner', () => {
       await taskRunner.run();
     }
     const runnerResult = await taskRunner.run();
-    expect(runnerResult.monitoring?.execution.history.length).toBe(200);
+    expect(runnerResult.monitoring?.run.history.length).toBe(200);
   });
 
   test('Actions circuit breaker kicked in, should set status as warning and log a message in event log', async () => {

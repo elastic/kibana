@@ -61,6 +61,7 @@ describe('getRuleRoute', () => {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
+    running: false,
   };
 
   const getResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
@@ -87,6 +88,7 @@ describe('getRuleRoute', () => {
         connector_type_id: mockedAlert.actions[0].actionTypeId,
       },
     ],
+    running: false,
   };
 
   it('gets a rule with proper parameters', async () => {

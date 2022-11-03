@@ -37,6 +37,7 @@ const alert: SanitizedRule<{
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  running: false,
 };
 
 describe('Alert Task Instance', () => {

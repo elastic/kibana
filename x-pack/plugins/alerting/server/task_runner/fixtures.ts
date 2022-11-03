@@ -7,7 +7,7 @@
 
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { Rule, RuleTypeParams, RecoveredActionGroup } from '../../common';
-import { getDefaultRuleMonitoring } from './task_runner';
+import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
@@ -155,7 +155,8 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
-  monitoring: getDefaultRuleMonitoring(),
+  monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
+  running: false,
 };
 
 export const mockTaskInstance = () => ({

@@ -42,7 +42,7 @@ const mockHistory = [
 ];
 
 const mockRuleMonitoring = {
-  execution: {
+  run: {
     history: mockHistory,
     calculated_metrics: {
       success_ratio: 0,
@@ -52,7 +52,7 @@ const mockRuleMonitoring = {
 
 describe('getExecutionDurationPercentiles', () => {
   it('Calculates the percentile given partly undefined durations', () => {
-    const percentiles = getExecutionDurationPercentiles(mockRuleMonitoring);
+    const percentiles = getExecutionDurationPercentiles(mockRuleMonitoring.run.history);
     expect(percentiles.p50).toEqual(250);
     expect(percentiles.p95).toEqual(500);
     expect(percentiles.p99).toEqual(500);
@@ -66,13 +66,13 @@ describe('getExecutionDurationPercentiles', () => {
 
     const newMockRuleMonitoring = {
       ...mockRuleMonitoring,
-      execution: {
-        ...mockRuleMonitoring.execution,
+      run: {
+        ...mockRuleMonitoring.run,
         history: nullDurationHistory,
       },
     } as RuleMonitoring;
 
-    const percentiles = getExecutionDurationPercentiles(newMockRuleMonitoring);
+    const percentiles = getExecutionDurationPercentiles(newMockRuleMonitoring.run.history);
     expect(Object.keys(percentiles).length).toEqual(0);
   });
 });
