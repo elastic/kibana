@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-export const mockWriteFileAsync = jest.fn();
-export const mockMakeDirAsync = jest.fn();
-jest.mock('./utils', () => ({
-  // Jest typings don't define `requireActual` for some reason.
-  ...(jest as any).requireActual('./utils'),
-  writeFileAsync: mockWriteFileAsync,
-  makeDirAsync: mockMakeDirAsync,
+export const mockWriteFile = jest.fn();
+export const mockMkdir = jest.fn();
+jest.mock('fs/promises', () => ({
+  ...jest.requireActual('fs/promises'),
+  writeFile: mockWriteFile,
+  mkdir: mockMkdir,
 }));

@@ -7,10 +7,10 @@
  */
 
 import fs from 'fs';
-import { promisify } from 'util';
 import path from 'path';
 import { createHash } from 'crypto';
-import { pipeline, Transform } from 'stream';
+import { Transform } from 'stream';
+import { pipeline } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
 
 import fetch, { Headers } from 'node-fetch';
@@ -22,7 +22,6 @@ import { cache } from './utils/cache';
 import { resolveCustomSnapshotUrl } from './custom_snapshots';
 import { createCliError, isCliError } from './errors';
 
-const asyncPipeline = promisify(pipeline);
 const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
 const PERMANENT_SNAPSHOTS_BASE_URL =
   'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
@@ -300,7 +299,7 @@ export class Artifact {
 
     fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
 
-    await asyncPipeline(
+    await pipeline(
       resp.body,
       new Transform({
         transform(chunk, encoding, cb) {

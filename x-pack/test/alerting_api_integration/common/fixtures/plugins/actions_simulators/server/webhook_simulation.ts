@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import fs from 'fs';
+import { readFile } from 'fs/promises';
 import expect from '@kbn/expect';
 import http from 'http';
 import https from 'https';
-import { promisify } from 'util';
 import { fromNullable, map, filter, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { constant } from 'fp-ts/lib/function';
 import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
 
 export async function initPlugin() {
-  const httpsServerKey = await promisify(fs.readFile)(KBN_KEY_PATH, 'utf8');
-  const httpsServerCert = await promisify(fs.readFile)(KBN_CERT_PATH, 'utf8');
+  const httpsServerKey = await readFile(KBN_KEY_PATH, 'utf8');
+  const httpsServerCert = await readFile(KBN_CERT_PATH, 'utf8');
 
   return {
     httpServer: http.createServer(createServerCallback()),

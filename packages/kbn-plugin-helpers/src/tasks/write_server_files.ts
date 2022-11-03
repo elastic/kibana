@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import { pipeline } from 'stream/promises';
 
 import vfs from 'vinyl-fs';
 import { transformFileStream } from '@kbn/dev-utils';
 import { transformFileWithBabel } from './transform_file_with_babel';
 
 import { BuildContext } from '../build_context';
-
-const asyncPipeline = promisify(pipeline);
 
 export async function writeServerFiles({
   log,
@@ -28,7 +25,7 @@ export async function writeServerFiles({
   log.info('copying server source into the build and converting with babel');
 
   // copy source files and apply some babel transformations in the process
-  await asyncPipeline(
+  await pipeline(
     vfs.src(
       [
         'kibana.json',

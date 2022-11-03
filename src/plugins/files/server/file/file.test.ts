@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { setImmediate } from 'timers/promises';
 import { of } from 'rxjs';
 import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
 import { createSandbox } from 'sinon';
@@ -15,9 +16,6 @@ import {
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import { Readable } from 'stream';
-import { promisify } from 'util';
-
-const setImmediate = promisify(global.setImmediate);
 
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileService } from '../file_service/internal_file_service';

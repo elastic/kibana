@@ -7,7 +7,7 @@
 
 import type { Crypto } from '@elastic/node-crypto';
 import nodeCrypto from '@elastic/node-crypto';
-import { createHash, randomBytes } from 'crypto';
+import { createHash, randomBytes as randomBytesCb } from 'crypto';
 import { promisify } from 'util';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
@@ -18,6 +18,8 @@ import type { ConfigType } from '../config';
 import type { SessionCookie } from './session_cookie';
 import { SessionExpiredError, SessionMissingError, SessionUnexpectedError } from './session_errors';
 import type { SessionIndex, SessionIndexValue } from './session_index';
+
+const randomBytes = promisify(randomBytesCb);
 
 /**
  * The shape of the value that represents user's session information.
@@ -129,11 +131,6 @@ export class Session {
    */
   private readonly crypto: Crypto;
 
-  /**
-   * Promise-based version of the NodeJS native `randomBytes`.
-   */
-  private readonly randomBytes = promisify(randomBytes);
-
   constructor(private readonly options: Readonly<SessionOptions>) {
     this.crypto = nodeCrypto({ encryptionKey: this.options.config.encryptionKey });
   }
@@ -219,8 +216,8 @@ export class Session {
     >
   ) {
     const [sid, aad] = await Promise.all([
-      this.randomBytes(SID_BYTE_LENGTH).then((sidBuffer) => sidBuffer.toString('base64')),
-      this.randomBytes(AAD_BYTE_LENGTH).then((aadBuffer) => aadBuffer.toString('base64')),
+      randomBytes(SID_BYTE_LENGTH).then((sidBuffer) => sidBuffer.toString('base64')),
+      randomBytes(AAD_BYTE_LENGTH).then((aadBuffer) => aadBuffer.toString('base64')),
     ]);
 
     const sessionLogger = this.getLoggerForSID(sid);

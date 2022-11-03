@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import { pipeline } from 'stream/promises';
 
 import vfs from 'vinyl-fs';
 
 import { BuildContext } from '../build_context';
-
-const asyncPipeline = promisify(pipeline);
 
 export async function writePublicAssets({ log, plugin, sourceDir, buildDir }: BuildContext) {
   if (!plugin.manifest.ui) {
@@ -22,7 +19,7 @@ export async function writePublicAssets({ log, plugin, sourceDir, buildDir }: Bu
 
   log.info('copying assets from `public/assets` to build');
 
-  await asyncPipeline(
+  await pipeline(
     vfs.src(['public/assets/**/*'], {
       cwd: sourceDir,
       base: sourceDir,

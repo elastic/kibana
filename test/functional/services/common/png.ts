@@ -7,14 +7,10 @@
  */
 
 import { dirname } from 'path';
-import { promisify } from 'util';
-import { promises as fs, writeFile, readFileSync, mkdir } from 'fs';
+import { writeFile, readFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { comparePngs, PngDescriptor } from '../lib/compare_pngs';
 import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
-
-const mkdirAsync = promisify(mkdir);
-const writeFileAsync = promisify(writeFile);
 
 export class PngService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -39,8 +35,8 @@ export class PngService extends FtrService {
     const sessionDirectoryPath = path.resolve(folder, 'session');
     const failureDirectoryPath = path.resolve(folder, 'failure');
 
-    await fs.mkdir(sessionDirectoryPath, { recursive: true });
-    await fs.mkdir(failureDirectoryPath, { recursive: true });
+    await mkdir(sessionDirectoryPath, { recursive: true });
+    await mkdir(failureDirectoryPath, { recursive: true });
 
     const actualpngFileName = path.basename(actualpngPath, '.png');
     const baselinepngFileName = path.basename(baselinepngPath, '.png');
@@ -56,12 +52,12 @@ export class PngService extends FtrService {
     // mac and linux covered which is better than nothing for now.
     try {
       this.log.debug(`writeFile: ${baselineCopyPath}`);
-      await fs.writeFile(baselineCopyPath, await fs.readFile(baselinepngPath));
+      await writeFile(baselineCopyPath, await readFile(baselinepngPath));
     } catch (error) {
       throw new Error(`No baseline png found at ${baselinepngPath}`);
     }
     this.log.debug(`writeFile: ${actualCopyPath}`);
-    await fs.writeFile(actualCopyPath, await fs.readFile(actualpngPath));
+    await writeFile(actualCopyPath, await readFile(actualpngPath));
 
     let diffTotal = 0;
 
@@ -86,8 +82,8 @@ export class PngService extends FtrService {
 
     if (updateBaselines) {
       this.log.debug('Updating baseline PNG');
-      await mkdirAsync(dirname(baselinePath), { recursive: true });
-      await writeFileAsync(baselinePath, readFileSync(sessionPath));
+      await mkdir(dirname(baselinePath), { recursive: true });
+      await writeFile(baselinePath, await readFile(sessionPath));
       return 0;
     } else {
       return await this.checkIfPngsMatch(sessionPath, baselinePath, folder);

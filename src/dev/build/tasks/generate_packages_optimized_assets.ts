@@ -8,8 +8,7 @@
 
 import Path from 'path';
 
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import { pipeline } from 'stream/promises';
 import fs from 'fs';
 
 import gulpBrotli from 'gulp-brotli';
@@ -28,7 +27,6 @@ import { Task, write } from '../lib';
 
 const EUI_THEME_RE = /\.v\d\.(light|dark)\.css$/;
 const ASYNC_CHUNK_RE = /\.chunk\.\d+\.js$/;
-const asyncPipeline = promisify(pipeline);
 
 const getSize = (paths: string[]) => paths.reduce((acc, path) => acc + fs.statSync(path).size, 0);
 
@@ -40,7 +38,7 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
     await del(['**/*.map'], { cwd: assetDir });
 
     log.debug('Minify CSS');
-    await asyncPipeline(
+    await pipeline(
       vfs.src(['**/*.css'], { cwd: assetDir }),
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       gulpPostCSS(require('@kbn/optimizer/postcss.config').plugins),
@@ -48,14 +46,14 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
     );
 
     log.debug('Minify JS');
-    await asyncPipeline(
+    await pipeline(
       vfs.src(['**/*.js'], { cwd: assetDir }),
       gulpTerser({ compress: { passes: 2 }, mangle: true }, terser.minify),
       vfs.dest(assetDir)
     );
 
     log.debug('Brotli compress');
-    await asyncPipeline(
+    await pipeline(
       vfs.src(['**/*.{js,css}'], { cwd: assetDir }),
       gulpBrotli({
         params: {

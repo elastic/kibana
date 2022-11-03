@@ -7,11 +7,6 @@
  */
 
 export {
-  // constants
-  readFileAsync,
-  writeFileAsync,
-  makeDirAsync,
-  accessAsync,
   // functions
   normalizePath,
   difference,

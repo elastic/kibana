@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Readable, Writable, pipeline } from 'stream';
-import { promisify } from 'util';
+import { Readable, Writable } from 'stream';
+import { pipeline } from 'stream/promises';
 import { enforceMaxByteSizeTransform } from './max_byte_size_transform';
-
-const pipe = promisify(pipeline);
 
 class DummyWrite extends Writable {
   public chunks: string[] = [];
@@ -26,7 +24,7 @@ describe('Max byte size transform', () => {
     const dataStream = [data, data, data];
     const src = Readable.from(dataStream);
     const dest = new DummyWrite();
-    await pipe(src, enforceMaxByteSizeTransform(Infinity), dest);
+    await pipeline(src, enforceMaxByteSizeTransform(Infinity), dest);
     expect(dest.chunks.join('')).toEqual(dataStream.join(''));
   });
   it('should throw an error when the max number of bytes has been reached', async () => {
@@ -34,7 +32,7 @@ describe('Max byte size transform', () => {
     const dataStream = [data, data, data];
     const src = Readable.from(dataStream);
     const dest = new DummyWrite();
-    await expect(() => pipe(src, enforceMaxByteSizeTransform(5), dest)).rejects.toThrowError(
+    await expect(() => pipeline(src, enforceMaxByteSizeTransform(5), dest)).rejects.toThrowError(
       new Error('Maximum of 5 bytes exceeded')
     );
   });

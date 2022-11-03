@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { unlinkSync as unlink } from 'fs';
+import { unlinkSync, type PathLike } from 'fs';
+import { writeFile, stat } from 'fs/promises';
 import once from 'lodash/once';
 import type { Logger } from '@kbn/logging';
-import { writeFile, exists } from './fs';
 import { PidConfigType } from './pid_config';
+
+const exists = async (path: PathLike) => !!(await stat(path).catch(() => false));
 
 export const writePidFile = async ({
   pidConfig,
@@ -50,7 +52,7 @@ export const writePidFile = async ({
   });
 
   const clean = once(() => {
-    unlink(path);
+    unlinkSync(path);
   });
 
   process.once('exit', clean); // for "natural" exits

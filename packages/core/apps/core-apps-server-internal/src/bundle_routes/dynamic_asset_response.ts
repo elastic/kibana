@@ -7,12 +7,12 @@
  */
 
 import { createReadStream } from 'fs';
+import type { FileHandle } from 'fs/promises';
 import { resolve, extname } from 'path';
 import mime from 'mime-types';
 import agent from 'elastic-apm-node';
 
 import type { RequestHandler } from '@kbn/core-http-server';
-import { fstat, close } from './fs';
 import type { IFileHashCache } from './file_hash_cache';
 import { getFileHash } from './file_hash';
 import { selectCompressedFile } from './select_compressed_file';
@@ -52,7 +52,7 @@ export const createDynamicAssetHandler = ({
   return async (ctx, req, res) => {
     agent.setTransactionName('GET ?/bundles/?');
 
-    let fd: number | undefined;
+    let fileHandle: FileHandle | undefined;
     let fileEncoding: 'gzip' | 'br' | undefined;
 
     try {
@@ -68,7 +68,7 @@ export const createDynamicAssetHandler = ({
       // we use and manage a file descriptor mostly because
       // that's what Inert does, and since we are accessing
       // the file 2 or 3 times per request it seems logical
-      ({ fd, fileEncoding } = await selectCompressedFile(
+      ({ fileHandle, fileEncoding } = await selectCompressedFile(
         req.headers['accept-encoding'] as string,
         path
       ));
@@ -77,8 +77,8 @@ export const createDynamicAssetHandler = ({
       if (isDist) {
         headers = { 'cache-control': `max-age=${365 * DAY}` };
       } else {
-        const stat = await fstat(fd);
-        const hash = await getFileHash(fileHashCache, path, stat, fd);
+        const stat = await fileHandle.stat();
+        const hash = await getFileHash(fileHashCache, path, stat, fileHandle);
         headers = {
           etag: `${hash}-${publicPath}`,
           'cache-control': 'must-revalidate',
@@ -97,7 +97,7 @@ export const createDynamicAssetHandler = ({
       headers['content-type'] = mediaType || '';
 
       const content = createReadStream(null as any, {
-        fd,
+        fd: fileHandle,
         start: 0,
         autoClose: true,
       });
@@ -107,9 +107,9 @@ export const createDynamicAssetHandler = ({
         headers,
       });
     } catch (error) {
-      if (fd) {
+      if (fileHandle) {
         try {
-          await close(fd);
+          await fileHandle.close();
         } catch (_) {
           // ignore errors from close, we already have one to report
           // and it's very likely they are the same

@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { writeFile, exists } from './fs';
+import { writeFile, stat } from 'fs/promises';
 import { writePidFile } from './write_pid_file';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-jest.mock('./fs', () => ({
+jest.mock('fs/promises', () => ({
+  ...jest.requireActual('fs/promises'),
   writeFile: jest.fn(),
-  exists: jest.fn(),
+  stat: jest.fn(),
 }));
 
 const writeFileMock = writeFile as jest.MockedFunction<typeof writeFile>;
-const existsMock = exists as jest.MockedFunction<typeof exists>;
+const statMock = stat as jest.MockedFunction<typeof stat>;
 
 const pid = String(process.pid);
 
@@ -28,7 +29,7 @@ describe('writePidFile', () => {
     jest.spyOn(process, 'once');
 
     writeFileMock.mockImplementation(() => Promise.resolve());
-    existsMock.mockImplementation(() => Promise.resolve(false));
+    statMock.mockImplementation(() => Promise.reject());
   });
 
   afterEach(() => {
@@ -54,7 +55,7 @@ describe('writePidFile', () => {
   });
 
   it('writes the pid file to `pid.file`', async () => {
-    existsMock.mockResolvedValue(false);
+    statMock.mockRejectedValue(new Error()); // `pid-file` doesn't exist
 
     await writePidFile({
       pidConfig: {
@@ -82,7 +83,7 @@ describe('writePidFile', () => {
   });
 
   it('throws an error if the file exists and `pid.exclusive is true`', async () => {
-    existsMock.mockResolvedValue(true);
+    statMock.mockResolvedValue({} as any); // `pid-file` already exists
 
     await expect(
       writePidFile({
@@ -100,7 +101,7 @@ describe('writePidFile', () => {
   });
 
   it('logs a warning if the file exists and `pid.exclusive` is false', async () => {
-    existsMock.mockResolvedValue(true);
+    statMock.mockResolvedValue({} as any); // `pid-file` already exists
 
     await writePidFile({
       pidConfig: {

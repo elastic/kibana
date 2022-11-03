@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import { readFile } from 'fs/promises';
 import { promisify } from 'util';
 
-import { parseString } from 'xml2js';
+import { parseString as parseStringCb } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
 import { getUniqueJunitReportPath } from '../report_path';
@@ -22,7 +22,7 @@ const DURATION_REGEX = /^\d+\.\d{3}$/;
 const ISO_DATE_SEC_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
 const XML_PATH = getUniqueJunitReportPath(PROJECT_DIR, 'test');
 
-const parseStringAsync = promisify(parseString);
+const parseString = promisify(parseStringCb);
 
 describe('dev/mocha/junit report generation', () => {
   afterEach(() => {
@@ -41,7 +41,7 @@ describe('dev/mocha/junit report generation', () => {
 
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise((resolve) => mocha.run(resolve));
-    const report = await parseStringAsync(await readFile(XML_PATH));
+    const report = await parseString(await readFile(XML_PATH));
 
     // test case results are wrapped in <testsuites></testsuites>
     expect(report).toEqual({

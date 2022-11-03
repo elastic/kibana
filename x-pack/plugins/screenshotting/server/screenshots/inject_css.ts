@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import fs from 'fs';
-import { promisify } from 'util';
+import { readFile } from 'fs/promises';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_INJECTCSS } from './constants';
 import { Actions, EventLogger } from './event_logger';
-
-const fsp = { readFile: promisify(fs.readFile) };
 
 export const injectCustomCss = async (
   browser: HeadlessChromiumDriver,
@@ -32,7 +29,7 @@ export const injectCustomCss = async (
     'correction'
   );
 
-  const buffer = await fsp.readFile(filePath);
+  const buffer = await readFile(filePath);
   try {
     await browser.evaluate<string[]>(
       {

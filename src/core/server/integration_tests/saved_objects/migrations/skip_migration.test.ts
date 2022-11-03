@@ -7,8 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import Util from 'util';
+import { unlink } from 'fs/promises';
 import { firstValueFrom } from 'rxjs';
 import {
   createRootWithCorePlugins,
@@ -18,11 +17,10 @@ import {
 import { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'cleanup.log');
-const asyncUnlink = Util.promisify(Fs.unlink);
 
 async function removeLogFile() {
   // ignore errors if it doesn't exist
-  await asyncUnlink(logFilePath).catch(() => void 0);
+  await unlink(logFilePath).catch(() => void 0);
 }
 
 function createRoot({ skipMigration }: { skipMigration: boolean }) {

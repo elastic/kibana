@@ -7,16 +7,13 @@
  */
 
 import Path from 'path';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import { pipeline } from 'stream/promises';
 
 import del from 'del';
 import vfs from 'vinyl-fs';
 import zip from 'gulp-zip';
 
 import { BuildContext } from '../build_context';
-
-const asyncPipeline = promisify(pipeline);
 
 export async function createArchive({ kibanaVersion, plugin, log }: BuildContext) {
   const {
@@ -30,7 +27,7 @@ export async function createArchive({ kibanaVersion, plugin, log }: BuildContext
   const buildDir = Path.resolve(directory, 'build');
 
   // zip up the build files
-  await asyncPipeline(
+  await pipeline(
     vfs.src([`kibana/${id}/**/*`], {
       cwd: buildDir,
       base: buildDir,

@@ -7,8 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import Util from 'util';
+import { unlink } from 'fs/promises';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import {
   createRootWithCorePlugins,
@@ -21,10 +20,9 @@ import { deterministicallyRegenerateObjectId } from '@kbn/core-saved-objects-mig
 
 const logFilePath = Path.join(__dirname, 'rewriting_id.log');
 
-const asyncUnlink = Util.promisify(Fs.unlink);
 async function removeLogFile() {
   // ignore errors if it doesn't exist
-  await asyncUnlink(logFilePath).catch(() => void 0);
+  await unlink(logFilePath).catch(() => void 0);
 }
 
 function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {

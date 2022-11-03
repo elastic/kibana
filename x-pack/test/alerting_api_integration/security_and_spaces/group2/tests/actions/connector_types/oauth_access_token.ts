@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import fs from 'fs';
+import { readFile } from 'fs/promises';
 import expect from '@kbn/expect';
-import { promisify } from 'util';
 import httpProxy from 'http-proxy';
 import { KBN_KEY_PATH } from '@kbn/dev-utils';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -30,7 +29,7 @@ export default function oAuthAccessTokenTest({ getService }: FtrProviderContext)
 
     // need to wait for kibanaServer to settle ...
     before(async () => {
-      testPrivateKey = await promisify(fs.readFile)(KBN_KEY_PATH, 'utf8');
+      testPrivateKey = await readFile(KBN_KEY_PATH, 'utf8');
       servicenowSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
       );

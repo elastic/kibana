@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { access, link, unlink, chmod } from 'fs';
+import { access, link, unlink, chmod } from 'fs/promises';
 import { resolve, basename } from 'path';
-import { promisify } from 'util';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
@@ -17,11 +16,6 @@ import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
-
-const accessAsync = promisify(access);
-const linkAsync = promisify(link);
-const unlinkAsync = promisify(unlink);
-const chmodAsync = promisify(chmod);
 
 export async function runDockerGenerator(
   config: Config,
@@ -137,7 +131,7 @@ export async function runDockerGenerator(
   // In order to do this we just call the file we
   // created from the templates/build_docker_sh.template.js
   // and we just run that bash script
-  await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
+  await chmod(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
 
   // Only build images on native targets
   if (flags.image) {
@@ -146,14 +140,14 @@ export async function runDockerGenerator(
       const file = basename(src);
       const dest = resolve(dockerBuildDir, file);
       try {
-        await accessAsync(src);
-        await unlinkAsync(dest);
+        await access(src);
+        await unlink(dest);
       } catch (e) {
         if (e && e.code === 'ENOENT' && e.syscall === 'access') {
           throw new Error(`${src} is needed in order to build the docker image.`);
         }
       }
-      await linkAsync(src, dest);
+      await link(src, dest);
     }
 
     await exec(log, `./build_docker.sh`, [], {

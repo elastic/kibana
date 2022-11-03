@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { mkdir } from 'fs/promises';
 import { PathConfigType } from '@kbn/utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createDataFolder } from './create_data_folder';
-import { mkdir } from './fs';
 
-jest.mock('./fs', () => ({
-  mkdir: jest.fn(() => Promise.resolve('')),
+jest.mock('fs/promises', () => ({
+  ...jest.requireActual('fs/promises'),
+  mkdir: jest.fn(),
 }));
 
 const mkdirMock = mkdir as jest.Mock;

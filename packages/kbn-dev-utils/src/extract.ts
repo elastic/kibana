@@ -9,8 +9,7 @@
 import Fs from 'fs/promises';
 import { createWriteStream } from 'fs';
 import Path from 'path';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import { pipeline } from 'stream/promises';
 
 import Tar from 'tar';
 import Yauzl, { ZipFile, Entry } from 'yauzl';
@@ -21,8 +20,6 @@ const strComplete = (obs: Rx.Observable<unknown>) =>
   new Promise<void>((resolve, reject) => {
     obs.subscribe({ complete: resolve, error: reject });
   });
-
-const asyncPipeline = promisify(pipeline);
 
 interface Options {
   /**
@@ -119,7 +116,7 @@ export async function extract({
           }
 
           // write the file contents to disk
-          await asyncPipeline(readStream, createWriteStream(fileName));
+          await pipeline(readStream, createWriteStream(fileName));
 
           if (setModifiedTimes) {
             // update the modified time of the file to match the zip entry

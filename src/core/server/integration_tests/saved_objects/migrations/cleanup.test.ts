@@ -7,8 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import Util from 'util';
+import { unlink, readFile } from 'fs/promises';
 import JSON5 from 'json5';
 import {
   createTestServers,
@@ -21,12 +20,9 @@ import { getMigrationDocLink } from './test_utils';
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, 'cleanup.log');
 
-const asyncUnlink = Util.promisify(Fs.unlink);
-const asyncReadFile = Util.promisify(Fs.readFile);
-
 async function removeLogFile() {
   // ignore errors if it doesn't exist
-  await asyncUnlink(logFilePath).catch(() => void 0);
+  await unlink(logFilePath).catch(() => void 0);
 }
 
 function createRoot() {
@@ -127,7 +123,7 @@ describe('migration v2', () => {
             Please refer to ${migrationDocLink} for more information."
           `);
 
-    const logFileContent = await asyncReadFile(logFilePath, 'utf-8');
+    const logFileContent = await readFile(logFilePath, 'utf-8');
     const records = logFileContent
       .split('\n')
       .filter(Boolean)

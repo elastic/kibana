@@ -7,13 +7,13 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import { promisify } from 'util';
+import type { PathLike } from 'fs';
+import { stat } from 'fs/promises';
 
-const existsAsync = promisify(Fs.exists);
+const exists = async (path: PathLike) => !!(await stat(path).catch(() => false));
 
 export async function findKibanaJson(directory: string): Promise<string | undefined> {
-  if (await existsAsync(Path.resolve(directory, 'kibana.json'))) {
+  if (await exists(Path.resolve(directory, 'kibana.json'))) {
     return directory;
   }
 

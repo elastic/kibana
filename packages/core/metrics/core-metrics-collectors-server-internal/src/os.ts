@@ -7,13 +7,13 @@
  */
 
 import os from 'os';
-import getosAsync, { LinuxOs } from 'getos';
+import getosCb, { LinuxOs } from 'getos';
 import { promisify } from 'util';
 import type { Logger } from '@kbn/logging';
 import type { OpsOsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
 import { OsCgroupMetricsCollector } from './cgroup';
 
-const getos = promisify(getosAsync);
+const getos = promisify(getosCb);
 
 export interface OpsMetricsCollectorOptions {
   logger: Logger;

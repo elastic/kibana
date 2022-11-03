@@ -9,17 +9,16 @@
 import dedent from 'dedent';
 import { resolve, basename } from 'path';
 import { createHash } from 'crypto';
-import { promisify } from 'util';
-import { pipeline, Transform } from 'stream';
-import Fs from 'fs';
+const { Transform } = require('stream');
+const { pipeline } = require('stream/promises');
+const { createWriteStream, createReadStream } = require('fs');
+const { mkdir, writeFile } = require('fs/promises');
 
 import getopts from 'getopts';
 import del from 'del';
 
 import { buildSnapshot, log } from '../utils';
 import { Command } from './types';
-
-const pipelineAsync = promisify(pipeline);
 
 export const buildSnapshots: Command = {
   description: 'Build and collect ES snapshots',
@@ -47,7 +46,7 @@ export const buildSnapshots: Command = {
 
     const outputDir = resolve(process.cwd(), options.output);
     del.sync(outputDir);
-    Fs.mkdirSync(outputDir, { recursive: true });
+    await mkdir(outputDir, { recursive: true });
 
     for (const license of ['oss', 'trial']) {
       for (const platform of ['darwin', 'win32', 'linux']) {
@@ -63,18 +62,18 @@ export const buildSnapshots: Command = {
           const filename = basename(snapshotPath);
           const outputPath = resolve(outputDir, filename);
           const hash = createHash('sha512');
-          await pipelineAsync(
-            Fs.createReadStream(snapshotPath),
+          await pipeline(
+            createReadStream(snapshotPath),
             new Transform({
               transform(chunk, _, cb) {
                 hash.update(chunk);
                 cb(undefined, chunk);
               },
             }),
-            Fs.createWriteStream(outputPath)
+            createWriteStream(outputPath)
           );
 
-          Fs.writeFileSync(`${outputPath}.sha512`, `${hash.digest('hex')}  ${filename}`);
+          await writeFile(`${outputPath}.sha512`, `${hash.digest('hex')}  ${filename}`);
           log.success('snapshot and shasum written to', outputPath);
         });
       }

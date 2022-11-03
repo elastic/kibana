@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { resolve } from 'path';
+import { writeFile } from 'fs/promises';
+
 import chalk from 'chalk';
 import Listr from 'listr';
-import { resolve } from 'path';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
-import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from './i18n';
+import { ErrorReporter, serializeToJson, serializeToJson5 } from './i18n';
 import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
 
 run(
@@ -56,7 +58,7 @@ run(
             const sortedMessages = [...ctx.messages].sort(([key1], [key2]) =>
               key1.localeCompare(key2)
             );
-            await writeFileAsync(
+            await writeFile(
               resolve(outputDir, 'en.json'),
               outputFormat === 'json5'
                 ? serializeToJson5(sortedMessages)

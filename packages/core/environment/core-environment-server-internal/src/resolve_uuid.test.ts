@@ -7,9 +7,9 @@
  */
 
 import { join } from 'path';
+import { readFile, writeFile } from 'fs/promises';
 import { PathConfigType } from '@kbn/utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { readFile, writeFile } from './fs';
 import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
 import { HttpConfigType } from './types';
 
@@ -17,9 +17,10 @@ jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
 }));
 
-jest.mock('./fs', () => ({
-  readFile: jest.fn(() => Promise.resolve('')),
-  writeFile: jest.fn(() => Promise.resolve('')),
+jest.mock('fs/promises', () => ({
+  ...jest.requireActual('fs/promises'),
+  readFile: jest.fn(),
+  writeFile: jest.fn(),
 }));
 
 const DEFAULT_FILE_UUID = 'ffffffff-bbbb-0ccc-0ddd-eeeeeeeeeeee';

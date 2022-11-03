@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import { setTimeout } from 'timers/promises';
 import path from 'path';
-import fs from 'fs';
-import { promisify } from 'util';
+import { readFile } from 'fs/promises';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
-const sleep = promisify(setTimeout);
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -25,7 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const uploadPkgVersion = '0.1.4';
 
   const installUploadPackage = async () => {
-    const buf = fs.readFileSync(testPkgArchiveZip);
+    const buf = await readFile(testPkgArchiveZip);
     await supertest
       .post(`/api/fleet/epm/packages`)
       .set('kbn-xsrf', 'xxxx')
@@ -91,7 +90,7 @@ export default function (providerContext: FtrProviderContext) {
 
       if (createdTemplates.length === legacyTemplateNames.length) return;
 
-      await sleep(500);
+      await setTimeout(500);
     }
 
     throw new Error('Legacy component templates not created after 5 attempts');

@@ -15,12 +15,12 @@ import execa from 'execa';
 import * as Rx from 'rxjs';
 import { tap, share, take, mergeMap, map, ignoreElements } from 'rxjs/operators';
 import chalk from 'chalk';
-import treeKill from 'tree-kill';
+import killCb from 'tree-kill';
 import { ToolingLog } from '@kbn/tooling-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { createFailError } from '@kbn/dev-cli-errors';
 
-const treeKillAsync = promisify((...args: [number, string, any]) => treeKill(...args));
+const kill = promisify((...args: [number, string, any]) => killCb(...args));
 
 const SECOND = 1000;
 const STOP_TIMEOUT = 30 * SECOND;
@@ -144,7 +144,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     await withTimeout(
       async () => {
         log.debug(`Sending "${signal}" to proc "${name}"`);
-        await treeKillAsync(childProcess.pid!, signal);
+        await kill(childProcess.pid!, signal);
         await outcomePromise;
       },
       STOP_TIMEOUT,
@@ -152,7 +152,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
         log.warning(
           `Proc "${name}" was sent "${signal}" didn't emit the "exit" or "error" events after ${STOP_TIMEOUT} ms, sending SIGKILL`
         );
-        await treeKillAsync(childProcess.pid!, 'SIGKILL');
+        await kill(childProcess.pid!, 'SIGKILL');
       }
     );
 

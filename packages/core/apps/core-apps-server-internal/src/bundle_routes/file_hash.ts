@@ -7,13 +7,19 @@
  */
 
 import type { Stats } from 'fs';
+import type { FileHandle } from 'fs/promises';
 import { generateFileHash, getFileCacheKey } from './utils';
 import type { IFileHashCache } from './file_hash_cache';
 
 /**
  *  Get the hash of a file via a file descriptor
  */
-export async function getFileHash(cache: IFileHashCache, path: string, stat: Stats, fd: number) {
+export async function getFileHash(
+  cache: IFileHashCache,
+  path: string,
+  stat: Stats,
+  fileHandle: FileHandle
+) {
   const key = getFileCacheKey(path, stat);
 
   const cached = cache.get(key);
@@ -21,7 +27,7 @@ export async function getFileHash(cache: IFileHashCache, path: string, stat: Sta
     return await cached;
   }
 
-  const promise = generateFileHash(fd).catch((error) => {
+  const promise = generateFileHash(fileHandle).catch((error) => {
     // don't cache failed attempts
     cache.del(key);
     throw error;

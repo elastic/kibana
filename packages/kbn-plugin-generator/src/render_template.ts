@@ -7,8 +7,7 @@
  */
 
 import Path from 'path';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import { pipeline } from 'stream/promises';
 
 import vfs from 'vinyl-fs';
 import prettier from 'prettier';
@@ -19,8 +18,6 @@ import { Minimatch } from 'minimatch';
 
 import { snakeCase, camelCase, upperCamelCase } from './casing';
 import { Answers } from './ask_questions';
-
-const asyncPipeline = promisify(pipeline);
 
 const excludeFiles = (globs: string[]) => {
   const patterns = globs.map(
@@ -73,7 +70,7 @@ export async function renderTemplates({
     upperCamelCase,
   };
 
-  await asyncPipeline(
+  await pipeline(
     vfs.src(['**/*'], {
       dot: true,
       buffer: true,

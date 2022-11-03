@@ -9,11 +9,12 @@
 import { fetchStreaming } from './fetch_streaming';
 import { mockXMLHttpRequest } from '../test_helpers/xhr';
 import { promisify } from 'util';
-import { deflate } from 'zlib';
-const pDeflate = promisify(deflate);
+import { deflate as deflateCb } from 'zlib';
+
+const deflate = promisify(deflateCb);
 
 const compressResponse = async (resp: any) => {
-  const gzipped = await pDeflate(JSON.stringify(resp));
+  const gzipped = await deflate(JSON.stringify(resp));
   return gzipped.toString('base64');
 };
 

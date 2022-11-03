@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { inflate as _inflate } from 'zlib';
+import { inflate as inflateCb } from 'zlib';
 import { promisify } from 'util';
 import type { SavedObjectsClient, Logger } from '@kbn/core/server';
 import type { EndpointArtifactClientInterface } from '../../services';
@@ -18,7 +18,7 @@ class ArtifactMigrationError extends Error {
   }
 }
 
-const inflateAsync = promisify(_inflate);
+const inflate = promisify(inflateCb);
 
 function isCompressed(artifact: InternalArtifactSchema) {
   return artifact.compressionAlgorithm === 'zlib';
@@ -66,7 +66,7 @@ export const migrateArtifactsToFleet = async (
         if (isCompressed(artifact.attributes)) {
           artifact.attributes = {
             ...artifact.attributes,
-            body: (await inflateAsync(Buffer.from(artifact.attributes.body, 'base64'))).toString(
+            body: (await inflate(Buffer.from(artifact.attributes.body, 'base64'))).toString(
               'base64'
             ),
           };

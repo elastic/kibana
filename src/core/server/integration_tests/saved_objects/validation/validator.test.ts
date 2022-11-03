@@ -7,8 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import Util from 'util';
+import { unlink } from 'fs/promises';
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -26,11 +25,9 @@ import {
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const logFilePath = Path.join(__dirname, 'saved_object_type_validation.log');
 
-const asyncUnlink = Util.promisify(Fs.unlink);
-
 async function removeLogFile() {
   // ignore errors if it doesn't exist
-  await asyncUnlink(logFilePath).catch(() => void 0);
+  await unlink(logFilePath).catch(() => void 0);
 }
 
 function createRoot() {

@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
+import { readFile } from 'fs/promises';
 import { engines } from '../../package.json';
-import { promisify } from 'util';
-const readFile = promisify(fs.readFile);
 
 describe('All configs should use a single version of Node', () => {
   it('should compare .node-version and .nvmrc', async () => {

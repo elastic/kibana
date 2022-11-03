@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-const realFs = jest.requireActual('fs');
+const realFs = jest.requireActual('fs/promises');
 
 export const mockReadFile = jest.fn();
 const mockStat = jest.fn();
-jest.doMock('fs', () => ({
+jest.doMock('fs/promises', () => ({
   ...realFs,
   readFile: mockReadFile,
   stat: mockStat,

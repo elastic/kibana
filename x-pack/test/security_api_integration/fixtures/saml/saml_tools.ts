@@ -11,7 +11,7 @@ import { stringify } from 'query-string';
 import url from 'url';
 import zlib from 'zlib';
 import { promisify } from 'util';
-import { parseString } from 'xml2js';
+import { parseString as parseStringCb } from 'xml2js';
 import { SignedXml } from 'xml-crypto';
 import { KBN_KEY_PATH } from '@kbn/dev-utils';
 
@@ -22,22 +22,22 @@ import { KBN_KEY_PATH } from '@kbn/dev-utils';
  * http://docs.oasis-open.org/security/saml/v2.0/saml-bindings-2.0-os.pdf.
  */
 
-const inflateRawAsync = promisify(zlib.inflateRaw);
-const deflateRawAsync = promisify(zlib.deflateRaw);
-const parseStringAsync = promisify(parseString);
+const inflateRaw = promisify(zlib.inflateRaw);
+const deflateRaw = promisify(zlib.deflateRaw);
+const parseString = promisify(parseStringCb);
 
 const signingKey = fs.readFileSync(KBN_KEY_PATH);
 const signatureAlgorithm = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
 
 export async function getSAMLRequestId(urlWithSAMLRequestId: string) {
-  const inflatedSAMLRequest = (await inflateRawAsync(
+  const inflatedSAMLRequest = (await inflateRaw(
     Buffer.from(
       url.parse(urlWithSAMLRequestId, true /* parseQueryString */).query.SAMLRequest as string,
       'base64'
     )
   )) as Buffer;
 
-  const parsedSAMLRequest = (await parseStringAsync(inflatedSAMLRequest.toString())) as any;
+  const parsedSAMLRequest = (await parseString(inflatedSAMLRequest.toString())) as any;
   return parsedSAMLRequest['saml2p:AuthnRequest'].$.ID;
 }
 
@@ -140,9 +140,7 @@ export async function getLogoutRequest({
 
   // HTTP-Redirect with deflate encoding:
   // http://docs.oasis-open.org/security/saml/v2.0/saml-bindings-2.0-os.pdf - section 3.4.4.1
-  const deflatedLogoutRequest = (await deflateRawAsync(
-    Buffer.from(logoutRequestTemplateXML)
-  )) as Buffer;
+  const deflatedLogoutRequest = await deflateRaw(Buffer.from(logoutRequestTemplateXML));
 
   const queryStringParameters: Record<string, string> = {
     SAMLRequest: deflatedLogoutRequest.toString('base64'),
