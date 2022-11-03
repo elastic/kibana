@@ -129,7 +129,7 @@
                 "label": "reportType",
                 "description": [],
                 "signature": [
-                  "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
+                  "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
                 ],
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
                 "deprecated": false,
@@ -1244,7 +1244,13 @@
             "text": "IInspectorInfo"
           },
           " | undefined; name: string; }) => { data: ",
-          "ESSearchResponse",
+          {
+            "pluginId": "@kbn/es-types",
+            "scope": "server",
+            "docId": "kibKbnEsTypesPluginApi",
+            "section": "def-server.ESSearchResponse",
+            "text": "ESSearchResponse"
+          },
           "<DocumentSource, TParams, { restTotalHitsAsInt: false; }>; loading: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/observability/public/hooks/use_es_search.ts",
@@ -2300,7 +2306,7 @@
             "label": "reportType",
             "description": [],
             "signature": [
-              "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
+              "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -3772,6 +3778,26 @@
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3817,7 +3843,7 @@
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
-              "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link: string; }"
+              "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }) => { reason: string; link: string; }"
             ],
             "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
             "deprecated": false,
@@ -3836,7 +3862,7 @@
                   "Maybe",
                   "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
                   "Maybe",
-                  "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }"
+                  "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }"
                 ],
                 "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
                 "deprecated": false,
@@ -4028,9 +4054,21 @@
             "description": [],
             "signature": [
               "(",
-              "ExistsFilter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ExistsFilter",
+                "text": "ExistsFilter"
+              },
               " | ",
-              "PhraseFilter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.PhraseFilter",
+                "text": "PhraseFilter"
+              },
               " | ",
               {
                 "pluginId": "lens",
@@ -4054,9 +4092,21 @@
             "description": [],
             "signature": [
               "(string | { field: string; nested?: string | undefined; singleSelection?: boolean | undefined; filters?: (",
-              "ExistsFilter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ExistsFilter",
+                "text": "ExistsFilter"
+              },
               " | ",
-              "PhraseFilter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.PhraseFilter",
+                "text": "PhraseFilter"
+              },
               " | ",
               {
                 "pluginId": "lens",
@@ -4136,7 +4186,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -4930,10 +4986,7 @@
         "tags": [],
         "label": "METRIC_TYPE",
         "description": [],
-        "signature": [
-          "METRIC_TYPE"
-        ],
-        "path": "node_modules/@types/kbn__analytics/index.d.ts",
+        "path": "packages/kbn-analytics/src/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5140,21 +5193,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.enableServiceGroups",
-        "type": "string",
-        "tags": [],
-        "label": "enableServiceGroups",
-        "description": [],
-        "signature": [
-          "\"observability:enableServiceGroups\""
-        ],
-        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.ENVIRONMENT_ALL",
         "type": "string",
         "tags": [],
@@ -5347,7 +5385,7 @@
           "Maybe",
           "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
           "Maybe",
-          "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link: string; }"
+          "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }) => { reason: string; link: string; }"
         ],
         "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
         "deprecated": false,
@@ -5366,7 +5404,7 @@
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
-              "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }"
+              "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }"
             ],
             "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
             "deprecated": false,
@@ -5831,9 +5869,21 @@
           " | undefined; runtime?: ",
           "MappingRuntimeFields",
           " | undefined; }; client: ",
-          "ElasticsearchClient",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
           "; logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; }) => Promise<void>"
         ],
         "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
@@ -7103,7 +7153,13 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  "Logger"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.Logger",
+                    "text": "Logger"
+                  }
                 ],
                 "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
                 "deprecated": false,
@@ -7136,7 +7192,13 @@
             "text": "RequestStatus"
           },
           "; esResponse: any; kibanaRequest: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>; operationName: string; startTime: number; }) => ",
           {
             "pluginId": "inspector",
@@ -7232,7 +7294,13 @@
                 "label": "kibanaRequest",
                 "description": [],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/observability/common/utils/get_inspect_response.ts",
@@ -7375,7 +7443,7 @@
         "label": "termQuery",
         "description": [],
         "signature": [
-          "(field: T, value: string | number | boolean | null | undefined) => ",
+          "(field: T, value: string | number | boolean | null | undefined, opts: TermQueryOpts) => ",
           "QueryDslQueryContainer",
           "[]"
         ],
@@ -7412,6 +7480,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.termQuery.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "TermQueryOpts"
+            ],
+            "path": "x-pack/plugins/observability/server/utils/queries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -7550,9 +7633,21 @@
             "description": [],
             "signature": [
               "{ start: () => Promise<",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
               ">; setup: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>; }"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -7607,7 +7702,13 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -7622,7 +7723,13 @@
             "label": "context",
             "description": [],
             "signature": [
-              "RequestHandlerContext",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
               " & { licensing: Promise<",
               {
                 "pluginId": "licensing",
@@ -7640,7 +7747,13 @@
                 "text": "AlertingApiRequestHandlerContext"
               },
               ">; core: Promise<",
-              "CoreRequestHandlerContext",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.CoreRequestHandlerContext",
+                "text": "CoreRequestHandlerContext"
+              },
               ">; }"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -7655,7 +7768,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
             "deprecated": false,
@@ -7676,9 +7795,21 @@
         "description": [],
         "signature": [
           "{ [x: string]: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<string, ",
-          "RouteParamsRT",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
           " | undefined, any, any, Record<string, any>>; }"
         ],
         "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -7729,7 +7860,13 @@
         "description": [],
         "signature": [
           "{ \"DELETE /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"DELETE /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -7753,7 +7890,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"GET /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -7777,7 +7920,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"PUT /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -7941,7 +8090,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"POST /api/observability/slos\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"POST /api/observability/slos\", ",
           "TypeC",
           "<{ body: ",
@@ -8101,7 +8256,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", ",
           "TypeC",
           "<{ query: ",
@@ -8129,7 +8290,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           ">; }[TEndpoint] extends ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<any, any, any, infer TReturnType, ",
           "ServerRouteCreateOptions",
           "> ? TReturnType : never"
@@ -8163,7 +8330,13 @@
         "description": [],
         "signature": [
           "{ \"DELETE /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"DELETE /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -8187,7 +8360,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"GET /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -8211,7 +8390,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"PUT /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -8375,7 +8560,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"POST /api/observability/slos\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"POST /api/observability/slos\", ",
           "TypeC",
           "<{ body: ",
@@ -8535,7 +8726,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", ",
           "TypeC",
           "<{ query: ",
@@ -8633,10 +8830,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableNewSyntheticsView.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8658,10 +8858,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableNewSyntheticsView.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8674,7 +8877,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -8725,10 +8934,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInspectEsQueries.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8750,10 +8962,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInspectEsQueries.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8766,7 +8981,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -8817,10 +9038,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.maxSuggestions.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8839,10 +9063,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.maxSuggestions.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8855,7 +9082,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<number>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -8892,10 +9125,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableComparisonByDefault.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8917,10 +9153,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableComparisonByDefault.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8933,7 +9172,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -8984,10 +9229,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.defaultApmServiceEnvironment.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8995,10 +9243,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.defaultApmServiceEnvironment.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9022,7 +9273,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<string>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9059,10 +9316,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9070,10 +9330,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9106,7 +9369,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<",
                   {
                     "pluginId": "observability",
@@ -9184,10 +9453,13 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.off",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.off]",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9195,10 +9467,13 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.low",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.low]",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9206,10 +9481,13 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.medium",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.medium]",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9217,10 +9495,13 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.high",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.high]",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9230,112 +9511,6 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.showInLabs",
-                "type": "boolean",
-                "tags": [],
-                "label": "showInLabs",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.enableServiceGroups",
-            "type": "Object",
-            "tags": [],
-            "label": "[enableServiceGroups]",
-            "description": [],
-            "path": "x-pack/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  "Type",
-                  "<boolean>"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.showInLabs",
                 "type": "boolean",
                 "tags": [],
                 "label": "showInLabs",
@@ -9377,10 +9552,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableServiceMetrics.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9402,10 +9580,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableServiceMetrics.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9418,7 +9599,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9483,10 +9670,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9494,10 +9684,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9510,7 +9703,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9603,10 +9802,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9625,10 +9827,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9641,7 +9846,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<number>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9678,10 +9889,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmTraceExplorerTab.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9689,10 +9903,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmTraceExplorerTab.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9705,7 +9922,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9798,10 +10021,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmOperationsTab.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9809,10 +10035,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmOperationsTab.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9825,7 +10054,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9918,10 +10153,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmLabsButton.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9929,10 +10167,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmLabsButton.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9945,7 +10186,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -10024,10 +10271,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInfrastructureHostsView.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10049,10 +10299,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInfrastructureHostsView.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10065,7 +10318,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -10102,10 +10361,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAwsLambdaMetrics.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10113,10 +10375,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAwsLambdaMetrics.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10129,7 +10394,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -10193,6 +10464,328 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmAWSLambdaPriceFactor",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmAWSLambdaPriceFactor]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"json\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.value",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.description",
+                "type": "Any",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<{ arm: ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<number>; x86_64: ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<number>; }>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmAWSLambdaRequestCostPerMillion]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.value",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<number>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableCriticalPath",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableCriticalPath]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableCriticalPath.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableCriticalPath.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableCriticalPath.description",
+                "type": "Any",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableCriticalPath.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableCriticalPath.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableCriticalPath.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableCriticalPath.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableCriticalPath.showInLabs",
+                "type": "boolean",
+                "tags": [],
+                "label": "showInLabs",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -10206,8 +10799,14 @@
       "label": "ObservabilityPluginSetup",
       "description": [],
       "signature": [
-        "{ getScopedAnnotationsClient: (requestContext: ",
-        "RequestHandlerContext",
+        "{ getAlertDetailsConfig(): Readonly<{} & { apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
+        {
+          "pluginId": "@kbn/core-http-request-handler-context-server",
+          "scope": "server",
+          "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+          "section": "def-server.RequestHandlerContext",
+          "text": "RequestHandlerContext"
+        },
         " & { licensing: Promise<",
         {
           "pluginId": "licensing",
@@ -10217,7 +10816,13 @@
           "text": "LicensingApiRequestHandlerContext"
         },
         ">; }, request: ",
-        "KibanaRequest",
+        {
+          "pluginId": "@kbn/core-http-server",
+          "scope": "server",
+          "docId": "kibKbnCoreHttpServerPluginApi",
+          "section": "def-server.KibanaRequest",
+          "text": "KibanaRequest"
+        },
         "<unknown, unknown, unknown, any>) => Promise<{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
         "Annotation",
         "; }>; getById: (getByIdParams: { id: string; }) => Promise<",
@@ -10376,6 +10981,36 @@
     "misc": [
       {
         "parentPluginId": "observability",
+        "id": "def-common.apmAWSLambdaPriceFactor",
+        "type": "string",
+        "tags": [],
+        "label": "apmAWSLambdaPriceFactor",
+        "description": [],
+        "signature": [
+          "\"observability:apmAWSLambdaPriceFactor\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmAWSLambdaRequestCostPerMillion",
+        "type": "string",
+        "tags": [],
+        "label": "apmAWSLambdaRequestCostPerMillion",
+        "description": [],
+        "signature": [
+          "\"observability:apmAWSLambdaRequestCostPerMillion\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.apmLabsButton",
         "type": "string",
         "tags": [],
@@ -10522,7 +11157,7 @@
         "signature": [
           "(numerator: ",
           "Maybe",
-          "<number>, denominator: number | undefined, fallbackResult?: string) => string"
+          "<number>, denominator: number | undefined, fallbackResult?: any) => any"
         ],
         "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
         "deprecated": false,
@@ -10560,10 +11195,13 @@
           {
             "parentPluginId": "observability",
             "id": "def-common.AsPercent.$3",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "fallbackResult",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10648,6 +11286,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.enableCriticalPath",
+        "type": "string",
+        "tags": [],
+        "label": "enableCriticalPath",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableCriticalPath\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.enableInfrastructureHostsView",
         "type": "string",
         "tags": [],
@@ -10685,21 +11338,6 @@
         "description": [],
         "signature": [
           "\"observability:enableNewSyntheticsView\""
-        ],
-        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.enableServiceGroups",
-        "type": "string",
-        "tags": [],
-        "label": "enableServiceGroups",
-        "description": [],
-        "signature": [
-          "\"observability:enableServiceGroups\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,

@@ -7,7 +7,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { BehaviorSubject, map, from, concatMap, of, Observable, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, map, concatMap, of, Observable, firstValueFrom } from 'rxjs';
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '@kbn/guided-onboarding';
 
 import { GuidedOnboardingApi } from '../types';
@@ -26,11 +26,43 @@ import { API_BASE_PATH } from '../../common/constants';
 export class ApiService implements GuidedOnboardingApi {
   private client: HttpSetup | undefined;
   private onboardingGuideState$!: BehaviorSubject<GuideState | undefined>;
+  private isGuideStateLoading: boolean | undefined;
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   public setup(httpClient: HttpSetup): void {
     this.client = httpClient;
     this.onboardingGuideState$ = new BehaviorSubject<GuideState | undefined>(undefined);
+  }
+
+  private createGetStateObservable(): Observable<GuideState | undefined> {
+    return new Observable<GuideState | undefined>((observer) => {
+      const controller = new AbortController();
+      const signal = controller.signal;
+      this.isGuideStateLoading = true;
+      this.client!.get<{ state: GuideState[] }>(`${API_BASE_PATH}/state`, {
+        query: {
+          active: true,
+        },
+        signal,
+      })
+        .then((response) => {
+          this.isGuideStateLoading = false;
+          // There should only be 1 active guide
+          const hasState = response.state.length === 1;
+          if (hasState) {
+            this.onboardingGuideState$.next(response.state[0]);
+          }
+          observer.complete();
+        })
+        .catch((error) => {
+          this.isGuideStateLoading = false;
+          observer.error(error);
+        });
+      return () => {
+        this.isGuideStateLoading = false;
+        controller.abort();
+      };
+    });
   }
 
   /**
@@ -39,24 +71,9 @@ export class ApiService implements GuidedOnboardingApi {
    * Subsequently, the observable is updated automatically, when the state changes.
    */
   public fetchActiveGuideState$(): Observable<GuideState | undefined> {
-    // TODO add error handling if this.client has not been initialized or request fails
     return this.onboardingGuideState$.pipe(
       concatMap((state) =>
-        state === undefined
-          ? from(
-              this.client!.get<{ state: GuideState[] }>(`${API_BASE_PATH}/state`, {
-                query: {
-                  active: true,
-                },
-              })
-            ).pipe(
-              map((response) => {
-                // There should only be 1 active guide
-                const hasState = response.state.length === 1;
-                return hasState ? response.state[0] : undefined;
-              })
-            )
-          : of(state)
+        !state && !this.isGuideStateLoading ? this.createGetStateObservable() : of(state)
       )
     );
   }
@@ -83,7 +100,7 @@ export class ApiService implements GuidedOnboardingApi {
   /**
    * Updates the SO with the updated guide state and refreshes the observables
    * This is largely used internally and for tests
-   * @param {GuideState} guideState the updated guide state
+   * @param {GuideState} newState the updated guide state
    * @param {boolean} panelState boolean to determine whether the dropdown panel should open or not
    * @return {Promise} a promise with the updated guide state
    */
@@ -99,8 +116,8 @@ export class ApiService implements GuidedOnboardingApi {
       const response = await this.client.put<{ state: GuideState }>(`${API_BASE_PATH}/state`, {
         body: JSON.stringify(newState),
       });
-      // If the guide has been deactivated, we return undefined
-      this.onboardingGuideState$.next(newState.isActive ? newState : undefined);
+      // broadcast the newState
+      this.onboardingGuideState$.next(newState);
       this.isGuidePanelOpen$.next(panelState);
       return response;
     } catch (error) {
@@ -147,10 +164,10 @@ export class ApiService implements GuidedOnboardingApi {
       });
 
       const updatedGuide: GuideState = {
+        guideId,
         isActive: true,
         status: 'not_started',
         steps: updatedSteps,
-        guideId,
       };
 
       return await this.updateGuideState(updatedGuide, true);

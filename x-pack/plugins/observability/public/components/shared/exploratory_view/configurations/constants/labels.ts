@@ -242,6 +242,10 @@ export const SINGLE_METRIC_LABEL = i18n.translate(
   }
 );
 
+export const HEATMAP_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.heatMap', {
+  defaultMessage: 'Heatmap',
+});
+
 export const MOBILE_RESPONSE_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.mobileResponse',
   {

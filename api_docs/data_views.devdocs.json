@@ -20,7 +20,13 @@
             "text": "DataView"
           },
           " implements ",
-          "DataViewBase"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          }
         ],
         "path": "src/plugins/data_views/common/data_views/data_view.ts",
         "deprecated": false,
@@ -57,6 +63,10 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/types.ts"
+              },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
@@ -146,6 +156,94 @@
                 "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
               },
               {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/build_es_query.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_kuery.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/handle_combined_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/handle_nested_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/build_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/exists_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/get_filter_field.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/phrase_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/phrase_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/phrases_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/ast/ast.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/and.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/exists.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/is.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/nested.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/not.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/or.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/range.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/node_types/function.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/utils/get_full_field_name_node.test.ts"
+              },
+              {
                 "plugin": "data",
                 "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
               },
@@ -210,8 +308,52 @@
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "presentationUtil",
@@ -248,10 +390,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -339,6 +477,26 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/preconfigured_job_redirect.ts"
               },
               {
@@ -352,26 +510,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
               },
               {
                 "plugin": "ml",
@@ -454,36 +592,20 @@
                 "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
                 "plugin": "canvas",
@@ -492,6 +614,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
                 "plugin": "reporting",
@@ -870,24 +996,16 @@
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/metrics/hosts/hooks/use_data_view.test.ts"
               }
             ]
           },
@@ -910,7 +1028,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -2452,7 +2576,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -2494,7 +2624,13 @@
                     "text": "SerializedFieldFormat"
                   },
                   "<{}, ",
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   ">"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -2562,7 +2698,13 @@
             "text": "DataViewField"
           },
           " implements ",
-          "DataViewFieldBase"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          }
         ],
         "path": "src/plugins/data_views/common/fields/data_view_field.ts",
         "deprecated": false,
@@ -2576,7 +2718,13 @@
             "label": "spec",
             "description": [],
             "signature": [
-              "DataViewFieldBase",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
               " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
               {
                 "pluginId": "fieldFormats",
@@ -2586,7 +2734,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
@@ -3039,7 +3193,13 @@
               "\nReturns field subtype, multi, nested, or undefined if neither"
             ],
             "signature": [
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -3161,7 +3321,13 @@
             ],
             "signature": [
               "() => ",
-              "IFieldSubTypeNested",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubTypeNested",
+                "text": "IFieldSubTypeNested"
+              },
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -3181,7 +3347,13 @@
             ],
             "signature": [
               "() => ",
-              "IFieldSubTypeMulti",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubTypeMulti",
+                "text": "IFieldSubTypeMulti"
+              },
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -3219,7 +3391,13 @@
             ],
             "signature": [
               "() => { count: number; script: string | undefined; lang: string | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined; customLabel: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -3364,7 +3542,13 @@
                   "http dependency"
                 ],
                 "signature": [
-                  "HttpSetup"
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-common.HttpSetup",
+                    "text": "HttpSetup"
+                  }
                 ],
                 "path": "src/plugins/data_views/public/data_views/data_views_api_client.ts",
                 "deprecated": false,
@@ -3525,7 +3709,13 @@
             "text": "DataViewsPublicPlugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
           "<",
           {
             "pluginId": "dataViews",
@@ -3573,7 +3763,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<",
               {
                 "pluginId": "dataViews",
@@ -3619,7 +3815,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<",
                   {
                     "pluginId": "dataViews",
@@ -3676,7 +3878,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
               ", { fieldFormats }: ",
               {
                 "pluginId": "dataViews",
@@ -3706,7 +3914,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "src/plugins/data_views/public/plugin.ts",
                 "deprecated": false,
@@ -4071,7 +4285,13 @@
             ],
             "signature": [
               "() => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<",
               {
                 "pluginId": "dataViews",
@@ -4555,7 +4775,13 @@
             ],
             "signature": [
               "(savedObject: ",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<",
               {
                 "pluginId": "dataViews",
@@ -4585,7 +4811,13 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
                   "<",
                   {
                     "pluginId": "dataViews",
@@ -4672,10 +4904,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4702,8 +4934,10 @@
                 "id": "def-public.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -5355,7 +5589,13 @@
                 "text": "SavedObjectsClientCommonFindArgs"
               },
               ") => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<T>[]>"
             ],
             "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
@@ -5395,7 +5635,13 @@
             "description": [],
             "signature": [
               "<T = unknown>(type: string, id: string) => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<T>>"
             ],
             "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
@@ -5452,9 +5698,21 @@
                 "text": "DataViewAttributes"
               },
               ", options: ",
-              "SavedObjectsUpdateOptions",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsUpdateOptions",
+                "text": "SavedObjectsUpdateOptions"
+              },
               "<unknown>) => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>>"
             ],
             "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
@@ -5520,7 +5778,13 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "SavedObjectsUpdateOptions",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SavedObjectsUpdateOptions",
+                    "text": "SavedObjectsUpdateOptions"
+                  },
                   "<unknown>"
                 ],
                 "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
@@ -5548,9 +5812,21 @@
                 "text": "DataViewAttributes"
               },
               ", options?: ",
-              "SavedObjectsCreateOptions",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
               " | undefined) => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>>"
             ],
             "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
@@ -5601,7 +5877,13 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "SavedObjectsCreateOptions",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SavedObjectsCreateOptions",
+                    "text": "SavedObjectsCreateOptions"
+                  },
                   " | undefined"
                 ],
                 "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
@@ -5712,7 +5994,13 @@
                 "label": "uiSettings",
                 "description": [],
                 "signature": [
-                  "IUiSettingsClient"
+                  {
+                    "pluginId": "@kbn/core-ui-settings-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                    "section": "def-common.IUiSettingsClient",
+                    "text": "IUiSettingsClient"
+                  }
                 ],
                 "path": "src/plugins/data_views/public/ui_settings_wrapper.ts",
                 "deprecated": false,
@@ -5763,9 +6051,21 @@
             "description": [],
             "signature": [
               "<T = unknown>() => Promise<Record<string, (",
-              "PublicUiSettingsParams",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.PublicUiSettingsParams",
+                "text": "PublicUiSettingsParams"
+              },
               " & ",
-              "UserProvidedValues",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UserProvidedValues",
+                "text": "UserProvidedValues"
+              },
               "<T>) | undefined>>"
             ],
             "path": "src/plugins/data_views/public/ui_settings_wrapper.ts",
@@ -5867,7 +6167,13 @@
         "description": [],
         "signature": [
           "(field: HasSubtype) => ",
-          "IFieldSubTypeMulti",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubTypeMulti",
+            "text": "IFieldSubTypeMulti"
+          },
           " | undefined"
         ],
         "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -5884,7 +6190,13 @@
             "description": [],
             "signature": [
               "{ subType?: ",
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -5903,7 +6215,13 @@
         "description": [],
         "signature": [
           "(field: HasSubtype) => ",
-          "IFieldSubTypeNested",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubTypeNested",
+            "text": "IFieldSubTypeNested"
+          },
           " | undefined"
         ],
         "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -5920,7 +6238,13 @@
             "description": [],
             "signature": [
               "{ subType?: ",
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -7208,7 +7532,13 @@
                 "text": "SavedObjectsClientCommonFindArgs"
               },
               ") => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<T>[]>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -7252,7 +7582,13 @@
             ],
             "signature": [
               "<T = unknown>(type: string, id: string) => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<T>>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -7315,9 +7651,21 @@
                 "text": "DataViewAttributes"
               },
               ", options: ",
-              "SavedObjectsUpdateOptions",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsUpdateOptions",
+                "text": "SavedObjectsUpdateOptions"
+              },
               "<unknown>) => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -7391,7 +7739,13 @@
                   "- client options"
                 ],
                 "signature": [
-                  "SavedObjectsUpdateOptions",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SavedObjectsUpdateOptions",
+                    "text": "SavedObjectsUpdateOptions"
+                  },
                   "<unknown>"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
@@ -7421,9 +7775,21 @@
                 "text": "DataViewAttributes"
               },
               ", options: ",
-              "SavedObjectsCreateOptions",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
               ") => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -7480,7 +7846,13 @@
                   "- client options"
                 ],
                 "signature": [
-                  "SavedObjectsCreateOptions"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SavedObjectsCreateOptions",
+                    "text": "SavedObjectsCreateOptions"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -7700,7 +8072,13 @@
             "text": "SerializedFieldFormat"
           },
           "<{}, ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">> | undefined; runtimeFieldMap?: Record<string, ",
           {
             "pluginId": "dataViews",
@@ -7734,7 +8112,13 @@
           "\nSerialized version of DataViewField"
         ],
         "signature": [
-          "DataViewFieldBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          },
           " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
           {
             "pluginId": "fieldFormats",
@@ -7744,7 +8128,13 @@
             "text": "SerializedFieldFormat"
           },
           "<{}, ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
@@ -7931,7 +8321,13 @@
             "text": "DataView"
           },
           " implements ",
-          "DataViewBase"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          }
         ],
         "path": "src/plugins/data_views/common/data_views/data_view.ts",
         "deprecated": false,
@@ -7968,6 +8364,10 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/types.ts"
+              },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
@@ -8057,6 +8457,94 @@
                 "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
               },
               {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/build_es_query.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_kuery.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/handle_combined_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/handle_nested_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/build_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/exists_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/get_filter_field.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/phrase_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/phrase_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/phrases_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/ast/ast.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/and.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/exists.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/is.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/nested.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/not.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/or.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/range.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/node_types/function.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/utils/get_full_field_name_node.test.ts"
+              },
+              {
                 "plugin": "data",
                 "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
               },
@@ -8121,8 +8609,52 @@
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "presentationUtil",
@@ -8159,10 +8691,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -8250,6 +8778,26 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/preconfigured_job_redirect.ts"
               },
               {
@@ -8263,26 +8811,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
               },
               {
                 "plugin": "ml",
@@ -8365,36 +8893,20 @@
                 "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
                 "plugin": "canvas",
@@ -8403,6 +8915,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
                 "plugin": "reporting",
@@ -8781,24 +9297,16 @@
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/metrics/hosts/hooks/use_data_view.test.ts"
               }
             ]
           },
@@ -8821,7 +9329,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -10363,7 +10877,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -10405,7 +10925,13 @@
                     "text": "SerializedFieldFormat"
                   },
                   "<{}, ",
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   ">"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -10471,7 +10997,13 @@
             "text": "DataViewsServerPlugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "server",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-server.Plugin",
+            "text": "Plugin"
+          },
           "<",
           {
             "pluginId": "dataViews",
@@ -10532,7 +11064,13 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  "PluginInitializerContext",
+                  {
+                    "pluginId": "@kbn/core-plugins-server",
+                    "scope": "server",
+                    "docId": "kibKbnCorePluginsServerPluginApi",
+                    "section": "def-server.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
                   "<unknown>"
                 ],
                 "path": "src/plugins/data_views/server/plugin.ts",
@@ -10552,7 +11090,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<",
               {
                 "pluginId": "dataViews",
@@ -10591,7 +11135,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<",
                   {
                     "pluginId": "dataViews",
@@ -10648,7 +11198,13 @@
             "description": [],
             "signature": [
               "({ uiSettings, capabilities }: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
               ", { fieldFormats }: ",
               {
                 "pluginId": "dataViews",
@@ -10658,11 +11214,29 @@
                 "text": "DataViewsServerPluginStartDependencies"
               },
               ") => { dataViewsServiceFactory: (savedObjectsClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ", elasticsearchClient: ",
-              "ElasticsearchClient",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
               ", request?: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
@@ -10685,7 +11259,13 @@
                 "label": "{ uiSettings, capabilities }",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "src/plugins/data_views/server/plugin.ts",
                 "deprecated": false,
@@ -11050,7 +11630,13 @@
             ],
             "signature": [
               "() => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<",
               {
                 "pluginId": "dataViews",
@@ -11534,7 +12120,13 @@
             ],
             "signature": [
               "(savedObject: ",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<",
               {
                 "pluginId": "dataViews",
@@ -11564,7 +12156,13 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
                   "<",
                   {
                     "pluginId": "dataViews",
@@ -11651,10 +12249,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11681,8 +12279,10 @@
                 "id": "def-server.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -12140,7 +12740,13 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  "ElasticsearchClient"
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-server.ElasticsearchClient",
+                    "text": "ElasticsearchClient"
+                  }
                 ],
                 "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                 "deprecated": false,
@@ -12350,11 +12956,29 @@
         ],
         "signature": [
           "(deps: DataViewsServiceFactoryDeps) => (savedObjectsClient: ",
-          "SavedObjectsClientContract",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          },
           ", elasticsearchClient: ",
-          "ElasticsearchClient",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
           ", request?: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
           {
             "pluginId": "dataViews",
@@ -12401,9 +13025,21 @@
         "description": [],
         "signature": [
           "(savedObjectsClient: ",
-          "SavedObjectsClientContract",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          },
           ", index: string) => Promise<",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "dataViews",
@@ -12444,7 +13080,13 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "src/plugins/data_views/server/utils.ts",
             "deprecated": false,
@@ -12527,7 +13169,13 @@
         "description": [],
         "signature": [
           "(fieldName: string, indexPattern: ",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "dataViews",
@@ -12591,7 +13239,13 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<",
               {
                 "pluginId": "dataViews",
@@ -12741,7 +13395,13 @@
               "\nLogger"
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "src/plugins/data_views/server/types.ts",
             "deprecated": false,
@@ -12991,7 +13651,13 @@
                 "text": "SavedObjectsClientCommonFindArgs"
               },
               ") => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<T>[]>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -13035,7 +13701,13 @@
             ],
             "signature": [
               "<T = unknown>(type: string, id: string) => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<T>>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -13098,9 +13770,21 @@
                 "text": "DataViewAttributes"
               },
               ", options: ",
-              "SavedObjectsUpdateOptions",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsUpdateOptions",
+                "text": "SavedObjectsUpdateOptions"
+              },
               "<unknown>) => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -13174,7 +13858,13 @@
                   "- client options"
                 ],
                 "signature": [
-                  "SavedObjectsUpdateOptions",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SavedObjectsUpdateOptions",
+                    "text": "SavedObjectsUpdateOptions"
+                  },
                   "<unknown>"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
@@ -13204,9 +13894,21 @@
                 "text": "DataViewAttributes"
               },
               ", options: ",
-              "SavedObjectsCreateOptions",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
               ") => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -13263,7 +13965,13 @@
                   "- client options"
                 ],
                 "signature": [
-                  "SavedObjectsCreateOptions"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SavedObjectsCreateOptions",
+                    "text": "SavedObjectsCreateOptions"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -13370,7 +14078,13 @@
           "\nSerialized version of DataViewField"
         ],
         "signature": [
-          "DataViewFieldBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          },
           " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
           {
             "pluginId": "fieldFormats",
@@ -13380,7 +14094,13 @@
             "text": "SerializedFieldFormat"
           },
           "<{}, ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
@@ -13647,11 +14367,29 @@
           ],
           "signature": [
             "(savedObjectsClient: ",
-            "SavedObjectsClientContract",
+            {
+              "pluginId": "@kbn/core-saved-objects-api-server",
+              "scope": "server",
+              "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+              "section": "def-server.SavedObjectsClientContract",
+              "text": "SavedObjectsClientContract"
+            },
             ", elasticsearchClient: ",
-            "ElasticsearchClient",
+            {
+              "pluginId": "@kbn/core-elasticsearch-server",
+              "scope": "server",
+              "docId": "kibKbnCoreElasticsearchServerPluginApi",
+              "section": "def-server.ElasticsearchClient",
+              "text": "ElasticsearchClient"
+            },
             ", request?: ",
-            "KibanaRequest",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
             "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
             {
               "pluginId": "dataViews",
@@ -13675,7 +14413,13 @@
               "label": "savedObjectsClient",
               "description": [],
               "signature": [
-                "SavedObjectsClientContract"
+                {
+                  "pluginId": "@kbn/core-saved-objects-api-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                  "section": "def-server.SavedObjectsClientContract",
+                  "text": "SavedObjectsClientContract"
+                }
               ],
               "path": "src/plugins/data_views/server/types.ts",
               "deprecated": false,
@@ -14889,7 +15633,13 @@
               "label": "request",
               "description": [],
               "signature": [
-                "KibanaRequest",
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
                 "<unknown, unknown, unknown, any> | undefined"
               ],
               "path": "src/plugins/data_views/server/types.ts",
@@ -14953,7 +15703,13 @@
             "text": "DataView"
           },
           " implements ",
-          "DataViewBase"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          }
         ],
         "path": "src/plugins/data_views/common/data_views/data_view.ts",
         "deprecated": false,
@@ -14990,6 +15746,10 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/types.ts"
+              },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
@@ -15079,6 +15839,94 @@
                 "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
               },
               {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/build_es_query.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_kuery.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/handle_combined_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/handle_nested_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/build_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/exists_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/get_filter_field.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/phrase_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/phrase_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/build_filters/phrases_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/ast/ast.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/and.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/exists.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/is.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/nested.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/not.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/or.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/range.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/node_types/function.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/kuery/functions/utils/get_full_field_name_node.test.ts"
+              },
+              {
                 "plugin": "data",
                 "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
               },
@@ -15143,8 +15991,52 @@
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "presentationUtil",
@@ -15181,10 +16073,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -15272,6 +16160,26 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/preconfigured_job_redirect.ts"
               },
               {
@@ -15285,26 +16193,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
               },
               {
                 "plugin": "ml",
@@ -15387,36 +16275,20 @@
                 "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
                 "plugin": "canvas",
@@ -15425,6 +16297,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
                 "plugin": "reporting",
@@ -15803,24 +16679,16 @@
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/metrics/hosts/hooks/use_data_view.test.ts"
               }
             ]
           },
@@ -15843,7 +16711,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -17385,7 +18259,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -17427,7 +18307,13 @@
                     "text": "SerializedFieldFormat"
                   },
                   "<{}, ",
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   ">"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -17495,7 +18381,13 @@
             "text": "DataViewField"
           },
           " implements ",
-          "DataViewFieldBase"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          }
         ],
         "path": "src/plugins/data_views/common/fields/data_view_field.ts",
         "deprecated": false,
@@ -17509,7 +18401,13 @@
             "label": "spec",
             "description": [],
             "signature": [
-              "DataViewFieldBase",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
               " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
               {
                 "pluginId": "fieldFormats",
@@ -17519,7 +18417,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
@@ -17972,7 +18876,13 @@
               "\nReturns field subtype, multi, nested, or undefined if neither"
             ],
             "signature": [
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -18094,7 +19004,13 @@
             ],
             "signature": [
               "() => ",
-              "IFieldSubTypeNested",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubTypeNested",
+                "text": "IFieldSubTypeNested"
+              },
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -18114,7 +19030,13 @@
             ],
             "signature": [
               "() => ",
-              "IFieldSubTypeMulti",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubTypeMulti",
+                "text": "IFieldSubTypeMulti"
+              },
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -18152,7 +19074,13 @@
             ],
             "signature": [
               "() => { count: number; script: string | undefined; lang: string | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined; customLabel: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -18680,7 +19608,13 @@
             ],
             "signature": [
               "() => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<",
               {
                 "pluginId": "dataViews",
@@ -19164,7 +20098,13 @@
             ],
             "signature": [
               "(savedObject: ",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<",
               {
                 "pluginId": "dataViews",
@@ -19194,7 +20134,13 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
                   "<",
                   {
                     "pluginId": "dataViews",
@@ -19281,10 +20227,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19311,8 +20257,10 @@
                 "id": "def-common.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -19880,7 +20828,13 @@
         "description": [],
         "signature": [
           "(field: HasSubtype) => ",
-          "IFieldSubTypeMulti",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubTypeMulti",
+            "text": "IFieldSubTypeMulti"
+          },
           " | undefined"
         ],
         "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -19897,7 +20851,13 @@
             "description": [],
             "signature": [
               "{ subType?: ",
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -19916,7 +20876,13 @@
         "description": [],
         "signature": [
           "(field: HasSubtype) => ",
-          "IFieldSubTypeNested",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubTypeNested",
+            "text": "IFieldSubTypeNested"
+          },
           " | undefined"
         ],
         "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -19933,7 +20899,13 @@
             "description": [],
             "signature": [
               "{ subType?: ",
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -20039,7 +21011,13 @@
             "description": [],
             "signature": [
               "{ subType?: ",
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -20073,7 +21051,13 @@
             "description": [],
             "signature": [
               "{ subType?: ",
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -20480,9 +21464,21 @@
                 "text": "FormatFactory"
               },
               "; getDefaultConfig: (fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
               {
                 "pluginId": "fieldFormats",
@@ -20508,9 +21504,21 @@
                 "text": "FieldFormatInstanceType"
               },
               " | undefined; getDefaultType: (fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
               {
                 "pluginId": "fieldFormats",
@@ -20520,19 +21528,61 @@
                 "text": "FieldFormatInstanceType"
               },
               " | undefined; getTypeNameByEsTypes: (esTypes: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               " | undefined; getDefaultTypeName: (fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               " | ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "; getInstance: (formatId: string, params?: ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -20542,11 +21592,29 @@
                 "text": "FieldFormat"
               },
               "; getDefaultInstancePlain: (fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined, params?: ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -20556,11 +21624,29 @@
                 "text": "FieldFormat"
               },
               "; getDefaultInstanceCacheResolver: (fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => string; getByFieldType: (fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -20570,11 +21656,29 @@
                 "text": "FieldFormatInstanceType"
               },
               "[]; getDefaultInstance: (fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined, params?: ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -20608,7 +21712,13 @@
             ],
             "signature": [
               "(toastInputFields: ",
-              "ToastInputFields",
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.ToastInputFields",
+                "text": "ToastInputFields"
+              },
               ", key: string) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -20627,9 +21737,21 @@
                   "Pick<",
                   "Toast",
                   ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\" | \"css\"> & { title?: string | ",
-                  "MountPoint",
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
                   "<HTMLElement> | undefined; text?: string | ",
-                  "MountPoint",
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
                   "<HTMLElement> | undefined; }"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
@@ -20660,7 +21782,13 @@
             ],
             "signature": [
               "(error: Error, toastInputFields: ",
-              "ErrorToastOptions",
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.ErrorToastOptions",
+                "text": "ErrorToastOptions"
+              },
               ", key: string) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -20690,7 +21818,13 @@
                 "label": "toastInputFields",
                 "description": [],
                 "signature": [
-                  "ErrorToastOptions"
+                  {
+                    "pluginId": "@kbn/core-notifications-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                    "section": "def-common.ErrorToastOptions",
+                    "text": "ErrorToastOptions"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -21383,7 +22517,13 @@
             ],
             "signature": [
               "() => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<",
               {
                 "pluginId": "dataViews",
@@ -21883,7 +23023,13 @@
             ],
             "signature": [
               "(savedObject: ",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<",
               {
                 "pluginId": "dataViews",
@@ -21913,7 +23059,13 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
                   "<",
                   {
                     "pluginId": "dataViews",
@@ -22128,7 +23280,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               "> | null | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -22935,7 +24093,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">> | undefined; runtimeFieldMap?: Record<string, ",
               {
                 "pluginId": "dataViews",
@@ -23080,10 +24244,16 @@
         "label": "SavedObject",
         "description": [],
         "signature": [
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<T>"
         ],
-        "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23096,7 +24266,7 @@
             "description": [
               "The ID of this Saved Object, guaranteed to be unique for all objects of the same `type`"
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -23109,7 +24279,7 @@
             "description": [
               " The type of Saved Object. Each plugin can define it's own custom Saved Object types."
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -23125,7 +24295,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -23141,7 +24311,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -23157,7 +24327,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -23169,10 +24339,16 @@
             "label": "error",
             "description": [],
             "signature": [
-              "SavedObjectError",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
               " | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -23188,7 +24364,7 @@
             "signature": [
               "T"
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -23202,10 +24378,16 @@
               "{@inheritdoc SavedObjectReference}"
             ],
             "signature": [
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]"
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -23219,10 +24401,16 @@
               "{@inheritdoc SavedObjectsMigrationVersion}"
             ],
             "signature": [
-              "SavedObjectsMigrationVersion",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsMigrationVersion",
+                "text": "SavedObjectsMigrationVersion"
+              },
               " | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -23238,7 +24426,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -23254,7 +24442,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -23270,7 +24458,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -23309,7 +24497,13 @@
                 "text": "SavedObjectsClientCommonFindArgs"
               },
               ") => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<T>[]>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -23353,7 +24547,13 @@
             ],
             "signature": [
               "<T = unknown>(type: string, id: string) => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<T>>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -23416,9 +24616,21 @@
                 "text": "DataViewAttributes"
               },
               ", options: ",
-              "SavedObjectsUpdateOptions",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsUpdateOptions",
+                "text": "SavedObjectsUpdateOptions"
+              },
               "<unknown>) => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -23492,7 +24704,13 @@
                   "- client options"
                 ],
                 "signature": [
-                  "SavedObjectsUpdateOptions",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SavedObjectsUpdateOptions",
+                    "text": "SavedObjectsUpdateOptions"
+                  },
                   "<unknown>"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
@@ -23522,9 +24740,21 @@
                 "text": "DataViewAttributes"
               },
               ", options: ",
-              "SavedObjectsCreateOptions",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
               ") => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -23581,7 +24811,13 @@
                   "- client options"
                 ],
                 "signature": [
-                  "SavedObjectsCreateOptions"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SavedObjectsCreateOptions",
+                    "text": "SavedObjectsCreateOptions"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -24135,7 +25371,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; delete: (indexPatternId: string) => Promise<{}>; create: ({ id, name, title, ...restOfSpec }: ",
+          ">; delete: (indexPatternId: string) => Promise<{}>; create: (spec: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24168,7 +25404,13 @@
             "text": "DataViewListItem"
           },
           "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "dataViews",
@@ -24266,7 +25508,13 @@
             "text": "DataViewFieldMap"
           },
           "; savedObjectToSpec: (savedObject: ",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "dataViews",
@@ -24389,7 +25637,13 @@
             "text": "SerializedFieldFormat"
           },
           "<{}, ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">> | undefined; runtimeFieldMap?: Record<string, ",
           {
             "pluginId": "dataViews",
@@ -24472,7 +25726,13 @@
             "text": "SerializedFieldFormat"
           },
           "<{}, ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
@@ -24490,7 +25750,13 @@
           "\nSerialized version of DataViewField"
         ],
         "signature": [
-          "DataViewFieldBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          },
           " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
           {
             "pluginId": "fieldFormats",
@@ -24500,7 +25766,13 @@
             "text": "SerializedFieldFormat"
           },
           "<{}, ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
@@ -24563,7 +25835,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
@@ -24599,7 +25877,13 @@
         ],
         "signature": [
           "(error: Error, toastInputFields: ",
-          "ErrorToastOptions",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-common.ErrorToastOptions",
+            "text": "ErrorToastOptions"
+          },
           ", key: string) => void"
         ],
         "path": "src/plugins/data_views/common/types.ts",
@@ -24633,7 +25917,13 @@
               "Toast notif config"
             ],
             "signature": [
-              "ErrorToastOptions"
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.ErrorToastOptions",
+                "text": "ErrorToastOptions"
+              }
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -24666,7 +25956,13 @@
         ],
         "signature": [
           "(toastInputFields: ",
-          "ToastInputFields",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-common.ToastInputFields",
+            "text": "ToastInputFields"
+          },
           ", key: string) => void"
         ],
         "path": "src/plugins/data_views/common/types.ts",
@@ -24687,9 +25983,21 @@
               "Pick<",
               "Toast",
               ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\" | \"css\"> & { title?: string | ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement> | undefined; text?: string | ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement> | undefined; }"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -24888,7 +26196,13 @@
                 "text": "DataViewSpec"
               },
               ", references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]) => ",
               {
                 "pluginId": "dataViews",
@@ -24931,7 +26245,13 @@
                 "label": "references",
                 "description": [],
                 "signature": [
-                  "SavedObjectReference",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
