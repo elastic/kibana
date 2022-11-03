@@ -89,6 +89,8 @@ while read -r journey; do
   status=0
   for phase in "${phases[@]}"; do
     echo "--- $journey - $phase"
+    echo "Wait 30 sec b/w journeys"
+    sleep 30
 
     export TEST_PERFORMANCE_PHASE="$phase"
 
