@@ -148,6 +148,8 @@ export interface ISavedObjectsRepository {
   ): Promise<any>;
 
   /**
+   * Find saved objects by query
+   *
    * @param {object} [options={}] {@link SavedObjectsFindOptions} - options for the find operation
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
@@ -245,6 +247,7 @@ export interface ISavedObjectsRepository {
    *
    * @param {string} type - the type of the object to update
    * @param {string} id - the ID of the object to update
+   * @param {object} attributes - attributes to update
    * @param {object} [options={}] {@link SavedObjectsUpdateOptions} - options for the update operation
    * @property {string} options.version - ensures version matches that of persisted object
    * @property {string} [options.namespace]
@@ -413,6 +416,7 @@ export interface ISavedObjectsRepository {
    * @param {object} [options] {@link SavedObjectsOpenPointInTimeOptions} - options for the open PIT operation
    * @property {string} [options.keepAlive]
    * @property {string} [options.preference]
+   * @param {object} internalOptions {@link SavedObjectsFindInternalOptions} - internal options for the open PIT operation
    * @returns {promise} - { id - the ID for the PIT }
    */
   openPointInTimeForType(
@@ -460,6 +464,7 @@ export interface ISavedObjectsRepository {
    *
    * @param {string} id - ID of the saved object
    * @param {object} [options] {@link SavedObjectsClosePointInTimeOptions} - options for the close PIT operation
+   * @param {object} internalOptions {@link SavedObjectsFindInternalOptions} - internal options for the close PIT operation
    * @returns {promise} - { succeeded, num_freed - number of contexts closed }
    */
   closePointInTime(
@@ -493,6 +498,10 @@ export interface ISavedObjectsRepository {
    * done iterating and have not yet paged through all of the results: the
    * PIT will automatically be closed for you once you reach the last page
    * of results, or if the underlying call to `find` fails for any reason.
+   *
+   * @param {object} findOptions - {@link SavedObjectsCreatePointInTimeFinderOptions} - the options for creating the point-in-time finder
+   * @param {object} dependencies - {@link SavedObjectsCreatePointInTimeFinderDependencies} - the dependencies for creating the point-in-time finder
+   * @returns - the point-in-time finder {@link ISavedObjectsPointInTimeFinder}
    *
    * @example
    * ```ts

@@ -58,6 +58,7 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
   SavedObjectsFindInternalOptions,
+  ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
 import {
   SavedObjectSanitizedDoc,
@@ -159,13 +160,6 @@ export const DEFAULT_RETRY_COUNT = 3;
 const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
 
 /**
- * See {@link SavedObjectsRepository}
- *
- * @public
- */
-export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
-
-/**
  * @internal
  */
 interface PreflightCheckNamespacesParams {
@@ -199,6 +193,11 @@ function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetG
 }
 
 /**
+ * Saved Objects Respositiry - the client entry point for saved object manipulation.
+ *
+ * The SOR calls the Elasticsearch client and leverages extension implementations to
+ * support spaces, security, and encryption features.
+ *
  * @public
  */
 export class SavedObjectsRepository implements ISavedObjectsRepository {
