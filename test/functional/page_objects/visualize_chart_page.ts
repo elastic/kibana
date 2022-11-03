@@ -206,7 +206,7 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   public async getVisualizationRenderingCount() {
-    const visualizationLoader = await this.testSubjects.find('visualizationLoader');
+    const visualizationLoader = await this.testSubjects.find('tvbEditorVisualization');
     const renderingCount = await visualizationLoader.getAttribute('data-rendering-count');
     return Number(renderingCount);
   }
