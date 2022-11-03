@@ -10,7 +10,7 @@ import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
-const defaultSuccessfulResponse = { total: 1 };
+const defaultSuccessfulResponse = { total: 1, errors: [], taskIdsFailedToBeEnabled: [] };
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
