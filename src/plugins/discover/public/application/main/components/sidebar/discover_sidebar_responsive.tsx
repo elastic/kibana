@@ -212,12 +212,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     // it is useful to know what fields are populated in the docs fetched
     // or what fields are selected by the user
 
-    const availableFields =
-      props.columns.length === 1 && props.columns[0] === '_source'
-        ? allFieldsNames
-        : props.columns.length > 0
-        ? props.columns
-        : allFieldsNames;
+    const availableFields = props.columns.length > 0 ? props.columns : allFieldsNames;
     availableFields$.next({
       fetchStatus: FetchStatus.COMPLETE,
       fields: availableFields,
