@@ -26,22 +26,20 @@ interface Props {
   serviceGroup: ServiceGroup;
   hideServiceCount?: boolean;
   href?: string;
-  servicesCount?: number;
-  alertsCount?: number;
+  serviceGroupCounts?: { services: number; alerts: number };
 }
 
 export function ServiceGroupsCard({
   serviceGroup,
   hideServiceCount = false,
   href,
-  servicesCount,
-  alertsCount,
+  serviceGroupCounts,
 }: Props) {
   const cardProps: EuiCardProps = {
     style: { width: 286 },
     icon: (
       <>
-        {alertsCount && (
+        {serviceGroupCounts?.alerts && (
           <div>
             <EuiBadge
               iconType="alert"
@@ -56,7 +54,7 @@ export function ServiceGroupsCard({
               {i18n.translate('xpack.apm.serviceGroups.cardsList.alertCount', {
                 defaultMessage:
                   '{alertsCount} {alertsCount, plural, one {alert} other {alerts}}',
-                values: { alertsCount },
+                values: { alertsCount: serviceGroupCounts.alerts },
               })}
             </EuiBadge>
             <EuiSpacer size="s" />
@@ -84,7 +82,7 @@ export function ServiceGroupsCard({
         {!hideServiceCount && (
           <EuiFlexItem>
             <EuiText size="s">
-              {servicesCount === undefined ? (
+              {serviceGroupCounts === undefined ? (
                 <>&nbsp;</>
               ) : (
                 i18n.translate(
@@ -92,7 +90,7 @@ export function ServiceGroupsCard({
                   {
                     defaultMessage:
                       '{servicesCount} {servicesCount, plural, one {service} other {services}}',
-                    values: { servicesCount },
+                    values: { servicesCount: serviceGroupCounts.services },
                   }
                 )
               )}

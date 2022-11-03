@@ -11,19 +11,15 @@ import { ServiceGroupsCard } from './service_group_card';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useDefaultEnvironment } from '../../../../hooks/use_default_environment';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 interface Props {
   items: SavedServiceGroup[];
-  servicesCounts: Record<string, number>;
-  serviceGroupAlertsCount: Record<string, number>;
+  serviceGroupCounts: APIReturnType<'GET /internal/apm/service-group/counts'>;
   isLoading: boolean;
 }
 
-export function ServiceGroupsListItems({
-  items,
-  servicesCounts,
-  serviceGroupAlertsCount,
-}: Props) {
+export function ServiceGroupsListItems({ items, serviceGroupCounts }: Props) {
   const router = useApmRouter();
   const { query } = useApmParams('/service-groups');
 
@@ -34,8 +30,7 @@ export function ServiceGroupsListItems({
       {items.map((item) => (
         <ServiceGroupsCard
           serviceGroup={item}
-          servicesCount={servicesCounts[item.id]}
-          alertsCount={serviceGroupAlertsCount[item.id]}
+          serviceGroupCounts={serviceGroupCounts[item.id]}
           href={router.link('/services', {
             query: {
               ...query,

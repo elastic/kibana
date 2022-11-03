@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import datemath from '@kbn/datemath';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
@@ -22,6 +23,7 @@ import {
 import { getServicesCounts } from './get_services_counts';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getServiceGroupAlerts } from './get_service_group_alerts';
+import { getAlertsIndices } from './get_alerts_indices';
 
 const serviceGroupsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-groups',
@@ -39,43 +41,6 @@ const serviceGroupsRoute = createApmServerRoute({
       savedObjectsClient,
     });
     return { serviceGroups };
-  },
-});
-
-const serviceGroupsWithServiceCountRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service_groups/services_count',
-  params: t.type({
-    query: rangeRt,
-  }),
-  options: {
-    tags: ['access:apm'],
-  },
-  handler: async (
-    resources
-  ): Promise<{ servicesCounts: Record<string, number> }> => {
-    const { context, params } = resources;
-    const {
-      savedObjects: { client: savedObjectsClient },
-    } = await context.core;
-
-    const {
-      query: { start, end },
-    } = params;
-
-    const apmEventClient = await getApmEventClient(resources);
-
-    const serviceGroups = await getServiceGroups({
-      savedObjectsClient,
-    });
-
-    return {
-      servicesCounts: await getServicesCounts({
-        apmEventClient,
-        serviceGroups,
-        start,
-        end,
-      }),
-    };
   },
 });
 
@@ -190,34 +155,49 @@ const serviceGroupServicesRoute = createApmServerRoute({
   },
 });
 
-const serviceGroupAlertsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-group/alerts',
+const serviceGroupCountsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-group/counts',
   options: {
     tags: ['access:apm'],
   },
-  handler: async (resources): ReturnType<typeof getServiceGroupAlerts> => {
+  handler: async (
+    resources
+  ): Promise<Record<string, { services: number; alerts: number }>> => {
     const { context } = resources;
     const {
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
-    const serviceGroups = await getServiceGroups({
-      savedObjectsClient,
-    });
-    const ruleRegistryPluginStart =
-      await resources.plugins.ruleRegistry.start();
-    const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(
-      resources.request
+
+    const [serviceGroups, authorizedAlertsIndices, apmEventClient] =
+      await Promise.all([
+        getServiceGroups({ savedObjectsClient }),
+        getAlertsIndices(resources),
+        getApmEventClient(resources),
+      ]);
+
+    const [servicesCounts, serviceGroupAlertsCount] = await Promise.all([
+      getServicesCounts({
+        apmEventClient,
+        serviceGroups,
+        start: datemath.parse('now-24h')!.toDate().getTime(),
+        end: datemath.parse('now')!.toDate().getTime(),
+      }),
+      getServiceGroupAlerts({
+        serviceGroups,
+        authorizedAlertsIndices,
+        context,
+      }),
+    ]);
+    return serviceGroups.reduce(
+      (acc, { id }) => ({
+        ...acc,
+        [id]: {
+          services: servicesCounts[id],
+          alerts: serviceGroupAlertsCount[id],
+        },
+      }),
+      {}
     );
-    const authorizedAlertsIndices =
-      await alertsClient.getAuthorizedAlertsIndices(['apm']);
-    if (!authorizedAlertsIndices || authorizedAlertsIndices.length === 0) {
-      return { serviceGroupAlertsCount: {} };
-    }
-    return await getServiceGroupAlerts({
-      serviceGroups,
-      authorizedAlertsIndices,
-      context,
-    });
   },
 });
 
@@ -227,6 +207,5 @@ export const serviceGroupRouteRepository = {
   ...serviceGroupSaveRoute,
   ...serviceGroupDeleteRoute,
   ...serviceGroupServicesRoute,
-  ...serviceGroupsWithServiceCountRoute,
-  ...serviceGroupAlertsRoute,
+  ...serviceGroupCountsRoute,
 };

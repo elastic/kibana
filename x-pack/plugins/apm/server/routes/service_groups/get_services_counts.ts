@@ -67,10 +67,14 @@ export async function getServicesCounts({
 
   const buckets: Record<string, { services_count: { value: number } }> =
     response?.aggregations?.service_groups.buckets ?? {};
-  return Object.keys(buckets).reduce((acc, key) => {
+
+  const servicesCount: Record<string, number> = Object.keys(buckets).reduce<
+    Record<string, number>
+  >((acc, key) => {
     return {
       ...acc,
       [key]: buckets[key].services_count.value,
     };
   }, {});
+  return servicesCount;
 }

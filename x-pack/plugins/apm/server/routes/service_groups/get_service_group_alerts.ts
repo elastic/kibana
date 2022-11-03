@@ -20,11 +20,15 @@ export async function getServiceGroupAlerts({
   context,
 }: {
   serviceGroups: SavedServiceGroup[];
-  authorizedAlertsIndices: string[];
+  authorizedAlertsIndices?: string[];
   context: ApmPluginRequestHandlerContext;
 }) {
-  if (serviceGroups.length === 0) {
-    return { serviceGroupAlertsCount: {} };
+  if (
+    !authorizedAlertsIndices ||
+    authorizedAlertsIndices.length === 0 ||
+    serviceGroups.length === 0
+  ) {
+    return {};
   }
   const serviceGroupsKueryMap: Record<string, QueryDslQueryContainer> =
     serviceGroups.reduce((acc, sg) => {
@@ -84,5 +88,5 @@ export async function getServiceGroupAlerts({
     };
   }, {});
 
-  return { serviceGroupAlertsCount };
+  return serviceGroupAlertsCount;
 }
