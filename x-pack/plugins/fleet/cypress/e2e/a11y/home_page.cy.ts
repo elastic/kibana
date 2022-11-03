@@ -32,6 +32,7 @@ import { cleanupAgentPolicies, unenrollAgent } from '../../tasks/cleanup';
 import { setFleetServerHost } from '../../tasks/fleet_server';
 describe('Home page', () => {
   before(() => {
+    setFleetServerHost('https://fleetserver:8220');
     navigateTo(FLEET);
     cy.getBySel(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).click();
   });
@@ -75,7 +76,6 @@ describe('Home page', () => {
         checkA11y({ skipFailures: false });
       });
       it('Generate service token', () => {
-        cy.getBySel(ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON, { timeout: 15000 }).should('be.visible');
         cy.getBySel(ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON).click();
         cy.getBySel(PLATFORM_TYPE_LINUX_BUTTON, { timeout: 15000 })
           .scrollIntoView()
