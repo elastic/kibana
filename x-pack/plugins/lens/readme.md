@@ -159,6 +159,14 @@ The Lens embeddable is handling data fetching internally, this means as soon as 
 * When refreshing, simply call `session.start` again and update your state - Lens will discard the existing cache and re-fetch even if the query doesn't change at all
 * When unmounting your app, call `session.clear` to end the current session
 
+## Performance considerations
+
+As the Lens embeddable is doing data fetching and processing internally as soon as props are passed to it, it's beneficial to make sure it's not rendered with new props if that's avoidable. Lens is aborting in-flight search requests as soon as the chart configuration changes based on props, but there's still non-trivial work kicked off in multiple parts of the stack. To avoid this, make sure to keep these things in mind:
+* Changing the reference of the `attributes` prop will cause the Lens vis to re-initialize from scratch. Try to keep it stable as long as possible, e.g. by using `useMemo` instead of re-constructing it on the fly on every render
+* Pass time range and filters in via the dedicated props instead of part of the `attributes` to avoid re-initalization. Changing time range or filters might kick off another search request so it makes sense to keep this stable as well, but this can also be controlled somewhat by the session id (see section above)
+* The chart will adjust itself automatically to layout changes, no need to trigger another re-render in this situation
+
+
 ## Getting data tables and requests/responses
 
 The Lens embeddable is handling both data fetching and rendering - all the user has to do is to supply the configuration. However in some cases the resulting values are necessary for other parts of the UI - to access them pass supply an `onLoad` callback prop to the component. It will be called with an `adapters` object which allows you to access the current data tables and requests/responses:
