@@ -49,6 +49,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { DiscoverAppLocator } from './locator';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
+import { DiscoverContextAppLocator } from './application/context/services/locator';
+import { DiscoverSingleDocLocator } from './application/doc/locator';
 
 export interface HistoryLocationState {
   referrer: string;
@@ -85,6 +87,8 @@ export interface DiscoverServices {
   spaces?: SpacesApi;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   locator: DiscoverAppLocator;
+  contextLocator: DiscoverContextAppLocator;
+  singleDocLocator: DiscoverSingleDocLocator;
   expressions: ExpressionsStart;
   charts: ChartsPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
@@ -96,7 +100,9 @@ export const buildServices = memoize(function (
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext,
-  locator: DiscoverAppLocator
+  locator: DiscoverAppLocator,
+  contextLocator: DiscoverContextAppLocator,
+  singleDocLocator: DiscoverSingleDocLocator
 ): DiscoverServices {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
@@ -134,6 +140,8 @@ export const buildServices = memoize(function (
     dataViewEditor: plugins.dataViewEditor,
     triggersActionsUi: plugins.triggersActionsUi,
     locator,
+    contextLocator,
+    singleDocLocator,
     expressions: plugins.expressions,
     charts: plugins.charts,
     savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),

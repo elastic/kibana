@@ -11,11 +11,11 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { Filter } from '@kbn/es-query';
 import { formatFieldValue } from '../../../utils/format_value';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
-import { useNavigationProps } from '../../../hooks/use_navigation_props';
 import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
 import { DataTableRecord, EsHitRecord } from '../../../types';
 import { TableRowDetails } from './table_row_details';
@@ -29,6 +29,8 @@ export type DocTableRow = EsHitRecord & {
 export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
+  filters?: Filter[];
+  savedSearchId?: string;
   row: DataTableRecord;
   dataView: DataView;
   useNewFieldsApi: boolean;
@@ -38,8 +40,10 @@ export interface TableRowProps {
 }
 
 export const TableRow = ({
+  filters,
   columns,
   filter,
+  savedSearchId,
   row,
   dataView,
   useNewFieldsApi,
@@ -47,7 +51,7 @@ export const TableRow = ({
   onAddColumn,
   onRemoveColumn,
 }: TableRowProps) => {
-  const { uiSettings, filterManager, fieldFormats, addBasePath } = useDiscoverServices();
+  const { uiSettings, fieldFormats } = useDiscoverServices();
   const [maxEntries, hideTimeColumn] = useMemo(
     () => [
       uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
@@ -97,15 +101,6 @@ export const TableRow = ({
     },
     [filter, dataView.fields, row.flattened]
   );
-
-  const { singleDocProps, surrDocsProps } = useNavigationProps({
-    dataViewId: dataView.id!,
-    rowIndex: row.raw._index,
-    rowId: row.raw._id,
-    filterManager,
-    addBasePath,
-    columns,
-  });
 
   const rowCells = [
     <td className="kbnDocTableCell__toggleDetails" key="toggleDetailsCell">
@@ -203,22 +198,27 @@ export const TableRow = ({
         {rowCells}
       </tr>
       <tr data-test-subj="docTableDetailsRow" className="kbnDocTableDetails__row">
-        <TableRowDetails
-          open={open}
-          colLength={(columns.length || 1) + 2}
-          isTimeBased={dataView.isTimeBased()}
-          singleDocProps={singleDocProps}
-          surrDocsProps={surrDocsProps}
-        >
-          <DocViewer
-            columns={columns}
-            filter={filter}
-            hit={row}
+        {open && (
+          <TableRowDetails
+            colLength={(columns.length || 1) + 2}
+            isTimeBased={dataView.isTimeBased()}
             dataView={dataView}
-            onAddColumn={onAddColumn}
-            onRemoveColumn={onRemoveColumn}
-          />
-        </TableRowDetails>
+            rowIndex={row.raw._index}
+            rowId={row.raw._id}
+            columns={columns}
+            filters={filters}
+            savedSearchId={savedSearchId}
+          >
+            <DocViewer
+              columns={columns}
+              filter={filter}
+              hit={row}
+              dataView={dataView}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
+          </TableRowDetails>
+        )}
       </tr>
     </Fragment>
   );

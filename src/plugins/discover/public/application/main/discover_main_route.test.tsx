@@ -8,13 +8,13 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
-import { setHeaderActionMenuMounter } from '../../kibana_services';
+import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverMainRoute } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
 import { dataViewMock } from '../../__mocks__/data_view';
-import { SavedObject } from '@kbn/core/public';
+import { SavedObject, ScopedHistory } from '@kbn/core/public';
 import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 import { DiscoverMainApp } from './discover_main_app';
 import { SearchSource } from '@kbn/data-plugin/common';
@@ -25,6 +25,8 @@ jest.mock('./discover_main_app', () => {
     DiscoverMainApp: jest.fn().mockReturnValue(<></>),
   };
 });
+
+setScopedHistory({ location: {} } as ScopedHistory);
 
 describe('DiscoverMainRoute', () => {
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {

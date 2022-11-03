@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { Filter } from '@kbn/es-query';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -178,6 +179,14 @@ export interface DiscoverGridProps {
    * Callback to execute on edit runtime field
    */
   onFieldEdited?: () => void;
+  /**
+   * Filters applied by saved search embeddable
+   */
+  filters?: Filter[];
+  /**
+   * Saved search id used for links to single doc and surrounding docs in the flyout
+   */
+  savedSearchId?: string;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -191,6 +200,8 @@ export const DiscoverGrid = ({
   isLoading,
   expandedDoc,
   onAddColumn,
+  filters,
+  savedSearchId,
   onFilter,
   onRemoveColumn,
   onResize,
@@ -621,6 +632,8 @@ export const DiscoverGrid = ({
             hits={displayedRows}
             // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
             columns={defaultColumns ? [] : displayedColumns}
+            filters={filters}
+            savedSearchId={savedSearchId}
             onFilter={onFilter}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
