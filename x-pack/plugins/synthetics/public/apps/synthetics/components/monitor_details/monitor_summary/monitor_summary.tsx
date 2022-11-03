@@ -52,7 +52,7 @@ export const MonitorSummary = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel hasShadow={false} hasBorder paddingSize="m" css={{ height: 158 }}>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="m" css={{ height: 120 }}>
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">

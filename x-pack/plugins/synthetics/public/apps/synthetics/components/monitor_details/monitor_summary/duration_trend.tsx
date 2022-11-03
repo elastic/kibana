@@ -26,7 +26,7 @@ export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
 
   return (
     <ExploratoryViewEmbeddable
-      customHeight={'300px'}
+      customHeight="240px"
       reportType="kpi-over-time"
       attributes={metricsToShow.map((metric) => ({
         dataType: 'synthetics',

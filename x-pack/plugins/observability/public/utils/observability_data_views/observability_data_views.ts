@@ -13,6 +13,7 @@ import type {
   DataViewSpec,
 } from '@kbn/data-views-plugin/public';
 import { RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
 import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
 import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
 import { rumFieldFormats } from '../../components/shared/exploratory_view/configurations/rum/field_formats';
@@ -57,17 +58,8 @@ export const dataViewList: Record<AppDataType, string> = {
   mobile: 'mobile_static_index_pattern_id',
 };
 
-const appToPatternMap: Record<AppDataType, string> = {
-  synthetics: '(synthetics-data-view)*',
-  apm: 'apm-*',
-  ux: '(rum-data-view)*',
-  infra_logs: '(infra-logs-data-view)*',
-  infra_metrics: '(infra-metrics-data-view)*',
-  mobile: '(mobile-data-view)*',
-};
-
 const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
-  return `${appToPatternMap?.[app] ?? app},${indices}`;
+  return `${indices}`;
 };
 
 const getAppDataViewId = (app: AppDataType, indices: string) => {
@@ -126,6 +118,7 @@ export class ObservabilityDataViews {
       id: getAppDataViewId(app, indices),
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
+      name: DataTypesLabels[app],
     });
 
     if (runtimeFields !== null) {
@@ -140,11 +133,14 @@ export class ObservabilityDataViews {
   async createAndSavedDataView(app: AppDataType, indices: string) {
     const appIndicesPattern = getAppIndicesWithPattern(app, indices);
 
+    const dataViewId = getAppDataViewId(app, indices);
+
     return await this.dataViews.createAndSave({
       title: appIndicesPattern,
-      id: getAppDataViewId(app, indices),
+      id: dataViewId,
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
+      name: DataTypesLabels[app],
     });
   }
   // we want to make sure field formats remain same
@@ -163,12 +159,17 @@ export class ObservabilityDataViews {
           }
         }
       });
+      let hasNewRuntimeField = false;
       if (runtimeFields !== null) {
+        const allRunTimeFields = dataView.getAllRuntimeFields();
         runtimeFields.forEach(({ name, field }) => {
-          dataView.addRuntimeField(name, field);
+          if (!allRunTimeFields[name]) {
+            hasNewRuntimeField = true;
+            dataView.addRuntimeField(name, field);
+          }
         });
       }
-      if (isParamsDifferent || runtimeFields !== null) {
+      if (isParamsDifferent || hasNewRuntimeField) {
         await this.dataViews?.updateSavedObject(dataView);
       }
     }
