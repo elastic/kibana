@@ -26,7 +26,10 @@ export function useDownloadExportedRules() {
     async (response: Blob) => {
       try {
         downloadBlob(response, DEFAULT_EXPORT_FILENAME);
-        showBulkSuccessToast(BulkActionType.export, await getExportedRulesCounts(response));
+        showBulkSuccessToast({
+          actionType: BulkActionType.export,
+          summary: await getExportedRulesCounts(response),
+        });
       } catch (error) {
         showBulkErrorToast(BulkActionType.export, error);
       }

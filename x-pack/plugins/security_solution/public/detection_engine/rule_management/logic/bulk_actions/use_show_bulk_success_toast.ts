@@ -8,17 +8,29 @@
 import { useCallback } from 'react';
 import type { BulkActionSummary } from '..';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { explainBulkSuccess, summarizeBulkSuccess } from './translations';
+import type { BulkActionEditPayload } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { explainBulkEditSuccess, explainBulkSuccess, summarizeBulkSuccess } from './translations';
+
+interface ShowBulkSuccessToastProps {
+  actionType: BulkActionType;
+  summary: BulkActionSummary;
+  editPayload?: BulkActionEditPayload[];
+}
 
 export function useShowBulkSuccessToast() {
   const toasts = useAppToasts();
 
   return useCallback(
-    (action: BulkActionType, summary: BulkActionSummary) => {
+    ({ actionType, summary, editPayload }: ShowBulkSuccessToastProps) => {
+      const text =
+        actionType === BulkActionType.edit
+          ? explainBulkEditSuccess(editPayload ?? [], summary)
+          : explainBulkSuccess(actionType, summary);
+
       toasts.addSuccess({
-        title: summarizeBulkSuccess(action),
-        text: explainBulkSuccess(action, summary),
+        title: summarizeBulkSuccess(actionType),
+        text,
       });
     },
     [toasts]

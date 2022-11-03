@@ -54,7 +54,12 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
         sendTelemetry(bulkAction.type, response);
 
         if (!options?.suppressSuccessToast) {
-          showBulkSuccessToast(bulkAction.type, response.attributes.summary);
+          showBulkSuccessToast({
+            actionType: bulkAction.type,
+            summary: response.attributes.summary,
+            editPayload:
+              bulkAction.type === BulkActionType.edit ? bulkAction.editPayload : undefined,
+          });
         }
 
         return response;
