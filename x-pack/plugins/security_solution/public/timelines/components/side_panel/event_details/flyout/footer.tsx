@@ -195,6 +195,7 @@ export const FlyoutFooterComponent = React.memo(
             agentId={isOsqueryFlyoutOpenWithAgentId}
             defaultValues={alertId ? { alertIds: [alertId] } : undefined}
             onClose={closeOsqueryFlyout}
+            ecsData={detailsEcsData}
           />
         )}
       </>

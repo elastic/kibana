@@ -15,6 +15,7 @@ import {
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Ecs } from '../../../../common/ecs';
 import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
@@ -59,7 +60,13 @@ interface ExpandedEventFieldsObject {
   };
 }
 
-export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventData }) => {
+export const useOsqueryTab = ({
+  rawEventData,
+  ecsData,
+}: {
+  rawEventData?: AlertRawEventData;
+  ecsData?: Ecs;
+}) => {
   const {
     services: { osquery, application },
   } = useKibana();
@@ -87,7 +94,7 @@ export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventDa
     []
   );
 
-  if (!osquery || !rawEventData || !responseActionsEnabled) {
+  if (!osquery || !rawEventData || !responseActionsEnabled || !ecsData) {
     return;
   }
 
@@ -137,7 +144,12 @@ export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventDa
           {!application?.capabilities?.osquery?.read ? (
             emptyPrompt
           ) : (
-            <OsqueryResults agentIds={agentIds} ruleName={ruleName} alertId={alertId} />
+            <OsqueryResults
+              agentIds={agentIds}
+              ruleName={ruleName}
+              alertId={alertId}
+              ecsData={ecsData}
+            />
           )}
         </TabContentWrapper>
       </>

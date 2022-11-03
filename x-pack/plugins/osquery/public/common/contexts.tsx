@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { AlertEcsData } from '../../common/contexts';
+import React from 'react';
 
-export interface OsqueryActionResultsProps {
-  agentIds?: string[];
-  ruleName?: string[];
-  alertId: string;
-  ecsData: AlertEcsData;
+export interface AlertEcsData {
+  _id: string;
+  _index?: string;
 }
+
+export const AlertAttachmentContext = React.createContext<AlertEcsData | null>(null);
