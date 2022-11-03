@@ -11,7 +11,6 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { TelemetryReceiver } from './receiver';
-import { createTelemetryTaskConfigs } from './tasks';
 import {
   TELEMETRY_EBT_LIVE_QUERY_EVENT,
   TELEMETRY_EBT_SAVED_QUERY_EVENT,
@@ -19,8 +18,7 @@ import {
   TELEMETRY_EBT_PACK_EVENT,
 } from './constants';
 
-import type { OsqueryTelemetryTaskConfig } from './task';
-import { OsqueryTelemetryTask } from './task';
+import type { OsqueryTelemetryTask } from './task';
 
 export class TelemetryEventsSender {
   private readonly logger: Logger;
@@ -45,16 +43,16 @@ export class TelemetryEventsSender {
 
       this.registerEvents(analytics.registerEventType);
 
-      if (taskManager) {
-        this.telemetryTasks = createTelemetryTaskConfigs().map(
-          (config: OsqueryTelemetryTaskConfig) => {
-            const task = new OsqueryTelemetryTask(config, this.logger, this, telemetryReceiver);
-            task.register(taskManager);
+      // if (taskManager) {
+      //   this.telemetryTasks = createTelemetryTaskConfigs().map(
+      //     (config: OsqueryTelemetryTaskConfig) => {
+      //       const task = new OsqueryTelemetryTask(config, this.logger, this, telemetryReceiver);
+      //       task.register(taskManager);
 
-            return task;
-          }
-        );
-      }
+      //       return task;
+      //     }
+      //   );
+      // }
     }
   }
 

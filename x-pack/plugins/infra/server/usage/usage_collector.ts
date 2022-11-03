@@ -28,6 +28,7 @@ interface Usage {
 
 export class UsageCollector {
   public static registerUsageCollector(usageCollection: UsageCollectionSetup): void {
+    return;
     const collector = UsageCollector.getUsageCollector(usageCollection);
     usageCollection.registerCollector(collector);
   }

@@ -23,7 +23,6 @@ import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmRuleTypes } from './routes/alerts/register_apm_rule_types';
 import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
-import { createApmTelemetry } from './lib/apm_telemetry';
 import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
@@ -85,21 +84,21 @@ export class APMPlugin
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
 
-    if (
-      plugins.taskManager &&
-      plugins.usageCollection &&
-      currentConfig.telemetryCollectionEnabled
-    ) {
-      createApmTelemetry({
-        core,
-        config$,
-        usageCollector: plugins.usageCollection,
-        taskManager: plugins.taskManager,
-        logger: this.logger,
-        kibanaVersion: this.initContext.env.packageInfo.version,
-        isProd: this.initContext.env.mode.prod,
-      });
-    }
+    // if (
+    //   plugins.taskManager &&
+    //   plugins.usageCollection &&
+    //   currentConfig.telemetryCollectionEnabled
+    // ) {
+    //   createApmTelemetry({
+    //     core,
+    //     config$,
+    //     usageCollector: plugins.usageCollection,
+    //     taskManager: plugins.taskManager,
+    //     logger: this.logger,
+    //     kibanaVersion: this.initContext.env.packageInfo.version,
+    //     isProd: this.initContext.env.mode.prod,
+    //   });
+    // }
 
     plugins.features.registerKibanaFeature(APM_FEATURE);
 

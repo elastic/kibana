@@ -18,15 +18,10 @@ import { createDashboardSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
-import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './embeddable/dashboard_container_embeddable_factory';
 import { getUISettings } from './ui_settings';
 
-import {
-  initializeDashboardTelemetryTask,
-  scheduleDashboardTelemetry,
-  TASK_ID,
-} from './usage/dashboard_telemetry_collection_task';
+import { initializeDashboardTelemetryTask } from './usage/dashboard_telemetry_collection_task';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -63,12 +58,12 @@ export class DashboardPlugin
     }
     core.capabilities.registerProvider(capabilitiesProvider);
 
-    if (plugins.usageCollection && plugins.taskManager) {
-      registerDashboardUsageCollector(
-        plugins.usageCollection,
-        core.getStartServices().then(([_, { taskManager }]) => taskManager)
-      );
-    }
+    // if (plugins.usageCollection && plugins.taskManager) {
+    //   registerDashboardUsageCollector(
+    //     plugins.usageCollection,
+    //     core.getStartServices().then(([_, { taskManager }]) => taskManager)
+    //   );
+    // }
 
     plugins.embeddable.registerEmbeddableFactory(
       dashboardPersistableStateServiceFactory(plugins.embeddable)
@@ -82,15 +77,15 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
 
-    if (plugins.taskManager) {
-      scheduleDashboardTelemetry(this.logger, plugins.taskManager)
-        .then(async () => {
-          await plugins.taskManager.runSoon(TASK_ID);
-        })
-        .catch((e) => {
-          this.logger.debug(`Error scheduling task, received ${e.message}`);
-        });
-    }
+    // if (plugins.taskManager) {
+    //   scheduleDashboardTelemetry(this.logger, plugins.taskManager)
+    //     .then(async () => {
+    //       await plugins.taskManager.runSoon(TASK_ID);
+    //     })
+    //     .catch((e) => {
+    //       this.logger.debug(`Error scheduling task, received ${e.message}`);
+    //     });
+    // }
 
     return {};
   }

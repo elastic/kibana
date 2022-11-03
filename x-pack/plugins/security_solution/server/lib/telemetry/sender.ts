@@ -20,11 +20,9 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, filterList } from './filterlists';
-import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel, tlog } from './helpers';
 import type { TelemetryEvent } from './types';
-import type { SecurityTelemetryTaskConfig } from './task';
-import { SecurityTelemetryTask } from './task';
+import type { SecurityTelemetryTask } from './task';
 import { telemetryConfiguration } from './configuration';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
@@ -87,15 +85,15 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
   ) {
     this.telemetrySetup = telemetrySetup;
     this.telemetryUsageCounter = telemetryUsageCounter;
-    if (taskManager) {
-      this.telemetryTasks = createTelemetryTaskConfigs().map(
-        (config: SecurityTelemetryTaskConfig) => {
-          const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
-          task.register(taskManager);
-          return task;
-        }
-      );
-    }
+    // if (taskManager) {
+    //   this.telemetryTasks = createTelemetryTaskConfigs().map(
+    //     (config: SecurityTelemetryTaskConfig) => {
+    //       const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
+    //       task.register(taskManager);
+    //       return task;
+    //     }
+    //   );
+    // }
   }
 
   public getTelemetryUsageCluster(): UsageCounter | undefined {

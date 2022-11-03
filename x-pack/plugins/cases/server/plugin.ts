@@ -48,7 +48,7 @@ import { CasesClientFactory } from './client/factory';
 import { getCasesKibanaFeature } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
-import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
+import { scheduleCasesTelemetryTask } from './telemetry';
 import { getInternalRoutes } from './routes/api/get_internal_routes';
 import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
@@ -130,15 +130,15 @@ export class CasePlugin {
       })
     );
 
-    if (plugins.taskManager && plugins.usageCollection) {
-      createCasesTelemetry({
-        core,
-        taskManager: plugins.taskManager,
-        usageCollection: plugins.usageCollection,
-        logger: this.logger,
-        kibanaVersion: this.kibanaVersion,
-      });
-    }
+    // if (plugins.taskManager && plugins.usageCollection) {
+    //   createCasesTelemetry({
+    //     core,
+    //     taskManager: plugins.taskManager,
+    //     usageCollection: plugins.usageCollection,
+    //     logger: this.logger,
+    //     kibanaVersion: this.kibanaVersion,
+    //   });
+    // }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);

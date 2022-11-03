@@ -90,6 +90,9 @@ export function makeFtrConfigProvider(
           `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',
+          '--data.search.sessions.enabled=false',
+          '--usageCollection.uiCounters.enabled=false',
+          '--usageCollection.usageCounters.enabled=false',
         ],
 
         env: {
