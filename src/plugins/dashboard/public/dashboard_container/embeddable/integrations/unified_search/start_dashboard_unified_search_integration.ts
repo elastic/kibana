@@ -11,7 +11,7 @@ import { cloneDeep } from 'lodash';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
-import { syncUnifiedSearchState } from './sync_unified_search_state';
+import { syncUnifiedSearchState } from './sync_dashboard_unified_search_state';
 import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardContainerByValueInput } from '../../../../../common';
 

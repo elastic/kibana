@@ -12,7 +12,6 @@ import {
   ResolvedSimpleSavedObject,
   SavedObjectAttributes,
   SavedObjectsClientContract,
-  ScopedHistory,
 } from '@kbn/core/public';
 import { Filter, Query } from '@kbn/es-query';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -41,7 +40,6 @@ export function migrateLegacyQuery(query: Query | { [key: string]: any } | strin
 
 export type LoadDashboardFromSavedObjectProps = DashboardSavedObjectRequiredServices & {
   id?: string;
-  getScopedHistory?: () => ScopedHistory;
   savedObjectsClient: SavedObjectsClientContract;
 };
 
@@ -55,10 +53,7 @@ export interface LoadDashboardFromSavedObjectReturn {
 export const loadDashboardStateFromSavedObject = async ({
   savedObjectsTagging,
   savedObjectsClient,
-  getScopedHistory,
-  screenshotMode,
   embeddable,
-  spaces,
   data,
   id,
 }: LoadDashboardFromSavedObjectProps): Promise<LoadDashboardFromSavedObjectReturn> => {

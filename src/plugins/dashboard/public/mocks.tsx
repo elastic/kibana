@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/public';
+
 import { DashboardStart } from './plugin';
-import { REMOVEME_DashboardContainerInput } from './types';
+import { DashboardContainerByValueInput, DashboardPanelState } from '../common';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -63,14 +65,20 @@ export function setupIntersectionObserverMock({
 }
 
 export function getSampleDashboardInput(
-  overrides?: Partial<REMOVEME_DashboardContainerInput>
-): REMOVEME_DashboardContainerInput {
+  overrides?: Partial<DashboardContainerByValueInput>
+): DashboardContainerByValueInput {
   return {
+    options: {
+      useMargins: true,
+      syncColors: false,
+      syncCursor: true,
+      syncTooltips: false,
+      hidePanelTitles: false,
+    },
     id: '123',
+    tags: [],
     filters: [],
-    useMargins: false,
     isEmbeddedExternally: false,
-    isFullScreenMode: false,
     title: 'My Dashboard',
     query: {
       language: 'kuery',

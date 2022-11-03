@@ -18,7 +18,6 @@ import {
 import {
   ViewMode,
   Container,
-  ErrorEmbeddable,
   type Embeddable,
   type IEmbeddable,
   type EmbeddableInput,
@@ -54,8 +53,10 @@ import {
   syncDataViews,
   getHasUnsavedChanges,
   startDiffingDashboardState,
+  startControlGroupIntegration,
   startUnifiedSearchIntegration,
   applySavedFiltersToUnifiedSearch,
+  combineDashboardFiltersWithControlGroupFilters,
 } from './integrations';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { createPanelState } from '../component/panel';
@@ -100,6 +101,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private subscriptions: Subscription = new Subscription();
 
   private initialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
   private initialSavedDashboardId?: string;
 
   private reduxEmbeddableTools?: ReduxEmbeddableTools<
@@ -121,9 +123,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   constructor(
     initialInput: DashboardContainerInput,
     parent?: Container,
-    creationOptions?: DashboardCreationOptions,
-    controlGroup?: ControlGroupContainer | ErrorEmbeddable
+    creationOptions?: DashboardCreationOptions
   ) {
+    // we won't initialize any embeddable children until after the dashboard is done initializing.
+    const readyToInitializeChildren$ = new Subject<DashboardContainerInput>();
     const {
       embeddable: { getEmbeddableFactory },
     } = pluginServices.getServices();
@@ -134,7 +137,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       },
       { embeddableLoaded: {} },
       getEmbeddableFactory,
-      parent
+      parent,
+      {
+        readyToInitializeChildren$,
+      }
     );
 
     ({
@@ -148,7 +154,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.initialSavedDashboardId = dashboardContainerInputIsByValue(this.input)
       ? undefined
       : this.input.savedObjectId;
-    this.initializeDashboard(creationOptions);
+    this.initializeDashboard(readyToInitializeChildren$, creationOptions);
   }
 
   public getDashboardSavedObjectId() {
@@ -183,7 +189,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
   }
 
-  private async initializeDashboard(creationOptions?: DashboardCreationOptions) {
+  private async initializeDashboard(
+    readyToInitializeChildren$: Subject<DashboardContainerInput>,
+    creationOptions?: DashboardCreationOptions
+  ) {
     const reduxEmbeddablePackagePromise = lazyLoadReduxEmbeddablePackage();
     const dashboardStateUnwrapPromise = this.unwrapDashboardContainerInput(creationOptions);
 
@@ -256,7 +265,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     // update input so the redux embeddable tools get the unwrapped, initial input
     this.updateInput({ ...initialInput });
 
-    // start diffing dashboard state
+    // build Control Group
+    this.controlGroup = await this.startControlGroupIntegration(initialInput);
+
+    // now that the input with the initial panel state has been set, we can tell the container class it's time to start loading children.
+    readyToInitializeChildren$.next(initialInput);
+
+    // start diffing dashboard state - note that this has to happen after readyToInitializeChildren$.next().
     const { diffingMiddleware, initialUnsavedChanges } = await this.startDiffingDashboardState({
       initialInput,
       initialLastSavedInput: inputFromSavedObject,
@@ -369,12 +384,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       executionContext,
     } = this.input as DashboardContainerByValueInput;
 
-    const combinedFilters = filters;
-
-    // TODO Control group
-    // if (this.controlGroup) {
-    //   combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
-    // }
+    let combinedFilters = filters;
+    if (this.controlGroup) {
+      combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
+    }
     return {
       refreshConfig: refreshInterval,
       filters: combinedFilters,
@@ -445,6 +458,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private startDiffingDashboardState = startDiffingDashboardState;
   private stopDiffingDashboardState?: () => void;
 
+  /**
+   * Control Group
+   */
+  private startControlGroupIntegration = startControlGroupIntegration;
+
   // ------------------------------------------------------------------------------------------------------
   // Dashboard API
   // ------------------------------------------------------------------------------------------------------
@@ -496,6 +514,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   };
 
   public clearOverlays = () => {
+    this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
   };
 

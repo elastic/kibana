@@ -102,7 +102,7 @@ export const ControlFrame = ({
   } = pluginServices.getServices();
 
   const embeddable = useChildEmbeddable({
-    untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded,
+    untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),
     embeddableType,
     embeddableId,
   });

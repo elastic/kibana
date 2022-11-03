@@ -64,7 +64,7 @@ export abstract class Container<
     output: TContainerOutput,
     protected readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: IContainer,
-    settings?: EmbeddableContainerSettings
+    settings?: EmbeddableContainerSettings<TContainerInput>
   ) {
     super(input, output, parent);
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
@@ -74,11 +74,14 @@ export abstract class Container<
       settings?.initializeSequentially || settings?.childIdInitializeOrder
     );
 
-    // initialize all children on the first input change.
-    const init$ = this.getInput$().pipe(
+    const initSource = settings?.readyToInitializeChildren$
+      ? settings?.readyToInitializeChildren$
+      : this.getInput$();
+
+    const init$ = initSource.pipe(
       take(1),
-      mergeMap(async () => {
-        const initPromise = this.initializeChildEmbeddables(input, settings);
+      mergeMap(async (currentInput) => {
+        const initPromise = this.initializeChildEmbeddables(currentInput, settings);
         if (awaitingInitialize) await initPromise;
       })
     );
@@ -369,7 +372,7 @@ export abstract class Container<
 
   private async initializeChildEmbeddables(
     initialInput: TContainerInput,
-    initializeSettings?: EmbeddableContainerSettings
+    initializeSettings?: EmbeddableContainerSettings<TContainerInput>
   ) {
     let initializeOrder = Object.keys(initialInput.panels);
 

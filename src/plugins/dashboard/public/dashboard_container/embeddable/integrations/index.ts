@@ -15,7 +15,11 @@ export {
 export {
   startUnifiedSearchIntegration,
   applySavedFiltersToUnifiedSearch,
-} from './unified_search_integration/start_unified_search_integration';
+} from './unified_search/start_dashboard_unified_search_integration';
 
-export { syncDataViews } from './data_views_integration/sync_data_views';
-export { syncUnifiedSearchState } from './unified_search_integration/sync_unified_search_state';
+export {
+  startControlGroupIntegration,
+  combineDashboardFiltersWithControlGroupFilters,
+} from './controls/dashboard_control_group_integration';
+
+export { syncDataViews } from './data_views/sync_dashboard_data_views';

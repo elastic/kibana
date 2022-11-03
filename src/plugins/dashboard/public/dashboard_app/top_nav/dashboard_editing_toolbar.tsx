@@ -132,7 +132,7 @@ export function DashboardEditingToolbar() {
               onClick={() => dashboardContainer.addFromLibrary()}
               data-test-subj="dashboardAddPanelButton"
             />,
-            // dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(),
+            dashboardContainer.controlGroup?.getToolbarButtons(),
           ],
         }}
       </SolutionToolbar>

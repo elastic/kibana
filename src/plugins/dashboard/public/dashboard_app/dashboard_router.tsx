@@ -82,7 +82,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     createKbnUrlStateStorage({
       history,
       useHash: uiSettings.get('state:storeInSessionStorage'),
-      ...withNotifyOnErrors(core.notifications.toasts),
+      ...withNotifyOnErrors(notifications.toasts),
     });
 
   const redirect = (redirectTo: RedirectToProps) => {

@@ -7,10 +7,10 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
+import { convertPanelMapToSavedPanels, DashboardContainerByValueInput } from '../../../../common';
 
 import { DashboardAppLocatorParams } from '../../..';
 import { pluginServices } from '../../../services/plugin_services';
-import { stateToRawDashboardState } from '../../lib/convert_dashboard_state';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 
 describe('showPublicUrlSwitch', () => {
@@ -67,14 +67,16 @@ describe('ShowShareModal', () => {
     jest.clearAllMocks();
   });
 
-  const getPropsAndShare = (unsavedState?: Partial<DashboardState>): ShowShareModalProps => {
+  const getPropsAndShare = (
+    unsavedState?: Partial<DashboardContainerByValueInput>
+  ): ShowShareModalProps => {
     pluginServices.getServices().dashboardSessionStorage.getState = jest
       .fn()
       .mockReturnValue(unsavedState);
     return {
       isDirty: true,
       anchorElement: document.createElement('div'),
-      currentDashboardState: { panels: {} } as DashboardState,
+      currentDashboardState: { panels: {} } as DashboardContainerByValueInput,
     };
   };
 
@@ -93,7 +95,7 @@ describe('ShowShareModal', () => {
   });
 
   it('locatorParams unsaved state is properly propagated to locator', () => {
-    const unsavedDashboardState: DashboardState = {
+    const unsavedDashboardState: DashboardContainerByValueInput = {
       panels: {
         panel_1: {
           type: 'panel_type',
@@ -123,7 +125,7 @@ describe('ShowShareModal', () => {
       ],
       query: { query: 'bye', language: 'kuery' },
       savedQuery: 'amazingSavedQuery',
-    } as unknown as DashboardState;
+    } as unknown as DashboardContainerByValueInput;
     const showModalProps = getPropsAndShare(unsavedDashboardState);
     ShowShareModal(showModalProps);
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
@@ -132,9 +134,13 @@ describe('ShowShareModal', () => {
         locatorParams: { params: DashboardAppLocatorParams };
       }
     ).locatorParams.params;
-    const rawDashboardState = stateToRawDashboardState({
-      state: unsavedDashboardState,
-    });
+    const {
+      initializerContext: { kibanaVersion },
+    } = pluginServices.getServices();
+    const rawDashboardState = {
+      ...unsavedDashboardState,
+      panels: convertPanelMapToSavedPanels(unsavedDashboardState.panels, kibanaVersion),
+    };
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(
         (rawDashboardState as unknown as Partial<DashboardAppLocatorParams>)[key]

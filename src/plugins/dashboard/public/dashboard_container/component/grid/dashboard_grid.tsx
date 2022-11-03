@@ -216,7 +216,7 @@ export const DashboardGrid = ({ onDataLoaded }: DashboardGridProps) => {
         index={index + 1}
         type={type}
         expandedPanelId={expandedPanelId}
-        focusedPanelId={''} // TODO Panel focus / blur?
+        focusedPanelId={''} // TODO PORTABLE DASHBOARDS Panel focus / blur? Is this even used?
         onPanelStatusChange={onPanelStatusChange}
       />
     ));

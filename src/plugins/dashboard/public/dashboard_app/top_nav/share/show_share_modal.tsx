@@ -134,7 +134,7 @@ export function ShowShareModal({
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
-      // savedQuery: unsavedDashboardState.savedQuery, // TODO saved query
+      // savedQuery: unsavedDashboardState.savedQuery, // TODO PORTABLE DASHBOARDS figure out saved query
       options: unsavedDashboardState.options as unknown as DashboardOptions & SerializableRecord,
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels

@@ -84,7 +84,8 @@ export const createReduxEmbeddableTools = <
 
   const store = configureStore({
     reducer: slice.reducer,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(...additionalMiddleware),
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(...(additionalMiddleware ?? [])),
   });
 
   // create the context which will wrap this embeddable's react components to allow access to update and read from the store.

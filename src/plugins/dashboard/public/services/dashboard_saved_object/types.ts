@@ -44,7 +44,7 @@ export interface DashboardSavedObjectRequiredServices {
 }
 export interface DashboardSavedObjectService {
   loadDashboardStateFromSavedObject: (
-    props: Pick<LoadDashboardFromSavedObjectProps, 'id' | 'getScopedHistory'>
+    props: Pick<LoadDashboardFromSavedObjectProps, 'id'>
   ) => Promise<LoadDashboardFromSavedObjectReturn>;
 
   saveDashboardStateToSavedObject: (

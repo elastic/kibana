@@ -5,11 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DashboardContainer } from '../embeddable/dashboard_container';
-import { getSampleDashboardInput } from '../test_helpers';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-
 import {
   EmbeddableInput,
   ErrorEmbeddable,
@@ -25,7 +20,12 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { pluginServices } from '../../services/plugin_services';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+
+import { getSampleDashboardInput } from '../mocks';
+import { DashboardContainer } from '../dashboard_container';
+
+import { pluginServices } from '../services/plugin_services';
 import { AddToLibraryAction } from './add_to_library_action';
 
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
@@ -169,6 +169,6 @@ test('Add to library returns reference type input', async () => {
   expect(newPanelId).toBeDefined();
   const newPanel = container.getInput().panels[newPanelId!];
   expect(newPanel.type).toEqual(embeddable.type);
-  expect(newPanel.explicitInput.attributes).toBeUndefined();
+  expect((newPanel.explicitInput as unknown as { attributes: unknown }).attributes).toBeUndefined();
   expect(newPanel.explicitInput.savedObjectId).toBe('testSavedObjectId');
 });
