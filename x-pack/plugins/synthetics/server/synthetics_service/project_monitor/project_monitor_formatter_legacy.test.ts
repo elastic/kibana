@@ -10,7 +10,7 @@ import {
   INSUFFICIENT_FLEET_PERMISSIONS,
   ProjectMonitorFormatterLegacy,
 } from './project_monitor_formatter_legacy';
-import { DataStream, LocationStatus } from '../../../common/runtime_types';
+import { ConfigKey, DataStream, LocationStatus } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { times } from 'lodash';
 import { SyntheticsService } from '../synthetics_service';
@@ -468,8 +468,22 @@ describe('ProjectMonitorFormatterLegacy', () => {
 
     expect(soClient.bulkCreate).toHaveBeenCalledWith(
       expect.arrayContaining([
-        expect.objectContaining(soData[0]),
-        expect.objectContaining(soData[1]),
+        expect.objectContaining({
+          ...soData[0],
+          attributes: {
+            ...soData[0].attributes,
+            [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
+            [ConfigKey.CONFIG_ID]: expect.any(String),
+          },
+        }),
+        expect.objectContaining({
+          ...soData[1],
+          attributes: {
+            ...soData[1].attributes,
+            [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
+            [ConfigKey.CONFIG_ID]: expect.any(String),
+          },
+        }),
       ])
     );
 

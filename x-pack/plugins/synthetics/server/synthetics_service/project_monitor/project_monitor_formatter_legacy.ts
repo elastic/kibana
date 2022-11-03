@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Subject } from 'rxjs';
-import { isEqual } from 'lodash';
+import { omit, isEqual } from 'lodash';
 import { KibanaRequest } from '@kbn/core/server';
 import {
   SavedObjectsUpdateResponse,
@@ -369,10 +369,13 @@ export class ProjectMonitorFormatterLegacy {
       const previousMonitor = monitors[i].previousMonitor;
       const normalizedMonitor = monitors[i].monitor;
 
-      const {
-        attributes: { [ConfigKey.REVISION]: _, ...normalizedPreviousMonitorAttributes },
-      } = normalizeSecrets(decryptedPreviousMonitor);
-      const hasMonitorBeenEdited = !isEqual(normalizedMonitor, normalizedPreviousMonitorAttributes);
+      const keysToOmit = [ConfigKey.REVISION, ConfigKey.MONITOR_QUERY_ID, ConfigKey.CONFIG_ID];
+      const { attributes: normalizedPreviousMonitorAttributes } =
+        normalizeSecrets(decryptedPreviousMonitor);
+      const hasMonitorBeenEdited = !isEqual(
+        omit(normalizedMonitor, keysToOmit),
+        omit(normalizedPreviousMonitorAttributes, keysToOmit)
+      );
 
       if (hasMonitorBeenEdited) {
         const monitorWithRevision = formatSecrets({
