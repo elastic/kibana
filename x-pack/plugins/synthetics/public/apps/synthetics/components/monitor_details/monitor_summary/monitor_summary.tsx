@@ -13,11 +13,12 @@ import {
   EuiFlexItem,
   EuiText,
   EuiSpacer,
-  useEuiTheme,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { LoadWhenInView } from '@kbn/observability-plugin/public';
+
+import { useEarliestStartDate } from '../hooks/use_earliest_start_data';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
 import { DurationSparklines } from './duration_sparklines';
 import { MonitorDurationTrend } from './duration_trend';
@@ -31,17 +32,20 @@ import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorErrorsCount } from './monitor_errors_count';
 
 export const MonitorSummary = () => {
-  const { euiTheme } = useEuiTheme();
-
-  // TODO this range needs to be adjusted dynamically https://github.com/elastic/kibana/issues/143472
-  const from = 'now-30d/d';
+  const { from, loading } = useEarliestStartDate();
   const to = 'now';
+
+  if (loading) {
+    return <EuiLoadingSpinner size="xl" />;
+  }
+
+  const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
 
   return (
     <>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel hasShadow={false} hasBorder>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="m">
             <EuiTitle size="xs">
               <h3>{MONITOR_DETAILS_LABEL}</h3>
             </EuiTitle>
@@ -49,10 +53,20 @@ export const MonitorSummary = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel hasShadow={false} hasBorder paddingSize="s" css={{ height: 158 }}>
-            <EuiTitle size="xs">
-              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{LAST_30DAYS_LABEL}</h3>
-            </EuiTitle>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="m" css={{ height: 158 }}>
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h3>{SUMMARY_LABEL}</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  {dateLabel}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <AvailabilityPanel from={from} to={to} />
@@ -70,15 +84,15 @@ export const MonitorSummary = () => {
                 <MonitorErrorsCount from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <MonitorErrorSparklines />
+                <MonitorErrorSparklines from={from} to={to} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
-              <EuiPanel hasShadow={false} hasBorder>
-                <EuiFlexGroup alignItems="center">
+              <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
+                <EuiFlexGroup alignItems="center" gutterSize="m">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
                       <h3>{DURATION_TREND_LABEL}</h3>
@@ -86,7 +100,7 @@ export const MonitorSummary = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText color="subdued" size="s">
-                      {LAST_30_DAYS_LABEL}
+                      {dateLabel}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -119,8 +133,12 @@ const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.moni
   defaultMessage: 'Monitor details',
 });
 
-const LAST_30DAYS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.last30Days', {
-  defaultMessage: 'Last 30 days',
+const SUMMARY_LABEL = i18n.translate('xpack.synthetics.detailsPanel.summary', {
+  defaultMessage: 'Summary',
+});
+
+const TO_DATE_LABEL = i18n.translate('xpack.synthetics.detailsPanel.toDate', {
+  defaultMessage: 'To date',
 });
 
 const DURATION_TREND_LABEL = i18n.translate('xpack.synthetics.detailsPanel.durationTrends', {
