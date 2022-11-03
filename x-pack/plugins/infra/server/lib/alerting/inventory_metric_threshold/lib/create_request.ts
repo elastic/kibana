@@ -62,7 +62,7 @@ export const createRequest = (
   const bucketSelector = createBucketSelector(metric, condition, customMetric);
 
   const containerContextAgg =
-    nodeType == 'pod' && fieldsExisted && fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
+    nodeType === 'pod' && fieldsExisted && fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {
         containerContext: {
           terms: {

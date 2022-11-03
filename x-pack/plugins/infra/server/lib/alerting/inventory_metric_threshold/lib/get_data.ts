@@ -140,7 +140,7 @@ export const getData = async (
       ? logQueryFields.indexPattern
       : source.configuration.metricAlias;
 
-  const fieldsExisted = nodeType == 'pod'
+  const fieldsExisted = nodeType === 'pod'
     ? await doFieldsExist(esClient, [termsAggField[KUBERNETES_POD_UID]], index)
     : null;
 
