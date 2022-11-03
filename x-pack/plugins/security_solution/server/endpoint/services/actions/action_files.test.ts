@@ -105,7 +105,7 @@ describe('Action Files service', () => {
       esClientMock.ilm.getLifecycle.mockImplementation(async () => {
         return {
           // FIXME:PT get policy name from fleet when available
-          paul: ilmPolicyMock,
+          foo: ilmPolicyMock,
         };
       });
     });

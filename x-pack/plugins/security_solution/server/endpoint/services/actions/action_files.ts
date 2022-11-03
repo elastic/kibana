@@ -142,7 +142,7 @@ const calculateFileTtl = async (
   esClient: ElasticsearchClient,
   createdDate: string
 ): Promise<number | undefined> => {
-  const policyName = 'paul'; // FIXME:PT get const from fleet
+  const policyName = 'foo'; // FIXME:PT get const from fleet
   const ilmPolicy = await esClient.ilm.getLifecycle({ name: policyName }, { ignore: [404] });
   const deleteMinAge = ilmPolicy[policyName]?.policy.phases?.delete?.min_age;
 
