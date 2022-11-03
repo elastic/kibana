@@ -13,6 +13,7 @@ import { useEnablement } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
+  quietFetchOverviewAction,
   selectOverviewState,
   selectServiceLocationsState,
 } from '../../../state';
@@ -51,6 +52,10 @@ export const OverviewPage: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchMonitorOverviewAction.get(pageState));
+  }, [dispatch, pageState]);
+
+  useEffect(() => {
+    dispatch(quietFetchOverviewAction.get(pageState));
   }, [dispatch, pageState, lastRefresh]);
 
   const {
