@@ -19,7 +19,6 @@ export class FilesManagementPlugin
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       order: 1,
-      isUsingKibanaPageTemplate: true,
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');
         const [coreStart, depsStart] = await core.getStartServices();

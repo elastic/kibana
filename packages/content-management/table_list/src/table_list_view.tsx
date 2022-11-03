@@ -78,10 +78,10 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   additionalRightSideActions?: ReactNode[];
   /**
    * This assumes the content is already wrapped in an outer PageTemplate component.
-   * @note this is being used as a workaround so that this page can be rendered in the Kibana management UI
+   * @note Hack! This is being used as a workaround so that this page can be rendered in the Kibana management UI
    * @deprecated
    */
-  asManangementSection?: boolean;
+  withoutPageTemplateWrapper?: boolean;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -131,12 +131,9 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   onClickTitle,
   id = 'userContent',
   children,
-<<<<<<< HEAD
   titleColumnName,
   additionalRightSideActions = [],
-=======
-  asManagementSection,
->>>>>>> parent of 45e4e2d0f6a (remove page template hack)
+  withoutPageTemplateWrapper,
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(
@@ -465,17 +462,13 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     return null;
   }
 
-  const PageTemplate = asManagementSection
+  const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
     : KibanaPageTemplate;
 
   if (!fetchError && hasNoItems) {
     return (
-      <PageTemplate
-        panelled={!asManagementSection}
-        isEmptyState={true}
-        data-test-subj={pageDataTestSubject}
-      >
+      <PageTemplate isEmptyState={true} data-test-subj={pageDataTestSubject}>
         <KibanaPageTemplate.Section
           aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
         >
@@ -486,7 +479,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   }
 
   return (
-    <PageTemplate panelled={!asManagementSection} data-test-subj={pageDataTestSubject}>
+    <PageTemplate data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{tableListTitle}</span>}
         rightSideItems={[

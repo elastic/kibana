@@ -54,7 +54,7 @@ export const App: FunctionComponent = () => {
       deleteItems={async (items) => {
         await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });
       }}
-      asManagementSection
+      withoutPageTemplateWrapper
     />
   );
 };
