@@ -172,7 +172,8 @@ const parseDuration = (duration: string): ParsedDuration => {
     unit: 'd',
   };
 
-  const matches = /(\d+)(\w)/.exec(duration);
+  // ILM Delete policy seems to only accept [h]ours, [m]inutes and [d]ays
+  const matches = /(\d+)([mdh])/.exec(duration);
 
   if (matches) {
     response.age = Number(matches[1]);
