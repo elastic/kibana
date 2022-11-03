@@ -11,13 +11,16 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GuideState } from '@kbn/guided-onboarding';
 
+import { GuidedOnboardingPluginState } from '../types';
 import { getStepConfig } from '../services/helpers';
 import { GuideButtonPopover } from './guide_button_popover';
 
 interface GuideButtonProps {
-  guideState: GuideState;
+  pluginState: GuidedOnboardingPluginState | undefined;
+  guideState: GuideState | undefined;
   toggleGuidePanel: () => void;
   isGuidePanelOpen: boolean;
+  navigateToLandingPage: () => void;
 }
 
 const getStepNumber = (state: GuideState): number | undefined => {
@@ -39,10 +42,40 @@ const getStepNumber = (state: GuideState): number | undefined => {
 };
 
 export const GuideButton = ({
+  pluginState,
   guideState,
   toggleGuidePanel,
   isGuidePanelOpen,
+  navigateToLandingPage,
 }: GuideButtonProps) => {
+  // TODO handle loading, error state
+  // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
+
+  // if there is no active guide
+  if (!guideState || !guideState.isActive) {
+    // if still active period and the user quit or skipped the guide,
+    // display the button that redirects to the landing page
+    if (
+      pluginState?.isActivePeriod &&
+      (pluginState?.status === 'quit' || pluginState?.status === 'skipped')
+    ) {
+      return (
+        <EuiButton
+          onClick={navigateToLandingPage}
+          color="success"
+          fill
+          size="s"
+          data-test-subj="guideButton"
+        >
+          {i18n.translate('guidedOnboarding.guidedSetupRedirectButtonLabel', {
+            defaultMessage: 'Launch setup guide',
+          })}
+        </EuiButton>
+      );
+    }
+
+    return null;
+  }
   const stepNumber = getStepNumber(guideState);
   const stepReadyToComplete = guideState.steps.find((step) => step.status === 'ready_to_complete');
   const button = (

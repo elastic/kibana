@@ -32,9 +32,13 @@ import { ApplicationStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
 import { GuideId } from '@kbn/guided-onboarding';
-import type { GuideConfig, StepConfig } from '../types';
+import type {
+  GuideConfig,
+  GuidedOnboardingApi,
+  GuidedOnboardingPluginState,
+  StepConfig,
+} from '../types';
 
-import type { ApiService } from '../services/api';
 import { getGuideConfig } from '../services/helpers';
 
 import { GuideStep } from './guide_panel_step';
@@ -43,7 +47,7 @@ import { getGuidePanelStyles } from './guide_panel.styles';
 import { GuideButton } from './guide_button';
 
 interface GuidePanelProps {
-  api: ApiService;
+  api: GuidedOnboardingApi;
   application: ApplicationStart;
 }
 
@@ -61,7 +65,7 @@ const getProgress = (state?: GuideState): number => {
 
 // Temporarily provide a different guide ID for telemetry purposes
 // Should not be necessary once https://github.com/elastic/kibana/issues/144452 is addressed
-const getTelemetryGuideId = (guideId: GuideId) => {
+const getTelemetryGuideId = (guideId?: GuideId) => {
   switch (guideId) {
     case 'security':
       return 'siem';
@@ -78,6 +82,9 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isQuitGuideModalOpen, setIsQuitGuideModalOpen] = useState(false);
   const [guideState, setGuideState] = useState<GuideState | undefined>(undefined);
+  const [pluginState, setPluginState] = useState<GuidedOnboardingPluginState | undefined>(
+    undefined
+  );
 
   const styles = getGuidePanelStyles(euiTheme);
 
@@ -150,25 +157,27 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     return () => subscription.unsubscribe();
   }, [api]);
 
-  const guideConfig = getGuideConfig(guideState?.guideId);
+  useEffect(() => {
+    const subscription = api.fetchPluginState$().subscribe((newPluginState) => {
+      setPluginState(newPluginState);
+    });
+    return () => subscription.unsubscribe();
+  }, [api]);
 
-  // TODO handle loading, error state
-  // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
-  if (!guideConfig || !guideState || !guideState.isActive) {
-    // TODO button show/hide logic https://github.com/elastic/kibana/issues/141129
-    return null;
-  }
+  const guideConfig = getGuideConfig(guideState?.guideId)!;
 
   const stepsCompleted = getProgress(guideState);
   const isGuideReadyToComplete = guideState?.status === 'ready_to_complete';
-  const telemetryGuideId = getTelemetryGuideId(guideState.guideId);
+  const telemetryGuideId = getTelemetryGuideId(guideState?.guideId);
 
   return (
     <>
       <GuideButton
-        guideState={guideState!}
+        pluginState={pluginState}
+        guideState={guideState}
         toggleGuidePanel={toggleGuide}
         isGuidePanelOpen={isGuideOpen}
+        navigateToLandingPage={navigateToLandingPage}
       />
 
       {isGuideOpen && (
@@ -281,7 +290,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                       stepNumber={index + 1}
                       handleButtonClick={() => handleStepButtonClick(stepState, step)}
                       key={accordionId}
-                      telemetryGuideId={telemetryGuideId}
+                      telemetryGuideId={telemetryGuideId!}
                     />
                   );
                 }
@@ -374,7 +383,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
         <QuitGuideModal
           closeModal={closeQuitGuideModal}
           currentGuide={guideState!}
-          telemetryGuideId={telemetryGuideId}
+          telemetryGuideId={telemetryGuideId!}
         />
       )}
     </>

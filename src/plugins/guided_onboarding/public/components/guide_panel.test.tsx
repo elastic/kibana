@@ -94,7 +94,7 @@ describe('Guided setup', () => {
     httpClient.get.mockResolvedValue({
       state: [],
     });
-    apiService.setup(httpClient);
+    apiService.setup(httpClient, false);
 
     await act(async () => {
       const GuidePanelComponent = getGuidePanel();

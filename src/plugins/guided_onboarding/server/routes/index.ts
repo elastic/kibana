@@ -9,12 +9,19 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import type { GuideState } from '@kbn/guided-onboarding';
+import {
+  guideStateSavedObjectsType,
+  pluginStateSavedObjectsType,
+  pluginStateSavedObjectsId,
+  PluginStateSO,
+} from '../saved_objects';
+import { registerGetPluginState } from './plugin_state_routes';
+import { calculateIsActivePeriod } from '../helpers';
 import { API_BASE_PATH } from '../../common/constants';
-import { guidedSetupSavedObjectsType } from '../saved_objects';
 
 const findGuideById = async (savedObjectsClient: SavedObjectsClient, guideId: string) => {
   return savedObjectsClient.find<GuideState>({
-    type: guidedSetupSavedObjectsType,
+    type: guideStateSavedObjectsType,
     search: `"${guideId}"`,
     searchFields: ['guideId'],
   });
@@ -22,14 +29,14 @@ const findGuideById = async (savedObjectsClient: SavedObjectsClient, guideId: st
 
 const findActiveGuide = async (savedObjectsClient: SavedObjectsClient) => {
   return savedObjectsClient.find<GuideState>({
-    type: guidedSetupSavedObjectsType,
+    type: guideStateSavedObjectsType,
     search: 'true',
     searchFields: ['isActive'],
   });
 };
 
 const findAllGuides = async (savedObjectsClient: SavedObjectsClient) => {
-  return savedObjectsClient.find<GuideState>({ type: guidedSetupSavedObjectsType });
+  return savedObjectsClient.find<GuideState>({ type: guideStateSavedObjectsType });
 };
 
 export function defineRoutes(router: IRouter) {
@@ -99,7 +106,7 @@ export function defineRoutes(router: IRouter) {
         const selectedGuide = selectedGuideSO.saved_objects[0];
 
         updatedGuides.push({
-          type: guidedSetupSavedObjectsType,
+          type: guideStateSavedObjectsType,
           id: selectedGuide.id,
           attributes: {
             ...updatedGuideState,
@@ -115,7 +122,7 @@ export function defineRoutes(router: IRouter) {
             const activeGuide = activeGuideSO.saved_objects[0];
             if (activeGuide.attributes.guideId !== updatedGuideState.guideId) {
               updatedGuides.push({
-                type: guidedSetupSavedObjectsType,
+                type: guideStateSavedObjectsType,
                 id: activeGuide.id,
                 attributes: {
                   ...activeGuide.attributes,
@@ -141,7 +148,7 @@ export function defineRoutes(router: IRouter) {
 
           if (activeGuideSO.total > 0) {
             const activeGuide = activeGuideSO.saved_objects[0];
-            await savedObjectsClient.update(guidedSetupSavedObjectsType, activeGuide.id, {
+            await savedObjectsClient.update(guideStateSavedObjectsType, activeGuide.id, {
               ...activeGuide.attributes,
               isActive: false,
             });
@@ -149,7 +156,7 @@ export function defineRoutes(router: IRouter) {
         }
 
         const createdGuideResponse = await savedObjectsClient.create(
-          guidedSetupSavedObjectsType,
+          guideStateSavedObjectsType,
           updatedGuideState
         );
 
@@ -159,6 +166,46 @@ export function defineRoutes(router: IRouter) {
           },
         });
       }
+    }
+  );
+
+  registerGetPluginState(router);
+
+  router.put(
+    {
+      path: `${API_BASE_PATH}/plugin_state`,
+      validate: {
+        body: schema.object({
+          status: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const updatedPluginState = request.body;
+
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client as SavedObjectsClient;
+
+      const { attributes } = await savedObjectsClient.update<PluginStateSO>(
+        pluginStateSavedObjectsType,
+        pluginStateSavedObjectsId,
+        {
+          ...updatedPluginState,
+        },
+        {
+          // if there is no saved object yet, insert a new SO with the creation date
+          upsert: { ...updatedPluginState, creationDate: new Date() },
+        }
+      );
+
+      return response.ok({
+        body: {
+          pluginState: {
+            status: attributes.status,
+            isActivePeriod: calculateIsActivePeriod(attributes.creationDate),
+          },
+        },
+      });
     }
   );
 }

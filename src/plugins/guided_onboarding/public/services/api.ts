@@ -22,20 +22,29 @@ import {
   isStepReadyToComplete,
 } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
+import { PluginState, PluginStatus } from '../../common/types';
 
 export class ApiService implements GuidedOnboardingApi {
+  private isCloudEnabled: boolean | undefined;
   private client: HttpSetup | undefined;
   private guideState$!: BehaviorSubject<GuideState | undefined>;
   private isGuideStateLoading: boolean | undefined;
   private isGuideStateInitialized: boolean | undefined;
+  private pluginState$!: BehaviorSubject<PluginState | undefined>;
+  private isPluginStateLoading: boolean | undefined;
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-  public setup(httpClient: HttpSetup): void {
+  public setup(httpClient: HttpSetup, isCloudEnabled: boolean) {
+    this.isCloudEnabled = isCloudEnabled;
     this.client = httpClient;
     this.guideState$ = new BehaviorSubject<GuideState | undefined>(undefined);
+    this.pluginState$ = new BehaviorSubject<PluginState | undefined>(undefined);
   }
 
-  private createGetStateObservable(): Observable<GuideState | undefined> {
+  private getGuideStateObservable(): Observable<GuideState | undefined> {
+    if (!this.isCloudEnabled) {
+      return of(undefined);
+    }
     return new Observable<GuideState | undefined>((observer) => {
       const controller = new AbortController();
       const signal = controller.signal;
@@ -63,6 +72,33 @@ export class ApiService implements GuidedOnboardingApi {
         });
       return () => {
         this.isGuideStateLoading = false;
+        controller.abort();
+      };
+    });
+  }
+
+  private getPluginStateObservable(): Observable<PluginState | undefined> {
+    if (!this.isCloudEnabled) {
+      return of(undefined);
+    }
+    return new Observable<PluginState | undefined>((observer) => {
+      const controller = new AbortController();
+      const signal = controller.signal;
+      this.isPluginStateLoading = true;
+      this.client!.get<{ pluginState: PluginState }>(`${API_BASE_PATH}/plugin_state`, {
+        signal,
+      })
+        .then((response) => {
+          this.isPluginStateLoading = false;
+          this.pluginState$.next(response.pluginState);
+          observer.complete();
+        })
+        .catch((error) => {
+          this.isPluginStateLoading = false;
+          observer.error(error);
+        });
+      return () => {
+        this.isPluginStateLoading = false;
         controller.abort();
       };
     });
@@ -145,6 +181,7 @@ export class ApiService implements GuidedOnboardingApi {
     guideId: GuideId,
     guide?: GuideState
   ): Promise<{ state: GuideState } | undefined> {
+    await this.updatePluginState('in_progress');
     // If we already have the guide state (i.e., user has already started the guide at some point),
     // simply pass it through so they can continue where they left off, and update the guide to active
     if (guide) {
@@ -188,6 +225,8 @@ export class ApiService implements GuidedOnboardingApi {
    * @return {Promise} a promise with the updated guide state
    */
   public async deactivateGuide(guide: GuideState): Promise<{ state: GuideState } | undefined> {
+    // update the state of the plugin
+    await this.updatePluginState('quit');
     return await this.updateGuideState(
       {
         ...guide,
@@ -224,6 +263,8 @@ export class ApiService implements GuidedOnboardingApi {
         status: 'complete',
       };
 
+      // update the state of the plugin
+      await this.updatePluginState('complete');
       return await this.updateGuideState(updatedGuide, false);
     }
   }
@@ -365,6 +406,61 @@ export class ApiService implements GuidedOnboardingApi {
         }
       }
     }
+  }
+
+  public async updatePluginState(status: PluginStatus): Promise<PluginState | undefined> {
+    if (!this.client) {
+      throw new Error('ApiService has not be initialized.');
+    }
+
+    const currentState = await firstValueFrom(this.fetchPluginState$());
+    // only update the status if no state exists or the status is different from current
+    if (!currentState || currentState.status !== status) {
+      try {
+        const { pluginState } = await this.client.put<{ pluginState: PluginState }>(
+          `${API_BASE_PATH}/plugin_state`,
+          {
+            body: JSON.stringify({ status }),
+          }
+        );
+        this.pluginState$.next(pluginState);
+        return pluginState;
+      } catch (error) {
+        // TODO handle error
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+    }
+  }
+
+  public async fetchPluginState(): Promise<PluginState | undefined> {
+    if (!this.client) {
+      throw new Error('ApiService has not be initialized.');
+    }
+
+    try {
+      const response = await this.client.get<{ pluginState: PluginState }>(
+        `${API_BASE_PATH}/plugin_state`
+      );
+      return response.pluginState;
+    } catch (error) {
+      // TODO handle error
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }
+
+  public fetchPluginState$(): Observable<PluginState | undefined> {
+    return this.pluginState$.pipe(
+      concatMap((state) =>
+        !state && !this.isPluginStateLoading ? this.getPluginStateObservable() : of(state)
+      )
+    );
+  }
+
+  public async skipGuidedOnboarding(): Promise<PluginState | undefined> {
+    // TODO error handling and loading state
+    return await this.updatePluginState('skipped');
   }
 }
 

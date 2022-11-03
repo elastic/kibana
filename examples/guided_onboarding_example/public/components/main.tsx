@@ -28,6 +28,7 @@ import {
 import type { GuideState, GuideStepIds, GuideId, GuideStep } from '@kbn/guided-onboarding';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { guidesConfig } from '@kbn/guided-onboarding-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 
 interface MainProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
@@ -54,6 +55,11 @@ export const Main = (props: MainProps) => {
 
     fetchGuidesState();
   }, [guidedOnboardingApi]);
+
+  const pluginState = useObservable(guidedOnboardingApi!.fetchPluginState$());
+  useEffect(() => {
+    console.log({ pluginState });
+  }, [pluginState]);
 
   useEffect(() => {
     const newActiveGuide = guidesState?.find((guide) => guide.isActive === true);

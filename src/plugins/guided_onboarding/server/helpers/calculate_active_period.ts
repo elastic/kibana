@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-export {
-  guideStateSavedObjects,
-  guideStateSavedObjectsType,
-  pluginStateSavedObjects,
-  pluginStateSavedObjectsId,
-  pluginStateSavedObjectsType,
-  PluginStateSO,
-} from './guided_setup';
+export const calculateIsActivePeriod = (creationDate?: Date): boolean => {
+  // TODO
+  return true;
+};
