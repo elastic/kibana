@@ -7,7 +7,15 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiHighlight,
+  EuiTextColor,
+} from '@elastic/eui';
 
 import { RULE_TAGS_TEMPLATE } from '../../../../../common/opsgenie';
 import * as i18n from './translations';
@@ -18,11 +26,12 @@ interface TagsProps {
   values: string[];
 }
 
-const options = [
+const options: Array<EuiComboBoxOptionOption<string>> = [
   {
     label: RULE_TAGS_TEMPLATE,
     key: RULE_TAGS_TEMPLATE,
     'data-test-subj': 'opsgenie-tags-rule-tags',
+    value: i18n.RULE_TAGS_DESCRIPTION,
   },
 ];
 
@@ -50,6 +59,21 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange, values }) => {
     [onChange]
   );
 
+  const renderOption = useCallback((option: EuiComboBoxOptionOption, searchValue: string) => {
+    return (
+      <EuiFlexGroup alignItems="baseline" gutterSize="none" direction="column">
+        <EuiFlexItem>
+          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        </EuiFlexItem>
+        {option.value && (
+          <EuiFlexItem>
+            <EuiTextColor color="subdued">{option.value}</EuiTextColor>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }, []);
+
   return (
     <EuiFormRow
       data-test-subj="opsgenie-tags-row"
@@ -58,6 +82,7 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange, values }) => {
       helpText={i18n.TAGS_HELP}
     >
       <EuiComboBox
+        rowHeight={50}
         fullWidth
         isClearable
         options={options}
@@ -65,6 +90,7 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange, values }) => {
         onCreateOption={onCreateOption}
         onChange={onTagsChange}
         data-test-subj="opsgenie-tags"
+        renderOption={renderOption}
       />
     </EuiFormRow>
   );

@@ -21,16 +21,13 @@ export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> 
     return renderMustacheObject(params, variables);
   }
 
-  // TODO: replace all not just a single one
-  const ruleTagsIndex = params.subActionParams.tags.indexOf(RULE_TAGS_TEMPLATE);
+  const foundRuleTagsTemplate = params.subActionParams.tags.includes(RULE_TAGS_TEMPLATE);
 
-  if (!ruleTagsIndex || ruleTagsIndex <= -1) {
+  if (!foundRuleTagsTemplate) {
     return renderMustacheObject(params, variables);
   }
 
   const paramsCopy = cloneDeep(params);
-
-  paramsCopy.subActionParams.tags?.splice(ruleTagsIndex, 1);
 
   const tagsWithoutRuleTagsTemplate = paramsCopy.subActionParams.tags?.filter(
     (tag) => tag !== RULE_TAGS_TEMPLATE
@@ -56,5 +53,5 @@ const getRuleTags = (variables: Record<string, unknown>): string[] => {
     return [];
   }
 
-  return ruleTagsAsUnknown.filter((tag) => !isString(tag));
+  return ruleTagsAsUnknown.filter((tag) => isString(tag));
 };
