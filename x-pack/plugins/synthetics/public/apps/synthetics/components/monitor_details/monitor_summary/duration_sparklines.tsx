@@ -8,7 +8,7 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes, useTheme } from '@kbn/observability-plugin/public';
-import { useParams } from 'react-router-dom';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 interface DurationSparklinesProps {
@@ -22,8 +22,7 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
       observability: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
-  const { monitorId } = useParams<{ monitorId: string }>();
-
+  const monitorId = useMonitorQueryId();
   const theme = useTheme();
 
   return (
@@ -40,7 +39,7 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
             name: 'Monitor duration',
             dataType: 'synthetics',
             selectedMetricField: 'monitor.duration.us',
-            reportDefinitions: { config_id: [monitorId] },
+            reportDefinitions: { 'monitor.id': [monitorId] },
             color: theme.eui.euiColorVis1,
           },
         ]}

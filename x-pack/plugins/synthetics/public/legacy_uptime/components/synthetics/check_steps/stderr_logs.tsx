@@ -31,14 +31,14 @@ import { selectDynamicSettings } from '../../../state/selectors';
 import { Ping } from '../../../../../common/runtime_types';
 
 export const StdErrorLogs = ({
-  configId,
+  monitorId,
   checkGroup,
   timestamp,
   title,
   summaryMessage,
   hideTitle = false,
 }: {
-  configId?: string;
+  monitorId?: string;
   checkGroup?: string;
   timestamp?: string;
   title?: string;
@@ -65,7 +65,7 @@ export const StdErrorLogs = ({
     },
   ] as Array<EuiBasicTableColumn<Ping>>;
 
-  const { items, loading } = useStdErrorLogs({ configId, checkGroup });
+  const { items, loading } = useStdErrorLogs({ monitorId, checkGroup });
 
   const { discover, observability } = useKibana<ClientPluginsStart>().services;
 

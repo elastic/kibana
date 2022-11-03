@@ -33,7 +33,7 @@ describe('useInlineErrors', function () {
       3,
       {
         body: {
-          collapse: { field: 'config_id' },
+          collapse: { field: 'monitor.id' },
           query: {
             bool: {
               filter: [

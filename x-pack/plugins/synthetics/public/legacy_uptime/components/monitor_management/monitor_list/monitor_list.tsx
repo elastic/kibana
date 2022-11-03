@@ -206,7 +206,7 @@ export const MonitorManagementList = ({
       }),
       render: (fields: EncryptedSyntheticsMonitorWithId) => (
         <Actions
-          id={fields.id}
+          configId={fields[ConfigKey.CONFIG_ID]}
           name={fields[ConfigKey.NAME]}
           isDisabled={!canEdit}
           onUpdate={onUpdate}

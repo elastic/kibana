@@ -23,7 +23,7 @@ import {
 } from '../../../../../common/runtime_types';
 
 interface Props {
-  id: string;
+  configId: string;
   name: string;
   isDisabled?: boolean;
   onUpdate: () => void;
@@ -31,12 +31,19 @@ interface Props {
   monitors: MonitorManagementListResult['monitors'];
 }
 
-export const Actions = ({ id, name, onUpdate, isDisabled, errorSummaries, monitors }: Props) => {
+export const Actions = ({
+  configId,
+  name,
+  onUpdate,
+  isDisabled,
+  errorSummaries,
+  monitors,
+}: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
 
-  let errorSummary = errorSummaries?.find((summary) => summary.config_id === id);
+  let errorSummary = errorSummaries?.find((summary) => summary.config_id === configId);
 
-  const monitor = monitors.find((monitorT) => monitorT.id === id);
+  const monitor = monitors.find((monitorT) => monitorT.id === configId);
   const isProjectMonitor =
     (monitor?.attributes as BrowserFields)[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
 
