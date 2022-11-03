@@ -68,11 +68,6 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   deleteItems?(items: T[]): Promise<void>;
   editItem?(item: T): void;
   /**
-   * Whether to use a panelled page.
-   * @default true
-   */
-  panelledPage?: boolean;
-  /**
    * Name for the column containing the "title" value.
    */
   titleColumnName?: string;
@@ -130,7 +125,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   onClickTitle,
   id = 'userContent',
   children,
-  panelledPage = true,
   titleColumnName,
   additionalRightSideActions = [],
 }: Props<T>) {
@@ -463,11 +457,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
   if (!fetchError && hasNoItems) {
     return (
-      <KibanaPageTemplate
-        panelled={panelledPage}
-        isEmptyState={true}
-        data-test-subj={pageDataTestSubject}
-      >
+      <KibanaPageTemplate isEmptyState={true} data-test-subj={pageDataTestSubject}>
         <KibanaPageTemplate.Section
           aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
         >
@@ -478,7 +468,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   }
 
   return (
-    <KibanaPageTemplate panelled={panelledPage} data-test-subj={pageDataTestSubject}>
+    <KibanaPageTemplate data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{tableListTitle}</span>}
         rightSideItems={[
