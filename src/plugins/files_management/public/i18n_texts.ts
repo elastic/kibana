@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
+  tableListTitle: i18n.translate('filesManagement.table.title', { defaultMessage: 'Files' }),
   entityName: i18n.translate('filesManagement.entityName.title', { defaultMessage: 'file' }),
   entityNamePlural: i18n.translate('filesManagement.entityNamePlural.title', {
     defaultMessage: 'files',

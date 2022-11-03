@@ -48,7 +48,8 @@ export const App: FunctionComponent = () => {
       initialFilter=""
       initialPageSize={50}
       listingLimit={1000}
-      tableListTitle="Files"
+      panelledPage={false}
+      tableListTitle={i18nTexts.tableListTitle}
       // TODO: Handle click
       onClickTitle={() => {}}
       deleteItems={async (items) => {
