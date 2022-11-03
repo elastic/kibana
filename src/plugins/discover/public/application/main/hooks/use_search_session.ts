@@ -12,7 +12,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import {
   createSearchSessionRestorationDataProvider,
-  GetStateReturn,
+  DiscoverStateContainer,
 } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
 
@@ -23,7 +23,7 @@ export function useSearchSession({
   savedSearch,
 }: {
   services: DiscoverServices;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   history: History;
   savedSearch: SavedSearch;
 }) {
@@ -43,7 +43,7 @@ export function useSearchSession({
   useEffect(() => {
     data.search.session.enableStorage(
       createSearchSessionRestorationDataProvider({
-        appStateContainer: stateContainer.appStateContainer,
+        appStateContainer: stateContainer.appState,
         data,
         getSavedSearch: () => savedSearch,
       }),
@@ -57,12 +57,7 @@ export function useSearchSession({
               },
       }
     );
-  }, [
-    capabilities.discover.storeSearchSession,
-    data,
-    savedSearch,
-    stateContainer.appStateContainer,
-  ]);
+  }, [capabilities.discover.storeSearchSession, data, savedSearch, stateContainer.appState]);
 
   return searchSessionManager;
 }

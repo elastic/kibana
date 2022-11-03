@@ -19,11 +19,12 @@ import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
-import { AppState, GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { useDiscoverHistogram } from './use_discover_histogram';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
@@ -37,8 +38,7 @@ export interface DiscoverMainContentProps {
   savedSearch: SavedSearch;
   savedSearchData$: SavedSearchData;
   savedSearchRefetch$: DataRefetch$;
-  state: AppState;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   isTimeBased: boolean;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
@@ -57,7 +57,6 @@ export const DiscoverMainContent = ({
   savedSearch,
   savedSearchData$,
   savedSearchRefetch$,
-  state,
   stateContainer,
   isTimeBased,
   viewMode,
@@ -68,6 +67,8 @@ export const DiscoverMainContent = ({
 }: DiscoverMainContentProps) => {
   const services = useDiscoverServices();
   const { trackUiMetric } = services;
+  const query = useAppStateSelector((state) => state.query);
+  const filters = useAppStateSelector((state) => state.filters);
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -94,7 +95,6 @@ export const DiscoverMainContent = ({
     onTimeIntervalChange,
   } = useDiscoverHistogram({
     stateContainer,
-    state,
     savedSearchData$,
     dataView,
     savedSearch,
@@ -156,7 +156,6 @@ export const DiscoverMainContent = ({
             onAddFilter={!isPlainRecord ? onAddFilter : undefined}
             savedSearch={savedSearch}
             setExpandedDoc={setExpandedDoc}
-            state={state}
             stateContainer={stateContainer}
             onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
           />
@@ -165,8 +164,8 @@ export const DiscoverMainContent = ({
             availableFields$={savedSearchData$.availableFields$}
             savedSearch={savedSearch}
             dataView={dataView}
-            query={state.query}
-            filters={state.filters}
+            query={query}
+            filters={filters}
             columns={columns}
             stateContainer={stateContainer}
             onAddFilter={!isPlainRecord ? onAddFilter : undefined}

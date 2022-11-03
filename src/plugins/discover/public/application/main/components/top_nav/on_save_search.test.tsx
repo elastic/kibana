@@ -15,7 +15,7 @@ import { onSaveSearch } from './on_save_search';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../build_services';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { i18nServiceMock } from '@kbn/core/public/mocks';
 import { ReactElement } from 'react';
 import { discoverServiceMock } from '../../../../__mocks__/services';
@@ -30,12 +30,12 @@ describe('onSaveSearch', () => {
       },
     } as unknown as DiscoverServices;
     const stateMock = {
-      appStateContainer: {
+      appState: {
         getState: () => ({
           rowsPerPage: 250,
         }),
       },
-    } as unknown as GetStateReturn;
+    } as unknown as DiscoverStateContainer;
 
     await onSaveSearch({
       dataView: dataViewMock,
@@ -52,12 +52,12 @@ describe('onSaveSearch', () => {
   it('should pass tags to the save modal', async () => {
     const serviceMock = discoverServiceMock;
     const stateMock = {
-      appStateContainer: {
+      appState: {
         getState: () => ({
           rowsPerPage: 250,
         }),
       },
-    } as unknown as GetStateReturn;
+    } as unknown as DiscoverStateContainer;
     let saveModal: ReactElement | undefined;
     jest.spyOn(savedObjectsPlugin, 'showSaveModal').mockImplementationOnce((modal) => {
       saveModal = modal;
@@ -79,13 +79,13 @@ describe('onSaveSearch', () => {
   it('should update the saved search tags', async () => {
     const serviceMock = discoverServiceMock;
     const stateMock = {
-      appStateContainer: {
+      appState: {
         getState: () => ({
           rowsPerPage: 250,
         }),
       },
       resetInitialAppState: jest.fn(),
-    } as unknown as GetStateReturn;
+    } as unknown as DiscoverStateContainer;
     let saveModal: ReactElement | undefined;
     jest.spyOn(savedObjectsPlugin, 'showSaveModal').mockImplementationOnce((modal) => {
       saveModal = modal;
@@ -123,13 +123,13 @@ describe('onSaveSearch', () => {
   it('should not update tags if savedObjectsTagging is undefined', async () => {
     const serviceMock = discoverServiceMock;
     const stateMock = {
-      appStateContainer: {
+      appState: {
         getState: () => ({
           rowsPerPage: 250,
         }),
       },
       resetInitialAppState: jest.fn(),
-    } as unknown as GetStateReturn;
+    } as unknown as DiscoverStateContainer;
     let saveModal: ReactElement | undefined;
     jest.spyOn(savedObjectsPlugin, 'showSaveModal').mockImplementationOnce((modal) => {
       saveModal = modal;

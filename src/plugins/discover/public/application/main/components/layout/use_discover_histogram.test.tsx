@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import React from 'react';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { esHits } from '../../../../__mocks__/es_hits';
@@ -20,7 +20,7 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../hooks/use_saved_search';
-import type { GetStateReturn } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../services/discover_state';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
@@ -33,6 +33,8 @@ import {
 } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { calculateBounds } from '@kbn/data-plugin/public';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 
 const mockData = dataPluginMock.createStartContract();
 
@@ -62,19 +64,30 @@ jest.mock('@kbn/unified-field-list-plugin/public', () => {
   };
 });
 
+function getStateContainer() {
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  stateContainer.setAppState({
+    interval: 'auto',
+    hideChart: false,
+  });
+  stateContainer.setAppState = jest.fn();
+
+  return stateContainer;
+}
+
 describe('useDiscoverHistogram', () => {
   const renderUseDiscoverHistogram = async ({
     isPlainRecord = false,
     isTimeBased = true,
     canVisualize = true,
     storage = new LocalStorageMock({}) as unknown as Storage,
-    stateContainer = {},
+    stateContainer = getStateContainer(),
   }: {
     isPlainRecord?: boolean;
     isTimeBased?: boolean;
     canVisualize?: boolean;
     storage?: Storage;
-    stateContainer?: unknown;
+    stateContainer?: DiscoverStateContainer;
   } = {}) => {
     mockStorage = storage;
     mockCanVisualize = canVisualize;
@@ -158,17 +171,23 @@ describe('useDiscoverHistogram', () => {
       availableFields$,
     };
 
-    const hook = renderHook(() => {
-      return useDiscoverHistogram({
-        stateContainer: stateContainer as GetStateReturn,
-        state: { interval: 'auto', hideChart: false },
-        savedSearchData$,
-        dataView: dataViewWithTimefieldMock,
-        savedSearch: savedSearchMock,
-        isTimeBased,
-        isPlainRecord,
-      });
-    });
+    const hook = renderHook(
+      () => {
+        return useDiscoverHistogram({
+          stateContainer,
+          savedSearchData$,
+          dataView: dataViewWithTimefieldMock,
+          savedSearch: savedSearchMock,
+          isTimeBased,
+          isPlainRecord,
+        });
+      },
+      {
+        wrapper: ({ children }: { children: React.ReactElement }) => (
+          <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>
+        ),
+      }
+    );
 
     await act(() => setTimeout(0));
 
@@ -267,9 +286,7 @@ describe('useDiscoverHistogram', () => {
     it('should update chartHidden when onChartHiddenChange is called', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       storage.set = jest.fn();
-      const stateContainer = {
-        setAppState: jest.fn(),
-      };
+      const stateContainer = getStateContainer();
       const { result } = await renderUseDiscoverHistogram({
         storage,
         stateContainer,
@@ -282,9 +299,7 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should update interval when onTimeIntervalChange is called', async () => {
-      const stateContainer = {
-        setAppState: jest.fn(),
-      };
+      const stateContainer = getStateContainer();
       const { result } = await renderUseDiscoverHistogram({
         stateContainer,
       });

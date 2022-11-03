@@ -17,7 +17,7 @@ import { useUrl } from './hooks/use_url';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
-import { DiscoverAppStateProvider } from './services/discover_app_state_container';
+import { DiscoverMainProvider } from './services/discover_state_provider';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -50,7 +50,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   const {
     data$,
-    dataView,
     inspectorAdapters,
     onChangeDataView,
     onUpdateQuery,
@@ -59,9 +58,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     refetch$,
     resetSavedSearch,
     searchSource,
-    state,
     stateContainer,
-    adHocDataViewList,
   } = useDiscoverState({
     services,
     history: usedHistory,
@@ -101,10 +98,8 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
-    <DiscoverAppStateProvider value={stateContainer.appStateContainer}>
+    <DiscoverMainProvider value={stateContainer}>
       <DiscoverLayoutMemoized
-        dataView={dataView}
-        dataViewList={dataViewList}
         inspectorAdapters={inspectorAdapters}
         expandedDoc={expandedDoc}
         onChangeDataView={onChangeDataView}
@@ -116,12 +111,10 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
         savedSearchData$={data$}
         savedSearchRefetch$={refetch$}
         searchSource={searchSource}
-        state={state}
         stateContainer={stateContainer}
         persistDataView={persistDataView}
         updateAdHocDataViewId={updateAdHocDataViewId}
-        adHocDataViewList={adHocDataViewList}
       />
-    </DiscoverAppStateProvider>
+    </DiscoverMainProvider>
   );
 }

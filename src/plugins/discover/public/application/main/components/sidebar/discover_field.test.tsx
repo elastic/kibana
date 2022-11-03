@@ -133,7 +133,7 @@ async function getComponent({
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     charts: chartPluginMock.createSetupContract(),
   };
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
   appStateContainer.set({
     query: { query: '', language: 'lucene' },
     filters: [],

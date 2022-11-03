@@ -13,7 +13,7 @@ import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { useUrlTracking } from './use_url_tracking';
-import { getState } from '../services/discover_state';
+import { getDiscoverStateContainer } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
@@ -55,21 +55,22 @@ export function useDiscoverState({
     return savedSearch.searchSource.createChild();
   }, [savedSearch, dataView]);
 
+  const stateContainer = useMemo(() => {
+    const container = getDiscoverStateContainer({
+      history,
+      savedSearch,
+      services,
+    });
+    container.actions.setDataView(dataView);
+    return container;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [history, savedSearch, services]);
+
   const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
-  const stateContainer = useMemo(
-    () =>
-      getState({
-        history,
-        savedSearch,
-        services,
-      }),
-    [history, savedSearch, services]
-  );
+  const { appState, replaceUrlAppState } = stateContainer;
 
-  const { appStateContainer, replaceUrlAppState } = stateContainer;
-
-  const [state, setState] = useState(appStateContainer.getState());
+  const [state, setState] = useState(appState.getState());
 
   /**
    * Search session logic
@@ -124,8 +125,7 @@ export function useDiscoverState({
   /**
    * Adhoc data views functionality
    */
-  const { adHocDataViewList, persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
-    dataView,
+  const { persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
     stateContainer,
     savedSearch,
     setUrlTracking,
@@ -168,7 +168,7 @@ export function useDiscoverState({
    */
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(dataView, filterManager, data);
-    setState(stateContainer.appStateContainer.getState());
+    setState(stateContainer.appState.getState());
 
     return () => stopSync();
   }, [stateContainer, filterManager, data, dataView]);
@@ -177,7 +177,7 @@ export function useDiscoverState({
    * Track state changes that should trigger a fetch
    */
   useEffect(() => {
-    const unsubscribe = appStateContainer.subscribe(async (nextState) => {
+    const unsubscribe = appState.subscribe(async (nextState) => {
       const { hideChart, interval, sort, index } = state;
       // chart was hidden, now it should be displayed, so data is needed
       const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
@@ -209,9 +209,9 @@ export function useDiscoverState({
           replaceUrlAppState({ index: nextDataView.id });
           return;
         }
-
         savedSearch.searchSource.setField('index', nextDataView);
         reset();
+        stateContainer.actions.setDataView(nextDataView);
       }
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
@@ -222,13 +222,14 @@ export function useDiscoverState({
     return () => unsubscribe();
   }, [
     services,
-    appStateContainer,
+    appState,
     state,
     refetch$,
     data$,
     reset,
-    savedSearch.searchSource,
+    savedSearch,
     replaceUrlAppState,
+    stateContainer,
   ]);
 
   /**
@@ -295,17 +296,13 @@ export function useDiscoverState({
 
   return {
     data$,
-    dataView,
     inspectorAdapters,
     refetch$,
     resetSavedSearch,
     onChangeDataView,
     onUpdateQuery,
     searchSource,
-    setState,
-    state,
     stateContainer,
-    adHocDataViewList,
     persistDataView,
     updateAdHocDataViewId,
   };
