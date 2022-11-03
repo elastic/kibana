@@ -21,6 +21,7 @@ import { ESSearchSource } from '../../../../../../classes/sources/es_search_sour
 import { isVectorLayer, IVectorLayer } from '../../../../../../classes/layers/vector_layer';
 import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common/constants';
 import { RemoveLayerConfirmModal } from '../../../../../../components/remove_layer_confirm_modal';
+import { isLayerGroup, LayerGroup } from '../../../../../../classes/layers/layer_group';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
@@ -38,6 +39,7 @@ export interface Props {
   supportsFitToBounds: boolean;
   toggleVisible: (layerId: string) => void;
   numLayers: number;
+  ungroupLayer: (layerId: string) => void;
 }
 
 interface State {
@@ -114,18 +116,6 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     }));
   };
 
-  _cloneLayer() {
-    this.props.cloneLayer(this.props.layer.getId());
-  }
-
-  _fitToBounds() {
-    this.props.fitToBounds(this.props.layer.getId());
-  }
-
-  _toggleVisible() {
-    this.props.toggleVisible(this.props.layer.getId());
-  }
-
   _getActionsPanel() {
     const actionItems = [
       {
@@ -140,7 +130,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         disabled: !this.props.supportsFitToBounds,
         onClick: () => {
           this._closePopover();
-          this._fitToBounds();
+          this.props.fitToBounds(this.props.layer.getId());
         },
       },
       {
@@ -150,7 +140,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         toolTipContent: null,
         onClick: () => {
           this._closePopover();
-          this._toggleVisible();
+          this.props.toggleVisible(this.props.layer.getId());
         },
       },
     ];
@@ -218,9 +208,24 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         'data-test-subj': 'cloneLayerButton',
         onClick: () => {
           this._closePopover();
-          this._cloneLayer();
+          this.props.cloneLayer(this.props.layer.getId());
         },
       });
+      if (isLayerGroup(this.props.layer) && (this.props.layer as LayerGroup).getChildren().length > 0) {
+        actionItems.push({
+          name: i18n.translate('xpack.maps.layerTocActions.ungroupLayerTitle', {
+            defaultMessage: 'Ungroup layers',
+          }),
+          icon: <EuiIcon type="layers" size="m" />,
+          toolTipContent: null,
+          'data-test-subj': 'removeLayerButton',
+          onClick: () => {
+            this._closePopover();
+            this.props.ungroupLayer(this.props.layer.getId());
+            this.props.removeLayer(this.props.layer.getId());
+          },
+        });
+      }
       actionItems.push({
         name: i18n.translate('xpack.maps.layerTocActions.removeLayerTitle', {
           defaultMessage: 'Remove layer',

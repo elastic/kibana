@@ -876,7 +876,7 @@ export function createLayerGroup(draggedLayerId: string, combineLayerId: string)
   };
 }
 
-function ungroupLayer(layerId: string) {
+export function ungroupLayer(layerId: string) {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
