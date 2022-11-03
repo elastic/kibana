@@ -79,11 +79,13 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       selectionDisplayNode: (
         <>
           {exclude && (
-            <span className="optionsList__negateLabel">
-              {existsSelected
-                ? OptionsListStrings.control.getExcludeExists()
-                : OptionsListStrings.control.getNegate()}
-            </span>
+            <>
+              <span className="optionsList__negateLabel">
+                {existsSelected
+                  ? OptionsListStrings.control.getExcludeExists()
+                  : OptionsListStrings.control.getNegate()}
+              </span>{' '}
+            </>
           )}
           {existsSelected ? (
             <span

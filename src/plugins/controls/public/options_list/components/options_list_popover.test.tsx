@@ -118,22 +118,6 @@ describe('Options list popover', () => {
     expect(excludeButton.prop('checked')).toBe(true);
   });
 
-  test('if exclude = false and existsSelected = true, then the option should read "Exists"', async () => {
-    const popover = await mountComponent({
-      explicitInput: { exclude: false, existsSelected: true },
-    });
-    const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');
-    expect(existsOption.text()).toBe('Exists (*)');
-  });
-
-  test('if exclude = true and existsSelected = true, then the option should read "Does not exist"', async () => {
-    const popover = await mountComponent({
-      explicitInput: { exclude: true, existsSelected: true },
-    });
-    const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');
-    expect(existsOption.text()).toBe('Does not exist (!)');
-  });
-
   test('clicking another option unselects "Exists"', async () => {
     const popover = await mountComponent({
       explicitInput: { existsSelected: true },

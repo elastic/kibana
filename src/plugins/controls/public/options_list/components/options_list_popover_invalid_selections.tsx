@@ -27,9 +27,7 @@ export const OptionsListPopoverInvalidSelections = () => {
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const existsSelectionInvalid = select((state) => state.componentState.existsSelectionInvalid);
-
   const existsSelected = select((state) => state.explicitInput.existsSelected);
-  const exclude = select((state) => state.explicitInput.exclude);
 
   return (
     <>
@@ -48,7 +46,7 @@ export const OptionsListPopoverInvalidSelections = () => {
           className="optionsList__selectionInvalid"
           onClick={() => dispatch(selectExists(false))}
         >
-          {OptionsListStrings.controlAndPopover.getExists(+Boolean(exclude))}
+          {OptionsListStrings.controlAndPopover.getExists(+Boolean(false))}
         </EuiFilterSelectItem>
       ) : (
         <>

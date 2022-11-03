@@ -227,11 +227,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSetIncludeSelections(false);
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[1]);
 
-      await ensureAvailableOptionsEql(
-        controlIds[1],
-        ['Max', 'Ignored selection', 'Does not exist (!)'],
-        false
-      );
+      await ensureAvailableOptionsEql(controlIds[1], ['Max', 'Ignored selection', 'Exists'], false);
     });
 
     describe('Hierarchical chaining off', async () => {

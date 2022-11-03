@@ -87,10 +87,9 @@ export const OptionsListPopoverSuggestions = ({
             onClick={() => {
               dispatch(selectExists(!Boolean(existsSelected)));
             }}
+            className="optionsList__existsFilter"
           >
-            <span className="optionsList__existsFilter">
-              {OptionsListStrings.controlAndPopover.getExists()}
-            </span>
+            {OptionsListStrings.controlAndPopover.getExists()}
           </EuiFilterSelectItem>
         )}
       {suggestions?.map((suggestion, index) => (
