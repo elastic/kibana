@@ -217,7 +217,13 @@ function parseAndVerifyArchive(paths: string[], topLevelDirOverride?: string): A
     );
   }
 
-  const parsedDataStreams = parseAndVerifyDataStreams(paths, parsed.name, parsed.version);
+  const parsedDataStreams = parseAndVerifyDataStreams(
+    paths,
+    parsed.name,
+    parsed.version,
+    topLevelDirOverride
+  );
+
   if (parsedDataStreams.length) {
     parsed.data_streams = parsedDataStreams;
   }
@@ -250,26 +256,26 @@ function parseAndVerifyReadme(paths: string[], pkgName: string, pkgVersion: stri
 export function parseAndVerifyDataStreams(
   paths: string[],
   pkgName: string,
-  pkgVersion: string
+  pkgVersion: string,
+  pkgBasePathOverride?: string
 ): RegistryDataStream[] {
   // A data stream is made up of a subdirectory of name-version/data_stream/, containing a manifest.yml
-  let dataStreamPaths: string[] = [];
+  const dataStreamPaths = new Set<string>();
   const dataStreams: RegistryDataStream[] = [];
-  const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
+  const pkgBasePath = pkgBasePathOverride || pkgToPkgKey({ name: pkgName, version: pkgVersion });
+  const streamBasePath = path.join(pkgBasePath, 'data_stream');
+  // pick all paths matching name-version/data_stream/DATASTREAM_NAME/...
+  // from those, pick all unique data stream names
+  paths.forEach((filePath) => {
+    if (!filePath.startsWith(streamBasePath)) return;
 
-  // pick all paths matching name-version/data_stream/DATASTREAM_PATH/...
-  // from those, pick all unique data stream paths
-  paths
-    .filter((filePath) => filePath.startsWith(`${pkgKey}/data_stream/`))
-    .forEach((filePath) => {
-      const parts = filePath.split('/');
-      if (parts.length > 2 && parts[2]) dataStreamPaths.push(parts[2]);
-    });
-
-  dataStreamPaths = uniq(dataStreamPaths);
+    const streamWithoutPrefix = filePath.slice(streamBasePath.length);
+    const [dataStreamPath] = streamWithoutPrefix.split('/').filter((v) => v); // remove undefined incase of leading /
+    if (dataStreamPath) dataStreamPaths.add(dataStreamPath);
+  });
 
   dataStreamPaths.forEach((dataStreamPath) => {
-    const manifestFile = `${pkgKey}/data_stream/${dataStreamPath}/${MANIFEST_NAME}`;
+    const manifestFile = path.join(streamBasePath, dataStreamPath, MANIFEST_NAME);
     const manifestBuffer = MANIFESTS[manifestFile];
     if (!paths.includes(manifestFile) || !manifestBuffer) {
       throw new PackageInvalidArchiveError(
