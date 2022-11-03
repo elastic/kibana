@@ -351,6 +351,7 @@ export interface RegistryElasticsearch {
   'index_template.settings'?: estypes.IndicesIndexSettings;
   'index_template.mappings'?: estypes.MappingTypeMapping;
   'ingest_pipeline.name'?: string;
+  source_mode?: 'default' | 'synthetic';
 }
 
 export interface RegistryDataStreamPrivileges {
