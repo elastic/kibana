@@ -164,8 +164,10 @@ export const useDataTablesStorage = (): DataTablesStorage => {
   const getDataTablesById: DataTablesStorage['getDataTablesById'] = (id: TableIdLiteral) =>
     getDataTablesInStorageByIds(storage, [id])[id] ?? null;
 
-  const addDataTable: DataTablesStorage['addDataTable'] = (id: TableIdLiteral, table: DataTableModel) =>
-    addTableInStorage(storage, id, table);
+  const addDataTable: DataTablesStorage['addDataTable'] = (
+    id: TableIdLiteral,
+    table: DataTableModel
+  ) => addTableInStorage(storage, id, table);
 
   return { getAllDataTables, getDataTablesById, addDataTable };
 };

@@ -18,7 +18,10 @@ const selectTable = (state: DataTableState, tableId: string): DataTableModel =>
 
 export const getTableByIdSelector = () => createSelector(selectTable, (table) => table);
 
-const getDefaultTgrid = (id: string) => ({ ...dataTableDefaults, ...getDataTableManageDefaults(id) });
+const getDefaultTgrid = (id: string) => ({
+  ...dataTableDefaults,
+  ...getDataTableManageDefaults(id),
+});
 
 const selectTGridById = (state: unknown, tableId: string): DataTableModel => {
   return getOr(
