@@ -87,8 +87,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       if (!dataViewId || !dataView) {
         return true;
       }
-      const overallField = dataView.getFieldByName?.(field.name);
-      return Boolean(overallField && hasFieldDataHandler(dataViewId, overallField.name));
+      const isDataViewField = Boolean(dataView.getFieldByName?.(field.name));
+      return hasFieldDataHandler(dataViewId, field.name) || !isDataViewField; // treat unmapped fields as Available rather than Empty
     };
 
     const fields = allFields || [];
@@ -113,7 +113,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       (onSelectedFieldFilter ? sortedFields.filter(onSelectedFieldFilter) : []);
     const popularFields = popularFieldsLimit
       ? sortedFields
-          .filter((field) => field.count && field.type !== '_source' && containsData(field)) // TODO: check if we should check if that field has data
+          .filter((field) => field.count && field.type !== '_source' && containsData(field))
           .sort((a: T, b: T) => (b.count || 0) - (a.count || 0))
           .slice(0, popularFieldsLimit)
       : [];
