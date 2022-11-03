@@ -89,6 +89,7 @@
 /x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 /test/plugin_functional/test_suites/panel_actions @elastic/kibana-app-services
 /test/plugin_functional/test_suites/data_plugin @elastic/kibana-app-services
+/x-pack/plugins/notifications/ @elastic/kibana-app-services
 
 ### Observability Plugins
 
@@ -709,6 +710,7 @@ packages/core/application/core-application-browser-mocks @elastic/kibana-core
 packages/core/application/core-application-common @elastic/kibana-core
 packages/core/apps/core-apps-browser-internal @elastic/kibana-core
 packages/core/apps/core-apps-browser-mocks @elastic/kibana-core
+packages/core/apps/core-apps-server-internal @elastic/kibana-core
 packages/core/base/core-base-browser-internal @elastic/kibana-core
 packages/core/base/core-base-browser-mocks @elastic/kibana-core
 packages/core/base/core-base-common @elastic/kibana-core
