@@ -317,7 +317,7 @@ export class LensPlugin {
 
     visualizations.registerAlias(getLensAliasConfig());
 
-    const discoverLocator = share?.url.locators.get('discover');
+    const discoverLocator = share?.url.locators.get('DISCOVER_APP_LOCATOR');
 
     if (discoverLocator) {
       uiActionsEnhanced.registerDrilldown(
@@ -499,7 +499,7 @@ export class LensPlugin {
       visualizeAggBasedVisAction(core.application)
     );
 
-    const discoverLocator = startDependencies.share?.url.locators.get('discover');
+    const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
 
     if (discoverLocator) {
       startDependencies.uiActions.addTriggerAction(

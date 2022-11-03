@@ -52,6 +52,10 @@ export interface DiscoverMainContentProps {
   searchSessionManager: DiscoverSearchSessionManager;
 }
 
+const resetSearchButtonWrapper = css`
+  overflow: hidden;
+`;
+
 export const DiscoverMainContent = ({
   isPlainRecord,
   dataView,
@@ -114,10 +118,6 @@ export const DiscoverMainContent = ({
     inspectorAdapters,
     searchSessionManager,
   });
-
-  const resetSearchButtonWrapper = css`
-    overflow: hidden;
-  `;
 
   return (
     <UnifiedHistogramLayout

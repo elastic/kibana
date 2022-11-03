@@ -309,7 +309,7 @@ function FieldItemPopoverContents(
       [indexPattern],
       getEsQueryConfig(services.uiSettings)
     );
-    const discoverLocator = services.share?.url.locators.get('discover');
+    const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (!discoverLocator || !services.application.capabilities.discover.show) {
       return;
     }
