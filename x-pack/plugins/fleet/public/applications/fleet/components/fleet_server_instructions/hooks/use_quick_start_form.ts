@@ -93,7 +93,8 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
         };
 
         if (!fleetServerHost) {
-          await saveFleetServerHost(newFleetServerHost);
+          const res = await saveFleetServerHost(newFleetServerHost);
+          setFleetServerHost(res);
         }
 
         await generateServiceToken();
