@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import { stringify } from 'querystring';
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
