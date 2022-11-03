@@ -174,10 +174,11 @@ describe('IndexPatterns', () => {
 
     // run creating in parallel
     await Promise.all([
+      indexPatterns.create({ id }),
+      indexPatterns.create({ id }),
+      indexPatterns.create({ id }),
       doWithTimeout(() => indexPatterns.create({ id }), 1),
       doWithTimeout(() => indexPatterns.create({ id }), 10),
-      doWithTimeout(() => indexPatterns.create({ id }), 20),
-      doWithTimeout(() => indexPatterns.create({ id }), 30),
 
       doWithTimeout(() => indexPatterns.get(id), 10),
       doWithTimeout(() => indexPatterns.get(id), 40),
