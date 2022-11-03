@@ -30,10 +30,7 @@ import {
   type DecoratedError,
   SavedObjectsUtils,
 } from '@kbn/core-saved-objects-utils-server';
-import {
-  IndexMapping,
-  SavedObjectsSerializer,
-} from '@kbn/core-saved-objects-base-server-internal';
+import { IndexMapping, SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   getBulkOperationError,

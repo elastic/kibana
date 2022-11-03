@@ -7,10 +7,7 @@
  */
 
 import { gt, valid } from 'semver';
-import {
-  QueryDslBoolQuery,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslBoolQuery, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import * as Either from 'fp-ts/lib/Either';
 import { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { State } from '../state';

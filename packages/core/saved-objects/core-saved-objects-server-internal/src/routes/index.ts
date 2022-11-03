@@ -8,10 +8,7 @@
 
 import { Logger } from '@kbn/logging';
 import { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import {
-  SavedObjectConfig,
-  IKibanaMigrator,
-} from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectConfig, IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
 import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';

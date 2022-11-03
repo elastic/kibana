@@ -12,10 +12,7 @@ import {
   SavedObjectsImportResponse,
 } from '@kbn/core-saved-objects-common';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
-  ISavedObjectTypeRegistry,
-  SavedObjectsImportHook,
-} from '@kbn/core-saved-objects-server';
+import { ISavedObjectTypeRegistry, SavedObjectsImportHook } from '@kbn/core-saved-objects-server';
 import {
   checkReferenceOrigins,
   validateReferences,

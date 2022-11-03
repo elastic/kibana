@@ -7,10 +7,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import {
-  SavedObjectsValidationMap,
-  SavedObjectSanitizedDoc,
-} from '@kbn/core-saved-objects-server';
+import { SavedObjectsValidationMap, SavedObjectSanitizedDoc } from '@kbn/core-saved-objects-server';
 import { createSavedObjectSanitizedDocSchema } from './schema';
 
 /**

@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  SavedObjectsMigrationVersion,
-  SavedObjectReference,
-} from '@kbn/core-saved-objects-common';
+import { SavedObjectsMigrationVersion, SavedObjectReference } from '@kbn/core-saved-objects-common';
 
 /**
  * A serializer that can be used to manually convert {@link SavedObjectsRawDoc | raw} or
