@@ -547,7 +547,8 @@ export function parseDefaultIngestPipeline(opts: {
   const { pkgKey, paths, dataStreamPath } = opts;
   const ingestPipelineDirPath = `${pkgKey}/data_stream/${dataStreamPath}/elasticsearch/ingest_pipeline`;
   const defaultIngestPipelinePaths = paths.filter(
-    (path) => path.startsWith(ingestPipelineDirPath) && isDefaultPipelineFile(path)
+    (pipelinePath) =>
+      pipelinePath.startsWith(ingestPipelineDirPath) && isDefaultPipelineFile(pipelinePath)
   );
 
   if (!defaultIngestPipelinePaths.length) return undefined;
