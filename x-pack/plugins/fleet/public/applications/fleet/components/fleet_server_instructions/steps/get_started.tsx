@@ -43,7 +43,7 @@ export function getGettingStartedStep(props: QuickStartCreateForm): EuiStepProps
 
 const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> = ({
   fleetServerHosts,
-  fleetServerHost,
+  fleetServerHost: selectedFleetServerHost,
   setFleetServerHost,
   status,
   error,
@@ -80,7 +80,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
             id="xpack.fleet.fleetServerFlyout.generateFleetServerPolicySuccessInstructions"
             defaultMessage="Fleet server policy and service token have been generated. Host configured at {hostUrl}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
             values={{
-              hostUrl: <EuiCode>{fleetServerHost?.host_urls[0]}</EuiCode>,
+              hostUrl: <EuiCode>{selectedFleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
                 <EuiLink href={getHref('settings')}>
                   <FormattedMessage
@@ -120,7 +120,10 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
               </EuiText>
             }
             append={
-              <EuiButtonEmpty onClick={() => setFleetServerHost(null)}>
+              <EuiButtonEmpty
+                data-test-subj="fleetServerSetup.addNewHostBtn"
+                onClick={() => setFleetServerHost(null)}
+              >
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.fleetServerHostsLabel"
                   defaultMessage="Add new Fleet Server Hosts"
@@ -139,7 +142,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
       ) : null}
 
       <EuiForm onSubmit={submit}>
-        {!fleetServerHost ? (
+        {!selectedFleetServerHost ? (
           <>
             <EuiFormRow
               fullWidth

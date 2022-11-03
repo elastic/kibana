@@ -138,7 +138,10 @@ export const AddFleetServerHostStepContent = ({
               </EuiText>
             }
             append={
-              <EuiButtonEmpty onClick={() => setFleetServerHost(null)}>
+              <EuiButtonEmpty
+                data-test-subj="fleetServerSetup.addNewHostBtn"
+                onClick={() => setFleetServerHost(null)}
+              >
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.fleetServerHostsLabel"
                   defaultMessage="Add new Fleet Server Hosts"

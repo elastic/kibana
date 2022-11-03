@@ -29,6 +29,7 @@ import {
 } from '../../screens/fleet';
 import { AGENT_POLICY_NAME_LINK } from '../../screens/integrations';
 import { cleanupAgentPolicies, unenrollAgent } from '../../tasks/cleanup';
+import { setFleetServerHost } from '../../tasks/fleet_server';
 describe('Home page', () => {
   before(() => {
     navigateTo(FLEET);
@@ -38,6 +39,7 @@ describe('Home page', () => {
   describe('Agents', () => {
     before(() => {
       cy.getBySel(AGENT_FLYOUT.QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
+      setFleetServerHost('https://fleetserver:8220');
     });
     const fleetServerHost = 'https://localhost:8220';
 
@@ -46,6 +48,7 @@ describe('Home page', () => {
         checkA11y({ skipFailures: false });
       });
       it('Install Fleet Server', () => {
+        cy.getBySel(FLEET_SERVER_SETUP.ADD_HOST_BTN).click();
         cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('Host edited');
         cy.get('[placeholder="Specify host URL"', { timeout: 15000 }).should('be.visible');
         cy.get('[placeholder="Specify host URL"').type(fleetServerHost);
@@ -65,6 +68,7 @@ describe('Home page', () => {
         checkA11y({ skipFailures: false });
       });
       it('Add your fleet sever host', () => {
+        cy.getBySel(FLEET_SERVER_SETUP.ADD_HOST_BTN).click();
         cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('New host');
         cy.get('[placeholder="Specify host URL"').type('https://localhost:8220');
         cy.getBySel(ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON).click();

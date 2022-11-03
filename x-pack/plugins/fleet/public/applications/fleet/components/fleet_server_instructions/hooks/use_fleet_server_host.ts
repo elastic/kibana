@@ -63,7 +63,6 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   const fleetServerHosts = useMemo(() => data?.items ?? [], [data?.items]);
 
   useEffect(() => {
-    const fleetServerHosts = data?.items ?? [];
     const defaultHost = fleetServerHosts.find((item) => item.is_default === true);
     if (defaultHost) {
       setFleetServerHost(defaultHost);
@@ -94,7 +93,7 @@ export const useFleetServerHost = (): FleetServerHostForm => {
 
       return res.data.item;
     },
-    [data?.items]
+    [data?.items, refreshGetFleetServerHosts]
   );
 
   return {
