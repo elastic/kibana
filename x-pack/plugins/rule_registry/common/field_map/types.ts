@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { MappingDynamicMapping } from '@elastic/elasticsearch/lib/api/types';
+
 export interface FieldMap {
   [key: string]: {
     type: string;
@@ -12,5 +14,6 @@ export interface FieldMap {
     array?: boolean;
     path?: string;
     scaling_factor?: number;
+    dynamic?: MappingDynamicMapping;
   };
 }

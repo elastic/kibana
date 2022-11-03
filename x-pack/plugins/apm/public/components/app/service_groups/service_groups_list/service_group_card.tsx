@@ -20,11 +20,11 @@ import {
   ServiceGroup,
   SERVICE_GROUP_COLOR_DEFAULT,
 } from '../../../../../common/service_groups';
+import { useObservabilityActiveAlertsHref } from '../../../shared/links/kibana';
 
 interface Props {
   serviceGroup: ServiceGroup;
   hideServiceCount?: boolean;
-  onClick?: () => void;
   href?: string;
   servicesCount?: number;
   alertsCount?: number;
@@ -33,7 +33,6 @@ interface Props {
 export function ServiceGroupsCard({
   serviceGroup,
   hideServiceCount = false,
-  onClick,
   href,
   servicesCount,
   alertsCount,
@@ -44,7 +43,16 @@ export function ServiceGroupsCard({
       <>
         {alertsCount && (
           <div>
-            <EuiBadge iconType="alert" color="danger">
+            <EuiBadge
+              iconType="alert"
+              color="danger"
+              href={useObservabilityActiveAlertsHref(serviceGroup.kuery)}
+              {...({
+                onClick(e: React.SyntheticEvent) {
+                  e.stopPropagation(); // prevents extra click thru to EuiCard's href destination
+                },
+              } as object)} // workaround for type check that prevents href + onclick
+            >
               {i18n.translate('xpack.apm.serviceGroups.cardsList.alertCount', {
                 defaultMessage:
                   '{alertsCount} {alertsCount, plural, one {alert} other {alerts}}',
@@ -93,7 +101,6 @@ export function ServiceGroupsCard({
         )}
       </EuiFlexGroup>
     ),
-    onClick,
     href,
   };
 

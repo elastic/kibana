@@ -140,6 +140,10 @@ export class APMPlugin
               [SERVICE_LANGUAGE_NAME]: {
                 type: 'keyword',
               },
+              labels: {
+                type: 'object',
+                dynamic: true,
+              },
             },
             true,
           ),
