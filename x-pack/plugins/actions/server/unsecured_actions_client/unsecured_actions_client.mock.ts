@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUnsecuredActionsClient } from './unsecured_actions_client';
+import type { IUnsecuredActionsClient } from './unsecured_actions_client';
 
 export type UnsecuredActionsClientMock = jest.Mocked<IUnsecuredActionsClient>;
 
