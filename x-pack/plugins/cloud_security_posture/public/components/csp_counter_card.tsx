@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiCard, EuiIcon, EuiStat, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { EuiStatProps } from '@elastic/eui/src/components/stat/stat';
-import { EuiCardProps } from '@elastic/eui/src/components/card/card';
+import { EuiCard, EuiIcon, EuiStat, useEuiTheme } from '@elastic/eui';
+import type { EuiStatProps, EuiCardProps } from '@elastic/eui';
 
 export type CspCounterCardProps = Pick<EuiStatProps, 'title' | 'description' | 'titleColor'> &
   Pick<EuiCardProps, 'onClick'>;
@@ -18,7 +17,7 @@ export const CspCounterCard = ({ counter }: { counter: CspCounterCardProps }) =>
 
   return (
     <EuiCard
-      title={''}
+      title=""
       hasBorder
       onClick={counter.onClick}
       paddingSize="m"
@@ -44,16 +43,16 @@ export const CspCounterCard = ({ counter }: { counter: CspCounterCardProps }) =>
         css={`
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: ${euiTheme.size.m};
         `}
       />
       {counter.onClick && (
         <EuiIcon
-          type="popout"
+          type="link"
           css={`
             position: absolute;
-            top: 5px;
-            right: 5px;
+            top: ${euiTheme.size.m};
+            right: ${euiTheme.size.m};
           `}
         />
       )}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { PartitionElementEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
@@ -16,7 +16,10 @@ import { ChartPanel } from '../../../components/chart_panel';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
-import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
+import {
+  useNavigateFindings,
+  useNavigateFindingsByResource,
+} from '../../../common/hooks/use_navigate_findings';
 import { RULE_FAILED } from '../../../../common/constants';
 
 const defaultHeight = 360;
@@ -38,7 +41,7 @@ export const CloudSummarySection = ({
   complianceData: ComplianceDashboardData;
 }) => {
   const navToFindings = useNavigateFindings();
-  const { euiTheme } = useEuiTheme();
+  const navToFindingsByResource = useNavigateFindingsByResource();
 
   const handleElementClick = (elements: PartitionElementEvent[]) => {
     const [element] = elements;
@@ -61,19 +64,32 @@ export const CloudSummarySection = ({
 
   const counters: CspCounterCardProps[] = [
     {
-      title: <CompactFormattedNumber number={123} />,
-      description: 'Clusters Evaluated',
+      title: <CompactFormattedNumber number={complianceData.clusters.length} />,
+      description: i18n.translate(
+        'xpack.csp.dashboard.summarySection.counterCard.clustersEvaluatedDescription',
+        { defaultMessage: 'Clusters Evaluated' }
+      ),
     },
     {
       title: <CompactFormattedNumber number={123456} />,
-      description: 'Resources Evaluated',
-      onClick: () => {},
+      description: i18n.translate(
+        'xpack.csp.dashboard.summarySection.counterCard.resourcesEvaluatedDescription',
+        { defaultMessage: 'Resources Evaluated' }
+      ),
+      onClick: () => {
+        navToFindingsByResource();
+      },
     },
     {
-      title: <CompactFormattedNumber number={1234567890} />,
-      description: 'Failing Findings',
-      titleColor: 'danger',
-      onClick: () => {},
+      title: <CompactFormattedNumber number={complianceData.stats.totalFailed} />,
+      description: i18n.translate(
+        'xpack.csp.dashboard.summarySection.counterCard.failingFindingsDescription',
+        { defaultMessage: 'Failing Findings' }
+      ),
+      titleColor: complianceData.stats.totalFailed > 0 ? 'danger' : 'text',
+      onClick: () => {
+        navToFindings({ 'result.evaluation': RULE_FAILED });
+      },
     },
   ];
 

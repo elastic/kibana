@@ -42,3 +42,14 @@ export const useNavigateFindings = () => {
     });
   };
 };
+
+export const useNavigateFindingsByResource = () => {
+  const history = useHistory();
+
+  return (query?: Query['query']) => {
+    history.push({
+      pathname: findingsNavigation.findings_by_resource.path,
+      ...(query && { search: encodeQuery(getFindingsQuery(query)) }),
+    });
+  };
+};
