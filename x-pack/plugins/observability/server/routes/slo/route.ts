@@ -15,6 +15,7 @@ import {
   UpdateSLO,
   DefaultSLIClient,
 } from '../../services/slo';
+import { FindSLO } from '../../services/slo/find_slo';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
@@ -25,6 +26,7 @@ import { IndicatorTypes } from '../../types/models';
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
+  findSLOParamsSchema,
   getSLOParamsSchema,
   updateSLOParamsSchema,
 } from '../../types/rest_specs';
@@ -115,9 +117,27 @@ const getSLORoute = createObservabilityServerRoute({
   },
 });
 
+const findSLORoute = createObservabilityServerRoute({
+  endpoint: 'GET /api/observability/slos',
+  options: {
+    tags: [],
+  },
+  params: findSLOParamsSchema,
+  handler: async ({ context, params }) => {
+    const soClient = (await context.core).savedObjects.client;
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const findSLO = new FindSLO(repository);
+
+    const response = await findSLO.execute(params.query ?? {});
+
+    return response;
+  },
+});
+
 export const slosRouteRepository = {
   ...createSLORoute,
   ...updateSLORoute,
   ...getSLORoute,
   ...deleteSLORoute,
+  ...findSLORoute,
 };

@@ -17,6 +17,7 @@ import {
   SLO,
 } from '../../../types/models';
 import { CreateSLOParams } from '../../../types/rest_specs';
+import { Paginated } from '../slo_repository';
 
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
@@ -98,4 +99,17 @@ export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO 
     },
     ...params,
   });
+};
+
+export const createPaginatedSLO = (
+  slo: SLO,
+  params: Partial<Paginated<SLO>> = {}
+): Paginated<SLO> => {
+  return {
+    page: 1,
+    perPage: 25,
+    total: 1,
+    results: [slo],
+    ...params,
+  };
 };
