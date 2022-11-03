@@ -238,8 +238,8 @@ const getPersistentAlertsByTimeRange = async <TSearchRequest extends ESSearchReq
   ruleId,
   ruleDataClientReader,
 }: GetAlertsByTimeRangeHelperOpts) => {
-  // persistent alerts only create new alerts so query by execution UUID to
-  // get all alerts created during an execution
+  // persistent alerts only create new alerts so query for all alerts within the time
+  // range and treat them as NEW
   const request = getQueryByTimeRange(start, end, ruleId);
   const response = (await ruleDataClientReader.search(request)) as ESSearchResponse<
     AlertDocument,
@@ -283,6 +283,7 @@ const getLifecycleAlertsByTimeRange = async ({
 };
 
 const getQueryByTimeRange = (start: Date, end: Date, ruleId: string, type?: AlertTypes) => {
+  // base query filters the alert documents for a rule by the given time range
   let filter: QueryDslQueryContainer[] = [
     {
       range: {
@@ -298,7 +299,10 @@ const getQueryByTimeRange = (start: Date, end: Date, ruleId: string, type?: Aler
       },
     },
   ];
+
   if (type === AlertTypes.NEW) {
+    // alerts are considered NEW within the time range if they started after
+    // the query start time
     filter.push({
       range: {
         [ALERT_START]: {
@@ -307,6 +311,8 @@ const getQueryByTimeRange = (start: Date, end: Date, ruleId: string, type?: Aler
       },
     });
   } else if (type === AlertTypes.ONGOING) {
+    // alerts are considered ONGOING within the time range if they started
+    // before the query start time and they have not been recovered (no end time)
     filter = [
       ...filter,
       {
@@ -327,6 +333,8 @@ const getQueryByTimeRange = (start: Date, end: Date, ruleId: string, type?: Aler
       },
     ];
   } else if (type === AlertTypes.RECOVERED) {
+    // alerts are considered RECOVERED within the time range if they recovered
+    // within the query time range
     filter.push({
       range: {
         [ALERT_END]: {
