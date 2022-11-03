@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { EuiTitle, EuiLink, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FleetServerHost } from '../../../../types';
-import { useLink, useStartServices } from '../../../../hooks';
+import { useFlyoutContext, useStartServices } from '../../../../hooks';
 import { FleetServerHostsTable } from '../fleet_server_hosts_table';
 
 export interface FleetServerHostsSectionProps {
@@ -24,7 +24,11 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
   deleteFleetServerHost,
 }) => {
   const { docLinks } = useStartServices();
-  const { getHref } = useLink();
+  const flyoutContext = useFlyoutContext();
+
+  const onClickAddFleetServer = useCallback(() => {
+    flyoutContext.openFleetServerFlyout();
+  }, [flyoutContext]);
 
   return (
     <>
@@ -61,7 +65,7 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
       <EuiSpacer size="s" />
       <EuiButtonEmpty
         iconType="plusInCircle"
-        href={getHref('settings_create_fleet_server_hosts')}
+        onClick={onClickAddFleetServer}
         data-test-subj="settings.fleetServerHosts.addFleetServerHostBtn"
       >
         <FormattedMessage

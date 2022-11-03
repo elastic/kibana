@@ -14,6 +14,7 @@ import {
   ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON,
   ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON,
   FLEET_SERVER_SETUP,
+  LANDING_PAGE_ADD_FLEET_SERVER_BUTTON,
 } from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { verifyPolicy, verifyAgentPackage, navigateToTab } from '../tasks/fleet';
@@ -80,18 +81,23 @@ describe('Fleet startup', () => {
     });
 
     it('should create Fleet Server policy', () => {
+      cy.getBySel(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).click();
+
       cy.getBySel(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
-      cy.getBySel(CREATE_FLEET_SERVER_POLICY_BTN).click();
+      cy.getBySel(CREATE_FLEET_SERVER_POLICY_BTN, { timeout: 180000 }).click();
 
       // Wait until the success callout is shown before navigating away
       cy.getBySel(AGENT_POLICY_CREATE_STATUS_CALLOUT)
         .should('exist')
         .and('have.class', 'euiCallOut--success');
+      cy.getBySel(AGENT_FLYOUT.CLOSE_BUTTON).click();
 
       // verify policy is created and has fleet server and system package
       verifyPolicy('Fleet Server policy 1', ['Fleet Server', 'System']);
 
+      // Reopen Flyout
       navigateToTab(AGENTS_TAB);
+      cy.getBySel(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).click();
       cy.getBySel(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
 
       // verify create button changed to dropdown
