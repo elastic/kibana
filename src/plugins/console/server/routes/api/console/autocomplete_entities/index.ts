@@ -104,7 +104,7 @@ const getEntity = (path: string, config: ESConfigForProxy) => {
             // Destroy the request if the response is too large
             if (Buffer.byteLength(Buffer.concat(chunks)) > MAX_RESPONSE_SIZE) {
               req.destroy();
-              reject(Boom.badRequest('Response size is too large'));
+              reject(Boom.badRequest(`Response size is too large for ${path}`));
             }
           });
           res.on('end', () => {
@@ -162,7 +162,12 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
           if (result.status === 'fulfilled') {
             return result.value;
           }
-          // If the request failed, return an empty object
+
+          // If the request failed, log the error and return an empty object
+          if (result.reason instanceof Error) {
+            deps.log.error(result.reason);
+          }
+
           return {};
         });
 
