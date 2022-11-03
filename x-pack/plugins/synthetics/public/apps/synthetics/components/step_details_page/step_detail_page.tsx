@@ -19,6 +19,7 @@ import {
 import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
 import { ObjectWeightList } from './components/object_weight_list';
 import { NetworkTimingsBreakdown } from './network_timings_breakdown';
+import { ObjectCountList } from './components/object_count_list';
 import { StepImage } from './components/step_image';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
@@ -94,7 +95,9 @@ export const StepDetailPage = () => {
               <EuiFlexItem grow={1}>
                 <ObjectWeightList />
               </EuiFlexItem>
-              <EuiFlexItem grow={1}>{/* TODO: Add breakdown of object weight*/}</EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <ObjectCountList />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>

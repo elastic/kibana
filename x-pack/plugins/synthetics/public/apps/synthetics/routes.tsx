@@ -47,8 +47,8 @@ import {
   MONITOR_ERRORS_ROUTE,
   MONITOR_HISTORY_ROUTE,
   MONITOR_ROUTE,
-  STEP_DETAIL_ROUTE,
   ERROR_DETAILS_ROUTE,
+  STEP_DETAIL_ROUTE,
   OVERVIEW_ROUTE,
 } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
