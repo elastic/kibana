@@ -71,18 +71,24 @@ const ExecutionModeComponent: React.FC<Pick<ActionParamsProps<{}>, 'executionMod
   return (
     <EuiForm component="form">
       <EuiFormRow label="Execution mode" helpText="Execution mode help text.">
-        {executionMode === ActionConnectorMode.Test ? (
-          <EuiFieldText data-test-subj="executionModeFieldTest" />
-        ) : (
-          <EuiFieldText data-test-subj="executionModeFieldNotTest" />
-        )}
+        <>
+          {executionMode === ActionConnectorMode.Test && (
+            <EuiFieldText data-test-subj="executionModeFieldTest" />
+          )}
+          {executionMode === ActionConnectorMode.ActionForm && (
+            <EuiFieldText data-test-subj="executionModeFieldActionForm" />
+          )}
+          {executionMode === undefined && (
+            <EuiFieldText data-test-subj="executionModeFieldUndefined" />
+          )}
+        </>
       </EuiFormRow>
     </EuiForm>
   );
 };
 
 const mockedActionParamsFieldsExecutionMode = lazy(async () => ({
-  default: ({ executionMode }: { executionMode: ActionConnectorMode }) => {
+  default: ({ executionMode }: { executionMode?: ActionConnectorMode }) => {
     return <ExecutionModeComponent executionMode={executionMode} />;
   },
 }));
@@ -154,7 +160,8 @@ describe('test_connector_form', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('executionModeFieldTest')).toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldNotTest')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('executionModeFieldActionForm')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
     });
   });
 

@@ -40,13 +40,17 @@ describe('action_type_form', () => {
   }));
 
   const mockedActionParamsFieldsWithExecutionMode = React.lazy(async () => ({
-    default({ executionMode }: { executionMode: ActionConnectorMode }) {
+    default({ executionMode }: { executionMode?: ActionConnectorMode }) {
       return (
         <>
-          {executionMode === ActionConnectorMode.ActionForm ? (
+          {executionMode === ActionConnectorMode.Test && (
+            <EuiFieldText data-test-subj="executionModeFieldTest" />
+          )}
+          {executionMode === ActionConnectorMode.ActionForm && (
             <EuiFieldText data-test-subj="executionModeFieldActionForm" />
-          ) : (
-            <EuiFieldText data-test-subj="executionModeFieldNotActionForm" />
+          )}
+          {executionMode === undefined && (
+            <EuiFieldText data-test-subj="executionModeFieldUndefined" />
           )}
         </>
       );
@@ -144,7 +148,8 @@ describe('action_type_form', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('executionModeFieldActionForm')).toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldNotActionForm')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('executionModeFieldTest')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
     });
   });
 

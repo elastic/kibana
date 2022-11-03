@@ -116,6 +116,22 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByDisplayValue('hello')).toBeInTheDocument();
   });
 
+  it('does not render the sub action select for closing an alert when execution mode is ActionForm', async () => {
+    render(
+      <OpsgenieParamFields
+        {...{ ...defaultCloseAlertProps, executionMode: ActionConnectorMode.ActionForm }}
+      />
+    );
+
+    expect(screen.queryByTestId('opsgenie-subActionSelect')).not.toBeInTheDocument();
+  });
+
+  it('does not render the sub action select for closing an alert when execution mode is undefined', async () => {
+    render(<OpsgenieParamFields {...{ ...defaultCloseAlertProps, executionMode: undefined }} />);
+
+    expect(screen.queryByTestId('opsgenie-subActionSelect')).not.toBeInTheDocument();
+  });
+
   it('calls editAction when the message field is changed', async () => {
     render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 

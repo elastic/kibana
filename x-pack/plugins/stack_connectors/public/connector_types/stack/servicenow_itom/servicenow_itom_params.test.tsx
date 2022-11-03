@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { ActionConnector, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useChoices } from '../../lib/servicenow/use_choices';
 import ServiceNowITOMParamsFields from './servicenow_itom_params';
 
@@ -52,7 +52,6 @@ const defaultProps = {
   editAction,
   index: 0,
   messageVariables: [],
-  executionMode: ActionConnectorMode.Test,
 };
 
 const choicesResponse = {

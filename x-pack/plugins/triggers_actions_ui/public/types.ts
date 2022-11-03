@@ -178,7 +178,7 @@ export interface ActionParamsProps<TParams> {
   isLoading?: boolean;
   isDisabled?: boolean;
   showEmailSubjectAndMessage?: boolean;
-  executionMode: ActionConnectorMode;
+  executionMode?: ActionConnectorMode;
 }
 
 export interface Pagination {

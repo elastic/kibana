@@ -9,7 +9,6 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ServerLogLevelOptions } from '../../types';
 import ServerLogParamsFields from './server_log_params';
-import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('ServerLogParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -25,7 +24,6 @@ describe('ServerLogParamsFields renders', () => {
         editAction={editAction}
         index={0}
         defaultMessage={'test default message'}
-        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(editAction).not.toHaveBeenCalled();
@@ -48,7 +46,6 @@ describe('ServerLogParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={editAction}
         index={0}
-        executionMode={ActionConnectorMode.Test}
       />
     );
 
@@ -69,7 +66,6 @@ describe('ServerLogParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={editAction}
         index={0}
-        executionMode={ActionConnectorMode.Test}
       />
     );
 
@@ -89,7 +85,6 @@ describe('ServerLogParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={editAction}
         index={0}
-        executionMode={ActionConnectorMode.Test}
       />
     );
 
@@ -115,7 +110,6 @@ describe('ServerLogParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={editAction}
         index={0}
-        executionMode={ActionConnectorMode.Test}
       />
     );
 

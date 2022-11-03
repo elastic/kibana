@@ -8,7 +8,6 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import EmailParamsFields from './email_params';
-import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('EmailParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -26,7 +25,6 @@ describe('EmailParamsFields renders', () => {
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
         editAction={() => {}}
         index={0}
-        executionMode={ActionConnectorMode.Test}
       />
     );
 
@@ -54,7 +52,6 @@ describe('EmailParamsFields renders', () => {
         editAction={editAction}
         defaultMessage={'Some default message'}
         index={0}
-        executionMode={ActionConnectorMode.Test}
       />
     );
 
@@ -77,7 +74,6 @@ describe('EmailParamsFields renders', () => {
         editAction={editAction}
         defaultMessage={'Some default message'}
         index={0}
-        executionMode={ActionConnectorMode.Test}
       />
     );
 
@@ -106,7 +102,6 @@ describe('EmailParamsFields renders', () => {
         editAction={editAction}
         defaultMessage={'Some default message'}
         index={0}
-        executionMode={ActionConnectorMode.Test}
       />
     );
 

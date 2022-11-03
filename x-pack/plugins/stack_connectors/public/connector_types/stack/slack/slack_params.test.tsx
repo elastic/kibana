@@ -8,7 +8,6 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import SlackParamsFields from './slack_params';
-import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('SlackParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -22,7 +21,6 @@ describe('SlackParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
-        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();

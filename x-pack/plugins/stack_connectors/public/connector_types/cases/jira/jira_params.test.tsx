@@ -11,7 +11,7 @@ import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { useGetIssues } from './use_get_issues';
 import { useGetSingleIssue } from './use_get_single_issue';
-import { ActionConnector, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -59,7 +59,6 @@ const defaultProps = {
   errors: { 'subActionParams.incident.summary': [] },
   index: 0,
   messageVariables: [],
-  executionMode: ActionConnectorMode.Test,
 };
 
 describe('JiraParamsFields renders', () => {

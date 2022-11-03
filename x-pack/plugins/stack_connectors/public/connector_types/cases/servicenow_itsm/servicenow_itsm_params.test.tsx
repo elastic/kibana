@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 
-import { ActionConnector, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useGetChoices } from '../../lib/servicenow/use_get_choices';
 import ServiceNowITSMParamsFields from './servicenow_itsm_params';
 import { Choice } from '../../lib/servicenow/types';
@@ -57,7 +57,6 @@ const defaultProps = {
   editAction,
   index: 0,
   messageVariables: [],
-  executionMode: ActionConnectorMode.Test,
 };
 
 const useGetChoicesResponse = {
