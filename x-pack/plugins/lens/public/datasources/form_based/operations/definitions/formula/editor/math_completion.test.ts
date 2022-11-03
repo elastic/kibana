@@ -353,7 +353,7 @@ describe('math completion', () => {
       expect(results.list).toEqual(['bytes', 'memory']);
     });
 
-    it('should autocomplete only operations that provide numeric output', async () => {
+    it('should autocomplete only operations that provide numeric or date output', async () => {
       const results = await suggest({
         expression: 'last_value()',
         zeroIndexedOffset: 11,
@@ -366,7 +366,7 @@ describe('math completion', () => {
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
         dataViews: dataViewPluginMocks.createStartContract(),
       });
-      expect(results.list).toEqual(['bytes', 'memory']);
+      expect(results.list).toEqual(['bytes', 'memory', 'timestamp', 'start_date']);
     });
   });
 
