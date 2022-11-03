@@ -100,7 +100,16 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
-      expect(apiResponse.body.attributes).eql(omit(newMonitor, secretKeys));
+      expect(apiResponse.body.attributes).eql(
+        omit(
+          {
+            ...newMonitor,
+            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+          },
+          secretKeys
+        )
+      );
       newMonitorId = apiResponse.body.id;
     });
 
@@ -266,7 +275,15 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponse.body.attributes).eql(
-          omit({ ...monitor, [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID) }, secretKeys)
+          omit(
+            {
+              ...monitor,
+              [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+              [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+              [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
+            },
+            secretKeys
+          )
         );
         monitorId = apiResponse.body.id;
 
