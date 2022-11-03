@@ -23,7 +23,7 @@ import {
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
-import { ConfigKey, DataStream, JourneyStep, Ping } from '../../../../../../common/runtime_types';
+import { ConfigKey, DataStream, Ping } from '../../../../../../common/runtime_types';
 import {
   formatTestDuration,
   formatTestRunAt,
@@ -33,13 +33,11 @@ import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_setti
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
 import { selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
-import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
-import { JourneyStepScreenshotContainer } from '../../common/monitor_test_result/journey_step_screenshot_container';
 
 import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
-import { useJourneySteps } from '../hooks/use_journey_steps';
+import { JourneyScreenshot } from '../../common/screenshot/journey_screenshot';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
@@ -98,7 +96,9 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
             align: 'left',
             field: 'timestamp',
             name: SCREENSHOT_LABEL,
-            render: (_timestamp: string, item) => <JourneyScreenshot ping={item} />,
+            render: (_timestamp: string, item) => (
+              <JourneyScreenshot checkGroupId={item.monitor.check_group} />
+            ),
           },
         ]
       : []) as Array<EuiBasicTableColumn<Ping>>),
@@ -139,7 +139,8 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
     },
   ];
 
-  const historyIdParam = monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID] ?? monitor?.[ConfigKey.ID];
+  const historyIdParam =
+    monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID] ?? monitor?.[ConfigKey.MONITOR_QUERY_ID];
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 200 }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -194,35 +195,6 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
         }
       />
     </EuiPanel>
-  );
-};
-
-const JourneyScreenshot = ({ ping }: { ping: Ping }) => {
-  const { data: stepsData, loading: stepsLoading } = useJourneySteps(ping?.monitor?.check_group);
-  const stepEnds: JourneyStep[] = (stepsData?.steps ?? []).filter(isStepEnd);
-  const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
-
-  const lastSignificantStep = useMemo(() => {
-    const copy = [...stepEnds];
-    // Sort desc by timestamp
-    copy.sort(
-      (stepA, stepB) =>
-        Number(new Date(stepB['@timestamp'])) - Number(new Date(stepA['@timestamp']))
-    );
-    return copy.find(
-      (stepEnd) => parseBadgeStatus(stepEnd?.synthetics?.step?.status ?? 'skipped') !== 'skipped'
-    );
-  }, [stepEnds]);
-
-  return (
-    <JourneyStepScreenshotContainer
-      checkGroup={lastSignificantStep?.monitor.check_group}
-      initialStepNo={lastSignificantStep?.synthetics?.step?.index}
-      stepStatus={lastSignificantStep?.synthetics.payload?.status}
-      allStepsLoaded={!stepsLoading}
-      stepLabels={stepLabels}
-      retryFetchOnRevisit={false}
-    />
   );
 };
 

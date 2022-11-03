@@ -42,6 +42,13 @@ export const IMPORT_EXCEPTION_LIST_HEADER = i18n.translate(
   }
 );
 
+export const IMPORT_EXCEPTION_LIST_BODY = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.importExceptionListFlyoutBody',
+  {
+    defaultMessage: 'Select shared exception lists to import',
+  }
+);
+
 export const IMPORT_EXCEPTION_LIST_WARNING = i18n.translate(
   'xpack.securitySolution.exceptionsTable.importExceptionListWarning',
   {
@@ -81,5 +88,19 @@ export const UPLOAD_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.exceptionListsImportButton',
   {
     defaultMessage: 'Import list',
+  }
+);
+
+export const CLOSE_FLYOUT = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionListsCloseImportFlyout',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const IMPORT_PROMPT = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionListsFilePickerPrompt',
+  {
+    defaultMessage: 'Select or drag and drop multiple files',
   }
 );

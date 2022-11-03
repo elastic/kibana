@@ -21,10 +21,7 @@ import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
-import {
-  syntheticsMonitorType,
-  syntheticsMonitor,
-} from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { syntheticsMonitorType } from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../common/config';
 import { ServiceAPIClient } from './service_api_client';
@@ -180,7 +177,7 @@ export class SyntheticsService {
                   type: 'runTaskError',
                   code: e?.code,
                   status: e.status,
-                  kibanaVersion: service.server.kibanaVersion,
+                  stackVersion: service.server.stackVersion,
                 });
                 throw e;
               }
@@ -226,7 +223,7 @@ export class SyntheticsService {
         type: 'scheduleTaskError',
         code: e?.code,
         status: e.status,
-        kibanaVersion: this.server.kibanaVersion,
+        stackVersion: this.server.stackVersion,
       });
 
       this.logger?.error(
@@ -422,7 +419,7 @@ export class SyntheticsService {
               new Promise((resolve) => {
                 encryptedClient
                   .getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-                    syntheticsMonitor.name,
+                    syntheticsMonitorType,
                     monitor.id,
                     {
                       namespace: monitor.namespaces?.[0],
@@ -437,7 +434,7 @@ export class SyntheticsService {
                       type: 'runTaskError',
                       code: e?.code,
                       status: e.status,
-                      kibanaVersion: this.server.kibanaVersion,
+                      stackVersion: this.server.stackVersion,
                     });
                     resolve(null);
                   });
