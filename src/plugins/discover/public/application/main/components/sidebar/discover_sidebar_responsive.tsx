@@ -123,7 +123,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
   const [allFields, setAllFields] = useState<DataViewField[] | null>(null);
-  const [allFieldsNames, setAllFieldsNames] = useState<string[]>([]);
+  const [allFieldsNames, setAllFieldsNames] = useState<string[] | null>(null);
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((next) => {
@@ -133,14 +133,21 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [props.documents$, setDocumentState]);
 
   useEffect(() => {
+    if (documentState.fetchStatus === FetchStatus.LOADING) {
+      setAllFields(null);
+      setAllFieldsNames(null);
+      return;
+    }
+
     const fieldCounts = calcFieldCounts(documentState.result, selectedDataView);
 
     setAllFields(getDataViewFieldList(selectedDataView, fieldCounts));
     setAllFieldsNames(Object.keys(fieldCounts));
-  }, [selectedDataView, documentState.result, setAllFields, setAllFieldsNames]);
+  }, [selectedDataView, documentState, setAllFields, setAllFieldsNames]);
 
   const query = useAppStateSelector((state) => state.query);
   const filters = useAppStateSelector((state) => state.filters);
+  // TODO: we could save the current dateRange when documents change
   const dateRange = data.query.timefilter.timefilter.getTime(); // TODO: is it correct to use the relative time range instead of absolute time range here? Currently, it helps to avoid unnecessary refetches.
 
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
@@ -197,22 +204,25 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !selectedDataView?.isPersisted();
 
-  useEffect(
-    () => {
-      // For an external embeddable like the Field stats
-      // it is useful to know what fields are populated in the docs fetched
-      // or what fields are selected by the user
+  useEffect(() => {
+    if (!allFieldsNames) {
+      return;
+    }
+    // For an external embeddable like the Field stats
+    // it is useful to know what fields are populated in the docs fetched
+    // or what fields are selected by the user
 
-      const availableFields = props.columns.length > 0 ? props.columns : allFieldsNames;
-      availableFields$.next({
-        fetchStatus: FetchStatus.COMPLETE,
-        fields: availableFields,
-      });
-    },
-    // Using columns.length here instead of columns to avoid array reference changing
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedDataView, allFieldsNames, props.columns.length, availableFields$]
-  );
+    const availableFields =
+      props.columns.length === 1 && props.columns[0] === '_source'
+        ? allFieldsNames
+        : props.columns.length > 0
+        ? props.columns
+        : allFieldsNames;
+    availableFields$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      fields: availableFields,
+    });
+  }, [selectedDataView, allFieldsNames, props.columns, availableFields$]);
 
   const editField = useMemo(
     () =>
