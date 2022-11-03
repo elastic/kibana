@@ -119,7 +119,6 @@ export const ChangePointDetectionPage: FC = () => {
             iconType="search"
             title={
               <h2>
-                {' '}
                 <FormattedMessage
                   id="xpack.aiops.changePointDetection.noChangePointsFoundTitle"
                   defaultMessage="No change points found"
