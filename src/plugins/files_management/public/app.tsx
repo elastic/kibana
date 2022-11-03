@@ -56,6 +56,7 @@ export const App: FunctionComponent = () => {
           name: i18nTexts.size,
           field: 'attributes.size',
           render: (value: any) => value && numeral(value).format('0[.]0 b'),
+          sortable: true,
         }}
         initialFilter=""
         initialPageSize={50}
