@@ -155,6 +155,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           expect(case2.tags).eql(['four', 'five', 'three']);
           expect(case1.tags).eql(['one', 'three']);
         });
+
+        it('adds a new tag', async () => {
+          await cases.casesTable.bulkAddNewTag([0, 1], 'tw');
+          await header.waitUntilLoadingHasFinished();
+
+          const case1 = await cases.api.getCase({ caseId: caseIds[0] });
+          const case2 = await cases.api.getCase({ caseId: caseIds[1] });
+          const case3 = await cases.api.getCase({ caseId: caseIds[2] });
+
+          expect(case3.tags).eql(['two', 'five', 'tw']);
+          expect(case2.tags).eql(['two', 'four', 'tw']);
+          expect(case1.tags).eql(['one', 'three']);
+        });
       });
     });
 

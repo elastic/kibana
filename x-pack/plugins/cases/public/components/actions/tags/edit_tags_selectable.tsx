@@ -34,7 +34,7 @@ interface Props {
   onChangeTags: (args: TagsSelectionState) => void;
 }
 
-type TagSelectableOption = EuiSelectableOption<{ tagIcon: IconType }>;
+type TagSelectableOption = EuiSelectableOption<{ tagIcon: IconType; newItem?: boolean }>;
 
 const enum TagState {
   CHECKED = 'checked',
@@ -213,7 +213,16 @@ const getSelectedAndUnselectedTags = (newOptions: EuiSelectableOption[], tags: S
       selectedTags.push(option.label);
     }
 
-    if (!option.checked && tags[option.label].dirty) {
+    /**
+     * User can only select the "Add new tag" item. Because a new item do not have a state yet
+     * we need to ensure that state access is done only by options with state.
+     */
+    if (
+      !option.data?.newItem &&
+      !option.checked &&
+      tags[option.label] &&
+      tags[option.label].dirty
+    ) {
       unSelectedTags.push(option.label);
     }
   }
@@ -221,7 +230,11 @@ const getSelectedAndUnselectedTags = (newOptions: EuiSelectableOption[], tags: S
   return { selectedTags, unSelectedTags };
 };
 
-const NoMatchesMessage: React.FC<{ searchValue: string; onNewItem: (newTag: string) => void }> =
+const hasExactMatch = (searchValue: string, options: TagSelectableOption[]) => {
+  return options.some((option) => option.key === searchValue);
+};
+
+const AddNewTagItem: React.FC<{ searchValue: string; onNewItem: (newTag: string) => void }> =
   React.memo(({ searchValue, onNewItem }) => {
     const onNewTagClick = useCallback(() => {
       onNewItem(searchValue);
@@ -243,7 +256,7 @@ const NoMatchesMessage: React.FC<{ searchValue: string; onNewItem: (newTag: stri
     );
   });
 
-NoMatchesMessage.displayName = 'NoMatchesMessage';
+AddNewTagItem.displayName = 'AddNewTagItem';
 
 const EditTagsSelectableComponent: React.FC<Props> = ({
   selectedCases,
@@ -263,12 +276,13 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   const options: TagSelectableOption[] = useMemo(() => stateToOptions(state.tags), [state.tags]);
 
   const renderOption = useCallback((option: TagSelectableOption, search: string) => {
+    const dataTestSubj = option.newItem
+      ? 'cases-actions-tags-edit-selectable-add-new-tag-icon'
+      : `cases-actions-tags-edit-selectable-tag-${option.label}-icon-${option.tagIcon}`;
+
     return (
       <>
-        <EuiIcon
-          type={option.tagIcon}
-          data-test-subj={`cases-actions-tags-edit-selectable-tag-${option.label}-icon-${option.tagIcon}`}
-        />
+        <EuiIcon type={option.tagIcon} data-test-subj={dataTestSubj} />
         <EuiHighlight search={search}>{option.label}</EuiHighlight>
       </>
     );
@@ -276,7 +290,28 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
 
   const onChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
-      const { selectedTags, unSelectedTags } = getSelectedAndUnselectedTags(newOptions, state.tags);
+      /**
+       * In this function the user has selected and deselected some tags. If the user
+       * pressed the "add new tag" option it means that needs to add the new tag to the list.
+       * Because the label of the "add new tag" item is "Add ${searchValue} as a tag" we need to
+       * change the label to the same as the tag the user entered. The key will always be the
+       * search term (aka the new label).
+       */
+      const normalizeOptions = newOptions.map((option) => {
+        if (option.data?.newItem) {
+          return {
+            ...option,
+            label: option.key ?? '',
+          };
+        }
+
+        return option;
+      });
+
+      const { selectedTags, unSelectedTags } = getSelectedAndUnselectedTags(
+        normalizeOptions,
+        state.tags
+      );
 
       dispatch({ type: Actions.CHECK_TAG, payload: selectedTags });
       dispatch({ type: Actions.UNCHECK_TAG, payload: unSelectedTags });
@@ -313,6 +348,10 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     onChangeTags({ selectedTags: [], unSelectedTags });
   }, [state.tags, onChangeTags]);
 
+  const onSearchChange = useCallback((value) => {
+    setSearchValue(value);
+  }, []);
+
   /**
    * TODO: Remove hack when PR https://github.com/elastic/eui/pull/6317
    * is merged and the new fix is merged into Kibana.
@@ -332,21 +371,48 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     }
   }, [options, setRerender, searchValue]);
 
+  /**
+   * While the user searches we need to add the ability
+   * to add the search term as a new tag. The no matches message
+   * is not enough because a search term can partial match to some tags
+   * but the user will still need to add the search term as tag.
+   * For that reason, we always add a "fake" option ("add new tag" option) which will serve as a
+   * the button with which the user can add a new tag. We do not show
+   * the "add new tag" option if there is an exact match.
+   */
+  const optionsWithAddNewTagOption = useMemo(() => {
+    if (!isEmpty(searchValue) && !hasExactMatch(searchValue, options)) {
+      return [
+        {
+          key: searchValue,
+          searchableLabel: searchValue,
+          label: `Add ${searchValue} as a tag`,
+          'data-test-subj': 'cases-actions-tags-edit-selectable-add-new-tag',
+          data: { tagIcon: 'empty', newItem: true },
+        },
+        ...options,
+      ] as TagSelectableOption[];
+    }
+
+    return options;
+  }, [options, searchValue]);
+
   return (
     <EuiSelectable
-      options={options}
+      options={optionsWithAddNewTagOption}
       searchable
       searchProps={{
         placeholder: i18n.SEARCH_PLACEHOLDER,
         isLoading,
         isClearable: !isLoading,
-        onChange: setSearchValue,
+        onChange: onSearchChange,
         value: searchValue,
+        'data-test-subj': 'cases-actions-tags-edit-selectable-search-input',
       }}
       renderOption={renderOption}
       listProps={{ showIcons: false }}
       onChange={onChange}
-      noMatchesMessage={<NoMatchesMessage searchValue={searchValue ?? ''} onNewItem={onNewItem} />}
+      noMatchesMessage={<AddNewTagItem searchValue={searchValue ?? ''} onNewItem={onNewItem} />}
       data-test-subj="cases-actions-tags-edit-selectable"
       height="full"
     >
@@ -388,6 +454,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="m" />
+          {/* <AddNewTagItem searchValue={searchValue} onNewItem={onNewItem} /> */}
           {list}
         </>
       )}

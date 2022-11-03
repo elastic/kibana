@@ -266,6 +266,35 @@ export function CasesTableServiceProvider(
       }
 
       await testSubjects.click('cases-edit-tags-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-tags-flyout');
+    },
+
+    async bulkAddNewTag(selectedCases: number[], tag: string) {
+      const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
+
+      for (const caseIndex of selectedCases) {
+        assertCaseExists(caseIndex, rows.length);
+        rows[caseIndex].click();
+      }
+
+      await this.openBulkActions();
+      await testSubjects.existOrFail('cases-bulk-action-tags');
+      await testSubjects.click('cases-bulk-action-tags');
+
+      await testSubjects.existOrFail('cases-edit-tags-flyout');
+      await testSubjects.existOrFail('cases-actions-tags-edit-selectable-search-input');
+      const searchInput = await testSubjects.find(
+        'cases-actions-tags-edit-selectable-search-input'
+      );
+
+      await testSubjects.existOrFail('cases-actions-tags-edit-selectable-search-input');
+      await searchInput.type(tag);
+
+      await testSubjects.existOrFail('cases-actions-tags-edit-selectable-add-new-tag');
+      await testSubjects.click('cases-actions-tags-edit-selectable-add-new-tag');
+
+      await testSubjects.click('cases-edit-tags-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-tags-flyout');
     },
 
     async selectAndChangeStatusOfAllCases(status: CaseStatuses) {

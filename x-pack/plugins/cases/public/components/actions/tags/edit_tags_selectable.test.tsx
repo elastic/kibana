@@ -147,22 +147,20 @@ describe('EditTagsSelectable', () => {
 
     await waitFor(() => {
       expect(
-        result.getAllByTestId('cases-actions-tags-edit-selectable-add-new-tag')[1]
+        result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
       ).toBeInTheDocument();
     });
 
-    const addNewTagButton = result.getAllByTestId(
-      'cases-actions-tags-edit-selectable-add-new-tag'
-    )[1];
+    const addNewTagButton = result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
 
     userEvent.click(addNewTagButton);
 
     await waitForComponentToUpdate();
 
-    expect(result.getByPlaceholderText('Search')).toHaveValue('');
+    // expect(result.getByPlaceholderText('Search')).toHaveValue('');
     expect(props.onChangeTags).toBeCalledTimes(1);
     expect(props.onChangeTags).nthCalledWith(1, {
-      selectedTags: ['coke', 'pepsi', 'not-exist'],
+      selectedTags: ['not-exist', 'coke', 'pepsi'],
       unSelectedTags: [],
     });
   });
@@ -195,5 +193,73 @@ describe('EditTagsSelectable', () => {
     });
 
     await waitForComponentToUpdate();
+  });
+
+  it('unselects correctly with the new item presented', async () => {
+    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+
+    /**
+     * Tag with label "one" exist. Searching for "on" will show both the
+     * "add new tag" item and the "one" tag
+     */
+    await userEvent.type(result.getByPlaceholderText('Search'), 'on', { delay: 1 });
+
+    await waitFor(() => {
+      expect(
+        result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+      ).toBeInTheDocument();
+    });
+
+    const iconDataTestSubj = 'cases-actions-tags-edit-selectable-tag-one-icon-check';
+    expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
+
+    userEvent.click(result.getByTestId(iconDataTestSubj));
+
+    await waitForComponentToUpdate();
+
+    expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
+    expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
+      selectedTags: [],
+      unSelectedTags: ['one'],
+    });
+  });
+
+  it('adds a partial match correctly', async () => {
+    const result = appMock.render(<EditTagsSelectable {...props} />);
+
+    /**
+     * Tag with label "one" exist. Searching for "on" will show both the
+     * "add new tag" item and the "one" tag
+     */
+    await userEvent.type(result.getByPlaceholderText('Search'), 'on', { delay: 1 });
+
+    await waitFor(() => {
+      expect(
+        result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+      ).toBeInTheDocument();
+    });
+
+    const addNewTagButton = result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
+
+    userEvent.click(addNewTagButton);
+
+    await waitForComponentToUpdate();
+
+    expect(props.onChangeTags).toBeCalledTimes(1);
+    expect(props.onChangeTags).nthCalledWith(1, {
+      selectedTags: ['on', 'coke', 'pepsi'],
+      unSelectedTags: [],
+    });
+  });
+
+  it('do not show the new item option on exact match', async () => {
+    const result = appMock.render(<EditTagsSelectable {...props} />);
+
+    await userEvent.type(result.getByPlaceholderText('Search'), 'one', { delay: 1 });
+    await waitForComponentToUpdate();
+
+    expect(
+      result.queryByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+    ).not.toBeInTheDocument();
   });
 });
