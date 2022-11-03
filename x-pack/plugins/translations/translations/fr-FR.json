@@ -21345,8 +21345,6 @@
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.typeHeader": "Type de processeur",
     "xpack.ml.trainedModels.modelsList.selectableMessage": "Sélectionner un modèle",
     "xpack.ml.trainedModels.modelsList.startDeployment.cancelButton": "Annuler",
-    "xpack.ml.trainedModels.modelsList.startDeployment.cloudWarningHeader": "À l'avenir, les déploiements cloud seront mis à l'échelle automatiquement afin de disposer du nombre requis de processeurs.",
-    "xpack.ml.trainedModels.modelsList.startDeployment.cloudWarningText": "Dans cette version, cependant, vous devez augmenter la taille de vos nœuds ML manuellement dans la console cloud pour obtenir plus de processeurs.",
     "xpack.ml.trainedModels.modelsList.startDeployment.docLinkTitle": "En savoir plus",
     "xpack.ml.trainedModels.modelsList.startDeployment.maxNumOfProcessorsWarning": "Le produit du nombre d'allocations et de threads par allocation doit être inférieur au nombre total de processeurs sur vos nœuds ML.",
     "xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsHelp": "Augmentez pour améliorer le débit de toutes les requêtes.",
