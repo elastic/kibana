@@ -22,6 +22,7 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { integrationsServiceMock } from '@kbn/core-integrations-browser-mocks';
 import { coreAppsMock } from '@kbn/core-apps-browser-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
 
 export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
 export const MockAnalyticsService = analyticsServiceMock.create();
@@ -136,4 +137,10 @@ export const MockThemeService = themeServiceMock.create();
 export const ThemeServiceConstructor = jest.fn().mockImplementation(() => MockThemeService);
 jest.doMock('@kbn/core-theme-browser-internal', () => ({
   ThemeService: ThemeServiceConstructor,
+}));
+
+export const MockLoggingSystem = loggingSystemMock.create();
+export const LoggingSystemConstructor = jest.fn().mockImplementation(() => MockLoggingSystem);
+jest.doMock('@kbn/core-logging-browser-internal', () => ({
+  BrowserLoggingSystem: LoggingSystemConstructor,
 }));
