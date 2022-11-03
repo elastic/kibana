@@ -34,13 +34,14 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     () =>
       columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
       isDetectionsAlertsTable(scopeId) &&
-      rowIndex === 0,
-    [columnId, rowIndex, scopeId]
+      rowIndex === 0 &&
+      !props.isDetails,
+    [columnId, props.isDetails, rowIndex, scopeId]
   );
 
   return (
     <GuidedOnboardingTourStep
-      isTourAnchor={isTourAnchor && !props.isDetails}
+      isTourAnchor={isTourAnchor}
       step={AlertsCasesTourSteps.pointToAlertName}
       stepId={SecurityStepId.alertsCases}
     >
