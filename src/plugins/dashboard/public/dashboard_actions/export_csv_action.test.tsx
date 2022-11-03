@@ -54,6 +54,7 @@ describe('Export CSV action', () => {
       },
     });
     container = new DashboardContainer(input);
+    await container.untilInitialized();
 
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,

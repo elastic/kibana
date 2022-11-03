@@ -110,6 +110,7 @@ export function DashboardApp({
         ...stateFromLocator,
       },
       incomingEmbeddable,
+      useControlGroupIntegration: true,
       backupStateToSessionStorage: true,
       validateLoadedSavedObject: validateOutcome,
     } as DashboardCreationOptions;

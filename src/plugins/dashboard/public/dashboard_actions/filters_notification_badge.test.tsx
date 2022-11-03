@@ -60,6 +60,7 @@ const getMockPhraseFilter = (key: string, value: string) => {
 
 beforeEach(async () => {
   container = new DashboardContainer(getSampleDashboardInput());
+  await container.untilInitialized();
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

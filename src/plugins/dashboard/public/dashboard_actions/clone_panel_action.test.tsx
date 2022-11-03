@@ -46,10 +46,12 @@ beforeEach(async () => {
     },
   });
   const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+
   pluginServices.getServices().embeddable.getEmbeddableFactory = jest
     .fn()
     .mockReturnValue(mockEmbeddableFactory);
   container = new DashboardContainer(input);
+  await container.untilInitialized();
 
   const refOrValContactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -88,11 +90,7 @@ beforeEach(async () => {
 
 test('Clone is incompatible with Error Embeddables', async () => {
   const action = new ClonePanelAction(coreStart.savedObjects);
-  const errorEmbeddable = new ErrorEmbeddable(
-    'Wow what an awful error',
-    { id: ' 404' },
-    byRefOrValEmbeddable.getRoot() as IContainer
-  );
+  const errorEmbeddable = new ErrorEmbeddable('Wow what an awful error', { id: ' 404' }, container);
   expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
 });
 

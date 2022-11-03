@@ -38,6 +38,7 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 
 export interface DashboardCreationOptions {
+  useControlGroupIntegration?: boolean;
   backupStateToSessionStorage?: boolean;
   incomingEmbeddable?: EmbeddablePackageState;
   overrideInput?: Partial<DashboardContainerByValueInput>;
