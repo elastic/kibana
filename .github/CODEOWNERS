@@ -708,6 +708,7 @@ packages/core/application/core-application-browser-mocks @elastic/kibana-core
 packages/core/application/core-application-common @elastic/kibana-core
 packages/core/apps/core-apps-browser-internal @elastic/kibana-core
 packages/core/apps/core-apps-browser-mocks @elastic/kibana-core
+packages/core/apps/core-apps-server-internal @elastic/kibana-core
 packages/core/base/core-base-browser-internal @elastic/kibana-core
 packages/core/base/core-base-browser-mocks @elastic/kibana-core
 packages/core/base/core-base-common @elastic/kibana-core
@@ -788,6 +789,9 @@ packages/core/lifecycle/core-lifecycle-browser-mocks @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-server @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-server-internal @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-server-mocks @elastic/kibana-core
+packages/core/logging/core-logging-browser-internal @elastic/kibana-core
+packages/core/logging/core-logging-browser-mocks @elastic/kibana-core
+packages/core/logging/core-logging-common-internal @elastic/kibana-core
 packages/core/logging/core-logging-server @elastic/kibana-core
 packages/core/logging/core-logging-server-internal @elastic/kibana-core
 packages/core/logging/core-logging-server-mocks @elastic/kibana-core
