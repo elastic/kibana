@@ -164,7 +164,6 @@ describe('TabbedAggResponseWriter class', () => {
             params: {
               missingBucketLabel: 'Missing',
               otherBucketLabel: 'Other',
-              params: {},
             },
           },
           field: 'geo.src',
@@ -231,7 +230,6 @@ describe('TabbedAggResponseWriter class', () => {
             params: {
               missingBucketLabel: 'Missing',
               otherBucketLabel: 'Other',
-              params: {},
             },
           },
           field: 'geo.src',
