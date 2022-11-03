@@ -10,6 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import SwimlaneParamsFields from './swimlane_params';
 import { SwimlaneConnectorType } from './types';
 import { mappings } from './mocks';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('SwimlaneParamsFields renders', () => {
   const editAction = jest.fn();
@@ -49,6 +50,7 @@ describe('SwimlaneParamsFields renders', () => {
     index: 0,
     messageVariables: [],
     actionConnector: connector,
+    executionMode: ActionConnectorMode.Test,
   };
 
   beforeEach(() => {

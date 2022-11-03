@@ -9,6 +9,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EventActionOptions, SeverityActionOptions } from '../../types';
 import PagerDutyParamsFields from './pagerduty_params';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('PagerDutyParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -37,6 +38,7 @@ describe('PagerDutyParamsFields renders', () => {
             useWithTripleBracesInTemplates: true,
           },
         ]}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
@@ -66,6 +68,7 @@ describe('PagerDutyParamsFields renders', () => {
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
         editAction={() => {}}
         index={0}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
@@ -86,6 +89,7 @@ describe('PagerDutyParamsFields renders', () => {
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
         editAction={() => {}}
         index={0}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
@@ -106,6 +110,7 @@ describe('PagerDutyParamsFields renders', () => {
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
         editAction={() => {}}
         index={0}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();

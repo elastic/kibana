@@ -68,9 +68,9 @@ const AdditionalOptions: React.FC<AdditionalOptionsProps> = ({
 
 AdditionalOptions.displayName = 'AdditionalOptions';
 
-type CloseAlertProps = Omit<
+type CloseAlertProps = Pick<
   ActionParamsProps<OpsgenieActionParams>,
-  'actionParams' | 'editAction'
+  'errors' | 'index' | 'messageVariables'
 > & {
   subActionParams?: RecursivePartial<OpsgenieCloseAlertParams>;
   editSubAction: EditActionCallback;

@@ -11,6 +11,7 @@ import ResilientParamsFields from './resilient_params';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');
@@ -50,6 +51,7 @@ const defaultProps = {
   index: 0,
   messageVariables: [],
   actionConnector: connector,
+  executionMode: ActionConnectorMode.Test,
 };
 
 describe('ResilientParamsFields renders', () => {

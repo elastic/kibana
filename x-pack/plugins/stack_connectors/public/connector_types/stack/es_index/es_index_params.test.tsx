@@ -9,7 +9,10 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import ParamsFields from './es_index_params';
-import { AlertHistoryEsIndexConnectorId } from '@kbn/triggers-actions-ui-plugin/public/types';
+import {
+  ActionConnectorMode,
+  AlertHistoryEsIndexConnectorId,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 
 const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
@@ -69,6 +72,7 @@ describe('IndexParamsFields renders', () => {
             useWithTripleBracesInTemplates: true,
           },
         ]}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').first().prop('value')).toBe(``);
@@ -96,6 +100,7 @@ describe('IndexParamsFields renders', () => {
             useWithTripleBracesInTemplates: true,
           },
         ]}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').first().prop('value')).toBe(`{
@@ -124,6 +129,7 @@ describe('IndexParamsFields renders', () => {
             useWithTripleBracesInTemplates: true,
           },
         ]}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').length > 0).toBeFalsy();
@@ -154,6 +160,7 @@ describe('IndexParamsFields renders', () => {
             useWithTripleBracesInTemplates: true,
           },
         ]}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').length > 0).toBeFalsy();

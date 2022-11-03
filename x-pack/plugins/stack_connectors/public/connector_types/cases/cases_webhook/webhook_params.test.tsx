@@ -10,6 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookParamsFields from './webhook_params';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { CasesWebhookActionConnector } from './types';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
 
@@ -59,6 +60,7 @@ describe('WebhookParamsFields renders', () => {
             useWithTripleBracesInTemplates: true,
           },
         ]}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="titleInput"]').length > 0).toBeTruthy();
@@ -87,6 +89,7 @@ describe('WebhookParamsFields renders', () => {
             useWithTripleBracesInTemplates: true,
           },
         ]}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').first().prop('disabled')).toEqual(

@@ -164,6 +164,7 @@ export interface BulkEditResponse {
 
 export enum ActionConnectorMode {
   Test = 'test',
+  ActionForm = 'actionForm',
 }
 
 export interface ActionParamsProps<TParams> {
@@ -177,7 +178,7 @@ export interface ActionParamsProps<TParams> {
   isLoading?: boolean;
   isDisabled?: boolean;
   showEmailSubjectAndMessage?: boolean;
-  executionMode?: ActionConnectorMode;
+  executionMode: ActionConnectorMode;
 }
 
 export interface Pagination {

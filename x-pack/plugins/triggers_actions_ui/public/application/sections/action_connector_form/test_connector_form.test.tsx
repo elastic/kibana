@@ -82,7 +82,7 @@ const ExecutionModeComponent: React.FC<Pick<ActionParamsProps<{}>, 'executionMod
 };
 
 const mockedActionParamsFieldsExecutionMode = lazy(async () => ({
-  default: ({ executionMode }: { executionMode?: ActionConnectorMode }) => {
+  default: ({ executionMode }: { executionMode: ActionConnectorMode }) => {
     return <ExecutionModeComponent executionMode={executionMode} />;
   },
 }));
@@ -152,7 +152,10 @@ describe('test_connector_form', () => {
       </I18nProvider>
     );
 
-    await waitFor(() => expect(screen.getByTestId('executionModeFieldTest')).toBeInTheDocument());
+    await waitFor(() => {
+      expect(screen.getByTestId('executionModeFieldTest')).toBeInTheDocument();
+      expect(screen.queryByTestId('executionModeFieldNotTest')).not.toBeInTheDocument();
+    });
   });
 
   it('renders successful results', async () => {

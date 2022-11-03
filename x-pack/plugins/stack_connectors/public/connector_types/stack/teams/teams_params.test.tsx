@@ -8,6 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import TeamsParamsFields from './teams_params';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 describe('TeamsParamsFields renders', () => {
@@ -22,6 +23,7 @@ describe('TeamsParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();

@@ -8,9 +8,17 @@ import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionConnector, ActionType, RuleAction, GenericValidationResult } from '../../../types';
+import {
+  ActionConnector,
+  ActionType,
+  RuleAction,
+  GenericValidationResult,
+  ActionConnectorMode,
+} from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { render, waitFor, screen } from '@testing-library/react';
 
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -26,6 +34,20 @@ describe('action_type_form', () => {
             onChange={() => true}
             fullWidth
           />
+        </>
+      );
+    },
+  }));
+
+  const mockedActionParamsFieldsWithExecutionMode = React.lazy(async () => ({
+    default({ executionMode }: { executionMode: ActionConnectorMode }) {
+      return (
+        <>
+          {executionMode === ActionConnectorMode.ActionForm ? (
+            <EuiFieldText data-test-subj="executionModeFieldActionForm" />
+          ) : (
+            <EuiFieldText data-test-subj="executionModeFieldNotActionForm" />
+          )}
         </>
       );
     },
@@ -79,6 +101,51 @@ describe('action_type_form', () => {
       'test',
       1
     );
+  });
+
+  it('renders the actionParamsField with the execution mode set to ActionForm', async () => {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.pagerduty',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFieldsWithExecutionMode,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
+    });
+    actionTypeRegistry.get.mockReturnValue(actionType);
+
+    render(
+      <I18nProvider>
+        {getActionTypeForm(1, undefined, {
+          id: '123',
+          actionTypeId: '.pagerduty',
+          group: 'recovered',
+          params: {
+            eventAction: 'recovered',
+            dedupKey: undefined,
+            summary: '2323',
+            source: 'source',
+            severity: '1',
+            timestamp: new Date().toISOString(),
+            component: 'test',
+            group: 'group',
+            class: 'test class',
+          },
+        })}
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('executionModeFieldActionForm')).toBeInTheDocument();
+      expect(screen.queryByTestId('executionModeFieldNotActionForm')).not.toBeInTheDocument();
+    });
   });
 
   it('does not call "setActionParamsProperty" because dedupKey is not empty', async () => {

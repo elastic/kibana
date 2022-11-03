@@ -9,6 +9,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookParamsFields from './webhook_params';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
 
@@ -41,6 +42,7 @@ describe('WebhookParamsFields renders', () => {
             useWithTripleBracesInTemplates: true,
           },
         ]}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();

@@ -9,6 +9,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { XmattersSeverityOptions } from '../../types';
 import XmattersParamsFields from './xmatters_params';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('XmattersParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -41,6 +42,7 @@ describe('XmattersParamsFields renders', () => {
             useWithTripleBracesInTemplates: true,
           },
         ]}
+        executionMode={ActionConnectorMode.Test}
       />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
