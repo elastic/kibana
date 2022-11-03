@@ -82,6 +82,8 @@ module.exports = (_, argv) => {
         '@elastic/eui/dist/eui_theme_dark.json',
         '@elastic/numeral',
         '@emotion/react',
+        '@tanstack/react-query',
+        '@tanstack/react-query-devtools',
         'classnames',
         'fflate',
         'history',

@@ -23,12 +23,13 @@
   "exclude": [
     "target/**/*",
     "analytics/fixtures/plugins/**/*",
-    "interpreter_functional/plugins/**/*",
-    "plugin_functional/plugins/**/*",
+    "interactive_setup_api_integration/fixtures/test_endpoints/**/*",
     "server_integration/__fixtures__/plugins/**/*",
+    "*/plugins/**/*",
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../src/core/tsconfig.json" },
+    { "path": "../src/setup_node_env/tsconfig.json" },
     { "path": "../src/plugins/telemetry_management_section/tsconfig.json" },
     { "path": "../src/plugins/advanced_settings/tsconfig.json" },
     { "path": "../src/plugins/management/tsconfig.json" },
