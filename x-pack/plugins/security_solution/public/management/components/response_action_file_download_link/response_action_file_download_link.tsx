@@ -64,11 +64,11 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
 
-    const shouldFetchFileInfo = useMemo(() => {
+    const shouldFetchFileInfo: boolean = useMemo(() => {
       return action.isCompleted && action.wasSuccessful;
     }, [action.isCompleted, action.wasSuccessful]);
 
-    const downloadUrl = useMemo(() => {
+    const downloadUrl: string = useMemo(() => {
       return resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
         action_id: action.id,
         agent_id: agentId ?? action.agents[0],
