@@ -48,7 +48,7 @@ const createPointInTimeFinderMock = ({
 const createPointInTimeFinderClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
   return {
     find: jest.fn(),
-    openPointInTimeForType: jest.fn(),
+    openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
     closePointInTime: jest.fn(),
   };
 };
