@@ -25,6 +25,8 @@ export * from './authz';
 // setting in the future?
 export const SO_SEARCH_LIMIT = 10000;
 
+export const ES_SEARCH_LIMIT = 10000;
+
 export const FLEET_SERVER_INDICES_VERSION = 1;
 
 export const FLEET_SERVER_ARTIFACTS_INDEX = '.fleet-artifacts';

@@ -112,6 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
         'dashboard_telemetry',
         'endpoint:metadata-check-transforms-task',
         'endpoint:user-artifact-packager',
+        'fleet:check-deleted-files-task',
         'fleet:reassign_action:retry',
         'fleet:unenroll_action:retry',
         'fleet:update_agent_tags:retry',
