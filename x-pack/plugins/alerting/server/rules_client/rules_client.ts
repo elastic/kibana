@@ -1719,7 +1719,7 @@ export class RulesClient {
     );
   }
 
-  private getAuthorizationFilter = async () => {
+  private getAuthorizationFilter = async ({ action }: { action: BulkAction }) => {
     try {
       const authorizationTuple = await this.authorization.getFindAuthorizationFilter(
         AlertingAuthorizationEntity.Rule,
@@ -1729,7 +1729,7 @@ export class RulesClient {
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.DELETE,
+          action: RuleAuditAction[action],
           error,
         })
       );
@@ -1793,7 +1793,6 @@ export class RulesClient {
             terms: [
               { field: 'alert.attributes.alertTypeId' },
               { field: 'alert.attributes.consumer' },
-              // { field: 'alert.attributes.actions' },
             ],
           },
         },
@@ -1823,11 +1822,6 @@ export class RulesClient {
             operation: actionToConstantsMapping[action].WriteOperation,
             entity: AlertingAuthorizationEntity.Rule,
           });
-          if (action === 'ENABLE') {
-            if (actions?.length) {
-              await this.actionsAuthorization.ensureAuthorized('execute');
-            }
-          }
         } catch (error) {
           this.auditLogger?.log(
             ruleAuditEvent({
@@ -1847,7 +1841,7 @@ export class RulesClient {
     const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
 
     const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
-    const authorizationFilter = await this.getAuthorizationFilter();
+    const authorizationFilter = await this.getAuthorizationFilter({ action: 'DELETE' });
 
     const kueryNodeFilterWithAuth =
       authorizationFilter && kueryNodeFilter
@@ -2384,11 +2378,22 @@ export class RulesClient {
     return { apiKeysToInvalidate, resultSavedObjects: result.saved_objects, errors, rules };
   }
 
+  private getShouldScheduleTask = async (scheduledTaskId: string | null | undefined) => {
+    if (!scheduledTaskId) return true;
+    try {
+      // make sure scheduledTaskId exist
+      await this.taskManager.get(scheduledTaskId);
+      return false;
+    } catch (err) {
+      return true;
+    }
+  };
+
   public bulkEnableRules = async (options: BulkCommonOptions) => {
     const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
 
     const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
-    const authorizationFilter = await this.getAuthorizationFilter();
+    const authorizationFilter = await this.getAuthorizationFilter({ action: 'ENABLE' });
 
     const kueryNodeFilterWithAuth =
       authorizationFilter && kueryNodeFilter
@@ -2407,9 +2412,29 @@ export class RulesClient {
       kueryNodeFilterWithAuth
     );
 
-    await this.taskManager.bulkEnable(taskIdsToEnable);
+    const taskIdsFailedToBeEnabled: string[] = [];
+    if (taskIdsToEnable.length > 0) {
+      try {
+        const resultFromEnablingTasks = await this.taskManager.bulkEnable(taskIdsToEnable);
+        resultFromEnablingTasks?.errors?.forEach((error) => {
+          taskIdsFailedToBeEnabled.push(error.task.id);
+        });
+        this.logger.debug(
+          `Successfully enabled schedules for underlying tasks: ${taskIdsToEnable
+            .filter((id) => !taskIdsFailedToBeEnabled.includes(id))
+            .join(', ')}`
+        );
+      } catch (error) {
+        taskIdsFailedToBeEnabled.push(...taskIdsToEnable);
+        this.logger.error(
+          `Failure to enable schedules for underlying tasks: ${taskIdsToEnable.join(
+            ', '
+          )}. TaskManager bulkEnable failed with Error: ${error.message}`
+        );
+      }
+    }
 
-    return { errors, total };
+    return { errors, total, taskIdsFailedToBeEnabled };
   };
 
   private bulkEnableRulesWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
@@ -2430,8 +2455,15 @@ export class RulesClient {
     const ruleNameToRuleIdMapping: Record<string, string> = {};
 
     for await (const response of rulesFinder.find()) {
-      for (const rule of response.saved_objects) {
-        if (rule.attributes.enabled === false) continue;
+      await pMap(response.saved_objects, async (rule) => {
+        if (rule.attributes.actions.length) {
+          try {
+            await this.actionsAuthorization.ensureAuthorized('execute');
+          } catch (error) {
+            throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+          }
+        }
+        if (rule.attributes.enabled === true) return; // add some logging
         if (rule.attributes.name) {
           ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
         }
@@ -2457,19 +2489,12 @@ export class RulesClient {
           },
         });
 
-        let scheduledTaskIdToCreate: string | null = null;
-        if (rule.attributes.scheduledTaskId) {
-          try {
-            // make sure scheduledTaskId exist
-            await this.taskManager.get(rule.attributes.scheduledTaskId);
-          } catch (err) {
-            scheduledTaskIdToCreate = rule.id;
-          }
-        } else {
-          scheduledTaskIdToCreate = rule.id;
-        }
+        const shouldScheduleTask = await this.getShouldScheduleTask(
+          rule.attributes.scheduledTaskId
+        );
 
-        if (scheduledTaskIdToCreate) {
+        let scheduledTaskId;
+        if (shouldScheduleTask) {
           const scheduledTask = await this.scheduleTask({
             id: rule.id,
             consumer: rule.attributes.consumer,
@@ -2477,13 +2502,16 @@ export class RulesClient {
             schedule: rule.attributes.schedule as IntervalSchedule,
             throwOnConflict: false,
           });
-          rulesToEnable.push({
-            ...rule,
-            attributes: { ...updatedAttributes, scheduledTaskId: scheduledTask },
-          });
-        } else {
-          taskIdsToEnable.push(rule.attributes.scheduledTaskId!);
+          scheduledTaskId = scheduledTask.id;
         }
+
+        rulesToEnable.push({
+          ...rule,
+          attributes: {
+            ...updatedAttributes,
+            ...(scheduledTaskId ? { scheduledTaskId } : undefined),
+          },
+        });
 
         this.auditLogger?.log(
           ruleAuditEvent({
@@ -2492,10 +2520,12 @@ export class RulesClient {
             savedObject: { type: 'alert', id: rule.id },
           })
         );
-      }
+      });
     }
 
-    const result = await this.unsecuredSavedObjectsClient.bulkUpdate(rulesToEnable);
+    const result = await this.unsecuredSavedObjectsClient.bulkCreate(rulesToEnable, {
+      overwrite: true,
+    });
 
     result.saved_objects.forEach((rule) => {
       if (rule.error === undefined) {
