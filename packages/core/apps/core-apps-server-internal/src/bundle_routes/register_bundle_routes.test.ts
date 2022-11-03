@@ -8,7 +8,7 @@
 
 import { registerRouteForBundleMock } from './register_bundle_routes.test.mocks';
 
-import { PackageInfo } from '@kbn/config';
+import type { PackageInfo } from '@kbn/config';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { registerBundleRoutes } from './register_bundle_routes';

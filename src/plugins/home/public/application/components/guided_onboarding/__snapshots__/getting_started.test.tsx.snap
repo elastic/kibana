@@ -102,7 +102,7 @@ exports[`getting started should render getting started component 1`] = `
         className="eui-textCenter"
       >
         <EuiLink
-          data-test-subj="onboarding--skipUseCaseTourLink"
+          data-test-subj="onboarding--skipGuideLink"
           onClick={[Function]}
         >
           I’d like to do something else (skip)
