@@ -201,6 +201,8 @@ export class CoreAppsService {
     });
   }
 
+  // After the package is built and bootstrap extracts files to bazel-bin,
+  // assets are exposed at the root of the package and in the package's node_modules dir
   private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot) {
     core.http.registerStaticDir(
       '/ui/{path*}',
