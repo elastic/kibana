@@ -14,10 +14,13 @@ import {
   useGetOutputs,
   useGetDownloadSources,
   useGetFleetServerHosts,
+  useFlyoutContext,
 } from '../../hooks';
 import { FLEET_ROUTING_PATHS, pagePathGetters } from '../../constants';
 import { DefaultLayout } from '../../layouts';
 import { Loading } from '../../components';
+
+import { FleetServerFlyout } from '../../components';
 
 import { SettingsPage } from './components/settings_page';
 import { withConfirmModalProvider } from './hooks/use_confirm_modal';
@@ -35,6 +38,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
   const outputs = useGetOutputs();
   const fleetServerHosts = useGetFleetServerHosts();
   const downloadSources = useGetDownloadSources();
+  const flyoutContext = useFlyoutContext();
 
   const { deleteOutput } = useDeleteOutput(outputs.resendRequest);
   const { deleteDownloadSource } = useDeleteDownloadSource(downloadSources.resendRequest);
@@ -45,11 +49,18 @@ export const SettingsApp = withConfirmModalProvider(() => {
   const resendFleetServerHostsRequest = fleetServerHosts.resendRequest;
 
   const onCloseCallback = useCallback(() => {
+    flyoutContext.closeFleetServerFlyout();
     resendOutputRequest();
     resendDownloadSourceRequest();
     resendFleetServerHostsRequest();
     history.replace(pagePathGetters.settings()[1]);
-  }, [resendOutputRequest, resendDownloadSourceRequest, resendFleetServerHostsRequest, history]);
+  }, [
+    flyoutContext,
+    resendOutputRequest,
+    resendDownloadSourceRequest,
+    resendFleetServerHostsRequest,
+    history,
+  ]);
 
   if (
     (outputs.isLoading && outputs.isInitialRequest) ||
@@ -91,7 +102,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
           </Route>
           <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
             <EuiPortal>
-              <FleetServerHostsFlyout onClose={onCloseCallback} />
+              <FleetServerFlyout onClose={onCloseCallback} />
             </EuiPortal>
           </Route>
           <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
