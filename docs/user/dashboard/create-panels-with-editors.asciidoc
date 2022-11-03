@@ -301,7 +301,7 @@ Metric aggregations are calculated from the values in the aggregated documents. 
 | &check;
 
 | Percentiles Rank
-|
+| &check;
 | &check;
 | &check;
 | &check;
