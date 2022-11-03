@@ -16,8 +16,8 @@ import {
   objectPairIntersection,
 } from './build_alert_group_from_sequence';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
-import { getCompleteRuleMock, getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
-import type { QueryRuleParams } from '../../../schemas/rule_schemas';
+import { getCompleteRuleMock, getQueryRuleParams } from '../../../rule_schema/mocks';
+import type { QueryRuleParams } from '../../../rule_schema';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -59,7 +59,8 @@ describe('buildAlert', () => {
       'allFields',
       SPACE_ID,
       jest.fn(),
-      completeRule.ruleParams.index as string[]
+      completeRule.ruleParams.index as string[],
+      undefined
     );
     expect(alertGroup.length).toEqual(3);
     expect(alertGroup[0]).toEqual(

@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { ErrorStateCodec } from './error_state';
 import { DateRangeType } from '../common';
 import { SyntheticsDataType } from './synthetics';
 
@@ -93,12 +94,12 @@ export const MonitorType = t.intersection([
     id: t.string,
     status: t.string,
     type: t.string,
+    check_group: t.string,
   }),
   t.partial({
     duration: t.type({
       us: t.number,
     }),
-    check_group: t.string,
     ip: t.string,
     name: t.string,
     timespan: t.type({
@@ -232,6 +233,7 @@ export const PingType = t.intersection([
       name: t.string,
     }),
     config_id: t.string,
+    state: ErrorStateCodec,
     data_stream: t.interface({
       namespace: t.string,
       type: t.string,
@@ -266,6 +268,7 @@ export const makePing = (f: {
       status: f.status || 'up',
       duration: { us: f.duration || 100000 },
       name: f.name,
+      check_group: 'myCheckGroup',
     },
     ...(f.location ? { observer: { geo: { name: f.location } } } : {}),
     ...(f.url ? { url: { full: f.url } } : {}),
@@ -287,6 +290,7 @@ export const GetPingsParamsType = t.intersection([
     excludedLocations: t.string,
     index: t.number,
     size: t.number,
+    pageIndex: t.number,
     locations: t.string,
     monitorId: t.string,
     sort: t.string,

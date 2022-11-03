@@ -39,7 +39,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   mode,
 }) => {
   const lensService = useKibana().services.lens;
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
     (event) => {
@@ -174,7 +174,7 @@ function getLensAttributes(
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: dataLayer,
           },

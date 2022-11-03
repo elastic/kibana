@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-export async function* parseStream(stream: NodeJS.ReadableStream) {
+export async function* parseStream(
+  stream: NodeJS.ReadableStream,
+  callback?: (chunkCounter: number) => void
+) {
   let partial = '';
+  let chunkCounter = 0;
 
   try {
     for await (const value of stream) {
+      chunkCounter++;
       const full = `${partial}${value}`;
       const parts = full.split('\n');
       const last = parts.pop();
@@ -24,5 +29,9 @@ export async function* parseStream(stream: NodeJS.ReadableStream) {
     }
   } catch (error) {
     yield { type: 'error', payload: error.toString() };
+  }
+
+  if (typeof callback === 'function') {
+    callback(chunkCounter);
   }
 }

@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import { DataViewBase } from '@kbn/es-query';
-import React, { useMemo, useState } from 'react';
-import { TimeHistory } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import React, { useState } from 'react';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { translations } from '../../../config';
+import { ObservabilityAppServices } from '../../../application/types';
+import { useAlertDataView } from '../../../hooks/use_alert_data_view';
 
 type QueryLanguageType = 'lucene' | 'kuery';
 
+const NO_INDEX_PATTERNS: DataView[] = [];
+
 export function AlertsSearchBar({
-  dynamicIndexPatterns,
-  onQueryChange,
+  appName,
+  featureIds,
   query,
+  onQueryChange,
   rangeFrom,
   rangeTo,
 }: {
-  dynamicIndexPatterns: DataViewBase[];
+  appName: string;
+  featureIds: ValidFeatureId[];
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;
@@ -31,29 +35,25 @@ export function AlertsSearchBar({
     query?: string;
   }) => void;
 }) {
-  const timeHistory = useMemo(() => {
-    return new TimeHistory(new Storage(localStorage));
-  }, []);
-  const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+  } = useKibana<ObservabilityAppServices>().services;
 
-  const compatibleIndexPatterns = useMemo(
-    () =>
-      dynamicIndexPatterns.map((dynamicIndexPattern) => ({
-        title: dynamicIndexPattern.title ?? '',
-        id: dynamicIndexPattern.id ?? '',
-        fields: dynamicIndexPattern.fields,
-      })),
-    [dynamicIndexPatterns]
-  );
+  const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
+  const { value: dataView, loading, error } = useAlertDataView(featureIds);
 
   return (
     <SearchBar
-      indexPatterns={compatibleIndexPatterns as DataView[]}
+      appName={appName}
+      indexPatterns={loading || error ? NO_INDEX_PATTERNS : [dataView!]}
       placeholder={translations.alertsSearchBar.placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
-      timeHistory={timeHistory}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}
+      displayStyle="inPage"
+      showFilterBar={false}
       onQuerySubmit={({ dateRange, query: nextQuery }) => {
         onQueryChange({
           dateRange,
@@ -61,7 +61,6 @@ export function AlertsSearchBar({
         });
         setQueryLanguage((nextQuery?.language ?? 'kuery') as QueryLanguageType);
       }}
-      displayStyle="inPage"
     />
   );
 }

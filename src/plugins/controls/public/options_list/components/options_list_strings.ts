@@ -16,7 +16,11 @@ export const OptionsListStrings = {
       }),
     getPlaceholder: () =>
       i18n.translate('controls.optionsList.control.placeholder', {
-        defaultMessage: 'Select...',
+        defaultMessage: 'Any',
+      }),
+    getNegate: () =>
+      i18n.translate('controls.optionsList.control.negate', {
+        defaultMessage: 'NOT',
       }),
   },
   editor: {
@@ -26,7 +30,16 @@ export const OptionsListStrings = {
       }),
     getRunPastTimeoutTitle: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout', {
-        defaultMessage: 'Run past timeout',
+        defaultMessage: 'Ignore timeout for results',
+      }),
+    getRunPastTimeoutTooltip: () =>
+      i18n.translate('controls.optionsList.editor.runPastTimeout.tooltip', {
+        defaultMessage:
+          'Wait to display results until the list is complete. This setting is useful for large data sets, but the results might take longer to populate.',
+      }),
+    getHideExcludeTitle: () =>
+      i18n.translate('controls.optionsList.editor.hideExclude', {
+        defaultMessage: 'Allow selections to be excluded',
       }),
   },
   popover: {
@@ -85,6 +98,18 @@ export const OptionsListStrings = {
         defaultMessage:
           '{selectedOptions} selected {selectedOptions, plural, one {option} other {options}} {selectedOptions, plural, one {is} other {are}} ignored because {selectedOptions, plural, one {it is} other {they are}} no longer in the data.',
         values: { selectedOptions },
+      }),
+    getIncludeLabel: () =>
+      i18n.translate('controls.optionsList.popover.includeLabel', {
+        defaultMessage: 'Include',
+      }),
+    getExcludeLabel: () =>
+      i18n.translate('controls.optionsList.popover.excludeLabel', {
+        defaultMessage: 'Exclude',
+      }),
+    getIncludeExcludeLegend: () =>
+      i18n.translate('controls.optionsList.popover.excludeOptionsLegend', {
+        defaultMessage: 'Include or exclude selections',
       }),
   },
 };

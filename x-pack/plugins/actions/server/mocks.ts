@@ -17,6 +17,7 @@ import { PluginSetupContract, PluginStartContract, renderActionParameterTemplate
 import { Services } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { ConnectorTokenClient } from './lib/connector_token_client';
+import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
@@ -38,6 +39,7 @@ const createStartMock = () => {
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
+    getUnsecuredActionsClient: jest.fn().mockResolvedValue(unsecuredActionsClientMock.create()),
     getActionsAuthorizationWithRequest: jest
       .fn()
       .mockReturnValue(actionsAuthorizationMock.create()),

@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { StepStatus, GuideStepIds } from '../../common/types';
+
+import type { StepStatus } from '@kbn/guided-onboarding';
 import type { StepConfig } from '../types';
 import { getGuidePanelStepStyles } from './guide_panel_step.styles';
 
@@ -29,7 +30,8 @@ interface GuideStepProps {
   stepStatus: StepStatus;
   stepConfig: StepConfig;
   stepNumber: number;
-  navigateToStep: (stepId: GuideStepIds, stepLocation: StepConfig['location']) => void;
+  handleButtonClick: () => void;
+  telemetryGuideId: string;
 }
 
 export const GuideStep = ({
@@ -37,13 +39,14 @@ export const GuideStep = ({
   stepStatus,
   stepNumber,
   stepConfig,
-  navigateToStep,
+  handleButtonClick,
+  telemetryGuideId,
 }: GuideStepProps) => {
   const { euiTheme } = useEuiTheme();
-  const styles = getGuidePanelStepStyles(euiTheme);
+  const styles = getGuidePanelStepStyles(euiTheme, stepStatus);
 
-  const buttonContent = (
-    <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="center" alignItems="center">
+  const stepTitleContent = (
+    <EuiFlexGroup gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         {stepStatus === 'complete' ? (
           <EuiIcon type="checkInCircleFilled" size="l" color={euiTheme.colors.success} />
@@ -58,48 +61,69 @@ export const GuideStep = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+  const isAccordionOpen =
+    stepStatus === 'in_progress' || stepStatus === 'active' || stepStatus === 'ready_to_complete';
+
+  const getStepButtonLabel = (): string => {
+    switch (stepStatus) {
+      case 'active':
+        return i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
+          defaultMessage: 'Start',
+        });
+      case 'in_progress':
+        return i18n.translate('guidedOnboarding.dropdownPanel.continueStepButtonLabel', {
+          defaultMessage: 'Continue',
+        });
+      case 'ready_to_complete':
+        return i18n.translate('guidedOnboarding.dropdownPanel.markDoneStepButtonLabel', {
+          defaultMessage: 'Mark done',
+        });
+    }
+    return '';
+  };
 
   return (
     <div data-test-subj="guidePanelStep">
-      <EuiAccordion
-        id={accordionId}
-        buttonContent={buttonContent}
-        arrowDisplay="right"
-        forceState={stepStatus === 'in_progress' || stepStatus === 'active' ? 'open' : 'closed'}
-      >
-        <>
-          <EuiSpacer size="s" />
+      {stepStatus === 'complete' ? (
+        <>{stepTitleContent}</>
+      ) : (
+        <EuiAccordion
+          id={accordionId}
+          buttonContent={stepTitleContent}
+          arrowDisplay="right"
+          initialIsOpen={isAccordionOpen}
+        >
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="s" data-test-subj="guidePanelStepDescription" css={styles.description}>
+              {stepConfig.description && <p>{stepConfig.description}</p>}
+              {stepConfig.descriptionList && (
+                <ul>
+                  {stepConfig.descriptionList.map((description, index) => {
+                    return <li key={`description-${index}`}>{description}</li>;
+                  })}
+                </ul>
+              )}
+            </EuiText>
 
-          <EuiText size="s">
-            <ul>
-              {stepConfig.descriptionList.map((description, index) => {
-                return <li key={`description-${index}`}>{description}</li>;
-              })}
-            </ul>
-          </EuiText>
-
-          <EuiSpacer />
-          {(stepStatus === 'in_progress' || stepStatus === 'active') && (
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={() => navigateToStep(stepConfig.id, stepConfig.location)}
-                  fill
-                  data-test-subj="activeStepButtonLabel"
-                >
-                  {stepStatus === 'active'
-                    ? i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
-                        defaultMessage: 'Start',
-                      })
-                    : i18n.translate('guidedOnboarding.dropdownPanel.continueStepButtonLabel', {
-                        defaultMessage: 'Continue',
-                      })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </>
-      </EuiAccordion>
+            <EuiSpacer />
+            {isAccordionOpen && (
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => handleButtonClick()}
+                    fill
+                    // data-test-subj used for FS tracking and tests
+                    data-test-subj={`onboarding--stepButton--${telemetryGuideId}--step${stepNumber}`}
+                  >
+                    {getStepButtonLabel()}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </>
+        </EuiAccordion>
+      )}
 
       <EuiHorizontalRule margin="l" />
     </div>

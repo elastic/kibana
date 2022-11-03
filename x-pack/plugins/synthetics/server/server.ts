@@ -57,7 +57,7 @@ export const initSyntheticsServer = (
   });
 
   syntheticsAppStreamingApiRoutes.forEach((route) => {
-    const { method, streamHandler, path } = syntheticsRouteWrapper(
+    const { method, streamHandler, path, options } = syntheticsRouteWrapper(
       createSyntheticsRouteWithAuth(libs, route),
       server,
       syntheticsMonitorClient
@@ -82,7 +82,8 @@ export const initSyntheticsServer = (
         };
       },
       method,
-      server.router
+      server.router,
+      options
     );
   });
 };

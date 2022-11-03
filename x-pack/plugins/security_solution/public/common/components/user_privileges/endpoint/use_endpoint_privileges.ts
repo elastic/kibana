@@ -17,6 +17,7 @@ import type {
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
+  calculatePermissionsFromCapabilities,
 } from '../../../../../common/endpoint/service/authz';
 import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
@@ -43,12 +44,23 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
 
   const fleetServices = fleetServicesFromUseKibana ?? fleetServicesFromPluginStart;
   const isEndpointRbacEnabled = useIsExperimentalFeatureEnabled('endpointRbacEnabled');
+  const isEndpointRbacV1Enabled = useIsExperimentalFeatureEnabled('endpointRbacV1Enabled');
+
+  const endpointPermissions = calculatePermissionsFromCapabilities(
+    useKibana().services.application.capabilities
+  );
 
   const privileges = useMemo(() => {
     const privilegeList: EndpointPrivileges = Object.freeze({
       loading: !fleetCheckDone || !userRolesCheckDone || !user,
       ...(fleetAuthz
-        ? calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, isEndpointRbacEnabled)
+        ? calculateEndpointAuthz(
+            licenseService,
+            fleetAuthz,
+            userRoles,
+            isEndpointRbacEnabled || isEndpointRbacV1Enabled,
+            endpointPermissions
+          )
         : getEndpointAuthzInitialState()),
     });
 
@@ -61,6 +73,8 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
     licenseService,
     userRoles,
     isEndpointRbacEnabled,
+    isEndpointRbacV1Enabled,
+    endpointPermissions,
   ]);
 
   // Check if user can access fleet

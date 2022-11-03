@@ -20,11 +20,23 @@
         "description": [],
         "signature": [
           "(config: ",
-          "ElasticsearchClientConfig",
-          ", { logger, type, scoped, getExecutionContext, agentManager, kibanaVersion, }: { logger: ",
-          "Logger",
-          "; type: string; scoped?: boolean | undefined; getExecutionContext?: (() => string | undefined) | undefined; agentManager: ",
-          "AgentManager",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClientConfig",
+            "text": "ElasticsearchClientConfig"
+          },
+          ", { logger, type, scoped, getExecutionContext, agentFactoryProvider, kibanaVersion, }: { logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
+          "; type: string; scoped?: boolean | undefined; getExecutionContext?: (() => string | undefined) | undefined; agentFactoryProvider: ",
+          "AgentFactoryProvider",
           "; kibanaVersion: string; }) => ",
           "default"
         ],
@@ -40,7 +52,13 @@
             "label": "config",
             "description": [],
             "signature": [
-              "ElasticsearchClientConfig"
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClientConfig",
+                "text": "ElasticsearchClientConfig"
+              }
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
             "deprecated": false,
@@ -52,7 +70,7 @@
             "id": "def-server.configureClient.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    logger,\n    type,\n    scoped = false,\n    getExecutionContext = noop,\n    agentManager,\n    kibanaVersion,\n  }",
+            "label": "{\n    logger,\n    type,\n    scoped = false,\n    getExecutionContext = noop,\n    agentFactoryProvider,\n    kibanaVersion,\n  }",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
             "deprecated": false,
@@ -66,7 +84,13 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  "Logger"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.Logger",
+                    "text": "Logger"
+                  }
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
                 "deprecated": false,
@@ -115,13 +139,13 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-                "id": "def-server.configureClient.$2.agentManager",
+                "id": "def-server.configureClient.$2.agentFactoryProvider",
                 "type": "Object",
                 "tags": [],
-                "label": "agentManager",
+                "label": "agentFactoryProvider",
                 "description": [],
                 "signature": [
-                  "AgentManager"
+                  "AgentFactoryProvider"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
                 "deprecated": false,
@@ -220,9 +244,66 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+        "id": "def-server.AgentStore",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentStore",
+        "description": [],
+        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+            "id": "def-server.AgentStore.getAgents",
+            "type": "Function",
+            "tags": [],
+            "label": "getAgents",
+            "description": [],
+            "signature": [
+              "() => Set<",
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
+                "section": "def-server.NetworkAgent",
+                "text": "NetworkAgent"
+              },
+              ">"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+        "id": "def-server.NetworkAgent",
+        "type": "Type",
+        "tags": [],
+        "label": "NetworkAgent",
+        "description": [],
+        "signature": [
+          "Agent",
+          " | ",
+          "Agent"
+        ],
+        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {

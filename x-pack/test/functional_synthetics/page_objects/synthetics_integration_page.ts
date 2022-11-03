@@ -329,6 +329,8 @@ export function SyntheticsIntegrationPageProvider({
         await testSubjects.click('syntheticsSourceTab__inline');
         await this.fillCodeEditor(inlineScript);
         return;
+      } else {
+        await testSubjects.click('syntheticsSourceTab__zipUrl');
       }
       await this.fillTextInputByTestSubj('syntheticsBrowserZipUrl', zipUrl);
       await this.fillTextInputByTestSubj('syntheticsBrowserZipUrlFolder', folder);

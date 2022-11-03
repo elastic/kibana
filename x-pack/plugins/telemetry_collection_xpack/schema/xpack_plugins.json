@@ -4109,6 +4109,9 @@
               "items": {
                 "type": "keyword"
               }
+            },
+            "total": {
+              "type": "long"
             }
           }
         },
@@ -4967,6 +4970,15 @@
       "properties": {
         "isCloudEnabled": {
           "type": "boolean"
+        },
+        "trialEndDate": {
+          "type": "date"
+        },
+        "inTrial": {
+          "type": "boolean"
+        },
+        "isElasticStaffOwned": {
+          "type": "boolean"
         }
       }
     },
@@ -5099,83 +5111,6 @@
           "properties": {
             "index_creation_count": {
               "type": "long"
-            }
-          }
-        }
-      }
-    },
-    "files": {
-      "properties": {
-        "countByExtension": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "extension": {
-                "type": "keyword"
-              },
-              "count": {
-                "type": "long"
-              }
-            }
-          }
-        },
-        "countByStatus": {
-          "properties": {
-            "AWAITING_UPLOAD": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files awaiting upload"
-              }
-            },
-            "DELETED": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are marked as deleted"
-              }
-            },
-            "READY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are ready for download"
-              }
-            },
-            "UPLOADING": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are currently uploading"
-              }
-            },
-            "UPLOAD_ERROR": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that failed to upload"
-              }
-            }
-          }
-        },
-        "storage": {
-          "properties": {
-            "esFixedSizeIndex": {
-              "properties": {
-                "capacity": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Capacity of the fixed size index"
-                  }
-                },
-                "available": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Available storage in bytes"
-                  }
-                },
-                "used": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Used storage in bytes"
-                  }
-                }
-              }
             }
           }
         }
@@ -5679,6 +5614,34 @@
                   "type": "long",
                   "_meta": {
                     "description": "total number of kbn tms layers in cluster"
+                  }
+                }
+              }
+            },
+            "layer_group": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of layer groups per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of layer groups per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of layer groups per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of layer groups in cluster"
                   }
                 }
               }
@@ -9335,6 +9298,36 @@
               }
             },
             "search": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "osquery-pack": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "osquery-pack-asset": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "osquery-saved-query": {
               "properties": {
                 "usedTags": {
                   "type": "integer"
@@ -13342,6 +13335,29 @@
           }
         },
         "failed_tasks": {
+          "type": "long"
+        },
+        "recurring_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "adhoc_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "capacity": {
           "type": "long"
         }
       }

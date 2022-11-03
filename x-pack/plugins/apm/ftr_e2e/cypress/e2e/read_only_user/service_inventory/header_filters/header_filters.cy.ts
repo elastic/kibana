@@ -28,6 +28,7 @@ describe('Service inventory - header filters', () => {
         specialServiceName,
       })
     );
+    cy.dismissServiceGroupsTour();
   });
 
   after(() => {
@@ -44,7 +45,7 @@ describe('Service inventory - header filters', () => {
       cy.contains('Services');
       cy.contains('opbeans-node');
       cy.contains('service 1');
-      cy.get('[data-test-subj="headerFilterKuerybar"]')
+      cy.getByTestSubj('headerFilterKuerybar')
         .type(`service.name: "${specialServiceName}"`)
         .type('{enter}');
       cy.contains('service 1');

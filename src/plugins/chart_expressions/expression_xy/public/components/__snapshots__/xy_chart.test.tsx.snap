@@ -5119,7 +5119,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             "getAll": [Function],
           }
         }
-        shouldShowValueLabels={false}
+        shouldShowValueLabels={true}
         syncColors={false}
         timeZone="UTC"
         titles={
@@ -6101,7 +6101,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "getAll": [Function],
           }
         }
-        shouldShowValueLabels={false}
+        shouldShowValueLabels={true}
         syncColors={false}
         timeZone="UTC"
         titles={
@@ -7083,7 +7083,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "getAll": [Function],
           }
         }
-        shouldShowValueLabels={false}
+        shouldShowValueLabels={true}
         syncColors={false}
         timeZone="UTC"
         titles={
