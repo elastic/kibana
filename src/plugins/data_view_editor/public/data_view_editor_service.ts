@@ -7,7 +7,15 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { BehaviorSubject, Subject, first, firstValueFrom, from, Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  Subject,
+  first,
+  firstValueFrom,
+  from,
+  Observable,
+  Subscription,
+} from 'rxjs';
 
 import {
   DataViewsServicePublic,
@@ -69,16 +77,16 @@ export class DataViewEditorService {
     this.rollupIndex$ = this.rollupIndexInternal$.asObservable();
 
     // when list of matched indices is updated always update timestamp fields
-    this.matchedIndices$.subscribe(() => this.loadTimestampFields());
+    this.loadTimestampFieldsSub = this.matchedIndices$.subscribe(() => this.loadTimestampFields());
 
     // alternate value with undefined so validation knows when its getting a fresh value
-    this.matchedIndices$.subscribe((matchedIndices) => {
+    this.matchedIndicesForProviderSub = this.matchedIndices$.subscribe((matchedIndices) => {
       this.matchedIndicesForProvider$.next(matchedIndices);
       this.matchedIndicesForProvider$.next(undefined);
     });
 
     // alternate value with undefined so validation knows when its getting a fresh value
-    this.rollupIndex$.subscribe((rollupIndex) => {
+    this.rollupIndexForProviderSub = this.rollupIndex$.subscribe((rollupIndex) => {
       this.rollupIndexForProvider$.next(rollupIndex);
       this.rollupIndexForProvider$.next(undefined);
     });
@@ -96,6 +104,10 @@ export class DataViewEditorService {
 
   // used for data view name validation - no dupes!
   dataViewNames$: Observable<string[]>;
+
+  private loadTimestampFieldsSub: Subscription;
+  private matchedIndicesForProviderSub: Subscription;
+  private rollupIndexForProviderSub: Subscription;
 
   // used for validating rollup data views - must match one and only one data view
   private rollupIndicesCapsInternal$ = new BehaviorSubject<RollupIndicesCapsResponse>({});
@@ -332,5 +344,11 @@ export class DataViewEditorService {
     ]);
 
     return { rollupIndex, matchedIndices: matchedIndices || matchedIndiciesDefault };
+  };
+
+  destroy = () => {
+    this.loadTimestampFieldsSub.unsubscribe();
+    this.matchedIndicesForProviderSub.unsubscribe();
+    this.rollupIndexForProviderSub.unsubscribe();
   };
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
@@ -39,6 +39,11 @@ const DataViewFlyoutContentContainer = ({
       requireTimestampField,
     })
   );
+
+  useEffect(() => {
+    const service = dataViewEditorService.current;
+    return service.destroy;
+  }, []);
 
   const onSaveClick = async (dataViewSpec: DataViewSpec, persist: boolean = true) => {
     try {
