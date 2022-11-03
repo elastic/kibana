@@ -97,7 +97,7 @@ export function runSaveAs(this: DashboardContainer) {
           dispatch(setLastSavedInput(stateToSave));
         });
       }
-      if (newCopyOnSave) this.expectIdChange();
+      if (newCopyOnSave || !lastSavedId) this.expectIdChange();
       resolve(saveResult);
       return saveResult;
     };

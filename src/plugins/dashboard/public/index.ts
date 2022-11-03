@@ -19,7 +19,7 @@ export {
   cleanEmptyKeys,
 } from './dashboard_app/locator/locator';
 
-export { DASHBOARD_APP_ID } from './dashboard_constants';
+export { DASHBOARD_APP_ID, LEGACY_DASHBOARD_APP_ID } from './dashboard_constants';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);
