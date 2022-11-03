@@ -885,12 +885,12 @@ packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-bazel-packages @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-cases-components @elastic/response-ops
-packages/kbn-chart-icons @elastic/kibana-visualizations
+packages/kbn-chart-icons @elastic/kibana-vis-editors
 packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
-packages/kbn-coloring @elastic/kibana-visualizations
+packages/kbn-coloring @elastic/kibana-vis-editors
 packages/kbn-config @elastic/kibana-core
 packages/kbn-config-mocks @elastic/kibana-core
 packages/kbn-config-schema @elastic/kibana-core
@@ -933,7 +933,7 @@ packages/kbn-io-ts-utils @elastic/apm-ui
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
-packages/kbn-language-documentation-popover @elastic/kibana-visualizations
+packages/kbn-language-documentation-popover @elastic/kibana-vis-editors
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-vscode-config @elastic/kibana-operations
@@ -982,8 +982,8 @@ packages/kbn-telemetry-tools @elastic/kibana-core
 packages/kbn-test @elastic/kibana-operations
 packages/kbn-test-jest-helpers @elastic/kibana-operations
 packages/kbn-test-subj-selector @elastic/kibana-operations
-packages/kbn-timelion-grammar @elastic/kibana-visualizations
-packages/kbn-tinymath @elastic/kibana-visualizations
+packages/kbn-timelion-grammar @elastic/kibana-vis-editors
+packages/kbn-tinymath @elastic/kibana-vis-editors
 packages/kbn-tooling-log @elastic/kibana-operations
 packages/kbn-type-summarizer @elastic/kibana-operations
 packages/kbn-type-summarizer-cli @elastic/kibana-operations
