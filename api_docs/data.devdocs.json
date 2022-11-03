@@ -5172,6 +5172,41 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.ShardFailureOpenModalButton",
+        "type": "Function",
+        "tags": [],
+        "label": "ShardFailureOpenModalButton",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "ShardFailureOpenModalButtonProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/data/public/shard_failure_modal/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureOpenModalButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "ShardFailureOpenModalButtonProps"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.tabifyAggResponse",
         "type": "Function",
         "tags": [],
@@ -9050,6 +9085,104 @@
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.ShardFailureRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "ShardFailureRequest",
+        "description": [],
+        "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest.docvalue_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "docvalue_fields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest._source",
+            "type": "Unknown",
+            "tags": [],
+            "label": "_source",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest.query",
+            "type": "Unknown",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest.script_fields",
+            "type": "Unknown",
+            "tags": [],
+            "label": "script_fields",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest.sort",
+            "type": "Unknown",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ShardFailureRequest.stored_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "stored_fields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12987,8 +13120,52 @@
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "presentationUtil",
@@ -13025,10 +13202,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -13229,38 +13402,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "canvas",
@@ -13637,18 +13778,6 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16317,10 +16446,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -16347,8 +16476,10 @@
                 "id": "def-server.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -20691,8 +20822,52 @@
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "presentationUtil",
@@ -20729,10 +20904,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -20933,38 +21104,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "canvas",
@@ -21341,18 +21480,6 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -24889,10 +25016,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -24919,8 +25046,10 @@
                 "id": "def-common.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -27291,7 +27420,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; delete: (indexPatternId: string) => Promise<{}>; create: ({ id, name, title, ...restOfSpec }: ",
+          ">; delete: (indexPatternId: string) => Promise<{}>; create: (spec: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

@@ -79,7 +79,6 @@ export const createVislibVisController = (
         return;
       }
 
-      // @ts-expect-error
       const { Vis: Vislib } = await import('./vislib/vis');
       const { uiState, event: fireEvent } = handlers;
 

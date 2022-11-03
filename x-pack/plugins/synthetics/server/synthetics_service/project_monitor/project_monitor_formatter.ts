@@ -204,7 +204,7 @@ export class ProjectMonitorFormatter {
         privateLocations: this.privateLocations,
         projectId: this.projectId,
         namespace: this.spaceId,
-        version: this.server.kibanaVersion,
+        version: this.server.stackVersion,
       });
 
       if (errors.length) {
