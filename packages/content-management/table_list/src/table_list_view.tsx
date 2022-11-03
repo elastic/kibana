@@ -69,10 +69,18 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   editItem?(item: T): void;
   /**
    * Whether to use a panelled page.
-   *
    * @default true
    */
   panelledPage?: boolean;
+  /**
+   * Name for the column containing the "title" value.
+   */
+  titleColumnName?: string;
+  /**
+   * Additional actions (buttons) to be placed in the page header.
+   * @note only the first two values will be used.
+   */
+  additionalRightSideActions?: ReactNode[];
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -123,6 +131,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   id = 'userContent',
   children,
   panelledPage = true,
+  titleColumnName,
+  additionalRightSideActions = [],
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(
@@ -196,9 +206,11 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
         field: 'attributes.title',
-        name: i18n.translate('contentManagement.tableList.mainColumnName', {
-          defaultMessage: 'Name, description, tags',
-        }),
+        name:
+          titleColumnName ??
+          i18n.translate('contentManagement.tableList.mainColumnName', {
+            defaultMessage: 'Name, description, tags',
+          }),
         sortable: true,
         render: (field: keyof T, record: T) => {
           return (
@@ -268,6 +280,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
     return columns;
   }, [
+    titleColumnName,
     customTableColumn,
     hasUpdatedAtMetadata,
     editItem,
@@ -468,7 +481,10 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     <KibanaPageTemplate panelled={panelledPage} data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{tableListTitle}</span>}
-        rightSideItems={[renderCreateButton() ?? <span />]}
+        rightSideItems={[
+          renderCreateButton() ?? <span />,
+          ...additionalRightSideActions?.slice(0, 2),
+        ]}
         data-test-subj="top-nav"
       />
       <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
