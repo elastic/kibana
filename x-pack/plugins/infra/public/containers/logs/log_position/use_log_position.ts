@@ -20,7 +20,7 @@ import {
   LogPositionState,
   updateStateFromTimefilterState,
   updateStateFromUrlState,
-  withLogger,
+  withDevelopmentLogger,
 } from './log_position_state';
 import { useLogPositionTimefilterStateSync } from './log_position_timefilter_state';
 import { LogPositionUrlState, useLogPositionUrlStateSync } from './use_log_position_url_state_sync';
@@ -77,7 +77,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     useLogPositionTimefilterStateSync();
 
   const [logPositionStateContainer] = useState(() =>
-    withLogger(
+    withDevelopmentLogger(
       createLogPositionStateContainer({
         initialStateFromUrl,
         initialStateFromTimefilter,

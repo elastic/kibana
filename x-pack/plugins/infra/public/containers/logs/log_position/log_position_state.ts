@@ -88,10 +88,13 @@ export const createLogPositionStateContainer = (initialArguments: InitialLogPosi
       updateTargetPosition({ time })(state),
   });
 
-export const withLogger = <StateContainer extends ReduxLikeStateContainer<any>>(
+export const withDevelopmentLogger = <StateContainer extends ReduxLikeStateContainer<any>>(
   stateContainer: StateContainer
 ): StateContainer => {
-  stateContainer.addMiddleware(logger as any);
+  if (process.env.NODE_ENV !== 'production') {
+    stateContainer.addMiddleware(logger as any);
+  }
+
   return stateContainer;
 };
 
