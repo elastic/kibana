@@ -32,7 +32,7 @@ export const bodySchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   consumer: schema.string(),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDurationSchema }))),
+  throttle: schema.nullable(schema.maybe(schema.string({ validate: validateDurationSchema }))),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   schedule: schema.object({
     interval: schema.string({ validate: validateDurationSchema }),
