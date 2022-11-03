@@ -15,6 +15,10 @@ import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
 import { lastValueFrom, defer } from 'rxjs';
+import {
+  FILE_UPLOAD_PERFORMANCE_EVENT_NAME,
+  withReportPerformanceMetric,
+} from '../../../performance';
 import type { BlobStorageClient } from '../../types';
 import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
@@ -28,6 +32,12 @@ import { mappings } from './mappings';
 export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 
 export const MAX_BLOB_STORE_SIZE_BYTES = 50 * 1024 * 1024 * 1024; // 50 GiB
+
+interface UploadOptions {
+  transforms?: Transform[];
+  id?: string;
+  analytics?: AnalyticsServiceStart;
+}
 
 export class ElasticsearchBlobStorageClient implements BlobStorageClient {
   private static defaultSemaphore: Semaphore;
@@ -89,14 +99,9 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     }
   });
 
-  public async upload(
-    src: Readable,
-    {
-      transforms,
-      id,
-      analytics,
-    }: { transforms?: Transform[]; id?: string; analytics?: AnalyticsServiceStart } = {}
-  ): Promise<{ id: string; size: number }> {
+  public async upload(src: Readable, options: UploadOptions = {}) {
+    const { transforms, id, analytics } = options;
+
     await this.createIndexIfNotExists();
 
     const processUpload = async () => {
@@ -110,14 +115,29 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
             maxChunkSize: this.chunkSize,
           },
         });
-        await pipeline.apply(null, [src, ...(transforms ?? []), dest] as unknown as Parameters<
-          typeof pipeline
-        >);
 
-        return {
-          id: dest.getContentReferenceId()!,
-          size: dest.getBytesWritten(),
+        const _id = dest.getContentReferenceId()!;
+        const size = dest.getBytesWritten();
+        const perfArgs = {
+          analytics,
+          eventData: {
+            eventName: FILE_UPLOAD_PERFORMANCE_EVENT_NAME,
+            key1: 'size',
+            value1: size,
+            meta: {
+              datasource: 'es',
+              id: _id,
+              index: this.index,
+              chunkSize: this.chunkSize,
+            },
+          },
         };
+
+        await withReportPerformanceMetric(perfArgs, () =>
+          pipeline([src, ...(transforms ?? []), dest])
+        );
+
+        return { id: _id, size };
       } catch (e) {
         this.logger.error(`Could not write chunks to Elasticsearch for id ${id}: ${e}`);
         throw e;

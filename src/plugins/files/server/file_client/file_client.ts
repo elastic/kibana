@@ -59,7 +59,7 @@ export function createFileClient({
   internalFileShareService: undefined | InternalFileShareService;
   auditLogger: undefined | AuditLogger;
   logger: Logger;
-  analytics: AnalyticsServiceStart;
+  analytics?: AnalyticsServiceStart;
 }) {
   return new FileClientImpl(
     fileKindDescriptor,
@@ -67,8 +67,8 @@ export function createFileClient({
     blobStorageClient,
     internalFileShareService,
     auditLogger,
-    analytics,
-    logger
+    logger,
+    analytics
   );
 }
 
@@ -90,8 +90,8 @@ export class FileClientImpl implements FileClient {
     private readonly blobStorageClient: BlobStorageClient,
     private readonly internalFileShareService: undefined | InternalFileShareService,
     auditLogger: undefined | AuditLogger,
-    private readonly analytics: AnalyticsServiceStart,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly analytics?: AnalyticsServiceStart
   ) {
     this.logAuditEvent = (e) => {
       if (auditLogger) {

@@ -11,7 +11,7 @@ import { PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-t
 import { Optional } from 'utility-types';
 
 export interface PerfArgs {
-  analytics: Pick<AnalyticsClient, 'reportEvent'>;
+  analytics?: Pick<AnalyticsClient, 'reportEvent'>;
   eventData: Optional<PerformanceMetricEvent, 'duration'>;
 }
 
@@ -20,10 +20,12 @@ export async function withReportPerformanceMetric<T>(perfArgs: PerfArgs, cb: () 
   const response = await cb();
   const end = performance.now();
 
-  reportPerformanceMetricEvent(perfArgs.analytics, {
-    ...perfArgs.eventData,
-    duration: end - start,
-  });
+  if (perfArgs.analytics) {
+    reportPerformanceMetricEvent(perfArgs.analytics, {
+      ...perfArgs.eventData,
+      duration: end - start,
+    });
+  }
 
   return response;
 }

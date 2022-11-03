@@ -135,9 +135,10 @@ export class AnalyticsClient implements IAnalyticsClient {
 
     // debug-logging before checking the opt-in status to help during development
     if (this.initContext.isDev) {
-      this.initContext.logger.debug<EventDebugLogMeta>(`Report event "${eventType}"`, {
-        ebt_event: event,
-      });
+      this.initContext.logger.debug<EventDebugLogMeta>(
+        `Report event "${eventType}":
+${JSON.stringify({ ebt_event: event }, null, 4)}`
+      );
     }
 
     const optInConfig = this.optInConfig$.value;

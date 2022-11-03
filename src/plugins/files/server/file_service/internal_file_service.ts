@@ -39,8 +39,8 @@ export class InternalFileService {
     private readonly fileShareService: InternalFileShareService,
     private readonly auditLogger: undefined | AuditLogger,
     private readonly fileKindRegistry: FileKindsRegistry,
-    private readonly analytics: AnalyticsServiceStart,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly analytics?: AnalyticsServiceStart
   ) {}
 
   public async createFile(args: CreateFileArgs): Promise<IFile> {
