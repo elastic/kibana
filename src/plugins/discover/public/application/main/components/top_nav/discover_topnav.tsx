@@ -61,8 +61,6 @@ export const DiscoverTopNav = ({
   const adHocDataViewList = useInternalStateSelector((state) => state.dataViewsAdHoc);
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
-  // eslint-disable-next-line no-console
-  console.log('adHocDataViewList', adHocDataViewList);
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
     [dataView]
