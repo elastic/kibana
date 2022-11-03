@@ -308,7 +308,7 @@ export function parseAndVerifyDataStreams(
       );
     }
 
-    const ingestPipeline = parseDefaultIngestPipeline({ pkgKey, dataStreamPath, paths });
+    const ingestPipeline = parseDefaultIngestPipeline({ streamBasePath, dataStreamPath, paths });
     const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
     const parsedElasticsearchEntry = parseDataStreamElasticsearchEntry(
       elasticsearch,
@@ -546,12 +546,16 @@ const isDefaultPipelineFile = (pipelinePath: string) =>
   pipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON);
 
 export function parseDefaultIngestPipeline(opts: {
-  pkgKey: string;
+  streamBasePath: string;
   paths: string[];
   dataStreamPath: string;
 }) {
-  const { pkgKey, paths, dataStreamPath } = opts;
-  const ingestPipelineDirPath = `${pkgKey}/data_stream/${dataStreamPath}/elasticsearch/ingest_pipeline`;
+  const { streamBasePath, paths, dataStreamPath } = opts;
+  const ingestPipelineDirPath = path.join(
+    streamBasePath,
+    dataStreamPath,
+    '/elasticsearch/ingest_pipeline'
+  );
   const defaultIngestPipelinePaths = paths.filter(
     (pipelinePath) =>
       pipelinePath.startsWith(ingestPipelineDirPath) && isDefaultPipelineFile(pipelinePath)
