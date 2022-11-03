@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { LoadWhenInView } from '@kbn/observability-plugin/public';
+import { I18LABELS } from './translations';
 import { UXMetrics } from './ux_metrics';
 import { ImpactfulMetrics } from './impactful_metrics';
 import { PageLoadAndViews } from './panels/page_load_and_views';
@@ -30,12 +31,15 @@ export function RumDashboard() {
         <PageLoadAndViews />
       </EuiFlexItem>
       <EuiFlexItem>
-        <LoadWhenInView minHeight={300}>
+        <LoadWhenInView
+          minHeight={300}
+          placeholder={I18LABELS.pageLoadDurationByRegion}
+        >
           <VisitorBreakdownsPanel />
         </LoadWhenInView>
       </EuiFlexItem>
       <EuiFlexItem>
-        <LoadWhenInView minHeight={300}>
+        <LoadWhenInView minHeight={300} placeholder={I18LABELS.jsErrors}>
           <ImpactfulMetrics />
         </LoadWhenInView>
       </EuiFlexItem>

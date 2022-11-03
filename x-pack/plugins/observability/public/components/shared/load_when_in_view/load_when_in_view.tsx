@@ -6,15 +6,21 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { EuiLoadingContent } from '@elastic/eui';
 import useIntersection from 'react-use/lib/useIntersection';
 
 export interface LoadWhenInViewProps {
   children: JSX.Element;
   minHeight?: string | number;
+  placeholder: string;
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function LoadWhenInView({ children, minHeight }: LoadWhenInViewProps) {
+export default function LoadWhenInView({
+  children,
+  placeholder,
+  minHeight = 100,
+}: LoadWhenInViewProps) {
   const intersectionRef = React.useRef(null);
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -31,8 +37,12 @@ export default function LoadWhenInView({ children, minHeight }: LoadWhenInViewPr
   }, [intersection, intersection?.intersectionRatio]);
 
   return (
-    <div ref={intersectionRef} style={!isVisible && minHeight ? { height: minHeight } : {}}>
-      {!isVisible ? 'No in view yet, please scroll.' : children}
+    <div
+      {...(!isVisible ? { region: undefined, 'aria-label': placeholder } : {})}
+      ref={intersectionRef}
+      style={!isVisible && minHeight ? { height: minHeight } : {}}
+    >
+      {!isVisible ? <EuiLoadingContent /> : children}
     </div>
   );
 }

@@ -27,7 +27,7 @@ import { DurationPanel } from './duration_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
 import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
-import { TestRunsTable } from './test_runs_table';
+import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorErrorsCount } from './monitor_errors_count';
 
 export const MonitorSummary = () => {
@@ -108,7 +108,7 @@ export const MonitorSummary = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <LoadWhenInView>
+      <LoadWhenInView placeholder={LAST_10_TEST_RUNS}>
         <TestRunsTable paginable={false} from={from} to={to} />
       </LoadWhenInView>
     </>
