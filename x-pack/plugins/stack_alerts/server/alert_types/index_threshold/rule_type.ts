@@ -214,16 +214,7 @@ export function getRuleType(
       // to use the compareFn
       const met = isGroupAgg ? true : compareFn(value, params.threshold);
 
-      logger.info(
-        `INDEX THRESHOLD RESULT ${ruleId} ${name} ${JSON.stringify(
-          params
-        )} alertId ${alertId} isGroupAgg ${isGroupAgg} value ${value} threshold ${
-          params.threshold
-        } met ${met}`
-      );
-
       if (!met) {
-        logger.info(`threshold not met ${alertId}`);
         unmetGroupValues[alertId] = value;
         continue;
       }
@@ -239,10 +230,9 @@ export function getRuleType(
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
-      logger.info(`actionContext ${JSON.stringify(actionContext)}`);
       const alert = alertFactory.create(alertId);
       alert.scheduleActions(ActionGroupId, actionContext);
-      logger.info(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+      logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
 
     alertFactory.alertLimit.setLimitReached(result.truncated);
