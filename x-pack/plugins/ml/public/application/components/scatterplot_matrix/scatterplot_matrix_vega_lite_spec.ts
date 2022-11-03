@@ -216,8 +216,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
         },
         tooltip: [
           ...(color !== undefined
-            // @ts-ignore
-            ? [{ type: colorSpec.condition.type, field: getEscapedVegaFieldName(color) }]
+            ? // @ts-ignore
+              [{ type: colorSpec.condition.type, field: getEscapedVegaFieldName(color) }]
             : []),
           ...vegaColumns.map((d) => ({
             type: LEGEND_TYPES.QUANTITATIVE,
