@@ -211,7 +211,10 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           this.props.cloneLayer(this.props.layer.getId());
         },
       });
-      if (isLayerGroup(this.props.layer) && (this.props.layer as LayerGroup).getChildren().length > 0) {
+      if (
+        isLayerGroup(this.props.layer) &&
+        (this.props.layer as LayerGroup).getChildren().length > 0
+      ) {
         actionItems.push({
           name: i18n.translate('xpack.maps.layerTocActions.ungroupLayerTitle', {
             defaultMessage: 'Ungroup layers',
