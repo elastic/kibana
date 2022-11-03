@@ -81,7 +81,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
 
     const status = getAlertStatus(alerts, alertId);
 
-    if (event?.kibana?.alerting?.flapping) {
+    if (event?.kibana?.alert?.flapping) {
       status.flapping = true;
     }
 

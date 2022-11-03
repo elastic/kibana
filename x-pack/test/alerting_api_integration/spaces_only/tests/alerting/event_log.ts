@@ -193,6 +193,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   event,
                   `created new alert: 'instance'`,
                   false,
+                  false,
                   currentExecutionId
                 );
                 break;
@@ -202,6 +203,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   event,
                   `alert 'instance' has recovered`,
                   true,
+                  false,
                   currentExecutionId
                 );
                 break;
@@ -210,6 +212,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 validateInstanceEvent(
                   event,
                   `active alert: 'instance' in actionGroup: 'default'`,
+                  false,
                   false,
                   currentExecutionId
                 );
@@ -259,33 +262,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
           });
 
-          for (const event of actionEvents) {
-            switch (event?.event?.action) {
-              case 'execute':
-                expect(event?.kibana?.alert?.rule?.execution?.uuid).not.to.be(undefined);
-                expect(
-                  executionIds.indexOf(event?.kibana?.alert?.rule?.execution?.uuid)
-                ).to.be.greaterThan(-1);
-                validateEvent(event, {
-                  spaceId: space.id,
-                  savedObjects: [
-                    { type: 'action', id: createdAction.id, rel: 'primary', type_id: 'test.noop' },
-                  ],
-                  message: `action executed: test.noop:${createdAction.id}: MY action`,
-                  outcome: 'success',
-                  shouldHaveTask: true,
-                  ruleTypeId: response.body.rule_type_id,
-                  rule: undefined,
-                  consumer: 'alertsFixture',
-                });
-                break;
-            }
-          }
-
           function validateInstanceEvent(
             event: IValidatedEvent,
             subMessage: string,
             shouldHaveEventEnd: boolean,
+            flapping: boolean,
             executionId?: string
           ) {
             validateEvent(event, {
@@ -307,7 +288,31 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 name: response.body.name,
               },
               consumer: 'alertsFixture',
+              flapping,
             });
+          }
+
+          for (const event of actionEvents) {
+            switch (event?.event?.action) {
+              case 'execute':
+                expect(event?.kibana?.alert?.rule?.execution?.uuid).not.to.be(undefined);
+                expect(
+                  executionIds.indexOf(event?.kibana?.alert?.rule?.execution?.uuid)
+                ).to.be.greaterThan(-1);
+                validateEvent(event, {
+                  spaceId: space.id,
+                  savedObjects: [
+                    { type: 'action', id: createdAction.id, rel: 'primary', type_id: 'test.noop' },
+                  ],
+                  message: `action executed: test.noop:${createdAction.id}: MY action`,
+                  outcome: 'success',
+                  shouldHaveTask: true,
+                  ruleTypeId: response.body.rule_type_id,
+                  rule: undefined,
+                  consumer: 'alertsFixture',
+                });
+                break;
+            }
           }
         });
 
@@ -567,6 +572,7 @@ interface ValidateEventLogParams {
     ruleset?: string;
     namespace?: string;
   };
+  flapping?: boolean;
 }
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
@@ -585,6 +591,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
     numRecoveredAlerts,
     consumer,
     ruleTypeId,
+    flapping,
   } = params;
   const { status, actionGroupId, instanceId, reason, shouldHaveEventEnd } = params;
 
@@ -632,6 +639,10 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
 
   if (numNewAlerts) {
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.new).to.be(numNewAlerts);
+  }
+
+  if (flapping) {
+    expect(event?.kibana?.alert?.flapping).to.be(flapping);
   }
 
   expect(event?.kibana?.alert?.rule?.rule_type_id).to.be(ruleTypeId);

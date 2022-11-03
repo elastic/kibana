@@ -54,13 +54,13 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
-          flapping: {
-            type: 'boolean',
-          },
         },
       },
       alert: {
         properties: {
+          flapping: {
+            type: 'boolean',
+          },
           rule: {
             properties: {
               consumer: {

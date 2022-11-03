@@ -698,15 +698,15 @@ export class EventsFactory {
     flapping = false
   ): EventsFactory {
     const kibanaAlerting = actionGroupId
-      ? { instance_id: alertId, action_group_id: actionGroupId, flapping }
-      : { instance_id: alertId, flapping };
+      ? { instance_id: alertId, action_group_id: actionGroupId }
+      : { instance_id: alertId };
     this.events.push({
       '@timestamp': this.date,
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.activeInstance,
       },
-      kibana: { alerting: kibanaAlerting },
+      kibana: { alerting: kibanaAlerting, alert: { flapping } },
     });
     return this;
   }
