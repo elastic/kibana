@@ -14,3 +14,18 @@ export const DEFAULT_RANGE_TYPE = 'percent';
 export const DEFAULT_MIN_STOP = 0;
 export const DEFAULT_MAX_STOP = 100;
 export const DEFAULT_COLOR_STEPS = 5;
+
+// Currently supported palettes. This list might be extended dynamically in a later release
+export const paletteIds = [
+  'default',
+  'kibana_palette',
+  'custom',
+  'status',
+  'temperature',
+  'complimentary',
+  'negative',
+  'positive',
+  'cool',
+  'warm',
+  'gray',
+];

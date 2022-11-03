@@ -37,4 +37,4 @@ export type {
   Labels,
   Style,
 } from '../common';
-export { paletteIds, LabelRotation, defaultCountLabel } from '../common';
+export { LabelRotation, defaultCountLabel } from '../common';

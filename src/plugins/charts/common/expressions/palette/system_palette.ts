@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { paletteIds } from '@kbn/coloring';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from './types';
-import { paletteIds } from '../../constants';
 
 export interface SystemPaletteArguments {
   name: string;
