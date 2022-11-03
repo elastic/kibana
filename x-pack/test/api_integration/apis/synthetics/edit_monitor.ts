@@ -5,14 +5,14 @@
  * 2.0.
  */
 import uuid from 'uuid';
-import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { ConfigKey, HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
