@@ -834,6 +834,42 @@ export const getXyVisualization = ({
     };
     return suggestion;
   },
+
+  getVisualizationInfo(state: XYState) {
+    const isHorizontal = isHorizontalChart(state.layers);
+    const dataLayers = getDataLayers(state.layers);
+    const dataLayersInfo = dataLayers.map((layer) => {
+      const dimensions = [];
+      if (layer.xAccessor) {
+        dimensions.push({ name: getAxisName('x', { isHorizontal }), id: layer.xAccessor });
+      }
+      if (layer.accessors && layer.accessors.length) {
+        layer.accessors.forEach((accessor) => {
+          dimensions.push({ name: getAxisName('y', { isHorizontal }), id: accessor });
+        });
+      }
+      if (layer.splitAccessor) {
+        dimensions.push({
+          name: i18n.translate('xpack.lens.xyChart.splitSeries', {
+            defaultMessage: 'Breakdown',
+          }),
+          id: layer.splitAccessor,
+        });
+      }
+      const layerVisType = visualizationTypes.find((visType) => visType.id === layer.seriesType);
+      return {
+        layerId: layer.layerId,
+        layerType: 'data',
+        chartType: layer.seriesType,
+        icon: layerVisType?.icon,
+        label: layerVisType?.fullLabel || layerVisType?.label,
+        dimensions,
+      };
+    });
+    return {
+      layers: dataLayersInfo,
+    };
+  },
 });
 
 const getMappedAccessors = ({

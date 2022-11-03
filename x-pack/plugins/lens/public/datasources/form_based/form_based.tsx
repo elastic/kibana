@@ -15,7 +15,7 @@ import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
@@ -37,6 +37,7 @@ import type {
   IndexPattern,
   IndexPatternRef,
   DatasourceLayerSettingsProps,
+  DataSourceInfo,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -105,7 +106,7 @@ export { deleteColumn } from './operations';
 export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string,
-  dataView?: IndexPattern
+  dataView?: IndexPattern | DataView
 ): OperationDescriptor {
   const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
   const fieldTypes =
@@ -983,6 +984,31 @@ export function getFormBasedDatasource({
     },
     getUsedDataViews: (state) => {
       return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
+    },
+
+    getDatasourceInfo: (state, references, indexPatterns) => {
+      const layers = references ? injectReferences(state, references).layers : state.layers;
+      return Object.entries(layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
+        const dataView = indexPatterns?.find(
+          (indexPattern) => indexPattern.id === layer.indexPatternId
+        );
+
+        const columns = Object.entries(layer.columns).map(([colId, col]) => {
+          return {
+            id: colId,
+            role: col.isBucketed ? 'split' : 'metric',
+            operation: columnToOperation(col, undefined, dataView),
+          };
+        });
+
+        acc.push({
+          layerId: key,
+          columns,
+          dataView,
+        });
+
+        return acc;
+      }, []);
     },
   };
 

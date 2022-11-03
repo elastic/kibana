@@ -27,7 +27,7 @@ import type {
 } from '@kbn/ui-actions-plugin/public';
 import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
-import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { EuiButtonIconColor } from '@elastic/eui';
@@ -132,6 +132,23 @@ export interface EditorFrameStart {
 export interface TableSuggestionColumn {
   columnId: string;
   operation: Operation;
+}
+
+export interface DataSourceInfo {
+  layerId: string;
+  dataView?: DataView;
+  columns: Array<{ id: string; role: string; operation: OperationDescriptor }>;
+}
+
+export interface VisualizationInfo {
+  layers: Array<{
+    layerId: string;
+    layerType: string;
+    chartType: string;
+    icon?: IconType;
+    label?: string;
+    dimensions: Array<{ name: string; id: string }>;
+  }>;
 }
 
 /**
@@ -478,6 +495,12 @@ export interface Datasource<T = unknown, P = unknown> {
     setState: StateSetter<T>,
     openLayerSettings?: () => void
   ) => LayerAction[];
+
+  getDatasourceInfo: (
+    state: T,
+    references?: SavedObjectReference[],
+    dataViews?: DataView[]
+  ) => DataSourceInfo[];
 }
 
 export interface DatasourceFixAction<T> {
@@ -1238,6 +1261,8 @@ export interface Visualization<T = unknown, P = unknown> {
   getSuggestionFromConvertToLensContext?: (
     props: VisualizationStateFromContextChangeProps
   ) => Suggestion<T> | undefined;
+
+  getVisualizationInfo?: (state: T) => VisualizationInfo;
 }
 
 // Use same technique as TriggerContext

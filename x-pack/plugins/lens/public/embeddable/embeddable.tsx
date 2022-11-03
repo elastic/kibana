@@ -494,6 +494,8 @@ export class Embeddable
     this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
 
     await this.initializeOutput();
+
+    const a = this.getChartInfo();
     this.isInitialized = true;
   }
 
@@ -1059,6 +1061,37 @@ export class Embeddable
     return {
       hideTitle: this.visDisplayOptions?.noPanelTitle,
     };
+  }
+
+  public getChartInfo() {
+    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
+    if (!activeDatasourceId || !this.savedVis?.visualizationType) {
+      return [];
+    }
+
+    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+    const dataSourceInfo = this.deps.datasourceMap[activeDatasourceId].getDatasourceInfo(
+      docDatasourceState,
+      this.savedVis?.references,
+      this.indexPatterns
+    );
+    const chartInfo = this.deps.visualizationMap[
+      this.savedVis.visualizationType
+    ].getVisualizationInfo?.(this.savedVis?.state.visualization);
+
+    return chartInfo?.layers.map((l) => {
+      const dataSource = dataSourceInfo.find((info) => info.layerId === l.layerId);
+      const updatedDimensions = l.dimensions.map((d) => {
+        return {
+          ...d,
+          ...dataSource?.columns.find((c) => c.id === d.id),
+        };
+      });
+      return {
+        ...l,
+        dimensions: updatedDimensions,
+      };
+    });
   }
 
   private get visDisplayOptions(): VisualizationDisplayOptions | undefined {
