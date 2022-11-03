@@ -156,7 +156,6 @@ export class DataViewEditorService {
     this.loadingTimestampFieldsInternal$.next(true);
 
     if (query?.endsWith('*')) {
-      // todo this isn't working correctly for comma separated index patterns
       const exactMatchedQuery = this.getIndicesCached({
         pattern: query,
         showAllIndices: allowHidden,
@@ -205,7 +204,7 @@ export class DataViewEditorService {
   };
 
   setIndexPattern = (indexPattern: string) => {
-    this.indexPattern = indexPattern;
+    this.indexPattern = removeSpaces(indexPattern);
     this.loadIndices();
   };
 
@@ -318,7 +317,6 @@ export class DataViewEditorService {
   // provides info necessary for validation of index pattern in required async format
   indexPatternValidationProvider = async () => {
     const rollupIndexPromise = firstValueFrom(
-      // todo track this guy
       this.rollupIndex$.pipe(first((data) => data !== undefined))
     );
 

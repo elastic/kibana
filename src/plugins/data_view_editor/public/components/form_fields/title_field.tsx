@@ -66,7 +66,6 @@ const createMatchesIndicesValidator = ({
       rollupIndex?: string;
     };
 
-    console.log('*** validator has results', matchedIndices);
     // verifies that the title matches at least one index, alias, or data stream
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
 
