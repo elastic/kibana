@@ -222,7 +222,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.snapshot_restore.ui.enabled (boolean)',
         'xpack.trigger_actions_ui.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
-        'xpack.upgrade_assistant.readonly (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.apm.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
