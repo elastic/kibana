@@ -8,7 +8,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { useComboInput, useInput } from '../../../hooks';
+import type { useComboInput, useInput, useSwitchInput } from '../../../hooks';
 import { sendCreateAgentPolicy, sendGetOneAgentPolicy, useStartServices } from '../../../hooks';
 
 import type { NewAgentPolicy } from '../../../types';
@@ -44,6 +44,7 @@ export interface QuickStartCreateForm {
   inputs: {
     hostUrlsInput: ReturnType<typeof useComboInput>;
     nameInput: ReturnType<typeof useInput>;
+    isDefaultInput: ReturnType<typeof useSwitchInput>;
   };
 }
 
@@ -87,7 +88,7 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
         const newFleetServerHost = {
           name: inputs.nameInput.value,
           host_urls: inputs.hostUrlsInput.value,
-          is_default: true, // TODO use criamico PR here
+          is_default: inputs.isDefaultInput.value,
           is_preconfigured: false,
         };
 
@@ -130,6 +131,7 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     validate,
     inputs.nameInput.value,
     inputs.hostUrlsInput.value,
+    inputs.isDefaultInput.value,
     setFleetServerHost,
     saveFleetServerHost,
     generateServiceToken,
