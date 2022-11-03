@@ -8,6 +8,7 @@
 import { useEffect, useCallback, useState, useMemo } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   ChangePointAnnotation,
@@ -90,7 +91,13 @@ export function useChangePointResults(
 ) {
   const {
     notifications: { toasts },
+    fieldFormats,
   } = useAiopsAppContext();
+
+  const numberFormatter = useMemo(
+    () => fieldFormats.deserialize({ id: FIELD_FORMAT_IDS.NUMBER }),
+    [fieldFormats]
+  );
 
   const { dataView } = useDataSource();
 
@@ -158,10 +165,13 @@ export function useChangePointResults(
           .map((v) => {
             const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
             const timeAsString = v.change_point_request.bucket?.key;
+            const rawPValue = v.change_point_request.type[changePointType].p_value;
+
             return {
               group_field: v.key.splitFieldTerm,
               type: changePointType,
-              p_value: v.change_point_request.type[changePointType].p_value,
+              p_value:
+                rawPValue === undefined ? undefined : Number(numberFormatter.convert(rawPValue)),
               timestamp: timeAsString,
               label: changePointType,
               reason: v.change_point_request.type[changePointType].reason,
@@ -193,7 +203,7 @@ export function useChangePointResults(
         });
       }
     },
-    [runRequest, requestParams, query, dataView, splitFieldCardinality, toasts]
+    [runRequest, requestParams, query, dataView, splitFieldCardinality, toasts, numberFormatter]
   );
 
   useEffect(() => {

@@ -177,7 +177,7 @@ export const ChangePointDetectionPage: FC = () => {
                 {v.p_value !== undefined ? (
                   <EuiDescriptionList
                     type="inline"
-                    listItems={[{ title: 'p_value', description: v.p_value }]}
+                    listItems={[{ title: 'p-value', description: v.p_value }]}
                   />
                 ) : null}
                 <ChartComponent annotation={v} />
