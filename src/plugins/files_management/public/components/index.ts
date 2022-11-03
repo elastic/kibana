@@ -8,3 +8,4 @@
 
 export { EmptyPrompt } from './empty_prompt';
 export { DiagnosticsFlyout } from './diagnostics_flyout';
+export { FileFlyout } from './file_flyout';

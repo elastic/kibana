@@ -11,9 +11,10 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list';
 import numeral from '@elastic/numeral';
+import type { FileJSON } from '@kbn/files-plugin/common';
 import { useKibana } from './context';
 import { i18nTexts } from './i18n_texts';
-import { EmptyPrompt, DiagnosticsFlyout } from './components';
+import { EmptyPrompt, DiagnosticsFlyout, FileFlyout } from './components';
 
 type FilesUserContentSchema = UserContentCommonSchema;
 
@@ -26,6 +27,7 @@ export const App: FunctionComponent = () => {
     services: { filesClient },
   } = useKibana();
   const [showDiagnosticsFlyout, setShowDiagnosticsFlyout] = useState<boolean>(false);
+  const [selectedFile, setSelectedFile] = useState<undefined | FileJSON>(undefined);
   return (
     <>
       <TableListView<FilesUserContentSchema>
@@ -44,7 +46,7 @@ export const App: FunctionComponent = () => {
                 type: 'file',
                 attributes: {
                   title: file.name + (file.extension ? `.${file.extension}` : ''),
-                  size: file.size,
+                  ...file,
                 },
               })),
               total,
@@ -59,8 +61,7 @@ export const App: FunctionComponent = () => {
         initialPageSize={50}
         listingLimit={1000}
         tableListTitle={i18nTexts.tableListTitle}
-        // TODO: Handle click
-        onClickTitle={() => {}}
+        onClickTitle={({ attributes }) => setSelectedFile(attributes as unknown as FileJSON)}
         deleteItems={async (items) => {
           await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });
         }}
@@ -73,6 +74,9 @@ export const App: FunctionComponent = () => {
       />
       {showDiagnosticsFlyout && (
         <DiagnosticsFlyout onClose={() => setShowDiagnosticsFlyout(false)} />
+      )}
+      {Boolean(selectedFile) && (
+        <FileFlyout file={selectedFile!} onClose={() => setSelectedFile(undefined)} />
       )}
     </>
   );

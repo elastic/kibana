@@ -50,4 +50,22 @@ export const i18nTexts = {
       defaultMessage: 'Count by extension',
     }
   ),
+  filesFlyoutSize: i18n.translate('filesManagement.filesFlyout.sizeLabel', {
+    defaultMessage: 'Size',
+  }),
+  filesFlyoutExtension: i18n.translate('filesManagement.filesFlyout.extensionLabel', {
+    defaultMessage: 'Extension',
+  }),
+  filesFlyoutMimeType: i18n.translate('filesManagement.filesFlyout.mimeTypeLabel', {
+    defaultMessage: 'MIME type',
+  }),
+  filesFlyoutStatus: i18n.translate('filesManagement.filesFlyout.statusLabel', {
+    defaultMessage: 'Status',
+  }),
+  filesFlyoutCreated: i18n.translate('filesManagement.filesFlyout.createdLabel', {
+    defaultMessage: 'Created',
+  }),
+  filesFlyoutUpdated: i18n.translate('filesManagement.filesFlyout.updatedLabel', {
+    defaultMessage: 'Updated',
+  }),
 };
