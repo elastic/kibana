@@ -20,7 +20,9 @@
     "share",
     "unifiedSearch",
     "dataViews",
-    "advancedSettings"
+    "advancedSettings",
+    "lens",
+    "maps"
   ],
   "optionalPlugins": [
     "actions",
@@ -47,6 +49,7 @@
     "kibanaUtils",
     "ml",
     "observability",
-    "esUiShared"
+    "esUiShared",
+    "maps"
   ]
 }

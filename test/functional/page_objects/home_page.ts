@@ -131,7 +131,12 @@ export class HomePageObject extends FtrService {
   async launchSampleDataSet(id: string) {
     await this.addSampleDataSet(id);
     await this.common.closeToastIfExists();
-    await this.testSubjects.click(`launchSampleDataSet${id}`);
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`launchSampleDataSet${id}`);
+      await this.find.byCssSelector(
+        `.euiPopover-isOpen[data-test-subj="launchSampleDataSet${id}"]`
+      );
+    });
   }
 
   async clickAllKibanaPlugins() {
