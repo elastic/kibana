@@ -69,6 +69,8 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   mlInferencePipelinesData: undefined,
   mlModelsData: undefined,
   mlModelsStatus: 0,
+  simulateExistingPipelineData: undefined,
+  simulateExistingPipelineStatus: 0,
   simulatePipelineData: undefined,
   simulatePipelineErrors: [],
   simulatePipelineResult: undefined,
@@ -322,7 +324,7 @@ describe('MlInferenceLogic', () => {
           },
         ]);
       });
-      it('returns disabled pipeline option if model is redacted', () => {
+      it('returns enabled pipeline option if model is redacted', () => {
         FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
           'unit-test': {
             processors: [
@@ -343,8 +345,7 @@ describe('MlInferenceLogic', () => {
         expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
           {
             destinationField: 'test-field',
-            disabled: true,
-            disabledReason: expect.any(String),
+            disabled: false,
             pipelineName: 'unit-test',
             modelType: '',
             modelId: '',
