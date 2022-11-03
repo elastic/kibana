@@ -104,3 +104,7 @@ export const getNextTimeKey = (timeKey: TimeKey) => ({
   time: timeKey.time,
   tiebreaker: timeKey.tiebreaker + 1,
 });
+
+export const isSameTimeKey = (firstKey: TimeKey | null, secondKey: TimeKey | null): boolean =>
+  firstKey === secondKey ||
+  (firstKey != null && secondKey != null && compareTimeKeys(firstKey, secondKey) === 0);

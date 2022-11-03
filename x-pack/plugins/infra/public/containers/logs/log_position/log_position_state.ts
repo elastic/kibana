@@ -9,15 +9,23 @@ import { RefreshInterval } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { createStateContainer, ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/public';
 import { identity, pipe } from 'fp-ts/lib/function';
-import produce from 'immer';
+import produce, { Draft, original } from 'immer';
+import moment, { DurationInputObject } from 'moment';
 import logger from 'redux-logger';
-import { MinimalTimeKey, TimeKey } from '../../../../common/time';
+import { isSameTimeKey, MinimalTimeKey, pickTimeKey, TimeKey } from '../../../../common/time';
 import { datemathToEpochMillis } from '../../../utils/datemath';
 import { TimefilterState } from '../../../utils/timefilter_state_storage';
 import { LogPositionUrlState } from './use_log_position_url_state_sync';
 
+interface VisiblePositions {
+  startKey: TimeKey | null;
+  middleKey: TimeKey | null;
+  endKey: TimeKey | null;
+  pagesAfterEnd: number;
+  pagesBeforeStart: number;
+}
+
 export interface LogPositionState {
-  targetPosition: TimeKey | null;
   timeRange: {
     expression: TimeRange;
     lastChangedCompletely: number;
@@ -28,6 +36,9 @@ export interface LogPositionState {
     lastChangedTimestamp: number;
   };
   refreshInterval: RefreshInterval;
+  latestPosition: TimeKey | null;
+  targetPosition: TimeKey | null;
+  visiblePositions: VisiblePositions;
 }
 
 export interface InitialLogPositionArguments {
@@ -35,6 +46,28 @@ export interface InitialLogPositionArguments {
   initialStateFromTimefilter: TimefilterState | null;
   now?: Date;
 }
+
+/**
+ * Initial state
+ */
+
+const initialTimeRangeExpression: TimeRange = {
+  from: 'now-1d',
+  to: 'now',
+};
+
+const initialRefreshInterval: RefreshInterval = {
+  pause: true,
+  value: 5000,
+};
+
+const initialVisiblePositions: VisiblePositions = {
+  endKey: null,
+  middleKey: null,
+  startKey: null,
+  pagesBeforeStart: Infinity,
+  pagesAfterEnd: Infinity,
+};
 
 export const createInitialLogPositionState = ({
   initialStateFromUrl,
@@ -45,28 +78,24 @@ export const createInitialLogPositionState = ({
 
   return pipe(
     {
-      targetPosition: null,
       timeRange: {
-        expression: {
-          from: 'now-1d',
-          to: 'now',
-        },
+        expression: initialTimeRangeExpression,
         lastChangedCompletely: nowTimestamp,
       },
       timestamps: {
-        startTimestamp: datemathToEpochMillis('now-1d', 'down', now) ?? 0,
-        endTimestamp: datemathToEpochMillis('now', 'up', now) ?? 0,
+        startTimestamp: datemathToEpochMillis(initialTimeRangeExpression.from, 'down', now) ?? 0,
+        endTimestamp: datemathToEpochMillis(initialTimeRangeExpression.to, 'up', now) ?? 0,
         lastChangedTimestamp: nowTimestamp,
       },
-      refreshInterval: {
-        pause: true,
-        value: 5000,
-      },
+      refreshInterval: initialRefreshInterval,
+      targetPosition: null,
+      latestPosition: null,
+      visiblePositions: initialVisiblePositions,
     },
     initialStateFromUrl != null
-      ? updateStateFromUrlState(initialStateFromUrl)
+      ? initializeStateFromUrlState(initialStateFromUrl, now)
       : initialStateFromTimefilter != null
-      ? updateStateFromTimefilterState(initialStateFromTimefilter)
+      ? updateStateFromTimefilterState(initialStateFromTimefilter, now)
       : identity
   );
 };
@@ -86,6 +115,8 @@ export const createLogPositionStateContainer = (initialArguments: InitialLogPosi
       updateTargetPosition(targetPosition)(state),
     jumpToTargetPositionTime: (state: LogPositionState) => (time: number) =>
       updateTargetPosition({ time })(state),
+    reportVisiblePositions: (state: LogPositionState) => (visiblePositions: VisiblePositions) =>
+      updateVisiblePositions(visiblePositions)(state),
   });
 
 export const withDevelopmentLogger = <StateContainer extends ReduxLikeStateContainer<any>>(
@@ -98,6 +129,17 @@ export const withDevelopmentLogger = <StateContainer extends ReduxLikeStateConta
   return stateContainer;
 };
 
+/**
+ * Common updaters
+ */
+
+const updateVisiblePositions = (visiblePositions: VisiblePositions) =>
+  produce<LogPositionState>((draftState) => {
+    draftState.visiblePositions = visiblePositions;
+
+    updateLatestPositionDraft(draftState);
+  });
+
 const updateTargetPosition = (targetPosition: Partial<MinimalTimeKey> | null) =>
   produce<LogPositionState>((draftState) => {
     if (targetPosition?.time != null) {
@@ -108,7 +150,21 @@ const updateTargetPosition = (targetPosition: Partial<MinimalTimeKey> | null) =>
     } else {
       draftState.targetPosition = null;
     }
+
+    updateLatestPositionDraft(draftState);
   });
+
+const updateLatestPositionDraft = (draftState: Draft<LogPositionState>) => {
+  const previousState = original(draftState);
+  const previousVisibleMiddleKey = previousState?.visiblePositions?.middleKey ?? null;
+  const previousTargetPosition = previousState?.targetPosition ?? null;
+
+  if (!isSameTimeKey(previousVisibleMiddleKey, draftState.visiblePositions.middleKey)) {
+    draftState.latestPosition = draftState.visiblePositions.middleKey;
+  } else if (!isSameTimeKey(previousTargetPosition, draftState.targetPosition)) {
+    draftState.latestPosition = draftState.targetPosition;
+  }
+};
 
 const updateTimeRange = (timeRange: Partial<TimeRange>, now?: Date) =>
   produce<LogPositionState>((draftState) => {
@@ -144,6 +200,8 @@ const updateTimeRange = (timeRange: Partial<TimeRange>, now?: Date) =>
         draftState.timestamps.endTimestamp < draftState.targetPosition.time)
     ) {
       draftState.targetPosition = null;
+
+      updateLatestPositionDraft(draftState);
     }
   });
 
@@ -161,23 +219,45 @@ const updateRefreshInterval =
 
         if (!draftState.refreshInterval.pause) {
           draftState.targetPosition = null;
+
+          updateLatestPositionDraft(draftState);
         }
       }),
       (currentState) => {
         if (!currentState.refreshInterval.pause) {
-          return updateTimeRange({ from: 'now-1d', to: 'now' })(currentState);
+          return updateTimeRange(initialTimeRangeExpression)(currentState);
         } else {
           return currentState;
         }
       }
     );
 
+/**
+ * URL state helpers
+ */
+
 export const getUrlState = (state: LogPositionState): LogPositionUrlState => ({
   streamLive: !state.refreshInterval.pause,
   start: state.timeRange.expression.from,
   end: state.timeRange.expression.to,
-  position: state.targetPosition,
+  position: state.latestPosition ? pickTimeKey(state.latestPosition) : null,
 });
+
+export const initializeStateFromUrlState =
+  (urlState: LogPositionUrlState | null, now?: Date) =>
+  (state: LogPositionState): LogPositionState =>
+    pipe(
+      state,
+      updateTargetPosition(urlState?.position ?? null),
+      updateTimeRange(
+        {
+          from: urlState?.start ?? getTimeRangeStartFromPosition(urlState?.position),
+          to: urlState?.end ?? getTimeRangeEndFromPosition(urlState?.position),
+        },
+        now
+      ),
+      updateRefreshInterval({ pause: !urlState?.streamLive })
+    );
 
 export const updateStateFromUrlState =
   (urlState: LogPositionUrlState | null, now?: Date) =>
@@ -195,22 +275,45 @@ export const updateStateFromUrlState =
       updateRefreshInterval({ pause: !urlState?.streamLive })
     );
 
+/**
+ * Timefilter helpers
+ */
+
 export const getTimefilterState = (state: LogPositionState): TimefilterState => ({
   timeRange: state.timeRange.expression,
   refreshInterval: state.refreshInterval,
 });
 
 export const updateStateFromTimefilterState =
-  (timefilterState: TimefilterState | null) =>
+  (timefilterState: TimefilterState | null, now?: Date) =>
   (state: LogPositionState): LogPositionState =>
     pipe(
       state,
-      updateTimeRange({
-        from: timefilterState?.timeRange?.from,
-        to: timefilterState?.timeRange?.to,
-      }),
+      updateTimeRange(
+        {
+          from: timefilterState?.timeRange?.from,
+          to: timefilterState?.timeRange?.to,
+        },
+        now
+      ),
       updateRefreshInterval({
         pause: timefilterState?.refreshInterval?.pause,
-        value: timefilterState?.refreshInterval?.value,
+        value: Math.max(timefilterState?.refreshInterval?.value ?? 0, initialRefreshInterval.value),
       })
     );
+
+const defaultTimeRangeFromPositionOffset: DurationInputObject = { hours: 1 };
+
+const getTimeRangeStartFromPosition = (
+  position: Partial<MinimalTimeKey> | null | undefined
+): string | undefined =>
+  position?.time != null
+    ? moment(position.time).subtract(defaultTimeRangeFromPositionOffset).toISOString()
+    : undefined;
+
+const getTimeRangeEndFromPosition = (
+  position: Partial<MinimalTimeKey> | null | undefined
+): string | undefined =>
+  position?.time != null
+    ? moment(position.time).add(defaultTimeRangeFromPositionOffset).toISOString()
+    : undefined;

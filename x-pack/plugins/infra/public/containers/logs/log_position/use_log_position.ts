@@ -113,10 +113,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     [latestLogPositionState]
   );
 
-  const targetPosition = useMemo(
-    () => latestLogPositionState.targetPosition,
-    [latestLogPositionState]
-  );
+  const { targetPosition, visiblePositions } = latestLogPositionState;
 
   const isStreaming = useMemo(
     () => !latestLogPositionState.refreshInterval.pause,
@@ -132,8 +129,13 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     [logPositionStateContainer]
   );
 
-  const { reportVisiblePositions, visibleMidpoint, visiblePositions, visibleTimeInterval } =
-    useVisiblePositions(targetPosition);
+  const visibleTimeInterval = useMemo(
+    () =>
+      visiblePositions.startKey && visiblePositions.endKey
+        ? { start: visiblePositions.startKey.time, end: visiblePositions.endKey.time }
+        : null,
+    [visiblePositions.startKey, visiblePositions.endKey]
+  );
 
   // `endTimestamp` update conditions
   const throttledPagesAfterEnd = useThrottle(
@@ -169,14 +171,14 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     firstVisiblePosition: visiblePositions.startKey,
     pagesBeforeStart: visiblePositions.pagesBeforeStart,
     pagesAfterEnd: visiblePositions.pagesAfterEnd,
-    visibleMidpoint,
-    visibleMidpointTime: visibleMidpoint ? visibleMidpoint.time : null,
+    visibleMidpoint: latestLogPositionState.latestPosition,
+    visibleMidpointTime: latestLogPositionState.latestPosition?.time ?? null,
     visibleTimeInterval,
 
     // actions
     jumpToTargetPosition: logPositionStateContainer.transitions.jumpToTargetPosition,
     jumpToTargetPositionTime: logPositionStateContainer.transitions.jumpToTargetPositionTime,
-    reportVisiblePositions,
+    reportVisiblePositions: logPositionStateContainer.transitions.reportVisiblePositions,
     startLiveStreaming: logPositionStateContainer.transitions.startLiveStreaming,
     stopLiveStreaming: logPositionStateContainer.transitions.stopLiveStreaming,
     updateDateRange,
@@ -185,54 +187,6 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
 
 export const [LogPositionStateProvider, useLogPositionStateContext] =
   createContainer(useLogPositionState);
-
-const useVisiblePositions = (targetPosition: TimeKeyOrNull) => {
-  const [visiblePositions, reportVisiblePositions] = useState<VisiblePositions>({
-    endKey: null,
-    middleKey: null,
-    startKey: null,
-    pagesBeforeStart: Infinity,
-    pagesAfterEnd: Infinity,
-  });
-
-  const { startKey, middleKey, endKey } = visiblePositions;
-
-  const visibleMidpoint = useVisibleMidpoint(middleKey, targetPosition);
-
-  const visibleTimeInterval = useMemo(
-    () => (startKey && endKey ? { start: startKey.time, end: endKey.time } : null),
-    [startKey, endKey]
-  );
-
-  return {
-    reportVisiblePositions,
-    visibleMidpoint,
-    visiblePositions,
-    visibleTimeInterval,
-  };
-};
-
-const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrNull) => {
-  // Of the two dependencies `middleKey` and `targetPosition`, return
-  // whichever one was the most recently updated. This allows the UI controls
-  // to display a newly-selected `targetPosition` before loading new data;
-  // otherwise the previous `middleKey` would linger in the UI for the entirety
-  // of the loading operation, which the user could perceive as unresponsiveness
-  const [store, update] = useState({
-    middleKey,
-    targetPosition,
-    currentValue: middleKey || targetPosition,
-  });
-  useEffect(() => {
-    if (middleKey !== store.middleKey) {
-      update({ targetPosition, middleKey, currentValue: middleKey });
-    } else if (targetPosition !== store.targetPosition) {
-      update({ targetPosition, middleKey, currentValue: targetPosition });
-    }
-  }, [middleKey, targetPosition]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return store.currentValue;
-};
 
 const getLegacyDateRange = (logPositionState: LogPositionState): DateRange => ({
   endDateExpression: logPositionState.timeRange.expression.to,
