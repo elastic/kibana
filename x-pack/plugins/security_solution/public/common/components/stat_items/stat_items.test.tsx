@@ -11,7 +11,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import type { StatItemsProps } from '.';
-import { StatItemsComponent } from './state_items';
+import { StatItemsComponent } from './stat_items';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';

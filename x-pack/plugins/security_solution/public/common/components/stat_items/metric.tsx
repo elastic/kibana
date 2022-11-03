@@ -12,6 +12,16 @@ import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visuali
 import { FlexItem, StatValue } from './utils';
 import { getEmptyTagValue } from '../empty_value';
 
+export interface MetricProps {
+  fields: StatItem[];
+  id: string;
+  timerange: { from: string; to: string };
+  isAreaChartDataAvailable: boolean;
+  isBarChartDataAvailable: boolean;
+  inspectTitle?: string;
+  inspectIndex?: number;
+}
+
 const MetricComponent = ({
   fields,
   id,
@@ -20,15 +30,7 @@ const MetricComponent = ({
   isBarChartDataAvailable,
   inspectTitle,
   inspectIndex,
-}: {
-  fields: StatItem[];
-  id: string;
-  timerange: { from: string; to: string };
-  isAreaChartDataAvailable: boolean;
-  isBarChartDataAvailable: boolean;
-  inspectTitle?: string;
-  inspectIndex?: number;
-}) => {
+}: MetricProps) => {
   return (
     <EuiFlexGroup>
       {fields.map((field) => (

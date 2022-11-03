@@ -24,7 +24,7 @@ import { StatItemHeader } from './stat_item_header';
 import { useToggleStatus } from './use_toggle_status';
 import type { StatItemsProps } from './types';
 import { areachartConfigs, barchartConfigs, FlexItem, ChartHeight } from './utils';
-import { Metric } from './metrix';
+import { Metric } from './metric';
 import { MetricEmbeddable } from './metric_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { LensEmbeddable } from '../visualization_actions/lens_embeddable';

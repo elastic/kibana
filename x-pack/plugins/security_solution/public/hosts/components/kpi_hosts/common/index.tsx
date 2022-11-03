@@ -19,6 +19,7 @@ import type { StatItemsProps, StatItems } from '../../../../common/components/st
 import { StatItemsComponent, useKpiMatrixStatus } from '../../../../common/components/stat_items';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import type { UserskKpiStrategyResponse } from '../../../../../common/search_strategy/security_solution/users';
+
 const kpiWidgetHeight = 247;
 
 export const FlexGroup = styled(EuiFlexGroup)`
@@ -38,7 +39,6 @@ interface KpiBaseComponentProps {
   setQuerySkip: (skip: boolean) => void;
 }
 
-// TODO: remove this file once all KPIs moved to lens Embeddables
 export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
   ({ fieldsMapping, data, id, loading = false, from, to, updateDateRange, setQuerySkip }) => {
     const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(

@@ -10,6 +10,13 @@ import { FlexItem, MetricItem } from './utils';
 import type { MetricStatItem } from './types';
 import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
 
+export interface MetricEmbeddableProps {
+  fields: MetricStatItem[];
+  id: string;
+  timerange: { from: string; to: string };
+  inspectTitle?: string;
+}
+
 const MetricEmbeddableComponent = ({
   fields,
   id,
@@ -39,7 +46,7 @@ const MetricEmbeddableComponent = ({
 
             <MetricItem>
               {field.lensAttributes && (
-                <p data-test-subj="stat-title">
+                <div data-test-subj="stat-title">
                   <LensEmbeddable
                     data-test-subj="embeddable-metric"
                     height="36px"
@@ -48,12 +55,17 @@ const MetricEmbeddableComponent = ({
                     timerange={timerange}
                     inspectTitle={inspectTitle}
                   />
-                </p>
+                </div>
               )}
             </MetricItem>
             {field.description != null && (
               <FlexItem>
-                <EuiStat title={field.description} description={null} titleSize="m" />
+                <EuiStat
+                  title={field.description}
+                  description={''}
+                  titleSize="m"
+                  data-test-subj="stat-title"
+                />
               </FlexItem>
             )}
           </EuiFlexGroup>

@@ -52,5 +52,5 @@ export const useRefetchByRestartingSession = ({
     };
   });
 
-  return { searchSessionId, session, refetchByRestartingSession };
+  return { searchSessionId, refetchByRestartingSession };
 };

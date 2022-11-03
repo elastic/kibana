@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { StatItemsComponent } from './state_items';
+export { StatItemsComponent } from './stat_items';
 export type { StatItemsProps, StatItems } from './types';
 export { useKpiMatrixStatus } from './use_kpi_matrix_status';

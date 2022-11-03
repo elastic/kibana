@@ -156,36 +156,3 @@ export const mockEnableChartsData = {
   areaChartLensAttributes: kpiUniquePrivateIpsAreaLensAttributes,
   barChartLensAttributes: kpiUniquePrivateIpsBarLensAttributes,
 };
-
-export const mockEmbeddablesData = {
-  description: 'Unique private IPs',
-  enableAreaChart: true,
-  enableBarChart: true,
-  fields: [
-    {
-      key: 'uniqueSourcePrivateIps',
-      value: null,
-      name: 'Src.',
-      description: 'source',
-      color: '#D36086',
-      icon: 'visMapCoordinate',
-      lensAttributes: kpiUniquePrivateIpsSourceMetricLensAttributes,
-    },
-    {
-      key: 'uniqueDestinationPrivateIps',
-      value: null,
-      name: 'Dest.',
-      description: 'destination',
-      color: '#9170B8',
-      icon: 'visMapCoordinate',
-      lensAttributes: kpiUniquePrivateIpsDestinationMetricLensAttributes,
-    },
-  ],
-  from: '2019-06-15T06:00:00.000Z',
-  id: 'statItem',
-  statKey: 'UniqueIps',
-  setQuerySkip: jest.fn(),
-  to: '2019-06-18T06:00:00.000Z',
-  areaChartLensAttributes: kpiUniquePrivateIpsAreaLensAttributes,
-  barChartLensAttributes: kpiUniquePrivateIpsBarLensAttributes,
-};
