@@ -32,6 +32,7 @@ describe('FilePickerState', () => {
       client: filesClient,
       pageSize: 20,
       kind: 'test',
+      selectMultiple: true,
     });
   });
   it('starts off empty', () => {
@@ -179,6 +180,22 @@ describe('FilePickerState', () => {
       const query$ = cold(queryInput).pipe(tap((q) => filePickerState.setQuery(q)));
       expectObservable(merge(upload$, query$)).toBe('---a-a|');
       expectObservable(filePickerState.files$).toBe('a------', { a: [] });
+    });
+  });
+  describe('single selection', () => {
+    beforeEach(() => {
+      filePickerState = createFilePickerState({
+        client: filesClient,
+        pageSize: 20,
+        kind: 'test',
+        selectMultiple: false,
+      });
+    });
+    it('allows only one file to be selected', () => {
+      filePickerState.selectFile('a');
+      expect(filePickerState.getSelectedFileIds()).toEqual(['a']);
+      filePickerState.selectFile(['b', 'a', 'c']);
+      expect(filePickerState.getSelectedFileIds()).toEqual(['b']);
     });
   });
 });
