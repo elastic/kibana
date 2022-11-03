@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { healthRoute } from './health';
-export { backgroundTaskUtilizationRoute } from './background_task_utilization';
+export type { EmailService, EmailServiceStart, PlainTextEmail } from './types';
+export type {
+  EmailServiceSetupDeps,
+  EmailServiceStartDeps,
+} from './connectors_email_service_provider';

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { healthRoute } from './health';
-export { backgroundTaskUtilizationRoute } from './background_task_utilization';
+export { type NotificationsConfigType, config } from './config';
