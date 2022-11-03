@@ -41,7 +41,7 @@ import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { getDeepLinks } from '../../../app/deep_links';
 import { fleetGetPackageListHttpMock } from '../../../management/mocks';
-import { tGridReducer } from '../../store/data_table/reducer';
+import { dataTableReducer } from '../../store/data_table/reducer';
 
 const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
 
@@ -208,7 +208,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const store = createStore(
     mockGlobalState,
     storeReducer,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage,
     [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]

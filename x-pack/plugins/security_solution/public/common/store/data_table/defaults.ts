@@ -5,12 +5,11 @@
  * 2.0.
  */
 import type { ColumnHeaderOptions, ColumnHeaderType } from '../../../../common/types';
-import { Direction } from '../../../../common/types';
 import {
   DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
 } from '../../components/data_table/constants';
-import type { SubsetTGridModel } from './model';
+import type { SubsetDataTableModel } from './model';
 import * as i18n from './translations';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';
@@ -60,7 +59,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
   },
 ];
 
-export const tableDefaults: SubsetTGridModel = {
+export const tableDefaults: SubsetDataTableModel = {
   defaultColumns: defaultHeaders,
   dataViewId: null,
   deletedEventIds: [],
@@ -89,36 +88,7 @@ export const tableDefaults: SubsetTGridModel = {
   title: '',
 };
 
-export const tGridDefaults: SubsetTGridModel = {
-  columns: defaultHeaders,
-  defaultColumns: defaultHeaders,
-  dataViewId: null,
-  deletedEventIds: [],
-  expandedDetail: {},
-  filters: [],
-  indexNames: [],
-  isLoading: false,
-  isSelectAllChecked: false,
-  itemsPerPage: 50,
-  itemsPerPageOptions: [10, 25, 50, 100],
-  loadingEventIds: [],
-  selectedEventIds: {},
-  showCheckboxes: false,
-  sort: [
-    {
-      columnId: '@timestamp',
-      columnType: 'date',
-      esTypes: ['date'],
-      sortDirection: Direction.desc,
-    },
-  ],
-  graphEventId: '',
-  sessionViewConfig: null,
-  queryFields: [],
-  title: '',
-};
-
-export const getTGridManageDefaults = (id: string) => ({
+export const getDataTableManageDefaults = (id: string) => ({
   defaultColumns: defaultHeaders,
   loadingText: i18n.LOADING_EVENTS,
   documentType: '',

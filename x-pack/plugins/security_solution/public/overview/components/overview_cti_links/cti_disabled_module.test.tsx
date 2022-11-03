@@ -21,7 +21,7 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
 import { mockTheme } from './mock';
-import { tGridReducer } from '../../../common/store/data_table/reducer';
+import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -32,7 +32,7 @@ describe('CtiDisabledModule', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );
@@ -42,7 +42,7 @@ describe('CtiDisabledModule', () => {
     store = createStore(
       myState,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );

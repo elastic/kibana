@@ -25,7 +25,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { lastValueFrom } from 'rxjs';
-import type { TGridModel } from '../../../common/store/data_table/types';
+import type { DataTableModel } from '../../../common/store/data_table/types';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
@@ -405,7 +405,7 @@ const createThresholdTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {
@@ -551,7 +551,7 @@ const createNewTermsTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {

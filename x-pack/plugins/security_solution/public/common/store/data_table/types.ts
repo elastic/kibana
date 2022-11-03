@@ -7,51 +7,33 @@
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { ColumnHeaderOptions, SortColumnTable } from '../../../../common/types';
-import type { TGridModel, TGridModelSettings } from './model';
+import type { DataTableModel, DataTableModelSettings } from './model';
 
 /** The state of all timelines is stored here */
 export interface DataTableState {
   dataTable: TableState;
 }
 
-export type { TGridModel };
+export type { DataTableModel };
 
 /** A map of id to data table  */
 export interface TableById {
-  [id: string]: TGridModel;
+  [id: string]: DataTableModel;
 }
 
 export const EMPTY_TABLE_BY_ID: TableById = {}; // stable reference
-
-export interface TGridEpicDependencies<State> {
-  // kibana$: Observable<CoreStart>;
-  storage: Storage;
-  tGridByIdSelector: () => (state: State, timelineId: string) => TGridModel;
-}
 
 /** The state of all data tables is stored here */
 export interface TableState {
   tableById: TableById;
 }
 
-export enum TableId {
-  usersPageEvents = 'users-page-events',
-  hostsPageEvents = 'hosts-page-events',
-  networkPageEvents = 'network-page-events',
-  hostsPageSessions = 'hosts-page-sessions-v2',
-  alertsOnRuleDetailsPage = 'alerts-rules-details-page',
-  alertsOnAlertsPage = 'alerts-page',
-  casePage = 'timeline-case',
-  test = 'table-test', // Reserved for testing purposes
-  alternateTest = 'alternateTest',
-  kubernetesPageSessions = 'kubernetes-page-sessions',
-}
-
-export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {
+export interface InitialyzeDataTableSettings extends Partial<DataTableModelSettings> {
   id: string;
 }
 
-export interface TGridPersistInput extends Partial<Omit<TGridModel, keyof TGridModelSettings>> {
+export interface DataTablePersistInput
+  extends Partial<Omit<DataTableModel, keyof DataTableModelSettings>> {
   id: string;
   columns: ColumnHeaderOptions[];
   indexNames: string[];

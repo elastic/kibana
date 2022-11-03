@@ -26,7 +26,7 @@ import {
 import { createStore } from '../../store';
 import type { LinkInfo } from '../../links';
 import { SecurityPageName } from '../../../app/types';
-import { tGridReducer } from '../../store/data_table/reducer';
+import { dataTableReducer } from '../../store/data_table/reducer';
 
 const mockDispatch = jest.fn();
 
@@ -66,7 +66,7 @@ describe('global query string', () => {
         globalUrlParam,
       },
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -195,7 +195,7 @@ describe('global query string', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );

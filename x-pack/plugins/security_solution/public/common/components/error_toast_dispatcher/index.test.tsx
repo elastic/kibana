@@ -19,7 +19,7 @@ import { createStore } from '../../store/store';
 
 import { ErrorToastDispatcher } from '.';
 import type { State } from '../../store/types';
-import { tGridReducer } from '../../store/data_table/reducer';
+import { dataTableReducer } from '../../store/data_table/reducer';
 
 describe('Error Toast Dispatcher', () => {
   const state: State = mockGlobalState;
@@ -27,7 +27,7 @@ describe('Error Toast Dispatcher', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );
@@ -36,7 +36,7 @@ describe('Error Toast Dispatcher', () => {
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );

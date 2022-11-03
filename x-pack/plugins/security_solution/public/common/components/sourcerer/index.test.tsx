@@ -28,7 +28,7 @@ import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers'
 import { TimelineId, TimelineType } from '../../../../common/types';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
-import { tGridReducer } from '../../store/data_table/reducer';
+import { dataTableReducer } from '../../store/data_table/reducer';
 
 const mockDispatch = jest.fn();
 
@@ -98,7 +98,7 @@ describe('Sourcerer component', () => {
     store = createStore(
       mockGlobalState,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -213,7 +213,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -264,7 +264,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -319,7 +319,7 @@ describe('Sourcerer component', () => {
     store = createStore(
       state2,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -370,7 +370,7 @@ describe('Sourcerer component', () => {
     store = createStore(
       state2,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -413,7 +413,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -471,7 +471,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -540,7 +540,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -588,7 +588,7 @@ describe('Sourcerer component', () => {
     store = createStore(
       state2,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -638,7 +638,7 @@ describe('Sourcerer component', () => {
     store = createStore(
       state2,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -723,7 +723,7 @@ describe('sourcerer on alerts page or rules details page', () => {
   store = createStore(
     mockGlobalState,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );
@@ -798,7 +798,7 @@ describe('timeline sourcerer', () => {
   store = createStore(
     mockGlobalState,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );
@@ -894,7 +894,7 @@ describe('timeline sourcerer', () => {
     store = createStore(
       state2,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -944,7 +944,7 @@ describe('Sourcerer integration tests', () => {
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -995,7 +995,7 @@ describe('No data', () => {
     store = createStore(
       mockNoIndicesState,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -1076,7 +1076,7 @@ describe('Update available', () => {
     store = createStore(
       state2,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -1211,7 +1211,7 @@ describe('Update available for timeline template', () => {
     store = createStore(
       state2,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -1302,7 +1302,7 @@ describe('Missing index patterns', () => {
     store = createStore(
       state3,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -1344,7 +1344,7 @@ describe('Missing index patterns', () => {
     store = createStore(
       state2,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );

@@ -5,47 +5,51 @@
  * 2.0.
  */
 
-import { tGridDefaults } from './defaults';
+import { tableDefaults } from './defaults';
 import {
-  setInitializeTgridSettings,
-  updateTGridColumnOrder,
-  updateTGridColumnWidth,
+  setInitializeDataTableSettings,
+  updateDataTableColumnOrder,
+  updateDataTableColumnWidth,
 } from './helpers';
 import { mockGlobalState } from '../../mock/global_state';
 import type { SortColumnTable } from '../../../../common/types';
 import { TableId } from '../../../../common/types';
-import type { TGridModelSettings } from './model';
+import type { DataTableModelSettings } from './model';
 
 const id = 'foo';
 const defaultTableById = {
   ...mockGlobalState.dataTable.tableById,
 };
 
-describe('setInitializeTgridSettings', () => {
-  test('it returns the expected sort when tGridSettingsProps has an override', () => {
+describe('setInitializeDataTableSettings', () => {
+  test('it returns the expected sort when dataTableSettingsProps has an override', () => {
     const sort: SortColumnTable[] = [
       { columnId: 'foozle', columnType: 'date', esTypes: ['date'], sortDirection: 'asc' },
     ];
 
-    const tGridSettingsProps: Partial<TGridModelSettings> = {
+    const dataTableSettingsProps: Partial<DataTableModelSettings> = {
       sort, // <-- override
     };
 
     expect(
-      setInitializeTgridSettings({ id, tableById: defaultTableById, tGridSettingsProps })[id].sort
+      setInitializeDataTableSettings({ id, tableById: defaultTableById, dataTableSettingsProps })[
+        id
+      ].sort
     ).toEqual(sort);
   });
 
-  test('it returns the default sort when tGridSettingsProps does NOT contain an override', () => {
-    const tGridSettingsProps = {}; // <-- no `sort` override
+  test('it returns the default sort when dataTableSettingsProps does NOT contain an override', () => {
+    const dataTableSettingsProps = {}; // <-- no `sort` override
 
     expect(
-      setInitializeTgridSettings({ id, tableById: defaultTableById, tGridSettingsProps })[id].sort
-    ).toEqual(tGridDefaults.sort);
+      setInitializeDataTableSettings({ id, tableById: defaultTableById, dataTableSettingsProps })[
+        id
+      ].sort
+    ).toEqual(tableDefaults.sort);
   });
 
   test('it doesn`t overwrite the timeline if it is initialized', () => {
-    const tGridSettingsProps = { title: 'testTitle' };
+    const dataTableSettingsProps = { title: 'testTitle' };
 
     const tableById = {
       [id]: {
@@ -54,16 +58,16 @@ describe('setInitializeTgridSettings', () => {
       },
     };
 
-    const result = setInitializeTgridSettings({
+    const result = setInitializeDataTableSettings({
       id,
       tableById: { ...defaultTableById, ...tableById },
-      tGridSettingsProps,
+      dataTableSettingsProps,
     });
     expect(result[id]).toBe(tableById[id]);
   });
 });
 
-describe('updateTGridColumnOrder', () => {
+describe('updateDataTableColumnOrder', () => {
   test('it returns the columns in the new expected order', () => {
     const originalIdOrder = defaultTableById[TableId.test].columns.map((x) => x.id); // ['@timestamp', 'event.severity', 'event.category', '...']
 
@@ -71,7 +75,7 @@ describe('updateTGridColumnOrder', () => {
     const newIdOrder = [originalIdOrder[1], originalIdOrder[0], ...originalIdOrder.slice(2)]; // ['event.severity', '@timestamp', 'event.category', '...']
 
     expect(
-      updateTGridColumnOrder({
+      updateDataTableColumnOrder({
         columnIds: newIdOrder,
         id: TableId.test,
         tableById: defaultTableById,
@@ -95,7 +99,7 @@ describe('updateTGridColumnOrder', () => {
     const newIdOrder = [originalIdOrder[0], unknownColumId, ...originalIdOrder.slice(1)]; // ['@timestamp', 'does.not.exist', 'event.severity', 'event.category', '...']
 
     expect(
-      updateTGridColumnOrder({
+      updateDataTableColumnOrder({
         columnIds: newIdOrder,
         id: TableId.test,
         tableById: defaultTableById,
@@ -112,7 +116,7 @@ describe('updateTGridColumnOrder', () => {
     const newIdOrder = ['this.id.does.NOT.exist', 'this.id.also.does.NOT.exist']; // all unknown IDs
 
     expect(
-      updateTGridColumnOrder({
+      updateDataTableColumnOrder({
         columnIds: newIdOrder,
         id: TableId.test,
         tableById: defaultTableById,
@@ -127,7 +131,7 @@ describe('updateTGridColumnOrder', () => {
   });
 });
 
-describe('updateTGridColumnWidth', () => {
+describe('updateDataTableColumnWidth', () => {
   test("it updates (only) the specified column's width", () => {
     const columnId = '@timestamp';
     const width = 1234;
@@ -138,7 +142,7 @@ describe('updateTGridColumnWidth', () => {
     };
 
     expect(
-      updateTGridColumnWidth({
+      updateDataTableColumnWidth({
         columnId,
         id: TableId.test,
         tableById: defaultTableById,
@@ -157,7 +161,7 @@ describe('updateTGridColumnWidth', () => {
     const unknownColumId = 'does.not.exist';
 
     expect(
-      updateTGridColumnWidth({
+      updateDataTableColumnWidth({
         columnId: unknownColumId,
         id: TableId.test,
         tableById: defaultTableById,

@@ -16,7 +16,7 @@ import type {
 import { BulkActions } from '.';
 import { useBulkActionItems } from './use_bulk_action_items';
 import { dataTableActions, dataTableSelectors } from '../../../store/data_table';
-import type { TGridModel } from '../../../store/data_table/model';
+import type { DataTableModel } from '../../../store/data_table/model';
 import type { AlertWorkflowStatus, Refetch } from '../../../types';
 import type { DataTableState } from '../../../store/data_table/types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
@@ -62,7 +62,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     // Catches state change isSelectAllChecked->false (page checkbox) upon user selection change to reset toolbar select all
     useEffect(() => {
       if (isSelectAllChecked) {
-        dispatch(dataTableActions.setTGridSelectAll({ id, selectAll: false }));
+        dispatch(dataTableActions.setDataTableSelectAll({ id, selectAll: false }));
       } else {
         setShowClearSelection(false);
       }
@@ -72,14 +72,14 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     // Dispatches to stateful_body's selectAll via TimelineTypeContext props
     // as scope of response data required to actually set selectedEvents
     const onSelectAll = useCallback(() => {
-      dispatch(dataTableActions.setTGridSelectAll({ id, selectAll: true }));
+      dispatch(dataTableActions.setDataTableSelectAll({ id, selectAll: true }));
       setShowClearSelection(true);
     }, [dispatch, id]);
 
     // Callback for clearing entire selection from toolbar
     const onClearSelection = useCallback(() => {
       clearSelected({ id });
-      dispatch(dataTableActions.setTGridSelectAll({ id, selectAll: false }));
+      dispatch(dataTableActions.setDataTableSelectAll({ id, selectAll: false }));
       setShowClearSelection(false);
     }, [clearSelected, dispatch, id]);
 
@@ -149,7 +149,7 @@ AlertBulkActionsComponent.displayName = 'AlertBulkActionsComponent';
 const makeMapStateToProps = () => {
   const getTGrid = dataTableSelectors.getTableByIdSelector();
   const mapStateToProps = (state: DataTableState, { id }: OwnProps) => {
-    const dataTable: TGridModel = getTGrid(state, id);
+    const dataTable: DataTableModel = getTGrid(state, id);
     const { selectedEventIds, isSelectAllChecked } = dataTable;
 
     return {

@@ -33,7 +33,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { createStore } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useGetUserCasesPermissions } from '../../../common/lib/kibana';
-import { tGridReducer } from '../../../common/store/data_table/reducer';
+import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -180,7 +180,7 @@ describe('StatefulTimeline', () => {
             },
           },
           SUB_PLUGINS_REDUCER,
-          { dataTable: tGridReducer },
+          { dataTable: dataTableReducer },
           kibanaObservable,
           storage
         )}
@@ -218,7 +218,7 @@ describe('StatefulTimeline', () => {
             },
           },
           SUB_PLUGINS_REDUCER,
-          { dataTable: tGridReducer },
+          { dataTable: dataTableReducer },
           kibanaObservable,
           storage
         )}

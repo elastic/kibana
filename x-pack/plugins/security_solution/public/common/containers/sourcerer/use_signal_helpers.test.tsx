@@ -17,7 +17,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useSignalHelpers } from './use_signal_helpers';
 import type { State } from '../../store';
 import { createStore } from '../../store';
-import { tGridReducer } from '../../store/data_table/reducer';
+import { dataTableReducer } from '../../store/data_table/reducer';
 
 describe('useSignalHelpers', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
@@ -57,7 +57,7 @@ describe('useSignalHelpers', () => {
     const store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -93,7 +93,7 @@ describe('useSignalHelpers', () => {
     const store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );

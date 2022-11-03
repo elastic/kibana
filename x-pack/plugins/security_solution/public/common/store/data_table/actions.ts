@@ -10,11 +10,11 @@ import type { SessionViewConfig } from '../../../../common/types/session_view';
 import type { ExpandedDetailType } from '../../../../common/types/detail_panel';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { ColumnHeaderOptions, SortColumnTable } from '../../../../common/types';
-import type { InitialyzeTGridSettings, TGridPersistInput } from './types';
+import type { InitialyzeDataTableSettings, DataTablePersistInput } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/data-table');
 
-export const createTGrid = actionCreator<TGridPersistInput>('CREATE_DATA_TABLE');
+export const createDataTable = actionCreator<DataTablePersistInput>('CREATE_DATA_TABLE');
 
 export const upsertColumn = actionCreator<{
   column: ColumnHeaderOptions;
@@ -103,10 +103,10 @@ export const clearEventsDeleted = actionCreator<{
   id: string;
 }>('CLEAR_DATA_TABLE_EVENTS_DELETED');
 
-export const initializeTGridSettings =
-  actionCreator<InitialyzeTGridSettings>('INITIALIZE_DATA_TABLE');
+export const initializeDataTableSettings =
+  actionCreator<InitialyzeDataTableSettings>('INITIALIZE_DATA_TABLE');
 
-export const setTGridSelectAll = actionCreator<{ id: string; selectAll: boolean }>(
+export const setDataTableSelectAll = actionCreator<{ id: string; selectAll: boolean }>(
   'SET_DATA_TABLE_SELECT_ALL'
 );
 

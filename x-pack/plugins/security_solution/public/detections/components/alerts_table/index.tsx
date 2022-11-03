@@ -124,7 +124,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   useEffect(() => {
     if (isSelectAllChecked) {
       dispatch(
-        dataTableActions.setTGridSelectAll({
+        dataTableActions.setDataTableSelectAll({
           id: tableId,
           selectAll: false,
         })
@@ -166,7 +166,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   useEffect(() => {
     dispatch(
-      dataTableActions.initializeTGridSettings({
+      dataTableActions.initializeDataTableSettings({
         defaultColumns: getColumns(license).map((c) =>
           !tGridEnabled && c.initialWidth == null
             ? {

@@ -28,7 +28,7 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import { TableId } from '../../../../common/types';
-import { tGridReducer } from '../../../common/store/data_table/reducer';
+import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
@@ -89,7 +89,7 @@ const myStore = createStore(
     },
   },
   SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
+  { dataTable: dataTableReducer },
   kibanaObservable,
   storage
 );

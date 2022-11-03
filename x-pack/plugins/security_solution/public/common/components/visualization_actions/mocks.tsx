@@ -16,7 +16,7 @@ import {
 } from '../../mock';
 import type { State } from '../../store';
 import { createStore } from '../../store';
-import { tGridReducer } from '../../store/data_table/reducer';
+import { dataTableReducer } from '../../store/data_table/reducer';
 
 export const queryFromSearchBar = {
   query: 'host.name: *',
@@ -61,7 +61,7 @@ export const mockCreateStoreWithQueryFilters = () => {
   return createStore(
     myState,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );

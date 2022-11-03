@@ -24,7 +24,7 @@ import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
-import { tGridReducer } from '../../../common/store/data_table/reducer';
+import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -47,7 +47,7 @@ describe('Tls Table Component', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );
@@ -57,7 +57,7 @@ describe('Tls Table Component', () => {
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );

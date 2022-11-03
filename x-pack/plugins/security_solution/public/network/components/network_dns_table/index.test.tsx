@@ -25,7 +25,7 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
-import { tGridReducer } from '../../../common/store/data_table/reducer';
+import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -36,7 +36,7 @@ describe('NetworkTopNFlow Table Component', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );
@@ -59,7 +59,7 @@ describe('NetworkTopNFlow Table Component', () => {
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );

@@ -12,7 +12,7 @@ import type { SessionViewConfig } from '../../../../common/types/session_view';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { ColumnHeaderOptions, SortColumnTable } from '../../../../common/types';
 
-export interface TGridModelSettings {
+export interface DataTableModelSettings {
   defaultColumns: Array<
     Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
       ColumnHeaderOptions
@@ -27,7 +27,7 @@ export interface TGridModelSettings {
   title: string;
   unit?: (n: number) => string | React.ReactNode;
 }
-export interface TGridModel extends TGridModelSettings {
+export interface DataTableModel extends DataTableModelSettings {
   /** The columns displayed in the data table */
   columns: Array<
     Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
@@ -62,9 +62,9 @@ export interface TGridModel extends TGridModelSettings {
   updated?: number;
 }
 
-export type SubsetTGridModel = Readonly<
+export type SubsetDataTableModel = Readonly<
   Pick<
-    TGridModel,
+    DataTableModel,
     | 'columns'
     | 'defaultColumns'
     | 'dataViewId'

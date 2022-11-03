@@ -19,7 +19,7 @@ import type { State } from '../../../../store';
 import { createStore } from '../../../../store';
 import * as i18n from './translations';
 import { useChartSettingsPopoverConfiguration } from '.';
-import { tGridReducer } from '../../../../store/data_table/reducer';
+import { dataTableReducer } from '../../../../store/data_table/reducer';
 
 const mockHandleClick = jest.fn();
 
@@ -36,7 +36,7 @@ describe('useChartSettingsPopoverConfiguration', () => {
   const store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );

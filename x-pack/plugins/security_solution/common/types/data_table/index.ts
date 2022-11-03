@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type { EuiDataGridColumn } from '@elastic/eui';
 import * as runtimeTypes from 'io-ts';
-import type { TGridModelSettings } from '../../../public/common/store/data_table/model';
-import type { TGridModel } from '../../../public/common/store/data_table/types';
-import type { ColumnHeaderOptions } from '../header_actions';
 
 export enum Direction {
   asc = 'asc',
@@ -24,25 +20,7 @@ export interface SortColumnTable {
   sortDirection: SortDirectionTable;
 }
 
-/** The state of all timelines is stored here */
-export interface DataTableState {
-  dataTable: TableState;
-}
-
-/** A map of id to data table  */
-export interface TableById {
-  [id: string]: TGridModel;
-}
-export interface TGridEpicDependencies<State> {
-  // kibana$: Observable<CoreStart>;
-  storage: Storage;
-  tGridByIdSelector: () => (state: State, timelineId: string) => TGridModel;
-}
-
-/** The state of all data tables is stored here */
-export interface TableState {
-  tableById: TableById;
-}
+export type { TableById } from '../../../public/common/store/data_table/types';
 
 export enum TableId {
   usersPageEvents = 'users-page-events',
@@ -57,7 +35,7 @@ export enum TableId {
   kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
-export const TableIdLiteralRt = runtimeTypes.union([
+const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.usersPageEvents),
   runtimeTypes.literal(TableId.hostsPageEvents),
   runtimeTypes.literal(TableId.networkPageEvents),
@@ -69,19 +47,3 @@ export const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.kubernetesPageSessions),
 ]);
 export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;
-
-export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {
-  id: string;
-}
-
-export interface TGridPersistInput extends Partial<Omit<TGridModel, keyof TGridModelSettings>> {
-  id: string;
-  columns: ColumnHeaderOptions[];
-  indexNames: string[];
-  showCheckboxes?: boolean;
-  defaultColumns: Array<
-    Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
-      ColumnHeaderOptions
-  >;
-  sort: SortColumnTable[];
-}

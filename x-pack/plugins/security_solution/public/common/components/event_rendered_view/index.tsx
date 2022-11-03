@@ -32,7 +32,6 @@ import type { BrowserFields, TimelineItem } from '../../../../common/search_stra
 import type {
   ColumnHeaderOptions,
   ControlColumnProps,
-  DataTableState,
   OnRowSelected,
   OnSelectAll,
   RowRenderer,
@@ -42,7 +41,7 @@ import { isEventBuildingBlockType } from './helpers';
 import { AlertCount } from '../toolbar/alert/styles';
 import { defaultUnit } from '../toolbar/alert';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
-import type { TGridModel } from '../../store/data_table/model';
+import type { DataTableModel } from '../../store/data_table/model';
 import type { Refetch } from '../../store/data_table/inputs';
 import type { AlertWorkflowStatus } from '../../types';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
@@ -50,6 +49,7 @@ import { checkBoxControlColumn, transformControlColumns } from '../control_colum
 import { getColumnHeaders } from '../data_table/column_headers/helpers';
 import { getEventIdToDataMapping } from '../data_table/helpers';
 import { clearSelected } from '../../store/data_table/actions';
+import type { DataTableState } from '../../store/data_table/types';
 
 const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
@@ -538,7 +538,7 @@ const makeMapStateToProps = () => {
     state: DataTableState,
     { tableId, hasAlertsCrud, browserFields }: EventRenderedViewProps
   ) => {
-    const dataTable: TGridModel = getDataTable(state, tableId);
+    const dataTable: DataTableModel = getDataTable(state, tableId);
     const {
       columns,
       isSelectAllChecked,

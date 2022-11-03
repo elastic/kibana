@@ -48,7 +48,7 @@ import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
 import type { SecurityDataView } from '../containers/sourcerer/api';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { tGridReducer } from './data_table/reducer';
+import { dataTableReducer } from './data_table/reducer';
 
 type ComposeType = typeof compose;
 declare global {
@@ -155,13 +155,13 @@ export const createStoreFactory = async (
     ...subPlugins.network.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
-    ...tGridReducer,
+    ...dataTableReducer,
   };
 
   return createStore(
     initialState,
     rootReducer,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     libs$.pipe(pluck('kibana')),
     storage,
     [...(subPlugins.management.store.middleware ?? [])]

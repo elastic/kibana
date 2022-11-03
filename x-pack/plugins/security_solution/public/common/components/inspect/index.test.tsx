@@ -23,7 +23,7 @@ import { upsertQuery } from '../../store/inputs/helpers';
 import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { InputsModelId } from '../../store/inputs/constants';
-import { tGridReducer } from '../../store/data_table/reducer';
+import { dataTableReducer } from '../../store/data_table/reducer';
 
 jest.mock('./modal', () => ({
   ModalInspectQuery: jest.fn(() => <div data-test-subj="mocker-modal" />),
@@ -45,7 +45,7 @@ describe('Inspect Button', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );
@@ -57,7 +57,7 @@ describe('Inspect Button', () => {
       store = createStore(
         myState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -169,7 +169,7 @@ describe('Inspect Button', () => {
       store = createStore(
         myState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -192,7 +192,7 @@ describe('Inspect Button', () => {
       store = createStore(
         myState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -215,7 +215,7 @@ describe('Inspect Button', () => {
       store = createStore(
         myState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -240,7 +240,7 @@ describe('Inspect Button', () => {
       store = createStore(
         myState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -291,7 +291,7 @@ describe('Inspect Button', () => {
       store = createStore(
         myState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -316,7 +316,7 @@ describe('Inspect Button', () => {
       store = createStore(
         myState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -341,7 +341,7 @@ describe('Inspect Button', () => {
       store = createStore(
         myState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -366,7 +366,7 @@ describe('Inspect Button', () => {
       store = createStore(
         myState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );

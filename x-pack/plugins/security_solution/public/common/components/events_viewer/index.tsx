@@ -36,7 +36,7 @@ import {
   useSessionViewNavigation,
   useSessionView,
 } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
-import type { SubsetTGridModel } from '../../store/data_table/model';
+import type { SubsetDataTableModel } from '../../store/data_table/model';
 import {
   EventsContainerLoading,
   FullWidthFlexGroupTable,
@@ -77,7 +77,7 @@ const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface Props {
   defaultCellActions?: DataTableCellAction[];
-  defaultModel: SubsetTGridModel;
+  defaultModel: SubsetDataTableModel;
   end: string;
   entityType: EntityType;
   tableId: TableId;
@@ -167,7 +167,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   useEffect(() => {
     if (!initialized) {
       dispatch(
-        dataTableActions.createTGrid({
+        dataTableActions.createDataTable({
           columns,
           dataViewId: selectedDataViewId,
           defaultColumns,
@@ -362,7 +362,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   useEffect(() => {
     dispatch(dataTableActions.clearSelected({ id: tableId }));
     dispatch(
-      dataTableActions.setTGridSelectAll({
+      dataTableActions.setDataTableSelectAll({
         id: tableId,
         selectAll: false,
       })

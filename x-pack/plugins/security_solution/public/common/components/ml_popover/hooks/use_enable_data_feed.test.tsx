@@ -18,14 +18,14 @@ import { createStore } from '../../../store';
 import type { State } from '../../../store';
 
 import type { SecurityJob } from '../types';
-import { tGridReducer } from '../../../store/data_table/reducer';
+import { dataTableReducer } from '../../../store/data_table/reducer';
 
 const state: State = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();
 const store = createStore(
   state,
   SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
+  { dataTable: dataTableReducer },
   kibanaObservable,
   storage
 );

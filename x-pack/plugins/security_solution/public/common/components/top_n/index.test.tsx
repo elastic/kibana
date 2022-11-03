@@ -25,7 +25,7 @@ import { createStore } from '../../store';
 import type { Props } from './top_n';
 import { StatefulTopN } from '.';
 import { TimelineId } from '../../../../common/types/timeline';
-import { tGridReducer } from '../../store/data_table/reducer';
+import { dataTableReducer } from '../../store/data_table/reducer';
 import { TableId } from '../../../../common/types';
 import { detectionAlertsTables } from './helpers';
 
@@ -155,7 +155,7 @@ const { storage } = createSecuritySolutionStorageMock();
 const store = createStore(
   state,
   SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
+  { dataTable: dataTableReducer },
   kibanaObservable,
   storage
 );

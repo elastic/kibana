@@ -16,10 +16,10 @@ import type {
 } from '../../../../common/types/detail_panel';
 import type { ColumnHeaderOptions, SortColumnTable } from '../../../../common/types';
 import type { TableToggleDetailPanel } from './actions';
-import type { TGridPersistInput, TableById } from './types';
-import type { TGridModelSettings } from './model';
+import type { DataTablePersistInput, TableById } from './types';
+import type { DataTableModelSettings } from './model';
 
-import { getTGridManageDefaults, tGridDefaults } from './defaults';
+import { getDataTableManageDefaults, tableDefaults } from './defaults';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 export type Maybe<T> = T | null;
@@ -42,19 +42,23 @@ interface TableNonEcsData {
   value?: Maybe<string[]>;
 }
 
-interface CreateTGridParams extends TGridPersistInput {
+interface CreateDataTableParams extends DataTablePersistInput {
   tableById: TableById;
 }
 
 /** Adds a new `Table` to the provided collection of `TableById` */
-export const createInitTGrid = ({ id, tableById, ...tGridProps }: CreateTGridParams): TableById => {
+export const createInitDataTable = ({
+  id,
+  tableById,
+  ...dataTableProps
+}: CreateDataTableParams): TableById => {
   const dataTable = tableById[id];
   return {
     ...tableById,
     [id]: {
       ...dataTable,
-      ...tGridDefaults,
-      ...tGridProps,
+      ...tableDefaults,
+      ...dataTableProps,
       isLoading: false,
     },
   };
@@ -124,33 +128,33 @@ export const removeTableColumn = ({
   };
 };
 
-interface InitializeTgridParams {
+interface InitializeDataTableParams {
   id: string;
   tableById: TableById;
-  tGridSettingsProps: Partial<TGridModelSettings>;
+  dataTableSettingsProps: Partial<DataTableModelSettings>;
 }
 
-export const setInitializeTgridSettings = ({
+export const setInitializeDataTableSettings = ({
   id,
   tableById,
-  tGridSettingsProps,
-}: InitializeTgridParams): TableById => {
+  dataTableSettingsProps,
+}: InitializeDataTableParams): TableById => {
   const dataTable = tableById[id];
 
   return !dataTable?.initialized
     ? {
         ...tableById,
         [id]: {
-          ...tGridDefaults,
-          ...getTGridManageDefaults(id),
+          ...tableDefaults,
+          ...getDataTableManageDefaults(id),
           ...dataTable,
-          ...tGridSettingsProps,
+          ...dataTableSettingsProps,
           ...(!dataTable ||
-          (isEmpty(dataTable.columns) && !isEmpty(tGridSettingsProps.defaultColumns))
-            ? { columns: tGridSettingsProps.defaultColumns }
+          (isEmpty(dataTable.columns) && !isEmpty(dataTableSettingsProps.defaultColumns))
+            ? { columns: dataTableSettingsProps.defaultColumns }
             : {}),
-          sort: tGridSettingsProps.sort ?? tGridDefaults.sort,
-          loadingEventIds: tGridDefaults.loadingEventIds,
+          sort: dataTableSettingsProps.sort ?? tableDefaults.sort,
+          loadingEventIds: tableDefaults.loadingEventIds,
           initialized: true,
         },
       }
@@ -211,7 +215,7 @@ type Columns = Array<
   Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
 >;
 
-export const updateTGridColumnOrder = ({
+export const updateDataTableColumnOrder = ({
   columnIds,
   id,
   tableById,
@@ -237,7 +241,7 @@ export const updateTGridColumnOrder = ({
   };
 };
 
-export const updateTGridColumnWidth = ({
+export const updateDataTableColumnWidth = ({
   columnId,
   id,
   tableById,

@@ -20,7 +20,7 @@ import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { NewTemplateTimeline } from './new_template_timeline';
-import { tGridReducer } from '../../../../common/store/data_table/reducer';
+import { dataTableReducer } from '../../../../common/store/data_table/reducer';
 
 jest.mock('../../../../common/lib/kibana', () => {
   return {
@@ -34,7 +34,7 @@ describe('NewTemplateTimeline', () => {
   const store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );

@@ -21,7 +21,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { createStore } from '../../store';
 import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
-import { tGridReducer } from '../../store/data_table/reducer';
+import { dataTableReducer } from '../../store/data_table/reducer';
 
 const mockSetAppFilters = jest.fn();
 const mockFilterManager = new FilterManager(coreMock.createStart().uiSettings);
@@ -141,7 +141,7 @@ describe('SearchBarComponent', () => {
     const store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -183,7 +183,7 @@ describe('SearchBarComponent', () => {
     const store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -204,7 +204,7 @@ describe('SearchBarComponent', () => {
     const store = createStore(
       mockGlobalState,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -235,7 +235,7 @@ describe('SearchBarComponent', () => {
     const store = createStore(
       mockGlobalState,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -277,7 +277,7 @@ describe('SearchBarComponent', () => {
     const store = createStore(
       mockGlobalState,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -316,7 +316,7 @@ describe('SearchBarComponent', () => {
       const store = createStore(
         mockGlobalState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -358,7 +358,7 @@ describe('SearchBarComponent', () => {
       const store = createStore(
         mockGlobalState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -403,7 +403,7 @@ describe('SearchBarComponent', () => {
       const store = createStore(
         mockGlobalState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );

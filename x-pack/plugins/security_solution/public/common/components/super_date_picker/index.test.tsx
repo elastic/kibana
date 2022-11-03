@@ -24,7 +24,7 @@ import { createStore } from '../../store';
 import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { InputsModelId } from '../../store/inputs/constants';
-import { tGridReducer } from '../../store/data_table/reducer';
+import { dataTableReducer } from '../../store/data_table/reducer';
 
 jest.mock('../../lib/kibana');
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
@@ -88,7 +88,7 @@ describe('SIEM Super Date Picker', () => {
     let store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
+      { dataTable: dataTableReducer },
       kibanaObservable,
       storage
     );
@@ -98,7 +98,7 @@ describe('SIEM Super Date Picker', () => {
       store = createStore(
         state,
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );

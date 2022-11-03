@@ -43,7 +43,7 @@ import type {
 } from '../../../../common/search_strategy';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 import * as module from '../../containers/query_toggle';
-import { tGridReducer } from '../../store/data_table/reducer';
+import { dataTableReducer } from '../../store/data_table/reducer';
 
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';
@@ -69,7 +69,7 @@ describe('Stat Items Component', () => {
   const store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );

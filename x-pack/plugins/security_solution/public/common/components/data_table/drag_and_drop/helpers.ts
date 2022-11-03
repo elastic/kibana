@@ -12,7 +12,7 @@ import { isString, keyBy } from 'lodash/fp';
 
 import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
 import type { ColumnHeaderOptions } from '../../../../../common/types';
-import { TableId } from '../../../store/data_table/types';
+import { TableId } from '../../../../../common/types';
 import { dataTableActions } from '../../../store/data_table';
 import { DEFAULT_TABLE_COLUMN_MIN_WIDTH } from '../constants';
 import type { BrowserField, BrowserFields } from '../../../containers/source';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { EuiDataGridColumnActions } from '@elastic/eui';
 import { keyBy } from 'lodash/fp';
 import React from 'react';
@@ -16,7 +15,6 @@ import type {
 } from '../../../../../common/search_strategy/index_fields';
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import { DEFAULT_TABLE_COLUMN_MIN_WIDTH, DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH } from '../constants';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../header_actions';
 import { defaultColumnHeaderType } from '../../../store/data_table/defaults';
 
 const defaultActions: EuiDataGridColumnActions = {

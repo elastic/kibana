@@ -11,12 +11,12 @@ import {
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
-  createTGrid,
-  initializeTGridSettings,
+  createDataTable,
+  initializeDataTableSettings,
   removeColumn,
   setEventsDeleted,
   setEventsLoading,
-  setTGridSelectAll,
+  setDataTableSelectAll,
   setSelected,
   toggleDetailPanel,
   updateColumnOrder,
@@ -34,14 +34,14 @@ import {
 
 import {
   applyDeltaToTableColumnWidth,
-  createInitTGrid,
-  setInitializeTgridSettings,
+  createInitDataTable,
+  setInitializeDataTableSettings,
   removeTableColumn,
   setDeletedTableEvents,
   setLoadingTableEvents,
   setSelectedTableEvents,
-  updateTGridColumnOrder,
-  updateTGridColumnWidth,
+  updateDataTableColumnOrder,
+  updateDataTableColumnWidth,
   updateTableColumns,
   updateTableItemsPerPage,
   updateTablePerPageOptions,
@@ -55,20 +55,20 @@ import {
 import type { TableState } from './types';
 import { EMPTY_TABLE_BY_ID } from './types';
 
-export const initialTGridState: TableState = {
+const initialDataTableState: TableState = {
   tableById: EMPTY_TABLE_BY_ID,
 };
 
 /** The reducer for all data table actions  */
-export const tGridReducer = reducerWithInitialState(initialTGridState)
+export const dataTableReducer = reducerWithInitialState(initialDataTableState)
   .case(upsertColumn, (state, { column, id, index }) => ({
     ...state,
     tableById: upsertTableColumn({ column, id, index, tableById: state.tableById }),
   }))
-  .case(createTGrid, (state, tableProps) => {
+  .case(createDataTable, (state, tableProps) => {
     return {
       ...state,
-      tableById: createInitTGrid({
+      tableById: createInitDataTable({
         ...tableProps,
         tableById: state.tableById,
       }),
@@ -98,7 +98,7 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
   }))
   .case(updateColumnOrder, (state, { id, columnIds }) => ({
     ...state,
-    tableById: updateTGridColumnOrder({
+    tableById: updateDataTableColumnOrder({
       columnIds,
       id,
       tableById: state.tableById,
@@ -106,7 +106,7 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
   }))
   .case(updateColumnWidth, (state, { id, columnId, width }) => ({
     ...state,
-    tableById: updateTGridColumnWidth({
+    tableById: updateDataTableColumnWidth({
       columnId,
       id,
       tableById: state.tableById,
@@ -218,15 +218,15 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       tableById: state.tableById,
     }),
   }))
-  .case(initializeTGridSettings, (state, { id, ...tGridSettingsProps }) => ({
+  .case(initializeDataTableSettings, (state, { id, ...dataTableSettingsProps }) => ({
     ...state,
-    tableById: setInitializeTgridSettings({
+    tableById: setInitializeDataTableSettings({
       id,
       tableById: state.tableById,
-      tGridSettingsProps,
+      dataTableSettingsProps,
     }),
   }))
-  .case(setTGridSelectAll, (state, { id, selectAll }) => ({
+  .case(setDataTableSelectAll, (state, { id, selectAll }) => ({
     ...state,
     tableById: {
       ...state.tableById,

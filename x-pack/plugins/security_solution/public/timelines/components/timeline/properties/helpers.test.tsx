@@ -21,7 +21,7 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../../common/mock';
 import { createStore } from '../../../../common/store';
-import { tGridReducer } from '../../../../common/store/data_table/reducer';
+import { dataTableReducer } from '../../../../common/store/data_table/reducer';
 
 jest.mock('./use_create_timeline');
 
@@ -150,7 +150,7 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -187,7 +187,7 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );
@@ -223,7 +223,7 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
+        { dataTable: dataTableReducer },
         kibanaObservable,
         storage
       );

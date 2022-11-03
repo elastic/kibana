@@ -28,7 +28,7 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { tGridReducer } from '../../common/store/data_table/reducer';
+import { dataTableReducer } from '../../common/store/data_table/reducer';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -91,7 +91,7 @@ const { storage } = createSecuritySolutionStorageMock();
 const myStore = createStore(
   myState,
   SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
+  { dataTable: dataTableReducer },
   kibanaObservable,
   storage
 );

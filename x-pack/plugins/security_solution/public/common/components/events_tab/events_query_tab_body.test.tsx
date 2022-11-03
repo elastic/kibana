@@ -165,7 +165,7 @@ describe('EventsQueryTabBody', () => {
   });
 
   it('initializes t-grid', () => {
-    const spy = jest.spyOn(dataTableActions, 'initializeTGridSettings');
+    const spy = jest.spyOn(dataTableActions, 'initializeDataTableSettings');
     render(
       <TestProviders>
         <EventsQueryTabBody {...commonProps} />

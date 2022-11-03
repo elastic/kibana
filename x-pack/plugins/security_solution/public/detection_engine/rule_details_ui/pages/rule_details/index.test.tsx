@@ -27,7 +27,7 @@ import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../common/mock/router';
 
 import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
-import { tGridReducer } from '../../../../common/store/data_table/reducer';
+import { dataTableReducer } from '../../../../common/store/data_table/reducer';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -165,7 +165,7 @@ const { storage } = createSecuritySolutionStorageMock();
 const store = createStore(
   state,
   SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
+  { dataTable: dataTableReducer },
   kibanaObservable,
   storage
 );

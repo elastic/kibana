@@ -48,18 +48,14 @@ import type { BrowserFields } from '../../../../common/search_strategy/index_fie
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import type { AlertWorkflowStatus, Refetch } from '../../types';
-import type { TGridModel } from '../../store/data_table/types';
+import type { DataTableState, DataTableModel } from '../../store/data_table/types';
 import { AlertCount, defaultUnit } from '../toolbar/alert';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { useKibana } from '../../lib/kibana';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
 import { getPageRowIndex } from './pagination';
-import type {
-  ControlColumnProps,
-  DataTableCellAction,
-  DataTableState,
-} from '../../../../common/types';
+import type { ControlColumnProps, DataTableCellAction } from '../../../../common/types';
 
 const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.securitySolution.dataTable.ariaLabel', {
   defaultMessage: 'Alerts',
@@ -664,7 +660,7 @@ const makeMapStateToProps = () => {
     state: DataTableState,
     { browserFields, id, hasAlertsCrud }: OwnProps
   ) => {
-    const dataTable: TGridModel = getDataTable(state, id);
+    const dataTable: DataTableModel = getDataTable(state, id);
     const {
       columns,
       isSelectAllChecked,
