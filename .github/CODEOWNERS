@@ -709,6 +709,7 @@ packages/core/application/core-application-browser-mocks @elastic/kibana-core
 packages/core/application/core-application-common @elastic/kibana-core
 packages/core/apps/core-apps-browser-internal @elastic/kibana-core
 packages/core/apps/core-apps-browser-mocks @elastic/kibana-core
+packages/core/apps/core-apps-server-internal @elastic/kibana-core
 packages/core/base/core-base-browser-internal @elastic/kibana-core
 packages/core/base/core-base-browser-mocks @elastic/kibana-core
 packages/core/base/core-base-common @elastic/kibana-core
