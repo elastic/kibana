@@ -16,7 +16,6 @@ import {
   EuiPageSideBar_Deprecated as EuiPageSideBar,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import {
@@ -36,10 +35,8 @@ import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
 import { getSelectedFields, shouldShowField } from './lib/group_fields';
 import { doesFieldMatchFilters, FieldFilterState, setFieldFilterProp } from './lib/field_filter';
-import { getDataViewFieldList } from './lib/get_data_view_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import type { DataTableRecord } from '../../../../types';
 import { getUiActions } from '../../../../kibana_services';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../hooks/use_saved_search';
@@ -81,13 +78,10 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   createNewDataView?: () => void;
 
   /**
-   * a statistics of the distribution of fields in the given hits
+   * All fields: fields from data view and unmapped fields
    */
-  fieldCounts?: Record<string, number>;
-  /**
-   * hits fetched from ES, displayed in the doc table
-   */
-  documents?: DataTableRecord[];
+  allFields: DataViewField[] | null;
+
   /**
    * Discover view mode
    */
@@ -99,10 +93,9 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
 export function DiscoverSidebarComponent({
   alwaysShowActionButtons = false,
   columns,
-  fieldCounts,
   fieldFilter,
   documents$,
-  documents, // TODO: remove
+  allFields,
   onAddField,
   onAddFilter,
   onRemoveField,
@@ -120,19 +113,11 @@ export function DiscoverSidebarComponent({
   showDataViewPicker,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor, dataViews } = useDiscoverServices();
-  const [fields, setFields] = useState<DataViewField[] | null>(null);
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
   const query = useAppStateSelector((state) => state.query);
   const isGlobalFilterApplied = useAppStateSelector((state) => Boolean(state.filters?.length));
-
-  useEffect(() => {
-    if (documents) {
-      const newFields = getDataViewFieldList(selectedDataView, fieldCounts);
-      setFields(newFields);
-    }
-  }, [selectedDataView, fieldCounts, documents]);
 
   const onChangeFieldSearch = useCallback(
     (filterName: string, value: string | boolean | undefined) => {
@@ -142,15 +127,11 @@ export function DiscoverSidebarComponent({
     [fieldFilter, setFieldFilter]
   );
 
-  const selectedFields = useMemo(() => {
-    return getSelectedFields(fields, columns);
-  }, [fields, columns]);
-
   const { fieldTypes, presentFieldTypes } = useMemo(() => {
     const result = ['any'];
     const dataViewFieldTypes = new Set<string>();
-    if (Array.isArray(fields)) {
-      for (const field of fields) {
+    if (Array.isArray(allFields)) {
+      for (const field of allFields) {
         if (field.type !== '_source') {
           // If it's a string type, we want to distinguish between keyword and text
           // For this purpose we need the ES type
@@ -171,37 +152,19 @@ export function DiscoverSidebarComponent({
       }
     }
     return { fieldTypes: result, presentFieldTypes: Array.from(dataViewFieldTypes) };
-  }, [fields]);
+  }, [allFields]);
 
   const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
+  const [selectedFields, setSelectedFields] = useState<DataViewField[]>([]);
+  const [multiFieldsMap, setMultiFieldsMap] = useState<
+    Map<string, Array<{ field: DataViewField; isSelected: boolean }>> | undefined
+  >(undefined);
 
-  const calculateMultiFields = () => {
-    if (!useNewFieldsApi || !fields) {
-      return undefined;
-    }
-    const map = new Map<string, Array<{ field: DataViewField; isSelected: boolean }>>();
-    fields.forEach((field) => {
-      const subTypeMulti = getFieldSubtypeMulti(field);
-      const parent = subTypeMulti?.multi.parent;
-      if (!parent) {
-        return;
-      }
-      const multiField = {
-        field,
-        isSelected: selectedFields.includes(field),
-      };
-      const value = map.get(parent) ?? [];
-      value.push(multiField);
-      map.set(parent, value);
-    });
-    return map;
-  };
-
-  const [multiFields, setMultiFields] = useState(() => calculateMultiFields());
-
-  useShallowCompareEffect(() => {
-    setMultiFields(calculateMultiFields());
-  }, [fields, selectedFields, useNewFieldsApi]);
+  useEffect(() => {
+    const nextSelectedFields = getSelectedFields(allFields, columns);
+    setSelectedFields(nextSelectedFields);
+    setMultiFieldsMap(calculateMultiFields(allFields, nextSelectedFields, useNewFieldsApi));
+  }, [allFields, columns, useNewFieldsApi, setSelectedFields, setMultiFieldsMap]);
 
   const deleteField = useMemo(
     () =>
@@ -272,10 +235,10 @@ export function DiscoverSidebarComponent({
     }, []);
   const fieldsExistenceReader = useExistingFieldsReader();
   const { fieldGroups } = useGroupedFields({
-    dataViewId: isPlainRecord || !selectedDataView?.id ? null : selectedDataView.id, // TODO: check whether we need Empty fields for text-based query
+    dataViewId: (!isPlainRecord && selectedDataView?.id) || null, // TODO: check whether we need Empty fields for text-based query
     fieldsExistenceReader,
-    allFields: fields || EMPTY_FIELD_LIST,
-    popularFieldsLimit: isPlainRecord ? 0 : popularFieldsLimit,
+    allFields: allFields || EMPTY_FIELD_LIST,
+    popularFieldsLimit: !isPlainRecord ? popularFieldsLimit : 0,
     sortedSelectedFields: selectedFields,
     isAffectedByGlobalFilter: isGlobalFilterApplied,
     services: {
@@ -285,8 +248,6 @@ export function DiscoverSidebarComponent({
     onSupportedFieldFilter,
     onOverrideFieldGroupDetails,
   });
-
-  // TODO: hide meta fields on Discover for text-based queries
 
   // console.log({
   //   fields,
@@ -310,7 +271,7 @@ export function DiscoverSidebarComponent({
           onAddFilter={onAddFilter}
           documents$={documents$}
           trackUiMetric={trackUiMetric}
-          multiFields={multiFields?.get(field.name)}
+          multiFields={multiFieldsMap?.get(field.name)} // ideally we better calculate multifields when they are requested first from the popover
           onEditField={editField}
           onDeleteField={deleteField}
           showFieldStats={showFieldStats}
@@ -327,7 +288,7 @@ export function DiscoverSidebarComponent({
       onAddFilter,
       documents$,
       trackUiMetric,
-      multiFields,
+      multiFieldsMap,
       editField,
       deleteField,
       showFieldStats,
@@ -386,12 +347,12 @@ export function DiscoverSidebarComponent({
           <FieldListGrouped
             fieldGroups={fieldGroups}
             fieldsExistenceStatus={
-              fields && selectedDataView?.id
+              allFields && selectedDataView?.id
                 ? fieldsExistenceReader.getFieldsExistenceStatus(selectedDataView.id)
                 : ExistenceFetchStatus.unknown
             }
             renderFieldItem={renderFieldItem}
-            fieldsExistInIndex={Boolean(fields?.length)}
+            fieldsExistInIndex={Boolean(allFields?.length)}
           />
         </EuiFlexItem>
         {!!editField && (
@@ -428,3 +389,29 @@ export function DiscoverSidebarComponent({
 }
 
 export const DiscoverSidebar = memo(DiscoverSidebarComponent);
+
+function calculateMultiFields(
+  allFields: DataViewField[] | null,
+  selectedFields: DataViewField[],
+  useNewFieldsApi: boolean
+) {
+  if (!useNewFieldsApi || !allFields) {
+    return undefined;
+  }
+  const map = new Map<string, Array<{ field: DataViewField; isSelected: boolean }>>();
+  allFields.forEach((field) => {
+    const subTypeMulti = getFieldSubtypeMulti(field);
+    const parent = subTypeMulti?.multi.parent;
+    if (!parent) {
+      return;
+    }
+    const multiField = {
+      field,
+      isSelected: selectedFields.includes(field),
+    };
+    const value = map.get(parent) ?? [];
+    value.push(multiField);
+    map.set(parent, value);
+  });
+  return map;
+}

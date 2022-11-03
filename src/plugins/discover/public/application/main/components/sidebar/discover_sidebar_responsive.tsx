@@ -35,6 +35,7 @@ import { FetchStatus } from '../../../types';
 // import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { getDataViewFieldList } from './lib/get_data_view_field_list';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -120,39 +121,30 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  /**
-   * fieldCounts are used to determine which fields are actually used in the given set of documents
-   */
-  const fieldCounts = useRef<Record<string, number> | null>(null);
-  if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(props.documents$.getValue().result!, selectedDataView);
-  }
-
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
+  const [allFields, setAllFields] = useState<DataViewField[] | null>(null);
+  const [allFieldsNames, setAllFieldsNames] = useState<string[]>([]);
+
   useEffect(() => {
     const subscription = props.documents$.subscribe((next) => {
-      if (next.fetchStatus !== documentState.fetchStatus) {
-        if (next.result) {
-          fieldCounts.current = calcFieldCounts(next.result, selectedDataView!);
-        }
-        setDocumentState({ ...documentState, ...next });
-      }
+      setDocumentState((current) => ({ ...current, ...next }));
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, selectedDataView, documentState, setDocumentState]);
+  }, [props.documents$, setDocumentState]);
 
   useEffect(() => {
-    // when data view changes fieldCounts needs to be cleaned up to prevent displaying
-    // fields of the previous data view
-    fieldCounts.current = {};
-  }, [selectedDataView]);
+    const fieldCounts = calcFieldCounts(documentState.result, selectedDataView);
+
+    setAllFields(getDataViewFieldList(selectedDataView, fieldCounts));
+    setAllFieldsNames(Object.keys(fieldCounts));
+  }, [selectedDataView, documentState.result, setAllFields, setAllFieldsNames]);
 
   const query = useAppStateSelector((state) => state.query);
   const filters = useAppStateSelector((state) => state.filters);
   const dateRange = data.query.timefilter.timefilter.getTime(); // TODO: is it correct to use the relative time range instead of absolute time range here? Currently, it helps to avoid unnecessary refetches.
 
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
-    dataViews: selectedDataView ? [selectedDataView] : [],
+    dataViews: !isPlainRecord && selectedDataView ? [selectedDataView] : [],
     query: query!,
     filters: filters!,
     fromDate: dateRange.from,
@@ -211,9 +203,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       // it is useful to know what fields are populated in the docs fetched
       // or what fields are selected by the user
 
-      const fieldCnts = fieldCounts.current ?? {};
-
-      const availableFields = props.columns.length > 0 ? props.columns : Object.keys(fieldCnts);
+      const availableFields = props.columns.length > 0 ? props.columns : allFieldsNames;
       availableFields$.next({
         fetchStatus: FetchStatus.COMPLETE,
         fields: availableFields,
@@ -221,13 +211,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     },
     // Using columns.length here instead of columns to avoid array reference changing
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      selectedDataView,
-      availableFields$,
-      fieldCounts.current,
-      documentState.result,
-      props.columns.length,
-    ]
+    [selectedDataView, allFieldsNames, props.columns.length, availableFields$]
   );
 
   const editField = useMemo(
@@ -288,9 +272,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           <DiscoverSidebar
             {...props}
             onFieldEdited={onFieldEditedExtended}
-            documents={documentState.result!}
+            allFields={allFields}
             fieldFilter={fieldFilter}
-            fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}
             editField={editField}
             createNewDataView={createNewDataView}
@@ -352,8 +335,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                 <DiscoverSidebar
                   {...props}
                   onFieldEdited={onFieldEditedExtended}
-                  documents={documentState.result}
-                  fieldCounts={fieldCounts.current}
+                  allFields={allFields}
                   fieldFilter={fieldFilter}
                   setFieldFilter={setFieldFilter}
                   alwaysShowActionButtons={true}

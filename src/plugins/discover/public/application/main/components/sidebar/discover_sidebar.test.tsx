@@ -17,7 +17,7 @@ import {
   DiscoverSidebarProps,
 } from './discover_sidebar';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
-
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
@@ -30,7 +30,7 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import * as ExistingFieldsHookApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { ExistenceFetchStatus } from '@kbn/unified-field-list-plugin/public';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import { getDataViewFieldList } from './lib/get_data_view_field_list';
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])
@@ -57,6 +57,8 @@ function getCompProps(): DiscoverSidebarProps {
     }
   }
 
+  const allFields = getDataViewFieldList(dataView, fieldCounts);
+
   (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockClear();
   (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockImplementation(() => ({
     hasFieldData: (dataViewId: string, fieldName: string) => {
@@ -82,7 +84,7 @@ function getCompProps(): DiscoverSidebarProps {
 
   return {
     columns: ['extension'],
-    fieldCounts,
+    allFields,
     dataViewList: [dataView as DataViewListItem],
     onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
@@ -98,7 +100,6 @@ function getCompProps(): DiscoverSidebarProps {
     createNewDataView: jest.fn(),
     onDataViewCreated: jest.fn(),
     documents$,
-    documents: hits,
     availableFields$,
     useNewFieldsApi: true,
   };
