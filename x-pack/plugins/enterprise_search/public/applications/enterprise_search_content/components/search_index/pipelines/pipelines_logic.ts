@@ -33,6 +33,11 @@ import {
   UpdatePipelineApiLogic,
 } from '../../../api/connector/update_pipeline_api_logic';
 import {
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicValues,
+  CachedFetchIndexApiLogicActions,
+} from '../../../api/index/cached_fetch_index_api_logic';
+import {
   CreateCustomPipelineApiLogic,
   CreateCustomPipelineApiLogicArgs,
   CreateCustomPipelineApiLogicResponse,
@@ -42,11 +47,6 @@ import {
   FetchCustomPipelineApiLogicResponse,
   FetchCustomPipelineApiLogic,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
-import {
-  CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicValues,
-  CachedFetchIndexApiLogicActions,
-} from '../../../api/index/fetch_index_wrapper_logic';
 import { CreateMlInferencePipelineApiLogic } from '../../../api/ml_models/create_ml_inference_pipeline';
 import {
   DeleteMlInferencePipelineApiLogic,

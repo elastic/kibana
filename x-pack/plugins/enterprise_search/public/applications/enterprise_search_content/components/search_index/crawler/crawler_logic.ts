@@ -26,7 +26,7 @@ import {
 import {
   CachedFetchIndexApiLogic,
   CachedFetchIndexApiLogicActions,
-} from '../../../api/index/fetch_index_wrapper_logic';
+} from '../../../api/index/cached_fetch_index_api_logic';
 
 import { isCrawlerIndex } from '../../../utils/indices';
 import { IndexNameLogic } from '../index_name_logic';

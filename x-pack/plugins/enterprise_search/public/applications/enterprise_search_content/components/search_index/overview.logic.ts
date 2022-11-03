@@ -15,7 +15,7 @@ import { GenerateApiKeyLogic } from '../../api/generate_api_key/generate_api_key
 import {
   CachedFetchIndexApiLogic,
   CachedFetchIndexApiLogicActions,
-} from '../../api/index/fetch_index_wrapper_logic';
+} from '../../api/index/cached_fetch_index_api_logic';
 
 import { SEARCH_INDICES_PATH } from '../../routes';
 

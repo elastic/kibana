@@ -27,7 +27,7 @@ import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync
 import {
   CachedFetchIndexApiLogic,
   CachedFetchIndexApiLogicActions,
-} from '../../api/index/fetch_index_wrapper_logic';
+} from '../../api/index/cached_fetch_index_api_logic';
 
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
 import {
@@ -43,14 +43,9 @@ import {
 import { CrawlerLogic } from './crawler/crawler_logic';
 import { IndexNameLogic } from './index_name_logic';
 
-const FETCH_INDEX_POLLING_DURATION = 5000; // 1 seconds
-const FETCH_INDEX_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
-
 type StartSyncApiValues = Actions<StartSyncArgs, {}>;
 
 export interface IndexViewActions {
-  clearFetchIndexTimeout(): void;
-  createNewFetchIndexTimeout(duration: number): { duration: number };
   fetchCrawlerData: () => void;
   fetchIndex: () => void;
   fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
@@ -59,12 +54,11 @@ export interface IndexViewActions {
   recheckIndex: () => void;
   resetFetchIndexApi: CachedFetchIndexApiLogicActions['apiReset'];
   resetRecheckIndexLoading: () => void;
-  setFetchIndexTimeoutId(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
-  startFetchIndexPoll(): void;
+  startFetchIndexPoll: CachedFetchIndexApiLogicActions['startPolling'];
   startSync(): void;
   startSyncApiError: StartSyncApiValues['apiError'];
   startSyncApiSuccess: StartSyncApiValues['apiSuccess'];
-  stopFetchIndexPoll(): void;
+  stopFetchIndexPoll(): CachedFetchIndexApiLogicActions['stopPolling'];
 }
 
 export interface IndexViewValues {
@@ -72,7 +66,6 @@ export interface IndexViewValues {
   connectorId: string | null;
   fetchIndexApiData: typeof CachedFetchIndexApiLogic.values.fetchIndexApiData;
   fetchIndexApiStatus: Status;
-  fetchIndexTimeoutId: NodeJS.Timeout | null;
   index: ElasticsearchViewIndex | undefined;
   indexData: typeof CachedFetchIndexApiLogic.values.indexData;
   indexName: string;
@@ -91,35 +84,32 @@ export interface IndexViewValues {
 
 export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewActions>>({
   actions: {
-    clearFetchIndexTimeout: true,
-    createNewFetchIndexTimeout: (duration) => ({ duration }),
     fetchIndex: true,
     recheckIndex: true,
     resetRecheckIndexLoading: true,
-    setFetchIndexTimeoutId: (timeoutId) => ({ timeoutId }),
-    startFetchIndexPoll: true,
     startSync: true,
-    stopFetchIndexPoll: true,
   },
   connect: {
     actions: [
-      StartSyncApiLogic,
-      [
-        'apiError as startSyncApiError',
-        'apiSuccess as startSyncApiSuccess',
-        'makeRequest as makeStartSyncRequest',
-      ],
+      IndexNameLogic,
+      ['setIndexName'],
       CachedFetchIndexApiLogic,
       [
         'apiError as fetchIndexApiError',
         'apiReset as resetFetchIndexApi',
         'apiSuccess as fetchIndexApiSuccess',
         'makeRequest as makeFetchIndexRequest',
+        'startPolling as startFetchIndexPoll',
+        'stopPolling as stopFetchIndexPoll',
+      ],
+      StartSyncApiLogic,
+      [
+        'apiError as startSyncApiError',
+        'apiSuccess as startSyncApiSuccess',
+        'makeRequest as makeStartSyncRequest',
       ],
       CrawlerLogic,
       ['fetchCrawlerData'],
-      IndexNameLogic,
-      ['setIndexName'],
     ],
     values: [
       IndexNameLogic,
@@ -133,35 +123,22 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       ],
     ],
   },
-  events: ({ actions, values }) => ({
+  events: ({ actions }) => ({
     afterMount: () => {
-      actions.startFetchIndexPoll();
+      const { indexName } = IndexNameLogic.values;
+      actions.startFetchIndexPoll(indexName);
     },
     beforeUnmount: () => {
-      if (values.fetchIndexTimeoutId) {
-        clearTimeout(values.fetchIndexTimeoutId);
-      }
+      actions.stopFetchIndexPoll();
+      actions.resetFetchIndexApi();
     },
   }),
   listeners: ({ actions, values }) => ({
-    createNewFetchIndexTimeout: ({ duration }) => {
-      if (values.fetchIndexTimeoutId) {
-        clearTimeout(values.fetchIndexTimeoutId);
-      }
-      const timeoutId = setTimeout(() => {
-        actions.fetchIndex();
-      }, duration);
-      actions.setFetchIndexTimeoutId(timeoutId);
-    },
     fetchIndex: () => {
       const { indexName } = IndexNameLogic.values;
       actions.makeFetchIndexRequest({ indexName });
     },
-    fetchIndexApiError: () => {
-      actions.createNewFetchIndexTimeout(FETCH_INDEX_POLLING_DURATION_ON_FAILURE);
-    },
     fetchIndexApiSuccess: (index) => {
-      actions.createNewFetchIndexTimeout(FETCH_INDEX_POLLING_DURATION);
       if (isCrawlerIndex(index) && index.name === values.indexName) {
         actions.fetchCrawlerData();
       }
@@ -180,16 +157,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     makeStartSyncRequest: () => clearFlashMessages(),
     recheckIndex: () => actions.fetchIndex(),
     setIndexName: () => {
-      if (values.fetchIndexTimeoutId) {
-        clearTimeout(values.fetchIndexTimeoutId);
-      }
-      actions.clearFetchIndexTimeout();
-      actions.resetFetchIndexApi();
-      actions.fetchIndex();
-    },
-    startFetchIndexPoll: () => {
-      // we rely on listeners for fetchIndexApiError and fetchIndexApiSuccess to handle reccuring polling
-      actions.fetchIndex();
+      actions.startFetchIndexPoll(values.indexName);
     },
     startSync: () => {
       if (isConnectorIndex(values.fetchIndexApiData)) {
@@ -204,23 +172,9 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         })
       );
     },
-    stopFetchIndexPoll: () => {
-      if (values.fetchIndexTimeoutId) {
-        clearTimeout(values.fetchIndexTimeoutId);
-      }
-      actions.clearFetchIndexTimeout();
-      actions.resetFetchIndexApi();
-    },
   }),
   path: ['enterprise_search', 'content', 'index_view_logic'],
   reducers: {
-    fetchIndexTimeoutId: [
-      null,
-      {
-        clearFetchIndexTimeout: () => null,
-        setFetchIndexTimeoutId: (_, { timeoutId }) => timeoutId,
-      },
-    ],
     localSyncNowValue: [
       false,
       {

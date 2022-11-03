@@ -21,11 +21,11 @@ import {
   PutConnectorNameAndDescriptionArgs,
   PutConnectorNameAndDescriptionResponse,
 } from '../../../../api/connector/update_connector_name_and_description_api_logic';
-import { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
 import {
   CachedFetchIndexApiLogic,
   CachedFetchIndexApiLogicActions,
-} from '../../../../api/index/fetch_index_wrapper_logic';
+} from '../../../../api/index/cached_fetch_index_api_logic';
+import { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
 import { isConnectorIndex } from '../../../../utils/indices';
 
 type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;

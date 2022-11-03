@@ -22,11 +22,11 @@ import {
   PostConnectorConfigurationArgs,
   PostConnectorConfigurationResponse,
 } from '../../../api/connector/update_connector_configuration_api_logic';
-import { FetchIndexApiResponse } from '../../../api/index/fetch_index_api_logic';
 import {
   CachedFetchIndexApiLogic,
   CachedFetchIndexApiLogicActions,
-} from '../../../api/index/fetch_index_wrapper_logic';
+} from '../../../api/index/cached_fetch_index_api_logic';
+import { FetchIndexApiResponse } from '../../../api/index/fetch_index_api_logic';
 import { isConnectorIndex } from '../../../utils/indices';
 
 type ConnectorConfigurationActions = Pick<
