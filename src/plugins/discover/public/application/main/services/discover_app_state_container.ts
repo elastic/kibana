@@ -63,7 +63,7 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<AppSt
    * Update state with new state derived by the given SavedSearch
    * @param savedSearch
    */
-  resetBySavedSearch: (savedSearch: SavedSearch) => void;
+  resetBySavedSearch: (savedSearch: SavedSearch) => AppState;
   /**
    * Init default values and start syncing changes state <-> url
    * @param currentSavedSearch
@@ -159,6 +159,7 @@ export const getDiscoverAppStateContainer = (
       const nextAppState = getInitialState(stateStorage, nextSavedSearch, services);
       addLog('🔗 [appState] reset appstate by savedsearch', { nextSavedSearch, nextAppState });
       appStateContainer.set(nextAppState);
+      return nextAppState;
     },
     set: (value: AppState | null) => {
       if (value) {
@@ -175,6 +176,8 @@ export const getDiscoverAppStateContainer = (
     replace: replaceUrlState,
     push: pushUrlState,
     isEmptyURL: () => {
+      addLog('🔗 [appState] isEmptyURL', stateStorage.get(APP_STATE_URL_KEY));
+      debugger
       return stateStorage.get(APP_STATE_URL_KEY) === null;
     },
     update: (newPartial: AppState, replace = false) => {

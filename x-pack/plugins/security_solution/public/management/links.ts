@@ -244,7 +244,7 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
-  const isEndpointRbacEnabled = ExperimentalFeaturesService.get().endpointRbacEnabled;
+  const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
   const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
   const linksToExclude: SecurityPageName[] = [];
 
@@ -255,7 +255,7 @@ export const getManagementFilteredLinks = async (
           licenseService,
           fleetAuthz,
           currentUserResponse.roles,
-          isEndpointRbacEnabled,
+          endpointRbacEnabled || endpointRbacV1Enabled,
           endpointPermissions
         )
       : getEndpointAuthzInitialState();

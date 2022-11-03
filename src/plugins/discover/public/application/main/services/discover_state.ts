@@ -279,7 +279,8 @@ export function getDiscoverStateContainer({
       setDataView(nextDataView);
     }
     await savedSearchContainer.update(nextDataView, appState);
-    appStateContainer.resetBySavedSearch(savedSearchContainer.get());
+    const nextAppState = appStateContainer.resetBySavedSearch(savedSearchContainer.get());
+    await savedSearchContainer.update(undefined, nextAppState);
     return nextSavedSearch;
   };
 
