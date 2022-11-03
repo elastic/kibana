@@ -26,8 +26,8 @@ import { testTrailingControlColumns } from '../../../../../common/mock/mock_time
 import type { UseFieldBrowserOptionsProps } from '../../../fields_browser';
 import { mockTriggersActionsUi } from '../../../../../common/mock/mock_triggers_actions_ui_plugin';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
-import { getActionsColumnWidth } from '../../../../../common/components/data_table/column_headers/helpers';
 import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
+import { getActionsColumnWidth } from '../../../../../common/components/header_actions';
 
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({

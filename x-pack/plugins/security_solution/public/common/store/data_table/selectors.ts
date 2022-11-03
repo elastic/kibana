@@ -6,7 +6,7 @@
  */
 import { getOr } from 'lodash/fp';
 import { createSelector } from 'reselect';
-import { dataTableDefaults, getDataTableManageDefaults } from './defaults';
+import { tableDefaults, getDataTableManageDefaults } from './defaults';
 import type { DataTableState, TableById, DataTableModel } from './types';
 
 const selectTableById = (state: DataTableState): TableById => state.dataTable.tableById;
@@ -18,7 +18,7 @@ const selectTable = (state: DataTableState, tableId: string): DataTableModel =>
 
 export const getTableByIdSelector = () => createSelector(selectTable, (table) => table);
 
-const getDefaultTgrid = (id: string) => ({ ...dataTableDefaults, ...getDataTableManageDefaults(id) });
+const getDefaultTgrid = (id: string) => ({ ...tableDefaults, ...getDataTableManageDefaults(id) });
 
 const selectTGridById = (state: unknown, tableId: string): DataTableModel => {
   return getOr(
