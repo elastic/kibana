@@ -57,7 +57,11 @@ export const useLogPositionUrlStateSync = () => {
             ),
           get: () => logPositionUrlStateRT.encode(stateContainer.get()),
         },
-        stateStorage: urlStateStorage,
+        stateStorage: {
+          ...urlStateStorage,
+          set: <State>(key: string, state: State) =>
+            urlStateStorage.set(key, state, { replace: true }),
+        },
       });
 
       start();
