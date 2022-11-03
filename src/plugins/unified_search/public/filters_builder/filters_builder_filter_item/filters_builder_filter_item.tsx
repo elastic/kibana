@@ -8,6 +8,7 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiDraggable,
   EuiDroppable,
@@ -285,34 +286,49 @@ export function FilterItem({
                           </EuiFlexItem>
                           {!hideOr ? (
                             <EuiFlexItem grow={false}>
-                              <EuiButtonIcon
+                              <EuiButtonEmpty
                                 onClick={onOrButtonClick}
                                 isDisabled={disableOr}
-                                iconType="returnKey"
+                                iconType="plusInCircle"
                                 size="s"
+                                iconSize="s"
                                 aria-label={i18n.translate(
                                   'unifiedSearch.filter.filtersBuilder.addOrFilterGroupButtonIcon',
                                   {
                                     defaultMessage: 'Add filter group with OR',
                                   }
                                 )}
-                              />
+                              >
+                                {i18n.translate(
+                                  'unifiedSearch.filter.filtersBuilder.addOrFilterGroupButtonLabel',
+                                  {
+                                    defaultMessage: 'OR',
+                                  }
+                                )}
+                              </EuiButtonEmpty>
                             </EuiFlexItem>
                           ) : null}
                           <EuiFlexItem grow={false}>
-                            <EuiButtonIcon
-                              display="base"
+                            <EuiButtonEmpty
                               onClick={onAddButtonClick}
                               isDisabled={disableAnd}
-                              iconType="plus"
+                              iconType="plusInCircle"
                               size="s"
+                              iconSize="s"
                               aria-label={i18n.translate(
                                 'unifiedSearch.filter.filtersBuilder.addAndFilterGroupButtonIcon',
                                 {
                                   defaultMessage: 'Add filter group with AND',
                                 }
                               )}
-                            />
+                            >
+                              {i18n.translate(
+                                'unifiedSearch.filter.filtersBuilder.addAndFilterGroupButtonLabel',
+                                {
+                                  defaultMessage: 'AND',
+                                }
+                              )}
+                            </EuiButtonEmpty>
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
