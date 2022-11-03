@@ -31,7 +31,11 @@ import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'loda
 import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
-import { type DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import {
+  type DataView,
+  DataView as KibanaDataView,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -180,11 +184,14 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
   };
 
   private fetchIndexPatterns = debounce(async () => {
-    const [stringPatterns = [], objectPatterns = []] = partition<
+    const [objectPatterns = [], stringPatterns = []] = partition<
       QueryStringInputProps['indexPatterns'][number],
       DataView
     >(this.props.indexPatterns || [], (indexPattern): indexPattern is DataView => {
-      return typeof indexPattern === 'string';
+      return (
+        indexPattern instanceof KibanaDataView ||
+        (indexPattern.hasOwnProperty('title') && indexPattern.hasOwnProperty('fields'))
+      );
     });
     const idOrTitlePatterns = stringPatterns.map((sp) =>
       typeof sp === 'string' ? { type: 'title', value: sp } : sp
