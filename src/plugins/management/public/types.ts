@@ -76,6 +76,4 @@ export interface CreateManagementItemArgs {
   icon?: string; // URL to image file; fallback if no `euiIconType`
   capabilitiesId?: string; // overrides app id
   redirectFrom?: string; // redirects from an old app id to the current app id
-  // TODO: Remove this once all management apps use KibanaPageTemplate
-  isUsingKibanaPageTemplate?: boolean; // Whether the management app should be treated as though it is using the KibanaPageTemplate
 }

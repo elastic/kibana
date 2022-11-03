@@ -17,10 +17,6 @@ export class ManagementItem {
   public readonly icon?: string;
   public readonly capabilitiesId?: string;
   public readonly redirectFrom?: string;
-  /**
-   * See {@link CreateManagementItemArgs['isUsingKibanaPageTemplate']} for more info.
-   */
-  public readonly isUsingKibanaPageTemplate?: boolean;
 
   public enabled: boolean = true;
 
@@ -33,7 +29,6 @@ export class ManagementItem {
     icon,
     capabilitiesId,
     redirectFrom,
-    isUsingKibanaPageTemplate,
   }: CreateManagementItemArgs) {
     this.id = id;
     this.title = title;
@@ -43,7 +38,6 @@ export class ManagementItem {
     this.icon = icon;
     this.capabilitiesId = capabilitiesId;
     this.redirectFrom = redirectFrom;
-    this.isUsingKibanaPageTemplate = isUsingKibanaPageTemplate;
   }
 
   disable() {
