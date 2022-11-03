@@ -156,7 +156,7 @@ describe('When using get-file action from response actions console', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('getFileSuccess').textContent).toEqual(
-        'File retrieved from the host.Click here to download(ZIP file passcode: elastic)'
+        'File retrieved from the host.Click here to download(ZIP file passcode: elastic). File download is available for 5 days.'
       );
     });
   });
