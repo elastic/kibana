@@ -7,8 +7,8 @@
 
 import { privateLocationsSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 import { privateLocationsSavedObjectId } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/private_locations';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { KibanaSupertestProvider } from '../../../../../../../test/api_integration/services/supertest';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
 
 export class PrivateLocationTestService {
   private supertestAPI: ReturnType<typeof KibanaSupertestProvider>;
