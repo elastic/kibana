@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
-import type { LensEmbeddableComponentProps, Request } from './types';
+import type { LensEmbeddableComponentProps } from './types';
 import { useActions } from './use_actions';
 import { inputsSelectors } from '../../store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -108,6 +108,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     }),
     [visData.isLoading]
   );
+
   const actions = useActions({
     withActions: true,
     attributes,

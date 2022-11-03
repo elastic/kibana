@@ -61,6 +61,10 @@ describe(`useRefetchByRestartingSession`, () => {
     });
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should start a session', () => {
     const { result } = renderHook(
       () =>

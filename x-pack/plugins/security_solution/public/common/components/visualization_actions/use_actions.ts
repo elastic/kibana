@@ -23,7 +23,7 @@ export const useActions = ({
   timeRange,
   inspectActionProps,
 }: {
-  withActions?: boolean | ActionTypes[];
+  withActions?: boolean;
 
   attributes: LensAttributes | null;
 
