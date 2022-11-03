@@ -310,8 +310,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      shard: policyShards?.[packagePolicy.policy_id]
-                        ? policyShards?.[packagePolicy.policy_id]
+                      shard: policyShards[packagePolicy.policy_id]
+                        ? policyShards[packagePolicy.policy_id]
                         : 100,
                       queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
                         removeMultiLines: true,
@@ -346,8 +346,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      shard: policyShards?.[packagePolicy.policy_id]
-                        ? policyShards?.[packagePolicy.policy_id]
+                      shard: policyShards[packagePolicy.policy_id]
+                        ? policyShards[packagePolicy.policy_id]
                         : 100,
                       queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
                         removeResultType: true,

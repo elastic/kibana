@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, isEmpty, map, omit, reduce, uniq } from 'lodash';
+import { filter, isEmpty, map, omit, reduce } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -164,7 +164,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               })
             ) as string[])
           : [];
-        const policies = uniq([...payloadPolicyIds, ...mappedShards]);
+        const policies = [...payloadPolicyIds, ...mappedShards];
 
         return {
           ...restPayload,
@@ -218,7 +218,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   }, [handleSubmitForm]);
 
   const euiFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
-  // const policyIdsFieldProps = useMemo(() => ({ isDisabled: isGlobalEnabled }), [isGlobalEnabled]);
 
   const changePackType = useCallback(
     (type: 'global' | 'policy' | 'shards') => {

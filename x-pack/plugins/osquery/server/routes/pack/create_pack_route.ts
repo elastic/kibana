@@ -155,8 +155,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   }
 
                   set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                    shard: policyShards?.[packagePolicy.policy_id]
-                      ? policyShards?.[packagePolicy.policy_id]
+                    shard: policyShards[packagePolicy.policy_id]
+                      ? policyShards[packagePolicy.policy_id]
                       : 100,
                     queries: convertSOQueriesToPack(queries, {
                       removeMultiLines: true,
