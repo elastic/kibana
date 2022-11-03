@@ -8,7 +8,14 @@
 
 import './filter_item.scss';
 
-import { EuiContextMenu, EuiContextMenuPanel, EuiPopover, EuiPopoverProps } from '@elastic/eui';
+import {
+  EuiContextMenu,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiPopoverProps,
+  euiShadowMedium,
+  useEuiTheme,
+} from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n-react';
 import {
   Filter,
@@ -18,10 +25,11 @@ import {
   toggleFilterDisabled,
 } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
+import React, { MouseEvent, useState, useEffect, HTMLAttributes, useMemo } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 
 import { DataView } from '@kbn/data-views-plugin/public';
+import { css } from '@emotion/react';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
@@ -58,12 +66,27 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
 
-export const FILTER_EDITOR_WIDTH = 800;
+export const FILTER_EDITOR_WIDTH = 850;
 
 export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [renderedComponent, setRenderedComponent] = useState('menu');
   const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
+
+  const euiTheme = useEuiTheme();
+
+  /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
+  const popoverDragAndDropStyle = useMemo(
+    () =>
+      css`
+        // Always needed for popover with drag & drop in them
+        transform: none !important;
+        transition: none !important;
+        filter: none !important;
+        ${euiShadowMedium(euiTheme)}
+      `,
+    [euiTheme]
+  );
 
   useEffect(() => {
     if (isPopoverOpen) {
@@ -329,6 +352,9 @@ export function FilterItem(props: FilterItemProps) {
     },
     button: <FilterView {...filterViewProps} />,
     panelPaddingSize: 'none',
+    panelProps: {
+      css: popoverDragAndDropStyle,
+    },
   };
 
   return readOnly ? (

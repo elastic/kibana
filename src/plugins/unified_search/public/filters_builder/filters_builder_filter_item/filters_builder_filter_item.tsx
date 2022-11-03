@@ -8,6 +8,7 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiDraggable,
   EuiDroppable,
@@ -229,8 +230,14 @@ export function FilterItem({
                         <EuiIcon type="grab" size="s" className={grabIconStyles} />
                       </EuiFlexItem>
                       <EuiFlexItem grow={true}>
-                        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
-                          <EuiFlexItem grow={4}>
+                        <EuiFlexGroup
+                          gutterSize="s"
+                          responsive={false}
+                          alignItems="center"
+                          justifyContent="center"
+                          wrap
+                        >
+                          <EuiFlexItem style={{ minWidth: '162px' }}>
                             <EuiFormRow>
                               <FieldInput
                                 field={field}
@@ -239,7 +246,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem grow={2}>
+                          <EuiFlexItem style={{ maxWidth: '162px' }}>
                             <EuiFormRow>
                               <OperatorInput
                                 field={field}
@@ -249,7 +256,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem grow={4}>
+                          <EuiFlexItem style={{ minWidth: '162px' }}>
                             <EuiFormRow>
                               <div data-test-subj="filterParams">
                                 <ParamsEditor
@@ -285,34 +292,49 @@ export function FilterItem({
                           </EuiFlexItem>
                           {!hideOr ? (
                             <EuiFlexItem grow={false}>
-                              <EuiButtonIcon
+                              <EuiButtonEmpty
                                 onClick={onOrButtonClick}
                                 isDisabled={disableOr}
-                                iconType="returnKey"
+                                iconType="plusInCircle"
                                 size="s"
+                                iconSize="s"
                                 aria-label={i18n.translate(
                                   'unifiedSearch.filter.filtersBuilder.addOrFilterGroupButtonIcon',
                                   {
                                     defaultMessage: 'Add filter group with OR',
                                   }
                                 )}
-                              />
+                              >
+                                {i18n.translate(
+                                  'unifiedSearch.filter.filtersBuilder.addOrFilterGroupButtonLabel',
+                                  {
+                                    defaultMessage: 'OR',
+                                  }
+                                )}
+                              </EuiButtonEmpty>
                             </EuiFlexItem>
                           ) : null}
                           <EuiFlexItem grow={false}>
-                            <EuiButtonIcon
-                              display="base"
+                            <EuiButtonEmpty
                               onClick={onAddButtonClick}
                               isDisabled={disableAnd}
-                              iconType="plus"
+                              iconType="plusInCircle"
                               size="s"
+                              iconSize="s"
                               aria-label={i18n.translate(
                                 'unifiedSearch.filter.filtersBuilder.addAndFilterGroupButtonIcon',
                                 {
                                   defaultMessage: 'Add filter group with AND',
                                 }
                               )}
-                            />
+                            >
+                              {i18n.translate(
+                                'unifiedSearch.filter.filtersBuilder.addAndFilterGroupButtonLabel',
+                                {
+                                  defaultMessage: 'AND',
+                                }
+                              )}
+                            </EuiButtonEmpty>
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
