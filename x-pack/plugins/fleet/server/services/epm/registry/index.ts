@@ -25,6 +25,7 @@ import type {
   GetCategoriesRequest,
   PackageVerificationResult,
   ArchivePackage,
+  BundledPackage,
 } from '../../../types';
 import {
   getArchiveFilelist,
@@ -55,6 +56,8 @@ import { getRegistryUrl } from './registry_url';
 
 export interface SearchParams {
   category?: CategoryId;
+  prerelease?: boolean;
+  // deprecated
   experimental?: boolean;
 }
 
@@ -70,8 +73,8 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
     if (params.category) {
       url.searchParams.set('category', params.category);
     }
-    if (params.experimental) {
-      url.searchParams.set('experimental', params.experimental.toString());
+    if (params.prerelease) {
+      url.searchParams.set('prerelease', params.prerelease.toString());
     }
   }
 
@@ -80,22 +83,31 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-interface FetchFindLatestPackageOptions {
+export interface FetchFindLatestPackageOptions {
   ignoreConstraints?: boolean;
+  prerelease?: boolean;
 }
 
 async function _fetchFindLatestPackage(
   packageName: string,
   options?: FetchFindLatestPackageOptions
-) {
+): Promise<RegistryPackage | BundledPackage | null> {
   return withPackageSpan(`Find latest package ${packageName}`, async () => {
     const logger = appContextService.getLogger();
-    const { ignoreConstraints = false } = options ?? {};
+    const { ignoreConstraints = false, prerelease = false } = options ?? {};
 
     const bundledPackage = await getBundledPackageByName(packageName);
 
+    // temporary workaround to allow synthetics package beta version until there is a GA available
+    // needed because synthetics is installed by default on kibana startup
+    const prereleaseAllowedExceptions = ['synthetics'];
+
+    const prereleaseEnabled = prerelease || prereleaseAllowedExceptions.includes(packageName);
+
     const registryUrl = getRegistryUrl();
-    const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
+    const url = new URL(
+      `${registryUrl}/search?package=${packageName}&prerelease=${prereleaseEnabled}`
+    );
 
     if (!ignoreConstraints) {
       setKibanaVersion(url);
@@ -224,8 +236,8 @@ export async function fetchCategories(
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
   if (params) {
-    if (params.experimental) {
-      url.searchParams.set('experimental', params.experimental.toString());
+    if (params.prerelease) {
+      url.searchParams.set('prerelease', params.prerelease.toString());
     }
     if (params.include_policy_templates) {
       url.searchParams.set('include_policy_templates', params.include_policy_templates.toString());

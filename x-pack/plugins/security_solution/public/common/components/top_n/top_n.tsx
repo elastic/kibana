@@ -17,11 +17,7 @@ import type { InputsModelId } from '../../store/inputs/constants';
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import type { TopNOption } from './helpers';
-import {
-  isDetectionsAlertsTable,
-  getSourcererScopeName,
-  removeIgnoredAlertFilters,
-} from './helpers';
+import { getSourcererScopeName, removeIgnoredAlertFilters } from './helpers';
 import * as i18n from './translations';
 import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
@@ -38,11 +34,12 @@ const CloseButton = styled(EuiButtonIcon)`
 
 const ViewSelect = styled(EuiSuperSelect)`
   z-index: 999999;
-  width: 155px;
+  width: 170px;
 `;
 
 const TopNContent = styled.div`
   margin-top: 4px;
+  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
 
   .euiPanel {
     border: none;
@@ -101,13 +98,13 @@ const TopNComponent: React.FC<Props> = ({
     () => (
       <ViewSelect
         data-test-subj="view-select"
-        disabled={!isDetectionsAlertsTable(scopeId)}
+        disabled={options.length === 1}
         onChange={onViewSelected}
         options={options}
         valueOfSelected={view}
       />
     ),
-    [onViewSelected, options, scopeId, view]
+    [onViewSelected, options, view]
   );
 
   // alert workflow statuses (e.g. open | closed) and other alert-specific
