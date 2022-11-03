@@ -203,7 +203,10 @@ export class CoreAppsService {
   }
 
   private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot) {
-    core.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
+    core.http.registerStaticDir(
+      '/ui/{path*}',
+      fromRoot('node_modules/@kbn/core-apps-server-internal/assets')
+    );
 
     core.http.registerStaticDir(
       '/node_modules/@kbn/ui-framework/dist/{path*}',
