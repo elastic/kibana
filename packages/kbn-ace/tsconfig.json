@@ -4,7 +4,7 @@
     "allowJs": false,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "./target_types",
+    "outDir": "target_types",
     "stripInternal": true,
     "types": ["node"]
   },

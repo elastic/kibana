@@ -4,11 +4,10 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "stripInternal": false,
     "types": [
       "jest",
       "node",
-      "react", 
+      "react",
       "@kbn/ambient-ui-types",
     ]
   },
