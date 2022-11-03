@@ -20,6 +20,7 @@ export interface FindingsEvaluation {
 
 export interface Stats extends FindingsEvaluation {
   postureScore: Score;
+  resourcesEvaluated: number;
 }
 
 export interface GroupedFindingsEvaluation extends FindingsEvaluation {

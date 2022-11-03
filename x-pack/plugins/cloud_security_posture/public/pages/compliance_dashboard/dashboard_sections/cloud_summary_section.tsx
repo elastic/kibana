@@ -71,7 +71,7 @@ export const CloudSummarySection = ({
       ),
     },
     {
-      title: <CompactFormattedNumber number={123456} />,
+      title: <CompactFormattedNumber number={complianceData.stats.resourcesEvaluated} />,
       description: i18n.translate(
         'xpack.csp.dashboard.summarySection.counterCard.resourcesEvaluatedDescription',
         { defaultMessage: 'Resources Evaluated' }
