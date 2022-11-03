@@ -8,7 +8,7 @@
 import React, { VFC } from 'react';
 import { useFieldTypes } from '../../../../hooks';
 import { EMPTY_VALUE } from '../../../../common/constants';
-import { Indicator, RawIndicatorFieldId } from '../../types';
+import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { DateFormatter } from '../../../../components/date_formatter';
 import { unwrapValue } from '../../utils';
 import { TLPBadge } from '../tlp_badge';
