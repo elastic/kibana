@@ -5,11 +5,25 @@
  * 2.0.
  */
 
+import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, type ConnectorsEmailConfigType } from './connectors_email_config';
 
-export type NotificationsConfigType = ConnectorsEmailConfigType;
+export const configSchema = schema.object(
+  {
+    connectors: schema.maybe(
+      schema.object({
+        default: schema.maybe(
+          schema.object({
+            email: schema.maybe(schema.string()),
+          })
+        ),
+      })
+    ),
+  },
+  { defaultValue: {} }
+);
+export type NotificationsConfigType = TypeOf<typeof configSchema>;
 
-export const config: PluginConfigDescriptor<ConnectorsEmailConfigType> = {
+export const config: PluginConfigDescriptor<NotificationsConfigType> = {
   schema: configSchema,
 };

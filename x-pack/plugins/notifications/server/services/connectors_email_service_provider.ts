@@ -14,6 +14,8 @@ import { LicensedEmailService } from './licensed_email_service';
 import { ConnectorsEmailService } from './connectors_email_service';
 import { PLUGIN_ID } from '../../common';
 
+const MINIMUM_LICENSE = 'platinum';
+
 export interface EmailServiceSetupDeps {
   actions?: PluginSetupContract;
   licensing?: LicensingPluginSetup;
@@ -54,6 +56,7 @@ export class EmailServiceProvider
     }
 
     this.setupSuccessful = true;
+    this.setupError = '';
   }
 
   public start(plugins: EmailServiceStartDeps): EmailServiceStart {
@@ -68,7 +71,7 @@ export class EmailServiceProvider
         email = new LicensedEmailService(
           new ConnectorsEmailService(PLUGIN_ID, emailConnector, unsecuredActionsClient),
           licensing.license$,
-          'platinum',
+          MINIMUM_LICENSE,
           this.logger
         );
       } catch (err) {
@@ -79,8 +82,10 @@ export class EmailServiceProvider
     return {
       isEmailServiceAvailable: () => !!email,
       getEmailService: () => {
-        if (email) return email;
-        throw new Error(this.setupError);
+        if (!email) {
+          throw new Error(this.setupError);
+        }
+        return email;
       },
     };
   }
