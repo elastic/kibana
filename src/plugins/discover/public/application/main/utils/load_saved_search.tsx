@@ -34,9 +34,9 @@ export const loadSavedSearch = async (
   });
 
   const currentDataView = await loadDataViewBySavedSearch(
-    currentSavedSearch,
     dataViewId,
     dataViewList,
+    currentSavedSearch.searchSource.getField('index'),
     services,
     dataViewSpec
   );

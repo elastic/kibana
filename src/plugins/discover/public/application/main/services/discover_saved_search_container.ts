@@ -78,7 +78,7 @@ export interface SavedSearchContainer {
   /**
    * Creating a new saved search
    */
-  new: () => Promise<SavedSearch>;
+  new: (dataView?: DataView) => Promise<SavedSearch>;
   /**
    * Persist the give saved search
    */
@@ -174,9 +174,9 @@ export function getSavedSearchContainer({
     return nextSavedSearch;
   };
 
-  const newSavedSearch = async () => {
-    addLog('🔎 [savedSearch] new');
-    const dataView = get().searchSource.getField('index');
+  const newSavedSearch = async (nextDataView?: DataView) => {
+    addLog('🔎 [savedSearch] new', { nextDataView });
+    const dataView = nextDataView || get().searchSource.getField('index');
     const nextSavedSearch = await getSavedSearch('', {
       search: services.data.search,
       savedObjectsClient: services.core.savedObjects.client,

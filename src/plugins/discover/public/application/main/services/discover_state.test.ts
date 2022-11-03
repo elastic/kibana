@@ -21,7 +21,7 @@ import {
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { createSearchSessionRestorationDataProvider } from './discover_state_utils';
 import { FetchStatus } from '../../types';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 
 let history: History;
 let state: DiscoverStateContainer;
@@ -238,8 +238,7 @@ describe('actions', () => {
       services: discoverServiceMock,
       history,
     });
-    state.actions.setDataView(dataViewMock);
-    // await state.setAppState({ index: dataViewMock.id }, true);
+    state.actions.setDataView(dataViewWithTimefieldMock);
 
     state.actions.subscribe();
   });
@@ -269,17 +268,35 @@ describe('actions', () => {
     expect(newSavedSearch?.id).toBeUndefined();
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_a=(columns:!(default_column),index:index-pattern-with-timefield-id,interval:auto,sort:!(!(timestamp,desc)))"`
     );
     expect(state.savedSearchState.hasChanged$.getValue()).toBe(false);
+    const { searchSource, ...savedSearch } = state.savedSearchState.get();
+    expect(savedSearch).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          "default_column",
+        ],
+        "refreshInterval": undefined,
+        "sort": Array [
+          Array [
+            "timestamp",
+            "desc",
+          ],
+        ],
+        "timeRange": undefined,
+      }
+    `);
+    expect(searchSource.getField('index')?.id).toEqual('index-pattern-with-timefield-id');
   });
-  test('loadNewSavedSearch given an empty URL II', async () => {
+
+  test('loadNewSavedSearch given an empty URL using loadSavedSearch', async () => {
     history.push('/');
     const newSavedSearch = await state.actions.loadSavedSearch(undefined);
     expect(newSavedSearch?.id).toBeUndefined();
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_a=(columns:!(default_column),index:index-pattern-with-timefield-id,interval:auto,sort:!(!(timestamp,desc)))"`
     );
     expect(state.savedSearchState.hasChanged$.getValue()).toBe(false);
   });
@@ -289,17 +306,17 @@ describe('actions', () => {
     expect(newSavedSearch?.id).toBeUndefined();
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=()"`
+      `"/#?_a=(columns:!(bytes),index:index-pattern-with-timefield-id,interval:month,sort:!(!(timestamp,desc)))&_g=()"`
     );
     expect(state.savedSearchState.hasChanged$.getValue()).toBe(true);
   });
-  test('loadNewSavedSearch with URL overwriting interval state II', async () => {
+  test('loadNewSavedSearch with URL overwriting interval state using loadSavedSearch', async () => {
     history.push('/#?_a=(interval:month,columns:!(bytes))&_g=()');
     const newSavedSearch = await state.actions.loadSavedSearch(undefined, undefined);
     expect(newSavedSearch?.id).toBeUndefined();
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=()"`
+      `"/#?_a=(columns:!(bytes),index:index-pattern-with-timefield-id,interval:month,sort:!(!(timestamp,desc)))&_g=()"`
     );
     expect(state.savedSearchState.hasChanged$.getValue()).toBe(true);
   });

@@ -262,19 +262,16 @@ export function getDiscoverStateContainer({
     if (isEmptyURL) {
       appStateContainer.set({});
     }
-    const nextSavedSearch = await savedSearchContainer.new();
     const appState = appStateContainer.getState();
-    /**
-    if (!isEmptyURL) {
-      await savedSearchContainer.update(undefined, appState);
-    } **/
     const nextDataView = await loadDataViewBySavedSearch(
-      nextSavedSearch,
       appState.index,
       internalStateContainer.getState().dataViews,
+      savedSearchContainer.get().searchSource.getField('index'),
       services,
       dataViewSpec
     );
+    const nextSavedSearch = await savedSearchContainer.new(nextDataView);
+
     if (nextDataView) {
       setDataView(nextDataView);
     }

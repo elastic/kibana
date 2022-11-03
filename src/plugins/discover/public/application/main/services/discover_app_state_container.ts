@@ -177,7 +177,6 @@ export const getDiscoverAppStateContainer = (
     push: pushUrlState,
     isEmptyURL: () => {
       addLog('🔗 [appState] isEmptyURL', stateStorage.get(APP_STATE_URL_KEY));
-      debugger
       return stateStorage.get(APP_STATE_URL_KEY) === null;
     },
     update: (newPartial: AppState, replace = false) => {

@@ -66,7 +66,7 @@ export const buildStateSubscribe =
       if (!nextDataViewObj.stateValFound) {
         resolveDataView(
           nextDataViewObj,
-          savedSearchContainer.get().searchSource,
+          savedSearchContainer.get().searchSource.getField('index'),
           services.toastNotifications
         );
         await appStateContainer.replace({ index }, true);

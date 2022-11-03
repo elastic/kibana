@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import { DiscoverServices } from '../../../build_services';
 interface DataViewData {
@@ -126,15 +125,13 @@ export async function loadDataView(
  */
 export function resolveDataView(
   ip: DataViewData,
-  searchSource: ISearchSource,
+  savedSearchDataView: DataView | undefined,
   toastNotifications: ToastsStart
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
 
-  const ownDataView = searchSource.getOwnField('index');
-
-  if (ownDataView && !stateVal) {
-    return ownDataView;
+  if (savedSearchDataView && !stateVal) {
+    return savedSearchDataView;
   }
 
   if (stateVal && !stateValFound) {
@@ -145,19 +142,19 @@ export function resolveDataView(
       },
     });
 
-    if (ownDataView) {
+    if (savedSearchDataView) {
       toastNotifications.addWarning({
         title: warningTitle,
         text: i18n.translate('discover.showingSavedDataViewWarningDescription', {
           defaultMessage: 'Showing the saved data view: "{ownDataViewTitle}" ({ownDataViewId})',
           values: {
-            ownDataViewTitle: ownDataView.getIndexPattern(),
-            ownDataViewId: ownDataView.id,
+            ownDataViewTitle: savedSearchDataView.getIndexPattern(),
+            ownDataViewId: savedSearchDataView.id,
           },
         }),
         'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
       });
-      return ownDataView;
+      return savedSearchDataView;
     }
     if (loadedDataView) {
       toastNotifications.addWarning({
