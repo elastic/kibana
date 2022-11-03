@@ -28,6 +28,16 @@ import {
 import { FieldSelect } from './field_select';
 import { FormBasedLayer } from '../types';
 
+jest.mock('@kbn/unified-field-list-plugin/public/hooks/use_existing_fields', () => ({
+  useExistingFieldsReader: jest.fn(() => {
+    return {
+      hasFieldData: (dataViewId: string, fieldName: string) => {
+        return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
+      },
+    };
+  }),
+}));
+
 jest.mock('../operations');
 
 describe('reference editor', () => {
@@ -59,14 +69,6 @@ describe('reference editor', () => {
       paramEditorUpdater,
       selectionStyle: 'full' as const,
       currentIndexPattern: createMockedIndexPattern(),
-      existingFields: {
-        'my-fake-index-pattern': {
-          timestamp: true,
-          bytes: true,
-          memory: true,
-          source: true,
-        },
-      },
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
       storage: {} as IStorageWrapper,
       uiSettings: {} as IUiSettingsClient,

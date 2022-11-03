@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 
 export const createPluginInitializerContextMock = (config: unknown = {}) => {
@@ -25,6 +26,7 @@ export const createPluginInitializerContextMock = (config: unknown = {}) => {
         dist: false,
       },
     },
+    logger: loggerMock.create(),
     config: {
       get: <T>() => config as T,
     },
