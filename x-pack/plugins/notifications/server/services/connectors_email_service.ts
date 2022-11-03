@@ -16,16 +16,6 @@ export class ConnectorsEmailService implements EmailService {
   ) {}
 
   async sendPlainTextEmail(params: PlainTextEmail): Promise<void> {
-    const relatedSavedObjects = params.context?.relatedObjects?.length
-      ? params.context!.relatedObjects!.map(({ id, type, spaceId }) => {
-          return {
-            id,
-            type,
-            namespace: spaceId,
-          };
-        })
-      : undefined;
-
     const actions = params.to.map((to) => ({
       id: this.connectorId,
       params: {
@@ -33,7 +23,7 @@ export class ConnectorsEmailService implements EmailService {
         subject: params.subject,
         message: params.message,
       },
-      relatedSavedObjects,
+      relatedSavedObjects: params.context?.relatedObjects,
     }));
     return await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
   }

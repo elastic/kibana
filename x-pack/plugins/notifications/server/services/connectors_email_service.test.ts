@@ -50,7 +50,7 @@ describe('sendPlainTextEmail()', () => {
             {
               id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
               type: 'cases',
-              spaceId: 'space1',
+              namespace: 'space1',
             },
           ],
         },

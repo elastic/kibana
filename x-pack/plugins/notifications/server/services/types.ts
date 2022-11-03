@@ -22,7 +22,7 @@ export interface IEmailServiceProvider<T, U> {
 export interface RelatedSavedObject {
   id: string;
   type: string;
-  spaceId: string;
+  namespace?: string; // namespace is undefined for the spaceId 'default'
 }
 
 export interface PlainTextEmail {
