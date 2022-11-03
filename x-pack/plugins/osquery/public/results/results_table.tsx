@@ -29,6 +29,7 @@ import React, { createContext, useEffect, useState, useCallback, useContext, use
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import type { AddToTimelinePayload } from '../timelines/get_add_to_timeline';
+import styled from 'styled-components';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
@@ -44,6 +45,10 @@ import { useActionResultsPrivileges } from '../action_results/use_action_privile
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 const DataContext = createContext<ResultEdges>([]);
+
+const StyledEuiDataGrid = styled(EuiDataGrid)`
+  max-height: 500px;
+`;
 
 export interface ResultsTableComponentProps {
   actionId: string;
@@ -414,7 +419,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </EuiPanel>
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>
-          <EuiDataGrid
+          <StyledEuiDataGrid
             data-test-subj="osqueryResultsTable"
             aria-label="Osquery results"
             columns={columns}
@@ -424,7 +429,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             leadingControlColumns={leadingControlColumns}
             sorting={tableSorting}
             pagination={tablePagination}
-            height="500px"
             toolbarVisibility={toolbarVisibility}
           />
         </DataContext.Provider>
