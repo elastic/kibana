@@ -13,7 +13,7 @@ export const getInitialCasesContextState = (): CasesContextState => {
   return {
     createCaseFlyout: {
       isFlyoutOpen: false,
-      isSubmit: false,
+      autoSubmit: false,
     },
     selectCaseModal: {
       isModalOpen: false,
@@ -24,7 +24,7 @@ export const getInitialCasesContextState = (): CasesContextState => {
 export interface CasesContextState {
   createCaseFlyout: {
     isFlyoutOpen: boolean;
-    isSubmit: boolean;
+    autoSubmit: boolean;
     props?: CreateCaseFlyoutProps;
   };
   selectCaseModal: {
@@ -74,7 +74,7 @@ export const casesContextReducer: React.Reducer<CasesContextState, CasesContextS
       return { ...state, selectCaseModal: { isModalOpen: false } };
     }
     case CasesContextStoreActionsList.SUBMIT_CASE_FROM_FLYOUT: {
-      return { ...state, createCaseFlyout: { ...state.createCaseFlyout, isSubmit: true } };
+      return { ...state, createCaseFlyout: { ...state.createCaseFlyout, autoSubmit: true } };
     }
     default:
       assertNever(action);

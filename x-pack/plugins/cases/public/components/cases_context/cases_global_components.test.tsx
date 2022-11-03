@@ -34,7 +34,7 @@ describe('Cases context UI', () => {
         ...getInitialCasesContextState(),
         createCaseFlyout: {
           isFlyoutOpen: true,
-          isSubmit: false,
+          autoSubmit: false,
           props: {
             attachments: [],
           },
@@ -49,7 +49,7 @@ describe('Cases context UI', () => {
         ...getInitialCasesContextState(),
         createCaseFlyout: {
           isFlyoutOpen: false,
-          isSubmit: false,
+          autoSubmit: false,
         },
       };
       appMock.render(<CasesGlobalComponents state={state} />);

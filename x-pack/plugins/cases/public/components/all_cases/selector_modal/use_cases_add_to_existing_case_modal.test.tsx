@@ -66,7 +66,7 @@ describe('use cases add to existing case modal hook', () => {
           externalReferenceAttachmentTypeRegistry,
           persistableStateAttachmentTypeRegistry,
           owner: ['test'],
-          isSubmit: false,
+          autoSubmit: false,
           permissions: allCasesPermissions(),
           appId: 'test',
           appTitle: 'jest',

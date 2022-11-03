@@ -79,11 +79,11 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const { isSubmitting, submit } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
 
-    const { owner, isSubmit } = useCasesContext();
+    const { owner, autoSubmit } = useCasesContext();
 
     useEffect(() => {
-      if (isSubmit) submit();
-    }, [isSubmit, submit]);
+      if (autoSubmit) submit();
+    }, [autoSubmit, submit]);
 
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length;

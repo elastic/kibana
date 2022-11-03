@@ -34,7 +34,7 @@ describe('use cases add to new case flyout hook', () => {
             externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry,
             owner: ['test'],
-            isSubmit: false,
+            autoSubmit: false,
             permissions: allCasesPermissions(),
             appId: 'test',
             appTitle: 'jest',

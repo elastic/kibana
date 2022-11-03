@@ -44,7 +44,7 @@ describe('CreateCaseFlyout', () => {
   beforeEach(() => {
     (useCasesContext as jest.Mock).mockReturnValue({
       owner: SECURITY_SOLUTION_OWNER,
-      isSubmit: false,
+      autoSubmit: false,
       features: {
         alerts: { enabled: true },
       },
@@ -88,17 +88,17 @@ describe('CreateCaseFlyout', () => {
     });
   });
 
-  it('does not call submit automatically if isSubmit=false', async () => {
+  it('does not call submit automatically if autoSubmit=false', async () => {
     mockedContext.render(<CreateCaseFlyout {...defaultProps} />);
     await act(async () => {
       expect(mockSubmit).not.toHaveBeenCalled();
     });
   });
 
-  it('calls submit automatically if isSubmit=true', async () => {
+  it('calls submit automatically if autoSubmit=true', async () => {
     (useCasesContext as jest.Mock).mockReturnValue({
       owner: SECURITY_SOLUTION_OWNER,
-      isSubmit: true,
+      autoSubmit: true,
       features: {
         alerts: { enabled: true },
       },
