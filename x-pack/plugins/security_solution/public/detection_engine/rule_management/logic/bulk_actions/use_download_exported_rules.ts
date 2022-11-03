@@ -31,7 +31,7 @@ export function useDownloadExportedRules() {
           summary: await getExportedRulesCounts(response),
         });
       } catch (error) {
-        showBulkErrorToast(BulkActionType.export, error);
+        showBulkErrorToast({ actionType: BulkActionType.export, error });
       }
     },
     [showBulkSuccessToast, showBulkErrorToast]

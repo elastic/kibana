@@ -64,7 +64,7 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
 
         return response;
       } catch (error) {
-        showBulkErrorToast(bulkAction.type, error);
+        showBulkErrorToast({ actionType: bulkAction.type, error });
       } finally {
         setLoadingRules?.({ ids: [], action: null });
       }

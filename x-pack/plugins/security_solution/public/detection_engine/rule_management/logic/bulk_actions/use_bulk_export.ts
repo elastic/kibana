@@ -29,7 +29,7 @@ export function useBulkExport() {
         });
         return await mutateAsync(queryOrIds);
       } catch (error) {
-        showBulkErrorToast(BulkActionType.export, error);
+        showBulkErrorToast({ actionType: BulkActionType.export, error });
       } finally {
         setLoadingRules?.({ ids: [], action: null });
       }

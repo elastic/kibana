@@ -11,14 +11,19 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { explainBulkError, summarizeBulkError } from './translations';
 
+interface ShowBulkErrorToastProps {
+  actionType: BulkActionType;
+  error: HTTPError;
+}
+
 export function useShowBulkErrorToast() {
   const toasts = useAppToasts();
 
   return useCallback(
-    (action: BulkActionType, error: HTTPError) => {
+    ({ actionType, error }: ShowBulkErrorToastProps) => {
       toasts.addError(populateErrorStack(error), {
-        title: summarizeBulkError(action),
-        toastMessage: explainBulkError(action, error),
+        title: summarizeBulkError(actionType),
+        toastMessage: explainBulkError(actionType, error),
       });
     },
     [toasts]
