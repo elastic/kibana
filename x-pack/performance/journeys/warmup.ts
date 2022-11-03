@@ -48,11 +48,11 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Flights Dasboard', async ({ page, kbnUrl, log }) => {
+  .step('Go to Flights Dasboard', async ({ page, log }) => {
     log.debug('Loading Flights dashboard');
     await page.click(subj('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'));
     log.debug('Loading eCommerce dashboard');
-    await waitForVisualizations(page, 16);
+    await waitForVisualizations(page, log, 16);
   })
 
   .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
@@ -60,10 +60,10 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to eCommerce Dasboard', async ({ page, kbnUrl, log }) => {
+  .step('Go to eCommerce Dasboard', async ({ page, log }) => {
     log.debug('Loading eCommerce dashboard');
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-Revenue-Dashboard'));
-    await waitForVisualizations(page, 14);
+    await waitForVisualizations(page, log, 14);
   })
 
   .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
@@ -71,10 +71,10 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Logs Dasboard', async ({ page, kbnUrl, log }) => {
+  .step('Go to Logs Dasboard', async ({ page, log }) => {
     log.debug('Loading logs dashboard');
     await page.click(subj('dashboardListingTitleLink-[Logs]-Web-Traffic'));
-    await waitForVisualizations(page, 12);
+    await waitForVisualizations(page, log, 12);
   })
 
   .step('Go to Discover', async ({ page, kbnUrl, log }) => {

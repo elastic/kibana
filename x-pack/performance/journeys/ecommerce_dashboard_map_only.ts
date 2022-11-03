@@ -19,7 +19,7 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Ecommerce No Map Dashboard', async ({ page }) => {
+  .step('Go to Ecommerce No Map Dashboard', async ({ page, log }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-Map-Only'));
-    await waitForVisualizations(page, 1);
+    await waitForVisualizations(page, log, 1);
   });
