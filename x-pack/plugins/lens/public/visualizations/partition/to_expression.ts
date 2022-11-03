@@ -291,7 +291,7 @@ function expressionHelper(
     }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
-  if (!layer.metrics.length || (!operations.length && !layer.allowMultipleMetrics)) {
+  if (!layer.metrics.length) {
     return null;
   }
   const visualizationAst = generateExprAst(

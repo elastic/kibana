@@ -163,7 +163,6 @@ export const getPieVisualization = ({
       }
 
       const primaryGroupConfigBaseProps = {
-        requiredMinDimensionCount: layer.allowMultipleMetrics ? 0 : 1,
         groupId: 'primaryGroups',
         accessors,
         enableDimensionEditor: true,
