@@ -29,13 +29,13 @@ export const useHostFilters = () => {
 
   useEffect(() => setUrlState(state), [setUrlState, state]);
 
-  const applyFilters = useCallback((filters: HostsFilters) => {
+  const setFilters = useCallback((filters: HostsFilters) => {
     setState(filters);
   }, []);
 
   return {
     filters: urlState,
-    applyFilters,
+    setFilters,
   };
 };
 

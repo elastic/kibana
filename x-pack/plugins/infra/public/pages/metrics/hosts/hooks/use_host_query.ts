@@ -30,13 +30,13 @@ export const useHostsQuery = () => {
 
   useEffect(() => setUrlState(state), [setUrlState, state]);
 
-  const applyFilterQuery = useCallback((filterQuery: HostsQueryState) => {
+  const setFilterQuery = useCallback((filterQuery: HostsQueryState) => {
     setState(filterQuery);
   }, []);
 
   return {
     filterQuery: urlState,
-    applyFilterQuery,
+    setFilterQuery,
   };
 };
 

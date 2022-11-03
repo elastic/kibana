@@ -27,8 +27,8 @@ export const useUnifiedSearch = () => {
 
   const { setTimeRange: setSelectedTimeRange, getTime, setTime } = useTimeRangeUrlState();
 
-  const { applyFilterQuery, filterQuery } = useHostsQuery();
-  const { applyFilters, filters: urlFilters } = useHostFilters();
+  const { setFilterQuery, filterQuery } = useHostsQuery();
+  const { setFilters, filters: urlFilters } = useHostFilters();
 
   const { queryString, filterManager } = queryManager;
 
@@ -68,7 +68,7 @@ export const useUnifiedSearch = () => {
     (query?: Query, dateRange?: TimeRange, filters?: Filter[]) => {
       if (filters) {
         filterManager.setFilters(filters);
-        applyFilters(filterManager.getFilters());
+        setFilters(filterManager.getFilters());
       }
 
       if (dateRange) {
@@ -84,7 +84,7 @@ export const useUnifiedSearch = () => {
       }
 
       if (query) {
-        applyFilterQuery({
+        setFilterQuery({
           language: query.language,
           expression: queryToString(query),
         });
@@ -96,10 +96,10 @@ export const useUnifiedSearch = () => {
       setTime,
       getTime,
       queryString,
-      applyFilters,
+      setFilters,
       filterManager,
       handleSelectedTimeRangeChange,
-      applyFilterQuery,
+      setFilterQuery,
     ]
   );
 
@@ -108,22 +108,22 @@ export const useUnifiedSearch = () => {
       const savedQueryFilters = newSavedQuery.attributes.filters ?? [];
       const globalFilters = filterManager.getGlobalFilters();
       filterManager.setFilters([...savedQueryFilters, ...globalFilters]);
-      applyFilters(filterManager.getFilters());
+      setFilters(filterManager.getFilters());
       const savedQuery = newSavedQuery.attributes.query;
       if (savedQuery) {
-        applyFilterQuery({
+        setFilterQuery({
           language: savedQuery.language,
           expression: queryToString(savedQuery),
         });
       }
     },
-    [applyFilterQuery, applyFilters, filterManager]
+    [setFilterQuery, setFilters, filterManager]
   );
 
   const clearSavedQUery = useCallback(() => {
     filterManager.setFilters(filterManager.getGlobalFilters());
-    applyFilters(filterManager.getFilters());
-  }, [applyFilters, filterManager]);
+    setFilters(filterManager.getFilters());
+  }, [setFilters, filterManager]);
 
   const buildQuery = useCallback(() => {
     if (!metricsDataView) {
