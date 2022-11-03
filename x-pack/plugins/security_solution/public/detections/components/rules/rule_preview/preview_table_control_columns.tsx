@@ -8,9 +8,11 @@
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
+import {
+  DEFAULT_ACTION_BUTTON_WIDTH,
+  getActionsColumnWidth,
+} from '../../../../common/components/header_actions';
 import type { ActionProps, ControlColumnProps } from '../../../../../common/types';
-import { getActionsColumnWidth } from '../../../../common/components/data_table/column_headers/helpers';
 import * as i18n from './translations';
 
 const EventsTdContent = styled.div.attrs(({ className }) => ({

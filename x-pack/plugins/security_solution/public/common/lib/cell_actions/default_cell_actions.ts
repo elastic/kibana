@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataTableCellAction } from '../../../../common/data_table/columns';
+import type { DataTableCellAction } from '../../../../common/types';
 import { getFilterForCellAction } from './filter_for';
 import { getFilterOutCellAction } from './filter_out';
 import { getAddToTimelineCellAction } from './add_to_timeline';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
+export type { ColumnHeaderOptions } from '../../header_actions';

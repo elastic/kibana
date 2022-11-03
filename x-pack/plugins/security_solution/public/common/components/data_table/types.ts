@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ColumnHeaderOptions, ColumnId } from '../../../../common/types';
 import type { SortDirectionTable as SortDirection } from '../../../../common/types/data_table';
-import type { ColumnHeaderOptions, ColumnId } from '../../../../common/data_table/columns';
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';
 

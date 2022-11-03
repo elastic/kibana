@@ -9,7 +9,7 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import * as runtimeTypes from 'io-ts';
 import type { TGridModelSettings } from '../../../public/common/store/data_table/model';
 import type { TGridModel } from '../../../public/common/store/data_table/types';
-import type { ColumnHeaderOptions } from '../../data_table/columns';
+import type { ColumnHeaderOptions } from '../header_actions';
 
 export enum Direction {
   asc = 'asc',

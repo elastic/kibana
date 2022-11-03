@@ -15,9 +15,9 @@ import type {
   BrowserFields,
 } from '../../../../../common/search_strategy/index_fields';
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
-import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
-import { defaultColumnHeaderType } from './default_headers';
+import { DEFAULT_TABLE_COLUMN_MIN_WIDTH, DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../header_actions';
+import { defaultColumnHeaderType } from '../../../store/data_table/defaults';
 
 const defaultActions: EuiDataGridColumnActions = {
   showSortAsc: true,
@@ -196,32 +196,9 @@ export const getColumnHeader = (
 ): ColumnHeaderOptions => ({
   columnHeaderType: defaultColumnHeaderType,
   id: fieldName,
-  initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+  initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   ...(defaultHeaders.find((c) => c.id === fieldName) ?? {}),
 });
 
 export const getColumnWidthFromType = (type: string): number =>
-  type !== 'date' ? DEFAULT_COLUMN_MIN_WIDTH : DEFAULT_DATE_COLUMN_MIN_WIDTH;
-
-/**
- * Returns the width of the Actions column based on the number of buttons being
- * displayed
- *
- * NOTE: This function is necessary because `width` is a required property of
- * the `EuiDataGridControlColumn` interface, so it must be calculated before
- * content is rendered. (The width of a `EuiDataGridControlColumn` does not
- * automatically size itself to fit all the content.)
- */
-export const getActionsColumnWidth = (actionButtonCount: number): number => {
-  const contentWidth =
-    actionButtonCount > 0
-      ? actionButtonCount * DEFAULT_ACTION_BUTTON_WIDTH
-      : DEFAULT_ACTION_BUTTON_WIDTH;
-
-  // `EuiDataGridRowCell` applies additional `padding-left` and
-  // `padding-right`, which must be added to the content width to prevent the
-  // content from being partially hidden due to the space occupied by padding:
-  const leftRightCellPadding = parseInt(euiThemeVars.euiDataGridCellPaddingM, 10) * 2; // parseInt ignores the trailing `px`, e.g. `6px`
-
-  return contentWidth + leftRightCellPadding;
-};
+  type !== 'date' ? DEFAULT_TABLE_COLUMN_MIN_WIDTH : DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH;

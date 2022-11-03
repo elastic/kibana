@@ -25,7 +25,6 @@ import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { SetEventsDeleted, SetEventsLoading } from '../../../../common/types/bulk_actions';
-import type { DataTableCellAction } from '../../../../common/data_table/columns';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -56,7 +55,11 @@ import { useKibana } from '../../lib/kibana';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
 import { getPageRowIndex } from './pagination';
-import type { ControlColumnProps, DataTableState } from '../../../../common/types';
+import type {
+  ControlColumnProps,
+  DataTableCellAction,
+  DataTableState,
+} from '../../../../common/types';
 
 const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.securitySolution.dataTable.ariaLabel', {
   defaultMessage: 'Alerts',

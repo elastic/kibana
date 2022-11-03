@@ -4,25 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { euiThemeVars } from '@kbn/ui-theme';
 import { mount } from 'enzyme';
 import { omit, set } from 'lodash/fp';
 import React from 'react';
 
-import { defaultHeaders } from './default_headers';
 import type { BUILT_IN_SCHEMA } from './helpers';
 import {
-  getActionsColumnWidth,
   getColumnWidthFromType,
   getColumnHeaders,
   getSchema,
   getColumnHeader,
   allowSorting,
 } from './helpers';
-import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
+import { DEFAULT_TABLE_COLUMN_MIN_WIDTH, DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import type { ColumnHeaderOptions } from '../../../../../common/types';
 import { mockBrowserFields } from '../../../containers/source/mock';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../header_actions';
+import { defaultHeaders } from '../../../store/data_table/defaults';
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
@@ -37,11 +34,11 @@ window.matchMedia = jest.fn().mockImplementation((query) => {
 describe('helpers', () => {
   describe('getColumnWidthFromType', () => {
     test('it returns the expected width for a non-date column', () => {
-      expect(getColumnWidthFromType('keyword')).toEqual(DEFAULT_COLUMN_MIN_WIDTH);
+      expect(getColumnWidthFromType('keyword')).toEqual(DEFAULT_TABLE_COLUMN_MIN_WIDTH);
     });
 
     test('it returns the expected width for a date column', () => {
-      expect(getColumnWidthFromType('date')).toEqual(DEFAULT_DATE_COLUMN_MIN_WIDTH);
+      expect(getColumnWidthFromType('date')).toEqual(DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH);
     });
   });
 
@@ -78,7 +75,7 @@ describe('helpers', () => {
       expect(getColumnHeader(field, [])).toEqual({
         columnHeaderType: 'not-filtered',
         id: field,
-        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+        initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
       });
     });
 
@@ -90,7 +87,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: field,
-            initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+            initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
             esTypes: ['date'],
             type: 'date',
           },
@@ -98,7 +95,7 @@ describe('helpers', () => {
       ).toEqual({
         columnHeaderType: 'not-filtered',
         id: field,
-        initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+        initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
         esTypes: ['date'],
         type: 'date',
       });
@@ -461,37 +458,6 @@ describe('helpers', () => {
           },
         ]);
       });
-    });
-  });
-
-  describe('getActionsColumnWidth', () => {
-    // ideally the following implementation detail wouldn't be part of these tests,
-    // but without it, the test would be brittle when `euiDataGridCellPaddingM` changes:
-    const expectedPadding = parseInt(euiThemeVars.euiDataGridCellPaddingM, 10) * 2;
-
-    test('it returns the expected width', () => {
-      const ACTION_BUTTON_COUNT = 5;
-      const expectedContentWidth = ACTION_BUTTON_COUNT * DEFAULT_ACTION_BUTTON_WIDTH;
-
-      expect(getActionsColumnWidth(ACTION_BUTTON_COUNT)).toEqual(
-        expectedContentWidth + expectedPadding
-      );
-    });
-
-    test('it returns the minimum width when the button count is zero', () => {
-      const ACTION_BUTTON_COUNT = 0;
-
-      expect(getActionsColumnWidth(ACTION_BUTTON_COUNT)).toEqual(
-        DEFAULT_ACTION_BUTTON_WIDTH + expectedPadding
-      );
-    });
-
-    test('it returns the minimum width when the button count is negative', () => {
-      const ACTION_BUTTON_COUNT = -1;
-
-      expect(getActionsColumnWidth(ACTION_BUTTON_COUNT)).toEqual(
-        DEFAULT_ACTION_BUTTON_WIDTH + expectedPadding
-      );
     });
   });
 

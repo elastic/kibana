@@ -19,11 +19,11 @@ import { getDefaultControlColumn } from '../control_columns';
 import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeline_control_columns';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { getActionsColumnWidth } from '../../../../../common/components/data_table/column_headers/helpers';
 import {
   NOTES_DISABLE_TOOLTIP,
   NOTES_TOOLTIP,
 } from '../../../../../common/components/header_actions/translations';
+import { getActionsColumnWidth } from '../../../../../common/components/header_actions';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;

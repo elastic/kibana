@@ -28,7 +28,6 @@ import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 export type KqlMode = 'filter' | 'search';
-export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
 export interface TimelineModel {
   /** The selected tab to displayed in the timeline */

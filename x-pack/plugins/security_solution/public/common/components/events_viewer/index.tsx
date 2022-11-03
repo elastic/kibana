@@ -15,8 +15,7 @@ import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/c
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
-import type { DataTableCellAction } from '../../../../common/data_table/columns';
-import type { ControlColumnProps, TableId } from '../../../../common/types';
+import type { ControlColumnProps, DataTableCellAction, TableId } from '../../../../common/types';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
@@ -49,7 +48,6 @@ import {
 import type { ViewSelection } from '../event_rendered_view/selector';
 import { SummaryViewSelector } from '../event_rendered_view/selector';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { defaultHeaders } from '../data_table/column_headers/default_headers';
 import { getDefaultViewSelection, resolverIsShowing, getCombinedFilterQuery } from './helpers';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../event_rendered_view/helpers';
 import { useTimelineEvents } from './use_timelines_events';
@@ -60,6 +58,7 @@ import type { AlertWorkflowStatus } from '../../types';
 import { StatefulEventRenderedView } from '../event_rendered_view';
 import { useQueryInspector } from '../page/manage_query';
 import type { SetQuery } from '../../containers/use_global_time/types';
+import { defaultHeaders } from '../../store/data_table/defaults';
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};

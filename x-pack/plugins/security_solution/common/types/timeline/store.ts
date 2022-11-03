@@ -6,11 +6,11 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { ColumnHeaderOptions, RowRendererId, TimelineTypeLiteral } from '.';
-import type { ColumnId } from '../../data_table/columns';
+import type { RowRendererId, TimelineTypeLiteral } from '.';
 
 import type { Direction } from '../../search_strategy';
 import type { ExpandedDetail } from '../detail_panel';
+import type { ColumnHeaderOptions, ColumnId } from '../header_actions';
 import type { DataProvider } from './data_provider';
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';

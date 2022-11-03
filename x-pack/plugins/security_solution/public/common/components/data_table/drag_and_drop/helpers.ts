@@ -14,7 +14,7 @@ import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
 import type { ColumnHeaderOptions } from '../../../../../common/types';
 import { TableId } from '../../../store/data_table/types';
 import { dataTableActions } from '../../../store/data_table';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
+import { DEFAULT_TABLE_COLUMN_MIN_WIDTH } from '../constants';
 import type { BrowserField, BrowserFields } from '../../../containers/source';
 
 /**
@@ -185,7 +185,7 @@ export const addFieldToTimelineColumns = ({
           linkField: linkFields[fieldId] ?? undefined,
           type: column.type,
           aggregatable: column.aggregatable,
-          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+          initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
           ...initColumnHeader,
         },
         id: timelineId,
@@ -199,7 +199,7 @@ export const addFieldToTimelineColumns = ({
         column: {
           columnHeaderType: 'not-filtered',
           id: fieldId,
-          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+          initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
         },
         id: timelineId,
         index: result.destination != null ? result.destination.index : 0,

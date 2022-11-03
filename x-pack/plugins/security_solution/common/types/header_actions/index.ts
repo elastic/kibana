@@ -5,21 +5,100 @@
  * 2.0.
  */
 
-import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
+import type {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
+  EuiDataGridColumnCellActionProps,
+  EuiDataGridControlColumn,
+} from '@elastic/eui';
+import type { IFieldSubType } from '@kbn/es-query';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
-import type { JSXElementConstructor } from 'react';
+import type { JSXElementConstructor, ReactNode } from 'react';
 import type { OnRowSelected } from '..';
 import type {
   HeaderCellRender,
   OnUpdateAlertStatusError,
   OnUpdateAlertStatusSuccess,
 } from '../../../public/common/components/toolbar/bulk_actions/types';
-import type { ColumnHeaderOptions } from '../../data_table/columns';
 import type { Ecs } from '../../ecs';
 import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
 import type { CustomBulkAction, SetEventsDeleted, SetEventsLoading } from '../bulk_actions';
 import type { SortColumnTable } from '../data_table';
 
+export type ColumnHeaderType = 'not-filtered' | 'text-filter';
+
+/** Uniquely identifies a column */
+export type ColumnId = string;
+
+/**
+ * A `DataTableCellAction` function accepts `data`, where each row of data is
+ * represented as a `TimelineNonEcsData[]`. For example, `data[0]` would
+ * contain a `TimelineNonEcsData[]` with the first row of data.
+ *
+ * A `DataTableCellAction` returns a function that has access to all the
+ * `EuiDataGridColumnCellActionProps`, _plus_ access to `data`,
+ *  which enables code like the following example to be written:
+ *
+ * Example:
+ * ```
+ * ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
+ *   const value = getMappedNonEcsValue({
+ *     data: data[rowIndex], // access a specific row's values
+ *     fieldName: columnId,
+ *   });
+ *
+ *   return (
+ *     <Component onClick={() => alert(`row ${rowIndex} col ${columnId} has value ${value}`)} iconType="heart">
+ *       {'Love it'}
+ *      </Component>
+ *   );
+ * };
+ * ```
+ */
+export type DataTableCellAction = ({
+  browserFields,
+  data,
+  ecsData,
+  header,
+  pageSize,
+  scopeId,
+  closeCellPopover,
+}: {
+  browserFields: BrowserFields;
+  /** each row of data is represented as one TimelineNonEcsData[] */
+  data: TimelineNonEcsData[][];
+  ecsData: Ecs[];
+  header?: ColumnHeaderOptions;
+  pageSize: number;
+  scopeId: string;
+  closeCellPopover?: () => void;
+}) => (props: EuiDataGridColumnCellActionProps) => ReactNode;
+
+/** The specification of a column header */
+export type ColumnHeaderOptions = Pick<
+  EuiDataGridColumn,
+  | 'actions'
+  | 'defaultSortDirection'
+  | 'display'
+  | 'displayAsText'
+  | 'id'
+  | 'initialWidth'
+  | 'isSortable'
+  | 'schema'
+> & {
+  aggregatable?: boolean;
+  dataTableCellActions?: DataTableCellAction[];
+  category?: string;
+  columnHeaderType: ColumnHeaderType;
+  description?: string | null;
+  esTypes?: string[];
+  example?: string | number | null;
+  format?: string;
+  linkField?: string;
+  placeholder?: string;
+  subType?: IFieldSubType;
+  type?: string;
+};
 export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;

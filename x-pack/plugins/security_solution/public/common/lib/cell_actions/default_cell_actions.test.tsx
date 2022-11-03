@@ -5,17 +5,15 @@
  * 2.0.
  */
 import type { EuiDataGridColumn } from '@elastic/eui';
+import type { ColumnHeaderType, DataTableCellAction } from '../../../../common/types';
 import { TableId } from '../../../../common/types';
 import type {
   BrowserFields,
   TimelineNonEcsData,
 } from '@kbn/timelines-plugin/common/search_strategy';
 import type { Ecs } from '../../../../common/ecs';
-import type { ColumnHeaderType } from '../../../timelines/store/timeline/model';
-
 import { defaultCellActions } from './default_cell_actions';
 import { COLUMNS_WITH_LINKS, EmptyComponent } from './helpers';
-import type { DataTableCellAction } from '../../../../common/data_table/columns';
 
 describe('default cell actions', () => {
   const browserFields: BrowserFields = {};
