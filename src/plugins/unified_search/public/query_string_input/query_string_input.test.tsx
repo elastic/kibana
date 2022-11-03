@@ -385,7 +385,6 @@ describe('QueryStringInput', () => {
       'logstash-*',
       { type: 'id', value: '1' },
       { type: 'title', value: 'my-fake-index-pattern' },
-      { title: '.fleet-agents', fields: [] },
       stubIndexPattern,
     ];
     mockFetchIndexPatterns.mockClear();
