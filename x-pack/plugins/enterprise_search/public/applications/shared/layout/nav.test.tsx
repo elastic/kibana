@@ -73,6 +73,11 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'Elasticsearch',
           },
           {
+            href: '/app/enterprise_search/search_experiences',
+            id: 'searchExperiences',
+            name: 'Search Experiences',
+          },
+          {
             href: '/app/enterprise_search/app_search',
             id: 'app_search',
             name: 'App Search',
@@ -108,6 +113,11 @@ describe('useEnterpriseSearchContentNav', () => {
           id: 'elasticsearch',
           name: 'Elasticsearch',
         },
+        {
+          href: '/app/enterprise_search/search_experiences',
+          id: 'searchExperiences',
+          name: 'Search Experiences',
+        },
       ],
       name: 'Search',
     });
@@ -128,6 +138,11 @@ describe('useEnterpriseSearchContentNav', () => {
           href: '/app/enterprise_search/elasticsearch',
           id: 'elasticsearch',
           name: 'Elasticsearch',
+        },
+        {
+          href: '/app/enterprise_search/search_experiences',
+          id: 'searchExperiences',
+          name: 'Search Experiences',
         },
         {
           href: '/app/enterprise_search/workplace_search',
@@ -154,6 +169,11 @@ describe('useEnterpriseSearchContentNav', () => {
           href: '/app/enterprise_search/elasticsearch',
           id: 'elasticsearch',
           name: 'Elasticsearch',
+        },
+        {
+          href: '/app/enterprise_search/search_experiences',
+          id: 'searchExperiences',
+          name: 'Search Experiences',
         },
         {
           href: '/app/enterprise_search/app_search',

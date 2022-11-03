@@ -69,9 +69,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await listingTable.expectItemsCount('dashboard', 2);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql([
-          'dashboard 4 with real data (tag-1)',
+        expect(itemNames.sort()).to.eql([
           'dashboard 3 (tag-1 and tag-3)',
+          'dashboard 4 with real data (tag-1)',
         ]);
       });
 
@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await listingTable.expectItemsCount('dashboard', 2);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql(['dashboard 2 (tag-3)', 'dashboard 3 (tag-1 and tag-3)']);
+        expect(itemNames.sort()).to.eql(['dashboard 2 (tag-3)', 'dashboard 3 (tag-1 and tag-3)']);
       });
 
       it('allows to filter by multiple tags', async () => {
@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await listingTable.expectItemsCount('dashboard', 3);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql([
+        expect(itemNames.sort()).to.eql([
           'dashboard 1 (tag-2)',
           'dashboard 2 (tag-3)',
           'dashboard 3 (tag-1 and tag-3)',
