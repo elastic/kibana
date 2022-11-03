@@ -8,18 +8,18 @@
 
 import { mockCreateOriginQuery } from './check_reference_origins.test.mock';
 
-import type {
+import {
   SavedObjectReference,
   SavedObject,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { checkOriginConflicts } from './check_origin_conflicts';
-import type { ImportStateMap } from './types';
+import { ImportStateMap } from './types';
 
 jest.mock('uuid', () => ({
   v4: () => 'uuidv4',

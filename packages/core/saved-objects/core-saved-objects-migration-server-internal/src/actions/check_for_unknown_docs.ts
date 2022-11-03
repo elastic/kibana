@@ -9,14 +9,14 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { flatten } from 'lodash';
-import type {
+import {
   AggregationsMultiBucketAggregateBase,
   Indices,
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,

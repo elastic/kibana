@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { LogMeta } from '@kbn/logging';
-import type { SavedObjectUnsanitizedDoc } from './serialization';
+import { LogMeta } from '@kbn/logging';
+import { SavedObjectUnsanitizedDoc } from './serialization';
 
 /**
  * A migration function for a {@link SavedObjectsType | saved object type}

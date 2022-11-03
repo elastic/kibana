@@ -7,10 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type {
-  SavedObjectsValidationMap,
-  SavedObjectSanitizedDoc,
-} from '@kbn/core-saved-objects-server';
+import { SavedObjectsValidationMap, SavedObjectSanitizedDoc } from '@kbn/core-saved-objects-server';
 import { createSavedObjectSanitizedDocSchema } from './schema';
 
 describe('Saved Objects type validation schema', () => {

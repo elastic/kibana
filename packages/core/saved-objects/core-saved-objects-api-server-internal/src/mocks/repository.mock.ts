@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 
 // mock duplicated from `@kbn/core/saved-objects-api-server-mocks` to avoid cyclic dependencies
 

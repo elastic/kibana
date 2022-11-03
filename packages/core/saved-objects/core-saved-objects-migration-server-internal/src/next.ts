@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type {
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import {
   AllActionStates,
   ReindexSourceToTempOpenPit,
   ReindexSourceToTempRead,
@@ -41,7 +41,7 @@ import type {
   CheckUnknownDocumentsState,
   CalculateExcludeFiltersState,
 } from './state';
-import type { TransformRawDocs } from './types';
+import { TransformRawDocs } from './types';
 import * as Actions from './actions';
 
 type ActionMap = ReturnType<typeof nextActionMap>;

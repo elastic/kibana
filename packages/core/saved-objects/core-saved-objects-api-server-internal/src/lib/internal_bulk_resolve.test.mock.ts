@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type * as InternalUtils from './internal_utils';
+import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import * as InternalUtils from './internal_utils';
 
 export const mockGetSavedObjectFromSource = jest.fn() as jest.MockedFunction<
   typeof InternalUtils['getSavedObjectFromSource']

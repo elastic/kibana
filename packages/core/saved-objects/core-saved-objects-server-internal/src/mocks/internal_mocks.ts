@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type {
+import {
   DeprecationsServiceSetup,
   DeprecationRegistryProvider,
 } from '@kbn/core-deprecations-server';
-import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 
 export const createDeprecationsSetupMock = () => {
   const setupContract: jest.Mocked<DeprecationsServiceSetup> = {

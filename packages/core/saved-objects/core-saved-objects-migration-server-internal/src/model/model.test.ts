@@ -8,8 +8,8 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import type {
+import { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import {
   FatalState,
   State,
   LegacySetWriteBlockState,

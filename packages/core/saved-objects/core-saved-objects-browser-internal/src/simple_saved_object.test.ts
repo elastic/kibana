@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-browser';
+import { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-browser';
 import { SimpleSavedObjectImpl as SimpleSavedObject } from './simple_saved_object';
 
 describe('SimpleSavedObjectImpl', () => {

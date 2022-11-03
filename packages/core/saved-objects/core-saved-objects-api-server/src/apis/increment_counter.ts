@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
+import { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
  * Options for the increment counter operation

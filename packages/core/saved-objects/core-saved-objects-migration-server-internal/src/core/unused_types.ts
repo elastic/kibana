@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * Types that are no longer registered and need to be removed

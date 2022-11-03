@@ -7,8 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import type { InternalSavedObjectRouter } from '../internal_types';
+import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import { InternalSavedObjectRouter } from '../internal_types';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;

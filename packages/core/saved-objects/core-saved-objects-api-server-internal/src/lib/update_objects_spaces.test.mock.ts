@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type * as InternalUtils from './internal_utils';
-import type { deleteLegacyUrlAliases } from './legacy_url_aliases';
+import * as InternalUtils from './internal_utils';
+import { deleteLegacyUrlAliases } from './legacy_url_aliases';
 
 export const mockGetBulkOperationError = jest.fn() as jest.MockedFunction<
   typeof InternalUtils['getBulkOperationError']

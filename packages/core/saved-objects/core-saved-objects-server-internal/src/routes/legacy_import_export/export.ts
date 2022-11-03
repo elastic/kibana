@@ -8,9 +8,9 @@
 
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
-import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import type { InternalSavedObjectRouter } from '../../internal_types';
+import { Logger } from '@kbn/logging';
+import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import { InternalSavedObjectRouter } from '../../internal_types';
 import { exportDashboards } from './lib';
 
 export const registerLegacyExportRoute = (

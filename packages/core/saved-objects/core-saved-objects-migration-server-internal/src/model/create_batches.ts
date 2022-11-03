@@ -7,7 +7,7 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { createBulkOperationBody } from '../actions/bulk_overwrite_transformed_documents';
 
 /**

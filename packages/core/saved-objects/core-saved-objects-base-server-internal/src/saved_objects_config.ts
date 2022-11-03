@@ -8,7 +8,7 @@
 
 import { valid } from 'semver';
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const migrationSchema = schema.object({
   batchSize: schema.number({ defaultValue: 1_000 }),

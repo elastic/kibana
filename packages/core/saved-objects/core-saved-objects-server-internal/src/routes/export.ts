@@ -10,15 +10,15 @@ import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
+import { KibanaRequest } from '@kbn/core-http-server';
+import {
   SavedObjectsExportByTypeOptions,
   SavedObjectsExportByObjectOptions,
 } from '@kbn/core-saved-objects-server';
-import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsExportError } from '@kbn/core-saved-objects-import-export-server-internal';
-import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import type { InternalSavedObjectRouter } from '../internal_types';
+import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import { InternalSavedObjectRouter } from '../internal_types';
 import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {

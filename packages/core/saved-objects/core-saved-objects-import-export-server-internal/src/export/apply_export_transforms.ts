@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type {
+import { KibanaRequest } from '@kbn/core-http-server';
+import { SavedObject } from '@kbn/core-saved-objects-common';
+import {
   SavedObjectsExportTransform,
   SavedObjectsExportTransformContext,
 } from '@kbn/core-saved-objects-server';

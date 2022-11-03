@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '../types';
+import { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
+import { IndexMapping } from '../types';
 import { getProperty } from './get_property';
 
 const MAPPINGS = {

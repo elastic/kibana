@@ -7,8 +7,8 @@
  */
 
 import { Observable } from 'rxjs';
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '../mappings';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import { IndexMapping } from '../mappings';
 
 /** @internal */
 export interface IKibanaMigrator {

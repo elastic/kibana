@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectsEncryptionExtension } from './encryption';
-import type { ISavedObjectsSecurityExtension } from './security';
-import type { ISavedObjectsSpacesExtension } from './spaces';
+import { ISavedObjectsEncryptionExtension } from './encryption';
+import { ISavedObjectsSecurityExtension } from './security';
+import { ISavedObjectsSpacesExtension } from './spaces';
 
 /**
  * The SavedObjectsExtensions interface contains the intefaces for three

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject, SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
+import { SavedObject, SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
 
 export function splitOverwrites<T>(
   savedObjects: Array<SavedObject<T>>,

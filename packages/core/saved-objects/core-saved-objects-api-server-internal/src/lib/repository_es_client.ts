@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import { TransportRequestOptions } from '@elastic/elasticsearch';
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { retryCallCluster } from '@kbn/core-elasticsearch-server-internal';
 import { decorateEsError } from './decorate_es_error';
 

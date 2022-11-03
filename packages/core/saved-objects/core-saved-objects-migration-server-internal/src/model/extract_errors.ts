@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { TransformErrorObjects } from '../core';
-import type { DocumentIdAndType } from '../actions';
+import { TransformErrorObjects } from '../core';
+import { DocumentIdAndType } from '../actions';
 
 /**
  * Constructs migration failure message strings from corrupt document ids and document transformation errors

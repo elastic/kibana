@@ -46,12 +46,12 @@ import uuidv5 from 'uuid/v5';
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
-import type { Logger } from '@kbn/logging';
-import type {
+import { Logger } from '@kbn/logging';
+import {
   SavedObjectsMigrationVersion,
   SavedObjectsNamespaceType,
 } from '@kbn/core-saved-objects-common';
-import type {
+import {
   SavedObjectUnsanitizedDoc,
   SavedObjectsType,
   ISavedObjectTypeRegistry,

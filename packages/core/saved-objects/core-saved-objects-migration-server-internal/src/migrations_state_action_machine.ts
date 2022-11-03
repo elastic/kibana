@@ -8,13 +8,13 @@
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
-import type { Logger, LogMeta } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Logger, LogMeta } from '@kbn/logging';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   getErrorMessage,
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
-import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
 import { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';

@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import type { SavedObjectsRawDoc, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import { SavedObjectsRawDoc, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { SavedObjectsSerializer } from './serializer';
 import { encodeVersion } from '../version';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';

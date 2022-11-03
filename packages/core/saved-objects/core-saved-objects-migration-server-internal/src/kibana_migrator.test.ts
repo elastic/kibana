@@ -7,11 +7,11 @@
  */
 
 import { take } from 'rxjs/operators';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { DocumentMigrator } from './core/document_migrator';

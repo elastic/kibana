@@ -7,7 +7,7 @@
  */
 
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import type {
+import {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';

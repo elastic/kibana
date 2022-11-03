@@ -7,7 +7,7 @@
  */
 
 import typeDetect from 'type-detect';
-import type {
+import {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,

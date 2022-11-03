@@ -10,8 +10,8 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
 import { type AliasAction, isTypeof } from '../actions';
-import type { AllActionStates, State } from '../state';
-import type { ResponseType } from '../next';
+import { AllActionStates, State } from '../state';
+import { ResponseType } from '../next';
 import { disableUnknownTypeMappingFields } from '../core';
 import {
   createInitialProgress,
@@ -27,7 +27,7 @@ import {
   extractDiscardedUnknownDocs,
   extractDiscardedCorruptDocs,
 } from './extract_errors';
-import type { ExcludeRetryableEsError } from './types';
+import { ExcludeRetryableEsError } from './types';
 import {
   addExcludedTypesToBoolQuery,
   addMustClausesToBoolQuery,
@@ -40,7 +40,7 @@ import {
   throwBadResponse,
 } from './helpers';
 import { createBatches } from './create_batches';
-import type { MigrationLog } from '../types';
+import { MigrationLog } from '../types';
 
 export const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
 const CLUSTER_SHARD_LIMIT_EXCEEDED_REASON = `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources.`;

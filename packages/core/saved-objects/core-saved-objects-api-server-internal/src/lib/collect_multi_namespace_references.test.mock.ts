@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { findLegacyUrlAliases } from './legacy_url_aliases';
-import type { findSharedOriginObjects } from './find_shared_origin_objects';
-import type * as InternalUtils from './internal_utils';
+import { findLegacyUrlAliases } from './legacy_url_aliases';
+import { findSharedOriginObjects } from './find_shared_origin_objects';
+import * as InternalUtils from './internal_utils';
 
 export const mockFindLegacyUrlAliases = jest.fn() as jest.MockedFunction<
   typeof findLegacyUrlAliases

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type {
+import {
   SortOrder,
   AggregationsAggregationContainer,
   Id as EsId,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObject } from '@kbn/core-saved-objects-common';
 
 type KueryNode = any;
 
