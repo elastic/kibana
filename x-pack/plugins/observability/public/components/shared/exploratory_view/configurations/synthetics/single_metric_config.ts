@@ -94,6 +94,18 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         },
       },
       {
+        id: 'monitor_total_runs',
+        label: i18n.translate('xpack.observability.expView.totalRuns', {
+          defaultMessage: 'Total Runs',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+        columnType: FORMULA_COLUMN,
+        formula: 'unique_count(state.id)',
+        format: 'number',
+      },
+      {
         id: 'monitor_complete',
         label: i18n.translate('xpack.observability.expView.complete', {
           defaultMessage: 'Complete',

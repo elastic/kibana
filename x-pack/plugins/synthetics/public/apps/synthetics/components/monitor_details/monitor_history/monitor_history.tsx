@@ -15,6 +15,7 @@ import { MonitorDurationTrend } from '../monitor_summary/duration_trend';
 import { TestRunsTable } from '../monitor_summary/test_runs_table';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 import { MonitorCompleteCount } from '../monitor_summary/monitor_complete_count';
+import { MonitorTotalRunsCount } from '../monitor_summary/monitor_total_runs_count';
 
 export const MonitorHistory = () => {
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
@@ -44,7 +45,9 @@ export const MonitorHistory = () => {
                 <EuiFlexItem>
                   <DurationPanel from={dateRangeStart} to={dateRangeEnd} />
                 </EuiFlexItem>
-                <EuiFlexItem>Total test runs</EuiFlexItem>
+                <EuiFlexItem>
+                  <MonitorTotalRunsCount from={dateRangeStart} to={dateRangeEnd} />
+                </EuiFlexItem>
               </EuiFlexGrid>
             </EuiPanel>
           </EuiFlexItem>
