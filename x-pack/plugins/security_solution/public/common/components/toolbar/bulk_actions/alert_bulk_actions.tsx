@@ -8,18 +8,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
-import type { SetEventsDeleted, SetEventsLoading } from '../../../../../common/types/bulk_actions';
+import type {
+  CustomBulkActionProp,
+  SetEventsDeleted,
+  SetEventsLoading,
+} from '../../../../../common/types/bulk_actions';
 import { BulkActions } from '.';
 import { useBulkActionItems } from './use_bulk_action_items';
 import { dataTableActions, dataTableSelectors } from '../../../store/data_table';
 import type { TGridModel } from '../../../store/data_table/model';
 import type { AlertWorkflowStatus, Refetch } from '../../../types';
 import type { DataTableState } from '../../../store/data_table/types';
-import type {
-  CustomBulkActionProp,
-  OnUpdateAlertStatusError,
-  OnUpdateAlertStatusSuccess,
-} from './types';
+import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
 
 interface OwnProps {
   id: string;
