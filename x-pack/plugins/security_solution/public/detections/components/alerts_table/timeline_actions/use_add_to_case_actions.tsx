@@ -140,6 +140,7 @@ export const useAddToCaseActions = ({
         <EuiContextMenuItem
           aria-label={ariaLabel}
           data-test-subj="add-to-existing-case-action"
+          key="add-to-existing-case-action"
           onClick={handleAddToExistingCaseClick}
           size="s"
         >
@@ -149,6 +150,7 @@ export const useAddToCaseActions = ({
         <EuiContextMenuItem
           aria-label={ariaLabel}
           data-test-subj="add-to-new-case-action"
+          key="add-to-new-case-action"
           onClick={handleAddToNewCaseClick}
           size="s"
         >
