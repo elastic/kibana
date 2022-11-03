@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsBaseOptions } from './base';
+import { SavedObjectsBaseOptions } from './base';
 
 /**
  * An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the

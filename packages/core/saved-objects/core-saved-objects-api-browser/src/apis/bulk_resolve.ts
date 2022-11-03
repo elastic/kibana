@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ResolvedSimpleSavedObject } from './resolve';
+import { ResolvedSimpleSavedObject } from './resolve';
 
 /**
  * Return type of the Saved Objects `bulkResolve()` method.

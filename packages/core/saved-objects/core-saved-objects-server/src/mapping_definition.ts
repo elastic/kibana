@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
+import {
   PropertyName as EsPropertyName,
   MappingProperty as EsMappingProperty,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';

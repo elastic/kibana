@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type {
+import { SavedObject } from '@kbn/core-saved-objects-common';
+import {
   SavedObjectsBaseOptions,
   SavedObjectsBulkResolveObject,
   SavedObjectsResolveResponse,
@@ -50,7 +50,7 @@ import {
   isLeft,
   isRight,
 } from './internal_utils';
-import type { RepositoryEsClient } from './repository_es_client';
+import { RepositoryEsClient } from './repository_es_client';
 
 const MAX_CONCURRENT_RESOLVE = 10;
 

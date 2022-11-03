@@ -7,9 +7,9 @@
  */
 
 import { pick, throttle, cloneDeep } from 'lodash';
-import type { HttpSetup, HttpFetchOptions } from '@kbn/core-http-browser';
-import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
-import type {
+import { HttpSetup, HttpFetchOptions } from '@kbn/core-http-browser';
+import { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+import {
   SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
   SavedObjectsBulkDeleteResponse as SavedObjectsBulkDeleteResponseServer,
   SavedObjectsClientContract as SavedObjectsApi,
@@ -17,7 +17,7 @@ import type {
   SavedObjectsResolveResponse,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core-saved-objects-api-server';
-import type {
+import {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,

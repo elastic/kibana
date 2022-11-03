@@ -7,8 +7,8 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SavedObject, SavedObjectError } from '@kbn/core-saved-objects-common';
-import type {
+import { SavedObject, SavedObjectError } from '@kbn/core-saved-objects-common';
+import {
   SavedObjectsExportTransform,
   SavedObjectsExportablePredicate,
 } from '@kbn/core-saved-objects-server';

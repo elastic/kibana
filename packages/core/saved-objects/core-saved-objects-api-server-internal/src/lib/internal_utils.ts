@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Payload } from '@hapi/boom';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type {
+import { Payload } from '@hapi/boom';
+import { SavedObject } from '@kbn/core-saved-objects-common';
+import {
   ISavedObjectTypeRegistry,
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,

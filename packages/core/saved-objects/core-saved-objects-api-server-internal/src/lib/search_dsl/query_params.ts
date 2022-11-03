@@ -7,11 +7,11 @@
  */
 
 import * as esKuery from '@kbn/es-query';
-import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+import { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 
 type KueryNode = any;
 
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,

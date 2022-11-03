@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsExportTransform } from './export';
-import type { SavedObjectsImportHook } from './import';
+import { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObjectsExportTransform } from './export';
+import { SavedObjectsImportHook } from './import';
 
 /**
  * Configuration options for the {@link SavedObjectsType | type}'s management section.

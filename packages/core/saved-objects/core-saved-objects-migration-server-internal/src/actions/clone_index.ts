@@ -10,12 +10,12 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound, AcknowledgeResponse } from '.';
+import { IndexNotFound, AcknowledgeResponse } from '.';
 import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
 import {
   DEFAULT_TIMEOUT,

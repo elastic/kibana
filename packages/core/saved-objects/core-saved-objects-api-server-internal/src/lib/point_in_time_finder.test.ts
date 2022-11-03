@@ -7,7 +7,7 @@
  */
 
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import type {
+import {
   SavedObjectsFindResult,
   SavedObjectsCreatePointInTimeFinderOptions,
 } from '@kbn/core-saved-objects-api-server';

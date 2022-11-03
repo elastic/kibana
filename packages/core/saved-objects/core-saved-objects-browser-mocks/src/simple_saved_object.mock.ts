@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type {
+import {
   SavedObjectsClientContract,
   SimpleSavedObject,
 } from '@kbn/core-saved-objects-api-browser';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObject } from '@kbn/core-saved-objects-common';
 
 type T = unknown;
 

@@ -10,7 +10,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { get, cloneDeep } from 'lodash';
 import * as esKuery from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
 type KueryNode = any;
 

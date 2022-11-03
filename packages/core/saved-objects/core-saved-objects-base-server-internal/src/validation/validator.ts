@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/logging';
-import type {
+import { Logger } from '@kbn/logging';
+import {
   SavedObjectsValidationMap,
   SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';

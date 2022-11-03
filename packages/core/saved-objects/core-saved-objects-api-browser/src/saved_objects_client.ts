@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
-import type {
+import { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+import {
   ResolvedSimpleSavedObject,
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
@@ -23,7 +23,7 @@ import type {
   SavedObjectsBulkDeleteOptions,
 } from './apis';
 
-import type { SimpleSavedObject } from './simple_saved_object';
+import { SimpleSavedObject } from './simple_saved_object';
 
 /**
  * The client-side SavedObjectsClient is a thin convenience library around the SavedObjects

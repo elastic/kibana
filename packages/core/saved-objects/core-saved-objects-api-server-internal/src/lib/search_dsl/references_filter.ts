@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+import { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 
-import type { SearchOperator } from './query_params';
+import { SearchOperator } from './query_params';
 
 export function getReferencesFilter({
   references,

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
+import { KibanaRequest } from '@kbn/core-http-server';
+import {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
-import type { ISavedObjectsEncryptionExtension } from './encryption';
-import type { SavedObjectsExtensions } from './extensions';
-import type { ISavedObjectsSecurityExtension } from './security';
-import type { ISavedObjectsSpacesExtension } from './spaces';
-import type { ISavedObjectTypeRegistry } from './type_registry';
+import { ISavedObjectsEncryptionExtension } from './encryption';
+import { SavedObjectsExtensions } from './extensions';
+import { ISavedObjectsSecurityExtension } from './security';
+import { ISavedObjectsSpacesExtension } from './spaces';
+import { ISavedObjectTypeRegistry } from './type_registry';
 
 /**
  * Describes the factory used to create instances of the Saved Objects Client.

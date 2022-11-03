@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import { SavedObjectReference } from '@kbn/core-saved-objects-common';
 
 /**
  * Per-object parameters for bulk update operation

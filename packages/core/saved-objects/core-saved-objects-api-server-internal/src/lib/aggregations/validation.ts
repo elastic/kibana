@@ -10,7 +10,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ObjectType } from '@kbn/config-schema';
 import { isPlainObject, isArray } from 'lodash';
 
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import {
   isObjectTypeAttribute,
   rewriteObjectTypeAttribute,

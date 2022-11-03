@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject, SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
+import { SavedObject, SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
 import { getImportStateMapForRetries } from './get_import_state_map_for_retries';
 
 describe('#getImportStateMapForRetries', () => {

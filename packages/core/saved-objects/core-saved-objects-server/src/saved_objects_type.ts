@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { MaybePromise } from '@kbn/utility-types';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsTypeManagementDefinition } from './saved_objects_management';
-import type { SavedObjectsValidationMap } from './validation';
-import type { SavedObjectMigrationMap } from './migration';
-import type { SavedObjectsTypeMappingDefinition } from './mapping_definition';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MaybePromise } from '@kbn/utility-types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
+import { SavedObjectsTypeManagementDefinition } from './saved_objects_management';
+import { SavedObjectsValidationMap } from './validation';
+import { SavedObjectMigrationMap } from './migration';
+import { SavedObjectsTypeMappingDefinition } from './mapping_definition';
 
 /**
  * @public

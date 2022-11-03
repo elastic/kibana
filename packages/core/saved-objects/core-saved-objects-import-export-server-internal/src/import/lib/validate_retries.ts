@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
+import { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 import { SavedObjectsImportError } from '../errors';
 

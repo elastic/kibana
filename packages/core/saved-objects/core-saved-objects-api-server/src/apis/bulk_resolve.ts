@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsResolveResponse } from './resolve';
+import { SavedObjectsResolveResponse } from './resolve';
 
 /**
  * Object parameters for the bulk resolve operation

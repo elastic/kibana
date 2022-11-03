@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import type {
+import {
   SavedObjectSanitizedDoc,
   SavedObjectsValidationMap,
 } from '@kbn/core-saved-objects-server';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
+import {
   SavedObjectsFieldMapping,
   SavedObjectsMappingProperties,
 } from '@kbn/core-saved-objects-server';

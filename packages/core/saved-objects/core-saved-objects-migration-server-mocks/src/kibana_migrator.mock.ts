@@ -7,8 +7,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type {
+import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import {
   IKibanaMigrator,
   KibanaMigratorStatus,
 } from '@kbn/core-saved-objects-base-server-internal';

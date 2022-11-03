@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
+import { KibanaRequest } from '@kbn/core-http-server';
+import {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
-import type { ISavedObjectsSerializer } from './serialization';
-import type {
+import { ISavedObjectsSerializer } from './serialization';
+import {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientProviderOptions,
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
 } from './client_factory';
-import type { SavedObjectsType } from './saved_objects_type';
-import type { ISavedObjectTypeRegistry } from './type_registry';
-import type { ISavedObjectsExporter } from './export';
-import type { ISavedObjectsImporter } from './import';
+import { SavedObjectsType } from './saved_objects_type';
+import { ISavedObjectTypeRegistry } from './type_registry';
+import { ISavedObjectsExporter } from './export';
+import { ISavedObjectsImporter } from './import';
 import { SavedObjectsExtensions } from './extensions';
 
 /**

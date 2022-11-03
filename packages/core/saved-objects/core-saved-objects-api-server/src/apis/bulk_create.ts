@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectReference,
-  SavedObjectsMigrationVersion,
-} from '@kbn/core-saved-objects-common';
+import { SavedObjectReference, SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 
 /**
  * Object parameters for the bulk create operation

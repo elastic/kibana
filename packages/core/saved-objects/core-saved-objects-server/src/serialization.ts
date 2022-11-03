@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
+import {
   SavedObjectsMigrationVersion,
   SavedObjectReference,
 } from '@kbn/core-saved-objects-common';

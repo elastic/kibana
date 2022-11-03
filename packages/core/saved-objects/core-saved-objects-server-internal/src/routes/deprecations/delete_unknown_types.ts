@@ -7,7 +7,7 @@
  */
 
 import { catchAndReturnBoomErrors } from '../utils';
-import type { InternalSavedObjectRouter } from '../../internal_types';
+import { InternalSavedObjectRouter } from '../../internal_types';
 import { deleteUnknownTypeObjects } from '../../deprecations';
 
 interface RouteDependencies {

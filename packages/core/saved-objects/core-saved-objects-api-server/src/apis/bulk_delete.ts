@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
  * Object parameters for the bulk delete operation

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { next } from './next';
 import { State } from './state';
 

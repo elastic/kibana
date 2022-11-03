@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ObjectType } from '@kbn/config-schema';
+import { ObjectType } from '@kbn/config-schema';
 
 /**
  * Allows for validating properties using @kbn/config-schema validations.

@@ -19,13 +19,13 @@ import {
 
 import { Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
-import type {
+import {
   SavedObject,
   SavedObjectsImportFailure,
   SavedObjectsImportWarning,
 } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type {
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import {
   SavedObjectsType,
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
@@ -33,7 +33,7 @@ import type {
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { importSavedObjectsFromStream, ImportSavedObjectsOptions } from './import_saved_objects';
-import type { ImportStateMap } from './lib';
+import { ImportStateMap } from './lib';
 
 describe('#importSavedObjectsFromStream', () => {
   beforeEach(() => {

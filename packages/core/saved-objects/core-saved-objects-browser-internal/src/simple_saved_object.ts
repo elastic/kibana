@@ -8,8 +8,8 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { get, has } from 'lodash';
-import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-common';
-import type {
+import { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-common';
+import {
   SavedObjectsClientContract,
   SimpleSavedObject,
 } from '@kbn/core-saved-objects-api-browser';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectsClientProvider } from '@kbn/core-saved-objects-api-server-internal';
+import { ISavedObjectsClientProvider } from '@kbn/core-saved-objects-api-server-internal';
 
 const create = (): jest.Mocked<ISavedObjectsClientProvider> => ({
   getClient: jest.fn(),

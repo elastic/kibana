@@ -7,14 +7,14 @@
  */
 
 import { gt, valid } from 'semver';
-import type {
+import {
   QueryDslBoolQuery,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import * as Either from 'fp-ts/lib/Either';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import type { State } from '../state';
-import type { FetchIndexResponse } from '../actions';
+import { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { State } from '../state';
+import { FetchIndexResponse } from '../actions';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.

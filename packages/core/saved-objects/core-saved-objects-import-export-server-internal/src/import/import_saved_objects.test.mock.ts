@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { collectSavedObjects } from './lib/collect_saved_objects';
-import type { checkReferenceOrigins } from './lib/check_reference_origins';
-import type { regenerateIds } from './lib/regenerate_ids';
-import type { validateReferences } from './lib/validate_references';
-import type { checkConflicts } from './lib/check_conflicts';
-import type { checkOriginConflicts } from './lib/check_origin_conflicts';
-import type { createSavedObjects } from './lib/create_saved_objects';
-import type { executeImportHooks } from './lib/execute_import_hooks';
+import { collectSavedObjects } from './lib/collect_saved_objects';
+import { checkReferenceOrigins } from './lib/check_reference_origins';
+import { regenerateIds } from './lib/regenerate_ids';
+import { validateReferences } from './lib/validate_references';
+import { checkConflicts } from './lib/check_conflicts';
+import { checkOriginConflicts } from './lib/check_origin_conflicts';
+import { createSavedObjects } from './lib/create_saved_objects';
+import { executeImportHooks } from './lib/execute_import_hooks';
 
 export const mockCollectSavedObjects = jest.fn() as jest.MockedFunction<typeof collectSavedObjects>;
 jest.mock('./lib/collect_saved_objects', () => ({

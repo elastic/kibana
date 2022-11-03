@@ -8,11 +8,11 @@
 
 import { getIndexForTypeMock } from './unknown_object_types.test.mocks';
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { deleteUnknownTypeObjects, getUnknownTypesDeprecations } from './unknown_object_types';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 const createAggregateTypesSearchResponse = (
   typesIds: Record<string, string[]> = {}

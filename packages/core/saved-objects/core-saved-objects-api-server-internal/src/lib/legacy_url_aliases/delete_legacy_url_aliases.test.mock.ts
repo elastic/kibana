@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { getErrorMessage } from '@kbn/core-elasticsearch-client-server-internal';
+import { getErrorMessage } from '@kbn/core-elasticsearch-client-server-internal';
 
 export const mockGetEsErrorMessage = jest.fn() as jest.MockedFunction<typeof getErrorMessage>;
 

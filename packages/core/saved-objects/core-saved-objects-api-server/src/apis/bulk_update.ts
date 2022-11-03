@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
-import type { SavedObjectsUpdateOptions, SavedObjectsUpdateResponse } from './update';
+import { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
+import { SavedObjectsUpdateOptions, SavedObjectsUpdateResponse } from './update';
 
 /**
  * Object parameters for the bulk update operation
