@@ -510,6 +510,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       searchQuery: jobConfigQuery,
       runtimeMappings,
       indexPattern: currentDataView,
+      jobType,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [

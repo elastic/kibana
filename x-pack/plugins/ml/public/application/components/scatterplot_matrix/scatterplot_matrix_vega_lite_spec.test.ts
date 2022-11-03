@@ -20,7 +20,7 @@ import {
   COLOR_OUTLIER,
   COLOR_SELECTION,
   COLOR_RANGE_NOMINAL,
-  DEFAULT_COLOR,
+  COLOR_BLUR,
   USER_SELECTION,
   SINGLE_POINT_CLICK,
 } from './scatterplot_matrix_vega_lite_spec';
@@ -30,11 +30,8 @@ describe('getColorSpec()', () => {
     const colorSpec = getColorSpec(euiThemeLight);
 
     expect(colorSpec).toEqual({
-      condition: [
-        { selection: USER_SELECTION, value: COLOR_SELECTION },
-        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
-      ],
-      value: DEFAULT_COLOR,
+      condition: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
+      value: COLOR_BLUR,
     });
   });
 
@@ -60,15 +57,15 @@ describe('getColorSpec()', () => {
     const colorSpec = getColorSpec(euiThemeLight, undefined, colorName, LEGEND_TYPES.NOMINAL);
 
     expect(colorSpec).toEqual({
-      condition: [
-        { selection: USER_SELECTION, value: COLOR_SELECTION },
-        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
-      ],
-      field: colorName,
-      scale: {
-        range: COLOR_RANGE_NOMINAL,
+      condition: {
+        selection: USER_SELECTION,
+        field: colorName,
+        scale: {
+          range: COLOR_RANGE_NOMINAL,
+        },
+        type: 'nominal',
       },
-      type: 'nominal',
+      value: COLOR_BLUR,
     });
   });
 });
@@ -93,11 +90,8 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       type: 'circle',
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
-      condition: [
-        { selection: USER_SELECTION, value: COLOR_SELECTION },
-        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
-      ],
-      value: DEFAULT_COLOR,
+      condition: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
+      value: COLOR_BLUR,
     });
     expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
       { field: 'x', type: 'quantitative' },
@@ -173,15 +167,15 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       type: 'circle',
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
-      condition: [
-        { selection: USER_SELECTION, value: COLOR_SELECTION },
-        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
-      ],
-      field: 'the-color-field',
-      scale: {
-        range: COLOR_RANGE_NOMINAL,
+      condition: {
+        selection: USER_SELECTION,
+        field: 'the-color-field',
+        type: 'nominal',
+        scale: {
+          range: COLOR_RANGE_NOMINAL,
+        },
       },
-      type: 'nominal',
+      value: COLOR_BLUR,
     });
     expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
       { field: 'the-color-field', type: 'nominal' },

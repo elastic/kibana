@@ -16,6 +16,8 @@ import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@e
 import { i18n } from '@kbn/i18n';
 
 import { LegendType, LEGEND_TYPES } from '../vega_chart/common';
+import { AnalyticsJobType } from '../../data_frame_analytics/pages/analytics_management/hooks/use_create_analytics_form/state';
+import { ANALYSIS_CONFIG_TYPE } from '../../data_frame_analytics/common/analytics';
 
 export const OUTLIER_SCORE_FIELD = 'outlier_score';
 
@@ -23,9 +25,10 @@ const SCATTERPLOT_SIZE = 125;
 export const USER_SELECTION = 'user_selection';
 export const SINGLE_POINT_CLICK = 'single_point_click';
 
-export const DEFAULT_COLOR = euiPaletteColorBlind()[0];
+export const COLOR_BLUR = '#bbb';
 export const COLOR_OUTLIER = euiPaletteNegative(2)[1];
 export const COLOR_SELECTION = euiPaletteColorBlind()[2];
+export const COLOR_RANGE_OUTLIER = [euiPaletteColorBlind()[1], euiPaletteColorBlind()[2]];
 export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
 export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
 
@@ -55,24 +58,22 @@ export const getColorSpec = (
   // this returns either a continuous or categorical color spec.
   if (color !== undefined && legendType !== undefined) {
     return {
-      condition: [
-        { selection: USER_SELECTION, value: COLOR_SELECTION },
-        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
-      ],
-      field: getEscapedVegaFieldName(color ?? '00FF00'),
-      type: legendType,
-      scale: {
-        range: legendType === LEGEND_TYPES.NOMINAL ? COLOR_RANGE_NOMINAL : COLOR_RANGE_QUANTITATIVE,
+      condition: {
+        selection: USER_SELECTION,
+        field: getEscapedVegaFieldName(color ?? '00FF00'),
+        type: legendType,
+        scale: {
+          range:
+            legendType === LEGEND_TYPES.NOMINAL ? COLOR_RANGE_NOMINAL : COLOR_RANGE_QUANTITATIVE,
+        },
       },
+      value: COLOR_BLUR,
     };
   }
 
   return {
-    condition: [
-      { selection: USER_SELECTION, value: COLOR_SELECTION },
-      { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
-    ],
-    value: DEFAULT_COLOR,
+    condition: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
+    value: COLOR_BLUR,
   };
 };
 
@@ -92,7 +93,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
   resultsField?: string,
   color?: string,
   legendType?: LegendType,
-  dynamicSize?: boolean
+  dynamicSize?: boolean,
+  jobType?: AnalyticsJobType
 ): TopLevelSpec => {
   const vegaValues = values;
   const vegaColumns = columns.map(getEscapedVegaFieldName);
@@ -146,8 +148,26 @@ export const getScatterplotMatrixVegaLiteSpec = (
             }
           : { type: 'circle', opacity: 0.75, size: 8 }),
       },
+      // transformation to apply outlier threshold as category
+      ...(outliers
+        ? {
+            transform: [
+              {
+                calculate: `datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff`,
+                as: 'is_outlier',
+              },
+            ],
+          }
+        : {}),
       encoding: {
         color: colorSpec,
+        opacity: {
+          condition: {
+            selection: USER_SELECTION,
+            value: 0.8,
+          },
+          value: 0.5,
+        },
         ...(dynamicSize
           ? {
               stroke: colorSpec,
@@ -196,7 +216,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
         },
         tooltip: [
           ...(color !== undefined
-            ? [{ type: colorSpec.type, field: getEscapedVegaFieldName(color) }]
+            // @ts-ignore
+            ? [{ type: colorSpec.condition.type, field: getEscapedVegaFieldName(color) }]
             : []),
           ...vegaColumns.map((d) => ({
             type: LEGEND_TYPES.QUANTITATIVE,
@@ -231,7 +252,10 @@ export const getScatterplotMatrixVegaLiteSpec = (
         : {
             selection: {
               // Always allow user selection
-              [USER_SELECTION]: { type: 'interval', empty: 'none' },
+              [USER_SELECTION]: {
+                type: 'interval',
+                ...(jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION ? { empty: 'none' } : {}),
+              },
               [SINGLE_POINT_CLICK]: { type: 'single', empty: 'none' },
             },
           }),
