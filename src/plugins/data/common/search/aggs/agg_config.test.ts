@@ -557,6 +557,7 @@ describe('AggConfig', () => {
               "id": undefined,
               "missingBucketLabel": "Missing",
               "otherBucketLabel": "Other",
+              "params": Object {},
             },
           },
         ]
