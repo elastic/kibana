@@ -13,9 +13,8 @@ export function shouldShowField(field: DataViewField, useNewFieldsApi: boolean):
   if (field.type === '_source') {
     return false;
   }
-  const subTypeMulti = getFieldSubtypeMulti(field?.spec);
-  const isSubfield = useNewFieldsApi && subTypeMulti;
-  return !useNewFieldsApi || !isSubfield;
+  // exclude multifields unless searching from source
+  return useNewFieldsApi ? !getFieldSubtypeMulti(field?.spec) : true;
 }
 
 export function getSelectedFields(

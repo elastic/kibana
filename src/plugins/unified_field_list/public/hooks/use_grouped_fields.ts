@@ -91,26 +91,30 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       return hasFieldDataHandler(dataViewId, field.name) || !isDataViewField; // treat unmapped fields as Available rather than Empty
     };
 
-    const fields = allFields || [];
-    const allSupportedTypesFields = onSupportedFieldFilter
-      ? fields.filter(onSupportedFieldFilter)
-      : fields;
-    const sortedFields = [...allSupportedTypesFields].sort(sortFields);
+    const selectedFields = sortedSelectedFields || [];
+    const sortedFields = [...(allFields || [])].sort(sortFields);
     const groupedFields = {
       ...getDefaultFieldGroups(),
       ...groupBy(sortedFields, (field) => {
+        if (!sortedSelectedFields && onSelectedFieldFilter && onSelectedFieldFilter(field)) {
+          selectedFields.push(field);
+        }
+        if (onSupportedFieldFilter && !onSupportedFieldFilter(field)) {
+          return 'skippedFields';
+        }
         if (field.type === 'document') {
           return 'specialFields';
-        } else if (dataView?.metaFields?.includes(field.name)) {
+        }
+        if (dataView?.metaFields?.includes(field.name)) {
           return 'metaFields';
-        } else if (containsData(field)) {
+        }
+        if (containsData(field)) {
           return 'availableFields';
-        } else return 'emptyFields';
+        }
+        return 'emptyFields';
       }),
     };
-    const selectedFields =
-      sortedSelectedFields ||
-      (onSelectedFieldFilter ? sortedFields.filter(onSelectedFieldFilter) : []);
+
     const popularFields = popularFieldsLimit
       ? sortedFields
           .filter((field) => field.count && field.type !== '_source' && containsData(field))
@@ -302,5 +306,6 @@ function getDefaultFieldGroups() {
     availableFields: [],
     emptyFields: [],
     metaFields: [],
+    skippedFields: [],
   };
 }
