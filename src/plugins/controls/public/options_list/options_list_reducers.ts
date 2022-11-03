@@ -57,7 +57,6 @@ export const optionsListReducers = {
       state.explicitInput.selectedOptions = [];
     } else {
       state.explicitInput.existsSelected = false;
-      state.componentState.existsSelectionInvalid = false;
     }
   },
   selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
@@ -104,11 +103,7 @@ export const optionsListReducers = {
     action: PayloadAction<
       Pick<
         OptionsListComponentState,
-        | 'availableOptions'
-        | 'invalidSelections'
-        | 'validSelections'
-        | 'totalCardinality'
-        | 'existsSelectionInvalid'
+        'availableOptions' | 'invalidSelections' | 'validSelections' | 'totalCardinality'
       >
     >
   ) => {

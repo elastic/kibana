@@ -31,7 +31,6 @@ export const OptionsListPopoverSuggestions = ({
   const dispatch = useEmbeddableDispatch();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
-  const existsSelectionInvalid = select((state) => state.componentState.existsSelectionInvalid);
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const availableOptions = select((state) => state.componentState.availableOptions);
 
@@ -77,21 +76,19 @@ export const OptionsListPopoverSuggestions = ({
 
   return (
     <>
-      {!hideExists &&
-        ((showOnlySelected && existsSelected) ||
-          (!showOnlySelected && !existsSelectionInvalid)) && (
-          <EuiFilterSelectItem
-            data-test-subj={`optionsList-control-selection-exists`}
-            checked={existsSelected ? 'on' : undefined}
-            key={'exists-option'}
-            onClick={() => {
-              dispatch(selectExists(!Boolean(existsSelected)));
-            }}
-            className="optionsList__existsFilter"
-          >
-            {OptionsListStrings.controlAndPopover.getExists()}
-          </EuiFilterSelectItem>
-        )}
+      {!hideExists && !(showOnlySelected && !existsSelected) && (
+        <EuiFilterSelectItem
+          data-test-subj={`optionsList-control-selection-exists`}
+          checked={existsSelected ? 'on' : undefined}
+          key={'exists-option'}
+          onClick={() => {
+            dispatch(selectExists(!Boolean(existsSelected)));
+          }}
+          className="optionsList__existsFilter"
+        >
+          {OptionsListStrings.controlAndPopover.getExists()}
+        </EuiFilterSelectItem>
+      )}
       {suggestions?.map((suggestion, index) => (
         <EuiFilterSelectItem
           data-test-subj={`optionsList-control-selection-${suggestion}`}

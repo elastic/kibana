@@ -38,7 +38,6 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const validSelections = select((state) => state.componentState.validSelections);
-  const existsSelectionInvalid = select((state) => state.componentState.existsSelectionInvalid);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
   const existsSelected = select((state) => state.explicitInput.existsSelected);
@@ -89,11 +88,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
             </>
           )}
           {existsSelected ? (
-            <span
-              className={`optionsList__existsFilter ${
-                existsSelectionInvalid && 'optionsList__filterInvalid'
-              }`}
-            >
+            <span className={`optionsList__existsFilter`}>
               {OptionsListStrings.controlAndPopover.getExists(+Boolean(exclude))}
             </span>
           ) : (
@@ -111,7 +106,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         </>
       ),
     };
-  }, [exclude, existsSelected, existsSelectionInvalid, validSelections, invalidSelections]);
+  }, [exclude, existsSelected, validSelections, invalidSelections]);
 
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>

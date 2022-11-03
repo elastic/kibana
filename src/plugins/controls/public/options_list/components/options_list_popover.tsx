@@ -33,12 +33,10 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   >();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
-  const existsSelectionInvalid = select((state) => state.componentState.existsSelectionInvalid);
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const availableOptions = select((state) => state.componentState.availableOptions);
   const field = select((state) => state.componentState.field);
 
-  const existsSelected = select((state) => state.explicitInput.existsSelected);
   const hideExclude = select((state) => state.explicitInput.hideExclude);
   const fieldName = select((state) => state.explicitInput.fieldName);
   const title = select((state) => state.explicitInput.title);
@@ -62,9 +60,9 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
         data-test-subj={`optionsList-control-available-options`}
       >
         <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} />
-        {!showOnlySelected &&
-          ((invalidSelections && !isEmpty(invalidSelections)) ||
-            (existsSelected && existsSelectionInvalid)) && <OptionsListPopoverInvalidSelections />}
+        {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
+          <OptionsListPopoverInvalidSelections />
+        )}
       </div>
       {!hideExclude && <OptionsListPopoverFooter />}
     </span>

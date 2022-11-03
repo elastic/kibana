@@ -59,11 +59,9 @@ export type OptionsListRequest = Omit<
 export interface OptionsListRequestBody {
   filters?: Array<{ bool: BoolQuery }>;
   selectedOptions?: string[];
-  existsSelected?: boolean;
   runPastTimeout?: boolean;
   textFieldName?: string;
   searchString?: string;
   fieldSpec?: FieldSpec;
-  exclude?: boolean;
   fieldName: string;
 }

@@ -26,22 +26,9 @@ interface EsBucket {
  * Validation aggregations
  */
 export const getValidationAggregationBuilder: () => OptionsListAggregationBuilder = () => ({
-  buildAggregation: ({
-    selectedOptions,
-    fieldName,
-    existsSelected,
-    exclude,
-  }: OptionsListRequestBody) => {
+  buildAggregation: ({ selectedOptions, fieldName }: OptionsListRequestBody) => {
     let selectedOptionsFilters;
-    if (existsSelected) {
-      if (exclude) {
-        selectedOptionsFilters = {
-          existsQuery: { bool: { must_not: { exists: { field: fieldName } } } },
-        };
-      } else {
-        selectedOptionsFilters = { existsQuery: { exists: { field: fieldName } } };
-      }
-    } else if (selectedOptions) {
+    if (selectedOptions) {
       selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
         acc[currentOption] = { match: { [fieldName]: currentOption } };
         return acc;

@@ -217,19 +217,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
     });
 
-    it('Can make "does not exist" query invalid through previous controls', async () => {
-      await dashboardControls.optionsListOpenPopover(controlIds[0]);
-      await dashboardControls.optionsListPopoverSetIncludeSelections(false);
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
-
-      await dashboardControls.optionsListOpenPopover(controlIds[1]);
-      await dashboardControls.optionsListPopoverSelectOption('exists');
-      await dashboardControls.optionsListPopoverSetIncludeSelections(false);
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[1]);
-
-      await ensureAvailableOptionsEql(controlIds[1], ['Max', 'Ignored selection', 'Exists'], false);
-    });
-
     describe('Hierarchical chaining off', async () => {
       before(async () => {
         await dashboardControls.updateChainingSystem('NONE');

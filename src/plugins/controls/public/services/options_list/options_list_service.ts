@@ -39,7 +39,6 @@ class OptionsListService implements ControlsOptionsListService {
   private optionsListCacheResolver = (request: OptionsListRequest) => {
     const {
       query,
-      exclude,
       filters,
       timeRange,
       searchString,
@@ -60,7 +59,6 @@ class OptionsListService implements ControlsOptionsListService {
       dataViewTitle,
       searchString,
       fieldName,
-      exclude,
     ].join('|');
   };
 
