@@ -10,9 +10,15 @@ import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logi
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import {
+  EuiPopover,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiButton,
+  EuiResizeObserver,
+} from '@elastic/eui';
 
-import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../../../common/types/api';
 
@@ -42,139 +48,59 @@ describe('SyncsContextMenu', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<SyncsContextMenu />);
+    setMockValues({ ...mockValues, isWaitingForSync: true });
+    const wrapper = mountWithIntl(<SyncsContextMenu />);
     const popover = wrapper.find(EuiPopover);
-    const buttons = wrapper.find(EuiButtonEmpty);
-    const firstButton = buttons.get(0);
-    const secondButton = buttons.get(1);
 
     expect(popover).toHaveLength(1);
     expect(popover.props().isOpen).toEqual(false);
-    expect(buttons).toHaveLength(2);
-    expect(firstButton.props).toEqual(
-      expect.objectContaining({
-        children: 'Sync',
-        disabled: false,
-        isLoading: false,
-      })
-    );
-    expect(secondButton.props).toEqual(
-      expect.objectContaining({
-        children: 'Cancel syncs',
-        disabled: true,
-        isLoading: false,
-      })
-    );
   });
-  it('renders correctly for a connector waiting for sync', () => {
-    setMockValues({ ...mockValues, isWaitingForSync: true });
-    const wrapper = shallow(<SyncsContextMenu />);
-    const popover = wrapper.find(EuiPopover);
-    const buttons = wrapper.find(EuiButtonEmpty);
-    const firstButton = buttons.get(0);
-    const secondButton = buttons.get(1);
 
-    expect(popover).toHaveLength(1);
-    expect(buttons).toHaveLength(2);
-    expect(firstButton.props).toEqual(
-      expect.objectContaining({
-        children: 'Waiting for sync',
-        disabled: false,
-        isLoading: true,
-      })
-    );
-    expect(secondButton.props).toEqual(
-      expect.objectContaining({
-        disabled: false,
-        isLoading: false,
-      })
-    );
-  });
-  it('renders correctly for a connector with an in progress sync', () => {
+  it('Can cancel syncs', () => {
     setMockValues({ ...mockValues, isSyncing: true });
-    const wrapper = shallow(<SyncsContextMenu />);
-    const popover = wrapper.find(EuiPopover);
-    const buttons = wrapper.find(EuiButtonEmpty);
-    const firstButton = buttons.get(0);
-    const secondButton = buttons.get(1);
+    const wrapper = mountWithIntl(<SyncsContextMenu />);
+    const button = wrapper.find(EuiButton);
+    button.simulate('click');
 
-    expect(popover).toHaveLength(1);
-    expect(buttons).toHaveLength(2);
+    const menuItems = wrapper
+      .find(EuiContextMenuPanel)
+      .find(EuiResizeObserver)
+      .find(EuiContextMenuItem);
+    expect(menuItems).toHaveLength(1);
+
+    const firstButton = menuItems.get(0);
+
     expect(firstButton.props).toEqual(
       expect.objectContaining({
-        children: 'Syncing',
+        children: 'Cancel Syncs',
         disabled: false,
-        isLoading: true,
       })
     );
-    expect(secondButton.props).toEqual(
-      expect.objectContaining({
-        disabled: false,
-        isLoading: false,
-      })
-    );
-  });
-  it('renders correctly for an incomplete connector', () => {
-    setMockValues({ ...mockValues, ingestionStatus: IngestionStatus.INCOMPLETE });
-    const wrapper = shallow(<SyncsContextMenu />);
-    const popover = wrapper.find(EuiPopover);
-    const buttons = wrapper.find(EuiButtonEmpty);
-    const firstButton = buttons.get(0);
-    const secondButton = buttons.get(1);
-
-    expect(popover).toHaveLength(1);
-    expect(buttons).toHaveLength(2);
-    expect(firstButton.props).toEqual(
-      expect.objectContaining({
-        children: 'Sync',
-        disabled: true,
-        isLoading: false,
-      })
-    );
-    expect(secondButton.props).toEqual(
-      expect.objectContaining({
-        disabled: true,
-        isLoading: false,
-      })
-    );
-  });
-  it('renders correctly for a loading cancellation', () => {
-    setMockValues({ ...mockValues, isSyncing: true, status: Status.LOADING });
-    const wrapper = shallow(<SyncsContextMenu />);
-    const popover = wrapper.find(EuiPopover);
-    const buttons = wrapper.find(EuiButtonEmpty);
-    const firstButton = buttons.get(0);
-    const secondButton = buttons.get(1);
-
-    expect(popover).toHaveLength(1);
-
-    expect(buttons).toHaveLength(2);
-    expect(firstButton.props).toEqual(
-      expect.objectContaining({
-        children: 'Syncing',
-        disabled: false,
-        isLoading: true,
-      })
-    );
-    expect(secondButton.props).toEqual(
-      expect.objectContaining({
-        disabled: false,
-        isLoading: true,
-      })
-    );
-  });
-  it('calls startSync on clicking sync', () => {
-    setMockValues({ ...mockValues });
-    const wrapper = shallow(<SyncsContextMenu />);
-    const buttons = wrapper.find(EuiButtonEmpty);
-    buttons.first().simulate('click');
-    expect(startSync).toHaveBeenCalled();
-  });
-  it('calls cancelSync on clicking cancel sync', () => {
-    setMockValues({ ...mockValues, isSyncing: true });
-    const wrapper = shallow(<SyncsContextMenu />);
-    const buttons = wrapper.find(EuiButtonEmpty);
-    buttons.last().simulate('click');
+    menuItems.first().simulate('click');
     expect(cancelSyncs).toHaveBeenCalled();
+  });
+
+  it('Can start a sync', () => {
+    setMockValues({ ...mockValues, ingestionStatus: IngestionStatus.ERROR });
+    const wrapper = mountWithIntl(<SyncsContextMenu />);
+    const button = wrapper.find(EuiButton);
+    button.simulate('click');
+
+    const menuItems = wrapper
+      .find(EuiContextMenuPanel)
+      .find(EuiResizeObserver)
+      .find(EuiContextMenuItem);
+    expect(menuItems).toHaveLength(2);
+
+    const firstButton = menuItems.get(0);
+
+    expect(firstButton.props).toEqual(
+      expect.objectContaining({
+        children: 'Sync',
+        disabled: false,
+      })
+    );
+    menuItems.first().simulate('click');
+    expect(startSync).toHaveBeenCalled();
   });
 });

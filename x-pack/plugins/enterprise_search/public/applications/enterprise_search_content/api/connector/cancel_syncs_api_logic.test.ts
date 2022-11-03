@@ -22,7 +22,7 @@ describe('CancelSyncsLogic', () => {
       http.post.mockReturnValue(promise);
       const result = cancelSyncs({ connectorId: 'connectorId1' });
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith(
+      expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/connectors/connectorId1/cancel_syncs'
       );
       await expect(result).resolves.toEqual('result');

@@ -8,12 +8,19 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPopover,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../../common/types/api';
-
 import { CancelSyncsApiLogic } from '../../../../api/connector/cancel_syncs_api_logic';
 import { IngestionStatus } from '../../../../types';
 import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
@@ -50,6 +57,8 @@ export const SyncsContextMenu: React.FC = () => {
     });
   };
 
+  const syncLoading = (isSyncing || isWaitingForSync) && ingestionStatus !== IngestionStatus.ERROR;
+
   return (
     <EuiPopover
       button={
@@ -60,7 +69,14 @@ export const SyncsContextMenu: React.FC = () => {
           onClick={togglePopover}
           fill
         >
-          {getSyncButtonText()}
+          <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+            {syncLoading && (
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>{getSyncButtonText()}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiButton>
       }
       isOpen={isPopoverOpen}
@@ -68,43 +84,43 @@ export const SyncsContextMenu: React.FC = () => {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            color="text"
-            data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-startSync`}
-            onClick={() => {
-              closePopover();
-              startSync();
-            }}
-            iconType="play"
-            disabled={ingestionStatus === IngestionStatus.INCOMPLETE}
-            // If there's an error, the ingestion status may not be accurate and we may need to be able to trigger a sync
-            isLoading={
-              (isSyncing && !(ingestionStatus === IngestionStatus.ERROR)) || isWaitingForSync
+      <EuiContextMenuPanel
+        items={[
+          ...(syncLoading
+            ? []
+            : [
+                <EuiContextMenuItem
+                  data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-startSync`}
+                  disabled={ingestionStatus === IngestionStatus.CONNECTED}
+                  key="Sync"
+                  onClick={() => {
+                    closePopover();
+                    startSync();
+                  }}
+                  icon="play"
+                >
+                  {getSyncButtonText()}
+                </EuiContextMenuItem>,
+              ]),
+          <EuiContextMenuItem
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-cancelSync`}
+            disabled={
+              (isCanceling && ingestionStatus !== IngestionStatus.ERROR) ||
+              status === Status.LOADING
             }
-          >
-            {getSyncButtonText()}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            color="text"
-            data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-cancelSyncs`}
-            disabled={!(isSyncing || isWaitingForSync)}
-            isLoading={status === Status.LOADING || isCanceling}
+            key="Cancel sync"
             onClick={() => {
               closePopover();
               cancelSyncs();
             }}
-            iconType="trash"
+            icon="trash"
           >
             {i18n.translate('xpack.enterpriseSearch.index.header.cancelSyncsTitle', {
-              defaultMessage: 'Cancel syncs',
+              defaultMessage: 'Cancel Syncs',
             })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiContextMenuItem>,
+        ]}
+      />
     </EuiPopover>
   );
 };

@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_JOBS_INDEX } from '../..';
+import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
 import { SyncStatus } from '../../../common/types/connectors';
 
 import { cancelSyncs } from './post_cancel_syncs';
@@ -15,6 +15,7 @@ import { cancelSyncs } from './post_cancel_syncs';
 describe('addConnector lib function', () => {
   const mockClient = {
     asCurrentUser: {
+      update: jest.fn(),
       updateByQuery: jest.fn(),
     },
     asInternalUser: {},
@@ -49,6 +50,7 @@ describe('addConnector lib function', () => {
           ],
         },
       },
+      refresh: true,
       script: {
         lang: 'painless',
         source: `ctx._source['status'] = '${SyncStatus.CANCELING}'`,
@@ -72,10 +74,17 @@ describe('addConnector lib function', () => {
           ],
         },
       },
+      refresh: true,
       script: {
         lang: 'painless',
         source: `ctx._source['status'] = '${SyncStatus.CANCELED}'`,
       },
+    });
+    await expect(mockClient.asCurrentUser.update).toHaveBeenCalledWith({
+      doc: { last_sync_status: SyncStatus.CANCELED, sync_now: false },
+      id: 'connectorId',
+      index: CONNECTORS_INDEX,
+      refresh: true,
     });
   });
 });

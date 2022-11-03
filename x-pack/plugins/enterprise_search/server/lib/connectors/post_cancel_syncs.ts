@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { CONNECTORS_JOBS_INDEX } from '../..';
+import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
 import { SyncStatus } from '../../../common/types/connectors';
 
 export const cancelSyncs = async (
@@ -32,6 +32,7 @@ export const cancelSyncs = async (
         ],
       },
     },
+    refresh: true,
     script: {
       lang: 'painless',
       source: `ctx._source['status'] = '${SyncStatus.CANCELED}'`,
@@ -55,9 +56,16 @@ export const cancelSyncs = async (
         ],
       },
     },
+    refresh: true,
     script: {
       lang: 'painless',
       source: `ctx._source['status'] = '${SyncStatus.CANCELING}'`,
     },
+  });
+  await client.asCurrentUser.update({
+    doc: { last_sync_status: SyncStatus.CANCELED, sync_now: false },
+    id: connectorId,
+    index: CONNECTORS_INDEX,
+    refresh: true,
   });
 };
