@@ -57,8 +57,8 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
     private readonly blobStorageService: BlobStorageService,
     private readonly security: undefined | SecurityPluginSetup,
     private readonly fileKindRegistry: FileKindsRegistry,
-    private readonly analytics: AnalyticsServiceStart,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly analytics?: AnalyticsServiceStart
   ) {}
 
   private createFileService(req?: KibanaRequest): FileServiceStart {
@@ -85,8 +85,8 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
       internalFileShareService,
       auditLogger,
       this.fileKindRegistry,
-      this.analytics,
-      this.logger
+      this.logger,
+      this.analytics
     );
 
     return {

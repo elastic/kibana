@@ -93,8 +93,8 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
       blobStorageService,
       this.securitySetup,
       getFileKindsRegistry(),
-      analytics,
-      this.logger.get('files-service')
+      this.logger.get('files-service'),
+      analytics
     );
 
     return {
