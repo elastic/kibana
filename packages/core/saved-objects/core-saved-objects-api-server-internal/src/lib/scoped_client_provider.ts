@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { KibanaRequest } from '@kbn/core-http-server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   ISavedObjectTypeRegistry,
   SavedObjectsClientFactory,
@@ -19,6 +19,9 @@ import {
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
+  ISavedObjectsEncryptionExtension,
+  ISavedObjectsSecurityExtension,
+  ISavedObjectsSpacesExtension,
 } from '@kbn/core-saved-objects-server';
 
 /**
@@ -82,21 +85,22 @@ export class SavedObjectsClientProvider {
   }
 
   getExtensions(request: KibanaRequest, excludedExtensions: string[]): SavedObjectsExtensions {
-    const isEncryptionExtensionIncluded =
-      !excludedExtensions.includes(ENCRYPTION_EXTENSION_ID) && !!this.encryptionExtensionFactory;
-    const encryptionExtension = isEncryptionExtensionIncluded
-      ? this.encryptionExtensionFactory?.({ typeRegistry: this._typeRegistry, request })
-      : undefined;
-    const isSecurityExtensionIncluded =
-      !excludedExtensions.includes(SECURITY_EXTENSION_ID) && !!this.securityExtensionFactory;
-    const securityExtension = isSecurityExtensionIncluded
-      ? this.securityExtensionFactory?.({ typeRegistry: this._typeRegistry, request })
-      : undefined;
-    const isSpacesExtensionIncluded =
-      !excludedExtensions.includes(SPACES_EXTENSION_ID) && !!this.spacesExtensionFactory;
-    const spacesExtension = isSpacesExtensionIncluded
-      ? this.spacesExtensionFactory?.({ typeRegistry: this._typeRegistry, request })
-      : undefined;
+    const extensionInfo = [
+      { id: ENCRYPTION_EXTENSION_ID, factory: this.encryptionExtensionFactory },
+      { id: SECURITY_EXTENSION_ID, factory: this.securityExtensionFactory },
+      { id: SPACES_EXTENSION_ID, factory: this.spacesExtensionFactory },
+    ];
+
+    const extensions = extensionInfo.map((extension) => {
+      const isIncluded = !excludedExtensions.includes(extension.id) && !!extension.factory;
+      return isIncluded
+        ? extension.factory?.({ typeRegistry: this._typeRegistry, request })
+        : undefined;
+    });
+
+    const encryptionExtension = extensions[0] as ISavedObjectsEncryptionExtension | undefined;
+    const securityExtension = extensions[1] as ISavedObjectsSecurityExtension | undefined;
+    const spacesExtension = extensions[2] as ISavedObjectsSpacesExtension | undefined;
 
     return {
       encryptionExtension,

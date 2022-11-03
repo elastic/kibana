@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { CreatePointInTimeFinderFn, PointInTimeFinder } from './point_in_time_finder';
+import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { CreatePointInTimeFinderFn, PointInTimeFinder } from './point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from '../mocks/point_in_time_finder.mock';
 import { findSharedOriginObjects } from './find_shared_origin_objects';
-import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { SavedObjectsPointInTimeFinderClient } from '@kbn/core-saved-objects-api-server';
 
 interface MockFindResultParams {
   type: string;
@@ -21,13 +20,13 @@ interface MockFindResultParams {
 }
 
 describe('findSharedOriginObjects', () => {
-  let savedObjectsMock: jest.Mocked<ISavedObjectsRepository>;
+  let pitFinderClientMock: jest.Mocked<SavedObjectsPointInTimeFinderClient>;
   let pointInTimeFinder: DeeplyMockedKeys<PointInTimeFinder>;
   let createPointInTimeFinder: jest.MockedFunction<CreatePointInTimeFinderFn>;
 
   beforeEach(() => {
-    savedObjectsMock = savedObjectsRepositoryMock.create();
-    savedObjectsMock.find.mockResolvedValue({
+    pitFinderClientMock = savedObjectsPointInTimeFinderMock.createClient();
+    pitFinderClientMock.find.mockResolvedValue({
       pit_id: 'foo',
       saved_objects: [],
       // the rest of these fields don't matter but are included for type safety
@@ -35,12 +34,14 @@ describe('findSharedOriginObjects', () => {
       page: 1,
       per_page: 100,
     });
-    pointInTimeFinder = savedObjectsPointInTimeFinderMock.create({ savedObjectsMock })(); // PIT finder mock uses the actual implementation, but it doesn't need to be created with real params because the SOR is mocked too
+    pointInTimeFinder = savedObjectsPointInTimeFinderMock.create({
+      savedObjectsMock: pitFinderClientMock,
+    })(); // PIT finder mock uses the actual implementation, but it doesn't need to be created with real params because the SOR is mocked too
     createPointInTimeFinder = jest.fn().mockReturnValue(pointInTimeFinder);
   });
 
   function mockFindResults(...results: MockFindResultParams[]) {
-    savedObjectsMock.find.mockResolvedValueOnce({
+    pitFinderClientMock.find.mockResolvedValueOnce({
       pit_id: 'foo',
       saved_objects: results.map(({ type, id, originId, namespaces }) => ({
         type,
@@ -133,7 +134,7 @@ describe('findSharedOriginObjects', () => {
   });
 
   it('handles PointInTimeFinder.find errors', async () => {
-    savedObjectsMock.find.mockRejectedValue(new Error('Oh no!'));
+    pitFinderClientMock.find.mockRejectedValue(new Error('Oh no!'));
 
     const objects = [obj1, obj2, obj3];
     await expect(() => findSharedOriginObjects(createPointInTimeFinder, objects)).rejects.toThrow(
