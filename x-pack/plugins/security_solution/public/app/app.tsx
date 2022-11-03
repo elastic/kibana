@@ -70,15 +70,15 @@ const StartAppComponent: FC<StartAppComponent> = ({
                   <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                     <ManageUserInfo>
                       <ReactQueryClientProvider>
-                        <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
-                          <PageRouter
-                            history={history}
-                            onAppLeave={onAppLeave}
-                            setHeaderActionMenu={setHeaderActionMenu}
-                          >
+                        <PageRouter
+                          history={history}
+                          onAppLeave={onAppLeave}
+                          setHeaderActionMenu={setHeaderActionMenu}
+                        >
+                          <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
                             {children}
-                          </PageRouter>
-                        </CasesContext>
+                          </CasesContext>
+                        </PageRouter>
                       </ReactQueryClientProvider>
                     </ManageUserInfo>
                   </UserPrivilegesProvider>

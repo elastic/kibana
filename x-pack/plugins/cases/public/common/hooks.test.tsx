@@ -20,7 +20,15 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../containers/co
 jest.mock('../components/cases_context/use_application');
 jest.mock('react-use/lib/useLocalStorage');
 
-const { page, ...LOCAL_STORAGE_DEFAULTS } = { ...DEFAULT_QUERY_PARAMS };
+const LOCAL_STORAGE_DEFAULTS = {
+  perPage: DEFAULT_QUERY_PARAMS.perPage,
+  sortOrder: DEFAULT_QUERY_PARAMS.sortOrder,
+};
+const URL_DEFAULTS = {
+  page: DEFAULT_QUERY_PARAMS.page,
+  perPage: DEFAULT_QUERY_PARAMS.perPage,
+  sortOrder: DEFAULT_QUERY_PARAMS.sortOrder,
+};
 
 const useApplicationMock = useApplication as jest.Mock;
 const useLocalStorageMock = useLocalStorage as jest.Mock;
@@ -98,7 +106,7 @@ describe('hooks', () => {
       });
 
       expect(useHistory().replace).toHaveBeenCalledWith({
-        search: stringify(DEFAULT_QUERY_PARAMS),
+        search: stringify(URL_DEFAULTS),
       });
     });
 
@@ -122,7 +130,7 @@ describe('hooks', () => {
         page: DEFAULT_TABLE_ACTIVE_PAGE + 1,
         perPage: DEFAULT_TABLE_LIMIT + 5,
       };
-      const expectedUrl = { ...DEFAULT_QUERY_PARAMS, ...nonDefaultUrlParams };
+      const expectedUrl = { ...URL_DEFAULTS, ...nonDefaultUrlParams };
 
       mockLocation.search = stringify(nonDefaultUrlParams);
 
@@ -151,34 +159,6 @@ describe('hooks', () => {
       expect(result.current.queryParams).toMatchObject({
         ...DEFAULT_QUERY_PARAMS,
         ...nonDefaultUrlParams,
-      });
-    });
-
-    it('url updated on unmount', () => {
-      const { unmount } = renderHook(() => useUrlState(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
-
-      unmount();
-
-      expect(useHistory().replace).toHaveBeenCalledWith({
-        search: '',
-      });
-    });
-
-    it('url updated on unmount leaves existing url unaffected', () => {
-      const existingUrlParams = 'foo=bar&lorem=ipsum';
-
-      mockLocation.search = existingUrlParams;
-
-      const { unmount } = renderHook(() => useUrlState(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
-
-      unmount();
-
-      expect(useHistory().replace).toHaveBeenCalledWith({
-        search: existingUrlParams,
       });
     });
   });

@@ -23,7 +23,7 @@ import {
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
-import { StatusAll } from '../../../common/ui/types';
+import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
@@ -401,7 +401,7 @@ describe('AllCasesListGeneric', () => {
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          queryParams: DEFAULT_QUERY_PARAMS,
+          queryParams: { ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.closedAt },
         })
       );
     });

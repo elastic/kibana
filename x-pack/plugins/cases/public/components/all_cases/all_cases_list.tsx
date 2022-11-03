@@ -65,7 +65,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const isLoading = useIsLoadingCases();
 
     const hasOwner = !!owner.length;
-
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
       ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: firstAvailableStatus }),
@@ -76,7 +75,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       ...DEFAULT_FILTER_OPTIONS,
       ...initialFilterOptions,
     });
-    const { queryParams, setUrlQueryParams } = useUrlState();
+    const { queryParams, setUrlQueryParams } = useUrlState(isSelectorView);
     const [selectedCases, setSelectedCases] = useState<Case[]>([]);
 
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
@@ -150,11 +149,11 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       (newFilterOptions: Partial<FilterOptions>) => {
         if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.closed) {
           setUrlQueryParams({ sortField: SortFieldCase.closedAt });
-        } else if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.open) {
-          setUrlQueryParams({ sortField: SortFieldCase.createdAt });
         } else if (
           newFilterOptions.status &&
-          newFilterOptions.status === CaseStatuses['in-progress']
+          [CaseStatuses.open, CaseStatuses['in-progress'], StatusAll].includes(
+            newFilterOptions.status
+          )
         ) {
           setUrlQueryParams({ sortField: SortFieldCase.createdAt });
         }
@@ -202,7 +201,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         pageIndex: (queryParams?.page ?? DEFAULT_QUERY_PARAMS.page) - 1,
         pageSize: queryParams?.perPage ?? DEFAULT_QUERY_PARAMS.perPage,
         totalItemCount: data.total ?? 0,
-        pageSizeOptions: [5, 10, 15, 20, 25],
+        pageSizeOptions: [10, 25, 50, 100],
       }),
       [data, queryParams]
     );
