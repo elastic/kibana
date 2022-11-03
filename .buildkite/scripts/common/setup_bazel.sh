@@ -33,7 +33,18 @@ cat <<EOF >> $KIBANA_DIR/.bazelrc
 EOF
 fi
 
-if [[ "$BAZEL_CACHE_MODE" != @(gcs|none|) ]]; then
-  echo "invalid value for BAZEL_CACHE_MODE received ($BAZEL_CACHE_MODE), expected one of [gcs,none]"
+if [[ "$BAZEL_CACHE_MODE" == "buildbuddy" ]]; then
+  echo "[bazel] enabling caching with Buildbuddy"
+cat <<EOF >> $KIBANA_DIR/.bazelrc
+  build --bes_results_url=https://app.buildbuddy.io/invocation/
+  build --bes_backend=grpcs://remote.buildbuddy.io
+  build --remote_cache=grpcs://remote.buildbuddy.io
+  build --remote_timeout=3600
+  build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY
+EOF
+fi
+
+if [[ "$BAZEL_CACHE_MODE" != @(gcs|buildbuddy|none|) ]]; then
+  echo "invalid value for BAZEL_CACHE_MODE received ($BAZEL_CACHE_MODE), expected one of [gcs,buildbuddy,none]"
   exit 1
 fi
