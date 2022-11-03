@@ -33,21 +33,21 @@ export const useStdErrorLogs = ({
               },
               ...(monitorId
                 ? [
-                  {
-                    term: {
-                      'monitor.id': monitorId,
+                    {
+                      term: {
+                        'monitor.id': monitorId,
+                      },
                     },
-                  },
-                ]
+                  ]
                 : []),
               ...(checkGroup
                 ? [
-                  {
-                    term: {
-                      'monitor.check_group': checkGroup,
+                    {
+                      term: {
+                        'monitor.check_group': checkGroup,
+                      },
                     },
-                  },
-                ]
+                  ]
                 : []),
             ],
           },
