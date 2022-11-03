@@ -8,6 +8,8 @@ PKG_REQUIRE_NAME = "@kbn/shared-ux-code-editor"
 SOURCE_FILES = glob(
   [
     "**/*.ts",
+    "**/*.tsx",
+    "**/*.mdx",
   ],
   exclude = [
     "**/*.config.js",
@@ -46,6 +48,9 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "//packages/kbn-monaco",
+  "//packages/kbn-i18n-react",
+  "//packages/kbn-i18n",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -60,6 +65,8 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "//packages/kbn-monaco:npm_module_types",
+  "//packages/kbn-ambient-ui-types",
 ]
 
 jsts_transpiler(
