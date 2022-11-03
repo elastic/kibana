@@ -21,6 +21,7 @@ interface ManagementRouterProps {
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   sections: ManagementSection[];
+  PageWrapper: React.FC;
 }
 
 export const ManagementRouter = memo(
@@ -31,16 +32,16 @@ export const ManagementRouter = memo(
     onAppMounted,
     sections,
     theme$,
+    PageWrapper,
   }: ManagementRouterProps) => (
     <Router history={history}>
       <Switch>
         {sections.map((section) =>
-          section
-            .getAppsEnabled()
-            .map((app) => (
-              <Route
-                path={`${app.basePath}`}
-                component={() => (
+          section.getAppsEnabled().map((app) => (
+            <Route
+              path={`${app.basePath}`}
+              component={() => {
+                const managementApp = (
                   <ManagementAppWrapper
                     app={app}
                     setBreadcrumbs={setBreadcrumbs}
@@ -48,9 +49,15 @@ export const ManagementRouter = memo(
                     history={history}
                     theme$={theme$}
                   />
-                )}
-              />
-            ))
+                );
+                return app.isUsingKibanaPageTemplate ? (
+                  managementApp
+                ) : (
+                  <PageWrapper>{managementApp}</PageWrapper>
+                );
+              }}
+            />
+          ))
         )}
         {sections.map((section) =>
           section

@@ -88,25 +88,30 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
     }),
   };
 
+  const PageWrapper: React.FC = ({ children }) => (
+    <KibanaPageTemplate
+      restrictWidth={false}
+      solutionNav={solution}
+      // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
+      // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
+      mainProps={{ paddingSize: 'l' }}
+    >
+      {children}
+    </KibanaPageTemplate>
+  );
+
   return (
     <I18nProvider>
       <KibanaThemeProvider theme$={theme$}>
-        <KibanaPageTemplate
-          restrictWidth={false}
-          solutionNav={solution}
-          // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
-          // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
-          mainProps={{ paddingSize: 'l' }}
-        >
-          <ManagementRouter
-            history={history}
-            theme$={theme$}
-            setBreadcrumbs={setBreadcrumbsScoped}
-            onAppMounted={onAppMounted}
-            sections={sections}
-            dependencies={dependencies}
-          />
-        </KibanaPageTemplate>
+        <ManagementRouter
+          PageWrapper={PageWrapper}
+          history={history}
+          theme$={theme$}
+          setBreadcrumbs={setBreadcrumbsScoped}
+          onAppMounted={onAppMounted}
+          sections={sections}
+          dependencies={dependencies}
+        />
       </KibanaThemeProvider>
     </I18nProvider>
   );
