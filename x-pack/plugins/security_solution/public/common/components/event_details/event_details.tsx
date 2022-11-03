@@ -397,6 +397,7 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const osqueryTab = useOsqueryTab({
     rawEventData: rawEventData as AlertRawEventData,
+    ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
   });
 
   const tabs = useMemo(() => {
