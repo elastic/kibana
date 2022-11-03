@@ -31,7 +31,6 @@ import {
 } from '../../../common/runtime_types';
 import {
   syntheticsMonitorType,
-  syntheticsMonitor,
 } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
@@ -339,7 +338,7 @@ export class ProjectMonitorFormatterLegacy {
       monitors,
       async (monitor) =>
         this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-          syntheticsMonitor.name,
+          syntheticsMonitorType,
           monitor.id,
           {
             namespace: monitor.namespaces?.[0],
