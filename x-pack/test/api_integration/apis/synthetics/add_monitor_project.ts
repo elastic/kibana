@@ -6,17 +6,20 @@
  */
 import fetch, { BodyInit, HeadersInit, Response } from 'node-fetch';
 import uuid from 'uuid';
-import expect from '@kbn/expect';
 import { format as formatUrl } from 'url';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import { comparePolicies, getTestProjectSyntheticsPolicy } from './sample_data/test_policy';
+import {
+  comparePolicies,
+  getTestProjectSyntheticsPolicy,
+} from '../uptime/rest/sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddProjectMonitors', function () {
@@ -131,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
                 is_generated_script: false,
               },
             },
-            config_id: '',
+            config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
             'filter_journeys.match': 'check if title is present',
@@ -193,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'browser',
             'url.port': null,
             urls: '',
-            id: '',
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }
@@ -251,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             'check.request.method': 'POST',
             'check.response.status': ['200'],
-            config_id: '',
+            config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             'check.response.body.negative': [],
             'check.response.body.positive': ['Saved', 'saved'],
@@ -308,7 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'http',
             urls: Array.isArray(monitor.urls) ? monitor.urls?.[0] : monitor.urls,
             'url.port': null,
-            id: '',
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }
@@ -364,7 +367,7 @@ export default function ({ getService }: FtrProviderContext) {
             __ui: {
               is_tls_enabled: false,
             },
-            config_id: '',
+            config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             'check.receive': '',
             'check.send': '',
@@ -410,7 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
             hosts: Array.isArray(monitor.hosts) ? monitor.hosts?.[0] : monitor.hosts,
             'url.port': null,
             urls: '',
-            id: '',
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }
@@ -463,7 +466,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
-            config_id: '',
+            config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
             form_monitor_type: 'icmp',
@@ -513,7 +516,7 @@ export default function ({ getService }: FtrProviderContext) {
               monitor.wait?.slice(-1) === 's'
                 ? monitor.wait?.slice(0, -1)
                 : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
-            id: '',
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }

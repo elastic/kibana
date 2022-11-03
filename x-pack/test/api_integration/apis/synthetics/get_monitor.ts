@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { SimpleSavedObject } from '@kbn/core/public';
-import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('getSyntheticsMonitors', function () {
@@ -97,6 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(apiResponse.body.attributes).eql({
           ...monitors[0],
+          [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+          [ConfigKey.CONFIG_ID]: apiResponse.body.id,
           revision: 1,
         });
       });

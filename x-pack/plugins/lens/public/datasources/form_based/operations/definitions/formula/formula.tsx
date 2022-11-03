@@ -139,6 +139,11 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
           arguments: {
             id: [columnId],
             name: [label || defaultLabel],
+            ...(currentColumn.references.length
+              ? {
+                  castColumns: [currentColumn.references[0]],
+                }
+              : {}),
             expression: [currentColumn.references.length ? `"${currentColumn.references[0]}"` : ''],
           },
         },

@@ -5,14 +5,14 @@
  * 2.0.
  */
 import uuid from 'uuid';
-import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { ConfigKey, HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -61,7 +61,16 @@ export default function ({ getService }: FtrProviderContext) {
         newMonitor as MonitorFields
       );
 
-      expect(savedMonitor).eql(omit(newMonitor, secretKeys));
+      expect(savedMonitor).eql(
+        omit(
+          {
+            ...newMonitor,
+            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+            [ConfigKey.CONFIG_ID]: monitorId,
+          },
+          secretKeys
+        )
+      );
 
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
@@ -116,7 +125,16 @@ export default function ({ getService }: FtrProviderContext) {
         newMonitor as MonitorFields
       );
 
-      expect(savedMonitor).eql(omit(newMonitor, secretKeys));
+      expect(savedMonitor).eql(
+        omit(
+          {
+            ...newMonitor,
+            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+            [ConfigKey.CONFIG_ID]: monitorId,
+          },
+          secretKeys
+        )
+      );
 
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
@@ -147,7 +165,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const modifiedMonitor = omit(
         {
-          ...newMonitor,
           ...updates,
           [ConfigKey.METADATA]: {
             ...newMonitor[ConfigKey.METADATA],
@@ -164,7 +181,14 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(editResponse.body.attributes).eql(
-        omit({ ...modifiedMonitor, revision: 2 }, secretKeys)
+        omit(
+          {
+            ...savedMonitor,
+            ...modifiedMonitor,
+            revision: 2,
+          },
+          secretKeys
+        )
       );
       expect(editResponse.body.attributes).not.to.have.keys('unknownkey');
     });
