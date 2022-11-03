@@ -22,8 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/unmapped_fields');
       await security.testUser.setRoles(['kibana_admin', 'test-index-unmapped-fields']);
-      const fromTime = 'Jan 20, 2021 @ 00:00:00.000';
-      const toTime = 'Jan 25, 2021 @ 00:00:00.000';
+      const fromTime = '2021-01-20T00:00:00.000Z';
+      const toTime = '2021-01-25T00:00:00.000Z';
 
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'test-index-unmapped-fields',

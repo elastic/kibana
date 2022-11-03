@@ -7,14 +7,25 @@
  */
 
 import { difference } from 'lodash';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
 import { isNestedFieldParent } from '../../../utils/nested_fields';
 
 export function getDataViewFieldList(dataView?: DataView, fieldCounts?: Record<string, number>) {
   if (!dataView || !fieldCounts) return [];
 
+  const sourceFiltersValues = dataView.getSourceFiltering?.()?.excludes;
+  let dataViewFields: DataViewField[] = dataView.fields.getAll();
+
+  if (sourceFiltersValues) {
+    const filter = fieldWildcardFilter(sourceFiltersValues, dataView.metaFields);
+    dataViewFields = dataViewFields.filter((field) => {
+      return filter(field.name);
+    });
+  }
+
   const fieldNamesInDocs = Object.keys(fieldCounts);
-  const fieldNamesInDataView = dataView.fields.getAll().map((fld) => fld.name);
+  const fieldNamesInDataView = dataViewFields.map((fld) => fld.name);
   const unknownFields: DataViewField[] = [];
 
   difference(fieldNamesInDocs, fieldNamesInDataView).forEach((unknownFieldName) => {
@@ -33,5 +44,5 @@ export function getDataViewFieldList(dataView?: DataView, fieldCounts?: Record<s
     }
   });
 
-  return [...dataView.fields.getAll(), ...unknownFields];
+  return [...dataViewFields, ...unknownFields];
 }
