@@ -119,6 +119,7 @@ export function useChangePointResults(
   const reset = useCallback(() => {
     cancelRequest();
     setProgress(0);
+    setActivePage(0);
     setResults([]);
   }, [cancelRequest]);
 
