@@ -116,6 +116,11 @@ export interface SearchSourceFields {
   timeout?: string;
   terminate_after?: number;
 
+  /**
+   * Allow querying to use a point-in-time ID for paging results
+   */
+  pit?: estypes.SearchPointInTimeReference;
+
   parent?: SearchSourceFields;
 }
 

@@ -21,7 +21,7 @@ export async function getDefaultSearchParams(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>
 ): Promise<{
   max_concurrent_shard_requests?: number;
-  ignore_unavailable: boolean;
+  ignore_unavailable?: boolean;
   track_total_hits: boolean;
 }> {
   const maxConcurrentShardRequests = await uiSettingsClient.get<number>(

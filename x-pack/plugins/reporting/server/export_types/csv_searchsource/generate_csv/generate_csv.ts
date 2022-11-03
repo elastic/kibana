@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import { errors as esErrors } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type {
-  DataView,
-  ISearchSource,
-  ISearchStartSearchSource,
-  SearchRequest,
-} from '@kbn/data-plugin/common';
+import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { Datatable } from '@kbn/expressions-plugin/server';
@@ -61,21 +55,65 @@ export class CsvGenerator {
     private stream: Writable
   ) {}
 
-  private async scan(index: DataView, searchSource: ISearchSource, settings: CsvExportSettings) {
+  private async openPointInTime(indexPatternTitle: string, settings: CsvExportSettings) {
+    const { duration } = settings.scroll;
+    let pitId: string | undefined;
+    this.logger.debug(`Open point-in-time for index: ${indexPatternTitle}`);
+    try {
+      // open PIT and set field format config
+      // use _pit API
+      const response = await this.clients.es.asCurrentUser.openPointInTime({
+        index: indexPatternTitle,
+        keep_alive: duration,
+        ignore_unavailable: true,
+      });
+      pitId = response.id;
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
+
+    if (!pitId) {
+      throw new Error(`Could not receive a point-in-time ID!`);
+    }
+
+    return pitId;
+  }
+
+  private async doSearch(
+    searchSource: ISearchSource,
+    settings: CsvExportSettings,
+    lastSortId?: estypes.SortResults
+  ) {
     const { scroll: scrollSettings, includeFrozen } = settings;
-    const searchBody: SearchRequest | undefined = searchSource.getSearchRequestBody();
+    searchSource.setField('size', scrollSettings.size);
+
+    {
+      const pitId = searchSource.getField('pit')?.id;
+      if (!pitId) {
+        throw new Error(`Unable to retrieve point-in-time ID from search source!`);
+      }
+      if (lastSortId) {
+        this.logger.debug(
+          `Executing search request with point-in-time ID: ${this.truncatePitId(pitId)}` +
+            `, and search_after: [${lastSortId}]`
+        );
+        searchSource.setField('searchAfter', lastSortId);
+      } else {
+        this.logger.debug(
+          `Executing search request with point-in-time ID: ${this.truncatePitId(pitId)}`
+        );
+      }
+    }
+
+    const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();
     if (searchBody == null) {
       throw new Error('Could not retrieve the search body!');
     }
 
-    this.logger.debug(`Tracking total hits with: track_total_hits=${searchBody.track_total_hits}`);
-    this.logger.info(`Executing search request...`);
     const searchParams = {
       params: {
         body: searchBody,
-        index: index.title,
-        scroll: scrollSettings.duration,
-        size: scrollSettings.size,
         ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
       },
     };
@@ -88,32 +126,16 @@ export class CsvGenerator {
             strategy: ES_SEARCH_STRATEGY,
             transport: {
               maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
-              requestTimeout: this.config.scroll.duration,
+              requestTimeout: scrollSettings.duration,
             },
           })
         )
-      ).rawResponse as estypes.SearchResponse<unknown>;
+      ).rawResponse;
     } catch (err) {
-      this.logger.error(`CSV export scan error: ${err}`);
+      this.logger.error(`CSV export search error: ${err}`);
       throw err;
     }
 
-    return results;
-  }
-
-  private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
-    this.logger.info(`Executing scroll request...`);
-
-    let results: estypes.SearchResponse<unknown> | undefined;
-    try {
-      results = await this.clients.es.asCurrentUser.scroll({
-        scroll: scrollSettings.duration,
-        scroll_id: scrollId,
-      });
-    } catch (err) {
-      this.logger.error(`CSV export scroll error: ${err}`);
-      throw err;
-    }
     return results;
   }
 
@@ -202,7 +224,7 @@ export class CsvGenerator {
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
-    this.logger.debug(`Building CSV header row...`);
+    this.logger.debug(`Building CSV header row`);
     const header =
       Array.from(columns).map(this.escapeValues(settings)).join(settings.separator) + '\n';
 
@@ -225,7 +247,7 @@ export class CsvGenerator {
     formatters: Record<string, FieldFormat>,
     settings: CsvExportSettings
   ) {
-    this.logger.debug(`Building ${table.rows.length} CSV data rows...`);
+    this.logger.debug(`Building ${table.rows.length} CSV data rows`);
     for (const dataTableRow of table.rows) {
       if (this.cancellationToken.isCancelled()) {
         break;
@@ -293,26 +315,29 @@ export class CsvGenerator {
       throw new Error(`The search must have a reference to an index pattern!`);
     }
 
-    const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
-
+    const { maxSizeBytes, bom, escapeFormulaValues, timezone } = settings;
+    const indexPatternTitle = index.title;
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
     let first = true;
     let currentRecord = -1;
     let totalRecords: number | undefined;
     let totalRelation = 'eq';
-    let scrollId: string | undefined;
+    let searchAfter: estypes.SortResults | undefined;
+
+    const pitId = await this.openPointInTime(indexPatternTitle, settings);
+    searchSource.setField('pit', { id: pitId, keep_alive: settings.scroll.duration });
 
     // apply timezone from the job to all date field formatters
     try {
       index.fields.getByType('date').forEach(({ name }) => {
-        this.logger.debug(`setting timezone on ${name}`);
+        this.logger.debug(`Setting timezone on ${name}`);
         const format: FieldFormatConfig = {
           ...index.fieldFormatMap[name],
           id: index.fieldFormatMap[name]?.id || 'date', // allow id: date_nanos
           params: {
             ...index.fieldFormatMap[name]?.params,
-            timezone: settings.timezone,
+            timezone,
           },
         };
         index.setFieldFormat(name, format);
@@ -327,24 +352,17 @@ export class CsvGenerator {
         if (this.cancellationToken.isCancelled()) {
           break;
         }
-        let results: estypes.SearchResponse<unknown> | undefined;
-        if (scrollId == null) {
-          // open a scroll cursor in Elasticsearch
-          results = await this.scan(index, searchSource, settings);
-          scrollId = results?._scroll_id;
-          if (results?.hits?.total != null) {
-            const { hits } = results;
-            if (typeof hits.total === 'number') {
-              totalRecords = hits.total;
-            } else {
-              totalRecords = hits.total?.value;
-              totalRelation = hits.total?.relation ?? 'unknown';
-            }
-            this.logger.info(`Total hits: [${totalRecords}].` + `Accuracy: ${totalRelation}`);
+        const results = await this.doSearch(searchSource, settings, searchAfter);
+
+        const { hits } = results;
+        if (first && hits.total != null) {
+          if (typeof hits.total === 'number') {
+            totalRecords = hits.total;
+          } else {
+            totalRecords = hits.total?.value;
+            totalRelation = hits.total?.relation ?? 'unknown';
           }
-        } else {
-          // use the scroll cursor in Elasticsearch
-          results = await this.scroll(scrollId, scrollSettings);
+          this.logger.info(`Total hits ${totalRelation} ${totalRecords}.`);
         }
 
         if (!results) {
@@ -354,12 +372,11 @@ export class CsvGenerator {
 
         // TODO check for shard failures, log them and add a warning if found
         {
-          const {
-            hits: { hits, ...hitsMeta },
-            ...header
-          } = results;
-          this.logger.debug('Results metadata: ' + JSON.stringify({ header, hitsMeta }));
-        }
+          const { hits: { hits: _hits, ...hitsMeta }, ...headerWithPit } = results;
+          const { pit_id: newPitId, ...header } = headerWithPit;
+          const meta = JSON.stringify({ header: { pit_id: `${this.truncatePitId(newPitId)}`, ...header }, hitsMeta });
+          this.logger.debug(`Results metadata: ${meta}`);
+        } // prettier-ignore
 
         let table: Datatable | undefined;
         try {
@@ -390,6 +407,10 @@ export class CsvGenerator {
         const formatters = this.getFormatters(table);
         await this.generateRows(columns, table, builder, formatters, settings);
 
+        // Update last sort results for next query. PIT is used, so the sort results
+        // automatically include _shard_doc as a tiebreaker
+        searchAfter = hits.hits[hits.hits.length - 1]?.sort as estypes.SortResults | undefined;
+
         // update iterator
         currentRecord += table.rows.length;
       } while (totalRecords != null && currentRecord < totalRecords - 1);
@@ -411,16 +432,12 @@ export class CsvGenerator {
         warnings.push(i18nTexts.unknownError(err?.message ?? err));
       }
     } finally {
-      // clear scrollID
-      if (scrollId) {
-        this.logger.debug(`Executing clearScroll request`);
-        try {
-          await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
-        } catch (err) {
-          this.logger.error(err);
-        }
+      //
+      if (pitId) {
+        this.logger.debug(`Closing point-in-time`);
+        await this.clients.es.asCurrentUser.closePointInTime({ body: { id: pitId } });
       } else {
-        this.logger.warn(`No scrollId to clear!`);
+        this.logger.warn(`No point-in-time ID to clear!`);
       }
     }
 
@@ -446,5 +463,9 @@ export class CsvGenerator {
       warnings,
       error_code: reportingError?.code,
     };
+  }
+
+  private truncatePitId(pitId: string | undefined) {
+    return pitId?.substring(0, 12) + '...';
   }
 }

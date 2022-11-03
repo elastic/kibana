@@ -85,12 +85,16 @@ const getMockConfig = (properties: DeepPartial<ReportingConfigType> = {}) => {
   return config.get('csv');
 };
 
+const mockPitId = 'oju9fs3698s3902f02-8qg3-u9w36oiewiuyew6';
+
 beforeEach(async () => {
   content = '';
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
   mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
   mockDataClient = dataPluginMock.createStartContract().search.asScoped({} as any);
   mockDataClient.search = mockDataClientSearchDefault;
+
+  mockEsClient.asCurrentUser.openPointInTime = jest.fn().mockResolvedValueOnce({ id: mockPitId });
 
   uiSettingsClient = uiSettingsServiceMock
     .createStartContract()
@@ -117,6 +121,8 @@ beforeEach(async () => {
 
   searchSourceMock.getField = jest.fn((key: string) => {
     switch (key) {
+      case 'pit':
+        return { id: mockPitId };
       case 'index':
         return {
           fields: {
@@ -283,36 +289,40 @@ it('warns if max size was reached', async () => {
   expect(content).toMatchSnapshot();
 });
 
-it('uses the scrollId to page all the data', async () => {
-  mockDataClient.search = jest.fn().mockImplementation(() =>
-    Rx.of({
-      rawResponse: {
-        _scroll_id: 'awesome-scroll-hero',
-        hits: {
-          hits: range(0, HITS_TOTAL / 10).map(() => ({
-            fields: {
-              date: ['2020-12-31T00:14:28.000Z'],
-              ip: ['110.135.176.89'],
-              message: ['hit from the initial search'],
-            },
-          })),
-          total: HITS_TOTAL,
+it('uses the pit ID to page all the data', async () => {
+  mockDataClient.search = jest
+    .fn()
+    .mockImplementationOnce(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: range(0, HITS_TOTAL / 10).map(() => ({
+              fields: {
+                date: ['2020-12-31T00:14:28.000Z'],
+                ip: ['110.135.176.89'],
+                message: ['hit from the initial search'],
+              },
+            })),
+            total: HITS_TOTAL,
+          },
         },
-      },
-    })
-  );
-
-  mockEsClient.asCurrentUser.scroll = jest.fn().mockResolvedValue({
-    hits: {
-      hits: range(0, HITS_TOTAL / 10).map(() => ({
-        fields: {
-          date: ['2020-12-31T00:14:28.000Z'],
-          ip: ['110.135.176.89'],
-          message: ['hit from a subsequent scroll'],
+      })
+    )
+    .mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: range(0, HITS_TOTAL / 10).map(() => ({
+              fields: {
+                date: ['2020-12-31T00:14:28.000Z'],
+                ip: ['110.135.176.89'],
+                message: ['hit from a subsequent scroll'],
+              },
+            })),
+          },
         },
-      })),
-    },
-  });
+      })
+    );
 
   const generateCsv = new CsvGenerator(
     createMockJob({ columns: ['date', 'ip', 'message'] }),
@@ -334,70 +344,78 @@ it('uses the scrollId to page all the data', async () => {
   expect(csvResult.warnings).toEqual([]);
   expect(content).toMatchSnapshot();
 
-  expect(mockDataClient.search).toHaveBeenCalledTimes(1);
+  expect(mockDataClient.search).toHaveBeenCalledTimes(10);
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { body: {}, ignore_throttled: undefined, scroll: '30s', size: 500 } },
+    { params: { body: {}, ignore_throttled: undefined } },
     { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
   );
 
-  // `scroll` and `clearScroll` must be called with scroll ID in the post body!
-  expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledTimes(9);
-  expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledWith({
-    scroll: '30s',
-    scroll_id: 'awesome-scroll-hero',
+  expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledTimes(1);
+  expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith({
+    ignore_unavailable: true,
+    index: undefined,
+    keep_alive: '30s',
   });
 
-  expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledTimes(1);
-  expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledWith({
-    scroll_id: ['awesome-scroll-hero'],
+  expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
+  expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledWith({
+    body: { id: mockPitId },
   });
 });
 
 it('keeps order of the columns during the scroll', async () => {
-  mockDataClient.search = jest.fn().mockImplementation(() =>
-    Rx.of({
-      rawResponse: {
-        _scroll_id: 'awesome-scroll-hero',
-        hits: {
-          hits: [
-            {
-              fields: {
-                a: ['a1'],
-                b: ['b1'],
-              },
-            },
-          ],
-          total: 3,
-        },
-      },
-    })
-  );
-
-  mockEsClient.asCurrentUser.scroll = jest
+  mockDataClient.search = jest
     .fn()
-    .mockResolvedValueOnce({
-      hits: {
-        hits: [
-          {
-            fields: {
-              b: ['b2'],
-            },
+    .mockImplementationOnce(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                fields: {
+                  a: ['a1'],
+                  b: ['b1'],
+                },
+              },
+            ],
+            total: 3,
           },
-        ],
-      },
-    })
-    .mockResolvedValueOnce({
-      hits: {
-        hits: [
-          {
-            fields: {
-              a: ['a3'],
-              c: ['c3'],
-            },
+        },
+      })
+    )
+    .mockImplementationOnce(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                fields: {
+                  b: ['b2'],
+                },
+              },
+            ],
+            total: 3,
           },
-        ],
-      },
-    });
+        },
+      })
+    )
+    .mockImplementationOnce(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                fields: {
+                  a: ['a3'],
+                  c: ['c3'],
+                },
+              },
+            ],
+            total: 3,
+          },
+        },
+      })
+    );
 
   const generateCsv = new CsvGenerator(
     createMockJob({ searchSource: {}, columns: [] }),
@@ -875,8 +893,6 @@ it('can override ignoring frozen indices', async () => {
       params: {
         body: {},
         ignore_throttled: false,
-        scroll: '30s',
-        size: 500,
       },
     },
     { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
@@ -928,7 +944,7 @@ it('will return partial data if the scroll or search fails', async () => {
   expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
     Array [
       Array [
-        "CSV export scan error: ResponseError: my error",
+        "CSV export search error: ResponseError: my error",
       ],
       Array [
         [ResponseError: my error],
@@ -978,27 +994,27 @@ it('handles unknown errors', async () => {
 
 describe('error codes', () => {
   it('returns the expected error code when authentication expires', async () => {
-    mockDataClient.search = jest.fn().mockImplementation(() =>
-      Rx.of({
-        rawResponse: {
-          _scroll_id: 'test',
-          hits: {
-            hits: range(0, 5).map(() => ({
-              fields: {
-                date: ['2020-12-31T00:14:28.000Z'],
-                ip: ['110.135.176.89'],
-                message: ['super cali fragile istic XPLA docious'],
-              },
-            })),
-            total: 10,
+    mockDataClient.search = jest
+      .fn()
+      .mockImplementationOnce(() =>
+        Rx.of({
+          rawResponse: {
+            hits: {
+              hits: range(0, 5).map(() => ({
+                fields: {
+                  date: ['2020-12-31T00:14:28.000Z'],
+                  ip: ['110.135.176.89'],
+                  message: ['super cali fragile istic XPLA docious'],
+                },
+              })),
+              total: 10,
+            },
           },
-        },
-      })
-    );
-
-    mockEsClient.asCurrentUser.scroll = jest.fn().mockImplementation(() => {
-      throw new esErrors.ResponseError({ statusCode: 403, meta: {} as any, warnings: [] });
-    });
+        })
+      )
+      .mockImplementationOnce(() => {
+        throw new esErrors.ResponseError({ statusCode: 403, meta: {} as any, warnings: [] });
+      });
 
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
@@ -1029,7 +1045,7 @@ describe('error codes', () => {
     expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "CSV export scroll error: ResponseError: Response Error",
+          "CSV export search error: ResponseError: Response Error",
         ],
         Array [
           [ResponseError: Response Error],
