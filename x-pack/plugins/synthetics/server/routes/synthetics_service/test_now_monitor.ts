@@ -14,10 +14,7 @@ import {
 } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import {
-  syntheticsMonitor,
-  syntheticsMonitorType,
-} from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
@@ -45,7 +42,7 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const monitorWithSecrets =
       await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-        syntheticsMonitor.name,
+        syntheticsMonitorType,
         monitorId
       );
     const normalizedMonitor = normalizeSecrets(monitorWithSecrets);

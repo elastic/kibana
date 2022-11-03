@@ -139,7 +139,8 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
     },
   ];
 
-  const historyIdParam = monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID] ?? monitor?.[ConfigKey.ID];
+  const historyIdParam =
+    monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID] ?? monitor?.[ConfigKey.MONITOR_QUERY_ID];
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 200 }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">

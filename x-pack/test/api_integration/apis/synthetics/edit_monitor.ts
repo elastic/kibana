@@ -61,7 +61,16 @@ export default function ({ getService }: FtrProviderContext) {
         newMonitor as MonitorFields
       );
 
-      expect(savedMonitor).eql(omit(newMonitor, secretKeys));
+      expect(savedMonitor).eql(
+        omit(
+          {
+            ...newMonitor,
+            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+            [ConfigKey.CONFIG_ID]: monitorId,
+          },
+          secretKeys
+        )
+      );
 
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
@@ -116,7 +125,16 @@ export default function ({ getService }: FtrProviderContext) {
         newMonitor as MonitorFields
       );
 
-      expect(savedMonitor).eql(omit(newMonitor, secretKeys));
+      expect(savedMonitor).eql(
+        omit(
+          {
+            ...newMonitor,
+            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+            [ConfigKey.CONFIG_ID]: monitorId,
+          },
+          secretKeys
+        )
+      );
 
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
@@ -147,7 +165,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const modifiedMonitor = omit(
         {
-          ...newMonitor,
           ...updates,
           [ConfigKey.METADATA]: {
             ...newMonitor[ConfigKey.METADATA],
@@ -164,7 +181,14 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(editResponse.body.attributes).eql(
-        omit({ ...modifiedMonitor, revision: 2 }, secretKeys)
+        omit(
+          {
+            ...savedMonitor,
+            ...modifiedMonitor,
+            revision: 2,
+          },
+          secretKeys
+        )
       );
       expect(editResponse.body.attributes).not.to.have.keys('unknownkey');
     });

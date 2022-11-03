@@ -134,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
                 is_generated_script: false,
               },
             },
-            config_id: '',
+            config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
             'filter_journeys.match': 'check if title is present',
@@ -196,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'browser',
             'url.port': null,
             urls: '',
-            id: '',
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }
@@ -254,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             'check.request.method': 'POST',
             'check.response.status': ['200'],
-            config_id: '',
+            config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             'check.response.body.negative': [],
             'check.response.body.positive': ['Saved', 'saved'],
@@ -311,7 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'http',
             urls: Array.isArray(monitor.urls) ? monitor.urls?.[0] : monitor.urls,
             'url.port': null,
-            id: '',
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }
@@ -367,7 +367,7 @@ export default function ({ getService }: FtrProviderContext) {
             __ui: {
               is_tls_enabled: false,
             },
-            config_id: '',
+            config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             'check.receive': '',
             'check.send': '',
@@ -413,7 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
             hosts: Array.isArray(monitor.hosts) ? monitor.hosts?.[0] : monitor.hosts,
             'url.port': null,
             urls: '',
-            id: '',
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }
@@ -466,7 +466,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
-            config_id: '',
+            config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
             form_monitor_type: 'icmp',
@@ -516,7 +516,7 @@ export default function ({ getService }: FtrProviderContext) {
               monitor.wait?.slice(-1) === 's'
                 ? monitor.wait?.slice(0, -1)
                 : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
-            id: '',
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }

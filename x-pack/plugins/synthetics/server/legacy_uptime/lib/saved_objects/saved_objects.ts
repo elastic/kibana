@@ -15,7 +15,7 @@ import { DynamicSettings } from '../../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../adapters';
 import { UptimeConfig } from '../../../../common/config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';
-import { syntheticsMonitor } from './synthetics_monitor';
+import { syntheticsMonitorType, getSyntheticsMonitorSavedObjectType } from './synthetics_monitor';
 import { syntheticsServiceApiKey } from './service_api_key';
 
 export const registerUptimeSavedObjects = (
@@ -25,7 +25,7 @@ export const registerUptimeSavedObjects = (
   savedObjectsService.registerType(umDynamicSettings);
   savedObjectsService.registerType(privateLocationsSavedObject);
 
-  savedObjectsService.registerType(syntheticsMonitor);
+  savedObjectsService.registerType(getSyntheticsMonitorSavedObjectType(encryptedSavedObjects));
   savedObjectsService.registerType(syntheticsServiceApiKey);
 
   encryptedSavedObjects.registerType({
@@ -34,7 +34,7 @@ export const registerUptimeSavedObjects = (
   });
 
   encryptedSavedObjects.registerType({
-    type: syntheticsMonitor.name,
+    type: syntheticsMonitorType,
     attributesToEncrypt: new Set([
       'secrets',
       /* adding secretKeys to the list of attributes to encrypt ensures

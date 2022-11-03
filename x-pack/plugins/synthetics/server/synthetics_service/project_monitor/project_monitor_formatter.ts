@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Subject } from 'rxjs';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import pMap from 'p-map';
 import { KibanaRequest } from '@kbn/core/server';
 import {
@@ -30,10 +30,7 @@ import {
   MonitorFields,
   PrivateLocation,
 } from '../../../common/runtime_types';
-import {
-  syntheticsMonitorType,
-  syntheticsMonitor,
-} from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import {
@@ -347,7 +344,7 @@ export class ProjectMonitorFormatter {
       monitors,
       async (monitor) =>
         this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-          syntheticsMonitor.name,
+          syntheticsMonitorType,
           monitor.id,
           {
             namespace: monitor.namespaces?.[0],
@@ -378,10 +375,13 @@ export class ProjectMonitorFormatter {
       const previousMonitor = monitors[i].previousMonitor;
       const normalizedMonitor = monitors[i].monitor;
 
-      const {
-        attributes: { [ConfigKey.REVISION]: _, ...normalizedPreviousMonitorAttributes },
-      } = normalizeSecrets(decryptedPreviousMonitor);
-      const hasMonitorBeenEdited = !isEqual(normalizedMonitor, normalizedPreviousMonitorAttributes);
+      const keysToOmit = [ConfigKey.REVISION, ConfigKey.MONITOR_QUERY_ID, ConfigKey.CONFIG_ID];
+      const { attributes: normalizedPreviousMonitorAttributes } =
+        normalizeSecrets(decryptedPreviousMonitor);
+      const hasMonitorBeenEdited = !isEqual(
+        omit(normalizedMonitor, keysToOmit),
+        omit(normalizedPreviousMonitorAttributes, keysToOmit)
+      );
 
       if (hasMonitorBeenEdited) {
         const monitorWithRevision = formatSecrets({
