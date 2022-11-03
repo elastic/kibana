@@ -34,14 +34,14 @@ export const deleteMonitorBulk = async ({
   syntheticsMonitorClient: SyntheticsMonitorClient;
   request: KibanaRequest;
 }) => {
-  const { logger, telemetry, kibanaVersion } = server;
+  const { logger, telemetry, stackVersion } = server;
   const spaceId = server.spaces.spacesService.getSpaceId(request);
 
   try {
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       monitors.map((normalizedMonitor) => ({
         ...normalizedMonitor.attributes,
-        id: normalizedMonitor.attributes[ConfigKey.HEARTBEAT_ID],
+        id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
       })) as EncryptedSyntheticsMonitorWithId[],
       request,
       savedObjectsClient,
@@ -60,7 +60,7 @@ export const deleteMonitorBulk = async ({
         telemetry,
         formatTelemetryDeleteEvent(
           monitor,
-          kibanaVersion,
+          stackVersion,
           new Date().toISOString(),
           Boolean((monitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
           errors

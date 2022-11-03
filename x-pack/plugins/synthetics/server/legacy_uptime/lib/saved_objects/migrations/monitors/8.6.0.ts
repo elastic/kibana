@@ -26,7 +26,7 @@ export const migration860 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
         ...doc,
         attributes: {
           ...attributes,
-          [ConfigKey.HEARTBEAT_ID]: attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+          [ConfigKey.MONITOR_QUERY_ID]: attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
           [ConfigKey.CONFIG_ID]: id,
         },
       };

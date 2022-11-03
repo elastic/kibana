@@ -58,7 +58,7 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         // making it enabled, even if it's disabled in the UI
         monitor: { ...normalizedMonitor.attributes, enabled: true },
         monitorId,
-        heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.HEARTBEAT_ID],
+        heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
         testRunId,
       }),
     ]);

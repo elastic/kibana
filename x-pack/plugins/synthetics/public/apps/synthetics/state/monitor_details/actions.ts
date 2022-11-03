@@ -25,7 +25,19 @@ export const getMonitorAction = createAsyncAction<
   EncryptedSyntheticsSavedMonitor
 >('[MONITOR DETAILS] GET MONITOR');
 
-export const getMonitorRecentPingsAction = createAsyncAction<
+export const getMonitorLastRunAction = createAsyncAction<
   { monitorId: string; locationId: string },
+  PingsResponse
+>('[MONITOR DETAILS] GET LAST RUN');
+
+export const getMonitorRecentPingsAction = createAsyncAction<
+  {
+    monitorId: string;
+    locationId: string;
+    size?: number;
+    pageIndex?: number;
+    from?: string;
+    to?: string;
+  },
   PingsResponse
 >('[MONITOR DETAILS] GET RECENT PINGS');

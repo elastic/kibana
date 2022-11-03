@@ -58,7 +58,7 @@ describe('validateMonitor', () => {
       [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
       [ConfigKey.NAME]: 'test-monitor-name',
       [ConfigKey.CONFIG_ID]: 'test-monitor-id',
-      [ConfigKey.HEARTBEAT_ID]: '',
+      [ConfigKey.MONITOR_QUERY_ID]: '',
       [ConfigKey.ENABLED]: true,
       [ConfigKey.TAGS]: testTags,
       [ConfigKey.SCHEDULE]: testSchedule,

@@ -44,7 +44,7 @@ export class SyntheticsMonitorClient {
       const config = formatHeartbeatRequest({
         monitor,
         monitorId: id,
-        heartbeatId: monitor[ConfigKey.HEARTBEAT_ID],
+        heartbeatId: monitor[ConfigKey.MONITOR_QUERY_ID],
       });
 
       const { privateLocations, publicLocations } = this.parseLocations(config);
@@ -96,7 +96,7 @@ export class SyntheticsMonitorClient {
       const editedConfig = formatHeartbeatRequest({
         monitor: editedMonitor.monitor,
         monitorId: editedMonitor.id,
-        heartbeatId: (editedMonitor.monitor as MonitorFields)[ConfigKey.HEARTBEAT_ID],
+        heartbeatId: (editedMonitor.monitor as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
       });
       const { publicLocations, privateLocations } = this.parseLocations(editedConfig);
       if (publicLocations.length > 0) {

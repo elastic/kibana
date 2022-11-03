@@ -130,9 +130,9 @@ export const createNewSavedObjectMonitor = async ({
     }),
     id
       ? {
-          id,
-          overwrite: true,
-        }
+        id,
+        overwrite: true,
+      }
       : undefined
   );
 };
@@ -165,7 +165,7 @@ export const syncNewMonitor = async ({
   let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
   const monitorWithNamespace = {
     ...normalizedMonitor,
-    [ConfigKey.HEARTBEAT_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || newMonitorId,
+    [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || newMonitorId,
     [ConfigKey.CONFIG_ID]: newMonitorId,
     [ConfigKey.NAMESPACE]: preserveNamespace
       ? normalizedMonitor[ConfigKey.NAMESPACE]
@@ -201,7 +201,7 @@ export const syncNewMonitor = async ({
         errors: syncErrors,
         monitor: monitorSavedObject,
         isInlineScript: Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-        kibanaVersion: server.kibanaVersion,
+        stackVersion: server.stackVersion,
       })
     );
 

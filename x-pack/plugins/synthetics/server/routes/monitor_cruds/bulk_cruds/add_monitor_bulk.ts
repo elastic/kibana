@@ -67,7 +67,8 @@ export const syncNewMonitorBulk = async ({
       monitor: {
         ...monitor,
         [ConfigKey.CONFIG_ID]: monitorSavedObjectId,
-        [ConfigKey.HEARTBEAT_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorSavedObjectId,
+        [ConfigKey.MONITOR_QUERY_ID]:
+          monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorSavedObjectId,
       } as MonitorFields,
     };
   });
@@ -144,7 +145,7 @@ const sendNewMonitorTelemetry = (
         errors,
         monitor,
         isInlineScript: Boolean((monitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-        kibanaVersion: server.kibanaVersion,
+        stackVersion: server.stackVersion,
       })
     );
   }

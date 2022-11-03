@@ -205,7 +205,7 @@ export class ProjectMonitorFormatter {
         privateLocations: this.privateLocations,
         projectId: this.projectId,
         namespace: this.spaceId,
-        version: this.server.kibanaVersion,
+        version: this.server.stackVersion,
       });
 
       if (errors.length) {
@@ -375,7 +375,7 @@ export class ProjectMonitorFormatter {
       const previousMonitor = monitors[i].previousMonitor;
       const normalizedMonitor = monitors[i].monitor;
 
-      const keysToOmit = [ConfigKey.REVISION, ConfigKey.HEARTBEAT_ID, ConfigKey.CONFIG_ID];
+      const keysToOmit = [ConfigKey.REVISION, ConfigKey.MONITOR_QUERY_ID, ConfigKey.CONFIG_ID];
       const { attributes: normalizedPreviousMonitorAttributes } =
         normalizeSecrets(decryptedPreviousMonitor);
       const hasMonitorBeenEdited = !isEqual(

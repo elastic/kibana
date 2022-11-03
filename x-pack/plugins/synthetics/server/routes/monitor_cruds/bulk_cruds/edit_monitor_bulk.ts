@@ -63,7 +63,7 @@ export const syncEditedMonitorBulk = async ({
             attributes: {
               ...monitorWithRevision,
               [ConfigKey.CONFIG_ID]: previousMonitor.id,
-              [ConfigKey.HEARTBEAT_ID]:
+              [ConfigKey.MONITOR_QUERY_ID]:
                 monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
             },
           }))
@@ -82,7 +82,7 @@ export const syncEditedMonitorBulk = async ({
             monitor: {
               ...(normalizedMonitor as MonitorFields),
               [ConfigKey.CONFIG_ID]: previousMonitor.id,
-              [ConfigKey.HEARTBEAT_ID]:
+              [ConfigKey.MONITOR_QUERY_ID]:
                 normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
             },
             id: previousMonitor.id,
@@ -116,7 +116,7 @@ export const syncEditedMonitorBulk = async ({
         formatTelemetryUpdateEvent(
           editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
           previousMonitor,
-          server.kibanaVersion,
+          server.stackVersion,
           Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
           errors
         )

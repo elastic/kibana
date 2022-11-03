@@ -472,7 +472,7 @@ describe('ProjectMonitorFormatter', () => {
           ...soData[0],
           attributes: {
             ...soData[0].attributes,
-            [ConfigKey.HEARTBEAT_ID]: expect.any(String),
+            [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
             [ConfigKey.CONFIG_ID]: expect.any(String),
           },
         }),
@@ -480,7 +480,7 @@ describe('ProjectMonitorFormatter', () => {
           ...soData[1],
           attributes: {
             ...soData[1].attributes,
-            [ConfigKey.HEARTBEAT_ID]: expect.any(String),
+            [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
             [ConfigKey.CONFIG_ID]: expect.any(String),
           },
         }),

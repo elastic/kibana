@@ -16,7 +16,7 @@ export const selectEncryptedSyntheticsSavedMonitors = createSelector(
   (state) =>
     state.data.monitors.map((monitor) => ({
       ...monitor.attributes,
-      id: monitor.attributes[ConfigKey.HEARTBEAT_ID],
+      id: monitor.attributes[ConfigKey.MONITOR_QUERY_ID],
       updated_at: monitor.updated_at,
     })) as EncryptedSyntheticsSavedMonitor[]
 );

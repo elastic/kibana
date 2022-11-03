@@ -78,7 +78,7 @@ export enum ConfigKey {
   ZIP_URL_TLS_KEY_PASSPHRASE = 'source.zip_url.ssl.key_passphrase',
   ZIP_URL_TLS_VERIFICATION_MODE = 'source.zip_url.ssl.verification_mode',
   ZIP_URL_TLS_VERSION = 'source.zip_url.ssl.supported_protocols',
-  HEARTBEAT_ID = 'id',
+  MONITOR_QUERY_ID = 'id',
 }
 
 export const secretKeys = [

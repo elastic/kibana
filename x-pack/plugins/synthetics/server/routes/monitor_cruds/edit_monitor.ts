@@ -143,7 +143,7 @@ export const syncEditedMonitor = async ({
   try {
     const monitorWithId = {
       ...normalizedMonitor,
-      [ConfigKey.HEARTBEAT_ID]:
+      [ConfigKey.MONITOR_QUERY_ID]:
         normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
       [ConfigKey.CONFIG_ID]: previousMonitor.id,
     };
@@ -176,7 +176,7 @@ export const syncEditedMonitor = async ({
       formatTelemetryUpdateEvent(
         editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
         previousMonitor,
-        server.kibanaVersion,
+        server.stackVersion,
         Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
         errors
       )

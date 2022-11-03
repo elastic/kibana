@@ -47,7 +47,7 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
         type: syntheticsMonitorType,
         perPage: 1,
         page: 1,
-        filter: `${syntheticsMonitorType}.attributes.${ConfigKey.HEARTBEAT_ID}: "${monitorId}"`,
+        filter: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_QUERY_ID}: "${monitorId}"`,
       });
 
       if (!monitorSavedObject) {

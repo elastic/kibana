@@ -27,7 +27,7 @@ describe('syncEditedMonitor', () => {
 
   const serverMock: UptimeServerSetup = {
     uptimeEsClient: { search: jest.fn() },
-    kibanaVersion: null,
+    stackVersion: null,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
       get: jest.fn(),

@@ -14,5 +14,5 @@ export const useMonitorQueryId = () => {
 
   const { monitor } = useSelectedMonitor();
 
-  return monitor[ConfigKey.HEARTBEAT_ID] || monitorId;
+  return monitor[ConfigKey.MONITOR_QUERY_ID] || monitorId;
 };
