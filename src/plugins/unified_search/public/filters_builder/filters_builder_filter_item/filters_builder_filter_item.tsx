@@ -230,8 +230,14 @@ export function FilterItem({
                         <EuiIcon type="grab" size="s" className={grabIconStyles} />
                       </EuiFlexItem>
                       <EuiFlexItem grow={true}>
-                        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
-                          <EuiFlexItem grow={4}>
+                        <EuiFlexGroup
+                          gutterSize="s"
+                          responsive={false}
+                          alignItems="center"
+                          justifyContent="center"
+                          wrap
+                        >
+                          <EuiFlexItem style={{ minWidth: '162px' }}>
                             <EuiFormRow>
                               <FieldInput
                                 field={field}
@@ -240,7 +246,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem grow={2}>
+                          <EuiFlexItem style={{ maxWidth: '162px' }}>
                             <EuiFormRow>
                               <OperatorInput
                                 field={field}
@@ -250,7 +256,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem grow={4}>
+                          <EuiFlexItem style={{ minWidth: '162px' }}>
                             <EuiFormRow>
                               <div data-test-subj="filterParams">
                                 <ParamsEditor
