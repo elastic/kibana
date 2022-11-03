@@ -20,6 +20,7 @@ Object {
       },
       "groupId": "metric",
       "groupLabel": "Primary metric",
+      "isMetricDimension": true,
       "paramEditorCustomProps": Object {
         "headingLabel": "Value",
       },
@@ -41,6 +42,7 @@ Object {
       },
       "groupId": "secondaryMetric",
       "groupLabel": "Secondary metric",
+      "isMetricDimension": true,
       "paramEditorCustomProps": Object {
         "headingLabel": "Value",
       },

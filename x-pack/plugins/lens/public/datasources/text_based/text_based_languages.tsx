@@ -383,11 +383,9 @@ export function getTextBasedDatasource({
         customLabel = selectedField?.fieldName;
       }
 
-      const columnExists = props.state.fieldList.some((f) => f.name === customLabel);
-
       render(
         <EuiButtonEmpty
-          color={columnExists ? 'primary' : 'danger'}
+          color={customLabel ? 'primary' : 'danger'}
           onClick={() => {}}
           data-test-subj="lns-dimensionTrigger-textBased"
         >
@@ -412,6 +410,19 @@ export function getTextBasedDatasource({
       const selectedField = props.state.layers[props.layerId]?.allColumns?.find(
         (column) => column.columnId === props.columnId
       );
+
+      const updatedFields = fields.map((f) => {
+        return {
+          ...f,
+          compatible: props.isMetricDimension
+            ? props.filterOperations({
+                dataType: f.meta.type as DataType,
+                isBucketed: Boolean(f?.meta?.type !== 'number'),
+                scale: 'ordinal',
+              })
+            : true,
+        };
+      });
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <EuiFormRow
@@ -423,7 +434,7 @@ export function getTextBasedDatasource({
             className="lnsIndexPatternDimensionEditor--padded"
           >
             <FieldSelect
-              existingFields={fields}
+              existingFields={updatedFields}
               selectedField={selectedField}
               onChoose={(choice) => {
                 const meta = fields.find((f) => f.name === choice.field)?.meta;
@@ -457,12 +468,12 @@ export function getTextBasedDatasource({
                             columns: props.state.layers[props.layerId].columns.map((col) =>
                               col.columnId !== props.columnId
                                 ? col
-                                : { ...col, fieldName: choice.field }
+                                : { ...col, fieldName: choice.field, meta }
                             ),
                             allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
                               col.columnId !== props.columnId
                                 ? col
-                                : { ...col, fieldName: choice.field }
+                                : { ...col, fieldName: choice.field, meta }
                             ),
                           },
                         },
@@ -522,9 +533,15 @@ export function getTextBasedDatasource({
     },
 
     getDropProps: (props) => {
-      const { source } = props;
+      const { source, target, state } = props;
       if (!source) {
         return;
+      }
+      if (target && target.isMetricDimension) {
+        const layerId = target.layerId;
+        const currentLayer = state.layers[layerId];
+        const field = currentLayer.allColumns.find((f) => f.columnId === source.id);
+        if (field?.meta?.type !== 'number') return;
       }
       const label = source.field as string;
       return { dropTypes: ['field_add'], nextLabel: label };

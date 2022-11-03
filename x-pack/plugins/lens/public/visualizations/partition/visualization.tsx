@@ -272,6 +272,7 @@ export const getPieVisualization = ({
       groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
         defaultMessage: 'Size by',
       }),
+      isMetricDimension: true,
       dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.groupSizeLabel', {
         defaultMessage: 'Size',
       }),
