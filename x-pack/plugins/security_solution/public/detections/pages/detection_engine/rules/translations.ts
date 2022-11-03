@@ -1071,9 +1071,17 @@ export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage:
-        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}. If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.",
+        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}",
     }
   );
+
+export const RULES_BULK_EDIT_SUCCESS_INDEX_EDIT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successIndexEditToastDescription',
+  {
+    defaultMessage:
+      'If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.',
+  }
+);
 
 export const RULES_BULK_EDIT_FAILURE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.errorToastTitle',
