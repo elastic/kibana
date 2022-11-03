@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { omit } from 'lodash';
 import { firstValueFrom, from, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import type { SearchUsage } from '../../collectors/search';
-import { searchUsageObserver } from '../../collectors/search/usage';
+import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
+import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy } from '../../types';
+import type { SearchUsage } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
+import { searchUsageObserver } from '../../collectors/search/usage';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -44,12 +42,7 @@ export const esSearchStrategyProvider = (
         const config = await firstValueFrom(config$);
         // @ts-expect-error params fall back to any, but should be valid SearchRequest params
         const { terminateAfter, ...requestParams } = request.params ?? {};
-        let defaults: estypes.IndicesOptions = await getDefaultSearchParams(uiSettingsClient);
-
-        if (isPit) {
-          // Remove IndicesOptions from the request if PIT is used, these options are set in the PIT
-          defaults = omit(defaults, ['ignore_unavailable']);
-        }
+        const defaults = await getDefaultSearchParams(uiSettingsClient, { isPit });
 
         const params = {
           ...defaults,
