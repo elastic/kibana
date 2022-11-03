@@ -456,6 +456,7 @@ export class TaskRunner<
           previouslyRecoveredAlerts: originalRecoveredAlerts,
           hasReachedAlertLimit,
           alertLimit: this.maxAlerts,
+          setFlapping: true,
         });
 
         logAlerts({

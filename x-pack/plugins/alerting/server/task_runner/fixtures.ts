@@ -214,7 +214,7 @@ export const generateRunnerResult = ({
   state = false,
   interval = '10s',
   alertInstances = {},
-  recoveredAlertInstances = {},
+  alertRecoveredInstances = {},
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
@@ -231,7 +231,7 @@ export const generateRunnerResult = ({
     },
     state: {
       ...(state && { alertInstances }),
-      ...(state && { recoveredAlertInstances }),
+      ...(state && { alertRecoveredInstances }),
       ...(state && { alertTypeState: undefined }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z') }),
     },
@@ -267,7 +267,9 @@ export const generateEnqueueFunctionInput = (isArray: boolean = false) => {
   return isArray ? [input] : input;
 };
 
-export const generateAlertInstance = ({ id, duration, start }: GeneratorParams = { id: 1 }) => ({
+export const generateAlertInstance = (
+  { id, duration, start, flappingHistory }: GeneratorParams = { id: 1, flappingHistory: [false] }
+) => ({
   [String(id)]: {
     meta: {
       lastScheduledActions: {
@@ -280,5 +282,6 @@ export const generateAlertInstance = ({ id, duration, start }: GeneratorParams =
       duration,
       start,
     },
+    flappingHistory,
   },
 });

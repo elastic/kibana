@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, drop, isEmpty } from 'lodash';
+import { drop, isEmpty } from 'lodash';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -55,7 +55,7 @@ export class Alert<
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
-    this.flappingHistory = cloneDeep(flappingHistory);
+    this.flappingHistory = flappingHistory;
   }
 
   getId() {
@@ -176,22 +176,22 @@ export class Alert<
     return {
       state: this.state,
       meta: this.meta,
-      flappingHistory: cloneDeep(this.flappingHistory),
+      flappingHistory: this.flappingHistory,
     };
   }
 
   toRawRecovered(): RawAlertRecoveredInstance {
     return {
-      flappingHistory: cloneDeep(this.flappingHistory),
+      flappingHistory: this.flappingHistory,
     };
   }
 
   setFlappingHistory(fh: boolean[]) {
-    this.flappingHistory = cloneDeep(fh);
+    this.flappingHistory = fh;
   }
 
   getFlappingHistory() {
-    return cloneDeep(this.flappingHistory);
+    return this.flappingHistory;
   }
 
   updateFlappingHistory(state: boolean) {

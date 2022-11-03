@@ -1010,7 +1010,12 @@ describe('Task Runner', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       const runnerResult = await taskRunner.run();
       expect(runnerResult.state.alertInstances).toEqual(
-        generateAlertInstance({ id: 1, duration: MOCK_DURATION, start: DATE_1969 })
+        generateAlertInstance({
+          id: 1,
+          duration: MOCK_DURATION,
+          start: DATE_1969,
+          flappingHistory: [false],
+        })
       );
 
       expect(logger.debug).toHaveBeenCalledTimes(6);
@@ -1319,7 +1324,12 @@ describe('Task Runner', () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
     const runnerResult = await taskRunner.run();
     expect(runnerResult.state.alertInstances).toEqual(
-      generateAlertInstance({ id: 1, duration: MOCK_DURATION, start: DATE_1969 })
+      generateAlertInstance({
+        id: 1,
+        duration: MOCK_DURATION,
+        start: DATE_1969,
+        flappingHistory: [false],
+      })
     );
 
     testAlertingEventLogCalls({
@@ -2300,6 +2310,7 @@ describe('Task Runner', () => {
               duration: '0',
               start: '1970-01-01T00:00:00.000Z',
             },
+            flappingHistory: [false],
           },
         },
       })
@@ -2453,6 +2464,7 @@ describe('Task Runner', () => {
               duration: '0',
               start: '1970-01-01T00:00:00.000Z',
             },
+            flappingHistory: [false],
           },
           '2': {
             meta: {
@@ -2465,6 +2477,7 @@ describe('Task Runner', () => {
               duration: '0',
               start: '1970-01-01T00:00:00.000Z',
             },
+            flappingHistory: [false],
           },
         },
       })

@@ -133,8 +133,10 @@ export function createAlertFactory<
             {
               alerts,
               existingAlerts: originalAlerts,
+              previouslyRecoveredAlerts: {},
               hasReachedAlertLimit,
               alertLimit: maxAlerts,
+              setFlapping: false,
             }
           );
           return Object.keys(recoveredAlerts ?? {}).map(

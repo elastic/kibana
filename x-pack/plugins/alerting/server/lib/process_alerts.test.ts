@@ -93,6 +93,7 @@ describe('processAlerts', () => {
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
       });
@@ -144,6 +145,7 @@ describe('processAlerts', () => {
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
       });
@@ -181,6 +183,7 @@ describe('processAlerts', () => {
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
       });
@@ -234,6 +237,7 @@ describe('processAlerts', () => {
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
       });
@@ -297,6 +301,7 @@ describe('processAlerts', () => {
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
       });
@@ -369,6 +374,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts,
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        setFlapping: true,
       });
 
       expect(
@@ -415,6 +421,7 @@ describe('processAlerts', () => {
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
       });
@@ -442,6 +449,7 @@ describe('processAlerts', () => {
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
       });
@@ -471,6 +479,7 @@ describe('processAlerts', () => {
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
       });
@@ -515,6 +524,7 @@ describe('processAlerts', () => {
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
       });
@@ -561,6 +571,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts,
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        setFlapping: true,
       });
 
       expect(recoveredAlerts).toEqual(updatedAlerts);
@@ -604,6 +615,7 @@ describe('processAlerts', () => {
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: true,
         alertLimit: 7,
       });
@@ -634,17 +646,12 @@ describe('processAlerts', () => {
       updatedAlerts['4'].scheduleActions('default', { foo: '2' });
       // intentionally not scheduling actions for alert "5"
 
-      updatedAlerts['1'].setFlappingHistory([false]);
-      updatedAlerts['2'].setFlappingHistory([false]);
-      updatedAlerts['3'].setFlappingHistory([false]);
-      updatedAlerts['4'].setFlappingHistory([false]);
-      existingAlert5.setFlappingHistory([false]);
-
       const { activeAlerts } = processAlerts({
         // @ts-expect-error
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: true,
         alertLimit: 7,
       });
@@ -699,22 +706,12 @@ describe('processAlerts', () => {
       updatedAlerts['9'].scheduleActions('default', { foo: '2' });
       updatedAlerts['10'].scheduleActions('default', { foo: '2' });
 
-      updatedAlerts['1'].setFlappingHistory([false]);
-      updatedAlerts['2'].setFlappingHistory([false]);
-      updatedAlerts['3'].setFlappingHistory([false]);
-      updatedAlerts['4'].setFlappingHistory([false]);
-      existingAlert5.setFlappingHistory([false]);
-      updatedAlerts['6'].setFlappingHistory([false]);
-      updatedAlerts['7'].setFlappingHistory([false]);
-      updatedAlerts['8'].setFlappingHistory([false]);
-      updatedAlerts['9'].setFlappingHistory([false]);
-      updatedAlerts['10'].setFlappingHistory([false]);
-
       const { activeAlerts, newAlerts } = processAlerts({
         // @ts-expect-error
         alerts: updatedAlerts,
         // @ts-expect-error
         existingAlerts,
+        previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: true,
         alertLimit: MAX_ALERTS,
       });
@@ -750,6 +747,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        setFlapping: true,
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`
@@ -799,6 +797,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        setFlapping: true,
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`
@@ -835,6 +834,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: { '1': recoveredAlert },
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        setFlapping: true,
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`
@@ -875,6 +875,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        setFlapping: true,
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
@@ -907,6 +908,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: alerts,
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        setFlapping: true,
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
@@ -942,6 +944,7 @@ describe('processAlerts', () => {
           previouslyRecoveredAlerts: {},
           hasReachedAlertLimit: true,
           alertLimit: 10,
+          setFlapping: true,
         });
 
         expect(activeAlerts).toMatchInlineSnapshot(`
@@ -978,6 +981,7 @@ describe('processAlerts', () => {
           previouslyRecoveredAlerts: {},
           hasReachedAlertLimit: true,
           alertLimit: 10,
+          setFlapping: true,
         });
 
         expect(activeAlerts).toMatchInlineSnapshot(`

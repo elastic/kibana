@@ -19,6 +19,7 @@ interface ProcessAlertsOpts<
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>;
   hasReachedAlertLimit: boolean;
   alertLimit: number;
+  setFlapping: boolean;
 }
 interface ProcessAlertsResult<
   State extends AlertInstanceState,
@@ -42,6 +43,7 @@ export function processAlerts<
   previouslyRecoveredAlerts,
   hasReachedAlertLimit,
   alertLimit,
+  setFlapping,
 }: ProcessAlertsOpts<State, Context>): ProcessAlertsResult<
   State,
   Context,
@@ -49,8 +51,8 @@ export function processAlerts<
   RecoveryActionGroupId
 > {
   return hasReachedAlertLimit
-    ? processAlertsLimitReached(alerts, existingAlerts, alertLimit)
-    : processAlertsHelper(alerts, existingAlerts, previouslyRecoveredAlerts);
+    ? processAlertsLimitReached(alerts, existingAlerts, alertLimit, setFlapping)
+    : processAlertsHelper(alerts, existingAlerts, previouslyRecoveredAlerts, setFlapping);
 }
 
 function processAlertsHelper<
@@ -61,10 +63,11 @@ function processAlertsHelper<
 >(
   alerts: Record<string, Alert<State, Context>>,
   existingAlerts: Record<string, Alert<State, Context>>,
-  previouslyRecoveredAlerts: Record<string, Alert<State, Context>>
+  previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
+  setFlapping: boolean
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
-  const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts || {}));
+  const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
 
   const currentTime = new Date().toISOString();
   const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
@@ -84,13 +87,17 @@ function processAlertsHelper<
 
           if (previouslyRecoveredAlertsIds.has(id)) {
             // this alert has flapped from recovered to active
-            alerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
-            alerts[id].updateFlappingHistory(true);
-            previouslyRecoveredAlertsIds.delete(id);
+            if (setFlapping) {
+              alerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
+              alerts[id].updateFlappingHistory(true);
+              previouslyRecoveredAlertsIds.delete(id);
+            }
           } else {
-            // this alert was also not recovered in the previous run, it is considered "new"
+            // this alert was not recovered in the previous run, it is considered "new"
             newAlerts[id] = alerts[id];
-            newAlerts[id].updateFlappingHistory(false);
+            if (setFlapping) {
+              newAlerts[id].updateFlappingHistory(false);
+            }
           }
         } else {
           // this alert did exist in previous run
@@ -106,7 +113,9 @@ function processAlertsHelper<
           });
 
           // this alert is still active
-          activeAlerts[id].updateFlappingHistory(false);
+          if (setFlapping) {
+            activeAlerts[id].updateFlappingHistory(false);
+          }
         }
       } else if (existingAlertIds.has(id)) {
         recoveredAlerts[id] = alerts[id];
@@ -122,7 +131,9 @@ function processAlertsHelper<
           ...(state.start ? { end: currentTime } : {}),
         });
         // this alert has flapped from active to recovered
-        recoveredAlerts[id].updateFlappingHistory(true);
+        if (setFlapping) {
+          recoveredAlerts[id].updateFlappingHistory(true);
+        }
       }
     }
   }
@@ -130,7 +141,9 @@ function processAlertsHelper<
   // alerts are still recovered
   for (const id of previouslyRecoveredAlertsIds) {
     recoveredAlerts[id] = previouslyRecoveredAlerts[id];
-    recoveredAlerts[id].updateFlappingHistory(false);
+    if (setFlapping) {
+      recoveredAlerts[id].updateFlappingHistory(false);
+    }
   }
 
   return { recoveredAlerts, newAlerts, activeAlerts };
@@ -144,7 +157,8 @@ function processAlertsLimitReached<
 >(
   alerts: Record<string, Alert<State, Context>>,
   existingAlerts: Record<string, Alert<State, Context>>,
-  alertLimit: number
+  alertLimit: number,
+  setFlapping: boolean
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
 
@@ -178,7 +192,9 @@ function processAlertsLimitReached<
       });
 
       // this alert is still active
-      activeAlerts[id].updateFlappingHistory(false);
+      if (setFlapping) {
+        activeAlerts[id].updateFlappingHistory(false);
+      }
     }
   }
 
@@ -196,7 +212,9 @@ function processAlertsLimitReached<
     if (alerts.hasOwnProperty(id) && alerts[id].hasScheduledActions()) {
       // if this alert did not exist in previous run, it is considered "new"
       if (!existingAlertIds.has(id)) {
-        alerts[id].updateFlappingHistory(false);
+        if (setFlapping) {
+          alerts[id].updateFlappingHistory(false);
+        }
 
         activeAlerts[id] = alerts[id];
         newAlerts[id] = alerts[id];

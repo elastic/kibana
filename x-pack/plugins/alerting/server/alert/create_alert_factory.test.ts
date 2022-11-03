@@ -33,11 +33,12 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
-              Object {
-                "meta": Object {},
-                "state": Object {},
-              }
-        `);
+      Object {
+        "flappingHistory": Array [],
+        "meta": Object {},
+        "state": Object {},
+      }
+    `);
     // @ts-expect-error
     expect(result.getId()).toEqual('1');
   });
@@ -57,6 +58,7 @@ describe('createAlertFactory()', () => {
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "flappingHistory": Array [],
         "meta": Object {
           "lastScheduledActions": Object {
             "date": "1970-01-01T00:00:00.000Z",
@@ -79,13 +81,14 @@ describe('createAlertFactory()', () => {
     });
     alertFactory.create('1');
     expect(alerts).toMatchInlineSnapshot(`
-              Object {
-                "1": Object {
-                  "meta": Object {},
-                  "state": Object {},
-                },
-              }
-        `);
+      Object {
+        "1": Object {
+          "flappingHistory": Array [],
+          "meta": Object {},
+          "state": Object {},
+        },
+      }
+    `);
   });
 
   test('throws error and sets flag when more alerts are created than allowed', () => {
@@ -118,6 +121,7 @@ describe('createAlertFactory()', () => {
       meta: {},
       state: {},
       context: {},
+      flappingHistory: [],
       scheduledExecutionOptions: undefined,
       id: '1',
     });
@@ -157,6 +161,7 @@ describe('createAlertFactory()', () => {
       meta: {},
       state: {},
       context: {},
+      flappingHistory: [],
       scheduledExecutionOptions: undefined,
       id: '1',
     });
@@ -181,6 +186,7 @@ describe('createAlertFactory()', () => {
       meta: {},
       state: {},
       context: {},
+      flappingHistory: [],
       scheduledExecutionOptions: undefined,
       id: '1',
     });
@@ -204,6 +210,7 @@ describe('createAlertFactory()', () => {
       meta: {},
       state: {},
       context: {},
+      flappingHistory: [],
       scheduledExecutionOptions: undefined,
       id: '1',
     });
@@ -226,6 +233,7 @@ describe('createAlertFactory()', () => {
       meta: {},
       state: {},
       context: {},
+      flappingHistory: [],
       scheduledExecutionOptions: undefined,
       id: '1',
     });

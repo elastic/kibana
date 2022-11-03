@@ -57,7 +57,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
           actions: new Map([
             // make sure the counts of the # of events per type are as expected
             ['execute', { gte: 9 }],
-            ['new-instance', { equal: 2 }],
+            ['new-instance', { equal: 1 }],
             ['active-instance', { gte: 4 }],
             ['recovered-instance', { equal: 2 }],
           ]),
@@ -107,7 +107,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
 
           case 'active-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
-            expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
+            expect(instanceEvents[i]?.event?.start).not.to.equal(undefined);
             expect(instanceEvents[i]?.event?.end).to.be(undefined);
 
             if (instanceEvents[i]?.event?.duration! !== '0') {
@@ -116,6 +116,8 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
                   BigInt(currentAlertSpan.durationToDate!)
               ).to.be(true);
             }
+            currentAlertSpan.alertId = instanceEvents[i]?.kibana?.alerting?.instance_id;
+            currentAlertSpan.start = instanceEvents[i]?.event?.start;
             currentAlertSpan.durationToDate = `${instanceEvents[i]?.event?.duration}`;
             break;
 

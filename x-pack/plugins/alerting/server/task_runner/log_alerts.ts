@@ -7,6 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
+import { isEmpty } from 'lodash';
 import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
@@ -94,15 +95,18 @@ export function logAlerts<
     for (const id of recoveredAlertIds) {
       const { group: actionGroup } = recoveredAlerts[id].getLastScheduledActions() ?? {};
       const state = recoveredAlerts[id].getState();
-      const message = `${ruleLogPrefix} alert '${id}' has recovered`;
+      // do not log previously recovered alerts that don't have a state
+      if (!isEmpty(state)) {
+        const message = `${ruleLogPrefix} alert '${id}' has recovered`;
 
-      alertingEventLogger.logAlert({
-        action: EVENT_LOG_ACTIONS.recoveredInstance,
-        id,
-        group: actionGroup,
-        message,
-        state,
-      });
+        alertingEventLogger.logAlert({
+          action: EVENT_LOG_ACTIONS.recoveredInstance,
+          id,
+          group: actionGroup,
+          message,
+          state,
+        });
+      }
     }
 
     for (const id of newAlertIds) {
