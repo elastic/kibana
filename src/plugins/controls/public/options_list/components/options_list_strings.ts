@@ -56,6 +56,11 @@ export const OptionsListStrings = {
       }),
   },
   popover: {
+    getAriaLabel: (fieldName: string) =>
+      i18n.translate('controls.optionsList.popover.ariaLabel', {
+        defaultMessage: 'Popover for {fieldName} control',
+        values: { fieldName },
+      }),
     getLoadingMessage: () =>
       i18n.translate('controls.optionsList.popover.loading', {
         defaultMessage: 'Loading options',

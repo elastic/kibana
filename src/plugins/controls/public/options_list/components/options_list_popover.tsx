@@ -13,6 +13,7 @@ import { EuiPopoverTitle } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListReduxState } from '../types';
+import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
@@ -39,12 +40,13 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
 
   const existsSelected = select((state) => state.explicitInput.existsSelected);
   const hideExclude = select((state) => state.explicitInput.hideExclude);
+  const fieldName = select((state) => state.explicitInput.fieldName);
   const title = select((state) => state.explicitInput.title);
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
-    <>
+    <span role="listbox" aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}>
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
       {field?.type !== 'boolean' && (
         <OptionsListPopoverActionBar
@@ -65,6 +67,6 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
             (existsSelected && existsSelectionInvalid)) && <OptionsListPopoverInvalidSelections />}
       </div>
       {!hideExclude && <OptionsListPopoverFooter />}
-    </>
+    </span>
   );
 };
