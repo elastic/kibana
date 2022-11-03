@@ -89,7 +89,7 @@ const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (state, attribut
     layer.categoryDisplay !== CategoryDisplay.HIDE ? (layer.categoryDisplay as LabelPositions) : [];
   const values = layer.numberDisplay !== NumberDisplay.HIDDEN;
   const valuesFormat =
-    layer.numberDisplay !== NumberDisplay.HIDDEN ? (layer.numberDisplay as ValueFormats) : [];
+    layer.numberDisplay !== NumberDisplay.HIDDEN ? (layer.numberDisplay as ValueFormats) : undefined;
   const percentDecimals = layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS;
   const partitionLabelsFn = buildExpressionFunction<PartitionLabelsExpressionFunctionDefinition>(
     'partitionLabels',
