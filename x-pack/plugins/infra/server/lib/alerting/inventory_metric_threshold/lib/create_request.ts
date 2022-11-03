@@ -15,11 +15,7 @@ import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { createMetricAggregations } from './create_metric_aggregations';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { createBucketSelector } from './create_bucket_selector';
-import {
-  KUBERNETES_POD_UID,
-  NUMBER_OF_DOCUMENTS,
-  termsAggField,
-} from '../../common/utils';
+import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
 
 export const createRequest = (
   index: string,
@@ -64,23 +60,23 @@ export const createRequest = (
   const containerContextAgg =
     nodeType === 'pod' && fieldsExisted && fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {
-        containerContext: {
-          terms: {
-            field: termsAggField[KUBERNETES_POD_UID],
-            size: NUMBER_OF_DOCUMENTS,
-          },
-          aggs: {
-            container: {
-              top_hits: {
-                size: 1,
-                _source: {
-                  includes: ['container.*'],
+          containerContext: {
+            terms: {
+              field: termsAggField[KUBERNETES_POD_UID],
+              size: NUMBER_OF_DOCUMENTS,
+            },
+            aggs: {
+              container: {
+                top_hits: {
+                  size: 1,
+                  _source: {
+                    includes: ['container.*'],
+                  },
                 },
               },
             },
           },
-        },
-      }
+        }
       : void 0;
 
   const includesList = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
@@ -109,7 +105,12 @@ export const createRequest = (
       aggs: {
         nodes: {
           composite,
-          aggs: { ...metricAggregations, ...bucketSelector, ...additionalContextAgg, ...containerContextAgg },
+          aggs: {
+            ...metricAggregations,
+            ...bucketSelector,
+            ...additionalContextAgg,
+            ...containerContextAgg,
+          },
         },
       },
     },
