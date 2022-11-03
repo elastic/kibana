@@ -35,4 +35,19 @@ export const i18nTexts = {
   failedToFetchDiagnostics: i18n.translate('filesManagement.diagnostics.errorMessage', {
     defaultMessage: 'Could not fetch diagnostics',
   }),
+  diagnosticsSpaceUsed: i18n.translate('filesManagement.diagnostics.spaceUsedLabel', {
+    defaultMessage: 'Total space used',
+  }),
+  diagnosticsTotalCount: i18n.translate('filesManagement.diagnostics.totalCountLabel', {
+    defaultMessage: 'Total number of files',
+  }),
+  diagnosticsBreakdownsStatus: i18n.translate('filesManagement.diagnostics.breakdownStatusTitle', {
+    defaultMessage: 'Count by status',
+  }),
+  diagnosticsBreakdownsExtension: i18n.translate(
+    'filesManagement.diagnostics.breakdownExtensionTitle',
+    {
+      defaultMessage: 'Count by extension',
+    }
+  ),
 };

@@ -7,3 +7,4 @@
  */
 
 export { EmptyPrompt } from './empty_prompt';
+export { DiagnosticsFlyout } from './diagnostics_flyout';

@@ -7,12 +7,13 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list';
 import numeral from '@elastic/numeral';
 import { useKibana } from './context';
 import { i18nTexts } from './i18n_texts';
-import { EmptyPrompt } from './components';
+import { EmptyPrompt, DiagnosticsFlyout } from './components';
 
 type FilesUserContentSchema = UserContentCommonSchema;
 
@@ -24,44 +25,55 @@ export const App: FunctionComponent = () => {
   const {
     services: { filesClient },
   } = useKibana();
+  const [showDiagnosticsFlyout, setShowDiagnosticsFlyout] = useState<boolean>(false);
   return (
-    <TableListView<FilesUserContentSchema>
-      titleColumnName={i18nTexts.titleColumnName}
-      emptyPrompt={<EmptyPrompt />}
-      entityName={i18nTexts.entityName}
-      entityNamePlural={i18nTexts.entityNamePlural}
-      findItems={(searchQuery) =>
-        filesClient
-          .find({ name: searchQuery ? naivelyFuzzify(searchQuery) : undefined })
-          .then(({ files, total }) => ({
-            hits: files.map((file) => ({
-              id: file.id,
-              updatedAt: file.updated,
-              references: [],
-              type: 'file',
-              attributes: {
-                title: file.name + (file.extension ? `.${file.extension}` : ''),
-                size: file.size,
-              },
-            })),
-            total,
-          }))
-      }
-      customTableColumn={{
-        name: i18nTexts.size,
-        field: 'attributes.size',
-        render: (value: any) => value && numeral(value).format('0[.]0 b'),
-      }}
-      initialFilter=""
-      initialPageSize={50}
-      listingLimit={1000}
-      tableListTitle={i18nTexts.tableListTitle}
-      // TODO: Handle click
-      onClickTitle={() => {}}
-      deleteItems={async (items) => {
-        await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });
-      }}
-      withoutPageTemplateWrapper
-    />
+    <>
+      <TableListView<FilesUserContentSchema>
+        titleColumnName={i18nTexts.titleColumnName}
+        emptyPrompt={<EmptyPrompt />}
+        entityName={i18nTexts.entityName}
+        entityNamePlural={i18nTexts.entityNamePlural}
+        findItems={(searchQuery) =>
+          filesClient
+            .find({ name: searchQuery ? naivelyFuzzify(searchQuery) : undefined })
+            .then(({ files, total }) => ({
+              hits: files.map((file) => ({
+                id: file.id,
+                updatedAt: file.updated,
+                references: [],
+                type: 'file',
+                attributes: {
+                  title: file.name + (file.extension ? `.${file.extension}` : ''),
+                  size: file.size,
+                },
+              })),
+              total,
+            }))
+        }
+        customTableColumn={{
+          name: i18nTexts.size,
+          field: 'attributes.size',
+          render: (value: any) => value && numeral(value).format('0[.]0 b'),
+        }}
+        initialFilter=""
+        initialPageSize={50}
+        listingLimit={1000}
+        tableListTitle={i18nTexts.tableListTitle}
+        // TODO: Handle click
+        onClickTitle={() => {}}
+        deleteItems={async (items) => {
+          await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });
+        }}
+        withoutPageTemplateWrapper
+        additionalRightSideActions={[
+          <EuiButtonEmpty onClick={() => setShowDiagnosticsFlyout(true)} iconType="iInCircle">
+            {i18nTexts.diagnosticsFlyoutTitle}
+          </EuiButtonEmpty>,
+        ]}
+      />
+      {showDiagnosticsFlyout && (
+        <DiagnosticsFlyout onClose={() => setShowDiagnosticsFlyout(false)} />
+      )}
+    </>
   );
 };
