@@ -80,8 +80,6 @@ export function getInitialDataViewsObject(
   return {
     indexPatterns,
     indexPatternRefs,
-    existingFields: {},
-    isFirstExistenceFetch: true,
   };
 }
 
@@ -107,9 +105,6 @@ export async function refreshIndexPatternsList({
     onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
   });
   const indexPattern = newlyMappedIndexPattern[indexPatternId];
-  // But what about existingFields here?
-  // When the indexPatterns cache object gets updated, the data panel will
-  // notice it and refetch the fields list existence map
   indexPatternService.updateDataViewsState({
     indexPatterns: {
       ...indexPatternsCache,
