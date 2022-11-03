@@ -8,7 +8,7 @@
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
-import type { MappingsApiResponse } from '../lib/autocomplete_entities/types';
+import type { AutoCompleteEntitiesApiResponse } from '../lib/autocomplete_entities/types';
 import { API_BASE_PATH } from '../../common/constants';
 import {
   Alias,
@@ -48,19 +48,19 @@ export class AutocompleteInfo {
     context: { indices: string[]; types: string[] } = { indices: [], types: [] }
   ) {
     switch (type) {
-      case 'indices':
+      case ENTITIES.INDICES:
         const includeAliases = true;
         const collaborator = this.mapping;
         return () => this.alias.getIndices(includeAliases, collaborator);
-      case 'fields':
+      case ENTITIES.FIELDS:
         return this.mapping.getMappings(context.indices, context.types);
-      case 'indexTemplates':
+      case ENTITIES.INDEX_TEMPLATES:
         return () => this.indexTemplate.getTemplates();
-      case 'componentTemplates':
+      case ENTITIES.COMPONENT_TEMPLATES:
         return () => this.componentTemplate.getTemplates();
-      case 'legacyTemplates':
+      case ENTITIES.LEGACY_TEMPLATES:
         return () => this.legacyTemplate.getTemplates();
-      case 'dataStreams':
+      case ENTITIES.DATA_STREAMS:
         return () => this.dataStream.getDataStreams();
       default:
         throw new Error(`Unsupported type: ${type}`);
@@ -70,7 +70,7 @@ export class AutocompleteInfo {
   public retrieve(settings: Settings, settingsToRetrieve: DevToolsSettings['autocomplete']) {
     this.clearSubscriptions();
     this.http
-      .get<MappingsApiResponse>(`${API_BASE_PATH}/autocomplete_entities`, {
+      .get<AutoCompleteEntitiesApiResponse>(`${API_BASE_PATH}/autocomplete_entities`, {
         query: { ...settingsToRetrieve },
       })
       .then((data) => {
@@ -92,7 +92,7 @@ export class AutocompleteInfo {
     }
   }
 
-  private load(data: MappingsApiResponse) {
+  private load(data: AutoCompleteEntitiesApiResponse) {
     this.mapping.loadMappings(data.mappings);
     const collaborator = this.mapping;
     this.alias.loadAliases(data.aliases, collaborator);
