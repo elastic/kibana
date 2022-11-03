@@ -942,7 +942,7 @@ export class DataViewsService {
     const doCreate = () => this.createFromSpec(spec, skipFetchFields, displayErrors);
 
     if (spec.id) {
-      const cachedDataView = await this.dataViewCache.get(spec.id);
+      const cachedDataView = this.dataViewCache.get(spec.id);
 
       if (cachedDataView) {
         return cachedDataView;
