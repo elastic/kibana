@@ -74,7 +74,7 @@ export const createEventSignal = async ({
       ruleExecutionLogger,
       threatListConfig: {
         _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
-        fields: undefined,
+        fields: ['alert_data.threat_0.keyword'],
       },
       pitId: threatPitId,
       reassignPitId: reassignThreatPitId,
@@ -83,7 +83,7 @@ export const createEventSignal = async ({
       exceptionFilter,
     });
 
-    const signalMatches = getSignalMatchesFromThreatList(threatListHits);
+    const signalMatches = getSignalMatchesFromThreatList(threatListHits, currentEventList);
 
     const ids = signalMatches.map((item) => item.signalId);
 

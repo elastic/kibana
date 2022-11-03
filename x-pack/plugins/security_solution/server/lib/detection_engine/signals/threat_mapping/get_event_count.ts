@@ -11,7 +11,7 @@ import { getQueryFilter } from '../get_query_filter';
 import { singleSearchAfter } from '../single_search_after';
 import { buildEventsSearchQuery } from '../build_events_query';
 
-export const MAX_PER_PAGE = 3000;
+export const MAX_PER_PAGE = 60000;
 
 export const getEventList = async ({
   services,
@@ -30,7 +30,7 @@ export const getEventList = async ({
   eventListConfig,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
-  if (calculatedPerPage > 10000) {
+  if (calculatedPerPage > 100000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
 

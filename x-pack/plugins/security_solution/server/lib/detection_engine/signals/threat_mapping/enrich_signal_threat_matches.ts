@@ -20,14 +20,30 @@ import { extractNamedQueries } from './utils';
 
 export const MAX_NUMBER_OF_SIGNAL_MATCHES = 1000;
 
+const extractQuery = (hit) =>
+  hit.matched_queries.map((query) => {
+    const [field, value] = query.split(':');
+    return { field, value };
+  });
 export const getSignalMatchesFromThreatList = (
-  threatList: ThreatListItem[] = []
+  threatList: ThreatListItem[] = [],
+  signals
 ): SignalMatch[] => {
   const signalMap: { [key: string]: ThreatMatchNamedQuery[] } = {};
 
   threatList.forEach((threatHit) =>
-    extractNamedQueries(threatHit).forEach((item) => {
-      const signalId = item.id;
+    extractQuery(threatHit).forEach((item) => {
+      console.log('----------');
+      console.log(JSON.stringify(item));
+      console.log(JSON.stringify(threatHit));
+      const signalF = signals.find((signal) => {
+        const signalValue = signal?.fields?.[item.field]?.[0];
+        if (!signalValue) return false;
+
+        return signalValue === threatHit?.fields?.[item.value]?.[0];
+      });
+      const signalId = signalF._id;
+      console.log(JSON.stringify(signalF));
       if (!signalId) {
         return;
       }

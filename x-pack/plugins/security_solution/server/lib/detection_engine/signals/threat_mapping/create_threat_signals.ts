@@ -57,7 +57,7 @@ export const createThreatSignals = async ({
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = completeRule.ruleParams;
   ruleExecutionLogger.debug('Indicator matching rule starting');
-  const perPage = concurrentSearches * itemsPerSearch;
+  const perPage = 60000 ?? concurrentSearches * itemsPerSearch;
   const verifyExecutionCanProceed = buildExecutionIntervalValidator(
     completeRule.ruleConfig.schedule.interval
   );
