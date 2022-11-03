@@ -8,6 +8,7 @@
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import { HttpResponse } from '@kbn/core/public';
+import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
 import { ErrorResponse, HttpError, Status } from '../../../../../../../common/types/api';
 import { TrainedModelState } from '../../../../../../../common/types/pipelines';
@@ -18,6 +19,7 @@ import { AttachMlInferencePipelineApiLogic } from '../../../../api/pipelines/att
 import { CreateMlInferencePipelineApiLogic } from '../../../../api/pipelines/create_ml_inference_pipeline';
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import { FetchMlInferencePipelinesApiLogic } from '../../../../api/pipelines/fetch_ml_inference_pipelines';
+import { SimulateExistingMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_existing_ml_inference_pipeline';
 import { SimulateMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
 
 import {
@@ -83,6 +85,9 @@ describe('MlInferenceLogic', () => {
   const { mount } = new LogicMounter(MLInferenceLogic);
   const { mount: mountMappingApiLogic } = new LogicMounter(MappingsApiLogic);
   const { mount: mountMLModelsApiLogic } = new LogicMounter(MLModelsApiLogic);
+  const { mount: mountSimulateExistingMlInterfacePipelineApiLogic } = new LogicMounter(
+    SimulateExistingMlInterfacePipelineApiLogic
+  );
   const { mount: mountSimulateMlInterfacePipelineApiLogic } = new LogicMounter(
     SimulateMlInterfacePipelineApiLogic
   );
@@ -105,6 +110,7 @@ describe('MlInferenceLogic', () => {
     mountMLModelsApiLogic();
     mountFetchMlInferencePipelineProcessorsApiLogic();
     mountFetchMlInferencePipelinesApiLogic();
+    mountSimulateExistingMlInterfacePipelineApiLogic();
     mountSimulateMlInterfacePipelineApiLogic();
     mountCreateMlInferencePipelineApiLogic();
     mountAttachMlInferencePipelineApiLogic();
@@ -246,6 +252,44 @@ describe('MlInferenceLogic', () => {
           ],
         };
         SimulateMlInterfacePipelineApiLogic.actions.apiSuccess(simulateResponse);
+
+        expect(MLInferenceLogic.values.simulatePipelineResult).toEqual(simulateResponse);
+      });
+      it('returns existing simulation result when API is successful', () => {
+        const simulateResponse = {
+          docs: [
+            {
+              doc: {
+                _id: 'id',
+                _index: 'index',
+                _ingest: { timestamp: '2022-10-06T10:28:54.3326245Z' },
+                _source: {
+                  _ingest: {
+                    inference_errors: [
+                      {
+                        message:
+                          "Processor 'inference' in pipeline 'test' failed with message 'Input field [text_field] does not exist in the source document'",
+                        pipeline: 'guy',
+                        timestamp: '2022-10-06T10:28:54.332624500Z',
+                      },
+                    ],
+                    processors: [
+                      {
+                        model_version: '8.6.0',
+                        pipeline: 'guy',
+                        processed_timestamp: '2022-10-06T10:28:54.332624500Z',
+                        types: ['pytorch', 'ner'],
+                      },
+                    ],
+                  },
+                  _version: '-3',
+                  foo: 'bar',
+                },
+              },
+            },
+          ],
+        };
+        SimulateExistingMlInterfacePipelineApiLogic.actions.apiSuccess(simulateResponse);
 
         expect(MLInferenceLogic.values.simulatePipelineResult).toEqual(simulateResponse);
       });
@@ -517,6 +561,128 @@ describe('MlInferenceLogic', () => {
           pipelineName: mockModelConfiguration.configuration.pipelineName,
           sourceField: mockModelConfiguration.configuration.sourceField,
         });
+      });
+    });
+    describe('simulatePipeline', () => {
+      const mockModelConfiguration = {
+        ...DEFAULT_VALUES.addInferencePipelineModal,
+        configuration: {
+          destinationField: '',
+          modelID: 'mock-model-id',
+          pipelineName: 'mock-pipeline-name',
+          sourceField: 'mock_text_field',
+        },
+        indexName: 'my-index-123',
+      };
+      const mlModelsData: TrainedModelConfigResponse[] = [
+        {
+          inference_config: {
+            text_classification: {},
+          },
+          input: {
+            field_names: ['text_field'],
+          },
+          model_id: 'mock-model-id',
+          model_type: 'pytorch',
+          tags: ['test_tag'],
+          version: '1',
+        },
+      ];
+      it('does nothing if mlInferencePipeline is undefined', () => {
+        mount({
+          ...DEFAULT_VALUES,
+        });
+
+        jest.spyOn(MLInferenceLogic.actions, 'setSimulatePipelineErrors');
+        jest.spyOn(MLInferenceLogic.actions, 'simulateExistingPipelineApiReset');
+        jest.spyOn(MLInferenceLogic.actions, 'simulatePipelineApiReset');
+        jest.spyOn(MLInferenceLogic.actions, 'makeSimulateExistingPipelineRequest');
+        jest.spyOn(MLInferenceLogic.actions, 'makeSimulatePipelineRequest');
+
+        MLInferenceLogic.actions.simulatePipeline();
+
+        expect(MLInferenceLogic.actions.setSimulatePipelineErrors).toHaveBeenCalledTimes(0);
+        expect(MLInferenceLogic.actions.simulateExistingPipelineApiReset).toHaveBeenCalledTimes(0);
+        expect(MLInferenceLogic.actions.simulatePipelineApiReset).toHaveBeenCalledTimes(0);
+        expect(MLInferenceLogic.actions.makeSimulateExistingPipelineRequest).toHaveBeenCalledTimes(
+          0
+        );
+        expect(MLInferenceLogic.actions.makeSimulatePipelineRequest).toHaveBeenCalledTimes(0);
+      });
+      it('clears simulate errors', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          addInferencePipelineModal: {
+            ...mockModelConfiguration,
+          },
+        });
+        MLModelsApiLogic.actions.apiSuccess(mlModelsData);
+        jest.spyOn(MLInferenceLogic.actions, 'setSimulatePipelineErrors');
+        MLInferenceLogic.actions.simulatePipeline();
+        expect(MLInferenceLogic.actions.setSimulatePipelineErrors).toHaveBeenCalledWith([]);
+      });
+      it('resets API logics', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          addInferencePipelineModal: {
+            ...mockModelConfiguration,
+          },
+        });
+        MLModelsApiLogic.actions.apiSuccess(mlModelsData);
+
+        jest.spyOn(MLInferenceLogic.actions, 'simulateExistingPipelineApiReset');
+        jest.spyOn(MLInferenceLogic.actions, 'simulatePipelineApiReset');
+
+        MLInferenceLogic.actions.simulatePipeline();
+
+        expect(MLInferenceLogic.actions.simulateExistingPipelineApiReset).toHaveBeenCalledTimes(1);
+        expect(MLInferenceLogic.actions.simulatePipelineApiReset).toHaveBeenCalledTimes(1);
+      });
+      it('calls simulate with new pipeline', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          addInferencePipelineModal: {
+            ...mockModelConfiguration,
+          },
+        });
+        MLModelsApiLogic.actions.apiSuccess(mlModelsData);
+
+        jest.spyOn(MLInferenceLogic.actions, 'makeSimulateExistingPipelineRequest');
+        jest.spyOn(MLInferenceLogic.actions, 'makeSimulatePipelineRequest');
+
+        MLInferenceLogic.actions.simulatePipeline();
+
+        expect(MLInferenceLogic.actions.makeSimulatePipelineRequest).toHaveBeenCalledTimes(1);
+        expect(MLInferenceLogic.actions.makeSimulateExistingPipelineRequest).toHaveBeenCalledTimes(
+          0
+        );
+      });
+      it('calls simulate existing with existing pipeline', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          addInferencePipelineModal: {
+            ...mockModelConfiguration,
+            configuration: {
+              ...mockModelConfiguration.configuration,
+              existingPipeline: true,
+              pipelineName: 'my-test-pipeline',
+            },
+          },
+        });
+        MLModelsApiLogic.actions.apiSuccess(mlModelsData);
+        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
+          'my-test-pipeline': {},
+        });
+
+        jest.spyOn(MLInferenceLogic.actions, 'makeSimulateExistingPipelineRequest');
+        jest.spyOn(MLInferenceLogic.actions, 'makeSimulatePipelineRequest');
+
+        MLInferenceLogic.actions.simulatePipeline();
+
+        expect(MLInferenceLogic.actions.makeSimulateExistingPipelineRequest).toHaveBeenCalledTimes(
+          1
+        );
+        expect(MLInferenceLogic.actions.makeSimulatePipelineRequest).toHaveBeenCalledTimes(0);
       });
     });
   });
