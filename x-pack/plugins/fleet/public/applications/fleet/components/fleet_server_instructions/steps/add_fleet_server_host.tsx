@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { EuiSelect, EuiStepProps } from '@elastic/eui';
+import { EuiSelect, EuiStepProps, EuiSwitch } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -122,6 +122,7 @@ export const AddFleetServerHostStepContent = ({
           values={{ port: <EuiCode>8220</EuiCode> }}
         />
       </EuiText>
+      <EuiSpacer size="m" />
       {fleetServerHosts.length > 0 ? (
         <>
           <EuiSelect
@@ -152,7 +153,6 @@ export const AddFleetServerHostStepContent = ({
           <EuiSpacer size="m" />
         </>
       ) : null}
-      <EuiSpacer size="m" />
       {!fleetServerHost ? (
         <>
           <EuiFormRow
@@ -196,6 +196,19 @@ export const AddFleetServerHostStepContent = ({
               />
               {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
             </>
+          </EuiFormRow>
+          <EuiFormRow fullWidth {...inputs.isDefaultInput.formRowProps}>
+            <EuiSwitch
+              data-test-subj="fleetServerHostsFlyout.isDefaultSwitch"
+              {...inputs.isDefaultInput.props}
+              disabled={false}
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.fleetServerHostsFlyout.defaultOutputSwitchLabel"
+                  defaultMessage="Make this Fleet server the default one."
+                />
+              }
+            />
           </EuiFormRow>
           <EuiButton
             isLoading={isLoading}
