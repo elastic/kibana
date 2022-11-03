@@ -112,7 +112,7 @@ const getRoutes = (
         </MonitorDetailsPage>
       ),
       dataTestSubj: 'syntheticsMonitorDetailsPage',
-      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'summary'),
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'overview'),
     },
     {
       title: i18n.translate('xpack.synthetics.monitorHistory.title', {
@@ -329,7 +329,7 @@ const getRoutes = (
 const getMonitorSummaryHeader = (
   history: ReturnType<typeof useHistory>,
   syntheticsPath: string,
-  selectedTab: 'summary' | 'history' | 'errors'
+  selectedTab: 'overview' | 'history' | 'errors'
 ): EuiPageHeaderProps => {
   // Not a component, but it doesn't matter. Hooks are just functions
   const match = useRouteMatch<{ monitorId: string }>(MONITOR_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
@@ -367,10 +367,10 @@ const getMonitorSummaryHeader = (
     ],
     tabs: [
       {
-        label: i18n.translate('xpack.synthetics.monitorSummaryTab.title', {
-          defaultMessage: 'Summary',
+        label: i18n.translate('xpack.synthetics.monitorOverviewTab.title', {
+          defaultMessage: 'Overview',
         }),
-        isSelected: selectedTab === 'summary',
+        isSelected: selectedTab === 'overview',
         href: `${syntheticsPath}${MONITOR_ROUTE.replace(':monitorId?', monitorId)}${search}`,
       },
       {

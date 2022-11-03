@@ -32,7 +32,7 @@ export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
         attributes={[
           {
             time: props,
-            reportDefinitions: { config_id: [monitorId] },
+            reportDefinitions: { 'monitor.id': [monitorId] },
             dataType: 'synthetics',
             selectedMetricField: 'monitor_errors',
             name: 'synthetics-series-1',

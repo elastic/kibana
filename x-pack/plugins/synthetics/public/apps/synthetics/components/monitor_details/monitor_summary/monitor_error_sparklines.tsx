@@ -11,7 +11,11 @@ import { useParams } from 'react-router-dom';
 import { useEuiTheme } from '@elastic/eui';
 import { ClientPluginsStart } from '../../../../../plugin';
 
-export const MonitorErrorSparklines = () => {
+interface Props {
+  from: string;
+  to: string;
+}
+export const MonitorErrorSparklines = (props: Props) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -29,10 +33,7 @@ export const MonitorErrorSparklines = () => {
       attributes={[
         {
           seriesType: 'area',
-          time: {
-            from: 'now-30d/d',
-            to: 'now',
-          },
+          time: props,
           reportDefinitions: { 'monitor.id': [monitorId] },
           dataType: 'synthetics',
           selectedMetricField: 'state.id',
