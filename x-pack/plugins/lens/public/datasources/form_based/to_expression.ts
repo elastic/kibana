@@ -10,10 +10,11 @@ import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
 import {
   AggFunctionsMapping,
+  DataPublicPluginStart,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '@kbn/data-plugin/public';
-import { queryToAst } from '@kbn/data-plugin/common';
+import { isAbsoluteTimeShift, queryToAst, TimeRange } from '@kbn/data-plugin/common';
 import {
   buildExpression,
   buildExpressionFunction,
@@ -29,6 +30,7 @@ import { FormattedIndexPatternColumn } from './operations/definitions/column_typ
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
+import { parseTimeShiftWrapper, roundToSecondsShift } from './time_shift_utils';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -50,10 +52,24 @@ const updatePositionIndex = (currentId: string, newIndex: number) => {
   return idParts.join('-') + (percentile ? `.${percentile}` : '');
 };
 
+function resolveTimeShift(timeShift: string | undefined, timeRange: TimeRange | undefined) {
+  if (timeShift && isAbsoluteTimeShift(timeShift)) {
+    if (timeRange) {
+      const duration = parseTimeShiftWrapper(timeShift, timeRange);
+      if (typeof duration !== 'string') {
+        return `${roundToSecondsShift(duration)}s`;
+      }
+    }
+    return;
+  }
+  return timeShift;
+}
+
 function getExpressionForLayer(
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
+  data: DataPublicPluginStart,
   searchSessionId?: string
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
@@ -120,7 +136,11 @@ function getExpressionForLayer(
       operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
       operationDefinitionMap[col.operationType]?.input === 'managedReference'
   );
-  const hasDateHistogram = columnEntries.some(([, c]) => c.operationType === 'date_histogram');
+  const firstDateHistogramColumn = columnEntries.find(
+    ([, col]) => col.operationType === 'date_histogram'
+  );
+  const hasDateHistogram = Boolean(firstDateHistogramColumn);
+  const currentTimeRange = data.query.timefilter.timefilter.getAbsoluteTime();
 
   if (referenceEntries.length || esAggEntries.length) {
     let aggs: ExpressionAstExpressionBuilder[] = [];
@@ -149,7 +169,10 @@ function getExpressionForLayer(
           col.reducedTimeRange &&
           indexPattern.timeFieldName;
         let aggAst = def.toEsAggsFn(
-          col,
+          {
+            ...col,
+            timeShift: resolveTimeShift(col.timeShift, currentTimeRange),
+          },
           wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
           indexPattern,
           layer,
@@ -171,11 +194,11 @@ function getExpressionForLayer(
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
                   timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
-                  timeShift: col.timeShift,
+                  timeShift: resolveTimeShift(col.timeShift, currentTimeRange),
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
-              timeShift: col.timeShift,
+              timeShift: resolveTimeShift(col.timeShift, currentTimeRange),
             }
           ).toAst();
         }
@@ -310,10 +333,6 @@ function getExpressionForLayer(
       return base;
     });
 
-    const firstDateHistogramColumn = columnEntries.find(
-      ([, col]) => col.operationType === 'date_histogram'
-    );
-
     const columnsWithTimeScale = columnEntries.filter(
       ([, col]) =>
         col.timeScale &&
@@ -446,6 +465,7 @@ export function toExpression(
   layerId: string,
   indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient,
+  data: DataPublicPluginStart,
   searchSessionId?: string
 ) {
   if (state.layers[layerId]) {
@@ -453,6 +473,7 @@ export function toExpression(
       state.layers[layerId],
       indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings,
+      data,
       searchSessionId
     );
   }

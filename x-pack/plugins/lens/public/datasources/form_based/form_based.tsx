@@ -415,7 +415,7 @@ export function getFormBasedDatasource({
     },
 
     toExpression: (state, layerId, indexPatterns, searchSessionId) =>
-      toExpression(state, layerId, indexPatterns, uiSettings, searchSessionId),
+      toExpression(state, layerId, indexPatterns, uiSettings, data, searchSessionId),
 
     renderLayerSettings(
       domElement: Element,
@@ -887,7 +887,12 @@ export function getFormBasedDatasource({
     },
     getWarningMessages: (state, frame, adapters, setState) => {
       return [
-        ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
+        ...(getStateTimeShiftWarningMessages(
+          data.datatableUtilities,
+          state,
+          data.query.timefilter.timefilter.getAbsoluteTime(),
+          frame
+        ) || []),
         ...getPrecisionErrorWarningMessages(
           data.datatableUtilities,
           state,

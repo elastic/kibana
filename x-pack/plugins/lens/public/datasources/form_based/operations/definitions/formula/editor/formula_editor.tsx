@@ -101,6 +101,7 @@ export function FormulaEditor({
   indexPattern,
   operationDefinitionMap,
   unifiedSearch,
+  data,
   dataViews,
   toggleFullscreen,
   isFullscreen,
@@ -237,7 +238,8 @@ export function FormulaEditor({
           layer,
           indexPattern,
           visibleOperationsMap,
-          currentColumn
+          currentColumn,
+          data.query.timefilter.timefilter.getAbsoluteTime()
         );
         if (validationErrors.length) {
           errors = validationErrors;
@@ -367,7 +369,11 @@ export function FormulaEditor({
                 const startPosition = offsetToRowColumn(text, locations[id].min);
                 const endPosition = offsetToRowColumn(text, locations[id].max);
                 newWarnings.push(
-                  ...getColumnTimeShiftWarnings(dateHistogramInterval, column).map((message) => ({
+                  ...getColumnTimeShiftWarnings(
+                    dateHistogramInterval,
+                    column,
+                    data.query.timefilter.timefilter.getAbsoluteTime()
+                  ).map((message) => ({
                     message,
                     startColumn: startPosition.column + 1,
                     startLineNumber: startPosition.lineNumber,

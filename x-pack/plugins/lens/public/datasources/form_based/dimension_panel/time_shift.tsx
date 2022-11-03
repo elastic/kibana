@@ -9,7 +9,8 @@ import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { TimefilterContract } from '@kbn/data-plugin/public/query/timefilter/timefilter';
 import {
   adjustTimeScaleLabelSuffix,
   GenericIndexPatternColumn,
@@ -21,6 +22,7 @@ import {
   getDateHistogramInterval,
   getLayerTimeShiftChecks,
   timeShiftOptions,
+  parseTimeShiftWrapper,
 } from '../time_shift_utils';
 import type { IndexPattern } from '../../../types';
 
@@ -57,6 +59,7 @@ export function setTimeShift(
 
 export function TimeShift({
   datatableUtilities,
+  timeFilter,
   selectedColumn,
   columnId,
   layer,
@@ -66,6 +69,7 @@ export function TimeShift({
   layerId,
 }: {
   datatableUtilities: DatatableUtilitiesService;
+  timeFilter: TimefilterContract;
   selectedColumn: GenericIndexPatternColumn;
   indexPattern: IndexPattern;
   columnId: string;
@@ -97,7 +101,9 @@ export function TimeShift({
     return null;
   }
 
-  const parsedLocalValue = localValue && parseTimeShift(localValue);
+  const currentTimeRange = timeFilter.getAbsoluteTime();
+
+  const parsedLocalValue = localValue && parseTimeShiftWrapper(localValue, currentTimeRange);
   const isLocalValueInvalid = Boolean(parsedLocalValue && isInvalid(parsedLocalValue));
   const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
   const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
@@ -158,7 +164,7 @@ export function TimeShift({
                 defaultMessage: 'Type custom values (e.g. 8w)',
               })}
               options={timeShiftOptions.filter(({ value }) => {
-                const parsedValue = parseTimeShift(value);
+                const parsedValue = parseTimeShiftWrapper(value, currentTimeRange);
                 return (
                   parsedValue &&
                   !isValueTooSmall(parsedValue) &&
@@ -170,7 +176,7 @@ export function TimeShift({
               singleSelection={{ asPlainText: true }}
               isInvalid={isLocalValueInvalid}
               onCreateOption={(val) => {
-                const parsedVal = parseTimeShift(val);
+                const parsedVal = parseTimeShiftWrapper(val, currentTimeRange);
                 if (!isInvalid(parsedVal)) {
                   updateLayer(setTimeShift(columnId, layer, val));
                 } else {
@@ -185,7 +191,7 @@ export function TimeShift({
                 }
 
                 const choice = choices[0].value as string;
-                const parsedVal = parseTimeShift(choice);
+                const parsedVal = parseTimeShiftWrapper(choice, currentTimeRange);
                 if (!isInvalid(parsedVal)) {
                   updateLayer(setTimeShift(columnId, layer, choice));
                 } else {

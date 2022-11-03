@@ -374,10 +374,18 @@ export async function getNamedArgumentSuggestions({
   dateHistogramInterval?: number;
 }) {
   if (ast.name === 'shift') {
+    const absShift = ast.value.split(MARKER)[0];
+    if (/^(start|end) - /.test(absShift)) {
+      return {
+        // Need to shift by a bit here, even just a seconds
+        list: [`${new Date().toISOString()}`],
+        type: SUGGESTION_TYPE.SHIFTS,
+      };
+    }
     return {
       list: timeShiftOptions
         .filter(({ value }) => {
-          if (typeof dateHistogramInterval === 'undefined') return true;
+          if (dateHistogramInterval == null) return true;
           const parsedValue = parseTimeShift(value);
           return (
             parsedValue !== 'previous' &&
