@@ -15,10 +15,11 @@ import { OptionsListComponentState, OptionsListReduxState } from '../types';
 import { ControlOutput, OptionsListEmbeddableInput } from '../..';
 import { mockOptionsListReduxEmbeddableTools } from '../../../common/mocks';
 import { OptionsListControl } from './options_list_control';
+import { BehaviorSubject } from 'rxjs';
 
 describe('Options list control', () => {
   const defaultProps = {
-    typeaheadSubject: jest.fn(),
+    typeaheadSubject: new BehaviorSubject(''),
   };
 
   interface MountOptions {
