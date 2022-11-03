@@ -318,7 +318,7 @@ export interface BulkEditError {
   };
 }
 
-export interface BulkDeleteError {
+export interface BulkOperationError {
   message: string;
   status: number;
   rule: {
@@ -1988,7 +1988,7 @@ export class RulesClient {
     const rules: SavedObjectsBulkDeleteObject[] = [];
     const apiKeysToInvalidate: string[] = [];
     const taskIdsToDelete: string[] = [];
-    const errors: BulkDeleteError[] = [];
+    const errors: BulkOperationError[] = [];
     const apiKeyToRuleIdMapping: Record<string, string> = {};
     const taskIdToRuleIdMapping: Record<string, string> = {};
     const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -2533,7 +2533,7 @@ export class RulesClient {
 
     const rulesToEnable: SavedObjectsBulkUpdateObject[] = [];
     const taskIdsToEnable: string[] = [];
-    const errors: BulkDeleteError[] = [];
+    const errors: BulkOperationError[] = [];
     const taskIdToRuleIdMapping: Record<string, string> = {};
     const ruleNameToRuleIdMapping: Record<string, string> = {};
 

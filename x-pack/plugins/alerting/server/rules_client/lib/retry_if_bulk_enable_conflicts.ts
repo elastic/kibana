@@ -10,18 +10,18 @@ import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { Logger } from '@kbn/core/server';
 import { convertRuleIdsToKueryNode } from '../../lib';
-import { BulkDeleteError } from '../rules_client';
+import { BulkOperationError } from '../rules_client';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 
 const MAX_RULES_IDS_IN_RETRY = 1000;
 
 export type BulkEnableOperation = (filter: KueryNode | null) => Promise<{
-  errors: BulkDeleteError[];
+  errors: BulkOperationError[];
   taskIdsToEnable: string[];
 }>;
 
 interface ReturnRetry {
-  errors: BulkDeleteError[];
+  errors: BulkOperationError[];
   taskIdsToEnable: string[];
 }
 
@@ -43,7 +43,7 @@ export const retryIfBulkEnableConflicts = async (
   bulkEnableOperation: BulkEnableOperation,
   filter: KueryNode | null,
   retries: number = RETRY_IF_CONFLICTS_ATTEMPTS,
-  accErrors: BulkDeleteError[] = [],
+  accErrors: BulkOperationError[] = [],
   accTaskIdsToEnable: string[] = []
 ): Promise<ReturnRetry> => {
   try {
