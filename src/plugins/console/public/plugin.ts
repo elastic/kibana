@@ -29,7 +29,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
       ui: { enabled: isConsoleUiEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
-    this.autocompleteInfo.setup(http, notifications);
+    this.autocompleteInfo.setup(http);
     setAutocompleteInfo(this.autocompleteInfo);
 
     if (isConsoleUiEnabled) {

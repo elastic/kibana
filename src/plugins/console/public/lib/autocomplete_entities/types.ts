@@ -6,6 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type {
+  ClusterGetComponentTemplateResponse,
+  IndicesGetAliasResponse,
+  IndicesGetDataStreamResponse,
+  IndicesGetIndexTemplateResponse,
+  IndicesGetMappingResponse,
+  IndicesGetTemplateResponse,
+} from '@elastic/elasticsearch/lib/api/types';
+
 export interface Field {
   name: string;
   type: string;
@@ -18,4 +27,13 @@ export interface FieldMapping {
   type?: string;
   index_name?: string;
   fields?: FieldMapping[];
+}
+
+export interface MappingsApiResponse {
+  mappings: IndicesGetMappingResponse;
+  aliases: IndicesGetAliasResponse;
+  dataStreams: IndicesGetDataStreamResponse;
+  legacyTemplates: IndicesGetTemplateResponse;
+  indexTemplates: IndicesGetIndexTemplateResponse;
+  componentTemplates: ClusterGetComponentTemplateResponse;
 }
