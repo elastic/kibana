@@ -117,7 +117,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
         </EuiButtonEmpty>
         <EuiText
           size={textSize}
-          data-test-subj={getTestId('passcodeMessage')}
+          data-test-subj={getTestId('message')}
           className="eui-displayInline"
         >
           <FormattedMessage
@@ -130,7 +130,10 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
 
           {fileInfo && fileInfo.data.ttl && fileInfo.data.ttl > 0 && (
             <>
-              &nbsp;
+              {
+                // Space needed to separate the text above with the passcode and this sentence
+                ' '
+              }
               <FormattedMessage
                 id="xpack.securitySolution.responseActionFileDownloadLink.expireDays"
                 defaultMessage="File download is available for {dayCount} {dayCount, plural, one {day} other {days}}."

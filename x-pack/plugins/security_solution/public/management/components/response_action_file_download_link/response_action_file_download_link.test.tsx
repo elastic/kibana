@@ -63,8 +63,8 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     });
 
     expect(renderResult.getByTestId('test-downloadButton')).not.toBeNull();
-    expect(renderResult.getByTestId('test-passcodeMessage')).toHaveTextContent(
-      '(ZIP file passcode: elastic)'
+    expect(renderResult.getByTestId('test-message').textContent).toEqual(
+      '(ZIP file passcode: elastic). File download is available for 5 days.'
     );
   });
 
@@ -187,5 +187,24 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
 
     expect(apiMocks.responseProvider.fileInfo).not.toHaveBeenCalled();
     expect(renderResult.container.children.length).toBe(0);
+  });
+
+  it('should not display expiration days if `ttl` is not returned or is zero', async () => {
+    const apiResponse = apiMocks.responseProvider.fileInfo();
+
+    apiResponse.data.ttl = undefined;
+    apiMocks.responseProvider.fileInfo.mockReturnValue(apiResponse);
+
+    render();
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-message').textContent).toEqual(
+        '(ZIP file passcode: elastic).'
+      );
+    });
   });
 });

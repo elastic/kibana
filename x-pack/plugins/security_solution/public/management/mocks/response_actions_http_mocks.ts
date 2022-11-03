@@ -192,6 +192,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
           name: 'test.txt',
           size: 1234,
           status: 'READY',
+          ttl: 5,
         },
       };
     },
