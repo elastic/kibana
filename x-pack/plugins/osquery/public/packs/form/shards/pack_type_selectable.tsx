@@ -31,7 +31,7 @@ const StyledEuiCard = styled(EuiCard)`
 
 interface PackTypeSelectableProps {
   packType: string;
-  setPackType: (type: 'global' | 'policy' | 'shards') => void;
+  setPackType: (type: 'global' | 'policy') => void;
   isGlobalDisabled: boolean;
   resetFormFields?: () => void;
 }
@@ -62,13 +62,6 @@ export const PackTypeSelectable = memo(
         isDisabled: isGlobalDisabled,
       }),
       [packType, isGlobalDisabled, handleChange]
-    );
-    const advancedCardSelectable = useMemo(
-      () => ({
-        onClick: () => handleChange('shards'),
-        isSelected: packType === 'shards',
-      }),
-      [packType, handleChange]
     );
 
     return (
@@ -118,28 +111,6 @@ export const PackTypeSelectable = memo(
                 })}
                 selectable={globalCardSelectable}
                 {...(packType === 'global' && { color: 'primary' })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <StyledEuiCard
-                layout="horizontal"
-                title={
-                  <EuiRadio
-                    id={'osquery_pack_type_advanced'}
-                    label={i18n.translate('xpack.osquery.pack.form.shardsDeploymentLabel', {
-                      defaultMessage: 'Shards deployment',
-                    })}
-                    onChange={noop}
-                    checked={packType === 'shards'}
-                  />
-                }
-                titleSize="xs"
-                hasBorder
-                description={i18n.translate('xpack.osquery.pack.form.shardsDeploymentDescription', {
-                  defaultMessage: 'Specify shards for specific policies',
-                })}
-                selectable={advancedCardSelectable}
-                {...(packType === 'shards' && { color: 'primary' })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

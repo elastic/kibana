@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elasti
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty } from 'lodash';
+import { useAgentPolicies } from '../../../agent_policies';
 import type { ShardsArray } from '../../../../common/schemas/common';
 import { convertShardsToArray, convertShardsToObject } from '../../../../common/schemas/common';
 import { ShardsForm } from './shards_form';
@@ -22,6 +23,7 @@ export const PackShardsField = React.memo(() => {
     setValue: setValueRoot,
     formState: { errors: errorsRoot },
   } = useFormContext();
+  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
   const rootShards = watchRoot('shards');
 
@@ -31,9 +33,17 @@ export const PackShardsField = React.memo(() => {
     mode: 'all',
     shouldUnregister: true,
     defaultValues: {
-      shardsArray: !isEmpty(convertShardsToArray(rootShards))
-        ? convertShardsToArray(rootShards)
-        : [{ policy: '', percentage: 100 }],
+      shardsArray: !isEmpty(convertShardsToArray(rootShards, agentPoliciesById))
+        ? convertShardsToArray(rootShards, agentPoliciesById)
+        : [
+            {
+              policy: {
+                label: '',
+                key: '',
+              },
+              percentage: 100,
+            },
+          ],
     },
   });
   const { fields, remove, append } = useFieldArray({

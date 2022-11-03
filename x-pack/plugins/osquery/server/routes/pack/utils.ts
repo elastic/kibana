@@ -73,60 +73,32 @@ export const convertSOQueriesToPack = (
 
 export const getInitialPolicies = (
   packagePolicies: PackagePolicy[] | never[],
-  policyIds?: string[]
-) => {
-  if (policyIds?.length) {
-    return policyIds;
-  }
-
-  // otherwise we get all policies available
-  const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
-    satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
-  );
-
-  return uniq(map(supportedPackagePolicyIds, 'policy_id'));
-};
-
-// We check if any shards were passed - if not - we keep using the previous policiesList
-export const updatePoliciesWithShards = (
-  foundMatchingPolicies: AgentPolicy[],
-  policiesList: string[],
-  shards?: Shard
-): string[] => {
-  if (shards && !isEmpty(shards)) {
-    const ids = map(foundMatchingPolicies, 'id');
-    // check if global was enabled - then use all policies + filtered policies depending on shards config
-    if (shards['*']) {
-      return uniq([...policiesList, ...ids]);
-    } else {
-      // use either the filtered policies depending on shards or no policies at all
-      return ids;
-    }
-  }
-
-  return policiesList;
-};
-
-// Find the agentPolicies that has name containing shard name
-export const findMatchingPoliciesAndShards = (
-  agentPolicies: AgentPolicy[] | undefined,
+  policyIds: string[] = [],
   shards?: Shard
 ) => {
-  const foundMatchingPolicies: AgentPolicy[] = [];
+  // we want to find all policies, because this is a global pack
+  if (shards?.['*']) {
+    const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
+      satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
+    );
+
+    return uniq(map(supportedPackagePolicyIds, 'policy_id'));
+  }
+
+  return policyIds;
+};
+
+export const findMatchingShards = (agentPolicies: AgentPolicy[] | undefined, shards?: Shard) => {
   const policyShards: Shard = {};
   if (!isEmpty(shards)) {
-    const agentPoliciesNames = map(agentPolicies, 'name');
-    const agentPoliciesNameMap = mapKeys(agentPolicies, 'name');
+    const agentPoliciesIdMap = mapKeys(agentPolicies, 'id');
 
     map(shards, (shard, shardName) => {
-      map(agentPoliciesNames, (agentPolicyName) => {
-        if (agentPolicyName.startsWith(shardName)) {
-          foundMatchingPolicies.push(agentPoliciesNameMap[agentPolicyName]);
-          policyShards[agentPoliciesNameMap[agentPolicyName].id] = shard;
-        }
-      });
+      if (agentPoliciesIdMap[shardName]) {
+        policyShards[agentPoliciesIdMap[shardName].id] = shard;
+      }
     });
   }
 
-  return { foundMatchingPolicies, policyShards };
+  return policyShards;
 };

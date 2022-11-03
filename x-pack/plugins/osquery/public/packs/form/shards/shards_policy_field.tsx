@@ -63,31 +63,17 @@ const ShardsPolicyFieldComponent = ({
   const handleChange = useCallback(
     (newSelectedOptions) => {
       setSelected(newSelectedOptions);
-      onChange(newSelectedOptions[0]?.label ?? '');
+      onChange(newSelectedOptions[0]);
     },
     [onChange]
   );
 
   useEffect(() => {
-    setSelected([{ label: value, value }]);
-  }, [value]);
-
-  const onCreateOption = useCallback(
-    (searchValue: string) => {
-      const normalizedSearchValue = searchValue.trim().toLowerCase();
-
-      if (!normalizedSearchValue) {
-        return;
-      }
-
-      const newOption = {
-        label: searchValue,
-      };
-
-      handleChange([newOption]);
-    },
-    [handleChange]
-  );
+    const foundPolicy = agentPoliciesById?.[value.key];
+    if (value && foundPolicy) {
+      setSelected([{ label: value.label || foundPolicy.name, value: value.key }]);
+    }
+  }, [agentPoliciesById, value]);
 
   const singleSelectionConfig = useMemo(() => ({ asPlainText: true }), []);
 
@@ -110,8 +96,6 @@ const ShardsPolicyFieldComponent = ({
         isInvalid={hasError}
         options={options}
         selectedOptions={selectedOptions}
-        onCreateOption={onCreateOption}
-        customOptionText="Add {searchValue} as a filter to the list"
         onChange={handleChange}
         data-test-subj="shards-field-policy"
         rowHeight={32}

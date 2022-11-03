@@ -6,7 +6,6 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { Shard } from '../../common/schemas/common/utils';
 
 export interface IQueryPayload {
   attributes?: {
@@ -14,6 +13,8 @@ export interface IQueryPayload {
     id: string;
   };
 }
+
+export type SOShard = Array<{ key: string; value: number }>;
 
 export interface PackSavedObjectAttributes {
   name: string;
@@ -34,7 +35,7 @@ export interface PackSavedObjectAttributes {
   updated_at: string;
   updated_by: string | undefined;
   policy_ids?: string[];
-  shards?: Shard;
+  shards: SOShard;
 }
 
 export type PackSavedObject = SavedObject<PackSavedObjectAttributes>;

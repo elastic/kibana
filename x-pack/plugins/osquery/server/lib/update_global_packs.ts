@@ -14,7 +14,6 @@ import { has, map, mapKeys, set, unset } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import produce from 'immer';
-import type { Shard } from '../../common/schemas/common/utils';
 import { packSavedObjectType } from '../../common/types';
 import type { OsqueryAppContextService } from './osquery_app_context_services';
 import type { PackSavedObjectAttributes } from '../common/types';
@@ -40,16 +39,12 @@ export const updateGlobalPacksCreateCallback = async (
     : {};
 
   const packsContainingShardForPolicy: PackSavedObject[] = [];
-  const policyShards: Shard = {};
   allPacks.saved_objects.map((pack) => {
     const shards = pack.attributes.shards;
 
     return map(shards, (shard, shardName) => {
       if (shardName === '*') {
         packsContainingShardForPolicy.push(pack);
-      } else if (agentPolicies[packagePolicy.policy_id]?.name.startsWith(shardName)) {
-        packsContainingShardForPolicy.push(pack);
-        policyShards[pack.attributes.name] = shard;
       }
     });
   });
@@ -85,7 +80,7 @@ export const updateGlobalPacksCreateCallback = async (
 
       map(packsContainingShardForPolicy, (pack) => {
         set(draft, `inputs[0].config.osquery.value.packs.${pack.attributes.name}`, {
-          shard: policyShards[pack.attributes.name] ? policyShards[pack.attributes.name] : 100,
+          shard: 100,
           queries: convertSOQueriesToPack(pack.attributes.queries, {
             removeMultiLines: true,
             removeResultType: true,

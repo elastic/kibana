@@ -36,10 +36,9 @@ import {
   convertSOQueriesToPack,
   convertPackQueriesToSO,
   getInitialPolicies,
-  findMatchingPoliciesAndShards,
-  updatePoliciesWithShards,
+  findMatchingShards,
 } from './utils';
-import { getInternalSavedObjectsClient } from '../utils';
+import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -59,7 +58,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             description: schema.maybe(schema.string()),
             enabled: schema.maybe(schema.boolean()),
             policy_ids: schema.maybe(schema.arrayOf(schema.string())),
-            shards: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+            shards: schema.recordOf(schema.string(), schema.number()),
             queries: schema.maybe(
               schema.recordOf(
                 schema.string(),
@@ -137,19 +136,14 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         has(packagePolicy, `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`)
       );
 
-      let policiesList = getInitialPolicies(packagePolicies, policy_ids);
+      const policiesList = getInitialPolicies(packagePolicies, policy_ids, shards);
 
       const agentPolicies = await agentPolicyService?.getByIds(
         internalSavedObjectsClient,
         policiesList
       );
 
-      const { foundMatchingPolicies, policyShards } = findMatchingPoliciesAndShards(
-        agentPolicies,
-        shards
-      );
-
-      policiesList = updatePoliciesWithShards(foundMatchingPolicies, policiesList, shards);
+      const policyShards = findMatchingShards(agentPolicies, shards);
 
       const agentPoliciesIdMap = mapKeys(agentPolicies, 'id');
 
@@ -184,7 +178,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           queries: queries && convertPackQueriesToSO(queries),
           updated_at: moment().toISOString(),
           updated_by: currentUser,
-          shards,
+          shards: convertShardsToArray(shards),
         },
         {
           refresh: 'wait_for',
@@ -316,8 +310,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      shard: policyShards[packagePolicy.policy_id]
-                        ? policyShards[packagePolicy.policy_id]
+                      shard: policyShards?.[packagePolicy.policy_id]
+                        ? policyShards?.[packagePolicy.policy_id]
                         : 100,
                       queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
                         removeMultiLines: true,
@@ -352,8 +346,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      shard: policyShards[packagePolicy.policy_id]
-                        ? policyShards[packagePolicy.policy_id]
+                      shard: policyShards?.[packagePolicy.policy_id]
+                        ? policyShards?.[packagePolicy.policy_id]
                         : 100,
                       queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
                         removeResultType: true,
