@@ -424,7 +424,7 @@ export const LensTopNavMenu = ({
     currentDoc,
   ]);
 
-  const discoverLocator = share?.url.locators.get('discover');
+  const discoverLocator = share?.url.locators.get('DISCOVER_APP_LOCATOR');
 
   const layerMetaInfo = useMemo(() => {
     if (!activeDatasourceId || !discoverLocator) {
