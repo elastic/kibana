@@ -21564,8 +21564,6 @@
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.typeHeader": "プロセッサータイプ",
     "xpack.ml.trainedModels.modelsList.selectableMessage": "モデルを選択",
     "xpack.ml.trainedModels.modelsList.startDeployment.cancelButton": "キャンセル",
-    "xpack.ml.trainedModels.modelsList.startDeployment.cloudWarningHeader": "将来は、必要な数のプロセッサーになるように、クラウドデプロイが自動スケーリングされる予定です。",
-    "xpack.ml.trainedModels.modelsList.startDeployment.cloudWarningText": "ただし、このリリースでは、クラウドコンソールで手動でMLノードのサイズを増やし、プロセッサーを増やす必要があります。",
     "xpack.ml.trainedModels.modelsList.startDeployment.docLinkTitle": "詳細",
     "xpack.ml.trainedModels.modelsList.startDeployment.maxNumOfProcessorsWarning": "割り当て数と割り当てごとのスレッドの積は、MLノードのプロセッサーの合計数未満でなければなりません。",
     "xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsHelp": "増やすと、すべてのリクエストのスループットを改善します。",

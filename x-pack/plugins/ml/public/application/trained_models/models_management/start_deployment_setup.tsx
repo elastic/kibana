@@ -33,7 +33,6 @@ import type { Observable } from 'rxjs';
 import type { CoreTheme, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { numberValidator } from '@kbn/ml-agg-utils';
-import { isCloud } from '../../services/ml_server_info';
 import { composeValidators, requiredValidator } from '../../../../common/util/validators';
 
 interface StartDeploymentSetup {
@@ -224,30 +223,6 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        {isCloud() ? (
-          <>
-            <EuiCallOut
-              size={'s'}
-              title={
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.cloudWarningHeader"
-                  defaultMessage="In the future Cloud deployments will autoscale to have the required number of processors."
-                />
-              }
-              iconType="iInCircle"
-              color={'warning'}
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.cloudWarningText"
-                  defaultMessage="However, in this release you must increase the size of your ML nodes manually in the Cloud console to get more processors."
-                />
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size={'m'} />
-          </>
-        ) : null}
-
         <EuiCallOut
           size={'s'}
           title={
