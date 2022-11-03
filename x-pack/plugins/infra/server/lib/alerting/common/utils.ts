@@ -8,17 +8,24 @@
 import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
-import type { IBasePath } from '@kbn/core/server';
+import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
+
+const SUPPORTED_ES_FIELD_TYPES = [
+  ES_FIELD_TYPES.KEYWORD,
+  ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.BOOLEAN,
+];
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
@@ -134,3 +141,42 @@ export const getAlertDetailsUrl = (
   spaceId: string,
   alertUuid: string | null
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
+
+export const NUMBER_OF_DOCUMENTS = 10;
+export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
+export const termsAggField: Record<string, string> = { [KUBERNETES_POD_UID]: 'container.id' };
+
+export interface AdditionalContext {
+  [x: string]: any;
+}
+
+export const doFieldsExist = async (
+  esClient: ElasticsearchClient,
+  fields: string[],
+  index: string
+): Promise<Record<string, boolean>> => {
+  // Get all supported fields
+  const respMapping = await esClient.fieldCaps({
+    index,
+    fields: '*',
+  });
+
+  const fieldsExisted: Record<string, boolean> = {};
+  const acceptableFields: Set<string> = new Set();
+
+  Object.entries(respMapping.fields).forEach(([key, value]) => {
+    const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
+    const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
+
+    // Check if fieldName is something we can aggregate on
+    if (isSupportedType) {
+      acceptableFields.add(key);
+    }
+  });
+
+  fields.forEach((field) => {
+    fieldsExisted[field] = acceptableFields.has(field);
+  });
+
+  return fieldsExisted;
+};
