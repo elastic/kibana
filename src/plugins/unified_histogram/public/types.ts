@@ -13,6 +13,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 
 /**
  * The fetch status of a unified histogram request
@@ -43,6 +44,22 @@ export interface UnifiedHistogramBucketInterval {
   scaled?: boolean;
   description?: string;
   scale?: number;
+}
+
+export type UnifiedHistogramAdapters = Partial<DefaultInspectorAdapters>;
+
+/**
+ * Emitted when the histogram loading status changes
+ */
+export interface UnifiedHistogramChartLoadEvent {
+  /**
+   * True if loading is complete
+   */
+  complete: boolean;
+  /**
+   * Inspector adapters for the request
+   */
+  adapters: UnifiedHistogramAdapters;
 }
 
 /**

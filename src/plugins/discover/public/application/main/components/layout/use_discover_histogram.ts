@@ -14,8 +14,8 @@ import {
 } from '@kbn/unified-field-list-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
-import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import useDebounce from 'react-use/lib/useDebounce';
+import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
 import { getUiActions } from '../../../../kibana_services';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -24,6 +24,7 @@ import type { SavedSearchData } from '../../hooks/use_saved_search';
 import type { AppState, GetStateReturn } from '../../services/discover_state';
 import { FetchStatus } from '../../../types';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
+import type { InspectorAdapters } from '../../hooks/use_inspector';
 
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
@@ -47,7 +48,7 @@ export const useDiscoverHistogram = ({
   savedSearch: SavedSearch;
   isTimeBased: boolean;
   isPlainRecord: boolean;
-  inspectorAdapters: { requests: RequestAdapter };
+  inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
 }) => {
   const { storage } = useDiscoverServices();
@@ -197,6 +198,14 @@ export const useDiscoverHistogram = ({
    * Chart
    */
 
+  const onChartLoad = useCallback(
+    (event: UnifiedHistogramChartLoadEvent) => {
+      // We need to store the Lens request adapter in order to inspect its requests
+      inspectorAdapters.lensRequests = event.adapters.requests;
+    },
+    [inspectorAdapters]
+  );
+
   const chart = useMemo(
     () =>
       isPlainRecord || !isTimeBased
@@ -241,5 +250,6 @@ export const useDiscoverHistogram = ({
     onTimeIntervalChange,
     onBreakdownFieldChange,
     onTotalHitsChange,
+    onChartLoad,
   };
 };

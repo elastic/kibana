@@ -9,17 +9,17 @@
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataViewListItem, ISearchSource } from '@kbn/data-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataTableRecord } from '../../../../types';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
+import type { InspectorAdapters } from '../../hooks/use_inspector';
 
 export interface DiscoverLayoutProps {
   dataView: DataView;
   dataViewList: DataViewListItem[];
-  inspectorAdapters: { requests: RequestAdapter };
+  inspectorAdapters: InspectorAdapters;
   navigateTo: (url: string) => void;
   onChangeDataView: (id: string) => void;
   onUpdateQuery: (

@@ -16,6 +16,8 @@ export type {
   UnifiedHistogramHitsContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramBreakdownContext,
+  UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramAdapters,
 } from './types';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();

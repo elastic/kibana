@@ -25,6 +25,7 @@ import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
 import type { DataTableRecord } from '../../../types';
+import type { InspectorAdapters } from './use_inspector';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -44,7 +45,7 @@ export interface UseSavedSearch {
   refetch$: DataRefetch$;
   data$: SavedSearchData;
   reset: () => void;
-  inspectorAdapters: { requests: RequestAdapter };
+  inspectorAdapters: InspectorAdapters;
 }
 
 export enum RecordRawType {

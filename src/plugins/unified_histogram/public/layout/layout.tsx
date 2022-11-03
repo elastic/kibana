@@ -21,6 +21,7 @@ import type {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramRequestContext,
+  UnifiedHistogramChartLoadEvent,
 } from '../types';
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
@@ -80,6 +81,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * and {@link UnifiedHistogramHitsContext.total} to totalHits
    */
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, totalHits?: number) => void;
+  /**
+   * Called when the histogram loading status changes
+   */
+  onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
 }
 
 export const UnifiedHistogramLayout = ({
@@ -99,6 +104,7 @@ export const UnifiedHistogramLayout = ({
   onTimeIntervalChange,
   onBreakdownFieldChange,
   onTotalHitsChange,
+  onChartLoad,
   children,
 }: UnifiedHistogramLayoutProps) => {
   const topPanelNode = useMemo(
@@ -159,6 +165,7 @@ export const UnifiedHistogramLayout = ({
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}
           onTotalHitsChange={onTotalHitsChange}
+          onChartLoad={onChartLoad}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>

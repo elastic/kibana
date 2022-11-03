@@ -15,7 +15,6 @@ import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -27,6 +26,7 @@ import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
+import type { InspectorAdapters } from '../../hooks/use_inspector';
 
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
@@ -48,7 +48,7 @@ export interface DiscoverMainContentProps {
   onFieldEdited: () => Promise<void>;
   columns: string[];
   resizeRef: RefObject<HTMLDivElement>;
-  inspectorAdapters: { requests: RequestAdapter };
+  inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
 }
 
@@ -107,6 +107,7 @@ export const DiscoverMainContent = ({
     onTimeIntervalChange,
     onBreakdownFieldChange,
     onTotalHitsChange,
+    onChartLoad,
   } = useDiscoverHistogram({
     stateContainer,
     state,
@@ -156,6 +157,7 @@ export const DiscoverMainContent = ({
       onTimeIntervalChange={onTimeIntervalChange}
       onBreakdownFieldChange={onBreakdownFieldChange}
       onTotalHitsChange={onTotalHitsChange}
+      onChartLoad={onChartLoad}
     >
       <EuiFlexGroup
         className="eui-fullHeight"

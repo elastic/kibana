@@ -26,6 +26,7 @@ import type {
   UnifiedHistogramChartContext,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramChartLoadEvent,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
 } from '../types';
@@ -51,6 +52,7 @@ export interface ChartProps {
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, totalHits?: number) => void;
+  onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -71,6 +73,7 @@ export function Chart({
   onTimeIntervalChange,
   onBreakdownFieldChange,
   onTotalHitsChange,
+  onChartLoad,
 }: ChartProps) {
   const {
     showChartOptionsPopover,
@@ -231,6 +234,7 @@ export function Chart({
               query={query}
               timeRange={timeRange}
               onTotalHitsChange={onTotalHitsChange}
+              onChartLoad={onChartLoad}
             />
           </section>
           {appendHistogram}

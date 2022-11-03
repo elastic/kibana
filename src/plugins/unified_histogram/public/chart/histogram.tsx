@@ -21,6 +21,7 @@ import type {
   UnifiedHistogramChartContext,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramChartLoadEvent,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
 } from '../types';
@@ -39,6 +40,7 @@ export interface HistogramProps {
   query: Query | AggregateQuery;
   timeRange: TimeRange;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, totalHits?: number) => void;
+  onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
 }
 
 export function Histogram({
@@ -52,6 +54,7 @@ export function Histogram({
   query,
   timeRange,
   onTotalHitsChange,
+  onChartLoad,
 }: HistogramProps) {
   const attributes = useMemo(
     () => getLensAttributes({ filters, query, dataView, timeInterval, breakdownField }),
@@ -66,7 +69,7 @@ export function Histogram({
   });
 
   const onLoad = useCallback(
-    (isLoading, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
+    (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
       const totalHits = adapters?.tables?.tables?.unifiedHistogram?.meta?.statistics?.totalCount;
 
       onTotalHitsChange?.(isLoading ? 'loading' : 'complete', totalHits ?? hits?.total);
@@ -85,8 +88,10 @@ export function Histogram({
 
         setBucketInterval(newBucketInterval);
       }
+
+      onChartLoad?.({ complete: !isLoading, adapters: adapters ?? {} });
     },
-    [data, dataView, hits?.total, onTotalHitsChange, timeInterval]
+    [data, dataView, hits?.total, onChartLoad, onTotalHitsChange, timeInterval]
   );
 
   const { euiTheme } = useEuiTheme();
