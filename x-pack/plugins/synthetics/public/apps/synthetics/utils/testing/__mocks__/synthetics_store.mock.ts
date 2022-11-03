@@ -362,6 +362,7 @@ function getMonitorDetailsMockSlice() {
     },
     syntheticsMonitor: {
       id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
+      config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
       type: DataStream.BROWSER,
       enabled: true,
       schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
