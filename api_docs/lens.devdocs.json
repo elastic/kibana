@@ -2556,6 +2556,20 @@
         "children": [
           {
             "parentPluginId": "lens",
+            "id": "def-public.LegacyMetricState.autoScaleMetricAlignment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoScaleMetricAlignment",
+            "description": [],
+            "signature": [
+              "\"left\" | \"right\" | \"center\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.LegacyMetricState.layerId",
             "type": "string",
             "tags": [],
@@ -8857,7 +8871,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; }"
+          "<object>[] | undefined; showInspector?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx",
         "deprecated": false,
@@ -11522,45 +11536,6 @@
       },
       {
         "parentPluginId": "lens",
-        "id": "def-common.ExistingFields",
-        "type": "Interface",
-        "tags": [],
-        "label": "ExistingFields",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.ExistingFields.indexPatternTitle",
-            "type": "string",
-            "tags": [],
-            "label": "indexPatternTitle",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.ExistingFields.existingFieldNames",
-            "type": "Array",
-            "tags": [],
-            "label": "existingFieldNames",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
         "id": "def-common.LegacyMetricState",
         "type": "Interface",
         "tags": [],
@@ -11570,6 +11545,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.LegacyMetricState.autoScaleMetricAlignment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoScaleMetricAlignment",
+            "description": [],
+            "signature": [
+              "\"left\" | \"right\" | \"center\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "lens",
             "id": "def-common.LegacyMetricState.layerId",
