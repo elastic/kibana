@@ -40,11 +40,16 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const hideExclude = select((state) => state.explicitInput.hideExclude);
   const fieldName = select((state) => state.explicitInput.fieldName);
   const title = select((state) => state.explicitInput.title);
+  const id = select((state) => state.explicitInput.id);
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
-    <span role="listbox" aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}>
+    <span
+      id={`control-popover-${id}`}
+      role="listbox"
+      aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+    >
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
       {field?.type !== 'boolean' && (
         <OptionsListPopoverActionBar
