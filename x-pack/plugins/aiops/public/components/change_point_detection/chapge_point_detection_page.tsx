@@ -7,8 +7,8 @@
 import React, { FC, useCallback } from 'react';
 import {
   EuiBadge,
-  EuiCallOut,
   EuiDescriptionList,
+  EuiEmptyPrompt,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -94,7 +94,7 @@ export const ChangePointDetectionPage: FC = () => {
           <SplitFieldSelector value={requestParams.splitField} onChange={setSplitField} />
         </EuiFlexItem>
 
-        <EuiFlexItem css={{ visibility: progress === 100 ? 'hidden' : 'visible' }}>
+        <EuiFlexItem css={{ visibility: progress === 100 ? 'hidden' : 'visible' }} grow={false}>
           <EuiProgress
             label={
               <FormattedMessage
@@ -114,23 +114,28 @@ export const ChangePointDetectionPage: FC = () => {
       <EuiSpacer size="m" />
 
       {annotations.length === 0 && progress === 100 ? (
-        <EuiCallOut
-          size="s"
-          title={
-            <FormattedMessage
-              id="xpack.aiops.changePointDetection.noChangePointsFoundTitle"
-              defaultMessage="No change points found"
-            />
-          }
-          iconType="search"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.aiops.changePointDetection.noChangePointsFoundMessage"
-              defaultMessage="Try to extend the time range or update the query"
-            />
-          </p>
-        </EuiCallOut>
+        <>
+          <EuiEmptyPrompt
+            iconType="search"
+            title={
+              <h2>
+                {' '}
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.noChangePointsFoundTitle"
+                  defaultMessage="No change points found"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.noChangePointsFoundMessage"
+                  defaultMessage="Try to extend the time range or update the query"
+                />
+              </p>
+            }
+          />
+        </>
       ) : null}
 
       <EuiFlexGrid columns={annotations.length >= 2 ? 2 : 1} responsive gutterSize={'m'}>
