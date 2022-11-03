@@ -1372,7 +1372,7 @@
               "\nImport exception lists parent containers and items as stream"
             ],
             "signature": [
-              "({ exceptionsToImport, maxExceptionsImportSize, overwrite, }: ",
+              "({ exceptionsToImport, maxExceptionsImportSize, overwrite, generateNewListId, }: ",
               "ImportExceptionListAndItemsOptions",
               ") => Promise<{ errors: ({ error: { status_code: number; message: string; }; } & { id?: string | undefined; list_id?: string | undefined; item_id?: string | undefined; })[]; success: boolean; success_count: number; success_exception_lists: boolean; success_count_exception_lists: number; success_exception_list_items: boolean; success_count_exception_list_items: number; }>"
             ],
@@ -1385,7 +1385,7 @@
                 "id": "def-server.ExceptionListClient.importExceptionListAndItems.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    exceptionsToImport,\n    maxExceptionsImportSize,\n    overwrite,\n  }",
+                "label": "{\n    exceptionsToImport,\n    maxExceptionsImportSize,\n    overwrite,\n    generateNewListId,\n  }",
                 "description": [],
                 "signature": [
                   "ImportExceptionListAndItemsOptions"

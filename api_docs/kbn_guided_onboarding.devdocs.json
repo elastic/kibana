@@ -296,7 +296,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"browse_docs\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
+              "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -339,13 +339,30 @@
       },
       {
         "parentPluginId": "@kbn/guided-onboarding",
+        "id": "def-common.GuideStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "GuideStatus",
+        "description": [
+          "\nAllowed states for a guide:\n not_started: Guide has not been started\n in_progress: At least one step in the guide has been started\n ready_to_complete: All steps have been completed, but the \"Continue using Elastic\" button has not been clicked\n complete: All steps and the guide have been completed"
+        ],
+        "signature": [
+          "\"complete\" | \"not_started\" | \"in_progress\" | \"ready_to_complete\""
+        ],
+        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/guided-onboarding",
         "id": "def-common.GuideStepIds",
         "type": "Type",
         "tags": [],
         "label": "GuideStepIds",
         "description": [],
         "signature": [
-          "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"browse_docs\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
+          "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
         ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
