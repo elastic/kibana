@@ -17,7 +17,7 @@ import { fetchMonitorOverview, fetchOverviewStatus } from './api';
 
 export function* fetchMonitorOverviewEffect() {
   yield takeLeading(
-    fetchMonitorOverviewAction.get,
+    [fetchMonitorOverviewAction.get, quietFetchOverviewAction.get],
     fetchEffectFactory(
       fetchMonitorOverview,
       fetchMonitorOverviewAction.success,
@@ -26,31 +26,9 @@ export function* fetchMonitorOverviewEffect() {
   );
 }
 
-export function* quietFetchOverviewEffect() {
-  yield takeLeading(
-    quietFetchOverviewAction.get,
-    fetchEffectFactory(
-      fetchMonitorOverview,
-      quietFetchOverviewAction.success,
-      quietFetchOverviewAction.fail
-    )
-  );
-}
-
 export function* fetchOverviewStatusEffect() {
   yield takeLatest(
-    fetchOverviewStatusAction.get,
-    fetchEffectFactory(
-      fetchOverviewStatus,
-      fetchOverviewStatusAction.success,
-      fetchOverviewStatusAction.fail
-    )
-  );
-}
-
-export function* quietFetchOverviewStatusEffect() {
-  yield takeLatest(
-    quietFetchOverviewStatusAction.get,
+    [fetchOverviewStatusAction.get, quietFetchOverviewStatusAction.get],
     fetchEffectFactory(
       fetchOverviewStatus,
       fetchOverviewStatusAction.success,

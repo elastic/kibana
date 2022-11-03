@@ -13,6 +13,7 @@ import { useEnablement, useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
+  quietFetchOverviewAction,
   setOverviewPageStateAction,
   selectOverviewPageState,
   selectServiceLocationsState,
@@ -66,6 +67,11 @@ export const OverviewPage: React.FC = () => {
   // fetch overview for all other page state changes
   useEffect(() => {
     dispatch(fetchMonitorOverviewAction.get(pageState));
+  }, [dispatch, pageState]);
+
+  // fetch overview for refresh
+  useEffect(() => {
+    dispatch(quietFetchOverviewAction.get(pageState));
   }, [dispatch, pageState, lastRefresh]);
 
   const {

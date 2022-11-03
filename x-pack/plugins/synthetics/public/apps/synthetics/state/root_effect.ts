@@ -11,12 +11,7 @@ import { fetchSyntheticsMonitorEffect } from './monitor_details';
 import { fetchIndexStatusEffect } from './index_status';
 import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
 import { fetchMonitorListEffect, upsertMonitorEffect } from './monitor_list';
-import {
-  fetchMonitorOverviewEffect,
-  quietFetchOverviewEffect,
-  fetchOverviewStatusEffect,
-  quietFetchOverviewStatusEffect,
-} from './overview';
+import { fetchMonitorOverviewEffect, fetchOverviewStatusEffect } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
 import { browserJourneyEffects } from './browser_journey';
 
@@ -29,10 +24,8 @@ export const rootEffect = function* root(): Generator {
     fork(fetchMonitorListEffect),
     fork(fetchSyntheticsMonitorEffect),
     fork(fetchMonitorOverviewEffect),
-    fork(quietFetchOverviewEffect),
     fork(browserJourneyEffects),
     fork(fetchOverviewStatusEffect),
-    fork(quietFetchOverviewStatusEffect),
     fork(fetchNetworkEventsEffect),
   ]);
 };
