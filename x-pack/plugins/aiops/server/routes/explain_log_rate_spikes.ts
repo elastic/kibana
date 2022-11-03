@@ -49,6 +49,7 @@ import {
   groupDuplicates,
 } from './queries/fetch_frequent_items';
 import type { ItemsetResult } from './queries/fetch_frequent_items';
+import { getHistogramQuery } from './queries/get_histogram_query';
 import {
   getFieldValuePairCounts,
   getSimpleHierarchicalTree,
@@ -322,12 +323,15 @@ export const defineExplainLogRateSpikesRoute = (
           logDebugMessage('Fetch overall histogram.');
 
           let overallTimeSeries: NumericChartData | undefined;
+
+          const overallHistogramQuery = getHistogramQuery(request.body);
+
           try {
             overallTimeSeries = (
               (await fetchHistogramsForFields(
                 client,
                 request.body.index,
-                { match_all: {} },
+                overallHistogramQuery,
                 // fields
                 histogramFields,
                 // samplerShardSize
@@ -578,13 +582,12 @@ export const defineExplainLogRateSpikesRoute = (
                   }
 
                   if (overallTimeSeries !== undefined) {
-                    const histogramQuery = {
-                      bool: {
-                        filter: cpg.group.map((d) => ({
-                          term: { [d.fieldName]: d.fieldValue },
-                        })),
-                      },
-                    };
+                    const histogramQuery = getHistogramQuery(
+                      request.body,
+                      cpg.group.map((d) => ({
+                        term: { [d.fieldName]: d.fieldValue },
+                      }))
+                    );
 
                     let cpgTimeSeries: NumericChartData;
                     try {
@@ -674,15 +677,11 @@ export const defineExplainLogRateSpikesRoute = (
               }
 
               if (overallTimeSeries !== undefined) {
-                const histogramQuery = {
-                  bool: {
-                    filter: [
-                      {
-                        term: { [cp.fieldName]: cp.fieldValue },
-                      },
-                    ],
+                const histogramQuery = getHistogramQuery(request.body, [
+                  {
+                    term: { [cp.fieldName]: cp.fieldValue },
                   },
-                };
+                ]);
 
                 let cpTimeSeries: NumericChartData;
 

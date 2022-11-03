@@ -24,48 +24,48 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const traceDuration = 1100;
       const rootTransactionName = `${ratePerMinute}rpm / ${traceDuration}ms`;
 
-      const opbeansRum = apm
-        .service({ name: 'opbeans-rum', environment: ENVIRONMENT, agentName: 'rum-js' })
+      const synthRum = apm
+        .service({ name: 'synth-rum', environment: ENVIRONMENT, agentName: 'rum-js' })
         .instance('my-instance');
 
-      const opbeansNode = apm
-        .service({ name: 'opbeans-node', environment: ENVIRONMENT, agentName: 'nodejs' })
+      const synthNode = apm
+        .service({ name: 'synth-node', environment: ENVIRONMENT, agentName: 'nodejs' })
         .instance('my-instance');
 
-      const opbeansGo = apm
-        .service({ name: 'opbeans-go', environment: ENVIRONMENT, agentName: 'go' })
+      const synthGo = apm
+        .service({ name: 'synth-go', environment: ENVIRONMENT, agentName: 'go' })
         .instance('my-instance');
 
-      const opbeansDotnet = apm
-        .service({ name: 'opbeans-dotnet', environment: ENVIRONMENT, agentName: 'dotnet' })
+      const synthDotnet = apm
+        .service({ name: 'synth-dotnet', environment: ENVIRONMENT, agentName: 'dotnet' })
         .instance('my-instance');
 
-      const opbeansJava = apm
-        .service({ name: 'opbeans-java', environment: ENVIRONMENT, agentName: 'java' })
+      const synthJava = apm
+        .service({ name: 'synth-java', environment: ENVIRONMENT, agentName: 'java' })
         .instance('my-instance');
 
       const traces = timerange(from, to)
         .ratePerMinute(ratePerMinute)
         .generator((timestamp) => {
           return new DistributedTrace({
-            serviceInstance: opbeansRum,
+            serviceInstance: synthRum,
             transactionName: rootTransactionName,
             timestamp,
             children: (_) => {
               _.service({
                 repeat: 10,
-                serviceInstance: opbeansNode,
+                serviceInstance: synthNode,
                 transactionName: 'GET /nodejs/products',
                 latency: 100,
 
                 children: (_) => {
                   _.service({
-                    serviceInstance: opbeansGo,
+                    serviceInstance: synthGo,
                     transactionName: 'GET /go',
                     children: (_) => {
                       _.service({
                         repeat: 20,
-                        serviceInstance: opbeansJava,
+                        serviceInstance: synthJava,
                         transactionName: 'GET /java',
                         children: (_) => {
                           _.external({
@@ -84,19 +84,19 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
               });
 
               _.service({
-                serviceInstance: opbeansNode,
+                serviceInstance: synthNode,
                 transactionName: 'GET /nodejs/users',
                 latency: 100,
                 repeat: 10,
                 children: (_) => {
                   _.service({
-                    serviceInstance: opbeansGo,
+                    serviceInstance: synthGo,
                     transactionName: 'GET /go/security',
                     latency: 50,
                     children: (_) => {
                       _.service({
                         repeat: 10,
-                        serviceInstance: opbeansDotnet,
+                        serviceInstance: synthDotnet,
                         transactionName: 'GET /dotnet/cases/4',
                         latency: 50,
                         children: (_) =>

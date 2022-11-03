@@ -19,6 +19,11 @@ import { responseActionsHttpMocks } from '../../../../mocks/response_actions_htt
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ActionDetailsApiResponse,
+  KillProcessActionOutputContent,
+} from '../../../../../../common/endpoint/types';
+import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
 describe('When using the suspend-process action from response actions console', () => {
   let render: (
@@ -238,6 +243,35 @@ describe('When using the suspend-process action from response actions console', 
       );
     });
   });
+
+  it.each([['ra_suspend-process_error_not-found'], ['ra_suspend-process_error_not-permitted']])(
+    'should show detailed error if suspend-process failure returned code: %s',
+    async (outputCode) => {
+      const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
+        path: '/api/endpoint/action/a.b.c',
+      }) as ActionDetailsApiResponse<KillProcessActionOutputContent>;
+      pendingDetailResponse.data.agents = ['a.b.c'];
+      pendingDetailResponse.data.wasSuccessful = false;
+      pendingDetailResponse.data.errors = ['not found'];
+      pendingDetailResponse.data.outputs = {
+        'a.b.c': {
+          type: 'json',
+          content: {
+            code: outputCode,
+          },
+        },
+      };
+      apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
+      await render();
+      enterConsoleCommand(renderResult, 'suspend-process --pid 123');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('suspendProcess-actionFailure').textContent).toMatch(
+          new RegExp(endpointActionResponseCodes[outputCode])
+        );
+      });
+    }
+  );
 
   describe('and when console is closed (not terminated) and then reopened', () => {
     beforeEach(() => {
