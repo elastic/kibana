@@ -16,4 +16,3 @@ export {
   setAutocompleteInfo,
   ENTITIES,
 } from './autocomplete';
-export type { SettingsToRetrieve } from './autocomplete';
