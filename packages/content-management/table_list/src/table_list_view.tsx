@@ -67,6 +67,12 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   editItem?(item: T): void;
+  /**
+   * Whether to use a panelled page.
+   *
+   * @default true
+   */
+  panelledPage?: boolean;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -116,6 +122,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   onClickTitle,
   id = 'userContent',
   children,
+  panelledPage = true,
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(
@@ -443,7 +450,11 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
   if (!fetchError && hasNoItems) {
     return (
-      <KibanaPageTemplate isEmptyState={true} data-test-subj={pageDataTestSubject}>
+      <KibanaPageTemplate
+        panelled={panelledPage}
+        isEmptyState={true}
+        data-test-subj={pageDataTestSubject}
+      >
         <KibanaPageTemplate.Section
           aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
         >
@@ -454,7 +465,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   }
 
   return (
-    <KibanaPageTemplate data-test-subj={pageDataTestSubject}>
+    <KibanaPageTemplate panelled={panelledPage} data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{tableListTitle}</span>}
         rightSideItems={[renderCreateButton() ?? <span />]}
