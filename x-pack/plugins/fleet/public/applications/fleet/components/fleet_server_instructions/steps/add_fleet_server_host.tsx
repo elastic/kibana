@@ -8,7 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 
 import type { EuiStepProps } from '@elastic/eui';
-import { EuiSelect, EuiSwit } from '@elastic/eui';
+import { EuiSelect, EuiSwitch } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -56,7 +56,7 @@ export const AddFleetServerHostStepContent = ({
 }) => {
   const {
     setFleetServerHost,
-    fleetServerHost,
+    fleetServerHost: selectedFleetServerHost,
     saveFleetServerHost,
     fleetServerHosts,
     error,
@@ -155,7 +155,7 @@ export const AddFleetServerHostStepContent = ({
           <EuiSpacer size="m" />
         </>
       ) : null}
-      {!fleetServerHost ? (
+      {!selectedFleetServerHost ? (
         <>
           <EuiFormRow
             fullWidth
