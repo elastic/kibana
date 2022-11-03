@@ -139,7 +139,7 @@ const generateCommonArguments = (
       .filter(({ columnId }) => !isCollapsed(columnId, layer))
       .map(({ columnId }) => columnId)
       .map(prepareDimension),
-    metric: layer.metric ? prepareDimension(layer.metric) : [],
+    metric: layer.metric ? prepareDimension(layer.metric) : undefined,
     legendDisplay: (attributes.isPreview
       ? LegendDisplay.HIDE
       : layer.legendDisplay) as PartitionVisLegendDisplay,
