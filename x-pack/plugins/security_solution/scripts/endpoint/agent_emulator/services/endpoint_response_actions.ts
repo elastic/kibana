@@ -133,6 +133,12 @@ export const sendEndpointActionResponse = async (
     endpointResponse.error = {
       message: 'Endpoint encountered an error and was unable to apply action to host',
     };
+
+    if (endpointResponse.EndpointActions.data.command === 'get-file') {
+      (
+        endpointResponse.EndpointActions.data.output?.content as ResponseActionGetFileOutputContent
+      ).code = endpointActionGenerator.randomGetFileFailureCode();
+    }
   }
 
   await esClient.index({
@@ -226,7 +232,7 @@ export const sendEndpointActionResponse = async (
 
     // Index the file content (just one chunk)
     // call to `.index()` copied from File plugin here:
-    // https://github.com/elastic/kibana/blob/main/x-pack/plugins/files/server/blob_storage_service/adapters/es/content_stream/content_stream.ts#L195
+    // https://github.com/elastic/kibana/blob/main/src/plugins/files/server/blob_storage_service/adapters/es/content_stream/content_stream.ts#L195
     await esClient.index(
       {
         index: FILE_STORAGE_DATA_INDEX,
