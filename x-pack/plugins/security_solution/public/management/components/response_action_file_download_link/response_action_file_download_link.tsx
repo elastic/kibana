@@ -7,15 +7,14 @@
 
 import React, { memo, useMemo, type CSSProperties } from 'react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
   EuiLoadingContent,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { FormattedError } from '../formatted_error';
 import { useGetFileInfo } from '../../hooks/response_actions/use_get_file_info';
@@ -69,10 +68,8 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     // console, where the link is displayed within a short time. So we only do the API call if the
     // action was completed more than 2 days ago.
     const checkIfStillAvailable = useMemo(() => {
-      return (
-        action.isCompleted && action.wasSuccessful && moment().diff(action.completedAt, 'days') > 2
-      );
-    }, [action.completedAt, action.isCompleted, action.wasSuccessful]);
+      return action.isCompleted && action.wasSuccessful && canWriteFileOperations;
+    }, [action.isCompleted, action.wasSuccessful, canWriteFileOperations]);
 
     const downloadUrl = useMemo(() => {
       return resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
@@ -111,28 +108,44 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     return (
       <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj={dataTestSubj}>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            href={downloadUrl}
-            iconType="download"
-            data-test-subj={getTestId('downloadButton')}
-            flush="left"
-            style={STYLE_INHERIT_FONT_FAMILY}
-            download
-            size={textSize}
-          >
-            <EuiText size={textSize}>{buttonTitle}</EuiText>
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size={textSize} data-test-subj={getTestId('passcodeMessage')}>
-            <FormattedMessage
-              id="xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo"
-              defaultMessage="(ZIP file passcode: {passcode})"
-              values={{
-                passcode: 'elastic',
-              }}
-            />
-          </EuiText>
+          <div>
+            <EuiButtonEmpty
+              href={downloadUrl}
+              iconType="download"
+              data-test-subj={getTestId('downloadButton')}
+              flush="left"
+              style={STYLE_INHERIT_FONT_FAMILY}
+              download
+            >
+              <EuiText size={textSize}>{buttonTitle}</EuiText>
+            </EuiButtonEmpty>
+            <EuiText
+              size={textSize}
+              data-test-subj={getTestId('passcodeMessage')}
+              className="eui-displayInline"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo"
+                defaultMessage="(ZIP file passcode: {passcode})."
+                values={{
+                  passcode: 'elastic',
+                }}
+              />
+
+              {fileInfo && fileInfo.data.ttl && fileInfo.data.ttl > 0 && (
+                <>
+                  &nbsp;
+                  <FormattedMessage
+                    id="xpack.securitySolution.responseActionFileDownloadLink.expireDays"
+                    defaultMessage="File download is available for {dayCount} {dayCount, plural, one {day} other {days}}."
+                    values={{
+                      dayCount: fileInfo.data.ttl,
+                    }}
+                  />
+                </>
+              )}
+            </EuiText>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
