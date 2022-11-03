@@ -28,14 +28,19 @@ import { useExistingFieldsFetcher } from '@kbn/unified-field-list-plugin/public'
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
-import { calcFieldCounts } from '../../utils/calc_field_counts';
+import {
+  AvailableFields$,
+  DataDocuments$,
+  DataDocumentsMsg,
+  RecordRawType,
+} from '../../hooks/use_saved_search';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
 // import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { getDataViewFieldList } from './lib/get_data_view_field_list';
+import { calcFieldCounts } from '../../utils/calc_field_counts';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -121,28 +126,24 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [documentState, setDocumentState] = useState(props.documents$.getValue());
+  const [documentState, setDocumentState] = useState<DataDocumentsMsg>();
   const [allFields, setAllFields] = useState<DataViewField[] | null>(null);
   const [allFieldsNames, setAllFieldsNames] = useState<string[] | null>(null);
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((next) => {
-      setDocumentState((current) => ({ ...current, ...next }));
+      setDocumentState(next);
     });
     return () => subscription.unsubscribe();
   }, [props.documents$, setDocumentState]);
 
   useEffect(() => {
-    if (documentState.fetchStatus === FetchStatus.LOADING) {
-      setAllFields(null);
-      setAllFieldsNames(null);
-      return;
+    if (documentState?.fetchStatus === FetchStatus.COMPLETE) {
+      const fieldCounts = calcFieldCounts(documentState.result, selectedDataView);
+
+      setAllFields(getDataViewFieldList(selectedDataView, fieldCounts));
+      setAllFieldsNames(Object.keys(fieldCounts));
     }
-
-    const fieldCounts = calcFieldCounts(documentState.result, selectedDataView);
-
-    setAllFields(getDataViewFieldList(selectedDataView, fieldCounts));
-    setAllFieldsNames(Object.keys(fieldCounts));
   }, [selectedDataView, documentState, setAllFields, setAllFieldsNames]);
 
   const query = useAppStateSelector((state) => state.query);
