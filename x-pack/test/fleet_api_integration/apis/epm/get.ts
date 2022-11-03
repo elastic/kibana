@@ -175,7 +175,7 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('returns package info from the archive if ?full=true', async function () {
       const res = await supertest
-        .get(`/api/fleet/epm/packages/non_epr_fields/0.2.0?full=true`)
+        .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=true`)
         .expect(200);
       const packageInfo = res.body.item as PackageInfo;
       expect(packageInfo?.data_streams?.length).equal(3);
@@ -186,7 +186,7 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('returns package info from the registry if ?full=false', async function () {
       const res = await supertest
-        .get(`/api/fleet/epm/packages/non_epr_fields/0.2.0?full=false`)
+        .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=false`)
         .expect(200);
       const packageInfo = res.body.item as PackageInfo;
       expect(packageInfo?.data_streams?.length).equal(3);
@@ -199,7 +199,7 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('returns package info from the registry if ?full not provided', async function () {
       const res = await supertest
-        .get(`/api/fleet/epm/packages/non_epr_fields/0.2.0?full=false`)
+        .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=false`)
         .expect(200);
       const packageInfo = res.body.item as PackageInfo;
       expect(packageInfo?.data_streams?.length).equal(3);

@@ -2,7 +2,7 @@ format_version: 1.0.0
 name: non_epr_fields
 title: Non EPR Fields
 description: This package contain fields in its manifest and datastreams such as source_mode which are not returned by the EPR API.
-version: 0.2.0
+version: 1.0.0
 categories: []
 release: beta
 type: integration
