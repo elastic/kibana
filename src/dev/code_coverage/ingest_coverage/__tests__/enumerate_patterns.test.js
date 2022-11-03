@@ -25,13 +25,13 @@ describe(`enumeratePatterns`, () => {
       'x-pack/plugins/screenshotting/server/browsers/extract/unzip.ts kibana-screenshotting'
     );
   });
-  it(`should resolve src/plugins/charts/common/static/color_maps/color_maps.ts to kibana-app`, () => {
+  it(`should resolve packages/kbn-coloring/src/colors/color_maps/color_maps.ts to kibana-app`, () => {
     const actual = enumeratePatterns(REPO_ROOT)(log)(
-      new Map([['src/plugins/charts/common/static/color_maps', ['kibana-app']]])
+      new Map([['packages/kbn-coloring/src/colors/color_maps', ['kibana-app']]])
     );
 
     expect(actual.flat()).toContain(
-      'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app'
+      'packages/kbn-coloring/src/colors/color_maps/color_maps.ts kibana-app'
     );
   });
 });
