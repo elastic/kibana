@@ -143,7 +143,7 @@ export const getGeoContainmentExecutor = (): GeoContainmentAlertType['executor']
     startedAt: windowEnd,
     services,
     params,
-    alertId,
+    rule: { id: ruleId },
     state,
     logger,
   }): Promise<GeoContainmentState> {
@@ -155,7 +155,7 @@ export const getGeoContainmentExecutor = (): GeoContainmentAlertType['executor']
           params.geoField,
           services.scopedClusterClient.asCurrentUser,
           logger,
-          alertId,
+          ruleId,
           params.boundaryNameField,
           params.boundaryIndexQuery
         );
@@ -170,7 +170,7 @@ export const getGeoContainmentExecutor = (): GeoContainmentAlertType['executor']
     // Start collecting data only on the first cycle
     let currentIntervalResults: estypes.SearchResponse<unknown> | undefined;
     if (!windowStart) {
-      logger.debug(`alert ${GEO_CONTAINMENT_ID}:${alertId} alert initialized. Collecting data`);
+      logger.debug(`alert ${GEO_CONTAINMENT_ID}:${ruleId} alert initialized. Collecting data`);
       // Consider making first time window configurable?
       const START_TIME_WINDOW = 1;
       const tempPreviousEndTime = new Date(windowEnd);
