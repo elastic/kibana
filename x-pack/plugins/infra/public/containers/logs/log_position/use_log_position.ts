@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import useThrottle from 'react-use/lib/useThrottle';
 import { TimeKey } from '../../../../common/time';
+import { withReduxDevTools } from '../../../utils/state_container_devtools';
 import { TimefilterState } from '../../../utils/timefilter_state_storage';
 import { useObservableState } from '../../../utils/use_observable';
 import { wrapStateContainer } from '../../../utils/wrap_state_container';
@@ -20,7 +21,6 @@ import {
   LogPositionState,
   updateStateFromTimefilterState,
   updateStateFromUrlState,
-  withDevelopmentLogger,
 } from './log_position_state';
 import { useLogPositionTimefilterStateSync } from './log_position_timefilter_state';
 import { LogPositionUrlState, useLogPositionUrlStateSync } from './use_log_position_url_state_sync';
@@ -77,11 +77,14 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     useLogPositionTimefilterStateSync();
 
   const [logPositionStateContainer] = useState(() =>
-    withDevelopmentLogger(
+    withReduxDevTools(
       createLogPositionStateContainer({
         initialStateFromUrl,
         initialStateFromTimefilter,
-      })
+      }),
+      {
+        name: 'logPosition',
+      }
     )
   );
 

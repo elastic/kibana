@@ -7,11 +7,10 @@
 
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { createStateContainer, ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/public';
+import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import { identity, pipe } from 'fp-ts/lib/function';
 import produce, { Draft, original } from 'immer';
 import moment, { DurationInputObject } from 'moment';
-import logger from 'redux-logger';
 import { isSameTimeKey, MinimalTimeKey, pickTimeKey, TimeKey } from '../../../../common/time';
 import { datemathToEpochMillis } from '../../../utils/datemath';
 import { TimefilterState } from '../../../utils/timefilter_state_storage';
@@ -118,16 +117,6 @@ export const createLogPositionStateContainer = (initialArguments: InitialLogPosi
     reportVisiblePositions: (state: LogPositionState) => (visiblePositions: VisiblePositions) =>
       updateVisiblePositions(visiblePositions)(state),
   });
-
-export const withDevelopmentLogger = <StateContainer extends ReduxLikeStateContainer<any>>(
-  stateContainer: StateContainer
-): StateContainer => {
-  if (process.env.NODE_ENV !== 'production') {
-    stateContainer.addMiddleware(logger as any);
-  }
-
-  return stateContainer;
-};
 
 /**
  * Common updaters
