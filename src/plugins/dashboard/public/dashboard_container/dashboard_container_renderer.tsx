@@ -29,7 +29,7 @@ import { dashboardContainerReducers } from './state/dashboard_container_reducers
 
 export interface DashboardContainerRendererProps {
   savedObjectId?: string;
-  getCreationOptions?: () => Promise<DashboardCreationOptions>;
+  getCreationOptions?: () => DashboardCreationOptions;
   onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
 }
 
@@ -64,7 +64,7 @@ export const DashboardContainerRenderer = ({
     let destroyContainer: () => void;
 
     (async () => {
-      const creationOptions = await getCreationOptions?.();
+      const creationOptions = getCreationOptions?.();
       const dashboardFactory = embeddable.getEmbeddableFactory(
         DASHBOARD_CONTAINER_TYPE
       ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };

@@ -23,7 +23,6 @@ import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common'
 import { dashboardUrlParams } from '../../dashboard_router';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { pluginServices } from '../../../services/plugin_services';
-import type { DashboardContainerByValueInput } from '../../../../common';
 import { convertPanelMapToSavedPanels, DashboardOptions } from '../../../../common';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator/locator';
 
@@ -32,8 +31,8 @@ const showFilterBarId = 'showFilterBar';
 export interface ShowShareModalProps {
   isDirty: boolean;
   savedObjectId?: string;
+  dashboardTitle?: string;
   anchorElement: HTMLElement;
-  currentDashboardState: DashboardContainerByValueInput;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -48,7 +47,7 @@ export function ShowShareModal({
   isDirty,
   anchorElement,
   savedObjectId,
-  currentDashboardState,
+  dashboardTitle,
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
@@ -127,7 +126,6 @@ export function ShowShareModal({
     DashboardAppLocatorParams,
     'options' | 'query' | 'filters' | 'panels' | 'controlGroupInput'
   > = {};
-  const { title } = currentDashboardState;
   const unsavedDashboardState = dashboardSessionStorage.getState(savedObjectId);
 
   if (unsavedDashboardState) {
@@ -178,7 +176,7 @@ export function ShowShareModal({
     objectType: 'dashboard',
     sharingData: {
       title:
-        title ||
+        dashboardTitle ||
         i18n.translate('dashboard.share.defaultDashboardTitle', {
           defaultMessage: 'Dashboard [{date}]',
           values: { date: moment().toISOString(true) },

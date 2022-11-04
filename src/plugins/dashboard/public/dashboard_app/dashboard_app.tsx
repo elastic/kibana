@@ -153,10 +153,8 @@ export function DashboardApp({
           {getLegacyConflictWarning?.()}
           <DashboardContainerRenderer
             savedObjectId={savedDashboardId}
-            onDashboardContainerLoaded={(finishedContainer) => {
-              setDashboardContainer(finishedContainer);
-            }}
-            getCreationOptions={async () => getCreationOptions()}
+            getCreationOptions={getCreationOptions}
+            onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
           />
         </>
       )}

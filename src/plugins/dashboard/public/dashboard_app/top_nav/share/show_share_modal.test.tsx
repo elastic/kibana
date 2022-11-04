@@ -76,7 +76,6 @@ describe('ShowShareModal', () => {
     return {
       isDirty: true,
       anchorElement: document.createElement('div'),
-      currentDashboardState: { panels: {} } as DashboardContainerByValueInput,
     };
   };
 

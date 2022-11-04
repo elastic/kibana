@@ -56,20 +56,21 @@ export const useDashboardMenuItems = ({
 
   const hasUnsavedChanges = select((state) => state.componentState.hasUnsavedChanges);
   const lastSavedId = select((state) => state.componentState.lastSavedId);
+  const dashboardTitle = select((state) => state.explicitInput.title);
 
   /**
    * Show the Dashboard app's share menu
    */
   const showShare = useCallback(
     (anchorElement: HTMLElement) => {
-      const dashboardState = dashboardContainer.getReduxEmbeddableTools().getState();
       ShowShareModal({
+        dashboardTitle,
         anchorElement,
-        currentDashboardState: dashboardState.explicitInput,
-        isDirty: Boolean(dashboardState.componentState.hasUnsavedChanges),
+        savedObjectId: lastSavedId,
+        isDirty: Boolean(hasUnsavedChanges),
       });
     },
-    [dashboardContainer]
+    [dashboardTitle, hasUnsavedChanges, lastSavedId]
   );
 
   const maybeRedirect = useCallback(
