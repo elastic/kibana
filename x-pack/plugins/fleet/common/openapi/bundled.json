@@ -4457,6 +4457,8 @@
           },
           "release": {
             "type": "string",
+            "deprecated": true,
+            "description": "release label is deprecated, derive from the version instead (packages follow semver)",
             "enum": [
               "experimental",
               "beta",
