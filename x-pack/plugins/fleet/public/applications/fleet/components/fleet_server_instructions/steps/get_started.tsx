@@ -64,7 +64,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.fleetServerFlyout.generateFleetServerPolicySuccessInstructions"
-            defaultMessage="Fleet server policy and service token have been generated. Host configured at  {hostUrl}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
+            defaultMessage="Fleet server policy and service token have been generated. Host configured at {hostUrl}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
             values={{
               hostUrl: <EuiCode>{fleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
