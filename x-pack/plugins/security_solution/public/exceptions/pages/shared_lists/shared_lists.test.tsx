@@ -8,15 +8,15 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { TestProviders } from '../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
-import { useUserData } from '../../detections/components/user_info';
+import { useUserData } from '../../../detections/components/user_info';
 
-import { ExceptionListsTable } from '../pages/shared_lists';
+import { SharedLists } from '.';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
-import { useAllExceptionLists } from '../hooks/use_all_exception_lists';
+import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
 import { useHistory } from 'react-router-dom';
-import { generateHistoryMock } from '../../common/utils/route/mocks';
+import { generateHistoryMock } from '../../../common/utils/route/mocks';
 
 jest.mock('../../../detections/components/user_info');
 jest.mock('../../../common/utils/route/mocks');
@@ -43,7 +43,7 @@ jest.mock('../../../detections/containers/detection_engine/lists/use_lists_confi
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
 
-describe('ExceptionListsTable', () => {
+describe('SharedLists', () => {
   const mockHistory = generateHistoryMock();
   const exceptionList1 = getExceptionListSchemaMock();
   const exceptionList2 = { ...getExceptionListSchemaMock(), list_id: 'not_endpoint_list', id: '2' };
@@ -93,7 +93,7 @@ describe('ExceptionListsTable', () => {
   it('renders delete option as disabled if list is "endpoint_list"', async () => {
     const wrapper = mount(
       <TestProviders>
-        <ExceptionListsTable />
+        <SharedLists />
       </TestProviders>
     );
 
@@ -119,7 +119,7 @@ describe('ExceptionListsTable', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <ExceptionListsTable />
+        <SharedLists />
       </TestProviders>
     );
     wrapper

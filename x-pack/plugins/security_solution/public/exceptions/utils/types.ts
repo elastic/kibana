@@ -6,8 +6,8 @@
  */
 
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import type { Ecs } from '../../../../common/ecs';
-import type { CodeSignature } from '../../../../common/ecs/file';
+import type { Ecs } from '../../../common/ecs';
+import type { CodeSignature } from '../../../common/ecs/file';
 
 export interface ExceptionListItemIdentifiers {
   id: string;
