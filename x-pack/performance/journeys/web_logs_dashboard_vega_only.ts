@@ -19,7 +19,7 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Web Logs Dashboard', async ({ page, log }) => {
-    await page.click(subj('dashboardListingTitleLink-vega-only-dashboard'));
+  .step('Go to Web Logs Dashboard with Vega only', async ({ page, log }) => {
+    await page.click(subj('dashboardListingTitleLink-[Logs]-Web-Traffic---Vega-only'));
     await waitForVisualizations(page, log, 1);
   });
