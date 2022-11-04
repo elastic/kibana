@@ -54,6 +54,9 @@ describe('parseDefaultIngestPipeline', () => {
 });
 
 describe('parseDataStreamElasticsearchEntry', () => {
+  it('Should handle undefined elasticsearch', () => {
+    expect(parseDataStreamElasticsearchEntry()).toEqual({});
+  });
   it('Should handle empty elasticsearch', () => {
     expect(parseDataStreamElasticsearchEntry({})).toEqual({});
   });
@@ -106,6 +109,17 @@ describe('parseDataStreamElasticsearchEntry', () => {
           sort: { field: 'monitor.id' },
         },
       },
+    });
+  });
+  it('Should handle dotted values for mappings and settings', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        'index_template.mappings': { dynamic: false },
+        'index_template.settings': { 'index.lifecycle.name': 'reference' },
+      })
+    ).toEqual({
+      'index_template.mappings': { dynamic: false },
+      'index_template.settings': { 'index.lifecycle.name': 'reference' },
     });
   });
 });

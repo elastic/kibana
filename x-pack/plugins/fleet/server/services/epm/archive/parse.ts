@@ -503,7 +503,7 @@ export function parseAndVerifyInputs(manifestInputs: any, location: string): Reg
 }
 
 export function parseDataStreamElasticsearchEntry(
-  elasticsearch: Record<string, any>,
+  elasticsearch?: Record<string, any>,
   ingestPipeline?: string
 ) {
   const parsedElasticsearchEntry: Record<string, any> = {};
@@ -520,16 +520,18 @@ export function parseDataStreamElasticsearchEntry(
     parsedElasticsearchEntry.source_mode = elasticsearch.source_mode;
   }
 
-  if (elasticsearch?.index_template?.mappings) {
-    parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
-      elasticsearch.index_template.mappings
-    );
+  const indexTemplateMappings =
+    elasticsearch?.index_template?.mappings || elasticsearch?.['index_template.mappings'];
+  if (indexTemplateMappings) {
+    parsedElasticsearchEntry['index_template.mappings'] =
+      expandDottedEntries(indexTemplateMappings);
   }
 
-  if (elasticsearch?.index_template?.settings) {
-    parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
-      elasticsearch.index_template.settings
-    );
+  const indexTemplateSettings =
+    elasticsearch?.index_template?.settings || elasticsearch?.['index_template.settings'];
+  if (indexTemplateSettings) {
+    parsedElasticsearchEntry['index_template.settings'] =
+      expandDottedEntries(indexTemplateSettings);
   }
 
   return parsedElasticsearchEntry;
