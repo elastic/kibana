@@ -2,7 +2,7 @@
 
 exports[`SampleDataCard installed renders with app links 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasBetaBadge emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left-vertical-hasBetaBadge"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left-vertical-hasBetaBadge"
   data-test-subj="sampleDataSetCardsample-data-set"
 >
   <div
@@ -116,7 +116,7 @@ exports[`SampleDataCard installed renders with app links 1`] = `
 
 exports[`SampleDataCard installed renders without app links 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasBetaBadge emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left-vertical-hasBetaBadge"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left-vertical-hasBetaBadge"
   data-test-subj="sampleDataSetCardsample-data-set"
 >
   <div
@@ -217,7 +217,7 @@ exports[`SampleDataCard installed renders without app links 1`] = `
 
 exports[`SampleDataCard not installed renders 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left-vertical"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left-vertical"
   data-test-subj="sampleDataSetCardsample-data-set"
 >
   <div
