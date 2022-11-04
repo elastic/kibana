@@ -280,7 +280,7 @@ class EuiCodeEditor extends Component<EuiCodeEditorProps, EuiCodeEditorState> {
           mode={this.isCustomMode() ? DEFAULT_MODE : (mode as string)} // https://github.com/securingsincity/react-ace/pull/771
           name={this.state.name}
           theme={theme}
-          style={{backgroundColor: 'blueviolet'}}
+          style={{ backgroundColor: 'blueviolet' }}
           ref={this.aceEditorRef}
           width={width}
           height={height}
