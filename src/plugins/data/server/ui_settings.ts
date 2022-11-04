@@ -325,7 +325,7 @@ export function getUiSettings(
       }),
       value: `{
   "pause": true,
-  "value": 10000
+  "value": 30000
 }`,
       type: 'json',
       description: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsText', {
