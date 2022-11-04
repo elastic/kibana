@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LoadWhenInView } from '@kbn/observability-plugin/public';
 
 import { useEarliestStartDate } from '../hooks/use_earliest_start_data';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
@@ -27,7 +28,7 @@ import { DurationPanel } from './duration_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
 import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
-import { TestRunsTable } from './test_runs_table';
+import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorErrorsCount } from './monitor_errors_count';
 
 export const MonitorSummary = () => {
@@ -121,7 +122,9 @@ export const MonitorSummary = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <TestRunsTable paginable={false} from={from} to={to} />
+      <LoadWhenInView placeholderTitle={LAST_10_TEST_RUNS}>
+        <TestRunsTable paginable={false} from={from} to={to} />
+      </LoadWhenInView>
     </>
   );
 };
