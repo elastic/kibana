@@ -43,3 +43,9 @@ export const inferTrainedModelBody = schema.object({
   docs: schema.any(),
   inference_config: schema.maybe(schema.any()),
 });
+
+export const pipelineSimulateBody = schema.object({
+  pipeline: schema.any(),
+  docs: schema.arrayOf(schema.any()),
+});
+export const pipelineDocs = schema.arrayOf(schema.string());

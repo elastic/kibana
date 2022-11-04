@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { InferenceBase, InferResponse } from '../inference_base';
+import { DEFAULT_INFERENCE_TIME_OUT, InferenceBase } from '../inference_base';
+import type { InferResponse } from '../inference_base';
 import { getQuestionAnsweringInput } from './question_answering_input';
 import { getQuestionAnsweringOutputComponent } from './question_answering_output';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
@@ -57,46 +57,71 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
 
   public questionText$ = new BehaviorSubject<string>('');
 
-  public async infer() {
+  public async inferText() {
     try {
       this.setRunning();
-      const inputText = this.inputText$.getValue();
-      const questionText = this.questionText$.value;
-      const numTopClassesConfig = this.getNumTopClassesConfig()?.inference_config;
+      const inputText = this.getInputText();
+      const question = this.questionText$.value;
 
       const payload = {
         docs: [{ [this.inputField]: inputText }],
-        inference_config: {
-          [this.inferenceType]: {
-            question: questionText,
-            ...(numTopClassesConfig
-              ? {
-                  num_top_classes: numTopClassesConfig[this.inferenceType].num_top_classes,
-                }
-              : {}),
-          },
-        },
+        ...this.getInferenceConfig([this.getNumTopClassesConfig(), { question }]),
       };
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
         payload,
-        '30s'
+        DEFAULT_INFERENCE_TIME_OUT
       )) as unknown as RawQuestionAnsweringResponse;
 
-      const processedResponse: QuestionAnsweringResponse = processResponse(
-        resp,
-        this.model,
-        inputText
+      const processedResponse: QuestionAnsweringResponse = processResponse(resp, inputText);
+
+      this.inferenceResult$.next([processedResponse]);
+      this.setFinished();
+
+      return [processedResponse];
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
+  }
+
+  protected async inferIndex() {
+    try {
+      this.setRunning();
+      const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
+        this.getPipeline(),
+        this.getPipelineDocs()
       );
+
+      const processedResponse: QuestionAnsweringResponse[] = docs.map((d) => {
+        // @ts-expect-error error does not exist in type
+        const { doc, error } = d;
+        if (doc === undefined) {
+          if (error) {
+            this.setFinishedWithErrors(error);
+            throw Error(error.reason);
+          }
+          throw Error('No doc aaaggghhhhhhh'); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        }
+
+        const pretendRawRequest = { inference_results: [doc._source[this.inferenceType]] };
+        const inputText = doc._source[this.inputField];
+
+        return processResponse(pretendRawRequest, inputText);
+      });
 
       this.inferenceResult$.next(processedResponse);
       this.setFinished();
-
       return processedResponse;
     } catch (error) {
       this.setFinishedWithErrors(error);
       throw error;
     }
+  }
+
+  protected getProcessors() {
+    const question = this.questionText$.value;
+    return this.getBasicProcessors([this.getNumTopClassesConfig(), { question }]);
   }
 
   public getInputComponent(): JSX.Element {
@@ -114,11 +139,7 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
   }
 }
 
-function processResponse(
-  resp: RawQuestionAnsweringResponse,
-  model: estypes.MlTrainedModelConfig,
-  inputText: string
-) {
+function processResponse(resp: RawQuestionAnsweringResponse, inputText: string) {
   const {
     inference_results: [inferenceResults],
   } = resp;

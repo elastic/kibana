@@ -123,6 +123,32 @@ export function isCategorizationAnomaly(anomaly: AnomaliesTableRecord): boolean 
   return anomaly.entityName === 'mlcategory';
 }
 
+export function isMultiMetricAnomaly(anomaly: AnomaliesTableRecord): boolean {
+  if (anomaly.source.anomaly_score_explanation === undefined) {
+    return false;
+  }
+
+  const sb = anomaly.source.anomaly_score_explanation.single_bucket_impact;
+  const mb = anomaly.source.anomaly_score_explanation.multi_bucket_impact;
+  if (mb === undefined || mb === 0) {
+    return false;
+  }
+
+  if (sb !== undefined && sb > mb) {
+    return false;
+  }
+
+  if ((sb === undefined || sb === 0) && mb > 0) {
+    return true;
+  }
+
+  if (sb !== undefined && mb > sb) {
+    return (((mb - sb) * mb) / sb) * 1.7 >= 2;
+  }
+
+  return false;
+}
+
 /**
  * Returns formatted severity score.
  * @param score - A normalized score between 0-100, which is based on the probability of the anomalousness of this record

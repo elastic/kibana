@@ -132,7 +132,7 @@ export const ModelsList: FC<Props> = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-  const [showTestFlyout, setShowTestFlyout] = useState<ModelItem | null>(null);
+  const [showTestFlyout, setShowTestFlyout] = useState<string | null>(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
@@ -508,7 +508,7 @@ export const ModelsList: FC<Props> = ({
       type: 'icon',
       isPrimary: true,
       available: isTestable,
-      onClick: setShowTestFlyout,
+      onClick: (item) => setShowTestFlyout(item.model_id),
       enabled: (item) => canTestTrainedModels && isTestEnabled(item),
     },
   ];
@@ -774,7 +774,7 @@ export const ModelsList: FC<Props> = ({
       )}
       {showTestFlyout === null ? null : (
         <TestTrainedModelFlyout
-          model={showTestFlyout}
+          modelId={showTestFlyout}
           onClose={setShowTestFlyout.bind(null, null)}
         />
       )}

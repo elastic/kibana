@@ -13,7 +13,7 @@ import { EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { TextInput } from '../text_input';
 import { QuestionAnsweringInference } from './question_answering_inference';
-import { RUNNING_STATE } from '../inference_base';
+import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 
 const QuestionInput: FC<{
   inferrer: QuestionAnsweringInference;
@@ -22,8 +22,7 @@ const QuestionInput: FC<{
 
   useEffect(() => {
     inferrer.questionText$.next(questionText);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionText]);
+  }, [questionText, inferrer]);
 
   const runningState = useObservable(inferrer.runningState$);
   return (
@@ -53,8 +52,13 @@ export const getQuestionAnsweringInput = (
   placeholder?: string
 ) => (
   <>
-    <TextInput placeholder={placeholder} inferrer={inferrer} />
-    <EuiSpacer />
+    {inferrer.getInputType() === INPUT_TYPE.TEXT ? (
+      <>
+        <TextInput placeholder={placeholder} inferrer={inferrer} />
+        <EuiSpacer />
+      </>
+    ) : null}
+
     <QuestionInput inferrer={inferrer} />
   </>
 );

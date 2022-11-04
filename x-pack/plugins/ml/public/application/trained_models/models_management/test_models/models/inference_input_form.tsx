@@ -31,13 +31,10 @@ export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
   const [errorText, setErrorText] = useState<string | null>(null);
 
   const runningState = useObservable(inferrer.runningState$);
-  const inputText = useObservable(inferrer.inputText$);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const inputComponent = useMemo(() => inferrer.getInputComponent(), []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const outputComponent = useMemo(() => inferrer.getOutputComponent(), []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const infoComponent = useMemo(() => inferrer.getInfoComponent(), []);
+  const inputText = useObservable(inferrer.inputText$) ?? [];
+  const inputComponent = useMemo(() => inferrer.getInputComponent(), [inferrer]);
+  const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
+  const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);
 
   async function run() {
     setErrorText(null);
@@ -56,7 +53,7 @@ export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
       <div>
         <EuiButton
           onClick={run}
-          disabled={runningState === RUNNING_STATE.RUNNING || inputText === ''}
+          disabled={runningState === RUNNING_STATE.RUNNING || inputText[0] === ''}
           fullWidth={false}
         >
           <FormattedMessage

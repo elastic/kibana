@@ -154,6 +154,21 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         ...(timeout ? { query: { timeout } as HttpFetchQuery } : {}),
       });
     },
+
+    trainedModelPipelineSimulate(
+      pipeline: estypes.IngestPipeline,
+      docs: estypes.IngestSimulateDocument[]
+    ) {
+      const body = JSON.stringify({
+        pipeline,
+        docs,
+      });
+      return httpService.http<estypes.IngestSimulateResponse>({
+        path: `${apiBasePath}/trained_models/pipeline_simulate`,
+        method: 'POST',
+        body,
+      });
+    },
   };
 }
 

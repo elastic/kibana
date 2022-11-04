@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// import { flatten } from 'lodash';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -14,9 +16,14 @@ import type { InferrerType } from '.';
 import { NerResponse } from './ner';
 import { TextClassificationResponse } from './text_classification';
 import { TextEmbeddingResponse } from './text_embedding';
-import { RUNNING_STATE } from './inference_base';
+import { INPUT_TYPE, RUNNING_STATE } from './inference_base';
+import { RawTextClassificationResponse } from './text_classification/common';
+import { RawTextEmbeddingResponse } from './text_embedding/text_embedding_inference';
 
-type InferenceResponse = NerResponse | TextClassificationResponse | TextEmbeddingResponse;
+type InferenceResponse = NerResponse[] | TextClassificationResponse[] | TextEmbeddingResponse[];
+type ResultResponses = Array<
+  estypes.MlInferTrainedModelResponse | RawTextClassificationResponse | RawTextEmbeddingResponse
+>;
 
 export const RawOutput: FC<{
   inferrer: InferrerType;
@@ -32,10 +39,21 @@ export const RawOutput: FC<{
     return null;
   }
 
+  const resultResponse: ResultResponses = [];
+  if (inferenceResult) {
+    for (const { rawResponse } of inferenceResult) {
+      resultResponse.push(rawResponse);
+    }
+  }
+
   const rawResponse =
     runningState === RUNNING_STATE.FINISHED_WITH_ERRORS
       ? JSON.stringify(inferenceError?.body ?? inferenceError, null, 2)
-      : JSON.stringify(inferenceResult?.rawResponse, null, 2);
+      : JSON.stringify(
+          inferrer.getInputType() === INPUT_TYPE.TEXT ? resultResponse[0] : resultResponse,
+          null,
+          2
+        );
 
   return (
     <>

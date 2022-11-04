@@ -18,6 +18,7 @@ export type InferenceType =
   | keyof estypes.AggregationsInferenceConfigContainer;
 
 const DEFAULT_INPUT_FIELD = 'text_field';
+export const DEFAULT_INFERENCE_TIME_OUT = '30s';
 
 export type FormattedNerResponse = Array<{
   value: string;
@@ -37,19 +38,25 @@ export enum RUNNING_STATE {
   FINISHED_WITH_ERRORS,
 }
 
+export enum INPUT_TYPE {
+  TEXT,
+  INDEX,
+}
+
 export abstract class InferenceBase<TInferResponse> {
   protected abstract readonly inferenceType: InferenceType;
   protected abstract readonly inferenceTypeLabel: string;
   protected readonly inputField: string;
-  public inputText$ = new BehaviorSubject<string>('');
-  public inferenceResult$ = new BehaviorSubject<TInferResponse | null>(null);
+  public inputText$ = new BehaviorSubject<string[]>([]);
+  public inferenceResult$ = new BehaviorSubject<TInferResponse[] | null>(null);
   public inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
   public runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
   protected readonly info: string[] = [];
 
   constructor(
-    protected trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
-    protected model: estypes.MlTrainedModelConfig
+    protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    protected readonly model: estypes.MlTrainedModelConfig,
+    protected readonly inputType: INPUT_TYPE
   ) {
     this.inputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
   }
@@ -76,12 +83,81 @@ export abstract class InferenceBase<TInferResponse> {
     return getInferenceInfoComponent(this.inferenceTypeLabel, this.info);
   }
 
-  protected abstract getInputComponent(): JSX.Element;
+  public getInputType() {
+    return this.inputType;
+  }
+
+  public reset() {
+    this.inputText$.next([]);
+    this.inferenceResult$.next(null);
+    this.inferenceError$.next(null);
+    this.runningState$.next(RUNNING_STATE.STOPPED);
+  }
+
+  protected getInputText() {
+    return this.inputText$.getValue()[0];
+  }
+
+  protected abstract getInputComponent(): JSX.Element | null;
   protected abstract getOutputComponent(): JSX.Element;
 
-  protected abstract infer(): Promise<TInferResponse>;
+  public async infer() {
+    return this.inputType === INPUT_TYPE.TEXT ? this.inferText() : this.inferIndex();
+  }
 
-  protected getInferenceConfig(): estypes.MlInferenceConfigCreateContainer[keyof estypes.MlInferenceConfigCreateContainer] {
+  protected abstract inferText(): Promise<TInferResponse[]>;
+  protected abstract inferIndex(): Promise<TInferResponse[]>;
+
+  public getPipeline(): estypes.IngestPipeline {
+    return {
+      processors: this.getProcessors(),
+    };
+  }
+
+  protected getBasicProcessors(
+    inferenceConfigOverrides?: Array<Record<string, any>>
+  ): estypes.IngestProcessorContainer[] {
+    const processor: estypes.IngestProcessorContainer = {
+      inference: {
+        model_id: this.model.model_id,
+        target_field: this.inferenceType,
+        field_map: {
+          [this.inputField]: this.inputField,
+        },
+        ...(inferenceConfigOverrides?.length
+          ? { ...this.getInferenceConfig(inferenceConfigOverrides) }
+          : {}),
+      },
+    };
+
+    return [processor];
+  }
+
+  protected getInferenceConfig(inferenceConfigOverrides: Array<Record<string, any>>): {
+    inference_config: estypes.MlInferenceConfigCreateContainer;
+  } {
+    return {
+      inference_config: {
+        [this.inferenceType as keyof estypes.MlInferenceConfigCreateContainer]: Object.assign(
+          {},
+          {},
+          ...inferenceConfigOverrides
+        ),
+      },
+    };
+  }
+
+  protected abstract getProcessors(): estypes.IngestProcessorContainer[];
+
+  protected getPipelineDocs() {
+    return this.inputText$.getValue().map((v) => ({
+      _source: {
+        [this.inputField]: v,
+      },
+    }));
+  }
+
+  private getDefaultInferenceConfig(): estypes.MlInferenceConfigCreateContainer[keyof estypes.MlInferenceConfigCreateContainer] {
     return this.model.inference_config[
       this.inferenceType as keyof estypes.MlInferenceConfigCreateContainer
     ];
@@ -89,18 +165,14 @@ export abstract class InferenceBase<TInferResponse> {
 
   protected getNumTopClassesConfig(defaultOverride = 5) {
     const options: estypes.MlInferenceConfigCreateContainer[keyof estypes.MlInferenceConfigCreateContainer] =
-      this.getInferenceConfig();
+      this.getDefaultInferenceConfig();
 
     if (options && 'num_top_classes' in options && (options?.num_top_classes ?? 0 > 0)) {
       return {};
     }
 
     return {
-      inference_config: {
-        [this.inferenceType]: {
-          num_top_classes: defaultOverride,
-        },
-      },
+      num_top_classes: defaultOverride,
     };
   }
 }

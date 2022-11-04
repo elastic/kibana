@@ -8,7 +8,14 @@
 import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTextArea, EuiCopy, EuiButton } from '@elastic/eui';
+import {
+  EuiTextArea,
+  EuiCopy,
+  EuiButton,
+  EuiHorizontalRule,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import type { TextEmbeddingInference } from './text_embedding_inference';
 
@@ -24,9 +31,26 @@ const TextEmbeddingOutput: FC<{
     return null;
   }
 
-  const value = result.response.predictedValue.toString();
   return (
     <>
+      {result.map(({ response, inputText }) => (
+        <>
+          <TextEmbedding value={response.predictedValue.toString()} inputText={inputText} />
+          <EuiHorizontalRule />
+        </>
+      ))}
+    </>
+  );
+};
+
+const TextEmbedding: FC<{
+  value: string;
+  inputText: string;
+}> = ({ value, inputText }) => {
+  return (
+    <>
+      <EuiText size="s">{inputText}</EuiText>
+      <EuiSpacer size="s" />
       <EuiTextArea value={value} fullWidth style={{ height: 300 }} />
       <EuiCopy textToCopy={value}>
         {(copy) => (

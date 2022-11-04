@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { InferenceBase } from '../inference_base';
+import { DEFAULT_INFERENCE_TIME_OUT, InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
-import { processResponse } from './common';
+import { processResponse, processInferenceResult } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getFillMaskOutputComponent } from './fill_mask_output';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
@@ -28,24 +28,53 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
     }),
   ];
 
-  public async infer() {
+  protected async inferText() {
     try {
       this.setRunning();
-      const inputText = this.inputText$.getValue();
+      const inputText = this.getInputText();
       const payload = {
         docs: [{ [this.inputField]: inputText }],
-        ...this.getNumTopClassesConfig(),
+        ...this.getInferenceConfig([this.getNumTopClassesConfig()]),
       };
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
         payload,
-        '30s'
+        DEFAULT_INFERENCE_TIME_OUT
       )) as unknown as RawTextClassificationResponse;
 
       const processedResponse = processResponse(resp, this.model, inputText);
-      this.inferenceResult$.next(processedResponse);
+      this.inferenceResult$.next([processedResponse]);
       this.setFinished();
 
+      return [processedResponse];
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
+  }
+
+  protected async inferIndex() {
+    try {
+      this.setRunning();
+      const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
+        this.getPipeline(),
+        this.getPipelineDocs()
+      );
+
+      const processedResponse: TextClassificationResponse[] = docs.map(({ doc }) => {
+        if (doc === undefined) {
+          throw Error('No doc aaaggghhhhhhh'); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        }
+
+        return {
+          response: processInferenceResult(doc._source[this.inferenceType], this.model),
+          rawResponse: doc._source[this.inferenceType],
+          inputText: doc._source[this.inputField],
+        };
+      });
+
+      this.inferenceResult$.next(processedResponse);
+      this.setFinished();
       return processedResponse;
     } catch (error) {
       this.setFinishedWithErrors(error);
@@ -53,26 +82,29 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
     }
   }
 
-  public predictedValue() {
-    const result = this.inferenceResult$.value;
-    if (result === null) {
-      return '';
-    }
-    return result.response[0]?.value
-      ? result.inputText.replace(MASK, result.response[0].value)
-      : result.inputText;
+  protected getProcessors() {
+    return this.getBasicProcessors([this.getNumTopClassesConfig()]);
   }
 
-  public getInputComponent(): JSX.Element {
-    const placeholder = i18n.translate(
-      'xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText',
-      {
-        defaultMessage:
-          'Enter a phrase to test. Use [MASK] as a placeholder for the missing words.',
-      }
-    );
+  public predictedValue(resp: TextClassificationResponse) {
+    const { response, inputText } = resp;
+    return response[0]?.value ? inputText.replace(MASK, response[0].value) : inputText;
+  }
 
-    return getGeneralInputComponent(this, placeholder);
+  public getInputComponent(): JSX.Element | null {
+    if (this.inputType === INPUT_TYPE.TEXT) {
+      const placeholder = i18n.translate(
+        'xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText',
+        {
+          defaultMessage:
+            'Enter a phrase to test. Use [MASK] as a placeholder for the missing words.',
+        }
+      );
+
+      return getGeneralInputComponent(this, placeholder);
+    } else {
+      return null;
+    }
   }
 
   public getOutputComponent(): JSX.Element {
