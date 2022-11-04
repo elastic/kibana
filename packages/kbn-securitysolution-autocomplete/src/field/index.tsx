@@ -63,11 +63,10 @@ export const FieldComponent: React.FC<FieldProps> = ({
         data-test-subj="fieldAutocompleteComboBox"
         style={fieldWidth}
         onCreateOption={handleCreateCustomOption}
-        customOptionText={i18n.translate('xpack.securitySolution.lists.customOptionText', {
+        customOptionText={i18n.translate('xpack.securitySolution.autocomplete.customOptionText', {
           defaultMessage: 'Add {searchValuePlaceholder} as a custom field',
           values: { searchValuePlaceholder: '{searchValue}' },
         })}
-        // customOptionText="Add {searchValue} as your occupation"
         fullWidth
       />
     );
