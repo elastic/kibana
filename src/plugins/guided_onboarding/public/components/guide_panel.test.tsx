@@ -120,7 +120,7 @@ describe('Guided setup', () => {
 
       await updateComponentWithState(
         component,
-        { ...mockActiveSearchGuideState, isActive: false },
+        { ...mockActiveTestGuideState, isActive: false },
         true
       );
 
@@ -134,7 +134,6 @@ describe('Guided setup', () => {
       // Enable the "test" guide
       await updateComponentWithState(component, mockActiveTestGuideState, true);
 
-      expect(exists('disabledGuideButton')).toBe(false);
       expect(exists('guideButton')).toBe(true);
       expect(find('guideButton').text()).toEqual('Setup guide');
     });
@@ -233,15 +232,21 @@ describe('Guided setup', () => {
       expect(find('guideDescription').text()).toContain(
         `You've completed the Elastic Testing example guide`
       );
-      expect(exists('useElasticButton')).toBe(true);
+      expect(exists('onboarding--completeGuideButton--testGuide')).toBe(true);
     });
 
     describe('Steps', () => {
-      const clickActiveStepButton = async () => {
+      const clickStepButton = async ({
+        telemetryGuideId,
+        stepNumber,
+      }: {
+        telemetryGuideId: string;
+        stepNumber: number;
+      }) => {
         const { component, find } = testBed;
 
         await act(async () => {
-          find('activeStepButton').simulate('click');
+          find(`onboarding--stepButton--${telemetryGuideId}--step${stepNumber}`).simulate('click');
         });
 
         component.update();
@@ -252,9 +257,9 @@ describe('Guided setup', () => {
 
         await updateComponentWithState(component, mockActiveTestGuideState, true);
 
-        expect(find('activeStepButton').text()).toEqual('Start');
+        expect(find('onboarding--stepButton--testGuide--step1').text()).toEqual('Start');
 
-        await clickActiveStepButton();
+        await clickStepButton({ telemetryGuideId: 'testGuide', stepNumber: 1 });
 
         expect(exists('guidePanel')).toBe(false);
       });
@@ -264,9 +269,9 @@ describe('Guided setup', () => {
 
         await updateComponentWithState(component, mockInProgressTestGuideState, true);
 
-        expect(find('activeStepButton').text()).toEqual('Continue');
+        expect(find('onboarding--stepButton--testGuide--step1').text()).toEqual('Continue');
 
-        await clickActiveStepButton();
+        await clickStepButton({ telemetryGuideId: 'testGuide', stepNumber: 1 });
 
         expect(exists('guidePanel')).toBe(false);
       });
@@ -276,14 +281,14 @@ describe('Guided setup', () => {
 
         await updateComponentWithState(component, mockReadyToCompleteTestGuideState, true);
 
-        expect(find('activeStepButton').text()).toEqual('Mark done');
+        expect(find('onboarding--stepButton--testGuide--step2').text()).toEqual('Mark done');
 
-        await clickActiveStepButton();
+        await clickStepButton({ telemetryGuideId: 'testGuide', stepNumber: 2 });
 
         // The guide panel should remain open after marking a step done
         expect(exists('guidePanel')).toBe(true);
-        // Dependent on the Search guide config, which expects another step to start
-        expect(find('activeStepButton').text()).toEqual('Start');
+        // Dependent on the Search guide config, which expects step 3 to start
+        expect(find('onboarding--stepButton--testGuide--step3').text()).toEqual('Start');
       });
 
       test('should render the step description as a paragraph if it is only one sentence', async () => {
@@ -358,19 +363,19 @@ describe('Guided setup', () => {
 
         component.update();
 
-        expect(exists('quitGuideModal')).toBe(true);
+        expect(exists('onboarding--quitGuideModal')).toBe(true);
       });
 
       test('quit a guide', async () => {
         const { component, find, exists } = testBed;
 
         await act(async () => {
-          find('confirmModalConfirmButton').simulate('click');
+          find('onboarding--quitGuideButton--testGuide').simulate('click');
         });
 
         component.update();
 
-        expect(exists('quitGuideModal')).toBe(false);
+        expect(exists('onboarding--quitGuideModal')).toBe(false);
 
         // TODO check for the correct button behavior once https://github.com/elastic/kibana/issues/141129 is implemented
       });
@@ -379,12 +384,12 @@ describe('Guided setup', () => {
         const { component, find, exists } = testBed;
 
         await act(async () => {
-          find('confirmModalCancelButton').simulate('click');
+          find('onboarding--cancelQuitGuideButton--testGuide').simulate('click');
         });
 
         component.update();
 
-        expect(exists('quitGuideModal')).toBe(false);
+        expect(exists('onboarding--quitGuideModal')).toBe(false);
         expect(exists('guideButton')).toBe(true);
       });
     });
