@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APMRouteHandlerResources } from '../../routes/typings';
+import { APMRouteHandlerResources } from '../typings';
 
 export async function getAlertsIndices({
   plugins,

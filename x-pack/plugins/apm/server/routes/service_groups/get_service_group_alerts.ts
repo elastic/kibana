@@ -67,14 +67,14 @@ export async function getServiceGroupAlerts({
   };
   const result = await esClient.asCurrentUser.search(params);
 
-  type ServiceGroupsAggResponse = {
+  interface ServiceGroupsAggResponse {
     buckets: Record<
       string,
       AggregationsFilterAggregate & {
         alerts_count: AggregationsCardinalityAggregate;
       }
     >;
-  };
+  }
 
   const { buckets: filterAggBuckets } = (result.aggregations
     ?.service_groups ?? { buckets: {} }) as ServiceGroupsAggResponse;
