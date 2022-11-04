@@ -55,10 +55,8 @@ export const loadFieldRegistryFromDataViewId = async (
   );
   dataView.fields.map((dataViewField) => {
     for (const factory of controlFactories) {
-      if (!dataViewField.spec.scripted) {
-        if (factory.isFieldCompatible) {
-          factory.isFieldCompatible(newFieldRegistry[dataViewField.name]);
-        }
+      if (factory.isFieldCompatible) {
+        factory.isFieldCompatible(newFieldRegistry[dataViewField.name]);
       }
     }
 
