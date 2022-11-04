@@ -6,6 +6,7 @@
  */
 import * as t from 'io-ts';
 import uuid from 'uuid';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
