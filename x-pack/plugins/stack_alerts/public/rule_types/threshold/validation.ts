@@ -13,9 +13,9 @@ import {
   builtInAggregationTypes,
   builtInComparators,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { IndexThresholdAlertParams } from './types';
+import { IndexThresholdRuleParams } from './types';
 
-export const validateExpression = (alertParams: IndexThresholdAlertParams): ValidationResult => {
+export const validateExpression = (alertParams: IndexThresholdRuleParams): ValidationResult => {
   const {
     index,
     timeField,

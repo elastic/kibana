@@ -27,7 +27,7 @@ export interface GroupByType {
   validNormalizedTypes: string[];
 }
 
-export interface IndexThresholdAlertParams extends RuleTypeParams {
+export interface IndexThresholdRuleParams extends RuleTypeParams {
   index: string | string[];
   timeField?: string;
   aggType: string;

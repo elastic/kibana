@@ -22,7 +22,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('./index_threshold_api', () => ({
-  getThresholdAlertVisualizationData: jest.fn(() =>
+  getThresholdRuleVisualizationData: jest.fn(() =>
     Promise.resolve({
       results: [
         { group: 'a', metrics: [['b', 2]] },
@@ -32,7 +32,7 @@ jest.mock('./index_threshold_api', () => ({
   ),
 }));
 
-const { getThresholdAlertVisualizationData } = jest.requireMock('./index_threshold_api');
+const { getThresholdRuleVisualizationData } = jest.requireMock('./index_threshold_api');
 
 const dataMock = dataPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
@@ -99,7 +99,7 @@ describe('ThresholdVisualization', () => {
       await nextTick();
       wrapper.update();
     });
-    expect(getThresholdAlertVisualizationData).toHaveBeenCalledTimes(1);
+    expect(getThresholdRuleVisualizationData).toHaveBeenCalledTimes(1);
 
     for (let i = 1; i <= 5; i++) {
       await act(async () => {
@@ -107,7 +107,7 @@ describe('ThresholdVisualization', () => {
         await nextTick();
         wrapper.update();
       });
-      expect(getThresholdAlertVisualizationData).toHaveBeenCalledTimes(i + 1);
+      expect(getThresholdRuleVisualizationData).toHaveBeenCalledTimes(i + 1);
     }
   });
 
@@ -130,7 +130,7 @@ describe('ThresholdVisualization', () => {
     });
 
     expect(wrapper.find('[data-test-subj="firstLoad"]').exists()).toBeFalsy();
-    expect(getThresholdAlertVisualizationData).toHaveBeenCalled();
+    expect(getThresholdRuleVisualizationData).toHaveBeenCalled();
   });
 
   test('renders chart when visualization results are available', async () => {
@@ -144,7 +144,7 @@ describe('ThresholdVisualization', () => {
   });
 
   test('renders multiple line series chart when visualization results contain multiple groups', async () => {
-    getThresholdAlertVisualizationData.mockImplementation(() =>
+    getThresholdRuleVisualizationData.mockImplementation(() =>
       Promise.resolve({
         results: [
           { group: 'a', metrics: [['b', 2]] },
@@ -165,7 +165,7 @@ describe('ThresholdVisualization', () => {
 
   test('renders error callout with message when getting visualization fails', async () => {
     const errorMessage = 'oh no';
-    getThresholdAlertVisualizationData.mockImplementation(() =>
+    getThresholdRuleVisualizationData.mockImplementation(() =>
       Promise.reject(new Error(errorMessage))
     );
     const wrapper = await setup();
@@ -182,7 +182,7 @@ describe('ThresholdVisualization', () => {
   });
 
   test('renders error callout even when unable to get message from error', async () => {
-    getThresholdAlertVisualizationData.mockImplementation(() =>
+    getThresholdRuleVisualizationData.mockImplementation(() =>
       Promise.reject(new Error(undefined))
     );
     const wrapper = await setup();
@@ -199,7 +199,7 @@ describe('ThresholdVisualization', () => {
   });
 
   test('renders no data message when visualization results are empty', async () => {
-    getThresholdAlertVisualizationData.mockImplementation(() => Promise.resolve({ results: [] }));
+    getThresholdRuleVisualizationData.mockImplementation(() => Promise.resolve({ results: [] }));
     const wrapper = await setup();
 
     expect(wrapper.find('[data-test-subj="alertVisualizationChart"]').exists()).toBeTruthy();

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IndexThresholdAlertParams } from './types';
+import { IndexThresholdRuleParams } from './types';
 import { validateExpression } from './validation';
 
 describe('expression params validation', () => {
   test('if index property is invalid should return proper error message', () => {
-    const initialParams: IndexThresholdAlertParams = {
+    const initialParams: IndexThresholdRuleParams = {
       index: [],
       aggType: 'count',
       threshold: [],
@@ -21,7 +21,7 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.index[0]).toBe('Index is required.');
   });
   test('if timeField property is not defined should return proper error message', () => {
-    const initialParams: IndexThresholdAlertParams = {
+    const initialParams: IndexThresholdRuleParams = {
       index: ['test'],
       aggType: 'count',
       threshold: [],
@@ -32,7 +32,7 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.timeField[0]).toBe('Time field is required.');
   });
   test('if aggField property is invalid should return proper error message', () => {
-    const initialParams: IndexThresholdAlertParams = {
+    const initialParams: IndexThresholdRuleParams = {
       index: 'test',
       aggType: 'avg',
       threshold: [],
@@ -45,7 +45,7 @@ describe('expression params validation', () => {
     );
   });
   test('if termSize property is not set should return proper error message', () => {
-    const initialParams: IndexThresholdAlertParams = {
+    const initialParams: IndexThresholdRuleParams = {
       index: ['test'],
       aggType: 'count',
       groupBy: 'top',
@@ -57,7 +57,7 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.termSize[0]).toBe('Term size is required.');
   });
   test('if termField property is not set should return proper error message', () => {
-    const initialParams: IndexThresholdAlertParams = {
+    const initialParams: IndexThresholdRuleParams = {
       index: ['test'],
       aggType: 'count',
       groupBy: 'top',
@@ -69,7 +69,7 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.termField[0]).toBe('Term field is required.');
   });
   test('if threshold0 property is not set should return proper error message', () => {
-    const initialParams: IndexThresholdAlertParams = {
+    const initialParams: IndexThresholdRuleParams = {
       index: ['test'],
       aggType: 'count',
       groupBy: 'top',
@@ -82,7 +82,7 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.threshold0[0]).toBe('Threshold0 is required.');
   });
   test('if threshold1 property is not set should return proper error message', () => {
-    const initialParams: IndexThresholdAlertParams = {
+    const initialParams: IndexThresholdRuleParams = {
       index: ['test'],
       aggType: 'count',
       groupBy: 'top',
@@ -96,7 +96,7 @@ describe('expression params validation', () => {
   });
 
   test('if filterKuery is invalid should return proper error message', () => {
-    const initialParams: IndexThresholdAlertParams = {
+    const initialParams: IndexThresholdRuleParams = {
       index: ['test'],
       aggType: 'count',
       groupBy: 'top',

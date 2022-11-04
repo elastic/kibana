@@ -15,14 +15,7 @@ import { DocLinksStart, HttpSetup } from '@kbn/core/public';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  builtInAggregationTypes,
-  getFields,
-  GroupByExpression,
-  OfExpression,
-  RuleTypeParamsExpressionProps,
-  WhenExpression,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
@@ -52,11 +45,6 @@ export const EsQueryExpression: React.FC<
     timeWindowSize,
     timeWindowUnit,
     excludeHitsFromPreviousRun,
-    aggType,
-    aggField,
-    groupBy,
-    termSize,
-    termField,
   } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<EsQueryRuleParams<SearchType.esQuery>>(
@@ -71,9 +59,6 @@ export const EsQueryExpression: React.FC<
       searchType: SearchType.esQuery,
       excludeHitsFromPreviousRun:
         excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-      aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
-      groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
-      termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
     }
   );
 
@@ -193,41 +178,6 @@ export const EsQueryExpression: React.FC<
           }
         }}
         onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
-      />
-      <WhenExpression
-        display="fullWidth"
-        data-test-subj="whenExpression"
-        aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
-        onChangeSelectedAggType={(selectedAggType: string) =>
-          setRuleParams('aggType', selectedAggType)
-        }
-      />
-      {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
-        <OfExpression
-          aggField={aggField}
-          data-test-subj="aggTypeExpression"
-          fields={esFields}
-          aggType={aggType}
-          errors={errors}
-          display="fullWidth"
-          onChangeSelectedAggField={(selectedAggField?: string) =>
-            setRuleParams('aggField', selectedAggField)
-          }
-        />
-      ) : null}
-      <GroupByExpression
-        groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
-        data-test-subj="groupByExpression"
-        termField={termField}
-        termSize={termSize}
-        errors={errors}
-        fields={esFields}
-        display="fullWidth"
-        onChangeSelectedGroupBy={(selectedGroupBy) => setRuleParams('groupBy', selectedGroupBy)}
-        onChangeSelectedTermField={(selectedTermField) =>
-          setRuleParams('termField', selectedTermField)
-        }
-        onChangeSelectedTermSize={(selectedTermSize) => setRuleParams('termSize', selectedTermSize)}
       />
       <EuiSpacer size="s" />
 
