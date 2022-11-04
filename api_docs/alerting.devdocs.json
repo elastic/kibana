@@ -1613,6 +1613,22 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.PluginStartContract.getAllTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllTypes",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.PluginStartContract.getRulesClientWithRequest",
             "type": "Function",
             "tags": [],

@@ -42,7 +42,9 @@
           "signature": [
             "((props: ",
             "OsqueryActionProps",
-            ") => JSX.Element) | undefined"
+            " & { ecsData?: ",
+            "AlertEcsData",
+            " | undefined; }) => JSX.Element) | undefined"
           ],
           "path": "x-pack/plugins/osquery/public/types.ts",
           "deprecated": false,

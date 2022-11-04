@@ -13400,10 +13400,6 @@
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
@@ -21100,10 +21096,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
               },
               {
                 "plugin": "canvas",

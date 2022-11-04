@@ -13780,6 +13780,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryElasticsearch.source_mode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source_mode",
+            "description": [],
+            "signature": [
+              "\"default\" | \"synthetic\" | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
