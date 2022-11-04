@@ -16,8 +16,8 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import {
   AuditAction,
-  ISavedObjectsSecurityExtension,
-  ISavedObjectTypeRegistry,
+  type ISavedObjectsSecurityExtension,
+  type ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {

@@ -40,7 +40,7 @@ import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
   resolveSavedObjectsImportErrors,
-  ResolveSavedObjectsImportErrorsOptions,
+  type ResolveSavedObjectsImportErrorsOptions,
 } from './resolve_import_errors';
 
 describe('#importSavedObjectsFromStream', () => {

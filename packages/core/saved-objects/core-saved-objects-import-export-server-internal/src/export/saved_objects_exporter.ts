@@ -25,7 +25,11 @@ import type {
 import { sortObjects } from './sort_objects';
 import { SavedObjectsExportError } from './errors';
 import { collectExportedObjects } from './collect_exported_objects';
-import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
+import {
+  byIdAscComparator,
+  getPreservedOrderComparator,
+  type SavedObjectComparator,
+} from './utils';
 
 /**
  * @internal

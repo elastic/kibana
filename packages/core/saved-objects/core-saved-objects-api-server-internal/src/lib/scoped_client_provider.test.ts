@@ -10,16 +10,16 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { SavedObjectsClientProvider } from './scoped_client_provider';
 import {
-  ISavedObjectTypeRegistry,
-  SavedObjectsClientFactory,
-  SavedObjectsEncryptionExtensionFactory,
-  SavedObjectsSecurityExtensionFactory,
-  SavedObjectsSpacesExtensionFactory,
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsClientFactory,
+  type SavedObjectsEncryptionExtensionFactory,
+  type SavedObjectsSecurityExtensionFactory,
+  type SavedObjectsSpacesExtensionFactory,
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
 } from '@kbn/core-saved-objects-server';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 /**

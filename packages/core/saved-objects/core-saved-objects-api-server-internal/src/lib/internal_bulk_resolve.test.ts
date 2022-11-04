@@ -24,13 +24,13 @@ import {
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { internalBulkResolve, InternalBulkResolveParams } from './internal_bulk_resolve';
+import { internalBulkResolve, type InternalBulkResolveParams } from './internal_bulk_resolve';
 import { normalizeNamespace } from './internal_utils';
 import {
   AuditAction,
-  ISavedObjectsEncryptionExtension,
-  ISavedObjectsSecurityExtension,
-  ISavedObjectTypeRegistry,
+  type ISavedObjectsEncryptionExtension,
+  type ISavedObjectsSecurityExtension,
+  type ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
 import {
   authMap,

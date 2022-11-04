@@ -61,17 +61,17 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
 import {
-  SavedObjectSanitizedDoc,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-  ISavedObjectTypeRegistry,
-  SavedObjectsExtensions,
-  ISavedObjectsEncryptionExtension,
-  ISavedObjectsSecurityExtension,
-  ISavedObjectsSpacesExtension,
+  type SavedObjectSanitizedDoc,
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsExtensions,
+  type ISavedObjectsEncryptionExtension,
+  type ISavedObjectsSecurityExtension,
+  type ISavedObjectsSpacesExtension,
   AuditAction,
-  CheckAuthorizationResult,
-  AuthorizationTypeMap,
+  type CheckAuthorizationResult,
+  type AuthorizationTypeMap,
 } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_NAMESPACE_STRING,
@@ -98,12 +98,12 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import pMap from 'p-map';
 import { PointInTimeFinder } from './point_in_time_finder';
-import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
+import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import {
   internalBulkResolve,
-  InternalBulkResolveError,
+  type InternalBulkResolveError,
   isBulkResolveError,
 } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
@@ -116,7 +116,7 @@ import {
   normalizeNamespace,
   rawDocExistsInNamespace,
   rawDocExistsInNamespaces,
-  Either,
+  type Either,
   isLeft,
   isRight,
 } from './internal_utils';
@@ -124,8 +124,8 @@ import { collectMultiNamespaceReferences } from './collect_multi_namespace_refer
 import { updateObjectsSpaces } from './update_objects_spaces';
 import {
   preflightCheckForCreate,
-  PreflightCheckForCreateObject,
-  PreflightCheckForCreateResult,
+  type PreflightCheckForCreateObject,
+  type PreflightCheckForCreateResult,
 } from './preflight_check_for_create';
 import { deleteLegacyUrlAliases } from './legacy_url_aliases';
 import type {
@@ -1494,13 +1494,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           // This ensures that the query DSL can filter only for object types that the user is authorized to access for a given space
           const { authorizedSpaces, isGloballyAuthorized } = entry.find;
           typeToNamespacesMap.set(objType, isGloballyAuthorized ? namespaces : authorizedSpaces);
-          // TODO: REMOVE console.log(`AUTHZd: ${authorizedSpaces}`);
-          // TODO: REMOVE console.log(`REPO MAP: ${JSON.stringify(typeToNamespacesMap.get(objType))}`);
         }
       }
     }
-
-    // TODO: REMOVE console.log(`getSearchDsl Mock Check: ${getSearchDsl.mock}`);
 
     const esOptions = {
       // If `pit` is provided, we drop the `index`, otherwise ES returns 400.

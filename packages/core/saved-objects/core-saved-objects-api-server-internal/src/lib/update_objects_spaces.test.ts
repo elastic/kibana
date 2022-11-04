@@ -25,7 +25,7 @@ import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-inte
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { UpdateObjectsSpacesParams } from './update_objects_spaces';
 import { updateObjectsSpaces } from './update_objects_spaces';
-import { AuditAction, ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import { AuditAction, type ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import {
   authMap,
   checkAuthError,

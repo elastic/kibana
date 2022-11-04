@@ -69,7 +69,7 @@ import { kibanaMigratorMock } from '../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { InternalBulkResolveError } from './internal_bulk_resolve';
+import type { InternalBulkResolveError } from './internal_bulk_resolve';
 
 import {
   KIBANA_VERSION,
@@ -88,7 +88,7 @@ import {
   createDocumentMigrator,
   getMockGetResponse,
   getMockMgetResponse,
-  TypeIdTuple,
+  type TypeIdTuple,
   createSpySerializer,
   bulkCreateSuccess,
   bulkUpdateSuccess,

@@ -20,9 +20,9 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import {
   AuditAction,
-  ISavedObjectsSecurityExtension,
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDocSource,
+  type ISavedObjectsSecurityExtension,
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
@@ -34,12 +34,12 @@ import type {
   IndexMapping,
   SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,
   rawDocExistsInNamespace,
-  Either,
+  type Either,
   isLeft,
   isRight,
 } from './internal_utils';

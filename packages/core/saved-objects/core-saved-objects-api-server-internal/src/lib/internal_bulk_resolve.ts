@@ -19,10 +19,10 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import {
   AuditAction,
-  ISavedObjectsEncryptionExtension,
-  ISavedObjectsSecurityExtension,
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDocSource,
+  type ISavedObjectsEncryptionExtension,
+  type ISavedObjectsSecurityExtension,
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
@@ -45,8 +45,8 @@ import {
   getSavedObjectFromSource,
   normalizeNamespace,
   rawDocExistsInNamespace,
-  Either,
-  Right,
+  type Either,
+  type Right,
   isLeft,
   isRight,
 } from './internal_utils';

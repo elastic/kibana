@@ -13,7 +13,7 @@ import type {
   SavedObjectsExportTransformContext,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsExportError } from './errors';
-import { getObjKey, SavedObjectComparator } from './utils';
+import { getObjKey, type SavedObjectComparator } from './utils';
 
 interface ApplyExportTransformsOptions {
   objects: SavedObject[];

@@ -22,11 +22,11 @@ import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-inte
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
   ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE,
-  CollectMultiNamespaceReferencesParams,
+  type CollectMultiNamespaceReferencesParams,
 } from './collect_multi_namespace_references';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
-import { AuditAction, ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import { AuditAction, type ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 
 import {
   authMap,
