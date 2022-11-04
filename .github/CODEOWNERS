@@ -22,31 +22,31 @@
 /src/plugins/saved_objects_finder/ @elastic/kibana-data-discovery
 
 # Vis Editors
-/x-pack/plugins/lens/ @elastic/kibana-vis-editors
-/src/plugins/charts/ @elastic/kibana-vis-editors
-/src/plugins/vis_default_editor/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/metric/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/table/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/tagcloud/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/timelion/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/timeseries/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/vega/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/vislib/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/xy/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/pie/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/heatmap/ @elastic/kibana-vis-editors
-/src/plugins/visualize/ @elastic/kibana-vis-editors
-/src/plugins/visualizations/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_metric/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_heatmap/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_gauge/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_partition_vis/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_xy/ @elastic/kibana-vis-editors
-/src/plugins/url_forwarding/ @elastic/kibana-vis-editors
-/x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
-/x-pack/test/api_integration/apis/lens/ @elastic/kibana-vis-editors
-/test/functional/apps/visualize/ @elastic/kibana-vis-editors
+/x-pack/plugins/lens/ @elastic/kibana-visualizations
+/src/plugins/charts/ @elastic/kibana-visualizations
+/src/plugins/vis_default_editor/ @elastic/kibana-visualizations
+/src/plugins/vis_types/metric/ @elastic/kibana-visualizations
+/src/plugins/vis_types/table/ @elastic/kibana-visualizations
+/src/plugins/vis_types/tagcloud/ @elastic/kibana-visualizations
+/src/plugins/vis_types/timelion/ @elastic/kibana-visualizations
+/src/plugins/vis_types/timeseries/ @elastic/kibana-visualizations
+/src/plugins/vis_types/vega/ @elastic/kibana-visualizations
+/src/plugins/vis_types/vislib/ @elastic/kibana-visualizations
+/src/plugins/vis_types/xy/ @elastic/kibana-visualizations
+/src/plugins/vis_types/pie/ @elastic/kibana-visualizations
+/src/plugins/vis_types/heatmap/ @elastic/kibana-visualizations
+/src/plugins/visualize/ @elastic/kibana-visualizations
+/src/plugins/visualizations/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_metric/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_heatmap/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_gauge/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_partition_vis/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_xy/ @elastic/kibana-visualizations
+/src/plugins/url_forwarding/ @elastic/kibana-visualizations
+/x-pack/test/functional/apps/lens @elastic/kibana-visualizations
+/x-pack/test/api_integration/apis/lens/ @elastic/kibana-visualizations
+/test/functional/apps/visualize/ @elastic/kibana-visualizations
 
 # Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-services
@@ -950,7 +950,7 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-react-field @elastic/kibana-app-services
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
-packages/kbn-rule-data-utils @elastic/apm-ui
+packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform

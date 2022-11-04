@@ -29,8 +29,13 @@ export function useFleetServerHostsForPolicy(agentPolicy?: AgentPolicy | null) {
   const isLoadingInitialRequest =
     fleetServerHostsRequest.isLoading && fleetServerHostsRequest.isInitialRequest;
 
+  const allFleetServerHosts = useMemo(
+    () => fleetServerHostsRequest.data?.items ?? [],
+    [fleetServerHostsRequest]
+  );
+
   return useMemo(
-    () => ({ isLoadingInitialRequest, fleetServerHosts }),
-    [fleetServerHosts, isLoadingInitialRequest]
+    () => ({ isLoadingInitialRequest, fleetServerHosts, allFleetServerHosts }),
+    [fleetServerHosts, allFleetServerHosts, isLoadingInitialRequest]
   );
 }
