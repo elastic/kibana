@@ -119,6 +119,14 @@ while read -r journey; do
   done
 done <<< "$journeys"
 
+echo "--- Upload journey step screenshots"
+JOURNEY_SCREENSHOTS_DIR="${KIBANA_DIR}/data/journey_screenshots"
+if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
+  cd "$JOURNEY_SCREENSHOTS_DIR"
+  buildkite-agent artifact upload "**/*fullscreen*.png"
+  cd "$KIBANA_DIR"
+fi
+
 echo "--- report/record failed journeys"
 if [ "${failedJourneys[*]}" != "" ]; then
   buildkite-agent meta-data set "failed-journeys" "$(printf "%s\n" "${failedJourneys[@]}")"
