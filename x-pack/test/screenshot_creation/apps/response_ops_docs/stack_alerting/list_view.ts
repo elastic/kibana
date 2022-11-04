@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const rules = getService('rules');
   const supertest = getService('supertest');
 
-  describe.only('list view', function () {
+  describe('list view', function () {
     let serverLogConnectorId: string;
 
     before(async () => {
@@ -27,16 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('connectors list screenshot', async () => {
-      await pageObjects.common.navigateToUrl(
-        'management',
-        'insightsAndAlerting/triggersActionsConnectors',
-        {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: true,
-          shouldUseHashForSubUrl: false,
-          basePath: '',
-        }
-      );
+      await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(
         'connector-listing',

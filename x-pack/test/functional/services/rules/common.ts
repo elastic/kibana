@@ -18,7 +18,6 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
   const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
-  const supertest = getService('supertest');
 
   return {
     async clickCreateAlertButton() {
