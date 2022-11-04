@@ -108,7 +108,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         if (dataView?.metaFields?.includes(field.name)) {
           return 'metaFields';
         }
-        if (containsData(field)) {
+        if (containsData(field) || fieldsExistenceInfoUnavailable) {
           return 'availableFields';
         }
         return 'emptyFields';
@@ -118,8 +118,9 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     const popularFields = popularFieldsLimit
       ? sortedFields
           .filter((field) => field.count && field.type !== '_source' && containsData(field))
-          .sort((a: T, b: T) => (b.count || 0) - (a.count || 0))
+          .sort((a: T, b: T) => (b.count || 0) - (a.count || 0)) // sort by popularity score
           .slice(0, popularFieldsLimit)
+          .sort(sortFields) // sort alphabetically
       : [];
 
     let fieldGroupDefinitions: FieldListGroups<T> = {
