@@ -22,6 +22,10 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.control.negate', {
         defaultMessage: 'NOT',
       }),
+    getExcludeExists: () =>
+      i18n.translate('controls.optionsList.control.excludeExists', {
+        defaultMessage: 'DOES NOT',
+      }),
   },
   editor: {
     getAllowMultiselectTitle: () =>
@@ -41,8 +45,21 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.editor.hideExclude', {
         defaultMessage: 'Allow selections to be excluded',
       }),
+    getHideExistsQueryTitle: () =>
+      i18n.translate('controls.optionsList.editor.hideExistsQuery', {
+        defaultMessage: 'Allow exists query',
+      }),
+    getHideExistsQueryTooltip: () =>
+      i18n.translate('controls.optionsList.editor.hideExistsQueryTooltip', {
+        defaultMessage: 'Returns the documents that contain an indexed value for the field.',
+      }),
   },
   popover: {
+    getAriaLabel: (fieldName: string) =>
+      i18n.translate('controls.optionsList.popover.ariaLabel', {
+        defaultMessage: 'Popover for {fieldName} control',
+        values: { fieldName },
+      }),
     getLoadingMessage: () =>
       i18n.translate('controls.optionsList.popover.loading', {
         defaultMessage: 'Loading options',
@@ -110,6 +127,13 @@ export const OptionsListStrings = {
     getIncludeExcludeLegend: () =>
       i18n.translate('controls.optionsList.popover.excludeOptionsLegend', {
         defaultMessage: 'Include or exclude selections',
+      }),
+  },
+  controlAndPopover: {
+    getExists: (negate: number = +false) =>
+      i18n.translate('controls.optionsList.controlAndPopover.exists', {
+        defaultMessage: '{negate, plural, one {Exist} other {Exists}}',
+        values: { negate },
       }),
   },
 };

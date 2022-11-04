@@ -107,7 +107,6 @@ export const setupOptionsListSuggestionsRoute = (
           validation: builtValidationAggregation,
         }
       : {};
-
     const body: SearchRequest['body'] = {
       size: 0,
       ...timeoutSettings,
@@ -138,7 +137,6 @@ export const setupOptionsListSuggestionsRoute = (
     const totalCardinality = get(rawEsResult, 'aggregations.unique_terms.value');
     const suggestions = suggestionBuilder.parse(rawEsResult);
     const invalidSelections = validationBuilder.parse(rawEsResult);
-
     return {
       suggestions,
       totalCardinality,

@@ -346,10 +346,11 @@ export class DashboardPageControls extends FtrService {
     return +(await availableOptions.getAttribute('data-option-count'));
   }
 
-  public async optionsListPopoverGetAvailableOptions() {
-    this.log.debug(`getting available options count from options list`);
+  public async optionsListPopoverGetAvailableOptions(filterOutExists: boolean = true) {
+    this.log.debug(`getting available options from options list`);
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
-    return (await availableOptions.getVisibleText()).split('\n');
+    const availableOptionsArray = (await availableOptions.getVisibleText()).split('\n');
+    return filterOutExists ? availableOptionsArray.slice(1) : availableOptionsArray;
   }
 
   public async optionsListPopoverSearchForOption(search: string) {
