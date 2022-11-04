@@ -17,8 +17,17 @@ export const CREATED_BY = i18n.translate('xpack.securitySolution.exceptionsTable
   defaultMessage: 'Created By',
 });
 
-export const CREATED_AT = i18n.translate('xpack.securitySolution.exceptionsTable.createdAt', {
-  defaultMessage: 'Created At',
+export const DATE_CREATED = i18n.translate('xpack.securitySolution.exceptionsTable.createdAt', {
+  defaultMessage: 'Date created',
+});
+export const EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.exceptionsCountLabel',
+  {
+    defaultMessage: 'Exceptions',
+  }
+);
+export const RULES = i18n.translate('xpack.securitySolution.exceptionsTable.rulesCountLabel', {
+  defaultMessage: 'Rules',
 });
 
 export const DELETE_EXCEPTION_LIST = i18n.translate(

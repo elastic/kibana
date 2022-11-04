@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { ButtonContentIconSide } from '@elastic/eui/src/components/button/_button_content_deprecated';
 
-interface Action {
+export interface Action {
   key: string;
   icon: string;
   label: string | boolean;
