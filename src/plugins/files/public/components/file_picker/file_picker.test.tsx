@@ -30,7 +30,7 @@ describe('FilePicker', () => {
   async function initTestBed(props?: Partial<Props>) {
     const createTestBed = registerTestBed((p: Props) => (
       <FilesContext client={client}>
-        <FilePicker {...p} />
+        <FilePicker multiple {...p} />
       </FilesContext>
     ));
 
