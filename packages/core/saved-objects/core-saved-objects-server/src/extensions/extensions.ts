@@ -17,9 +17,9 @@ import type { ISavedObjectsSpacesExtension } from './spaces';
  * security, and spaces features.
  */
 export interface SavedObjectsExtensions {
-  encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
-  securityExtension: ISavedObjectsSecurityExtension | undefined;
-  spacesExtension: ISavedObjectsSpacesExtension | undefined;
+  encryptionExtension?: ISavedObjectsEncryptionExtension;
+  securityExtension?: ISavedObjectsSecurityExtension;
+  spacesExtension?: ISavedObjectsSpacesExtension;
 }
 
 export const ENCRYPTION_EXTENSION_ID = 'encryptedSavedObjects' as const;

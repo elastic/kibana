@@ -57,7 +57,7 @@ import {
   generateIndexPatternSearchResults,
   bulkDeleteSuccess,
 } from '../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.

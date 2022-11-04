@@ -38,7 +38,7 @@ import {
   setupEnforceSuccess,
   setupRedactPassthrough,
 } from '../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
 type SetupParams = Partial<
   Pick<UpdateObjectsSpacesParams, 'objects' | 'spacesToAdd' | 'spacesToRemove' | 'options'>

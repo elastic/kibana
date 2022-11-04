@@ -65,7 +65,7 @@ export type {
 } from './src/serialization';
 export type { ISavedObjectTypeRegistry } from './src/type_registry';
 export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './src/validation';
-export type { ISavedObjectsEncryptionExtension, EncryptedObjectDescriptor } from './src/encryption';
+export type { ISavedObjectsEncryptionExtension, EncryptedObjectDescriptor } from './src/extensions/encryption';
 export type {
   CheckAuthorizationParams,
   AuthorizationTypeEntry,
@@ -75,12 +75,12 @@ export type {
   AddAuditEventParams,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
-} from './src/security';
-export { AuditAction } from './src/security';
-export type { ISavedObjectsSpacesExtension } from './src/spaces';
-export type { SavedObjectsExtensions } from './src/extensions';
+} from './src/extensions/security';
+export { AuditAction } from './src/extensions/security';
+export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
+export type { SavedObjectsExtensions } from './src/extensions/extensions';
 export {
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
-} from './src/extensions';
+} from './src/extensions/extensions';

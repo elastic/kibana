@@ -207,9 +207,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   private _registry: ISavedObjectTypeRegistry;
   private _allowedTypes: string[];
   private readonly client: RepositoryEsClient;
-  private readonly _encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
-  private readonly _securityExtension: ISavedObjectsSecurityExtension | undefined;
-  private readonly _spacesExtension: ISavedObjectsSpacesExtension | undefined;
+  private readonly _encryptionExtension?: ISavedObjectsEncryptionExtension;
+  private readonly _securityExtension?: ISavedObjectsSecurityExtension;
+  private readonly _spacesExtension?: ISavedObjectsSpacesExtension;
   private _serializer: SavedObjectsSerializer;
   private _logger: Logger;
 

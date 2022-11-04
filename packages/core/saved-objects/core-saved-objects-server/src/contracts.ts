@@ -23,7 +23,7 @@ import type { SavedObjectsType } from './saved_objects_type';
 import type { ISavedObjectTypeRegistry } from './type_registry';
 import type { ISavedObjectsExporter } from './export';
 import type { ISavedObjectsImporter } from './import';
-import type { SavedObjectsExtensions } from './extensions';
+import type { SavedObjectsExtensions } from './extensions/extensions';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to

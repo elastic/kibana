@@ -11,10 +11,10 @@ import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
-import type { ISavedObjectsEncryptionExtension } from './encryption';
-import type { SavedObjectsExtensions } from './extensions';
-import type { ISavedObjectsSecurityExtension } from './security';
-import type { ISavedObjectsSpacesExtension } from './spaces';
+import type { ISavedObjectsEncryptionExtension } from './extensions/encryption';
+import type { SavedObjectsExtensions } from './extensions/extensions';
+import type { ISavedObjectsSecurityExtension } from './extensions/security';
+import type { ISavedObjectsSpacesExtension } from './extensions/spaces';
 import type { ISavedObjectTypeRegistry } from './type_registry';
 
 /**

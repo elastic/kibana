@@ -13,17 +13,15 @@ import type { SavedObject } from '@kbn/core-saved-objects-common';
  * an object to be encrypted or decrpyted.
  */
 export interface EncryptedObjectDescriptor {
-  /**
-   * The Saved Object type
-   */
+  /** The Saved Object type */
   type: string;
-  /**
-   * The Saved Object ID
-   */
+  /** The Saved Object ID */
   id: string;
-  /**
-   * The namespace where the Saved Object resides
-   */
+  /** Namespace for use in index migration...
+   * If the object is being decrypted during index migration, the object was previously
+   * encrypted with its namespace in the descriptor portion of the AAD; on the other hand,
+   * if the object is being decrypted during object migration, the object was never encrypted
+   * with its namespace in the descriptor portion of the AAD. */
   namespace?: string;
 }
 
@@ -61,7 +59,7 @@ export interface ISavedObjectsEncryptionExtension {
    * @returns T, encrypted attributes
    */
   encryptAttributes: <T extends Record<string, unknown>>(
-    descriptor: { id: string; type: string; namespace: string | undefined },
+    descriptor: EncryptedObjectDescriptor,
     attributes: T
   ) => Promise<T>;
 }

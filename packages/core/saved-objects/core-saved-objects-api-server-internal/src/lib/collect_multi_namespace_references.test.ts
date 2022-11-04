@@ -39,7 +39,7 @@ import {
   setupEnforceSuccess,
   setupRedactPassthrough,
 } from '../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
 const SPACES = ['default', 'another-space'];
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
