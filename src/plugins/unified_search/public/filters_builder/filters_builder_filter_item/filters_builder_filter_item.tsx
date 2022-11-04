@@ -60,6 +60,14 @@ const cursorOrStyles = css`
   cursor: url(${or}), auto;
 `;
 
+const fieldAndParamStyle = css`
+  min-width: 216px;
+`;
+
+const operationStyle = css`
+  max-width: 162px;
+`;
+
 export function FilterItem({
   filter,
   path,
@@ -237,7 +245,7 @@ export function FilterItem({
                           justifyContent="center"
                           wrap
                         >
-                          <EuiFlexItem style={{ minWidth: '162px' }}>
+                          <EuiFlexItem className={fieldAndParamStyle}>
                             <EuiFormRow>
                               <FieldInput
                                 field={field}
@@ -246,7 +254,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem style={{ maxWidth: '162px' }}>
+                          <EuiFlexItem className={operationStyle}>
                             <EuiFormRow>
                               <OperatorInput
                                 field={field}
@@ -256,7 +264,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem style={{ minWidth: '162px' }}>
+                          <EuiFlexItem className={fieldAndParamStyle}>
                             <EuiFormRow>
                               <div data-test-subj="filterParams">
                                 <ParamsEditor
