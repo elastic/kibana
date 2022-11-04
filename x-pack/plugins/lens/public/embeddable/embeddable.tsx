@@ -19,6 +19,7 @@ import {
   TimeRange,
   isOfQueryType,
 } from '@kbn/es-query';
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
@@ -80,6 +81,7 @@ import {
   DatasourceMap,
   Datasource,
   IndexPatternMap,
+  OperationDescriptor,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -105,6 +107,21 @@ export interface LensUnwrapMetaInfo {
 export interface LensUnwrapResult {
   attributes: LensSavedObjectAttributes;
   metaInfo?: LensUnwrapMetaInfo;
+}
+
+export interface ChartLayerDescriptor {
+  dataView?: DataView;
+  layerId: string;
+  layerType: string;
+  chartType?: string;
+  icon?: IconType;
+  label?: string;
+  dimensions: Array<{
+    name: string;
+    id: string;
+    role: 'split' | 'metric';
+    operation: OperationDescriptor;
+  }>;
 }
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
@@ -495,7 +512,6 @@ export class Embeddable
 
     await this.initializeOutput();
 
-    const a = this.getChartInfo();
     this.isInitialized = true;
   }
 
@@ -1063,10 +1079,10 @@ export class Embeddable
     };
   }
 
-  public getChartInfo() {
+  public getChartInfo(): Readonly<ChartLayerDescriptor[] | undefined> {
     const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
     if (!activeDatasourceId || !this.savedVis?.visualizationType) {
-      return [];
+      return undefined;
     }
 
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
@@ -1084,11 +1100,12 @@ export class Embeddable
       const updatedDimensions = l.dimensions.map((d) => {
         return {
           ...d,
-          ...dataSource?.columns.find((c) => c.id === d.id),
+          ...dataSource?.columns.find((c) => c.id === d.id)!,
         };
       });
       return {
         ...l,
+        dataView: dataSource?.dataView,
         dimensions: updatedDimensions,
       };
     });

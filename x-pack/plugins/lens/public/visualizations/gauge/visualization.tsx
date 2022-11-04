@@ -556,4 +556,54 @@ export const getGaugeVisualization = ({
     };
     return suggestion;
   },
+
+  getVisualizationInfo(state: GaugeVisualizationState) {
+    const dimensions = [];
+    if (state.metricAccessor) {
+      dimensions.push({
+        id: state.metricAccessor,
+        name: i18n.translate('xpack.lens.gauge.metricLabel', {
+          defaultMessage: 'Metric',
+        }),
+      });
+    }
+
+    if (state.maxAccessor) {
+      dimensions.push({
+        id: state.maxAccessor,
+        name: i18n.translate('xpack.lens.gauge.maxValueLabel', {
+          defaultMessage: 'Maximum value',
+        }),
+      });
+    }
+
+    if (state.minAccessor) {
+      dimensions.push({
+        id: state.minAccessor,
+        name: i18n.translate('xpack.lens.gauge.minValueLabel', {
+          defaultMessage: 'Minimum value',
+        }),
+      });
+    }
+
+    if (state.goalAccessor) {
+      dimensions.push({
+        id: state.goalAccessor,
+        name: i18n.translate('xpack.lens.gauge.goalValueLabel', {
+          defaultMessage: 'Goal value',
+        }),
+      });
+    }
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: state.shape,
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
+  },
 });

@@ -602,6 +602,39 @@ export const getDatatableVisualization = ({
     };
     return suggestion;
   },
+
+  getVisualizationInfo(state: DatatableVisualizationState) {
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: 'table',
+          ...this.getDescription(state),
+          dimensions: state.columns.map((column) => {
+            let name = i18n.translate('xpack.lens.datatable.metric', {
+              defaultMessage: 'Metric',
+            });
+            if (!column.transposable) {
+              if (column.isTransposed) {
+                name = i18n.translate('xpack.lens.datatable.breakdownColumns', {
+                  defaultMessage: 'Split metrics by',
+                });
+              } else {
+                name = i18n.translate('xpack.lens.datatable.breakdownRow', {
+                  defaultMessage: 'Row',
+                });
+              }
+            }
+            return {
+              id: column.columnId,
+              name,
+            };
+          }),
+        },
+      ],
+    };
+  },
 });
 
 function getDataSourceAndSortedColumns(

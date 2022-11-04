@@ -996,7 +996,7 @@ export function getFormBasedDatasource({
         const columns = Object.entries(layer.columns).map(([colId, col]) => {
           return {
             id: colId,
-            role: col.isBucketed ? 'split' : 'metric',
+            role: col.isBucketed ? ('split' as const) : ('metric' as const),
             operation: columnToOperation(col, undefined, dataView),
           };
         });

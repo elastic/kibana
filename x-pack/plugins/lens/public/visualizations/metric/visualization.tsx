@@ -669,4 +669,76 @@ export const getMetricVisualization = ({
     };
     return suggestion;
   },
+
+  getVisualizationInfo(state: MetricVisualizationState) {
+    const accessors = {
+      metric:
+        state.layerType === 'metricTrendline'
+          ? state.trendlineMetricAccessor
+          : state.metricAccessor,
+      secondaryMetric:
+        state.layerType === 'metricTrendline'
+          ? state.trendlineSecondaryMetricAccessor
+          : state.secondaryMetricAccessor,
+      max: state.layerType === 'metricTrendline' ? undefined : state.maxAccessor,
+      breakdownBy:
+        state.layerType === 'metricTrendline'
+          ? state.trendlineBreakdownByAccessor
+          : state.breakdownByAccessor,
+      time: state.layerType === 'metricTrendline' ? state.trendlineTimeAccessor : undefined,
+    };
+    const dimensions = [];
+    if (accessors.metric) {
+      dimensions.push({
+        id: accessors.metric,
+        name: i18n.translate('xpack.lens.primaryMetric.label', {
+          defaultMessage: 'Primary metric',
+        }),
+      });
+    }
+
+    if (accessors.secondaryMetric) {
+      dimensions.push({
+        id: accessors.secondaryMetric,
+        name: i18n.translate('xpack.lens.metric.secondaryMetric', {
+          defaultMessage: 'Secondary metric',
+        }),
+      });
+    }
+
+    if (accessors.max) {
+      dimensions.push({
+        id: accessors.max,
+        name: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
+      });
+    }
+
+    if (accessors.breakdownBy) {
+      dimensions.push({
+        id: accessors.breakdownBy,
+        name: i18n.translate('xpack.lens.metric.breakdownBy', {
+          defaultMessage: 'Break down by',
+        }),
+      });
+    }
+
+    if (accessors.time) {
+      dimensions.push({
+        id: accessors.time,
+        name: i18n.translate('xpack.lens.metric.timeField', { defaultMessage: 'Time field' }),
+      });
+    }
+
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: 'metric',
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
+  },
 });

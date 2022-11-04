@@ -696,12 +696,12 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     isEqual: () => true,
-    getDatasourceInfo: (state) => {
+    getDatasourceInfo: (state, references, indexPatterns) => {
       return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
         const columns = Object.entries(layer.columns).map(([colId, col]) => {
           return {
             id: colId,
-            role: col.meta?.type !== 'number' ? 'split' : 'metric',
+            role: col.meta?.type !== 'number' ? ('split' as const) : ('metric' as const),
             operation: {
               dataType: col?.meta?.type as DataType,
               label: col.fieldName,
@@ -715,7 +715,7 @@ export function getTextBasedDatasource({
         acc.push({
           layerId: key,
           columns,
-          dataView: undefined,
+          dataView: indexPatterns?.find((dataView) => dataView.id === layer.index),
         });
 
         return acc;

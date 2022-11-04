@@ -137,14 +137,14 @@ export interface TableSuggestionColumn {
 export interface DataSourceInfo {
   layerId: string;
   dataView?: DataView;
-  columns: Array<{ id: string; role: string; operation: OperationDescriptor }>;
+  columns: Array<{ id: string; role: 'split' | 'metric'; operation: OperationDescriptor }>;
 }
 
 export interface VisualizationInfo {
   layers: Array<{
     layerId: string;
     layerType: string;
-    chartType: string;
+    chartType?: string;
     icon?: IconType;
     label?: string;
     dimensions: Array<{ name: string; id: string }>;

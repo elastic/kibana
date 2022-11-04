@@ -498,4 +498,62 @@ export const getPieVisualization = ({
         ]
       : [];
   },
+
+  getVisualizationInfo(state: PieVisualizationState) {
+    const layer = state.layers[0];
+    const dimensions = [];
+    if (layer.metric) {
+      dimensions.push({
+        id: layer.metric,
+        name: i18n.translate('xpack.lens.pie.groupsizeLabel', {
+          defaultMessage: 'Size by',
+        }),
+      });
+    }
+
+    if (state.shape === 'mosaic' && layer.secondaryGroups && layer.secondaryGroups.length) {
+      layer.secondaryGroups.forEach((accessor) => {
+        dimensions.push({
+          name: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
+            defaultMessage: 'Horizontal axis',
+          }),
+          id: accessor,
+        });
+      });
+    }
+
+    if (layer.primaryGroups && layer.primaryGroups.length) {
+      let name = i18n.translate('xpack.lens.pie.treemapGroupLabel', {
+        defaultMessage: 'Group by',
+      });
+      if (state.shape === 'mosaic') {
+        name = i18n.translate('xpack.lens.pie.verticalAxisLabel', {
+          defaultMessage: 'Vertical axis',
+        });
+      }
+      if (state.shape === 'donut' || state.shape === 'pie') {
+        name = i18n.translate('xpack.lens.pie.sliceGroupLabel', {
+          defaultMessage: 'Slice by',
+        });
+      }
+      layer.primaryGroups.forEach((accessor) => {
+        dimensions.push({
+          name,
+          id: accessor,
+        });
+      });
+    }
+
+    return {
+      layers: [
+        {
+          layerId: layer.layerId,
+          layerType: layer.layerType,
+          chartType: state.shape,
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
+  },
 });
