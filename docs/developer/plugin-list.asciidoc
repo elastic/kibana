@@ -593,6 +593,10 @@ Elastic.
 |This plugin allows for other plugins to add data to Kibana stack monitoring documents.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/notifications/README.md[notifications]
+|The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 

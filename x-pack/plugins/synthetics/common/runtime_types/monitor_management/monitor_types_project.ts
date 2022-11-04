@@ -45,6 +45,10 @@ export const ProjectMonitorCodec = t.intersection([
 ]);
 
 export const ProjectMonitorsRequestCodec = t.interface({
+  monitors: t.array(ProjectMonitorCodec),
+});
+
+export const LegacyProjectMonitorsRequestCodec = t.interface({
   project: t.string,
   keep_stale: t.boolean,
   monitors: t.array(ProjectMonitorCodec),
@@ -68,6 +72,8 @@ export const ProjectMonitorsResponseCodec = t.intersection([
 export type ProjectMonitorThrottlingConfig = t.TypeOf<typeof ProjectMonitorThrottlingConfigCodec>;
 
 export type ProjectMonitor = t.TypeOf<typeof ProjectMonitorCodec>;
+
+export type LegacyProjectMonitorsRequest = t.TypeOf<typeof LegacyProjectMonitorsRequestCodec>;
 
 export type ProjectMonitorsRequest = t.TypeOf<typeof ProjectMonitorsRequestCodec>;
 
