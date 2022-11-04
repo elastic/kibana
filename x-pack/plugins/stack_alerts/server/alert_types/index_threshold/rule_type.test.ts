@@ -183,7 +183,6 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      alertId: uuid.v4(),
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
@@ -197,11 +196,8 @@ describe('ruleType', () => {
         latestTimestamp: undefined,
       },
       spaceId: uuid.v4(),
-      name: uuid.v4(),
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
       rule: {
+        id: uuid.v4(),
         name: uuid.v4(),
         tags: [],
         consumer: '',
@@ -250,7 +246,6 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      alertId: uuid.v4(),
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
@@ -264,11 +259,8 @@ describe('ruleType', () => {
         latestTimestamp: undefined,
       },
       spaceId: uuid.v4(),
-      name: uuid.v4(),
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
       rule: {
+        id: uuid.v4(),
         name: uuid.v4(),
         tags: [],
         consumer: '',
@@ -317,7 +309,6 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      alertId: uuid.v4(),
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
@@ -331,11 +322,8 @@ describe('ruleType', () => {
         latestTimestamp: undefined,
       },
       spaceId: uuid.v4(),
-      name: uuid.v4(),
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
       rule: {
+        id: uuid.v4(),
         name: uuid.v4(),
         tags: [],
         consumer: '',
@@ -383,7 +371,6 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      alertId: uuid.v4(),
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
@@ -397,11 +384,8 @@ describe('ruleType', () => {
         latestTimestamp: undefined,
       },
       spaceId: uuid.v4(),
-      name: uuid.v4(),
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
       rule: {
+        id: uuid.v4(),
         name: uuid.v4(),
         tags: [],
         consumer: '',
