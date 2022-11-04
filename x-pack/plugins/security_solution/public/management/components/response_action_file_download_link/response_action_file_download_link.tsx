@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { FormattedError } from '../formatted_error';
 import { useGetFileInfo } from '../../hooks/response_actions/use_get_file_info';
@@ -36,7 +35,7 @@ const DEFAULT_BUTTON_TITLE = i18n.translate(
 
 export const FILE_NO_LONGER_AVAILABLE_MESSAGE = i18n.translate(
   'xpack.securitySolution.responseActionFileDownloadLink.fileNoLongerAvailable',
-  { defaultMessage: 'File is no longer available for download.' }
+  { defaultMessage: 'File has expired and is no longer available for download.' }
 );
 
 export interface ResponseActionFileDownloadLinkProps {
@@ -65,16 +64,11 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
 
-    // We don't need to call the file info API every time, especially if this component is used from the
-    // console, where the link is displayed within a short time. So we only do the API call if the
-    // action was completed more than 2 days ago.
-    const checkIfStillAvailable = useMemo(() => {
-      return (
-        action.isCompleted && action.wasSuccessful && moment().diff(action.completedAt, 'days') > 2
-      );
-    }, [action.completedAt, action.isCompleted, action.wasSuccessful]);
+    const shouldFetchFileInfo: boolean = useMemo(() => {
+      return action.isCompleted && action.wasSuccessful;
+    }, [action.isCompleted, action.wasSuccessful]);
 
-    const downloadUrl = useMemo(() => {
+    const downloadUrl: string = useMemo(() => {
       return resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
         action_id: action.id,
         agent_id: agentId ?? action.agents[0],
@@ -86,7 +80,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
       data: fileInfo,
       error,
     } = useGetFileInfo(action, undefined, {
-      enabled: canWriteFileOperations && checkIfStillAvailable,
+      enabled: canWriteFileOperations && shouldFetchFileInfo,
     });
 
     if (!canWriteFileOperations || !action.isCompleted || !action.wasSuccessful) {
@@ -100,7 +94,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     // Check if file is no longer available
     if ((error && error?.response?.status === 404) || fileInfo?.data.status === 'DELETED') {
       return (
-        <EuiText size="s" data-test-subj={getTestId('fileNoLongerAvailable')}>
+        <EuiText size={textSize} data-test-subj={getTestId('fileNoLongerAvailable')}>
           {FILE_NO_LONGER_AVAILABLE_MESSAGE}
         </EuiText>
       );
