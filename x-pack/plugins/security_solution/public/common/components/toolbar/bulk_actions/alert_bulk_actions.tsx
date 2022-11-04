@@ -12,7 +12,7 @@ import type {
   CustomBulkActionProp,
   SetEventsDeleted,
   SetEventsLoading,
-} from '../../../../../common/types/bulk_actions';
+} from '../../../../../common/types';
 import { BulkActions } from '.';
 import { useBulkActionItems } from './use_bulk_action_items';
 import { dataTableActions, dataTableSelectors } from '../../../store/data_table';

@@ -8,8 +8,8 @@
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import type { FluidDragActions } from 'react-beautiful-dnd';
-import { useKibana } from '../../../../lib/kibana';
-import { draggableKeyDownHandler } from '../helpers';
+import { useKibana } from '../../../lib/kibana';
+import { draggableKeyDownHandler } from './helpers';
 
 export interface UseDraggableKeyboardWrapperProps {
   closePopover?: () => void;

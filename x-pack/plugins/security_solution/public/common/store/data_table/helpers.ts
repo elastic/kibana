@@ -20,12 +20,10 @@ import type { DataTablePersistInput, TableById } from './types';
 import type { DataTableModelSettings } from './model';
 
 import { getDataTableManageDefaults, tableDefaults } from './defaults';
+import { DEFAULT_TABLE_COLUMN_MIN_WIDTH } from '../../components/data_table/constants';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 export type Maybe<T> = T | null;
-
-/** The default minimum width of a column (when a width for the column type is not specified) */
-export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
 
 /** The minimum width of a resized column */
 export const RESIZED_COLUMN_MIN_WITH = 70; // px
@@ -188,7 +186,7 @@ export const applyDeltaToTableColumnWidth = ({
   }
 
   const requestedWidth =
-    (dataTable.columns[columnIndex].initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH) + delta; // raw change in width
+    (dataTable.columns[columnIndex].initialWidth ?? DEFAULT_TABLE_COLUMN_MIN_WIDTH) + delta; // raw change in width
   const initialWidth = Math.max(RESIZED_COLUMN_MIN_WITH, requestedWidth); // if the requested width is smaller than the min, use the min
 
   const columnWithNewWidth = {

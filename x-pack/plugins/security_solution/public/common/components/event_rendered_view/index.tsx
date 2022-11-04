@@ -25,11 +25,12 @@ import { useDispatch, connect } from 'react-redux';
 import memoizeOne from 'memoize-one';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import type { SetEventsDeleted, SetEventsLoading } from '../../../../common/types/bulk_actions';
 import { APP_UI_ID } from '../../../../common/constants';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import type { BrowserFields, TimelineItem } from '../../../../common/search_strategy';
 import type {
+  SetEventsDeleted,
+  SetEventsLoading,
   ColumnHeaderOptions,
   ControlColumnProps,
   OnRowSelected,

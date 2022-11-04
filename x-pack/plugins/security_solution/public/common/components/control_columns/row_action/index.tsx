@@ -8,8 +8,12 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import type { SetEventsDeleted, SetEventsLoading } from '../../../../../common/types/bulk_actions';
-import type { ControlColumnProps, DataExpandedDetailType } from '../../../../../common/types';
+import type {
+  SetEventsDeleted,
+  SetEventsLoading,
+  ControlColumnProps,
+  DataExpandedDetailType,
+} from '../../../../../common/types';
 import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';

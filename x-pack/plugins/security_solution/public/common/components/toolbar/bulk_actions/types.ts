@@ -5,8 +5,15 @@
  * 2.0.
  */
 import type { ComponentType } from 'react';
-import type { BulkActionsObjectProp, HeaderActionProps } from '../../../../../common/types';
+import type { HeaderActionProps, CustomBulkAction } from '../../../../../common/types';
 import type { AlertWorkflowStatus } from '../../../types';
+
+export interface BulkActionsObjectProp {
+  alertStatusActions?: boolean;
+  onAlertStatusActionSuccess?: OnUpdateAlertStatusSuccess;
+  onAlertStatusActionFailure?: OnUpdateAlertStatusError;
+  customBulkActions?: CustomBulkAction[];
+}
 
 export type OnUpdateAlertStatusSuccess = (
   updated: number,

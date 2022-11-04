@@ -34,15 +34,13 @@ import {
   providerWasDroppedOnTimeline,
   draggableIsField,
   userIsReArrangingProviders,
+  getIdFromColumnDroppableId,
+  addFieldToColumns,
 } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultAlertsHeaders } from '../events_viewer/default_alert_headers';
-import {
-  addFieldToTimelineColumns,
-  getTimelineIdFromColumnDroppableId,
-} from '../data_table/drag_and_drop';
 
 // @ts-expect-error
 window['__react-beautiful-dnd-disable-dev-warnings'] = true;
@@ -87,12 +85,12 @@ const onDragEndHandler = ({
       timelineId: TimelineId.active,
     });
   } else if (fieldWasDroppedOnTimelineColumns(result)) {
-    addFieldToTimelineColumns({
+    addFieldToColumns({
       browserFields,
       defaultsHeader: defaultAlertsHeaders,
       dispatch,
       result,
-      timelineId: getTimelineIdFromColumnDroppableId(result.destination?.droppableId ?? ''),
+      scopeId: getIdFromColumnDroppableId(result.destination?.droppableId ?? ''),
     });
   }
 };

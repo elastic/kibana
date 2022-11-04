@@ -12,7 +12,7 @@ import type {
   CustomBulkActionProp,
   SetEventsDeleted,
   SetEventsLoading,
-} from '../../../../../common/types/bulk_actions';
+} from '../../../../../common/types';
 import * as i18n from './translations';
 import { useUpdateAlertsStatus } from './use_update_alerts';
 import { useAppToasts } from '../../../hooks/use_app_toasts';

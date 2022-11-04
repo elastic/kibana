@@ -15,14 +15,10 @@ import type { IFieldSubType } from '@kbn/es-query';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import type { JSXElementConstructor, ReactNode } from 'react';
 import type { OnRowSelected } from '..';
-import type {
-  HeaderCellRender,
-  OnUpdateAlertStatusError,
-  OnUpdateAlertStatusSuccess,
-} from '../../../public/common/components/toolbar/bulk_actions/types';
+import type { HeaderCellRender } from '../../../public/common/components/toolbar/bulk_actions/types';
 import type { Ecs } from '../../ecs';
 import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
-import type { CustomBulkAction, SetEventsDeleted, SetEventsLoading } from '../bulk_actions';
+import type { SetEventsDeleted, SetEventsLoading } from '../bulk_actions';
 import type { SortColumnTable } from '../data_table';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
@@ -114,7 +110,7 @@ export interface HeaderActionProps {
   timelineId: string;
 }
 
-export type GenericActionRowCellRenderProps = Pick<
+type GenericActionRowCellRenderProps = Pick<
   EuiDataGridCellValueElementProps,
   'rowIndex' | 'columnId'
 >;
@@ -177,9 +173,3 @@ export type ControlColumnProps = Omit<
   keyof AdditionalControlColumnProps
 > &
   Partial<AdditionalControlColumnProps>;
-export interface BulkActionsObjectProp {
-  alertStatusActions?: boolean;
-  onAlertStatusActionSuccess?: OnUpdateAlertStatusSuccess;
-  onAlertStatusActionFailure?: OnUpdateAlertStatusError;
-  customBulkActions?: CustomBulkAction[];
-}

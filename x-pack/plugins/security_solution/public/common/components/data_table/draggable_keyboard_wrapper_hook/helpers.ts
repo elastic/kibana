@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import type { DropResult, FluidDragActions, Position } from 'react-beautiful-dnd';
-import { KEYBOARD_DRAG_OFFSET, getFieldIdFromDraggable } from '@kbn/securitysolution-t-grid';
-import type { Dispatch } from 'redux';
-import { isString, keyBy } from 'lodash/fp';
+import type { FluidDragActions, Position } from 'react-beautiful-dnd';
+import { KEYBOARD_DRAG_OFFSET } from '@kbn/securitysolution-t-grid';
 
 import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
-import type { ColumnHeaderOptions } from '../../../../../common/types';
-import { TableId } from '../../../../../common/types';
-import { dataTableActions } from '../../../store/data_table';
-import { DEFAULT_TABLE_COLUMN_MIN_WIDTH } from '../constants';
-import type { BrowserField, BrowserFields } from '../../../containers/source';
 
 /**
  * Temporarily disables tab focus on child links of the draggable to work
@@ -131,82 +124,3 @@ export const draggableKeyDownHandler = ({
       break;
   }
 };
-const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
-  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
-    (acc, namespace) => [
-      ...acc,
-      ...Object.values(namespace.fields != null ? namespace.fields : {}),
-    ],
-    []
-  );
-
-const getAllFieldsByName = (
-  browserFields: BrowserFields
-): { [fieldName: string]: Partial<BrowserField> } =>
-  keyBy('name', getAllBrowserFields(browserFields));
-
-const linkFields: Record<string, string> = {
-  'kibana.alert.rule.name': 'kibana.alert.rule.uuid',
-  'event.module': 'rule.reference',
-};
-
-interface AddFieldToTimelineColumnsParams {
-  defaultsHeader: ColumnHeaderOptions[];
-  browserFields: BrowserFields;
-  dispatch: Dispatch;
-  result: DropResult;
-  timelineId: string;
-}
-
-export const addFieldToTimelineColumns = ({
-  browserFields,
-  dispatch,
-  result,
-  timelineId,
-  defaultsHeader,
-}: AddFieldToTimelineColumnsParams): void => {
-  const fieldId = getFieldIdFromDraggable(result);
-  const allColumns = getAllFieldsByName(browserFields);
-  const column = allColumns[fieldId];
-  const initColumnHeader =
-    timelineId === TableId.alertsOnAlertsPage || timelineId === TableId.alertsOnRuleDetailsPage
-      ? defaultsHeader.find((c) => c.id === fieldId) ?? {}
-      : {};
-
-  if (column != null) {
-    dispatch(
-      dataTableActions.upsertColumn({
-        column: {
-          category: column.category,
-          columnHeaderType: 'not-filtered',
-          description: isString(column.description) ? column.description : undefined,
-          example: isString(column.example) ? column.example : undefined,
-          id: fieldId,
-          linkField: linkFields[fieldId] ?? undefined,
-          type: column.type,
-          aggregatable: column.aggregatable,
-          initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
-          ...initColumnHeader,
-        },
-        id: timelineId,
-        index: result.destination != null ? result.destination.index : 0,
-      })
-    );
-  } else {
-    // create a column definition, because it doesn't exist in the browserFields:
-    dispatch(
-      dataTableActions.upsertColumn({
-        column: {
-          columnHeaderType: 'not-filtered',
-          id: fieldId,
-          initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
-        },
-        id: timelineId,
-        index: result.destination != null ? result.destination.index : 0,
-      })
-    );
-  }
-};
-
-export const getTimelineIdFromColumnDroppableId = (droppableId: string) =>
-  droppableId.slice(droppableId.lastIndexOf('.') + 1);
