@@ -43,7 +43,7 @@ const getSLOParamsSchema = t.type({
   }),
 });
 
-const findSLOParamsSchema = t.type({
+const findSLOParamsSchema = t.partial({
   query: t.partial({
     name_filter: t.string,
     page: t.string,

@@ -128,7 +128,7 @@ const findSLORoute = createObservabilityServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const findSLO = new FindSLO(repository);
 
-    const response = await findSLO.execute(params.query ?? {});
+    const response = await findSLO.execute(params?.query ?? {});
 
     return response;
   },
