@@ -6,7 +6,6 @@
  */
 
 import './table_basic.scss';
-import { CUSTOM_PALETTE } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -16,7 +15,6 @@ import React, {
   useContext,
   useEffect,
 } from 'react';
-import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
   EuiButtonIcon,
@@ -27,7 +25,9 @@ import {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
+import { EmptyPlaceholder } from '@kbn/charts-helpers';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import type { LensTableRowContextMenuEvent } from '../../../types';

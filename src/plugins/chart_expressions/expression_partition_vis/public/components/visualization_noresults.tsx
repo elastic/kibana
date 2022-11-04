@@ -8,7 +8,7 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { EmptyPlaceholder } from '@kbn/charts-helpers';
 import { ChartTypes } from '../../common/types';
 import { getIcon } from '../utils';
 

@@ -19,8 +19,8 @@ import {
   EuiButtonGroup,
   EuiButtonGroupOptionProps,
 } from '@elastic/eui';
+import { ColorPicker } from '@kbn/charts-helpers';
 
-import { ColorPicker } from '@kbn/charts-plugin/public';
 import { LegendItem } from './models';
 
 interface Props {

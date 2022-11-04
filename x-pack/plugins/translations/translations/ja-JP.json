@@ -139,7 +139,7 @@
     "chartsHelpers.colormaps.greensText": "緑",
     "chartsHelpers.colormaps.greenToRedText": "緑から赤",
     "chartsHelpers.colormaps.greysText": "グレー",
-    "coloring.colormaps.redsText": "赤",
+    "chartsHelpers.colormaps.redsText": "赤",
     "chartsHelpers.colormaps.yellowToRedText": "黄色から赤",
     "charts.colorPicker.clearColor": "色をリセット",
     "chartsHelpers.countText": "カウント",

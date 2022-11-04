@@ -10,13 +10,13 @@ import React from 'react';
 import { LegendColorPickerProps } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ColorPicker } from '@kbn/charts-helpers';
 import { ReactWrapper } from 'enzyme';
 import {
   LegendColorPickerWrapper,
   LegendColorPickerWrapperContext,
   LegendColorPickerWrapperContextType,
 } from './get_color_picker';
-import { ColorPicker } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { createMockBucketColumns, createMockVisData } from '../mocks';
 

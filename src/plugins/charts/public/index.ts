@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110891
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
 import { ChartsPlugin } from './plugin';
 
@@ -16,8 +13,6 @@ export const plugin = () => new ChartsPlugin();
 
 export type { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 
-export * from './static';
-export { lightenColor } from './services/palettes/lighten_color';
 export { useActiveCursor } from './services/active_cursor';
 
 export interface ClickTriggerEvent {
@@ -31,3 +26,4 @@ export interface BrushTriggerEvent {
 }
 
 export type { CustomPaletteArguments, CustomPaletteState, SystemPaletteArguments } from '../common';
+export { MULTILAYER_TIME_AXIS_STYLE } from '../common/styles';

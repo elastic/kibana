@@ -9,3 +9,4 @@
 export * from './color_maps';
 export * from './color_palette';
 export * from './constants';
+export * from './components';

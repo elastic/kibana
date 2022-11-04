@@ -30,8 +30,8 @@ import {
   VerticalAlignment,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
+import { EmptyPlaceholder } from '@kbn/charts-helpers';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';

@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
+import { Warnings } from '@kbn/charts-helpers';
 import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { Warnings } from '@kbn/charts-plugin/public';
 import {
   Adapters,
   AttributeService,

@@ -7,7 +7,7 @@
  */
 
 import React, { FC } from 'react';
-import moment, { unitOfTime } from 'moment';
+import moment, { unitOfTime } from 'moment-timezone';
 
 import {
   TooltipValue,

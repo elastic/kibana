@@ -14,8 +14,8 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
+import { EmptyPlaceholder } from '@kbn/charts-helpers';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';

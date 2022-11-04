@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { PaletteOutput } from '@kbn/coloring';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { EmptyPlaceholder } from '@kbn/charts-helpers';
 import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import {
   GaugeRenderProps,

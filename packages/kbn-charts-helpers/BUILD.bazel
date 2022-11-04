@@ -49,9 +49,17 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "//packages/kbn-i18n",
+  "//packages/kbn-i18n-react",
+  "//packages/kbn-ui-theme",
+  "//packages/kbn-shared-ux-utility",
   "//packages/kbn-utility-types",
   "@npm//lodash",
   "@npm//color",
+  "@npm//@elastic/charts",
+  "@npm//@elastic/eui",
+  "@npm//moment",
+  "@npm//react",
+  "@npm//@emotion/react",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -65,9 +73,17 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "//packages/kbn-i18n:npm_module_types",
+  "//packages/kbn-i18n-react:npm_module_types",
+  "//packages/kbn-ui-theme:npm_module_types",
+  "//packages/kbn-shared-ux-utility:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
   "@npm//@types/lodash",
   "@npm//@types/color",
+  "@npm//@elastic/charts",
+  "@npm//@elastic/eui",
+  "@npm//moment-timezone",
+  "@npm//react",
+  "@npm//@emotion/react",
 ]
 
 jsts_transpiler(

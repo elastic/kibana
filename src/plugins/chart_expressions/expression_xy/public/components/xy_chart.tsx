@@ -31,9 +31,9 @@ import {
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
+import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-helpers';
 import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';

@@ -35,6 +35,8 @@ import { toExpression, Ast } from '@kbn/interpreter';
 import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
+import { Warnings } from '@kbn/charts-helpers';
+
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -64,7 +66,7 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
+import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';

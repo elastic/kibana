@@ -23,9 +23,10 @@ import {
   ESCalendarIntervalUnit,
   PartialTheme,
 } from '@elastic/charts';
+import { LegendToggle, EmptyPlaceholder } from '@kbn/charts-helpers';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
-import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 import {
   getAccessorByDimension,
   getFormatByAccessor,

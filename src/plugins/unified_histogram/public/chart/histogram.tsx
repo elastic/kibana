@@ -42,7 +42,7 @@ import {
   Endzones,
   getAdjustedInterval,
   renderEndzoneTooltip,
-} from '@kbn/charts-plugin/public';
+} from '@kbn/charts-helpers';
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import { css } from '@emotion/react';
 import type { UnifiedHistogramChartContext, UnifiedHistogramServices } from '../types';

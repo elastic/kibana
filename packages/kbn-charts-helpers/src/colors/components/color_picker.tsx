@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { lightenColor } from '../../services/palettes/lighten_color';
+import { lightenColor } from '../color_palette';
 
 export const legacyColors: string[] = [
   '#3F6833',

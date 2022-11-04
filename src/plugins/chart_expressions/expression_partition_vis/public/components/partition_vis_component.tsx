@@ -21,7 +21,8 @@ import {
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { LegendToggle } from '@kbn/charts-helpers';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
