@@ -97,14 +97,7 @@ describe('CreateCaseFlyout', () => {
   });
 
   it('calls submit automatically if autoSubmit=true', async () => {
-    (useCasesContext as jest.Mock).mockReturnValue({
-      owner: SECURITY_SOLUTION_OWNER,
-      autoSubmit: true,
-      features: {
-        alerts: { enabled: true },
-      },
-    });
-    mockedContext.render(<CreateCaseFlyout {...defaultProps} />);
+    mockedContext.render(<CreateCaseFlyout {...defaultProps} autoSubmit />);
     await act(async () => {
       expect(mockSubmit).toHaveBeenCalled();
     });
