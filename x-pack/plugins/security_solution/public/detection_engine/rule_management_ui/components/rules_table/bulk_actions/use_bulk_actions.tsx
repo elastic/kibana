@@ -24,11 +24,9 @@ import { useStartTransaction } from '../../../../../common/lib/apm/use_start_tra
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import * as detectionI18n from '../../../../../detections/pages/detection_engine/translations';
-import {
-  downloadExportedRules,
-  useBulkExport,
-} from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
+import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
 import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
+import { useDownloadExportedRules } from '../../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import type { FilterOptions } from '../../../../rule_management/logic/types';
 import { convertRulesFilterToKQL } from '../../../../rule_management/logic/utils';
 import { getExportedRulesDetails } from '../helpers';
@@ -69,6 +67,7 @@ export const useBulkActions = ({
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
+  const downloadExportedRules = useDownloadExportedRules();
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
@@ -176,7 +175,7 @@ export const useBulkActions = ({
           return;
         }
 
-        await downloadExportedRules({ response, toasts });
+        await downloadExportedRules(response);
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -461,6 +460,7 @@ export const useBulkActions = ({
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
+      downloadExportedRules,
     ]
   );
 
