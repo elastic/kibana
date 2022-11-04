@@ -2750,6 +2750,46 @@ describe('create()', () => {
           params: {
             foo: true,
           },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Actions missing frequency parameters: default"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+  test('throws error when some actions are missing frequency params', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
           frequency: {
             summary: false,
             notifyWhen: 'onActionGroupChange',
@@ -2766,25 +2806,6 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Actions missing frequency parameters: default"`
-    );
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-    expect(taskManager.schedule).not.toHaveBeenCalled();
-
-    const data2 = getMockData({
-      notifyWhen: undefined,
-      throttle: undefined,
-      actions: [
-        {
-          group: 'default',
-          id: '1',
-          params: {
-            foo: true,
-          },
-        },
-      ],
-    });
-    await expect(rulesClient.create({ data: data2 })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Actions missing frequency parameters: default"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();

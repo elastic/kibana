@@ -1770,18 +1770,6 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
-                frequency: {
-                  summary: false,
-                  notifyWhen: 'onActionGroupChange',
-                  throttle: null,
-                },
-              },
-              {
-                group: 'default',
-                id: '2',
-                params: {
-                  foo: true,
-                },
               },
             ],
           },
@@ -1791,6 +1779,13 @@ describe('update()', () => {
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
+    });
+
+    test('throws error when when some actions are missing frequency params', async () => {
+      const alertId = uuid.v4();
+      const taskId = uuid.v4();
+
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
 
       await expect(
         rulesClient.update({
@@ -1808,6 +1803,18 @@ describe('update()', () => {
               {
                 group: 'default',
                 id: '1',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+              {
+                group: 'default',
+                id: '2',
                 params: {
                   foo: true,
                 },
