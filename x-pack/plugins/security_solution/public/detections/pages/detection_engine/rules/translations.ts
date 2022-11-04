@@ -1127,3 +1127,18 @@ export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
     defaultMessage: 'Failed to load the saved query',
   }
 );
+
+export const ML_RULE_JOBS_WARNING_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.mlJobsWarning.popover.description',
+  {
+    defaultMessage:
+      'The following jobs are not running and might cause the rule to generate wrong results:',
+  }
+);
+
+export const ML_RULE_JOBS_WARNING_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.mlJobsWarning.popover.buttonLabel',
+  {
+    defaultMessage: 'Visit rule details page to investigate',
+  }
+);

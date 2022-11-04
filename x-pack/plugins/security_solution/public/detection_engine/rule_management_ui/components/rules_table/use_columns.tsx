@@ -6,15 +6,7 @@
  */
 
 import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useMemo } from 'react';
@@ -52,7 +44,7 @@ import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
-import { RuleErrorPopover } from './rule_error_popover';
+import { MlRuleErrorPopover } from './ml_rule_error_popover';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -131,39 +123,39 @@ const useRuleNameColumn = (): TableColumn => {
   );
 };
 
-const useRuleExecutionStatusColumn = (sortable: boolean): TableColumn => {
+const useRuleExecutionStatusColumn = ({
+  sortable,
+  width,
+}: {
+  sortable: boolean;
+  width: string;
+}): TableColumn => {
   return useMemo(
     () => ({
       field: 'execution_summary.last_execution.status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: RuleExecutionSummary['last_execution']['status'] | undefined, item: Rule) => (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <RuleStatusBadge status={value} />
-          </EuiFlexItem>
-          {isMlRule(item.type) &&
-            false &&
-            (value === RuleExecutionStatus.failed ||
-              value === RuleExecutionStatus['partial failure']) && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={item.execution_summary?.last_execution.message}>
-                  <EuiIcon type={'alert'} />
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-          {(value === RuleExecutionStatus.failed ||
-            value === RuleExecutionStatus['partial failure']) && (
+      render: (value: RuleExecutionSummary['last_execution']['status'] | undefined, item: Rule) => {
+        const isFailedStatus =
+          value === RuleExecutionStatus.failed || value === RuleExecutionStatus['partial failure'];
+        return (
+          <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <RuleErrorPopover rule={item} />
+              <RuleStatusBadge
+                status={value}
+                message={isFailedStatus ? item.execution_summary?.last_execution.message : null}
+              />
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ),
+            <EuiFlexItem grow={false}>
+              <MlRuleErrorPopover rule={item} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
       sortable,
       truncateText: true,
-      width: '16%',
+      width,
     }),
-    [sortable]
+    [sortable, width]
   );
 };
 
@@ -223,7 +215,10 @@ export const useRulesColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColu
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-  const executionStatusColumn = useRuleExecutionStatusColumn(!!isInMemorySorting);
+  const executionStatusColumn = useRuleExecutionStatusColumn({
+    sortable: !!isInMemorySorting,
+    width: '16%',
+  });
 
   return useMemo(
     () => [
@@ -327,6 +322,10 @@ export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): Tabl
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+  const executionStatusColumn = useRuleExecutionStatusColumn({
+    sortable: !!isInMemorySorting,
+    width: '12%',
+  });
 
   return useMemo(
     () => [
@@ -410,16 +409,7 @@ export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): Tabl
         truncateText: true,
         width: '14%',
       },
-      {
-        field: 'execution_summary.last_execution.status',
-        name: i18n.COLUMN_LAST_RESPONSE,
-        render: (value: RuleExecutionSummary['last_execution']['status'] | undefined) => (
-          <RuleStatusBadge status={value} />
-        ),
-        sortable: !!isInMemorySorting,
-        truncateText: true,
-        width: '12%',
-      },
+      executionStatusColumn,
       {
         field: 'execution_summary.last_execution.date',
         name: i18n.COLUMN_LAST_COMPLETE_RUN,
@@ -446,6 +436,7 @@ export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): Tabl
       actionsColumn,
       docLinks.links.siem.troubleshootGaps,
       enabledColumn,
+      executionStatusColumn,
       hasCRUDPermissions,
       isInMemorySorting,
       ruleNameColumn,

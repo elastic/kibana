@@ -15,18 +15,19 @@ import type { RuleExecutionStatus } from '../../../../../common/detection_engine
 
 interface RuleStatusBadgeProps {
   status: RuleExecutionStatus | null | undefined;
+  message: string | null | undefined;
 }
 
 /**
  * Shows rule execution status
  * @param status - rule execution status
  */
-const RuleStatusBadgeComponent = ({ status }: RuleStatusBadgeProps) => {
+const RuleStatusBadgeComponent = ({ status, message }: RuleStatusBadgeProps) => {
   const statusText = getCapitalizedStatusText(status);
   const statusColor = getStatusColor(status);
   return (
     <HealthTruncateText
-      tooltipContent={statusText}
+      tooltipContent={message ?? statusText}
       healthColor={statusColor}
       dataTestSubj="ruleExecutionStatus"
     >
