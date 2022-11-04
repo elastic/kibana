@@ -28,7 +28,7 @@ export function Warnings({ warnings }: { warnings: React.ReactNode[] }) {
             size="xs"
             data-test-subj="chart-inline-warning-button"
           >
-            {i18n.translate('charts.warning.warningLabel', {
+            {i18n.translate('chartsHelpers.warning.warningLabel', {
               defaultMessage:
                 '{numberWarnings, number} {numberWarnings, plural, one {warning} other {warnings}}',
               values: {

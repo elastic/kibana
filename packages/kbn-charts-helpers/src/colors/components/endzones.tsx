@@ -137,7 +137,7 @@ export const getAdjustedInterval = (
   return newInterval > 0 ? newInterval : moment.duration(esValue, esUnit).asMilliseconds();
 };
 
-const partialDataText = i18n.translate('charts.partialData.bucketTooltipText', {
+const partialDataText = i18n.translate('chartsHelpers.partialData.bucketTooltipText', {
   defaultMessage:
     'The selected time range does not include this entire bucket. It might contain partial data.',
 });

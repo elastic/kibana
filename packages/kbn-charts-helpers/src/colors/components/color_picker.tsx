@@ -167,7 +167,7 @@ export const ColorPicker = ({
         <EuiScreenReaderOnly>
           <legend>
             <FormattedMessage
-              id="charts.colorPicker.setColor.screenReaderDescription"
+              id="chartsHelpers.colorPicker.setColor.screenReaderDescription"
               defaultMessage="Set color for value {legendDataLabel}"
               values={{ legendDataLabel: label }}
             />
@@ -220,7 +220,10 @@ export const ColorPicker = ({
         colorIsOverwritten && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="s" onClick={(e: any) => onChange(null, e)}>
-              <FormattedMessage id="charts.colorPicker.clearColor" defaultMessage="Reset color" />
+              <FormattedMessage
+                id="chartsHelpers.colorPicker.clearColor"
+                defaultMessage="Reset color"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}

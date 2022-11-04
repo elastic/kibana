@@ -60,13 +60,13 @@ const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendTo
         showLegend ? isOpenStyle : null,
         ['left', 'bottom'].includes(legendPosition) ? positionStyle : null,
       ]}
-      aria-label={i18n.translate('charts.legend.toggleLegendButtonAriaLabel', {
+      aria-label={i18n.translate('chartsHelpers.legend.toggleLegendButtonAriaLabel', {
         defaultMessage: 'Toggle legend',
       })}
       aria-expanded={showLegend}
       isSelected={showLegend}
       data-test-subj="vislibToggleLegend"
-      title={i18n.translate('charts.legend.toggleLegendButtonTitle', {
+      title={i18n.translate('chartsHelpers.legend.toggleLegendButtonTitle', {
         defaultMessage: 'Toggle legend',
       })}
     />

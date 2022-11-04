@@ -31,7 +31,7 @@ const style = css`
 export const EmptyPlaceholder = ({
   icon,
   iconColor = 'subdued',
-  message = <FormattedMessage id="charts.noDataLabel" defaultMessage="No results found" />,
+  message = <FormattedMessage id="chartsHelpers.noDataLabel" defaultMessage="No results found" />,
   dataTestSubj = 'emptyPlaceholder',
   className,
   renderComplete,
