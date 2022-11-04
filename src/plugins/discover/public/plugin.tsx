@@ -61,6 +61,14 @@ import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
 import { useDiscoverServices } from './hooks/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
+import {
+  DiscoverContextAppLocator,
+  DiscoverContextAppLocatorDefinition,
+} from './application/context/services/locator';
+import {
+  DiscoverSingleDocLocator,
+  DiscoverSingleDocLocatorDefinition,
+} from './application/doc/locator';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -199,15 +207,23 @@ export class DiscoverPlugin
   private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private locator?: DiscoverAppLocator;
+  private contextLocator?: DiscoverContextAppLocator;
+  private singleDocLocator?: DiscoverSingleDocLocator;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
     const isDev = this.initializerContext.env.mode.dev;
     if (plugins.share) {
+      const useHash = core.uiSettings.get('state:storeInSessionStorage');
       this.locator = plugins.share.url.locators.create(
-        new DiscoverAppLocatorDefinition({
-          useHash: core.uiSettings.get('state:storeInSessionStorage'),
-        })
+        new DiscoverAppLocatorDefinition({ useHash })
+      );
+
+      this.contextLocator = plugins.share.url.locators.create(
+        new DiscoverContextAppLocatorDefinition({ useHash })
+      );
+      this.singleDocLocator = plugins.share.url.locators.create(
+        new DiscoverSingleDocLocatorDefinition()
       );
     }
 
@@ -299,7 +315,9 @@ export class DiscoverPlugin
           coreStart,
           discoverStartPlugins,
           this.initializerContext,
-          this.locator!
+          this.locator!,
+          this.contextLocator!,
+          this.singleDocLocator!
         );
 
         // make sure the data view list is up to date
@@ -390,7 +408,14 @@ export class DiscoverPlugin
 
     const getDiscoverServices = async () => {
       const [coreStart, discoverStartPlugins] = await core.getStartServices();
-      return buildServices(coreStart, discoverStartPlugins, this.initializerContext, this.locator!);
+      return buildServices(
+        coreStart,
+        discoverStartPlugins,
+        this.initializerContext,
+        this.locator!,
+        this.contextLocator!,
+        this.singleDocLocator!
+      );
     };
 
     const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServices);

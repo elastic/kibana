@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, memo, useCallback, useRef } from 'react';
+import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { DataViewListItem } from '@kbn/data-plugin/public';
 import { DataViewSavedObjectConflictError } from '@kbn/data-views-plugin/public';
@@ -29,7 +29,7 @@ import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
-import { ScopedHistoryLocationState } from '../../locator';
+import { MainHistoryLocationState } from '../../locator';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -66,9 +66,10 @@ export function DiscoverMainRoute(props: Props) {
   /**
    * Get location state of scoped history only on initial load
    */
-  const historyLocationState = useRef(
-    getScopedHistory().location.state as ScopedHistoryLocationState
-  ).current;
+  const historyLocationState = useMemo(
+    () => getScopedHistory().location.state as MainHistoryLocationState | undefined,
+    []
+  );
 
   useExecutionContext(core.executionContext, {
     type: 'application',

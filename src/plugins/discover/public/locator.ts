@@ -102,7 +102,7 @@ export interface DiscoverAppLocatorDependencies {
 /**
  * Location state of scoped history (history instance of Kibana Platform application service)
  */
-export interface ScopedHistoryLocationState {
+export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
 }
 
@@ -160,7 +160,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (viewMode) appState.viewMode = viewMode;
     if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
 
-    const state: ScopedHistoryLocationState = {};
+    const state: MainHistoryLocationState = {};
     if (dataViewSpec) {
       state.dataViewSpec = dataViewSpec;
     }
