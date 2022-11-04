@@ -7,6 +7,8 @@
 
 import {
   IngestPipeline,
+  IngestProcessorContainer,
+  IngestRemoveProcessor,
   IngestSetProcessor,
   MlTrainedModelConfig,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -53,7 +55,8 @@ export const generateMlInferencePipelineBody = ({
     model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
 
   const inferenceType = Object.keys(model.inference_config)[0];
-  const set = getSetProcessorForInferenceType(destinationField, inferenceType);
+  const remove = getRemoveProcessorForInferenceType(destinationField, inferenceType);
+  const set = getSetProcessorForInferenceType(destinationField, inferenceType, pipelineName);
 
   return {
     description: description ?? '',
@@ -64,6 +67,7 @@ export const generateMlInferencePipelineBody = ({
           ignore_missing: true,
         },
       },
+      ...(remove ? [{ remove }] : []),
       {
         inference: {
           field_map: {
@@ -108,10 +112,26 @@ export const generateMlInferencePipelineBody = ({
 
 export const getSetProcessorForInferenceType = (
   destinationField: string,
-  inferenceType: string
+  inferenceType: string,
+  pipelineName: string
 ): IngestSetProcessor | undefined => {
   let set: IngestSetProcessor | undefined;
   const prefixedDestinationField = `ml.inference.${destinationField}`;
+  const onFailure: IngestProcessorContainer[] = [
+    {
+      append: {
+        field: '_source._ingest.set_errors',
+        ignore_failure: true,
+        value: [
+          {
+            message: `Processor 'set' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
+            pipeline: pipelineName,
+            timestamp: '{{{ _ingest.timestamp }}}',
+          },
+        ],
+      },
+    },
+  ];
 
   if (inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION) {
     set = {
@@ -119,6 +139,7 @@ export const getSetProcessorForInferenceType = (
       description: `Copy the predicted_value to '${destinationField}' if the prediction_probability is greater than 0.5`,
       field: destinationField,
       if: `${prefixedDestinationField}.prediction_probability > 0.5`,
+      on_failure: onFailure,
       value: undefined,
     };
   } else if (inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING) {
@@ -126,11 +147,27 @@ export const getSetProcessorForInferenceType = (
       copy_from: `${prefixedDestinationField}.predicted_value`,
       description: `Copy the predicted_value to '${destinationField}'`,
       field: destinationField,
+      on_failure: onFailure,
       value: undefined,
     };
   }
 
   return set;
+};
+
+export const getRemoveProcessorForInferenceType = (
+  destinationField: string,
+  inferenceType: string
+): IngestRemoveProcessor | undefined => {
+  if (
+    inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION ||
+    inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING
+  ) {
+    return {
+      field: destinationField,
+      ignore_missing: true,
+    };
+  }
 };
 
 /**
