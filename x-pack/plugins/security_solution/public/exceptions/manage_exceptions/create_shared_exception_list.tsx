@@ -22,6 +22,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
+import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notifications-browser';
 
 import { useCreateSharedExceptionListWithOptionalSignal } from './use_create_shared_list';
 
@@ -46,10 +47,10 @@ export const CreateSharedListFlyout = memo(
       useCreateSharedExceptionListWithOptionalSignal();
     const ctrl = useRef(new AbortController());
 
-    const onListNameChange = (e) => {
+    const onListNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setListName(e.target.value);
     };
-    const onDescriptionChange = (e) => {
+    const onDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setDescription(e.target.value);
     };
 
@@ -86,30 +87,24 @@ export const CreateSharedListFlyout = memo(
     );
 
     const handleCreateError = useCallback(
-      (errors) => {
-        errors.forEach((error) => {
-          if (!error.error.message.includes('AbortError')) {
-            addError(error.error.message, { title: 'creation error' });
-          }
-        });
+      (error) => {
+        if (!error.message.includes('AbortError') && !error?.body?.message.includes('AbortError')) {
+          addError(error, { title: 'creation error' });
+        }
       },
       [addError]
     );
 
     useEffect(() => {
       if (!createSharedExceptionListState.loading) {
-        console.error('NOT LOADING');
-        if (createSharedExceptionListState?.result?.name) {
-          console.error('HAS NAME');
+        if (createSharedExceptionListState?.result) {
           handleCreateSuccess(createSharedExceptionListState.result);
-        } else if (createSharedExceptionListState?.result?.errors) {
-          handleCreateError(createSharedExceptionListState?.result?.errors);
+        } else if (createSharedExceptionListState?.error) {
+          handleCreateError(createSharedExceptionListState?.error);
         }
-        console.error('FAILED');
-      } else {
-        console.error('LOADING');
       }
     }, [
+      createSharedExceptionListState?.error,
       createSharedExceptionListState.loading,
       createSharedExceptionListState.result,
       handleCreateError,
