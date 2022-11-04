@@ -44,25 +44,25 @@ export type SavedObjectsExtensionFactory<T> = (params: {
  * Describes the factory used to create instances of the Saved Objects Encryption Extension.
  * @public
  */
-export type SavedObjectsEncryptionExtensionFactory =
-  | SavedObjectsExtensionFactory<ISavedObjectsEncryptionExtension>
-  | undefined;
+export type SavedObjectsEncryptionExtensionFactory = SavedObjectsExtensionFactory<
+  ISavedObjectsEncryptionExtension | undefined
+>;
 
 /**
  * Describes the factory used to create instances of the Saved Objects Security Extension.
  * @public
  */
-export type SavedObjectsSecurityExtensionFactory =
-  | SavedObjectsExtensionFactory<ISavedObjectsSecurityExtension>
-  | undefined; // May be undefined if RBAC is disabled
+export type SavedObjectsSecurityExtensionFactory = SavedObjectsExtensionFactory<
+  ISavedObjectsSecurityExtension | undefined
+>; // May be undefined if RBAC is disabled
 
 /**
  * Describes the factory used to create instances of the Saved Objects Spaces Extension.
  * @public
  */
-export type SavedObjectsSpacesExtensionFactory =
-  | SavedObjectsExtensionFactory<ISavedObjectsSpacesExtension>
-  | undefined;
+export type SavedObjectsSpacesExtensionFactory = SavedObjectsExtensionFactory<
+  ISavedObjectsSpacesExtension | undefined
+>;
 
 /**
  * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.

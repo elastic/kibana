@@ -42,9 +42,9 @@ export type ISavedObjectsClientProvider = Pick<
 export class SavedObjectsClientProvider {
   private _clientFactory: SavedObjectsClientFactory;
   private readonly _originalClientFactory: SavedObjectsClientFactory;
-  private readonly encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory;
-  private readonly securityExtensionFactory: SavedObjectsSecurityExtensionFactory;
-  private readonly spacesExtensionFactory: SavedObjectsSpacesExtensionFactory;
+  private readonly encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
+  private readonly securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
+  private readonly spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
   private readonly _typeRegistry: ISavedObjectTypeRegistry;
 
   constructor({
@@ -56,9 +56,9 @@ export class SavedObjectsClientProvider {
   }: {
     defaultClientFactory: SavedObjectsClientFactory;
     typeRegistry: ISavedObjectTypeRegistry;
-    encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory;
-    securityExtensionFactory: SavedObjectsSecurityExtensionFactory;
-    spacesExtensionFactory: SavedObjectsSpacesExtensionFactory;
+    encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
+    securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
+    spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
   }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
     this._typeRegistry = typeRegistry;

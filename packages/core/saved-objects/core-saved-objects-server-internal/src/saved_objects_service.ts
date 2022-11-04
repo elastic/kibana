@@ -93,9 +93,9 @@ export class SavedObjectsService
   private setupDeps?: SavedObjectsSetupDeps;
   private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
-  private encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory;
-  private securityExtensionFactory: SavedObjectsSecurityExtensionFactory;
-  private spacesExtensionFactory: SavedObjectsSpacesExtensionFactory;
+  private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
+  private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
+  private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
