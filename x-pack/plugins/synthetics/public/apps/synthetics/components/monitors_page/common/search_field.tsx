@@ -37,6 +37,7 @@ export function SearchField() {
       }}
       isClearable={true}
       aria-label={PLACEHOLDER_TEXT}
+      data-test-subj="syntheticsOverviewSearchInput"
     />
   );
 }

@@ -24,10 +24,12 @@ import { OverviewLoader } from './overview_loader';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
 import { SortFields } from './sort_fields';
+import { NoMonitorsFound } from '../../common/no_monitors_found';
 
 export const OverviewGrid = memo(() => {
   const {
     data: { monitors },
+    status,
     loaded,
     pageState,
   } = useSelector(selectOverviewState);
@@ -35,9 +37,7 @@ export const OverviewGrid = memo(() => {
   const [loadNextPage, setLoadNextPage] = useState(false);
   const [page, setPage] = useState(1);
 
-  const { monitorsSortedByStatus } = useMonitorsSortedByStatus(
-    sortField === 'status' && monitors.length !== 0
-  );
+  const { monitorsSortedByStatus } = useMonitorsSortedByStatus();
   const currentMonitors = getCurrentMonitors({
     monitors,
     monitorsSortedByStatus,
@@ -73,11 +73,20 @@ export const OverviewGrid = memo(() => {
     }
   }, [loadNextPage]);
 
+  // Display no monitors found when down, up, or disabled filter produces no results
+  if (status && !monitorsSortedByStatus.length) {
+    return <NoMonitorsFound />;
+  }
+
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <OverviewPaginationInfo page={page} loading={!loaded} />
+          <OverviewPaginationInfo
+            page={page}
+            loading={!loaded}
+            total={status ? monitorsSortedByStatus.length : undefined}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <SortFields onSortChange={() => setPage(1)} />

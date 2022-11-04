@@ -93,7 +93,7 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: GETTING_STARTED_ROUTE,
-      component: () => <GettingStartedPage />,
+      component: GettingStartedPage,
       dataTestSubj: 'syntheticsGettingStartedPage',
       pageSectionProps: {
         alignment: 'center',
@@ -148,7 +148,7 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: OVERVIEW_ROUTE,
-      component: () => <OverviewPage />,
+      component: OverviewPage,
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {
         pageTitle: (
@@ -294,7 +294,7 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: STEP_DETAIL_ROUTE,
-      component: () => <StepDetailPage />,
+      component: StepDetailPage,
       dataTestSubj: 'syntheticsMonitorEditPage',
       pageHeader: {
         pageTitle: <StepTitle />,
@@ -312,7 +312,7 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: ERROR_DETAILS_ROUTE,
-      component: () => <ErrorDetailsPage />,
+      component: ErrorDetailsPage,
       dataTestSubj: 'syntheticsMonitorEditPage',
       pageHeader: {
         pageTitle: (

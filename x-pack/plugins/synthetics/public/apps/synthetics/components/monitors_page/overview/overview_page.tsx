@@ -26,6 +26,7 @@ import { useMonitorList } from '../hooks/use_monitor_list';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
 import { OverviewStatus } from './overview/overview_status';
+import { QuickFilters } from './overview/quick_filters';
 import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
 
@@ -103,7 +104,14 @@ export const OverviewPage: React.FC = () => {
 
   return (
     <>
-      <SearchField />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <SearchField />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <QuickFilters />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer />
       {Boolean(!monitorsLoaded || syntheticsMonitors?.length > 0) && (
         <>
