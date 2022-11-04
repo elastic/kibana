@@ -87,11 +87,13 @@ export const mockState: SyntheticsAppState = {
   overview: {
     pageState: {
       perPage: 10,
+      sortOrder: 'asc',
+      sortField: 'name.keyword',
     },
     data: {
       total: 0,
       allMonitorIds: [],
-      pages: {},
+      monitors: [],
     },
     error: null,
     loaded: false,

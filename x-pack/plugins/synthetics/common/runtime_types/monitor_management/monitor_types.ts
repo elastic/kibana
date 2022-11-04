@@ -400,7 +400,7 @@ export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
 export const MonitorOverviewResultCodec = t.type({
   total: t.number,
   allMonitorIds: t.array(t.string),
-  pages: t.record(t.string, t.array(MonitorOverviewItemCodec)),
+  monitors: t.array(MonitorOverviewItemCodec),
 });
 
 export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;

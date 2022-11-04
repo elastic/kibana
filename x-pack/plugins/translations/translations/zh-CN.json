@@ -31227,7 +31227,6 @@
     "xpack.synthetics.overview.heading": "监测",
     "xpack.synthetics.overview.monitors.label": "监测",
     "xpack.synthetics.overview.pageHeader.title": "概览",
-    "xpack.synthetics.overview.pagination.ariaLabel": "监测概述的分页",
     "xpack.synthetics.overviewPage.overviewCrumb": "概览",
     "xpack.synthetics.overviewPageLink.disabled.ariaLabel": "禁用的分页按钮表示在监测列表中无法进行进一步导航。",
     "xpack.synthetics.overviewPageLink.next.ariaLabel": "下页结果",
