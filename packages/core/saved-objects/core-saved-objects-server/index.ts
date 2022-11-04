@@ -65,7 +65,10 @@ export type {
 } from './src/serialization';
 export type { ISavedObjectTypeRegistry } from './src/type_registry';
 export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './src/validation';
-export type { ISavedObjectsEncryptionExtension, EncryptedObjectDescriptor } from './src/extensions/encryption';
+export type {
+  ISavedObjectsEncryptionExtension,
+  EncryptedObjectDescriptor,
+} from './src/extensions/encryption';
 export type {
   CheckAuthorizationParams,
   AuthorizationTypeEntry,
