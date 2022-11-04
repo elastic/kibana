@@ -126,4 +126,5 @@ export const discoverServiceMock = {
   savedObjectsTagging: {},
   dataViews: dataViewsMock,
   timefilter: { createFilter: jest.fn() },
+  lens: { EmbeddableComponent: jest.fn(() => null) },
 } as unknown as DiscoverServices;

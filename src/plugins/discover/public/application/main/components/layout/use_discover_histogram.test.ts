@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { act, renderHook } from '@testing-library/react-hooks';
@@ -14,7 +13,6 @@ import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import {
   AvailableFields$,
-  DataCharts$,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
@@ -33,6 +31,8 @@ import {
 } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { calculateBounds } from '@kbn/data-plugin/public';
+import { createSearchSessionMock } from '../../../../__mocks__/search_session';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
 
 const mockData = dataPluginMock.createStartContract();
 
@@ -100,61 +100,10 @@ describe('useDiscoverHistogram', () => {
       result: Number(esHits.length),
     }) as DataTotalHits$;
 
-    const charts$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      response: {
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 1,
-          successful: 1,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: 29,
-          max_score: null,
-          hits: [],
-        },
-        aggregations: {
-          '2': {
-            buckets: [
-              {
-                key_as_string: '2022-10-05T16:00:00.000-03:00',
-                key: 1664996400000,
-                doc_count: 6,
-              },
-              {
-                key_as_string: '2022-10-05T16:30:00.000-03:00',
-                key: 1664998200000,
-                doc_count: 2,
-              },
-              {
-                key_as_string: '2022-10-05T17:00:00.000-03:00',
-                key: 1665000000000,
-                doc_count: 3,
-              },
-              {
-                key_as_string: '2022-10-05T17:30:00.000-03:00',
-                key: 1665001800000,
-                doc_count: 8,
-              },
-              {
-                key_as_string: '2022-10-05T18:00:00.000-03:00',
-                key: 1665003600000,
-                doc_count: 10,
-              },
-            ],
-          },
-        },
-      } as SearchResponse,
-    }) as DataCharts$;
-
     const savedSearchData$ = {
       main$,
       documents$,
       totalHits$,
-      charts$,
       availableFields$,
     };
 
@@ -167,35 +116,14 @@ describe('useDiscoverHistogram', () => {
         savedSearch: savedSearchMock,
         isTimeBased,
         isPlainRecord,
+        inspectorAdapters: { requests: new RequestAdapter() },
+        searchSessionManager: createSearchSessionMock().searchSessionManager,
       });
     });
 
     await act(() => setTimeout(0));
 
     return hook;
-  };
-
-  const expectedChartData = {
-    xAxisOrderedValues: [1664996400000, 1664998200000, 1665000000000, 1665001800000, 1665003600000],
-    xAxisFormat: { id: 'date', params: { pattern: 'HH:mm:ss.SSS' } },
-    xAxisLabel: 'timestamp per 0 milliseconds',
-    yAxisFormat: { id: 'number' },
-    ordered: {
-      date: true,
-      interval: 'P0D',
-      intervalESUnit: 'ms',
-      intervalESValue: 0,
-      min: '1991-03-29T08:04:00.694Z',
-      max: '2021-03-29T07:04:00.695Z',
-    },
-    yAxisLabel: 'Count',
-    values: [
-      { x: 1664996400000, y: 6 },
-      { x: 1664998200000, y: 2 },
-      { x: 1665000000000, y: 3 },
-      { x: 1665001800000, y: 8 },
-      { x: 1665003600000, y: 10 },
-    ],
   };
 
   describe('contexts', () => {
@@ -207,12 +135,8 @@ describe('useDiscoverHistogram', () => {
 
     it('should output the correct chart context', async () => {
       const { result } = await renderUseDiscoverHistogram();
-      expect(result.current.chart?.status).toBe(FetchStatus.COMPLETE);
       expect(result.current.chart?.hidden).toBe(false);
       expect(result.current.chart?.timeInterval).toBe('auto');
-      expect(result.current.chart?.bucketInterval?.toString()).toBe('P0D');
-      expect(JSON.stringify(result.current.chart?.data)).toBe(JSON.stringify(expectedChartData));
-      expect(result.current.chart?.error).toBeUndefined();
     });
 
     it('should output undefined for hits and chart if isPlainRecord is true', async () => {
