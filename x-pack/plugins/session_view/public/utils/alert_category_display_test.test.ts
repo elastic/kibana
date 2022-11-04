@@ -65,7 +65,9 @@ describe('getAlertCategoryDisplayText(alert, category)', () => {
 
 describe('getAlertNetworkDisplay(network, destination)', () => {
   it('should transport message with dash  when network transport is undefined', () => {
-    const text = `Transport protocol: ${DASH} | Network protocol: ${dataOrDash(mockNetworkAlert.network.protocol)} | Destination: ${mockNetworkAlert.destination.address}:${mockNetworkAlert.destination.port}`;
+    const text = `Transport protocol: ${DASH} | Network protocol: ${dataOrDash(
+      mockNetworkAlert.network.protocol
+    )} | Destination: ${mockNetworkAlert.destination.address}:${mockNetworkAlert.destination.port}`;
     expect(
       getAlertNetworkDisplay(
         { ...mockNetworkAlert.network, transport: undefined },
@@ -95,7 +97,9 @@ describe('getAlertNetworkDisplay(network, destination)', () => {
   });
 
   it('should show only ip address  when network port does not exist', () => {
-    const text = `Transport protocol: ${ mockNetworkAlert?.network?.transport} | Network protocol: ${mockNetworkAlert?.network?.protocol} | Destination: ${dataOrDash(mockNetworkAlert?.destination?.address)}`;
+    const text = `Transport protocol: ${mockNetworkAlert?.network?.transport} | Network protocol: ${
+      mockNetworkAlert?.network?.protocol
+    } | Destination: ${dataOrDash(mockNetworkAlert?.destination?.address)}`;
     expect(
       getAlertNetworkDisplay(mockNetworkAlert.network, {
         ...mockNetworkAlert.destination,
@@ -107,10 +111,10 @@ describe('getAlertNetworkDisplay(network, destination)', () => {
   it('should show dash  when address does not exist', () => {
     const text = `Transport protocol: ${mockNetworkAlert.network.transport} | Network protocol: ${mockNetworkAlert?.network?.protocol} | Destination: -`;
     expect(
-      getAlertNetworkDisplay(
-        mockNetworkAlert.network,
-        {...mockNetworkAlert.destination, address: undefined}
-      )
+      getAlertNetworkDisplay(mockNetworkAlert.network, {
+        ...mockNetworkAlert.destination,
+        address: undefined,
+      })
     ).toEqual(text);
   });
 });
