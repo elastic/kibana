@@ -8,7 +8,6 @@
 import type { IBasePath, Logger } from '@kbn/core/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { namespaceToSpaceId } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import type { UserProfileUserInfo } from '@kbn/user-profile-components';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CaseSavedObject } from '../../common/types';
@@ -90,8 +89,14 @@ export class EmailNotificationService implements NotificationService {
             {
               id: theCase.id,
               type: CASE_SAVED_OBJECT,
-              // FIX: Should the spaceId be ["default"] if namespaces are undefined?
-              spaceIds: theCase.namespaces?.map(namespaceToSpaceId) ?? [],
+              /**
+               * Cases are not shareable at the moment from the UI
+               * The namespaces should be either undefined or contain
+               * only one item, the space the case got created. If we decide
+               * in the future to share cases in multiple spaces we need
+               * to change the logic.
+               */
+              namespace: theCase.namespaces?.[0],
             },
           ],
         },

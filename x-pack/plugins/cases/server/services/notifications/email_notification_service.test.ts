@@ -50,7 +50,7 @@ describe('EmailNotificationService', () => {
         relatedObjects: [
           {
             id: 'mock-id-1',
-            spaceIds: [],
+            namespace: undefined,
             type: 'cases',
           },
         ],
@@ -73,7 +73,7 @@ describe('EmailNotificationService', () => {
         relatedObjects: [
           {
             id: 'mock-id-1',
-            spaceIds: [],
+            namespace: undefined,
             type: 'cases',
           },
         ],
@@ -101,7 +101,7 @@ describe('EmailNotificationService', () => {
         relatedObjects: [
           {
             id: 'mock-id-1',
-            spaceIds: [],
+            namespace: undefined,
             type: 'cases',
           },
         ],
@@ -113,7 +113,7 @@ describe('EmailNotificationService', () => {
     });
   });
 
-  it('converts the namespace correctly', async () => {
+  it('passes the namespace correctly', async () => {
     await emailNotificationService.notifyAssignees({
       assignees,
       theCase: { ...caseSO, namespaces: ['space1'] },
@@ -124,7 +124,7 @@ describe('EmailNotificationService', () => {
         relatedObjects: [
           {
             id: 'mock-id-1',
-            spaceIds: ['space1'],
+            namespace: 'space1',
             type: 'cases',
           },
         ],
