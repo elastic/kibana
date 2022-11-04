@@ -171,6 +171,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.cname (string)',
         'xpack.cloud.deployment_url (string)',
         'xpack.cloud.is_elastic_staff_owned (boolean)',
+        'xpack.cloud.organization_created_at (string)',
         'xpack.cloud.trial_end_date (string)',
         'xpack.cloud_integrations.chat.chatURL (string)',
         // No PII. This is an escape patch to override LaunchDarkly's flag resolution mechanism for testing or quick fix.
