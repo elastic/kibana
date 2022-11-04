@@ -419,7 +419,7 @@ describe('createGetSummarizedAlertsFn', () => {
                 range: {
                   [TIMESTAMP]: {
                     gte: '2020-01-01T11:00:00.000Z',
-                    lte: '2020-01-01T12:25:00.000Z',
+                    lt: '2020-01-01T12:25:00.000Z',
                   },
                 },
               },
@@ -451,7 +451,7 @@ describe('createGetSummarizedAlertsFn', () => {
                 range: {
                   [TIMESTAMP]: {
                     gte: '2020-01-01T11:00:00.000Z',
-                    lte: '2020-01-01T12:25:00.000Z',
+                    lt: '2020-01-01T12:25:00.000Z',
                   },
                 },
               },
@@ -492,7 +492,7 @@ describe('createGetSummarizedAlertsFn', () => {
                 range: {
                   [TIMESTAMP]: {
                     gte: '2020-01-01T11:00:00.000Z',
-                    lte: '2020-01-01T12:25:00.000Z',
+                    lt: '2020-01-01T12:25:00.000Z',
                   },
                 },
               },
@@ -505,7 +505,7 @@ describe('createGetSummarizedAlertsFn', () => {
                 range: {
                   [ALERT_END]: {
                     gte: '2020-01-01T11:00:00.000Z',
-                    lte: '2020-01-01T12:25:00.000Z',
+                    lt: '2020-01-01T12:25:00.000Z',
                   },
                 },
               },
@@ -821,7 +821,7 @@ describe('createGetSummarizedAlertsFn', () => {
                 range: {
                   [TIMESTAMP]: {
                     gte: '2020-01-01T11:00:00.000Z',
-                    lte: '2020-01-01T12:25:00.000Z',
+                    lt: '2020-01-01T12:25:00.000Z',
                   },
                 },
               },
