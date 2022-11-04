@@ -28,8 +28,8 @@ import type { ExceptionListInfo } from '../../hooks/use_all_exception_lists';
 import { TitleBadge } from '../title_badge';
 import * as i18n from '../../translations/translations';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
-import { ListExceptionItems } from '../list_exception_items';
 import { checkIfListCannotBeEdited } from '../../utils/list.utils';
+import { ListExceptionItems } from '../list_exception_items';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
