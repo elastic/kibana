@@ -1920,7 +1920,6 @@
     "discover.context.olderDocumentsWarning": "Seuls {docCount} documents plus anciens que le document ancré ont été trouvés.",
     "discover.context.pageTitle": "Les documents relatifs à #{anchorId}",
     "discover.contextViewRoute.errorMessage": "Aucune donnée correspondante pour l'ID {dataViewId}",
-    "discover.discoverError.missingQueryParamsError": "La chaîne de requête URL est manquante {missingParamsList}.",
     "discover.doc.pageTitle": "Document unique - #{id}",
     "discover.doc.somethingWentWrongDescription": "Index {indexName} manquant.",
     "discover.docExplorerCallout.bodyMessage": "Triez, sélectionnez et comparez rapidement les données, redimensionnez les colonnes et affichez les documents en plein écran grâce à l'{documentExplorer}.",
