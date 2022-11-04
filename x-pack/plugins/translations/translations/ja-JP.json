@@ -2217,7 +2217,6 @@
     "discover.helpMenu.appName": "Discover",
     "discover.inspectorRequestDataTitleChart": "グラフデータ",
     "discover.inspectorRequestDataTitleDocuments": "ドキュメント",
-    "discover.inspectorRequestDescriptionChart": "このリクエストはElasticsearchにクエリをかけ、グラフの集計データを取得します。",
     "discover.inspectorRequestDescriptionDocument": "このリクエストはElasticsearchにクエリをかけ、ドキュメントを取得します。",
     "discover.json.codeEditorAriaLabel": "Elasticsearch ドキュメントの JSON ビューのみを読み込む",
     "discover.json.copyToClipboardLabel": "クリップボードにコピー",
