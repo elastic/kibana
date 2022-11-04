@@ -90,3 +90,23 @@ export const getFailedNotificationText = (
       },
     }
   );
+
+export const getPartialSuccessNotificationText = (
+  numberOfSuccess: number,
+  numberOfErrors: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText',
+    {
+      defaultMessage:
+        'Deleted {numberofSuccess, number} {numberofSuccess, plural, one {{singleTitle}} other {{multipleTitle}}}, {numberOfErrors, plural, one {{singleTitle}} other {{multipleTitle}}} encountered errors',
+      values: {
+        numberOfSuccess,
+        numberOfErrors,
+        singleTitle,
+        multipleTitle,
+      },
+    }
+  );

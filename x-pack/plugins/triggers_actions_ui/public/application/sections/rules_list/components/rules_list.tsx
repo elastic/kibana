@@ -93,13 +93,12 @@ import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
 import { runRule } from '../../../lib/run_rule';
 import { bulkDeleteRules } from '../../../lib/rule_api';
 import {
-  getFailedNotificationText,
-  getSuccessfulNotificationText,
   singleRuleTitle,
   multipleRuleTitle,
   getConfirmButtonText,
   getConfirmModalText,
 } from '../../../components/translations';
+import { useBulkDeleteResponse } from '../../../hooks/use_bulk_delete_response';
 
 const ENTER_KEY = 13;
 
@@ -1023,6 +1022,7 @@ export const RulesList = ({
   useEffect(() => {
     setIsDeleteModalVisibility(rulesToDelete.length > 0 || Boolean(rulesToDeleteFilter));
   }, [rulesToDelete, rulesToDeleteFilter]);
+  const { showToast } = useBulkDeleteResponse({ onSearchPopulate });
 
   const onDeleteCancel = () => {
     setIsDeleteModalVisibility(false);
@@ -1037,18 +1037,9 @@ export const RulesList = ({
       ids: rulesToDelete,
       http,
     });
-    setIsDeletingRules(false);
 
-    const numErrors = errors.length;
-    const numSuccesses = total - numErrors;
-    if (numSuccesses > 0) {
-      toasts.addSuccess(
-        getSuccessfulNotificationText(numSuccesses, singleRuleTitle, multipleRuleTitle)
-      );
-    }
-    if (numErrors > 0) {
-      toasts.addDanger(getFailedNotificationText(numErrors, singleRuleTitle, multipleRuleTitle));
-    }
+    setIsDeletingRules(false);
+    showToast({ errors, total });
     await refreshRules();
     clearRulesToDelete();
     onClearSelection();
