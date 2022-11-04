@@ -394,7 +394,7 @@ describe('bulkDelete', () => {
 
       expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
-        'Successfully deleted schedules for underlying tasks: taskId2'
+        'Successfully deleted schedules for underlying tasks: taskId1'
       );
       expect(result).toStrictEqual({
         errors: [],
