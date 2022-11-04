@@ -80,7 +80,7 @@ export function getIngestionStatus(index?: ElasticsearchIndexWithIngestion): Ing
   if (!index || isApiIndex(index)) {
     return IngestionStatus.CONNECTED;
   }
-  if (isConnectorIndex(index)) {
+  if (isConnectorIndex(index) || isCrawlerIndex(index)) {
     if (
       index.connector.last_seen &&
       moment(index.connector.last_seen).isBefore(moment().subtract(30, 'minutes'))
