@@ -12,7 +12,7 @@ import path from 'path';
 
 import { merge } from '@kbn/std';
 import yaml from 'js-yaml';
-import { pick, uniq } from 'lodash';
+import { pick } from 'lodash';
 import semverMajor from 'semver/functions/major';
 import semverPrerelease from 'semver/functions/prerelease';
 
@@ -217,7 +217,13 @@ function parseAndVerifyArchive(paths: string[], topLevelDirOverride?: string): A
     );
   }
 
-  const parsedDataStreams = parseAndVerifyDataStreams(paths, parsed.name, parsed.version);
+  const parsedDataStreams = parseAndVerifyDataStreams(
+    paths,
+    parsed.name,
+    parsed.version,
+    topLevelDirOverride
+  );
+
   if (parsedDataStreams.length) {
     parsed.data_streams = parsedDataStreams;
   }
@@ -250,26 +256,27 @@ function parseAndVerifyReadme(paths: string[], pkgName: string, pkgVersion: stri
 export function parseAndVerifyDataStreams(
   paths: string[],
   pkgName: string,
-  pkgVersion: string
+  pkgVersion: string,
+  pkgBasePathOverride?: string
 ): RegistryDataStream[] {
   // A data stream is made up of a subdirectory of name-version/data_stream/, containing a manifest.yml
-  let dataStreamPaths: string[] = [];
+  const dataStreamPaths = new Set<string>();
   const dataStreams: RegistryDataStream[] = [];
-  const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
+  const pkgBasePath = pkgBasePathOverride || pkgToPkgKey({ name: pkgName, version: pkgVersion });
+  const dataStreamsBasePath = path.join(pkgBasePath, 'data_stream');
+  // pick all paths matching name-version/data_stream/DATASTREAM_NAME/...
+  // from those, pick all unique data stream names
+  paths.forEach((filePath) => {
+    if (!filePath.startsWith(dataStreamsBasePath)) return;
 
-  // pick all paths matching name-version/data_stream/DATASTREAM_PATH/...
-  // from those, pick all unique data stream paths
-  paths
-    .filter((filePath) => filePath.startsWith(`${pkgKey}/data_stream/`))
-    .forEach((filePath) => {
-      const parts = filePath.split('/');
-      if (parts.length > 2 && parts[2]) dataStreamPaths.push(parts[2]);
-    });
-
-  dataStreamPaths = uniq(dataStreamPaths);
+    const streamWithoutPrefix = filePath.slice(dataStreamsBasePath.length);
+    const [dataStreamPath] = streamWithoutPrefix.split('/').filter((v) => v); // remove undefined incase of leading /
+    if (dataStreamPath) dataStreamPaths.add(dataStreamPath);
+  });
 
   dataStreamPaths.forEach((dataStreamPath) => {
-    const manifestFile = `${pkgKey}/data_stream/${dataStreamPath}/${MANIFEST_NAME}`;
+    const fullDataStreamPath = path.join(dataStreamsBasePath, dataStreamPath);
+    const manifestFile = path.join(fullDataStreamPath, MANIFEST_NAME);
     const manifestBuffer = MANIFESTS[manifestFile];
     if (!paths.includes(manifestFile) || !manifestBuffer) {
       throw new PackageInvalidArchiveError(
@@ -302,7 +309,7 @@ export function parseAndVerifyDataStreams(
       );
     }
 
-    const ingestPipeline = parseDefaultIngestPipeline({ pkgKey, dataStreamPath, paths });
+    const ingestPipeline = parseDefaultIngestPipeline(fullDataStreamPath, paths);
     const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
     const parsedElasticsearchEntry = parseDataStreamElasticsearchEntry(
       elasticsearch,
@@ -541,13 +548,8 @@ const isDefaultPipelineFile = (pipelinePath: string) =>
   pipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_YML) ||
   pipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON);
 
-export function parseDefaultIngestPipeline(opts: {
-  pkgKey: string;
-  paths: string[];
-  dataStreamPath: string;
-}) {
-  const { pkgKey, paths, dataStreamPath } = opts;
-  const ingestPipelineDirPath = `${pkgKey}/data_stream/${dataStreamPath}/elasticsearch/ingest_pipeline`;
+export function parseDefaultIngestPipeline(fullDataStreamPath: string, paths: string[]) {
+  const ingestPipelineDirPath = path.join(fullDataStreamPath, '/elasticsearch/ingest_pipeline');
   const defaultIngestPipelinePaths = paths.filter(
     (pipelinePath) =>
       pipelinePath.startsWith(ingestPipelineDirPath) && isDefaultPipelineFile(pipelinePath)
