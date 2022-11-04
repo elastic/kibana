@@ -9,10 +9,11 @@
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { BooleanRelation } from '@kbn/es-query';
-import { cloneDeep, pickBy, identity } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { buildCombinedFilter, isCombinedFilter } from '@kbn/es-query';
-import { getBooleanRelationType } from '../utils';
-import type { Operator } from '../filter_bar/filter_editor';
+import { getBooleanRelationType } from '../../utils';
+import { updateFilter } from './update_filter';
+import type { Operator } from '../../filter_bar/filter_editor';
 
 const PATH_SEPARATOR = '.';
 
@@ -247,7 +248,7 @@ export const moveFilter = (
  * @param {Operator} operator - defines a relation by property and value
  * @param {Filter['meta']['params']} params - filter value
  */
-export const updateFilter = (
+export const updateFilters = (
   filters: Filter[],
   path: string,
   field?: DataViewField,
@@ -255,145 +256,12 @@ export const updateFilter = (
   params?: Filter['meta']['params']
 ) => {
   const newFilters = [...filters];
-  const changedFilter = getFilterByPath(newFilters, path) as Filter;
-  let filter = Object.assign({}, changedFilter);
-
-  if (field && operator && params !== undefined) {
-    if (operator.type === 'range') {
-      filter = updateWithRangeOperator(filter, operator, params, field);
-    } else if (Array.isArray(params)) {
-      filter = updateWithIsOneOfOperator(filter, operator, params);
-    } else {
-      filter = updateWithIsOperator(filter, operator, params);
-    }
-  } else if (field && operator) {
-    if (operator.type === 'exists') {
-      filter = updateWithExistsOperator(filter, operator);
-    } else {
-      filter = updateOperator(filter, operator);
-    }
-  } else {
-    filter = updateField(filter, field);
-  }
+  const updatedFilter = updateFilter(getFilterByPath(newFilters, path), field, operator, params);
 
   const pathInArray = getPathInArray(path);
   const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
   const selector = pathInArray[pathInArray.length - 1];
-  targetArray.splice(selector, 1, filter);
+  targetArray.splice(selector, 1, updatedFilter);
 
   return newFilters;
 };
-
-function updateField(filter: Filter, field?: DataViewField) {
-  return {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      key: field?.name,
-      params: { query: undefined },
-      value: undefined,
-      type: undefined,
-    },
-    query: undefined,
-  };
-}
-
-function updateOperator(filter: Filter, operator?: Operator) {
-  return {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      negate: operator?.negate,
-      type: operator?.type,
-      params: { ...filter.meta.params, query: undefined },
-      value: undefined,
-    },
-    query: { match_phrase: { field: filter.meta.key } },
-  };
-}
-
-function updateWithExistsOperator(filter: Filter, operator?: Operator) {
-  return {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      negate: operator?.negate,
-      type: operator?.type,
-      params: undefined,
-      value: 'exists',
-    },
-    query: { exists: { field: filter.meta.key } },
-  };
-}
-
-function updateWithIsOperator(
-  filter: Filter,
-  operator?: Operator,
-  params?: Filter['meta']['params']
-) {
-  return {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      negate: operator?.negate,
-      type: operator?.type,
-      params: { ...filter.meta.params, query: params },
-    },
-    query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: params } },
-  };
-}
-
-function updateWithRangeOperator(
-  filter: Filter,
-  operator: Operator,
-  rawParams: Array<Filter['meta']['params']>,
-  field: DataViewField
-) {
-  const params = {
-    ...filter.meta.params,
-    ...pickBy(rawParams, identity),
-  };
-
-  params.gte = params.from;
-  params.lt = params.to;
-
-  const updatedFilter = {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      negate: operator?.negate,
-      type: operator?.type,
-      params,
-    },
-    query: {
-      [field.name]: params,
-    },
-  };
-
-  return updatedFilter;
-}
-
-function updateWithIsOneOfOperator(
-  filter: Filter,
-  operator?: Operator,
-  params?: Array<Filter['meta']['params']>
-) {
-  return {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      negate: operator?.negate,
-      type: operator?.type,
-      params,
-    },
-    query: {
-      bool: {
-        minimum_should_match: 1,
-        ...filter!.query?.should,
-        should: params?.map((param) => {
-          return { match_phrase: { [filter.meta.key!]: param } };
-        }),
-      },
-    },
-  };
-}

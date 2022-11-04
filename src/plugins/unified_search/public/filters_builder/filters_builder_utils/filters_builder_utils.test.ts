@@ -16,14 +16,14 @@ import {
   moveFilter,
   normalizeFilters,
 } from './filters_builder_utils';
-import { getBooleanRelationType } from '../utils';
+import { getBooleanRelationType } from '../../utils';
 
 import {
   getDataAfterNormalized,
   getDataThatNeedNotNormalized,
   getDataThatNeedsNormalized,
   getFiltersMock,
-} from './__mock__/filters';
+} from '../__mock__/filters';
 
 describe('filters_builder_utils', () => {
   let filters: Filter[];

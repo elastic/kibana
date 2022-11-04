@@ -10,7 +10,7 @@ import type { Reducer } from 'react';
 import type { Filter, BooleanRelation } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filters_builder_types';
-import { addFilter, moveFilter, removeFilter, updateFilter } from './filters_builder_utils';
+import { addFilter, moveFilter, removeFilter, updateFilters } from './filters_builder_utils';
 import type { Operator } from '../filter_bar/filter_editor';
 
 /** @internal **/
@@ -88,7 +88,7 @@ export const FiltersBuilderReducer: Reducer<FiltersBuilderState, FiltersBuilderA
     case 'updateFilter':
       return {
         ...state,
-        filters: updateFilter(
+        filters: updateFilters(
           state.filters,
           action.payload.path,
           action.payload.field,
