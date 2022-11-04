@@ -37,7 +37,7 @@ export const observabilityConfig: GuideConfig = {
       integration: 'kubernetes',
       descriptionList: [
         <FormattedMessage
-          id="guidedOnboarding.observabilityGuide.addDataStep.description"
+          id="guidedOnboarding.observabilityGuide.addDataStep.descriptionList.item1"
           defaultMessage="Deploy {kubeStateMetricsLink} service to your Kubernetes."
           values={{
             kubeStateMetricsLink: (
@@ -51,7 +51,7 @@ export const observabilityConfig: GuideConfig = {
             ),
           }}
         />,
-        i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.description', {
+        i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.descriptionList.item2', {
           defaultMessage: 'Add the Elastic Kubernetes integration.',
         }),
       ],
