@@ -221,9 +221,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         field: 'docCount',
         name: (
           <div className={'columnHeader__title'}>
-            {dimensions.showIcon ? (
-              <EuiIcon type={'visBarVertical'} className={'columnHeader__icon'} />
-            ) : null}
             {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
               defaultMessage: 'Documents (%)',
             })}
@@ -232,7 +229,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
                 content={i18n.translate(
                   'xpack.dataVisualizer.dataGrid.documentsCountColumnTooltip',
                   {
-                    defaultMessage: 'Document count found based on a sample of records.',
+                    defaultMessage:
+                      'Document count found is based on a smaller set of sampled records.',
                   }
                 )}
               >
