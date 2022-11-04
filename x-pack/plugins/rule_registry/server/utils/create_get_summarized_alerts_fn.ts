@@ -289,7 +289,7 @@ const getQueryByTimeRange = (start: Date, end: Date, ruleId: string, type?: Aler
       range: {
         [TIMESTAMP]: {
           gte: start.toISOString(),
-          lte: end.toISOString(),
+          lt: end.toISOString(),
         },
       },
     },
@@ -339,7 +339,7 @@ const getQueryByTimeRange = (start: Date, end: Date, ruleId: string, type?: Aler
       range: {
         [ALERT_END]: {
           gte: start.toISOString(),
-          lte: end.toISOString(),
+          lt: end.toISOString(),
         },
       },
     });
