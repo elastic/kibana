@@ -6,7 +6,7 @@
  */
 
 import { Query } from '@elastic/eui';
-import { EXCEPTIONS_SEARCH_SCHEMA } from '../../../../exceptions/manage_exceptions/exceptions_search_bar';
+import { EXCEPTIONS_SEARCH_SCHEMA } from '../../../../exceptions/components/list_search_bar';
 import { caseInsensitiveSort, getSearchFilters } from './helpers';
 
 describe('AllRulesTable Helpers', () => {

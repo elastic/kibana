@@ -53,6 +53,9 @@ export const useExceptionsListCard = ({
   }, [fetchItems]);
 
   return {
+    viewerStatus,
+    exceptionToEdit,
+    showEditExceptionFlyout,
     lastUpdated,
     exceptions,
     ruleReferences,
