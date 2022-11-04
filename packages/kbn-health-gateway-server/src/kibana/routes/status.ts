@@ -7,12 +7,15 @@
  */
 
 import https from 'https';
+import { URL } from 'url';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
 import nodeFetch, { RequestInit, Response } from 'node-fetch';
 import type { IConfigService } from '@kbn/config';
 import type { Logger } from '@kbn/logging';
 import type { KibanaConfigType } from '../kibana_config';
 import { KibanaConfig } from '../kibana_config';
+
+const HTTPS = 'https:';
 
 const GATEWAY_STATUS_ROUTE = '/api/status';
 const KIBANA_STATUS_ROUTE = '/api/status';
@@ -113,19 +116,26 @@ function generateAgentConfig(sslConfig: KibanaConfig['ssl']) {
 }
 
 function configureFetch(kibanaConfig: KibanaConfig) {
-  const agent = new https.Agent(generateAgentConfig(kibanaConfig.ssl));
-  return async (path: string) => {
+  let agent: https.Agent;
+
+  return async (url: string) => {
+    const { protocol } = new URL(url);
+    if (protocol === HTTPS && !agent) {
+      agent = new https.Agent(generateAgentConfig(kibanaConfig.ssl));
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(
       () => controller.abort(),
       kibanaConfig.requestTimeout.asMilliseconds()
     );
+
     const fetchOptions: RequestInit = {
-      agent,
+      ...(protocol === HTTPS && { agent }),
       signal: controller.signal,
     };
     try {
-      const response = await nodeFetch(path, fetchOptions);
+      const response = await nodeFetch(url, fetchOptions);
       clearTimeout(timeoutId);
       return response;
     } catch (e) {
