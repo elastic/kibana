@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { EuiLink } from '@elastic/eui';
 import type { GuideConfig } from '../../types';
 
 export const observabilityConfig: GuideConfig = {
@@ -32,9 +36,23 @@ export const observabilityConfig: GuideConfig = {
       }),
       integration: 'kubernetes',
       descriptionList: [
+        <FormattedMessage
+          id="guidedOnboarding.observabilityGuide.addDataStep.description"
+          defaultMessage="Deploy {kubeStateMetricsLink} service to your Kubernetes."
+          values={{
+            kubeStateMetricsLink: (
+              <EuiLink
+                external
+                target="_blank"
+                href="https://github.com/kubernetes/kube-state-metrics"
+              >
+                kube-state-metrics
+              </EuiLink>
+            ),
+          }}
+        />,
         i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.description', {
-          defaultMessage:
-            'Start by adding your data by setting up the Kubernetes integration. For the best experience, deploy kube-state-metrics in Kubernetes.',
+          defaultMessage: 'Add the Elastic Kubernetes integration.',
         }),
       ],
       location: {
@@ -55,7 +73,7 @@ export const observabilityConfig: GuideConfig = {
       ),
       location: {
         appID: 'dashboards',
-        path: '#/view/kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+        path: '#/view/kubernetes-e0195ce0-bcaf-11ec-b64f-7dd6e8e82013',
       },
       manualCompletion: {
         title: i18n.translate(
