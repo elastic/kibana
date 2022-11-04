@@ -18,7 +18,7 @@ import { convertShardsToObject } from '../routes/utils';
 import { packSavedObjectType } from '../../common/types';
 import type { OsqueryAppContextService } from './osquery_app_context_services';
 import type { PackSavedObjectAttributes } from '../common/types';
-import { convertSOQueriesToPack } from '../routes/pack/utils';
+import { convertSOQueriesToPackConfig } from '../routes/pack/utils';
 import type { PackSavedObject } from '../common/types';
 
 export const updateGlobalPacksCreateCallback = async (
@@ -82,10 +82,7 @@ export const updateGlobalPacksCreateCallback = async (
       map(packsContainingShardForPolicy, (pack) => {
         set(draft, `inputs[0].config.osquery.value.packs.${pack.attributes.name}`, {
           shard: 100,
-          queries: convertSOQueriesToPack(pack.attributes.queries, {
-            removeMultiLines: true,
-            removeResultType: true,
-          }),
+          queries: convertSOQueriesToPackConfig(pack.attributes.queries),
         });
       });
 
