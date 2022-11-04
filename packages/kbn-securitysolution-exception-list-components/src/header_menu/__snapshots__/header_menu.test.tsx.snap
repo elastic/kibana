@@ -17,7 +17,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Icon"
-              class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
               data-test-subj="ButtonIcon"
               type="button"
             >
@@ -49,7 +49,7 @@ Object {
           tabindex="0"
         >
           <div
-            class="emotion-euiPopoverArrow-bottom"
+            class="euiPopover__arrow emotion-euiPopoverArrow-bottom"
             data-popover-arrow="bottom"
             style="left: 10px; top: 0px;"
           />
@@ -127,7 +127,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Icon"
-            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
             data-test-subj="ButtonIcon"
             type="button"
           >
