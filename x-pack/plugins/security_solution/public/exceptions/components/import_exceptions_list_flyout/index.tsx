@@ -31,9 +31,9 @@ import type {
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ToastInput, Toast, ErrorToastOptions } from '@kbn/core-notifications-browser';
 
-import { useImportExceptionList } from './use_import_exception_list';
+import { useImportExceptionList } from '../../hooks/use_import_exception_list';
 
-import * as i18n from './translations';
+import * as i18n from '../../translations/translations';
 
 export const ImportExceptionListFlyout = React.memo(
   ({

@@ -104,3 +104,10 @@ export const IMPORT_PROMPT = i18n.translate(
     defaultMessage: 'Select or drag and drop multiple files',
   }
 );
+
+export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.exceptions.badge.readOnly.tooltip',
+  {
+    defaultMessage: 'Unable to create, edit or delete exceptions',
+  }
+);

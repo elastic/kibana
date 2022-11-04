@@ -13,8 +13,8 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../common/components/utility_bar';
-import * as i18n from './translations_exceptions_table';
+} from '../../../common/components/utility_bar';
+import * as i18n from '../../translations/shared_list.translations';
 
 interface ExceptionsTableUtilityBarProps {
   onRefresh?: () => void;

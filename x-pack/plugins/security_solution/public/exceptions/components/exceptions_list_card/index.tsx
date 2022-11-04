@@ -21,9 +21,11 @@ import {
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionListInfo } from './use_all_exception_lists';
-import { TitleBadge } from './title_badge';
-import * as i18n from './translations';
+import type { ExceptionListInfo } from '../../hooks/use_all_exception_lists';
+import { TitleBadge } from '../title_badge';
+import * as i18n from '../../translations/translations';
+// import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
+// import { ListExceptionItems } from '../list_exception_items';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
@@ -50,12 +52,24 @@ interface ExceptionsListCardProps {
 }
 
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
-  ({ exceptionsList, http, handleDelete, handleExport, readOnly }) => {
+  ({ exceptionsList, handleDelete, handleExport, readOnly }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const onItemActionsClick = () => setIsPopoverOpen((isOpen) => !isOpen);
     const onClosePopover = () => setIsPopoverOpen(false);
 
+    // const {
+    //   lastUpdated,
+    //   exceptions,
+    //   pagination,
+    //   exceptionViewerStatus,
+    //   ruleReferences,
+    //   onEditExceptionItem,
+    //   onDeleteException,
+    //   onPaginationChange,
+    // } = useExceptionsListCard({
+    //   exceptionsList,
+    // });
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -142,6 +156,23 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
+        {/* <EuiFlexItem>
+          <ListExceptionItems
+            isReadOnly={false}
+            exceptions={exceptions}
+            listType={exceptionsList.type as ExceptionListTypeEnum}
+            lastUpdated={lastUpdated}
+            pagination={pagination}
+            emptyViewerTitle={''}
+            emptyViewerBody={''}
+            viewerStatus={exceptionViewerStatus}
+            ruleReferences={ruleReferences}
+            onDeleteException={onDeleteException}
+            onEditExceptionItem={onEditExceptionItem}
+            onPaginationChange={onPaginationChange}
+            onCreateExceptionListItem={() => console.log('ask devin')} // remove from here
+          />
+        </EuiFlexItem> */}
       </EuiFlexGroup>
     );
   }
