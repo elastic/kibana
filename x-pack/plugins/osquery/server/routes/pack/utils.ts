@@ -21,9 +21,7 @@ export const convertPackQueriesToSO = (queries) =>
       const ecsMapping = value.ecs_mapping && convertECSMappingToArray(value.ecs_mapping);
       acc.push({
         id: key,
-        ...pick(value, ['name', 'query', 'interval', 'platform', 'version']),
-        ...(value.snapshot !== undefined ? { snapshot: value.snapshot } : {}),
-        ...(value.removed !== undefined ? { removed: value.removed } : {}),
+        ...pick(value, ['name', 'query', 'interval', 'platform', 'version', 'snapshot', 'removed']),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       });
 
@@ -42,27 +40,50 @@ export const convertPackQueriesToSO = (queries) =>
 
 export const convertSOQueriesToPack = (
   // @ts-expect-error update types
-  queries,
-  options?: { removeMultiLines?: boolean; removeResultType?: boolean }
+  queries
 ) =>
   reduce(
     queries,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    (acc, { id: queryId, ecs_mapping, query, platform, removed, snapshot, ...rest }, key) => {
-      const resultType = !snapshot ? { removed, snapshot } : {};
+    (acc, { id: queryId, ecs_mapping, query, platform, ...rest }, key) => {
       const index = queryId ? queryId : key;
       acc[index] = {
         ...rest,
-        query: options?.removeMultiLines ? removeMultilines(query) : query,
+        query,
         ...(!isEmpty(ecs_mapping)
           ? isArray(ecs_mapping)
             ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
             : { ecs_mapping }
           : {}),
         ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
-        ...(options?.removeResultType
-          ? resultType
-          : { ...(snapshot ? { snapshot } : {}), ...(removed ? { removed } : {}) }),
+      };
+
+      return acc;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    {} as Record<string, any>
+  );
+
+export const convertSOQueriesToPackConfig = (
+  // @ts-expect-error update types
+  queries
+) =>
+  reduce(
+    queries,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    (acc, { id: queryId, ecs_mapping, query, platform, removed, snapshot, ...rest }, key) => {
+      const resultType = snapshot === false ? { removed, snapshot } : {};
+      const index = queryId ? queryId : key;
+      acc[index] = {
+        ...rest,
+        query: removeMultilines(query),
+        ...(!isEmpty(ecs_mapping)
+          ? isArray(ecs_mapping)
+            ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
+            : { ecs_mapping }
+          : {}),
+        ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
+        ...resultType,
       };
 
       return acc;

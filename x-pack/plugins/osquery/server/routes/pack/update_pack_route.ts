@@ -35,9 +35,11 @@ import { PLUGIN_ID } from '../../../common';
 import {
   convertSOQueriesToPack,
   convertPackQueriesToSO,
+  convertSOQueriesToPackConfig,
   getInitialPolicies,
   findMatchingShards,
 } from './utils';
+
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
 
@@ -313,10 +315,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       shard: policyShards[packagePolicy.policy_id]
                         ? policyShards[packagePolicy.policy_id]
                         : 100,
-                      queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
-                        removeMultiLines: true,
-                        removeResultType: true,
-                      }),
+                      queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                     }
                   );
 
@@ -349,9 +348,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       shard: policyShards[packagePolicy.policy_id]
                         ? policyShards[packagePolicy.policy_id]
                         : 100,
-                      queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
-                        removeResultType: true,
-                      }),
+                      queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                     }
                   );
 

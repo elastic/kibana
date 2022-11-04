@@ -20,8 +20,8 @@ import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import {
+  convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
-  convertSOQueriesToPack,
   findMatchingShards,
   getInitialPolicies,
 } from './utils';
@@ -158,10 +158,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     shard: policyShards[packagePolicy.policy_id]
                       ? policyShards[packagePolicy.policy_id]
                       : 100,
-                    queries: convertSOQueriesToPack(queries, {
-                      removeMultiLines: true,
-                      removeResultType: true,
-                    }),
+                    queries: convertSOQueriesToPackConfig(queries),
                   });
 
                   return draft;
