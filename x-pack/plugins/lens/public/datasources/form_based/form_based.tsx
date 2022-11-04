@@ -432,7 +432,7 @@ export function getFormBasedDatasource({
                 fieldFormats,
                 charts,
                 unifiedSearch,
-                discover,
+                share,
               }}
             >
               <LayerSettingsPanel {...props} />
