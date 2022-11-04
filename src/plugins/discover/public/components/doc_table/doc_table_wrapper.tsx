@@ -11,6 +11,7 @@ import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Filter } from '@kbn/es-query';
 import { TableHeader } from './components/table_header/table_header';
 import { SHOW_MULTIFIELDS } from '../../../common';
 import { TableRow } from './components/table_row';
@@ -57,6 +58,14 @@ export interface DocTableProps {
    */
   isLoading: boolean;
   /**
+   * Filters applied by embeddalbe
+   */
+  filters?: Filter[];
+  /**
+   * Saved search id
+   */
+  savedSearchId?: string;
+  /**
    * Filter callback
    */
   onFilter: DocViewFilterFn;
@@ -100,6 +109,8 @@ export const DocTableWrapper = forwardRef(
     {
       render,
       columns,
+      filters,
+      savedSearchId,
       rows,
       dataView,
       onSort,
@@ -161,6 +172,8 @@ export const DocTableWrapper = forwardRef(
           <TableRow
             key={`${current.id}${current.raw._score}${current.raw._version}`}
             columns={columns}
+            filters={filters}
+            savedSearchId={savedSearchId}
             filter={onFilter}
             dataView={dataView}
             row={current}
@@ -171,7 +184,17 @@ export const DocTableWrapper = forwardRef(
           />
         ));
       },
-      [columns, onFilter, dataView, useNewFieldsApi, fieldsToShow, onAddColumn, onRemoveColumn]
+      [
+        columns,
+        filters,
+        savedSearchId,
+        onFilter,
+        dataView,
+        useNewFieldsApi,
+        fieldsToShow,
+        onAddColumn,
+        onRemoveColumn,
+      ]
     );
 
     return (
