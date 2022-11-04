@@ -44,20 +44,18 @@ function useAgentExplorerFetcher({
 
   return useProgressiveFetcher(
     (callApmApi) => {
-      if (start && end) {
-        return callApmApi('GET /internal/apm/get_agents_per_service', {
-          params: {
-            query: {
-              environment,
-              serviceName,
-              agentLanguage,
-              kuery,
-              start,
-              end,
-            },
+      return callApmApi('GET /internal/apm/get_agents_per_service', {
+        params: {
+          query: {
+            environment,
+            serviceName,
+            agentLanguage,
+            kuery,
+            start,
+            end,
           },
-        });
-      }
+        },
+      });
     },
     [environment, serviceName, agentLanguage, kuery, start, end]
   );
@@ -189,9 +187,7 @@ export function AgentExplorer() {
       <EuiFlexItem>
         <AgentList
           isLoading={isLoading}
-          items={
-            agents.data?.items.filter((agent) => agent.instances > 0) ?? []
-          }
+          items={agents.data?.items ?? []}
           noItemsMessage={noItemsMessage}
         />
       </EuiFlexItem>

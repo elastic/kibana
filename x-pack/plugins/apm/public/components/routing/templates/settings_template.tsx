@@ -10,7 +10,8 @@ import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableAgentExplorerView } from '@kbn/observability-plugin/public';
 import React from 'react';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
+import { Environment } from '../../../../common/environment_rt';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
@@ -38,7 +39,9 @@ interface Props {
 export function SettingsTemplate({ children, selectedTab }: Props) {
   const { core } = useApmPluginContext();
   const router = useApmRouter();
-  const tabs = getTabs({ core, selectedTab, router });
+  const defaultEnvironment = useDefaultEnvironment();
+
+  const tabs = getTabs({ core, selectedTab, router, defaultEnvironment });
 
   return (
     <ApmMainTemplate
@@ -59,10 +62,12 @@ function getTabs({
   core,
   selectedTab,
   router,
+  defaultEnvironment,
 }: {
   core: CoreStart;
   selectedTab: Tab['key'];
   router: ApmRouter;
+  defaultEnvironment: Environment;
 }) {
   const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
 
@@ -93,7 +98,7 @@ function getTabs({
       }),
       href: router.link('/settings/agent-explorer', {
         query: {
-          environment: ENVIRONMENT_ALL.value,
+          environment: defaultEnvironment,
           kuery: '',
         },
       }),

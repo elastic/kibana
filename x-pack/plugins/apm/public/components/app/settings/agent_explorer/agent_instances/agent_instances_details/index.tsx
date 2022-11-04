@@ -10,10 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { AgentExplorerFieldName } from '../../../../../../../common/agent_explorer';
-import {
-  getServiceNodeName,
-  SERVICE_NODE_NAME_MISSING,
-} from '../../../../../../../common/service_nodes';
+import { getServiceNodeName } from '../../../../../../../common/service_nodes';
 import { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../../shared/environment_badge';
@@ -39,7 +36,7 @@ enum AgentExplorerInstanceFieldName {
 }
 
 export function getInstanceColumns(
-  serviceName = ''
+  serviceName: string
 ): Array<ITableColumn<AgentExplorerInstance>> {
   return [
     {
@@ -52,31 +49,36 @@ export function getInstanceColumns(
       ),
       sortable: true,
       render: (_, { serviceNode }) => {
-        const { displayedName, tooltip } =
-          serviceNode === SERVICE_NODE_NAME_MISSING
-            ? {
-                displayedName: getServiceNodeName(serviceNode),
-                tooltip: i18n.translate(
-                  'xpack.apm.agentExplorerInstanceTable.explainServiceNodeNameMissing',
-                  {
-                    defaultMessage:
-                      'We could not identify the service node. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.',
-                  }
-                ),
-              }
-            : { displayedName: serviceNode, tooltip: serviceNode };
+        const { displayedName, tooltip } = !serviceNode
+          ? {
+              displayedName: getServiceNodeName(serviceNode),
+              tooltip: i18n.translate(
+                'xpack.apm.agentExplorerInstanceTable.explainServiceNodeNameMissing',
+                {
+                  defaultMessage:
+                    'This agent instance is not tied to a service node.',
+                }
+              ),
+            }
+          : { displayedName: serviceNode, tooltip: serviceNode };
 
         return (
           <TruncateWithTooltip
             data-test-subj="apmAgentExplorerInstanceListServiceLink"
             text={tooltip}
             content={
-              <ServiceNodeMetricOverviewLink
-                serviceName={serviceName}
-                serviceNodeName={serviceNode}
-              >
-                <span className="eui-textTruncate">{displayedName}</span>
-              </ServiceNodeMetricOverviewLink>
+              <>
+                {serviceNode ? (
+                  <ServiceNodeMetricOverviewLink
+                    serviceName={serviceName}
+                    serviceNodeName={serviceNode}
+                  >
+                    <span className="eui-textTruncate">{displayedName}</span>
+                  </ServiceNodeMetricOverviewLink>
+                ) : (
+                  <span className="eui-textTruncate">{displayedName}</span>
+                )}
+              </>
             }
           />
         );
@@ -93,7 +95,7 @@ export function getInstanceColumns(
       width: `${unit * 16}px`,
       sortable: true,
       render: (_, { environments }) => (
-        <EnvironmentBadge environments={environments ?? []} />
+        <EnvironmentBadge environments={environments} />
       ),
     },
     {
@@ -104,19 +106,22 @@ export function getInstanceColumns(
       ),
       width: `${unit * 16}px`,
       sortable: true,
-      render: (_, { agentVersion }) => (
-        <ItemsBadge
-          items={agentVersion ? [agentVersion] : []}
-          multipleItemsMessage={i18n.translate(
-            'xpack.apm.agentExplorerInstanceTable.agentVersionColumnLabel.multipleVersions',
-            {
-              values: { versionsCount: agentVersion.length },
-              defaultMessage:
-                '{versionsCount, plural, one {1 version} other {# versions}}',
-            }
-          )}
-        />
-      ),
+      render: (_, { agentVersion }) => {
+        const versions = [agentVersion];
+        return (
+          <ItemsBadge
+            items={versions}
+            multipleItemsMessage={i18n.translate(
+              'xpack.apm.agentExplorerInstanceTable.agentVersionColumnLabel.multipleVersions',
+              {
+                values: { versionsCount: versions.length },
+                defaultMessage:
+                  '{versionsCount, plural, one {1 version} other {# versions}}',
+              }
+            )}
+          />
+        );
+      },
     },
     {
       field: AgentExplorerInstanceFieldName.LastReport,
@@ -134,7 +139,7 @@ export function getInstanceColumns(
 }
 
 interface Props {
-  serviceName?: string;
+  serviceName: string;
   items: AgentExplorerInstance[];
   isLoading: boolean;
 }
@@ -157,7 +162,7 @@ export function AgentInstancesDetails({
       columns={getInstanceColumns(serviceName)}
       items={items}
       noItemsMessage={i18n.translate(
-        'xpack.apm.storageExplorer.table.noResults',
+        'xpack.apm.agentExplorer.table.noResults',
         {
           defaultMessage: 'No data found',
         }

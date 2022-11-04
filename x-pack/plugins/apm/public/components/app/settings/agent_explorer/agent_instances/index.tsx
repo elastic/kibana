@@ -26,7 +26,7 @@ import { AgentExplorerItem } from '../agent_list';
 import { AgentContextualInformation } from './agent_contextual_information';
 import { AgentInstancesDetails } from './agent_instances_details';
 
-function useAgentInstancesFetcher({ serviceName }: { serviceName?: string }) {
+function useAgentInstancesFetcher({ serviceName }: { serviceName: string }) {
   const {
     query: { environment, kuery },
   } = useApmParams('/settings/agent-explorer');
@@ -35,10 +35,6 @@ function useAgentInstancesFetcher({ serviceName }: { serviceName?: string }) {
 
   return useProgressiveFetcher(
     (callApmApi) => {
-      if (!serviceName) {
-        return;
-      }
-
       return callApmApi(
         'GET /internal/apm/services/{serviceName}/agent_instances',
         {
@@ -61,7 +57,7 @@ function useAgentInstancesFetcher({ serviceName }: { serviceName?: string }) {
 }
 
 interface Props {
-  agent?: AgentExplorerItem;
+  agent: AgentExplorerItem;
   onClose: () => void;
 }
 
@@ -69,12 +65,8 @@ export function AgentInstances({ agent, onClose }: Props) {
   const { query } = useApmParams('/settings/agent-explorer');
 
   const instances = useAgentInstancesFetcher({
-    serviceName: agent?.serviceName,
+    serviceName: agent.serviceName,
   });
-
-  if (!instances) {
-    return null;
-  }
 
   const isLoading = instances.status === FETCH_STATUS.LOADING;
 
@@ -99,16 +91,16 @@ export function AgentInstances({ agent, onClose }: Props) {
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <AgentContextualInformation
-            agentName={agent?.agentName}
-            serviceName={agent?.serviceName}
-            agentDocsPageUrl={agent?.agentDocsPageUrl}
-            instances={agent?.instances}
+            agentName={agent.agentName}
+            serviceName={agent.serviceName}
+            agentDocsPageUrl={agent.agentDocsPageUrl}
+            instances={agent.instances}
             query={query}
           />
           <EuiHorizontalRule margin="m" />
           <EuiSpacer size="m" />
           <AgentInstancesDetails
-            serviceName={agent?.serviceName}
+            serviceName={agent.serviceName}
             isLoading={isLoading}
             items={instances.data?.items ?? []}
           />

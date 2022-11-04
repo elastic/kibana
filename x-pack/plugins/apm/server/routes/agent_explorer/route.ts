@@ -37,7 +37,7 @@ const agentExplorerRoute = createApmServerRoute({
     items: Array<{
       serviceName: string;
       environments: string[];
-      agentName?: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
+      agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
       agentVersion: string[];
       agentDocsPageUrl?: string;
       instances: number;

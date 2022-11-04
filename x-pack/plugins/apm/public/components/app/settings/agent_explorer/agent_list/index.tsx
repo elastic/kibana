@@ -12,10 +12,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
 import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer';
-import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../../utils/style';
@@ -30,10 +29,6 @@ import { AgentInstances } from '../agent_instances';
 export type AgentExplorerItem = ValuesType<
   APIReturnType<'GET /internal/apm/get_agents_per_service'>['items']
 >;
-
-function formatString(value?: string | null) {
-  return value || NOT_AVAILABLE_LABEL;
-}
 
 export function getAgentsColumns({
   selectedAgent,
@@ -86,7 +81,7 @@ export function getAgentsColumns({
       render: (_, { serviceName, agentName }) => (
         <TruncateWithTooltip
           data-test-subj="apmAgentExplorerListServiceLink"
-          text={formatString(serviceName)}
+          text={serviceName}
           content={
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -111,7 +106,7 @@ export function getAgentsColumns({
       width: `${unit * 16}px`,
       sortable: true,
       render: (_, { environments }) => (
-        <EnvironmentBadge environments={environments ?? []} />
+        <EnvironmentBadge environments={environments} />
       ),
     },
     {
@@ -143,7 +138,7 @@ export function getAgentsColumns({
       width: `${unit * 8}px`,
       render: (_, { agentVersion }) => (
         <ItemsBadge
-          items={agentVersion ?? []}
+          items={agentVersion}
           multipleItemsMessage={i18n.translate(
             'xpack.apm.agentExplorerTable.agentVersionColumnLabel.multipleVersions',
             {
@@ -163,7 +158,7 @@ export function getAgentsColumns({
       ),
       width: `${unit * 8}px`,
       render: (_, { agentName, agentDocsPageUrl }) => (
-        <EuiToolTip content={formatString(`${agentName} agent docs`)}>
+        <EuiToolTip content={`${agentName} agent docs`}>
           <AgentExplorerDocsLink
             agentName={agentName as AgentName}
             repositoryUrl={agentDocsPageUrl}
@@ -176,24 +171,18 @@ export function getAgentsColumns({
 
 interface Props {
   items: AgentExplorerItem[];
-  noItemsMessage?: React.ReactNode;
+  noItemsMessage: React.ReactNode;
   isLoading: boolean;
 }
 
 export function AgentList({ items, noItemsMessage, isLoading }: Props) {
   const [selectedAgent, setSelectedAgent] = useState<AgentExplorerItem>();
-  const [showFlyout, setShowFlyout] = useState(false);
-
-  useEffect(() => {
-    setShowFlyout(!!selectedAgent);
-  }, [selectedAgent]);
 
   const onAgentSelected = (agent: AgentExplorerItem) => {
     setSelectedAgent(agent);
   };
 
   const onCloseFlyout = () => {
-    setShowFlyout(false);
     setSelectedAgent(undefined);
   };
 
@@ -204,7 +193,7 @@ export function AgentList({ items, noItemsMessage, isLoading }: Props) {
 
   return (
     <>
-      {showFlyout && (
+      {selectedAgent && (
         <AgentInstances agent={selectedAgent} onClose={onCloseFlyout} />
       )}
       <ManagedTable
