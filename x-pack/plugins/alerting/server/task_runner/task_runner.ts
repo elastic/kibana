@@ -24,7 +24,7 @@ import {
   isRuleSnoozed,
   processAlerts,
   lastRunFromError,
-  getNextRunString,
+  getNextRun,
 } from '../lib';
 import {
   Rule,
@@ -70,7 +70,7 @@ import { logAlerts } from './log_alerts';
 import { scheduleActionsForAlerts } from './schedule_actions_for_alerts';
 import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
-import { RuleMonitoringService } from '../monitoring/rule_monitoring_client';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
@@ -720,13 +720,16 @@ export class TaskRunner<
       schedule = asErr(err);
     }
 
-    const nextRunString = isOk(schedule) ? getNextRunString(schedule.value.interval) : null;
+    let nextRun: string | null = null;
+    if (isOk(schedule)) {
+      nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
+    }
 
     const { executionStatus, executionMetrics } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.ProcessRuleRun,
       async () =>
         this.processRunResults({
-          nextRun: nextRunString,
+          nextRun,
           runDate,
           stateWithMetrics,
         })
@@ -813,6 +816,7 @@ export class TaskRunner<
     const {
       params: { alertId: ruleId, spaceId, consumer },
       schedule: taskSchedule,
+      startedAt,
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
@@ -833,7 +837,11 @@ export class TaskRunner<
 
     this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_TIMEOUTS);
 
-    const nextRunString = taskSchedule ? getNextRunString(taskSchedule.interval) : null;
+    let nextRun: string | null = null;
+    if (taskSchedule) {
+      nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+    }
+
     const outcomeMsg = `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`;
     const date = new Date();
     // Update the rule saved object with execution status
@@ -857,8 +865,7 @@ export class TaskRunner<
         alertsCount: {},
       },
       monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-      nextRun:
-        nextRunString && new Date(nextRunString).getTime() > date.getTime() ? nextRunString : null,
+      nextRun: nextRun && new Date(nextRun).getTime() > date.getTime() ? nextRun : null,
     });
   }
 }

@@ -8,6 +8,14 @@
 import moment from 'moment';
 import { parseDuration } from '../../common';
 
-export const getNextRunDate = (interval: string) => moment().add(parseDuration(interval), 'ms');
-
-export const getNextRunString = (interval: string) => getNextRunDate(interval).toISOString();
+export const getNextRun = ({
+  startDate,
+  interval,
+}: {
+  startDate?: Date | null;
+  interval: string;
+}) => {
+  return moment(startDate || new Date())
+    .add(parseDuration(interval), 'ms')
+    .toISOString();
+};

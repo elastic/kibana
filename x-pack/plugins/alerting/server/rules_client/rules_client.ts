@@ -87,7 +87,7 @@ import {
   getDefaultMonitoring,
   updateMonitoring,
   convertMonitoringFromRawAndVerify,
-  getNextRunString,
+  getNextRun,
 } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -2655,7 +2655,7 @@ export class RulesClient {
             duration: 0,
           }),
         }),
-        nextRun: getNextRunString(schedule.interval),
+        nextRun: getNextRun({ interval: schedule.interval }),
         enabled: true,
         updatedBy: username,
         updatedAt: now.toISOString(),

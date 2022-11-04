@@ -45,14 +45,14 @@ export const lastRunFromState = (stateWithMetrics: RuleTaskStateAndMetrics): ILa
   return {
     lastRun: {
       outcome,
+      outcomeMsg: outcomeMsg || null,
+      warning: warning || null,
       alertsCount: {
         active: metrics.numberOfActiveAlerts,
         new: metrics.numberOfNewAlerts,
         recovered: metrics.numberOfRecoveredAlerts,
         ignored: 0,
       },
-      ...(warning ? { warning } : {}),
-      ...(outcomeMsg ? { outcome_msg: outcomeMsg } : {}),
     },
     metrics,
   };

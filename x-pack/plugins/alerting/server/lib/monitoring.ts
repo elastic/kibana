@@ -9,7 +9,6 @@ import stats from 'stats-lite';
 import { RuleMonitoring, RawRuleMonitoring, RuleMonitoringHistory } from '../types';
 
 export const INITIAL_METRICS = {
-  duration: 0,
   total_search_duration_ms: null,
   total_indexing_duration_ms: null,
   total_alerts_detected: null,

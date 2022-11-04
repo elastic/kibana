@@ -41,6 +41,7 @@ export class RuleMonitoringService {
     };
     if (null != duration) {
       monitoringHistory.duration = duration;
+      this.setLastRunMetricsDuration(duration);
     }
     if (hasError) {
       monitoringHistory.success = false;

@@ -203,7 +203,7 @@ export interface RuleMonitoringCalculatedMetrics extends SavedObjectAttributes {
 }
 
 export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
-  duration: number;
+  duration?: number;
   total_search_duration_ms?: number | null;
   total_indexing_duration_ms?: number | null;
   total_alerts_detected?: number | null;

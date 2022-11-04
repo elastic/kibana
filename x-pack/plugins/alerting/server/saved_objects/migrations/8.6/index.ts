@@ -50,13 +50,16 @@ const getMonitoring = (attributes: RawRule) => {
   // Question: Do we want to backfill the history?
   const { lastExecutionDate, lastDuration } = executionStatus;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const monitoringExecution = (monitoring as any).execution;
+
   return {
     run: {
-      ...monitoring.run,
+      ...monitoringExecution,
       last_run: {
         timestamp: lastExecutionDate,
         metrics: {
-          duration: lastDuration || 0,
+          ...(lastDuration ? { duration: lastDuration } : {}),
         },
       },
     },

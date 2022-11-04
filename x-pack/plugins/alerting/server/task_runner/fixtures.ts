@@ -58,10 +58,14 @@ export const generateSavedObjectParams = ({
   error = null,
   warning = null,
   status = 'ok',
+  outcome = 'succeeded',
+  alertsCount,
 }: {
   error?: null | { reason: string; message: string };
   warning?: null | { reason: string; message: string };
   status?: string;
+  outcome?: string;
+  alertsCount?: Record<string, number>;
 }) => [
   'alert',
   '1',
@@ -77,6 +81,16 @@ export const generateSavedObjectParams = ({
             timestamp: 0,
           },
         ],
+        last_run: {
+          timestamp: '1970-01-01T00:00:00.000Z',
+          metrics: {
+            gap_duration_s: null,
+            total_alerts_created: null,
+            total_alerts_detected: null,
+            total_indexing_duration_ms: null,
+            total_search_duration_ms: null,
+          },
+        },
       },
     },
     executionStatus: {
@@ -86,6 +100,19 @@ export const generateSavedObjectParams = ({
       status,
       warning,
     },
+    lastRun: {
+      outcome,
+      outcomeMsg: error?.message || warning?.message || null,
+      warning: error?.reason || warning?.reason || null,
+      alertsCount: {
+        active: 0,
+        ignored: 0,
+        new: 0,
+        recovered: 0,
+        ...(alertsCount || {}),
+      },
+    },
+    nextRun: '1970-01-01T00:00:10.000Z',
   },
   { refresh: false, namespace: undefined },
 ];
@@ -223,6 +250,16 @@ export const generateRunnerResult = ({
         },
         // @ts-ignore
         history: history.map((success) => ({ success, timestamp: 0 })),
+        last_run: {
+          metrics: {
+            gap_duration_s: null,
+            total_alerts_created: null,
+            total_alerts_detected: null,
+            total_indexing_duration_ms: null,
+            total_search_duration_ms: null,
+          },
+          timestamp: '1970-01-01T00:00:00.000Z',
+        },
       },
     },
     schedule: {
