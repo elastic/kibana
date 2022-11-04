@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-import { StackAlertsPublicPlugin } from './plugin';
+import { EsQueryRuleTypeExpression } from './expression';
 
-export const plugin = () => new StackAlertsPublicPlugin();
+// eslint-disable-next-line import/no-default-export
+export default EsQueryRuleTypeExpression;

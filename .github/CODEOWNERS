@@ -227,8 +227,8 @@
 /x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
-/x-pack/plugins/stack_alerts/server/alert_types/geo_containment @elastic/kibana-gis
-/x-pack/plugins/stack_alerts/public/alert_types/geo_containment @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/server/rule_types/geo_containment @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/public/rule_types/geo_containment @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 /x-pack/plugins/file_upload @elastic/kibana-gis
 
