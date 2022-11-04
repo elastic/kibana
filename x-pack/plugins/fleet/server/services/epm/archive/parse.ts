@@ -62,13 +62,13 @@ const expandDottedField = (dottedFieldName: string, val: unknown): object => {
   }
 };
 
-export const expandDottedObject = (dottedObj: object) => {
+export const expandDottedObject = (dottedObj: object = {}) => {
   if (typeof dottedObj !== 'object' || Array.isArray(dottedObj)) {
     return dottedObj;
   }
   return Object.entries(dottedObj).reduce(
     (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
-    {}
+    {} as Record<string, any>
   );
 };
 
@@ -507,31 +507,29 @@ export function parseDataStreamElasticsearchEntry(
   ingestPipeline?: string
 ) {
   const parsedElasticsearchEntry: Record<string, any> = {};
-
+  const expandedElasticsearch = expandDottedObject(elasticsearch);
   if (ingestPipeline) {
     parsedElasticsearchEntry['ingest_pipeline.name'] = ingestPipeline;
   }
 
-  if (elasticsearch?.privileges) {
-    parsedElasticsearchEntry.privileges = elasticsearch.privileges;
+  if (expandedElasticsearch?.privileges) {
+    parsedElasticsearchEntry.privileges = expandedElasticsearch.privileges;
   }
 
-  if (elasticsearch?.source_mode) {
-    parsedElasticsearchEntry.source_mode = elasticsearch.source_mode;
+  if (expandedElasticsearch?.source_mode) {
+    parsedElasticsearchEntry.source_mode = expandedElasticsearch.source_mode;
   }
 
-  const indexTemplateMappings =
-    elasticsearch?.index_template?.mappings || elasticsearch?.['index_template.mappings'];
-  if (indexTemplateMappings) {
-    parsedElasticsearchEntry['index_template.mappings'] =
-      expandDottedEntries(indexTemplateMappings);
+  if (expandedElasticsearch?.index_template?.mappings) {
+    parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
+      expandedElasticsearch.index_template.mappings
+    );
   }
 
-  const indexTemplateSettings =
-    elasticsearch?.index_template?.settings || elasticsearch?.['index_template.settings'];
-  if (indexTemplateSettings) {
-    parsedElasticsearchEntry['index_template.settings'] =
-      expandDottedEntries(indexTemplateSettings);
+  if (expandedElasticsearch?.index_template?.settings) {
+    parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
+      expandedElasticsearch.index_template.settings
+    );
   }
 
   return parsedElasticsearchEntry;

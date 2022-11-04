@@ -122,4 +122,32 @@ describe('parseDataStreamElasticsearchEntry', () => {
       'index_template.settings': { 'index.lifecycle.name': 'reference' },
     });
   });
+  it('Should handle non-dotted values for privileges', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        privileges: {
+          indices: ['read'],
+          cluster: ['test'],
+        },
+      })
+    ).toEqual({
+      privileges: {
+        indices: ['read'],
+        cluster: ['test'],
+      },
+    });
+  });
+  it('Should handle dotted values for privileges', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        'privileges.indices': ['read'],
+        'privileges.cluster': ['test'],
+      })
+    ).toEqual({
+      privileges: {
+        indices: ['read'],
+        cluster: ['test'],
+      },
+    });
+  });
 });
