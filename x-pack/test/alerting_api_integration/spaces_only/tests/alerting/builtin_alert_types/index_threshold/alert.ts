@@ -208,6 +208,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         aggType: 'avg',
         aggField: 'testedValue',
         groupBy: 'all',
+        timeWindowSize: RULE_INTERVAL_SECONDS * 10,
         thresholdComparator: '>=',
         threshold: [0],
       });
@@ -222,7 +223,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(name).to.be('always fire');
 
         const messagePattern =
-          /alert 'always fire' is active for group \'all documents\':\n\n- Value: .*\n- Conditions Met: avg\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+          /alert 'always fire' is active for group \'all documents\':\n\n- Value: .*\n- Conditions Met: avg\(testedValue\) is greater than or equal to 0 over 30s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
     });
@@ -672,7 +673,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             groupBy: params.groupBy,
             termField: params.termField,
             termSize: params.termSize,
-            timeWindowSize: params.timeWindowSize ?? RULE_INTERVAL_SECONDS * 10,
+            timeWindowSize: params.timeWindowSize ?? RULE_INTERVAL_SECONDS * 5,
             timeWindowUnit: 's',
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
