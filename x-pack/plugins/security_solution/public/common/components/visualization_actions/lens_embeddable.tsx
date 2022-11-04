@@ -92,11 +92,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   }, []);
 
   const updateDateRange = useCallback(
-    ({ x }) => {
-      if (!x) {
-        return;
-      }
-      const [min, max] = x;
+    ({ range }) => {
+      const [min, max] = range;
       dispatch(
         setAbsoluteRangeDatePicker({
           id: inputsModelId,
