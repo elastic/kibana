@@ -84,7 +84,7 @@ export function ParamsEditor<TParams = unknown>({
           compressed
           indexPattern={dataView}
           field={field!}
-          value={typeof params === 'string' ? params : undefined}
+          value={params !== undefined ? `${params}` : undefined}
           onChange={onParamsChange}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           fullWidth

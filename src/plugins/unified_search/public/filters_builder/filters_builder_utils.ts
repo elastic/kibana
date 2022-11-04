@@ -258,7 +258,7 @@ export const updateFilter = (
   const changedFilter = getFilterByPath(newFilters, path) as Filter;
   let filter = Object.assign({}, changedFilter);
 
-  if (field && operator && params) {
+  if (field && operator && params !== undefined) {
     if (operator.type === 'range') {
       filter = updateWithRangeOperator(filter, operator, params, field);
     } else if (Array.isArray(params)) {
