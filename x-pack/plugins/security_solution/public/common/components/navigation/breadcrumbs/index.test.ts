@@ -304,7 +304,7 @@ describe('Navigation Breadcrumbs', () => {
         expect(breadcrumbs).toEqual([
           securityBreadCrumb,
           {
-            text: 'Exception lists',
+            text: 'Rule Exceptions',
             href: '',
           },
         ]);
@@ -623,7 +623,7 @@ describe('Navigation Breadcrumbs', () => {
           securityBreadCrumb,
           manageBreadcrumbs,
           {
-            text: 'Exception lists',
+            text: 'Rule Exceptions',
             href: '',
           },
         ]);

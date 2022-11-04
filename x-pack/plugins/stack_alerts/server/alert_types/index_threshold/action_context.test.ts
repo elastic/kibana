@@ -28,7 +28,7 @@ describe('ActionContext', () => {
       value: 42,
       conditions: 'count greater than 4',
     };
-    const context = addMessages({ name: '[rule-name]' }, base, params);
+    const context = addMessages('[rule-name]', base, params);
     expect(context.title).toMatchInlineSnapshot(`"alert [rule-name] group [group] met threshold"`);
     expect(context.message).toEqual(
       `alert '[rule-name]' is active for group '[group]':
@@ -59,7 +59,7 @@ describe('ActionContext', () => {
       value: 42,
       conditions: 'avg([aggField]) greater than 4.2',
     };
-    const context = addMessages({ name: '[rule-name]' }, base, params);
+    const context = addMessages('[rule-name]', base, params);
     expect(context.title).toMatchInlineSnapshot(`"alert [rule-name] group [group] met threshold"`);
     expect(context.message).toEqual(
       `alert '[rule-name]' is active for group '[group]':
@@ -89,7 +89,7 @@ describe('ActionContext', () => {
       value: 4,
       conditions: 'count between 4 and 5',
     };
-    const context = addMessages({ name: '[rule-name]' }, base, params);
+    const context = addMessages('[rule-name]', base, params);
     expect(context.title).toMatchInlineSnapshot(`"alert [rule-name] group [group] met threshold"`);
     expect(context.message).toEqual(
       `alert '[rule-name]' is active for group '[group]':
@@ -119,7 +119,7 @@ describe('ActionContext', () => {
       value: 'unknown',
       conditions: 'count between 4 and 5',
     };
-    const context = addMessages({ name: '[rule-name]' }, base, params);
+    const context = addMessages('[rule-name]', base, params);
     expect(context.title).toMatchInlineSnapshot(`"alert [rule-name] group [group] met threshold"`);
     expect(context.message).toEqual(
       `alert '[rule-name]' is active for group '[group]':
