@@ -16,7 +16,6 @@ const createSetupContract = (): Setup => ({});
 const createStartContract = (): Start => {
   return {
     find: jest.fn((search) => [{ id: search, title: search }]),
-    create: jest.fn(() => {}),
     createField: jest.fn(() => {}),
     createFieldList: jest.fn(() => []),
     ensureDefaultIndexPattern: jest.fn(),
