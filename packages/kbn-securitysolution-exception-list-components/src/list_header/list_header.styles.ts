@@ -17,21 +17,17 @@ export const headerMenuCss = css`
   border-right: 1px solid #d3dae6;
   padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeXS} 0;
 `;
-export const textWithEditContainerCss = css`
-  display: flex;
-  width: fit-content;
-  align-items: baseline;
-  margin-bottom: ${euiThemeVars.euiSizeS};
-  h1 {
-    margin-bottom: 0;
-  }
+
+export const noLinkedRulesCss = css`
+  width: max-content;
 `;
+
 export const textCss = css`
   font-size: ${euiThemeVars.euiFontSize};
   color: ${euiThemeVars.euiTextSubduedColor};
   margin-left: ${euiThemeVars.euiSizeXS};
 `;
 export const descriptionContainerCss = css`
-  margin-top: -${euiThemeVars.euiSizeL};
+  margin-top: -${euiThemeVars.euiSizeXXL};
   margin-bottom: -${euiThemeVars.euiSizeL};
 `;
