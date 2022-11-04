@@ -123,7 +123,7 @@ describe('Workload Statistics Aggregator', () => {
             schedule: {
               terms: {
                 field: 'task.schedule.interval',
-                size: 20,
+                size: 100,
               },
             },
             nonRecurringTasks: {

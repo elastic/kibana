@@ -141,7 +141,7 @@ export function createWorkloadAggregator(
             },
           },
           schedule: {
-            terms: { field: 'task.schedule.interval', size: 20 },
+            terms: { field: 'task.schedule.interval', size: 100 },
           },
           nonRecurringTasks: {
             missing: { field: 'task.schedule' },
