@@ -156,9 +156,6 @@ export function DashboardApp({
             onDashboardContainerLoaded={(finishedContainer) => {
               setDashboardContainer(finishedContainer);
             }}
-            getInitialInput={() => {
-              return { savedObjectId: savedDashboardId };
-            }}
             getCreationOptions={async () => getCreationOptions()}
           />
         </>

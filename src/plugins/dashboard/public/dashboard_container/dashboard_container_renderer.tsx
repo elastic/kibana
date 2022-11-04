@@ -13,7 +13,6 @@ import classNames from 'classnames';
 import { EuiLoadingElastic } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import {
@@ -23,7 +22,6 @@ import {
 } from './embeddable/dashboard_container_factory';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardReduxState } from './types';
-import { DashboardContainerInput } from '../../common';
 import { pluginServices } from '../services/plugin_services';
 import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 import { DashboardContainer } from './embeddable/dashboard_container';
@@ -32,16 +30,12 @@ import { dashboardContainerReducers } from './state/dashboard_container_reducers
 export interface DashboardContainerRendererProps {
   savedObjectId?: string;
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
-  getInitialInput?: () => Partial<DashboardContainerInput>;
   onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
-  onControlGroupInputLoaded?: (controlGroupInput: PersistableControlGroupInput) => void;
 }
 
 export const DashboardContainerRenderer = ({
   savedObjectId,
-  getInitialInput,
   getCreationOptions,
-  onControlGroupInputLoaded,
   onDashboardContainerLoaded,
 }: DashboardContainerRendererProps) => {
   const {
@@ -55,7 +49,7 @@ export const DashboardContainerRenderer = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // check if dashboard container is expecting id change... if not, update dashboard ID to build to force it to rebuild the container.
+    // check if dashboard container is expecting id change... if not, update dashboardIdToBuild to force it to rebuild the container.
     if (!dashboardContainer) return;
     if (!dashboardContainer.isExpectingIdChange()) setDashboardIdToBuild(savedObjectId);
 
@@ -78,7 +72,8 @@ export const DashboardContainerRenderer = ({
         {
           id,
           ...DEFAULT_DASHBOARD_INPUT,
-          ...getInitialInput?.(),
+          ...creationOptions?.initialInput,
+          savedObjectId: dashboardIdToBuild,
         },
         undefined,
         creationOptions

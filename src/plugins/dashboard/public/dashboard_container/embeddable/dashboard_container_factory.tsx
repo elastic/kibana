@@ -41,6 +41,7 @@ export interface DashboardCreationOptions {
   useControlGroupIntegration?: boolean;
   backupStateToSessionStorage?: boolean;
   incomingEmbeddable?: EmbeddablePackageState;
+  initialInput?: Partial<DashboardContainerInput>;
   overrideInput?: Partial<DashboardContainerByValueInput>;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
   validateLoadedSavedObject?: (result: LoadDashboardFromSavedObjectReturn) => boolean;
