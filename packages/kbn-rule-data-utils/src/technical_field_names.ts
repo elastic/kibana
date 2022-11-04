@@ -19,6 +19,8 @@ const EVENT_ACTION = 'event.action' as const;
 const EVENT_KIND = 'event.kind' as const;
 const EVENT_MODULE = 'event.module' as const;
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
+const SERVICE_NAME = 'service.name' as const;
+const TRANSACTION_TYPE = 'transaction.type' as const;
 const TAGS = 'tags' as const;
 const TIMESTAMP = '@timestamp' as const;
 const VERSION = `${KIBANA_NAMESPACE}.version` as const;
@@ -107,6 +109,8 @@ const fields = {
   EVENT_KIND,
   EVENT_ACTION,
   EVENT_MODULE,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
   TAGS,
   TIMESTAMP,
   ALERT_ACTION_GROUP,
@@ -233,6 +237,8 @@ export {
   ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_ID,
   ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_NAME,
   ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_REFERENCE,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
   TAGS,
   TIMESTAMP,
   SPACE_IDS,

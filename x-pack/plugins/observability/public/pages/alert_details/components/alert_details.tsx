@@ -96,10 +96,8 @@ export function AlertDetails() {
         />
       </EuiPanel>
     );
-
   const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
   const timeZone = getTimeZone(uiSettings);
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -118,7 +116,9 @@ export function AlertDetails() {
       data-test-subj="alertDetails"
     >
       <AlertSummary alert={alert} />
-      {AlertDetailsAppSection && rule && <AlertDetailsAppSection rule={rule} timeZone={timeZone} />}
+      {AlertDetailsAppSection && rule && (
+        <AlertDetailsAppSection alert={alert} rule={rule} timeZone={timeZone} />
+      )}
     </ObservabilityPageTemplate>
   );
 }

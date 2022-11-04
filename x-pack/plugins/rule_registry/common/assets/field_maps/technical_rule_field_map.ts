@@ -188,6 +188,16 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
+  [Fields.SERVICE_NAME]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [Fields.TRANSACTION_TYPE]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
 } as const;
 
 export type TechnicalRuleFieldMap = typeof technicalRuleFieldMap;
