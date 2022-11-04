@@ -40,11 +40,6 @@ export interface OnlyEsQueryRuleParams {
   esQuery: string;
   index: string[];
   timeField: string;
-  aggType: string;
-  aggField?: string;
-  groupBy?: string;
-  termSize?: number;
-  termField?: string;
 }
 
 export interface OnlySearchSourceRuleParams {
