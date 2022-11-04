@@ -8,8 +8,8 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  DataView,
-  DataViewField,
+  type DataView,
+  type DataViewField,
   ES_FIELD_TYPES,
   getEsQueryConfig,
   KBN_FIELD_TYPES,

@@ -144,7 +144,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   reference,
                 },
                 alertInfo: {
-                  alertId,
+                  id: alertId,
                   consumer: 'alertsFixture',
                   spaceId: space.id,
                   namespace: space.id,
@@ -296,7 +296,7 @@ instanceStateValue: true
                   reference,
                 },
                 alertInfo: {
-                  alertId,
+                  id: alertId,
                   consumer: 'alertsFixture',
                   spaceId: space.id,
                   namespace: space.id,
@@ -428,7 +428,7 @@ instanceStateValue: true
             ['createdAt', 'updatedAt']
           );
           expect(alertSearchResultInfoWithoutDates).to.eql({
-            alertId,
+            id: alertId,
             consumer: 'alertsFixture',
             spaceId: space.id,
             namespace: space.id,

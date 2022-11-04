@@ -23,6 +23,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/utils';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SavedObjectsClientFactoryProvider } from '@kbn/core-saved-objects-server';
@@ -84,6 +85,7 @@ describe('SavedObjectsService', () => {
       pluginsInitialized,
       elasticsearch: elasticsearchServiceMock.createInternalStart(),
       docLinks: docLinksServiceMock.createStartContract(),
+      node: nodeServiceMock.createInternalStartContract(),
     };
   };
 
@@ -255,6 +257,81 @@ describe('SavedObjectsService', () => {
       await soService.start(createStartDeps());
 
       expect(KibanaMigratorMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
+    });
+
+    it('calls KibanaMigrator with waitForMigrationCompletion=false for the default ui+background tasks role', async () => {
+      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+      const kibanaVersion = pkg.version;
+
+      const coreContext = createCoreContext({
+        env: Env.createDefault(REPO_ROOT, getEnvOptions(), {
+          ...pkg,
+          version: `${kibanaVersion}-beta1`, // test behavior when release has a version qualifier
+        }),
+      });
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+      const startDeps = createStartDeps();
+      startDeps.node = nodeServiceMock.createInternalStartContract({
+        ui: true,
+        backgroundTasks: true,
+      });
+      await soService.start(startDeps);
+
+      expect(KibanaMigratorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ waitForMigrationCompletion: false })
+      );
+    });
+
+    it('calls KibanaMigrator with waitForMigrationCompletion=false for the ui only role', async () => {
+      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+      const kibanaVersion = pkg.version;
+
+      const coreContext = createCoreContext({
+        env: Env.createDefault(REPO_ROOT, getEnvOptions(), {
+          ...pkg,
+          version: `${kibanaVersion}-beta1`, // test behavior when release has a version qualifier
+        }),
+      });
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+      const startDeps = createStartDeps();
+      startDeps.node = nodeServiceMock.createInternalStartContract({
+        ui: true,
+        backgroundTasks: false,
+      });
+      await soService.start(startDeps);
+
+      expect(KibanaMigratorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ waitForMigrationCompletion: false })
+      );
+    });
+
+    it('calls KibanaMigrator with waitForMigrationCompletion=true for the background tasks only role', async () => {
+      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+      const kibanaVersion = pkg.version;
+
+      const coreContext = createCoreContext({
+        env: Env.createDefault(REPO_ROOT, getEnvOptions(), {
+          ...pkg,
+          version: `${kibanaVersion}-beta1`, // test behavior when release has a version qualifier
+        }),
+      });
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+      const startDeps = createStartDeps();
+      startDeps.node = nodeServiceMock.createInternalStartContract({
+        ui: false,
+        backgroundTasks: true,
+      });
+      await soService.start(startDeps);
+
+      expect(KibanaMigratorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ waitForMigrationCompletion: true })
+      );
     });
 
     it('waits for all es nodes to be compatible before running migrations', async () => {

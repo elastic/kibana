@@ -102,7 +102,7 @@ import {
   AgentServiceImpl,
   PackageServiceImpl,
 } from './services';
-import { registerFleetUsageCollector, fetchUsage } from './collectors/register';
+import { registerFleetUsageCollector, fetchUsage, fetchAgentsUsage } from './collectors/register';
 import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
@@ -111,6 +111,8 @@ import { setupFleet } from './services/setup';
 import { BulkActionsResolver } from './services/agents';
 import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
+import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
+import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -220,6 +222,7 @@ export class FleetPlugin
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
   private bulkActionsResolver?: BulkActionsResolver;
   private fleetUsageSender?: FleetUsageSender;
+  private checkDeletedFilesTask?: CheckDeletedFilesTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -389,6 +392,7 @@ export class FleetPlugin
       this.kibanaVersion,
       this.isProductionMode
     );
+    registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
 
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
     // Allow read-only users access to endpoints necessary for Integrations UI
@@ -425,6 +429,11 @@ export class FleetPlugin
 
     this.telemetryEventsSender.setup(deps.telemetry);
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
+    this.checkDeletedFilesTask = new CheckDeletedFilesTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
@@ -456,6 +465,8 @@ export class FleetPlugin
     this.telemetryEventsSender.start(plugins.telemetry, core);
     this.bulkActionsResolver?.start(plugins.taskManager);
     this.fleetUsageSender?.start(plugins.taskManager);
+    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
+    startFleetUsageLogger(plugins.taskManager);
 
     const logger = appContextService.getLogger();
 
@@ -570,7 +581,7 @@ export class FleetPlugin
       internalSoClient,
       this.getLogger()
     );
-    return this.packageService;
+    return this.packageService!;
   }
 
   private getLogger(): Logger {
