@@ -29,4 +29,6 @@ const errorBudgetSchema = t.type({
   remaining: t.number,
 });
 
-export { allOrAnyString, ALL_VALUE, dateType, errorBudgetSchema };
+const dateRangeSchema = t.type({ from: dateType, to: dateType });
+
+export { allOrAnyString, ALL_VALUE, dateType, errorBudgetSchema, dateRangeSchema };

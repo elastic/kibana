@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { allOrAnyString } from './common';
+import { allOrAnyString, dateRangeSchema } from './common';
 
 const apmTransactionDurationIndicatorTypeSchema = t.literal('slo.apm.transaction_duration');
 const apmTransactionDurationIndicatorSchema = t.type({
@@ -49,7 +49,11 @@ const kqlCustomIndicatorSchema = t.type({
   }),
 });
 
-const indicatorDataSchema = t.type({ good: t.number, total: t.number });
+const indicatorDataSchema = t.type({
+  date_range: dateRangeSchema,
+  good: t.number,
+  total: t.number,
+});
 
 const indicatorTypesSchema = t.union([
   apmTransactionDurationIndicatorTypeSchema,

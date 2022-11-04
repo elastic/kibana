@@ -950,7 +950,7 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-react-field @elastic/kibana-app-services
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
-packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
+packages/kbn-rule-data-utils @elastic/apm-ui
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform
