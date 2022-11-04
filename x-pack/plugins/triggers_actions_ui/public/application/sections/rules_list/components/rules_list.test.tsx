@@ -333,11 +333,8 @@ beforeEach(() => {
   (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
 });
 
-// This entire test suite is flaky/timing out and has been skipped.
 // FLAKY: https://github.com/elastic/kibana/issues/134922
 // FLAKY: https://github.com/elastic/kibana/issues/134923
-// FLAKY: https://github.com/elastic/kibana/issues/134924
-
 describe.skip('Update Api Key', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
@@ -424,6 +421,7 @@ describe.skip('Update Api Key', () => {
   });
 });
 
+// FLAKY: https://github.com/elastic/kibana/issues/134924
 describe.skip('rules_list component empty', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
@@ -488,7 +486,7 @@ describe.skip('rules_list component empty', () => {
   });
 });
 
-describe.skip('rules_list component with props', () => {
+describe('rules_list component with props', () => {
   describe('Status filter', () => {
     let wrapper: ReactWrapper<any>;
     async function setup(editable: boolean = true) {
@@ -1044,7 +1042,7 @@ describe.skip('rules_list component with props', () => {
   });
 });
 
-describe.skip('rules_list component with items', () => {
+describe('rules_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(editable: boolean = true) {
@@ -1590,7 +1588,7 @@ describe.skip('rules_list component with items', () => {
   });
 });
 
-describe.skip('rules_list component empty with show only capability', () => {
+describe('rules_list component empty with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
@@ -1633,7 +1631,7 @@ describe.skip('rules_list component empty with show only capability', () => {
   });
 });
 
-describe.skip('rules_list with show only capability', () => {
+describe('rules_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(editable: boolean = true) {
@@ -1754,7 +1752,7 @@ describe.skip('rules_list with show only capability', () => {
   });
 });
 
-describe.skip('rules_list with disabled items', () => {
+describe('rules_list with disabled items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
