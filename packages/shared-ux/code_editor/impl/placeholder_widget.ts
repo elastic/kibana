@@ -10,17 +10,16 @@ import { monaco } from '@kbn/monaco';
 import { useState } from 'react';
 
 interface Props {
-    placeholder: string;
-    editor: monaco.editor.ICodeEditor;
+  placeholder: string;
+  editor: monaco.editor.ICodeEditor;
 }
 
 /**
  * Creates a space for a widget alongside the code editor
  */
 export const PlaceholderWidget = (props: Props) => {
-    const [ placeholderText, setPlaceholderText ] = useState('');
-    const [ editor, setEditor ] = useState();
-
+  const [placeholderText, setPlaceholderText] = useState('');
+  const [editor, setEditor] = useState();
 
   const getDomNode = (domNode: undefined | HTMLElement): HTMLElement => {
     if (!domNode) {
@@ -31,26 +30,26 @@ export const PlaceholderWidget = (props: Props) => {
       domNode = domNode;
     }
     return domNode;
-  }
+  };
+};
 
-
-}
-
-export const getId = ():string => {
-    return 'KBN_CODE_EDITOR_PLACEHOLDER_WIDGET_ID';
-  }
-
+export const getId = (): string => {
+  return 'KBN_CODE_EDITOR_PLACEHOLDER_WIDGET_ID';
+};
 
 export const getPosition = (): monaco.editor.IContentWidgetPosition | null => {
-    return {
-      position: {
-        column: 1,
-        lineNumber: 1,
-      },
-      preference: [monaco.editor.ContentWidgetPositionPreference.EXACT],
-    };
-  }
+  return {
+    position: {
+      column: 1,
+      lineNumber: 1,
+    },
+    preference: [monaco.editor.ContentWidgetPositionPreference.EXACT],
+  };
+};
 
-export const dispose = (editor: monaco.editor.ICodeEditor, placeholderWidget: monaco.editor.IContentWidget): void => {
-    editor.removeContentWidget(placeholderWidget);
-  }
+export const dispose = (
+  editor: monaco.editor.ICodeEditor,
+  placeholderWidget: monaco.editor.IContentWidget
+): void => {
+  editor.removeContentWidget(placeholderWidget);
+};

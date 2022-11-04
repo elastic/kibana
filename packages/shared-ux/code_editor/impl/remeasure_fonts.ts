@@ -25,4 +25,4 @@ export const remeasureFonts = () => {
         console.warn(e);
       });
   }
-}
+};

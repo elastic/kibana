@@ -29,9 +29,6 @@ import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 import { dispose, PlaceholderWidget } from './placeholder_widget';
 
-
-import { CodeEditorStyles } from './code_editor.styles';
-
 export interface Props {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
