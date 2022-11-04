@@ -15,6 +15,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     deploymentId: 'deployment-id',
     isCloudEnabled: true,
     isElasticStaffOwned: true,
+    organizationCreatedAt: new Date('2019-10-01T14:13:12Z'),
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
     inTrial$: new BehaviorSubject<boolean>(true),
     isPaying$: new BehaviorSubject<boolean>(false),

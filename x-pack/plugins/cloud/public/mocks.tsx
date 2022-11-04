@@ -20,6 +20,7 @@ function createSetupMock() {
     profileUrl: 'profile-url',
     organizationUrl: 'organization-url',
     isElasticStaffOwned: true,
+    organizationCreatedAt: new Date('2019-10-01T14:13:12Z'),
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
     inTrial$: new BehaviorSubject<boolean>(true),
     isPaying$: new BehaviorSubject<boolean>(false),
