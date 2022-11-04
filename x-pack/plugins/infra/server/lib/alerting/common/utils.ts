@@ -13,13 +13,13 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -144,12 +144,11 @@ export const getAlertDetailsUrl = (
 
 export const NUMBER_OF_DOCUMENTS = 10;
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
-export const termsAggField: Record<string, string> =
-  { [KUBERNETES_POD_UID]: 'container.id' };
+export const termsAggField: Record<string, string> = { [KUBERNETES_POD_UID]: 'container.id' };
 
-export type AdditionalContext = {
+export interface AdditionalContext {
   [x: string]: any;
-};
+}
 
 export const doFieldsExist = async (
   esClient: ElasticsearchClient,
@@ -168,7 +167,7 @@ export const doFieldsExist = async (
   Object.entries(respMapping.fields).forEach(([key, value]) => {
     const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
     const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
-    
+
     // Check if fieldName is something we can aggregate on
     if (isSupportedType) {
       acceptableFields.add(key);
@@ -182,19 +181,18 @@ export const doFieldsExist = async (
   return fieldsExisted;
 };
 
-export const validGroupByForContext =
-  [
-    'host.name',
-    'host.hostname',
-    'host.id',
-    'kubernetes.pod.uid',
-    'container.id'
-  ];
+export const validGroupByForContext = [
+  'host.name',
+  'host.hostname',
+  'host.id',
+  'kubernetes.pod.uid',
+  'container.id',
+];
 
 export const hasAdditionalContext = (groupBy: string | string[] | undefined) => {
   return groupBy
     ? Array.isArray(groupBy)
-      ? groupBy.every(group => validGroupByForContext.includes(group))
+      ? groupBy.every((group) => validGroupByForContext.includes(group))
       : validGroupByForContext.includes(groupBy)
     : false;
 };
