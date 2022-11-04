@@ -48,6 +48,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "@npm//@elastic/eui",
   "//packages/kbn-monaco",
   "//packages/kbn-i18n-react",
   "//packages/kbn-i18n",
@@ -65,6 +66,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//@elastic/eui",
   "//packages/kbn-monaco:npm_module_types",
   "//packages/kbn-ambient-ui-types",
 ]

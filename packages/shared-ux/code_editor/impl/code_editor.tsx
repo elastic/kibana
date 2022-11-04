@@ -27,8 +27,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
+import { dispose, PlaceholderWidget } from './placeholder_widget';
 
-import './editor.scss';
+
+import { CodeEditorStyles } from './code_editor.styles';
 
 export interface Props {
   /** Width of editor. Defaults to 100%. */
@@ -162,7 +164,7 @@ export const CodeEditor: React.FC<Props> = ({
   const isReadOnly = options?.readOnly ?? false;
 
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const _placeholderWidget = useRef<PlaceholderWidget | null>(null);
+  const _placeholderWidget = useRef<typeof PlaceholderWidget | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
@@ -409,7 +411,7 @@ export const CodeEditor: React.FC<Props> = ({
       _placeholderWidget.current = new PlaceholderWidget(placeholder, _editor.current);
     }
     return () => {
-      _placeholderWidget.current?.dispose();
+      dispose(_editor, _placeholderWidget);
       _placeholderWidget.current = null;
     };
   }, [placeholder, value]);
