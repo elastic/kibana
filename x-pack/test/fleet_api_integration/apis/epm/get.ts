@@ -194,7 +194,7 @@ export default function (providerContext: FtrProviderContext) {
         ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
       );
       // this field is only returned if we go to the archive
-      // it i not part of the EPR API
+      // it is not part of the EPR API
       expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
     });
     it('returns package info from the registry if ?full not provided', async function () {
@@ -206,8 +206,6 @@ export default function (providerContext: FtrProviderContext) {
       const dataStream = packageInfo?.data_streams?.find(
         ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
       );
-      // this field is only returned if we go to the archive
-      // it i not part of the EPR API
       expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
     });
   });

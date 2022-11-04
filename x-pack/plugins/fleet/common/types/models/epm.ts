@@ -354,10 +354,6 @@ export interface RegistryElasticsearch {
   source_mode?: 'default' | 'synthetic';
 }
 
-export type ArchiveElasticsearch = RegistryElasticsearch & {
-  source_mode?: 'default' | 'synthetic';
-};
-
 export interface RegistryDataStreamPrivileges {
   cluster?: string[];
   indices?: string[];
