@@ -4971,13 +4971,16 @@
         "isCloudEnabled": {
           "type": "boolean"
         },
+        "isElasticStaffOwned": {
+          "type": "boolean"
+        },
         "trialEndDate": {
           "type": "date"
         },
         "inTrial": {
           "type": "boolean"
         },
-        "isElasticStaffOwned": {
+        "isPaying": {
           "type": "boolean"
         }
       }
