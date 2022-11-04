@@ -513,3 +513,9 @@ export type {
   PublicHttpServiceSetup as HttpServiceSetup,
   HttpServiceSetup as BaseHttpServiceSetup,
 };
+
+export {
+  ENCRYPTION_EXTENSION_ID,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
+} from '@kbn/core-saved-objects-server';

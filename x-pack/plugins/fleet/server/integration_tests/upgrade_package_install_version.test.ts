@@ -8,6 +8,7 @@
 import Path from 'path';
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
@@ -154,7 +155,7 @@ describe('Uprade package install version', () => {
 
     beforeAll(async () => {
       soClient = kbnServer.coreStart.savedObjects.getScopedClient(fakeRequest, {
-        excludedExtensions: ['security'],
+        excludedExtensions: [SECURITY_EXTENSION_ID],
       });
 
       const res = await soClient.find<Installation>({

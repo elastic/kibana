@@ -9,7 +9,7 @@ import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { RouteValidatorConfig } from '@kbn/core/server';
-import { kibanaResponseFactory } from '@kbn/core/server';
+import { kibanaResponseFactory, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
@@ -163,7 +163,7 @@ describe('copy to space', () => {
       await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
-        excludedExtensions: ['spaces'],
+        excludedExtensions: [SPACES_EXTENSION_ID],
       });
     });
 
@@ -326,7 +326,7 @@ describe('copy to space', () => {
       await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
-        excludedExtensions: ['spaces'],
+        excludedExtensions: [SPACES_EXTENSION_ID],
       });
     });
 

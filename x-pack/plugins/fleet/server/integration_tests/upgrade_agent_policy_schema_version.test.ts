@@ -12,6 +12,7 @@ import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 
@@ -120,7 +121,7 @@ describe('upgrade agent policy schema version', () => {
 
     beforeAll(async () => {
       soClient = kbnServer.coreStart.savedObjects.getScopedClient(fakeRequest, {
-        excludedExtensions: ['security'],
+        excludedExtensions: [SECURITY_EXTENSION_ID],
       });
       esClient = kbnServer.coreStart.elasticsearch.client.asInternalUser;
     });

@@ -11,6 +11,7 @@ import {
   SavedObjectsFindResponse,
   KibanaRequest,
   SavedObjectsClientContract,
+  SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -127,7 +128,7 @@ function taskRunner(
             getFakeKibanaRequest(http.basePath.serverBasePath),
             {
               includedHiddenTypes: ['api_key_pending_invalidation'],
-              excludedExtensions: ['security'],
+              excludedExtensions: [SECURITY_EXTENSION_ID],
             }
           );
           const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({

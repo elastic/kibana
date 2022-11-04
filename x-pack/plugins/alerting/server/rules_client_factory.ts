@@ -10,6 +10,7 @@ import {
   Logger,
   SavedObjectsServiceStart,
   PluginInitializerContext,
+  SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -91,7 +92,7 @@ export class RulesClientFactory {
       ruleTypeRegistry: this.ruleTypeRegistry,
       minimumScheduleInterval: this.minimumScheduleInterval,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
-        excludedExtensions: ['security'],
+        excludedExtensions: [SECURITY_EXTENSION_ID],
         includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
       }),
       authorization: this.authorization.create(request),

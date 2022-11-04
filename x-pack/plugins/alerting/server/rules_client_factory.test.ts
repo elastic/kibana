@@ -9,7 +9,7 @@ import { Request } from '@hapi/hapi';
 import { RulesClientFactory, RulesClientFactoryOpts } from './rules_client_factory';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { CoreKibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest, SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
@@ -95,7 +95,7 @@ test('creates a rules client with proper constructor arguments when security is 
   factory.create(request, savedObjectsService);
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
-    excludedExtensions: ['security'],
+    excludedExtensions: [SECURITY_EXTENSION_ID],
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
@@ -137,7 +137,7 @@ test('creates a rules client with proper constructor arguments', async () => {
   factory.create(request, savedObjectsService);
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
-    excludedExtensions: ['security'],
+    excludedExtensions: [SECURITY_EXTENSION_ID],
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 

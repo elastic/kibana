@@ -24,6 +24,7 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
@@ -368,7 +369,7 @@ export class FleetPlugin
             get internalSoClient() {
               return appContextService
                 .getSavedObjects()
-                .getScopedClient(request, { excludedExtensions: ['security'] });
+                .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
             },
           },
           get spaceId() {

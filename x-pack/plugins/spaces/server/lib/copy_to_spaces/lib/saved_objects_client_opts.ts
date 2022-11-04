@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsClientProviderOptions } from '@kbn/core/server';
+import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 
 export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProviderOptions = {
-  excludedExtensions: ['spaces'],
+  excludedExtensions: [SPACES_EXTENSION_ID],
 };

@@ -13,6 +13,7 @@ import type {
   SavedObjectsClientContract,
   IBasePath,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -108,7 +109,7 @@ export class CasesClientFactory {
       includedHiddenTypes: SAVED_OBJECT_TYPES,
       // this tells the security plugin to not perform SO authorization and audit logging since we are handling
       // that manually using our Authorization class and audit logger.
-      excludedExtensions: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
 
     const services = this.createServices({

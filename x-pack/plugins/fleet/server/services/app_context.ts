@@ -8,12 +8,13 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/utils';
-import type { KibanaRequest } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
   HttpServiceSetup,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
@@ -161,7 +162,7 @@ class AppContextService {
   public getInternalUserSOClient(request: KibanaRequest) {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      excludedExtensions: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
 

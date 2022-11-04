@@ -14,6 +14,8 @@ import {
   IKibanaResponse,
   Logger,
   SavedObject,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
@@ -65,7 +67,7 @@ export function defineRoutes(
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
         // Exclude the security and spaces wrappers to get around the safeguards those have in place to prevent
         // us from doing what we want to do - brute force replace the ApiKey
-        excludedExtensions: ['security', 'spaces'],
+        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
         includedHiddenTypes: ['alert'],
       });
 

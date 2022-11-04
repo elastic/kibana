@@ -18,6 +18,7 @@ import {
   ElasticsearchServiceStart,
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
+  SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 
 import {
@@ -567,7 +568,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     request: KibanaRequest
   ) =>
     savedObjects.getScopedClient(request, {
-      excludedExtensions: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes,
     });
 
@@ -630,7 +631,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             );
           }
           const unsecuredSavedObjectsClient = savedObjects.getScopedClient(request, {
-            excludedExtensions: ['security'],
+            excludedExtensions: [SECURITY_EXTENSION_ID],
             includedHiddenTypes,
           });
           return new ActionsClient({

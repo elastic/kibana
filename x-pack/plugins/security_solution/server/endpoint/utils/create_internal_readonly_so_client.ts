@@ -10,6 +10,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { EndpointError } from '../../../common/endpoint/errors';
 
 type SavedObjectsClientContractKeys = keyof SavedObjectsClientContract;
@@ -46,7 +47,7 @@ export const createInternalReadonlySoClient = (
   } as unknown as KibanaRequest;
 
   const internalSoClient = savedObjectsServiceStart.getScopedClient(fakeRequest, {
-    excludedExtensions: ['security'],
+    excludedExtensions: [SECURITY_EXTENSION_ID],
   });
 
   return new Proxy(internalSoClient, {
