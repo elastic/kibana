@@ -25,9 +25,9 @@
     {
       "groupName": "@elastic/charts",
       "matchPackageNames": ["@elastic/charts"],
-      "reviewers": ["team:datavis", "markov00", "nickofthyme"],
+      "reviewers": ["team:visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:DataVis"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
       "draftPR": true,
       "enabled": true,
       "assignAutomerge": true,
