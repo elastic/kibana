@@ -1087,7 +1087,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               ) ? (
                 <TimeShift
                   datatableUtilities={services.data.datatableUtilities}
-                  timeFilter={services.data.query.timefilter.timefilter}
+                  dateRange={dateRange}
                   indexPattern={currentIndexPattern}
                   selectedColumn={selectedColumn}
                   columnId={columnId}

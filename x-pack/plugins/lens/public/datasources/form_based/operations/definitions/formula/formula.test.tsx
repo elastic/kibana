@@ -922,6 +922,7 @@ describe('formula', () => {
           getNewLayerWithFormula('count()'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(undefined);
@@ -933,6 +934,7 @@ describe('formula', () => {
           getNewLayerWithFormula(`count(kql='*')`, false),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(undefined);
@@ -944,6 +946,7 @@ describe('formula', () => {
           getNewLayerWithFormula(`count(kql='invalid: "')`, false),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual([
@@ -959,6 +962,7 @@ invalid: "
           getNewLayerWithFormula('average(bytes)'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(undefined);
@@ -968,6 +972,7 @@ invalid: "
           getNewLayerWithFormula('average("bytes")'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(undefined);
@@ -979,6 +984,7 @@ invalid: "
           getNewLayerWithFormula('derivative(average(bytes))'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(undefined);
@@ -988,6 +994,7 @@ invalid: "
           getNewLayerWithFormula('derivative(average("bytes"))'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(undefined);
@@ -999,6 +1006,7 @@ invalid: "
           getNewLayerWithFormula('moving_average(average(bytes), window=7)'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(undefined);
@@ -1010,6 +1018,7 @@ invalid: "
           getNewLayerWithFormula('bytes'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual([`The field bytes cannot be used without operation`]);
@@ -1019,6 +1028,7 @@ invalid: "
           getNewLayerWithFormula('bytes + bytes'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual([`The operation add does not accept any field as argument`]);
@@ -1040,6 +1050,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual([`The Formula ${formula} cannot be parsed`]);
@@ -1060,6 +1071,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(['Field noField not found']);
@@ -1075,6 +1087,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(['Fields noField, noField2 not found']);
@@ -1090,6 +1103,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(['Operation noFn not found']);
@@ -1103,6 +1117,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(['Operations noFn, noFnTwo not found']);
@@ -1118,6 +1133,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(['Operation formula not found']);
@@ -1131,6 +1147,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(['Operation math not found']);
@@ -1154,6 +1171,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(
@@ -1173,6 +1191,7 @@ invalid: "
           getNewLayerWithFormula('count()'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(undefined);
@@ -1184,6 +1203,7 @@ invalid: "
           getNewLayerWithFormula('moving_average(average(bytes))'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual([
@@ -1195,6 +1215,7 @@ invalid: "
           getNewLayerWithFormula('moving_average(average(bytes), myparam=7)'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual([
@@ -1208,6 +1229,7 @@ invalid: "
           getNewLayerWithFormula('average(bytes, myparam=7)'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(['The operation average does not accept any parameter']);
@@ -1228,6 +1250,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(
@@ -1258,6 +1281,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(
@@ -1276,6 +1300,7 @@ invalid: "
           getNewLayerWithFormula('moving_average(average(bytes), window="m")'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual([
@@ -1295,6 +1320,7 @@ invalid: "
           `),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(undefined);
@@ -1315,6 +1341,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(undefined);
@@ -1353,6 +1380,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(expect.arrayContaining([expect.stringMatching(`Single quotes are required`)]));
@@ -1383,6 +1411,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual([`The Formula ${formula} cannot be parsed`]);
@@ -1401,6 +1430,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(undefined);
@@ -1413,6 +1443,7 @@ invalid: "
           getNewLayerWithFormula(`count(kql='category.keyword: *', lucene='category.keyword: *')`),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(['Use only one of kql= or lucene=, not both']);
@@ -1425,6 +1456,7 @@ invalid: "
             getNewLayerWithFormula(`${fn}()`),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual([`The first argument for ${fn} should be a field name. Found no field`]);
@@ -1434,6 +1466,7 @@ invalid: "
           getNewLayerWithFormula(`sum(kql='category.keyword: *')`),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual([`The first argument for sum should be a field name. Found category.keyword: *`]);
@@ -1446,6 +1479,7 @@ invalid: "
             getNewLayerWithFormula(`${fn}()`),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual([`The first argument for ${fn} should be a operation name. Found no operation`]);
@@ -1473,6 +1507,7 @@ invalid: "
           },
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual([
@@ -1486,6 +1521,7 @@ invalid: "
           getNewLayerWithFormula('5 + 3 * 7'),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual(undefined);
@@ -1502,6 +1538,7 @@ invalid: "
             getNewLayerWithFormula(`ifelse(${formula}, 1, 5)`),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(undefined);
@@ -1520,6 +1557,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(undefined);
@@ -1538,6 +1576,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(undefined);
@@ -1560,6 +1599,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual([
@@ -1633,6 +1673,7 @@ invalid: "
               getNewLayerWithFormula(formula),
               'col1',
               indexPattern,
+              undefined,
               operationDefinitionMap
             )
           ).toContain(errors[i](fn));
@@ -1653,6 +1694,7 @@ invalid: "
                 getNewLayerWithFormula(formula),
                 'col1',
                 indexPattern,
+                undefined,
                 operationDefinitionMap
               )
             ).toEqual([
@@ -1697,6 +1739,7 @@ invalid: "
                 getNewLayerWithFormula(`${fn}(${cond}, ${left}, ${right})`),
                 'col1',
                 indexPattern,
+                undefined,
                 operationDefinitionMap
               )
             ).toEqual(
@@ -1723,6 +1766,7 @@ invalid: "
             getNewLayerWithFormula(formula),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual([errorsWithSuggestions[i]]);
@@ -1751,6 +1795,7 @@ invalid: "
             }),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual([
@@ -1771,6 +1816,7 @@ invalid: "
           ),
           'col1',
           indexPattern,
+          undefined,
           operationDefinitionMap
         )
       ).toEqual([
@@ -1795,6 +1841,7 @@ invalid: "
             }),
             'col1',
             indexPattern,
+            undefined,
             operationDefinitionMap
           )
         ).toEqual(undefined);

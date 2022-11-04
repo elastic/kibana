@@ -60,22 +60,23 @@ export const parseAbsoluteTimeShift = (
   timeRange: TimeRange | undefined
 ): { value: moment.Duration; reason: null } | { value: 'invalid'; reason: REASON_ID_TYPES } => {
   const trimmedVal = val.trim();
-  if (timeRange == null || !isAbsoluteTimeShift(trimmedVal)) {
+  if (timeRange == null) {
     return {
       value: 'invalid',
-      reason: timeRange == null ? REASON_IDS.missingTimerange : REASON_IDS.notAbsoluteTimeShift,
+      reason: REASON_IDS.missingTimerange,
+    };
+  }
+  const error = shallowValidateAbsoluteTimeShift(trimmedVal, timeRange);
+  if (error) {
+    return {
+      value: 'invalid',
+      reason: error,
     };
   }
   const { anchor, timestamp } = extractTokensFromAbsTimeShift(trimmedVal);
   // the regexp test above will make sure anchor and timestamp are both strings
   // now be very strict on the format
   const tsMoment = moment(timestamp, moment.ISO_8601, true);
-  if (!tsMoment.isValid() || tsMoment.isAfter(timeRange.to)) {
-    return {
-      value: 'invalid',
-      reason: !tsMoment.isValid() ? REASON_IDS.invalidDate : REASON_IDS.shiftAfterTimeRange,
-    };
-  }
   // workout how long is the ref time range
   const duration = moment(timeRange.to).diff(moment(timeRange.from));
   // pick the end of the absolute range now
@@ -87,4 +88,30 @@ export const parseAbsoluteTimeShift = (
 export function extractTokensFromAbsTimeShift(val: string) {
   const [, anchor, , timestamp] = val.match(anchoredTimeShiftRegexp) || [];
   return { anchor, timestamp };
+}
+/**
+ * Relaxed version of the parsing validation
+ * This version of the validation applies the timeRange validation only when passed
+ * @param val
+ * @param timeRange
+ * @returns the reason id if the absolute shift is not valid, undefined otherwise
+ */
+export function shallowValidateAbsoluteTimeShift(
+  val: string,
+  timeRange: TimeRange | undefined
+): REASON_ID_TYPES | undefined {
+  const trimmedVal = val.trim();
+  if (!isAbsoluteTimeShift(trimmedVal)) {
+    return REASON_IDS.notAbsoluteTimeShift;
+  }
+  const { timestamp } = extractTokensFromAbsTimeShift(trimmedVal);
+  // the regexp test above will make sure anchor and timestamp are both strings
+  // now be very strict on the format
+  const tsMoment = moment(timestamp, moment.ISO_8601, true);
+  if (!tsMoment.isValid()) {
+    return REASON_IDS.invalidDate;
+  }
+  if (timeRange && tsMoment.isAfter(timeRange.to)) {
+    return REASON_IDS.shiftAfterTimeRange;
+  }
 }

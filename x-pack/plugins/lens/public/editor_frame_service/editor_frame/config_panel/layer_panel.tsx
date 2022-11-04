@@ -552,7 +552,8 @@ export function LayerPanel(
                                     layerDatasourceState,
                                     dataViews.indexPatterns,
                                     layerId,
-                                    columnId
+                                    columnId,
+                                    dateRange
                                   )
                                 }
                               >

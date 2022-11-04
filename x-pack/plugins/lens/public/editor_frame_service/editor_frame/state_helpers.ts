@@ -13,6 +13,7 @@ import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import {
   Datasource,
   DatasourceLayers,
@@ -299,6 +300,7 @@ export async function persistedStateToExpression(
     uiSettings: IUiSettingsClient;
     storage: IStorageWrapper;
     dataViews: DataViewsContract;
+    timefilter: TimefilterContract;
   }
 ): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
   const {
@@ -390,6 +392,7 @@ export async function persistedStateToExpression(
     visualizationState,
     { datasourceLayers, dataViews: { indexPatterns } as DataViewsState }
   );
+  const currentTimeRange = services.timefilter.getAbsoluteTime();
 
   return {
     ast: buildExpression({
@@ -401,6 +404,7 @@ export async function persistedStateToExpression(
       datasourceStates,
       datasourceLayers,
       indexPatterns,
+      dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
     }),
     errors: validationResult,
   };

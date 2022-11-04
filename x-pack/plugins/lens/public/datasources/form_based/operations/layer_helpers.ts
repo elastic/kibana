@@ -1574,7 +1574,14 @@ export function getErrorMessages(
       }
       const def = operationDefinitionMap[column.operationType];
       if (def.getErrorMessage) {
-        return def.getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap);
+        const currentTimeRange = data.query.timefilter.timefilter.getAbsoluteTime();
+        return def.getErrorMessage(
+          layer,
+          columnId,
+          indexPattern,
+          { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
+          operationDefinitionMap
+        );
       }
     })
     .map((errorMessage) => {

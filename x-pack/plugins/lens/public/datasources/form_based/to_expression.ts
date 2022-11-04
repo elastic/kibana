@@ -8,13 +8,12 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
-import {
+import type {
   AggFunctionsMapping,
-  DataPublicPluginStart,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '@kbn/data-plugin/public';
-import { isAbsoluteTimeShift, queryToAst, TimeRange } from '@kbn/data-plugin/common';
+import { isAbsoluteTimeShift, queryToAst } from '@kbn/data-plugin/common';
 import {
   buildExpression,
   buildExpressionFunction,
@@ -22,6 +21,7 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
+import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
 import { FormBasedPrivateState, FormBasedLayer } from './types';
@@ -52,13 +52,11 @@ const updatePositionIndex = (currentId: string, newIndex: number) => {
   return idParts.join('-') + (percentile ? `.${percentile}` : '');
 };
 
-function resolveTimeShift(timeShift: string | undefined, timeRange: TimeRange | undefined) {
+function resolveTimeShift(timeShift: string | undefined, dateRange: DateRange) {
   if (timeShift && isAbsoluteTimeShift(timeShift)) {
-    if (timeRange) {
-      const duration = parseTimeShiftWrapper(timeShift, timeRange);
-      if (typeof duration !== 'string') {
-        return `${roundToSecondsShift(duration)}s`;
-      }
+    const duration = parseTimeShiftWrapper(timeShift, dateRange);
+    if (typeof duration !== 'string') {
+      return `${roundToSecondsShift(duration)}s`;
     }
     return;
   }
@@ -69,7 +67,7 @@ function getExpressionForLayer(
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
-  data: DataPublicPluginStart,
+  dateRange: DateRange,
   searchSessionId?: string
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
@@ -140,7 +138,6 @@ function getExpressionForLayer(
     ([, col]) => col.operationType === 'date_histogram'
   );
   const hasDateHistogram = Boolean(firstDateHistogramColumn);
-  const currentTimeRange = data.query.timefilter.timefilter.getAbsoluteTime();
 
   if (referenceEntries.length || esAggEntries.length) {
     let aggs: ExpressionAstExpressionBuilder[] = [];
@@ -171,7 +168,7 @@ function getExpressionForLayer(
         let aggAst = def.toEsAggsFn(
           {
             ...col,
-            timeShift: resolveTimeShift(col.timeShift, currentTimeRange),
+            timeShift: resolveTimeShift(col.timeShift, dateRange),
           },
           wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
           indexPattern,
@@ -194,11 +191,11 @@ function getExpressionForLayer(
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
                   timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
-                  timeShift: resolveTimeShift(col.timeShift, currentTimeRange),
+                  timeShift: resolveTimeShift(col.timeShift, dateRange),
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
-              timeShift: resolveTimeShift(col.timeShift, currentTimeRange),
+              timeShift: resolveTimeShift(col.timeShift, dateRange),
             }
           ).toAst();
         }
@@ -465,7 +462,7 @@ export function toExpression(
   layerId: string,
   indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient,
-  data: DataPublicPluginStart,
+  dateRange: DateRange,
   searchSessionId?: string
 ) {
   if (state.layers[layerId]) {
@@ -473,7 +470,7 @@ export function toExpression(
       state.layers[layerId],
       indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings,
-      data,
+      dateRange,
       searchSessionId
     );
   }

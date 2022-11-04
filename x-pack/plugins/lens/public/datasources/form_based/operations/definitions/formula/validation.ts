@@ -13,12 +13,12 @@ import { luceneStringToDsl, toElasticsearchQuery, fromKueryExpression } from '@k
 import type { Query } from '@kbn/es-query';
 import {
   isAbsoluteTimeShift,
-  parseAbsoluteTimeShift,
   parseTimeShift,
   REASON_IDS,
   REASON_ID_TYPES,
-  TimeRange,
+  shallowValidateAbsoluteTimeShift,
 } from '@kbn/data-plugin/common';
+import { DateRange } from '../../../../../../common/types';
 import {
   findMathNodes,
   findVariables,
@@ -445,12 +445,12 @@ export function runASTValidation(
   indexPattern: IndexPattern,
   operations: Record<string, GenericOperationDefinition>,
   currentColumn: GenericIndexPatternColumn,
-  currentTimeRange?: TimeRange
+  dateRange?: DateRange
 ) {
   return [
     ...checkMissingVariableOrFunctions(ast, layer, indexPattern, operations),
     ...checkTopNodeReturnType(ast),
-    ...runFullASTValidation(ast, layer, indexPattern, operations, currentColumn, currentTimeRange),
+    ...runFullASTValidation(ast, layer, indexPattern, operations, dateRange, currentColumn),
   ];
 }
 
@@ -540,7 +540,7 @@ function getAbsoluteTimeShiftErrorMessage(reason: REASON_ID_TYPES) {
 function getQueryValidationErrors(
   namedArguments: TinymathNamedArgument[] | undefined,
   indexPattern: IndexPattern,
-  currentTimeRange?: TimeRange
+  dateRange: DateRange | undefined
 ): ErrorWrapper[] {
   const errors: ErrorWrapper[] = [];
   (namedArguments ?? []).forEach((arg) => {
@@ -562,10 +562,18 @@ function getQueryValidationErrors(
       if (parsedShift === 'invalid') {
         if (isAbsoluteTimeShift(arg.value)) {
           // try to parse as absolute time shift
-          const { value, reason } = parseAbsoluteTimeShift(arg.value, currentTimeRange);
-          if (value === 'invalid') {
+          const error = shallowValidateAbsoluteTimeShift(
+            arg.value,
+            dateRange
+              ? {
+                  from: dateRange.fromDate,
+                  to: dateRange.toDate,
+                }
+              : undefined
+          );
+          if (error) {
             errors.push({
-              message: getAbsoluteTimeShiftErrorMessage(reason),
+              message: getAbsoluteTimeShiftErrorMessage(error),
               locations: [arg.location],
             });
           }
@@ -641,7 +649,7 @@ function validateNameArguments(
     | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   namedArguments: TinymathNamedArgument[] | undefined,
   indexPattern: IndexPattern,
-  currentTimeRange?: TimeRange
+  dateRange: DateRange | undefined
 ) {
   const errors = [];
   const missingParams = getMissingParams(nodeOperation, namedArguments);
@@ -683,11 +691,7 @@ function validateNameArguments(
       })
     );
   }
-  const queryValidationErrors = getQueryValidationErrors(
-    namedArguments,
-    indexPattern,
-    currentTimeRange
-  );
+  const queryValidationErrors = getQueryValidationErrors(namedArguments, indexPattern, dateRange);
   if (queryValidationErrors.length) {
     errors.push(...queryValidationErrors);
   }
@@ -730,8 +734,8 @@ function runFullASTValidation(
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
   operations: Record<string, GenericOperationDefinition>,
-  currentColumn?: GenericIndexPatternColumn,
-  currentTimeRange?: TimeRange
+  dateRange?: DateRange,
+  currentColumn?: GenericIndexPatternColumn
 ): ErrorWrapper[] {
   const missingVariables = findVariables(ast).filter(
     // filter empty string as well?
@@ -830,7 +834,7 @@ function runFullASTValidation(
             nodeOperation,
             namedArguments,
             indexPattern,
-            currentTimeRange
+            dateRange
           );
 
           const filtersErrors = validateFiltersArguments(
@@ -908,7 +912,7 @@ function runFullASTValidation(
             nodeOperation,
             namedArguments,
             indexPattern,
-            currentTimeRange
+            dateRange
           );
           const filtersErrors = validateFiltersArguments(
             node,

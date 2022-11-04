@@ -309,6 +309,7 @@ interface BaseOperationDefinitionProps<
     layer: FormBasedLayer,
     columnId: string,
     indexPattern: IndexPattern,
+    dateRange?: DateRange,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) =>
     | Array<

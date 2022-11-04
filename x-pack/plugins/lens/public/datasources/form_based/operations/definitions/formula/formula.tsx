@@ -62,7 +62,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     getDisabledStatus(indexPattern: IndexPattern) {
       return undefined;
     },
-    getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap) {
+    getErrorMessage(layer, columnId, indexPattern, dateRange, operationDefinitionMap) {
       const column = layer.columns[columnId] as FormulaIndexPatternColumn;
       if (!column.params.formula || !operationDefinitionMap) {
         return;
@@ -74,7 +74,14 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         return error?.message ? [error.message] : [];
       }
 
-      const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap, column);
+      const errors = runASTValidation(
+        root,
+        layer,
+        indexPattern,
+        visibleOperationsMap,
+        column,
+        dateRange
+      );
 
       if (errors.length) {
         // remove duplicates
@@ -86,7 +93,13 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         .flatMap(([id, col]) => {
           const def = visibleOperationsMap[col.operationType];
           if (def?.getErrorMessage) {
-            const messages = def.getErrorMessage(layer, id, indexPattern, visibleOperationsMap);
+            const messages = def.getErrorMessage(
+              layer,
+              id,
+              indexPattern,
+              dateRange,
+              visibleOperationsMap
+            );
             return messages ? { message: messages.join(', ') } : [];
           }
           return [];

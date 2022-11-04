@@ -526,7 +526,8 @@ function getPreviewExpression(
     const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
       datasources,
       datasourceStates,
-      frame.dataViews.indexPatterns
+      frame.dataViews.indexPatterns,
+      frame.dateRange
     );
 
     return visualization.toPreviewExpression(

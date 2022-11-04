@@ -297,6 +297,7 @@ export class LensPlugin {
             dataViews: plugins.dataViews,
             storage: new Storage(localStorage),
             uiSettings: core.uiSettings,
+            timefilter: plugins.data.query.timefilter.timefilter,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
