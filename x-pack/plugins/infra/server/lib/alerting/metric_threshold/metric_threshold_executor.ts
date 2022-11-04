@@ -35,11 +35,13 @@ import {
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
+import { MissingGroupsRecord } from './lib/check_missing_group';
+import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
   lastRunTimestamp?: number;
-  missingGroups?: string[];
+  missingGroups?: Array<string | MissingGroupsRecord>;
   groupBy?: string | string[];
   filterQuery?: string;
 };
@@ -147,7 +149,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const filterQueryIsSame = isEqual(state.filterQuery, params.filterQuery);
     const groupByIsSame = isEqual(state.groupBy, params.groupBy);
     const previousMissingGroups =
-      alertOnGroupDisappear && filterQueryIsSame && groupByIsSame ? state.missingGroups : [];
+      alertOnGroupDisappear && filterQueryIsSame && groupByIsSame && state.missingGroups
+        ? state.missingGroups
+        : [];
 
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
@@ -158,7 +162,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       logger,
       state.lastRunTimestamp,
       { end: startedAt.valueOf() },
-      previousMissingGroups
+      convertStringsToMissingGroupsRecord(previousMissingGroups)
     );
 
     const resultGroupSet = new Set<string>();
@@ -169,7 +173,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     }
 
     const groups = [...resultGroupSet];
-    const nextMissingGroups = new Set<string>();
+    const nextMissingGroups = new Set<MissingGroupsRecord>();
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
     let scheduledActionsCount = 0;
 
@@ -183,7 +187,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       const isNoData = alertResults.some((result) => result[group]?.isNoData);
 
       if (isNoData && group !== UNGROUPED_FACTORY_KEY) {
-        nextMissingGroups.add(group);
+        nextMissingGroups.add({ key: group, bucketKey: alertResults[0][group].bucketKey });
       }
 
       const nextState = isNoData

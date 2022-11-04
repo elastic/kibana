@@ -28,6 +28,7 @@ describe('MonitorStatusBar component', () => {
         id: 'id1',
         status: 'up',
         type: 'http',
+        check_group: 'test-group',
       },
       url: {
         full: 'https://www.example.com/',
