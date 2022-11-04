@@ -14,7 +14,7 @@ import { BUILT_IN_MODEL_TAG } from '../../../../common/constants/data_frame_anal
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { getUserInputThreadingParamsProvider } from './start_deployment_setup';
+import { getUserInputThreadingParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { getAnalysisType } from '../../../../common/util/analytics_utils';
 import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
@@ -182,6 +182,58 @@ export function useModelActions({
               e,
               i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
                 defaultMessage: 'Failed to start "{modelId}"',
+                values: {
+                  modelId: item.model_id,
+                },
+              })
+            );
+            onLoading(false);
+          }
+        },
+      },
+      {
+        name: i18n.translate('xpack.ml.inference.modelsList.updateModelDeploymentActionLabel', {
+          defaultMessage: 'Update deployment',
+        }),
+        description: i18n.translate(
+          'xpack.ml.inference.modelsList.updateModelDeploymentActionLabel',
+          {
+            defaultMessage: 'Update deployment',
+          }
+        ),
+        'data-test-subj': 'mlModelsTableRowUpdateDeploymentAction',
+        icon: 'documentEdit',
+        type: 'icon',
+        isPrimary: false,
+        available: (item) =>
+          item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
+          canStartStopTrainedModels &&
+          !isLoading &&
+          item.stats?.deployment_stats?.state === DEPLOYMENT_STATE.STARTED,
+        onClick: async (item) => {
+          const threadingParams = await getUserInputThreadingParams(item.model_id, {
+            numOfAllocations: item.stats?.deployment_stats?.number_of_allocations,
+          });
+
+          if (!threadingParams) return;
+
+          try {
+            onLoading(true);
+            await trainedModelsApiService.updateModelDeployment(item.model_id);
+            displaySuccessToast(
+              i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
+                defaultMessage: 'Deployment for "{modelId}" has been updated successfully.',
+                values: {
+                  modelId: item.model_id,
+                },
+              })
+            );
+            await fetchModels();
+          } catch (e) {
+            displayErrorToast(
+              e,
+              i18n.translate('xpack.ml.trainedModels.modelsList.updateFailed', {
+                defaultMessage: 'Failed to update "{modelId}"',
                 values: {
                   modelId: item.model_id,
                 },

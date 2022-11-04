@@ -145,6 +145,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
+    updateModelDeployment(modelId: string, params: { number_of_allocations: number }) {
+      return httpService.http<{ acknowledge: boolean }>({
+        path: `${apiBasePath}/trained_models/${modelId}/deployment/_update`,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+    },
+
     inferTrainedModel(modelId: string, payload: any, timeout?: string) {
       const body = JSON.stringify(payload);
       return httpService.http<estypes.MlInferTrainedModelResponse>({

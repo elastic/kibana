@@ -35,14 +35,14 @@ import { css } from '@emotion/react';
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { composeValidators, requiredValidator } from '../../../../common/util/validators';
 
-interface StartDeploymentSetup {
+interface DeploymentSetupProps {
   config: ThreadingParams;
   onConfigChange: (config: ThreadingParams) => void;
 }
 
 export interface ThreadingParams {
   numOfAllocations: number;
-  threadsPerAllocations: number;
+  threadsPerAllocations?: number;
 }
 
 const THREADS_MAX_EXPONENT = 4;
@@ -50,7 +50,7 @@ const THREADS_MAX_EXPONENT = 4;
 /**
  * Form for setting threading params.
  */
-export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfigChange }) => {
+export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChange }) => {
   const numOfAllocation = config.numOfAllocations;
   const threadsPerAllocations = config.threadsPerAllocations;
 
@@ -68,10 +68,6 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
       }),
     []
   );
-
-  const toggleIdSelected = threadsPerAllocationsOptions.find(
-    (v) => v.value === threadsPerAllocations
-  )!.id;
 
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
@@ -115,51 +111,55 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
-      <EuiDescribedFormGroup
-        titleSize={'xxs'}
-        title={
-          <h3>
+      {threadsPerAllocations !== undefined ? (
+        <EuiDescribedFormGroup
+          titleSize={'xxs'}
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
+                defaultMessage="Threads per allocation"
+              />
+            </h3>
+          }
+          description={
             <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
-              defaultMessage="Threads per allocation"
-            />
-          </h3>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationHelp"
-            defaultMessage="Increase to improve latency for each request."
-          />
-        }
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
-              defaultMessage="Threads per allocation"
+              id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationHelp"
+              defaultMessage="Increase to improve latency for each request."
             />
           }
-          hasChildLabel={false}
         >
-          <EuiButtonGroup
-            legend={i18n.translate(
-              'xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLegend',
-              {
-                defaultMessage: 'Threads per allocation selector',
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
+                defaultMessage="Threads per allocation"
+              />
+            }
+            hasChildLabel={false}
+          >
+            <EuiButtonGroup
+              legend={i18n.translate(
+                'xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLegend',
+                {
+                  defaultMessage: 'Threads per allocation selector',
+                }
+              )}
+              name={'threadsPerAllocation'}
+              isFullWidth
+              idSelected={
+                threadsPerAllocationsOptions.find((v) => v.value === threadsPerAllocations)!.id
               }
-            )}
-            name={'threadsPerAllocation'}
-            isFullWidth
-            idSelected={toggleIdSelected}
-            onChange={(optionId) => {
-              const value = threadsPerAllocationsOptions.find((v) => v.id === optionId)!.value;
-              onConfigChange({ ...config, threadsPerAllocations: value });
-            }}
-            options={threadsPerAllocationsOptions}
-            data-test-subj={'mlModelsStartDeploymentModalThreadsPerAllocation'}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+              onChange={(optionId) => {
+                const value = threadsPerAllocationsOptions.find((v) => v.id === optionId)!.value;
+                onConfigChange({ ...config, threadsPerAllocations: value });
+              }}
+              options={threadsPerAllocationsOptions}
+              data-test-subj={'mlModelsStartDeploymentModalThreadsPerAllocation'}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+      ) : null}
     </EuiForm>
   );
 };
@@ -169,24 +169,27 @@ interface StartDeploymentModalProps {
   startModelDeploymentDocUrl: string;
   onConfigChange: (config: ThreadingParams) => void;
   onClose: () => void;
+  initialParams?: ThreadingParams;
 }
 
 /**
- * Modal window wrapper for {@link StartDeploymentSetup}
- *
- * @param onConfigChange
- * @param onClose
+ * Modal window wrapper for {@link DeploymentSetup}
  */
-export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
+export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   modelId,
   onConfigChange,
   onClose,
   startModelDeploymentDocUrl,
+  initialParams,
 }) => {
-  const [config, setConfig] = useState<ThreadingParams>({
-    numOfAllocations: 1,
-    threadsPerAllocations: 1,
-  });
+  const [config, setConfig] = useState<ThreadingParams>(
+    initialParams ?? {
+      numOfAllocations: 1,
+      threadsPerAllocations: 1,
+    }
+  );
+
+  const isUpdate = initialParams !== undefined;
 
   const numOfAllocationsValidator = composeValidators(
     requiredValidator(),
@@ -208,11 +211,19 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
             <EuiFlexItem grow={false}>
               <EuiTitle size={'s'}>
                 <h2>
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
-                    defaultMessage="Start {modelId} deployment"
-                    values={{ modelId }}
-                  />
+                  {isUpdate ? (
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle"
+                      defaultMessage="Update {modelId} deployment"
+                      values={{ modelId }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
+                      defaultMessage="Start {modelId} deployment"
+                      values={{ modelId }}
+                    />
+                  )}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
@@ -236,7 +247,7 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
         />
         <EuiSpacer size={'m'} />
 
-        <StartDeploymentSetup config={config} onConfigChange={setConfig} />
+        <DeploymentSetup config={config} onConfigChange={setConfig} />
 
         <EuiSpacer size={'m'} />
       </EuiModalBody>
@@ -272,10 +283,17 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
           disabled={!!errors}
           data-test-subj={'mlModelsStartDeploymentModalStartButton'}
         >
-          <FormattedMessage
-            id="xpack.ml.trainedModels.modelsList.startDeployment.startButton"
-            defaultMessage="Start"
-          />
+          {isUpdate ? (
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.updateButton"
+              defaultMessage="Update"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.startButton"
+              defaultMessage="Start"
+            />
+          )}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
@@ -291,14 +309,15 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
  */
 export const getUserInputThreadingParamsProvider =
   (overlays: OverlayStart, theme$: Observable<CoreTheme>, startModelDeploymentDocUrl: string) =>
-  (modelId: string): Promise<ThreadingParams | void> => {
-    return new Promise(async (resolve, reject) => {
+  (modelId: string, initialParams: ThreadingParams): Promise<ThreadingParams | void> => {
+    return new Promise(async (resolve) => {
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
             wrapWithTheme(
-              <StartDeploymentModal
+              <StartUpdateDeploymentModal
                 startModelDeploymentDocUrl={startModelDeploymentDocUrl}
+                initialParams={initialParams}
                 modelId={modelId}
                 onConfigChange={(config) => {
                   modalSession.close();
