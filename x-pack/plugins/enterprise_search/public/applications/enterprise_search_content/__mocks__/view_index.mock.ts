@@ -127,26 +127,8 @@ export const connectorIndex: ConnectorViewIndex = {
     store: { size_in_bytes: '8024' },
   },
 };
+
 export const crawlerIndex: CrawlerViewIndex = {
-  count: 1,
-  crawler: {
-    id: '3',
-    index_name: 'crawler',
-  },
-  hidden: false,
-  ingestionMethod: IngestionMethod.CRAWLER,
-  ingestionStatus: IngestionStatus.INCOMPLETE,
-  lastUpdated: null,
-  name: 'crawler',
-  total: {
-    docs: {
-      count: 1,
-      deleted: 0,
-    },
-    store: { size_in_bytes: '8024' },
-  },
-};
-export const connectorCrawlerIndex: CrawlerViewIndex = {
   connector: {
     api_key_id: null,
     configuration: { foo: { label: 'bar', value: 'barbar' } },
@@ -239,9 +221,4 @@ export const connectorCrawlerIndex: CrawlerViewIndex = {
   },
 };
 
-export const elasticsearchViewIndices = [
-  apiIndex,
-  connectorIndex,
-  crawlerIndex,
-  connectorCrawlerIndex,
-];
+export const elasticsearchViewIndices = [apiIndex, connectorIndex, crawlerIndex];
