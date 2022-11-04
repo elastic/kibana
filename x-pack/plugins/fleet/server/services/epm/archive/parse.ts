@@ -56,13 +56,13 @@ const expandDottedField = (dottedFieldName: string, val: unknown): object => {
   }
 };
 
-export const expandDottedObject = (dottedObj: object) => {
+export const expandDottedObject = (dottedObj: object = {}) => {
   if (typeof dottedObj !== 'object' || Array.isArray(dottedObj)) {
     return dottedObj;
   }
   return Object.entries(dottedObj).reduce(
     (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
-    {}
+    {} as Record<string, any>
   );
 };
 
@@ -511,4 +511,52 @@ export function parseAndVerifyInputs(manifestInputs: any, location: string): Reg
     });
   }
   return inputs;
+
+export function parseDataStreamElasticsearchEntry(
+  elasticsearch?: Record<string, any>,
+  ingestPipeline?: string
+) {
+  const parsedElasticsearchEntry: Record<string, any> = {};
+  const expandedElasticsearch = expandDottedObject(elasticsearch);
+  if (ingestPipeline) {
+    parsedElasticsearchEntry['ingest_pipeline.name'] = ingestPipeline;
+  }
+
+  if (expandedElasticsearch?.privileges) {
+    parsedElasticsearchEntry.privileges = expandedElasticsearch.privileges;
+  }
+
+  if (expandedElasticsearch?.source_mode) {
+    parsedElasticsearchEntry.source_mode = expandedElasticsearch.source_mode;
+  }
+
+  if (expandedElasticsearch?.index_template?.mappings) {
+    parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
+      expandedElasticsearch.index_template.mappings
+    );
+  }
+
+  if (expandedElasticsearch?.index_template?.settings) {
+    parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
+      expandedElasticsearch.index_template.settings
+    );
+  }
+
+  return parsedElasticsearchEntry;
+}
+
+const isDefaultPipelineFile = (pipelinePath: string) =>
+  pipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_YML) ||
+  pipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON);
+
+export function parseDefaultIngestPipeline(fullDataStreamPath: string, paths: string[]) {
+  const ingestPipelineDirPath = path.join(fullDataStreamPath, '/elasticsearch/ingest_pipeline');
+  const defaultIngestPipelinePaths = paths.filter(
+    (pipelinePath) =>
+      pipelinePath.startsWith(ingestPipelineDirPath) && isDefaultPipelineFile(pipelinePath)
+  );
+
+  if (!defaultIngestPipelinePaths.length) return undefined;
+
+  return DEFAULT_INGEST_PIPELINE_VALUE;
 }
