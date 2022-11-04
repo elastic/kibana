@@ -102,6 +102,7 @@ export const mockState: SyntheticsAppState = {
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
   browserJourney: getBrowserJourneyMockSlice(),
+  networkEvents: {},
 };
 
 function getBrowserJourneyMockSlice() {
@@ -359,6 +360,7 @@ function getMonitorDetailsMockSlice() {
     },
     syntheticsMonitor: {
       id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
+      config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
       type: DataStream.BROWSER,
       enabled: true,
       schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
