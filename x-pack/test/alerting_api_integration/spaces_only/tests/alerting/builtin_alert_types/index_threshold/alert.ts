@@ -672,7 +672,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             groupBy: params.groupBy,
             termField: params.termField,
             termSize: params.termSize,
-            timeWindowSize: params.timeWindowSize ?? RULE_INTERVAL_SECONDS * 5,
+            timeWindowSize: params.timeWindowSize ?? RULE_INTERVAL_SECONDS * 10,
             timeWindowUnit: 's',
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
