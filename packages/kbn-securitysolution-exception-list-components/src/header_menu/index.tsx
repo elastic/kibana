@@ -24,6 +24,7 @@ export interface Action {
   key: string;
   icon: string;
   label: string | boolean;
+  disabled?: boolean;
   onClick: () => void;
 }
 interface HeaderMenuComponentProps {
@@ -63,6 +64,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
         data-test-subj={`${dataTestSubj || ''}ActionItem${action.key}`}
         key={action.key}
         icon={action.icon}
+        disabled={action.disabled}
         layoutAlign="center"
         onClick={() => {
           onClosePopover();
