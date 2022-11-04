@@ -310,17 +310,9 @@ export interface BulkCommonOptionsIds {
 
 export type BulkCommonOptions = BulkCommonOptionsFilter | BulkCommonOptionsIds;
 
-export interface BulkEditError {
-  message: string;
-  rule: {
-    id: string;
-    name: string;
-  };
-}
-
 export interface BulkOperationError {
   message: string;
-  status: number;
+  status?: number;
   rule: {
     id: string;
     name: string;
@@ -2044,7 +2036,7 @@ export class RulesClient {
     options: BulkEditOptions<Params>
   ): Promise<{
     rules: Array<SanitizedRule<Params>>;
-    errors: BulkEditError[];
+    errors: BulkOperationError[];
     total: number;
   }> {
     const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
@@ -2211,7 +2203,7 @@ export class RulesClient {
     apiKeysToInvalidate: string[];
     rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
     resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
-    errors: BulkEditError[];
+    errors: BulkOperationError[];
   }> {
     const rulesFinder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
@@ -2224,7 +2216,7 @@ export class RulesClient {
       );
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-    const errors: BulkEditError[] = [];
+    const errors: BulkOperationError[] = [];
     const apiKeysToInvalidate: string[] = [];
     const apiKeysMap = new Map<string, { oldApiKey?: string; newApiKey?: string }>();
     const username = await this.getUserName();
@@ -2539,70 +2531,86 @@ export class RulesClient {
 
     for await (const response of rulesFinder.find()) {
       await pMap(response.saved_objects, async (rule) => {
-        if (rule.attributes.actions.length) {
-          try {
-            await this.actionsAuthorization.ensureAuthorized('execute');
-          } catch (error) {
-            throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+        try {
+          if (rule.attributes.actions.length) {
+            try {
+              await this.actionsAuthorization.ensureAuthorized('execute');
+            } catch (error) {
+              throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+            }
           }
-        }
-        if (rule.attributes.enabled === true) return; // add some logging
-        if (rule.attributes.name) {
-          ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-        }
-        if (rule.attributes.scheduledTaskId) {
-          taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
-        }
+          if (rule.attributes.enabled === true) return;
+          if (rule.attributes.name) {
+            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+          }
+          if (rule.attributes.scheduledTaskId) {
+            taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
+          }
 
-        const username = await this.getUserName();
+          const username = await this.getUserName();
 
-        const updatedAttributes = this.updateMeta({
-          ...rule.attributes,
-          ...(!rule.attributes.apiKey &&
-            (await this.createNewAPIKeySet({ attributes: rule.attributes, username }))),
-          enabled: true,
-          updatedBy: username,
-          updatedAt: new Date().toISOString(),
-          executionStatus: {
-            status: 'pending',
-            lastDuration: 0,
-            lastExecutionDate: new Date().toISOString(),
-            error: null,
-            warning: null,
-          },
-        });
-
-        const shouldScheduleTask = await this.getShouldScheduleTask(
-          rule.attributes.scheduledTaskId
-        );
-
-        let scheduledTaskId;
-        if (shouldScheduleTask) {
-          const scheduledTask = await this.scheduleTask({
-            id: rule.id,
-            consumer: rule.attributes.consumer,
-            ruleTypeId: rule.attributes.alertTypeId,
-            schedule: rule.attributes.schedule as IntervalSchedule,
-            throwOnConflict: false,
+          const updatedAttributes = this.updateMeta({
+            ...rule.attributes,
+            ...(!rule.attributes.apiKey &&
+              (await this.createNewAPIKeySet({ attributes: rule.attributes, username }))),
+            enabled: true,
+            updatedBy: username,
+            updatedAt: new Date().toISOString(),
+            executionStatus: {
+              status: 'pending',
+              lastDuration: 0,
+              lastExecutionDate: new Date().toISOString(),
+              error: null,
+              warning: null,
+            },
           });
-          scheduledTaskId = scheduledTask.id;
+
+          const shouldScheduleTask = await this.getShouldScheduleTask(
+            rule.attributes.scheduledTaskId
+          );
+
+          let scheduledTaskId;
+          if (shouldScheduleTask) {
+            const scheduledTask = await this.scheduleTask({
+              id: rule.id,
+              consumer: rule.attributes.consumer,
+              ruleTypeId: rule.attributes.alertTypeId,
+              schedule: rule.attributes.schedule as IntervalSchedule,
+              throwOnConflict: false,
+            });
+            scheduledTaskId = scheduledTask.id;
+          }
+
+          rulesToEnable.push({
+            ...rule,
+            attributes: {
+              ...updatedAttributes,
+              ...(scheduledTaskId ? { scheduledTaskId } : undefined),
+            },
+          });
+
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.ENABLE,
+              outcome: 'unknown',
+              savedObject: { type: 'alert', id: rule.id },
+            })
+          );
+        } catch (error) {
+          errors.push({
+            message: error.message,
+            rule: {
+              id: rule.id,
+              name: rule.attributes?.name,
+            },
+          });
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.ENABLE,
+              error,
+            })
+          );
         }
-
-        rulesToEnable.push({
-          ...rule,
-          attributes: {
-            ...updatedAttributes,
-            ...(scheduledTaskId ? { scheduledTaskId } : undefined),
-          },
-        });
-
-        this.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.ENABLE,
-            outcome: 'unknown',
-            savedObject: { type: 'alert', id: rule.id },
-          })
-        );
       });
     }
 
