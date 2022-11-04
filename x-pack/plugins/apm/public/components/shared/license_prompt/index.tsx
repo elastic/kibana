@@ -40,11 +40,6 @@ export function LicensePrompt({
                     'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
                 }
               ),
-              /* tooltipContent:i18n.translate('xpack.apm.license.betaTooltipMessage', {
-            defaultMessage:
-            'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
-            }
-          ) */
             }
           : undefined
       }
