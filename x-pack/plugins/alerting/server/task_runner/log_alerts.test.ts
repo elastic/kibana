@@ -151,7 +151,7 @@ describe('logAlerts', () => {
     expect(ruleRunMetricsStore.getNumberOfActiveAlerts()).toEqual(3);
     expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toEqual(4);
 
-    expect(alertingEventLogger.logAlert).toHaveBeenCalledTimes(8);
+    expect(alertingEventLogger.logAlert).toHaveBeenCalledTimes(4);
 
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {
       action: 'recovered-instance',
