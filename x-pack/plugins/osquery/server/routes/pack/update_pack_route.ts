@@ -20,7 +20,11 @@ import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
-import { convertSOQueriesToPack, convertPackQueriesToSO } from './utils';
+import {
+  convertSOQueriesToPack,
+  convertPackQueriesToSO,
+  convertSOQueriesToPackConfig,
+} from './utils';
 import { getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
 
@@ -283,10 +287,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
-                        removeMultiLines: true,
-                        removeResultType: true,
-                      }),
+                      queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                     }
                   );
 
@@ -316,9 +317,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
-                        removeResultType: true,
-                      }),
+                      queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                     }
                   );
 
