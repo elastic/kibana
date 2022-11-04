@@ -9,7 +9,7 @@
 import { $Values } from '@kbn/utility-types';
 import { Position } from '@elastic/charts';
 
-import { Labels } from '@kbn/charts-plugin/public';
+import { Labels } from '@kbn/charts-helpers';
 import {
   CategoryAxis,
   Dimensions,

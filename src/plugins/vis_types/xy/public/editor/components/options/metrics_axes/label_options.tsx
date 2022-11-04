@@ -11,9 +11,9 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Labels } from '@kbn/charts-helpers';
 
 import { SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
-import { Labels } from '@kbn/charts-plugin/public';
 
 import { TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../collections';

@@ -6,16 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { $Values } from '@kbn/utility-types';
+import { LabelRotation } from './labels';
 
-export const LabelRotation = Object.freeze({
-  Horizontal: 0,
-  Vertical: 90,
-  Angled: 75,
-});
-export type LabelRotation = $Values<typeof LabelRotation>;
+export interface Labels {
+  color?: string;
+  filter?: boolean;
+  overwriteColor?: boolean;
+  rotate?: LabelRotation;
+  show?: boolean;
+  truncate?: number | null;
+}
 
-export const defaultCountLabel = i18n.translate('charts.countText', {
-  defaultMessage: 'Count',
-});
+export interface Style {
+  bgFill: string;
+  bgColor: boolean;
+  labelColor: boolean;
+  subText: string;
+  fontSize: number;
+}

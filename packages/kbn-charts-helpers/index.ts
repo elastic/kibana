@@ -7,3 +7,4 @@
  */
 
 export * from './src/colors';
+export * from './src/labels';

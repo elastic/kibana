@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position, Fit } from '@elastic/charts';
+import { defaultCountLabel, LabelRotation } from '@kbn/charts-helpers';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import { defaultCountLabel, LabelRotation } from '@kbn/charts-plugin/public';
-
 import {
   ChartMode,
   AxisType,

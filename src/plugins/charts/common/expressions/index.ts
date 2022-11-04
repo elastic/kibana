@@ -6,21 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { LabelRotation } from './static';
-
-export interface Labels {
-  color?: string;
-  filter?: boolean;
-  overwriteColor?: boolean;
-  rotate?: LabelRotation;
-  show?: boolean;
-  truncate?: number | null;
-}
-
-export interface Style {
-  bgFill: string;
-  bgColor: boolean;
-  labelColor: boolean;
-  subText: string;
-  fontSize: number;
-}
+export * from './palette';

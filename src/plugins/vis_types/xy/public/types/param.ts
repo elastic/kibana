@@ -8,7 +8,7 @@
 
 import type { Fit, Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { Style, Labels } from '@kbn/charts-plugin/public';
+import type { Style, Labels } from '@kbn/charts-helpers';
 import type {
   SchemaConfig,
   FakeParams,

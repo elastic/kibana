@@ -30,11 +30,4 @@ export interface BrushTriggerEvent {
   data: RangeSelectContext['data'];
 }
 
-export type {
-  CustomPaletteArguments,
-  CustomPaletteState,
-  SystemPaletteArguments,
-  Labels,
-  Style,
-} from '../common';
-export { LabelRotation, defaultCountLabel } from '../common';
+export type { CustomPaletteArguments, CustomPaletteState, SystemPaletteArguments } from '../common';

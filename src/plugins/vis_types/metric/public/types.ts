@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ColorSchemas, ColorMode } from '@kbn/charts-helpers';
+import type { ColorSchemas, ColorMode, Labels, Style } from '@kbn/charts-helpers';
 import { Range } from '@kbn/expressions-plugin/public';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
-import { Labels, Style } from '@kbn/charts-plugin/public';
 
 export const visType = 'metric';
 

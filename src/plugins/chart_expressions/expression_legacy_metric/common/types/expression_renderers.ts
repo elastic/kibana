@@ -7,9 +7,9 @@
  */
 
 import { $Values } from '@kbn/utility-types';
-import type { ColorMode } from '@kbn/charts-helpers';
+import type { ColorMode, Labels, Style as ChartStyle } from '@kbn/charts-helpers';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { Labels, CustomPaletteState, Style as ChartStyle } from '@kbn/charts-plugin/common';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { Style } from '@kbn/expressions-plugin/common';
 import { LabelPosition } from '../constants';
 

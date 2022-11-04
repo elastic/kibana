@@ -13,9 +13,7 @@ export type {
   CustomPaletteArguments,
   CustomPaletteState,
   SystemPaletteArguments,
-} from './expressions/palette';
-export { palette, systemPalette } from './expressions/palette';
+} from './expressions';
+export { palette, systemPalette } from './expressions';
 
-export { LabelRotation, defaultCountLabel, MULTILAYER_TIME_AXIS_STYLE } from './static';
-
-export type { Labels, Style } from './types';
+export { MULTILAYER_TIME_AXIS_STYLE } from './styles';
