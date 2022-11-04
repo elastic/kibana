@@ -8,6 +8,10 @@
 import React, { FC } from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
+import {
+  type CloudCommonSetupContract,
+  getCommonSetupContract,
+} from '../common/get_common_setup_contract';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
@@ -51,11 +55,7 @@ export interface CloudStart {
   organizationUrl?: string;
 }
 
-export interface CloudSetup {
-  /**
-   * Cloud ID. Undefined if not running on Cloud.
-   */
-  cloudId?: string;
+export interface CloudSetup extends CloudCommonSetupContract {
   /**
    * This value is the same as `baseUrl` on ESS but can be customized on ECE.
    */
@@ -85,14 +85,6 @@ export interface CloudSetup {
    */
   isCloudEnabled: boolean;
   /**
-   * When the Cloud Trial ends/ended for the organization that owns this deployment. Only available when running on Elastic Cloud.
-   */
-  trialEndDate?: Date;
-  /**
-   * `true` if the Elastic Cloud organization that owns this deployment is owned by an Elastician. Only available when running on Elastic Cloud.
-   */
-  isElasticStaffOwned?: boolean;
-  /**
    * Registers CloudServiceProviders so start's `CloudContextProvider` hooks them.
    * @param contextProvider The React component from the Service Provider.
    */
@@ -117,23 +109,15 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public setup(core: CoreSetup): CloudSetup {
-    registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
+    const commonSetupContract = getCommonSetupContract(this.config);
 
-    const {
-      id,
-      cname,
-      base_url: baseUrl,
-      trial_end_date: trialEndDate,
-      is_elastic_staff_owned: isElasticStaffOwned,
-    } = this.config;
+    registerCloudDeploymentMetadataAnalyticsContext(core.analytics, commonSetupContract);
 
     return {
-      cloudId: id,
-      cname,
-      baseUrl,
+      ...commonSetupContract,
+      cname: this.config.cname,
+      baseUrl: this.config.base_url,
       ...this.getCloudUrls(),
-      trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
-      isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);

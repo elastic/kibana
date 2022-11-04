@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { registerCloudDeploymentMetadataAnalyticsContext } from './register_cloud_deployment_id_analytics_context';
 
 describe('registerCloudDeploymentIdAnalyticsContext', () => {
@@ -21,12 +21,30 @@ describe('registerCloudDeploymentIdAnalyticsContext', () => {
     expect(analytics.registerContextProvider).not.toHaveBeenCalled();
   });
 
-  test('it registers the context provider and emits the cloudId', async () => {
-    registerCloudDeploymentMetadataAnalyticsContext(analytics, { id: 'cloud_id' });
+  test('it registers the static metadata context provider and emits the cloudId', async () => {
+    registerCloudDeploymentMetadataAnalyticsContext(analytics, { cloudId: 'cloud_id' });
     expect(analytics.registerContextProvider).toHaveBeenCalledTimes(1);
     const [{ context$ }] = analytics.registerContextProvider.mock.calls[0];
-    await expect(firstValueFrom(context$)).resolves.toEqual({
+    await expect(firstValueFrom(context$)).resolves.toEqual({ cloudId: 'cloud_id' });
+  });
+
+  test('it registers the inTrial context provider', async () => {
+    registerCloudDeploymentMetadataAnalyticsContext(analytics, {
       cloudId: 'cloud_id',
+      inTrial$: of(true),
     });
+    expect(analytics.registerContextProvider).toHaveBeenCalledTimes(2);
+    const [{ context$ }] = analytics.registerContextProvider.mock.calls[1];
+    await expect(firstValueFrom(context$)).resolves.toEqual({ cloudInTrial: true });
+  });
+
+  test('it registers the isPaying context provider', async () => {
+    registerCloudDeploymentMetadataAnalyticsContext(analytics, {
+      cloudId: 'cloud_id',
+      isPaying$: of(true),
+    });
+    expect(analytics.registerContextProvider).toHaveBeenCalledTimes(2);
+    const [{ context$ }] = analytics.registerContextProvider.mock.calls[1];
+    await expect(firstValueFrom(context$)).resolves.toEqual({ cloudIsPaying: true });
   });
 });

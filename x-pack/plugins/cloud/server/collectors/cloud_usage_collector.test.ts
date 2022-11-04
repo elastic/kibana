@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import {
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
+  UsageCollectionSetup,
+  CollectorFetchContext,
+} from '@kbn/usage-collection-plugin/server';
 import { createCloudUsageCollector } from './cloud_usage_collector';
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 
 describe('createCloudUsageCollector', () => {
   let usageCollection: UsageCollectionSetup;
@@ -38,17 +41,21 @@ describe('createCloudUsageCollector', () => {
       });
     });
 
-    it('return inTrial boolean if trialEndDateIsProvided', async () => {
+    it('return inTrial and isPaying based on the provided observables', async () => {
       const collector = createCloudUsageCollector(usageCollection, {
         isCloudEnabled: true,
-        trialEndDate: '2020-10-01T14:30:16Z',
+        isElasticStaffOwned: false,
+        trialEndDate: new Date('2020-10-01T14:30:16Z'),
+        inTrial$: of(false),
+        isPaying$: of(true),
       });
 
       expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
         isCloudEnabled: true,
-        isElasticStaffOwned: undefined,
-        trialEndDate: '2020-10-01T14:30:16Z',
+        isElasticStaffOwned: false,
+        trialEndDate: '2020-10-01T14:30:16.000Z',
         inTrial: false,
+        isPaying: true,
       });
     });
   });

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import { CloudStart } from '.';
 
@@ -20,6 +21,8 @@ function createSetupMock() {
     organizationUrl: 'organization-url',
     isElasticStaffOwned: true,
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
+    inTrial$: new BehaviorSubject<boolean>(true),
+    isPaying$: new BehaviorSubject<boolean>(false),
     registerCloudService: jest.fn(),
   };
 }

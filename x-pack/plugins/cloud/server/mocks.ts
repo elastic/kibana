@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { CloudSetup } from '.';
 
 function createSetupMock(): jest.Mocked<CloudSetup> {
@@ -15,6 +16,8 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     isCloudEnabled: true,
     isElasticStaffOwned: true,
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
+    inTrial$: new BehaviorSubject<boolean>(true),
+    isPaying$: new BehaviorSubject<boolean>(false),
     apm: {
       url: undefined,
       secretToken: undefined,

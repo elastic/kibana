@@ -13,6 +13,10 @@ import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from './utils';
 import { readInstanceSizeMb } from './env';
+import {
+  type CloudCommonSetupContract,
+  getCommonSetupContract,
+} from '../common/get_common_setup_contract';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -21,11 +25,7 @@ interface PluginsSetup {
 /**
  * Setup contract
  */
-export interface CloudSetup {
-  /**
-   * The deployment's Cloud ID. Only available when running on Elastic Cloud.
-   */
-  cloudId?: string;
+export interface CloudSetup extends CloudCommonSetupContract {
   /**
    * The deployment's ID. Only available when running on Elastic Cloud.
    */
@@ -38,14 +38,6 @@ export interface CloudSetup {
    * The size of the instance in which Kibana is running. Only available when running on Elastic Cloud.
    */
   instanceSizeMb?: number;
-  /**
-   * When the Cloud Trial ends/ended for the organization that owns this deployment. Only available when running on Elastic Cloud.
-   */
-  trialEndDate?: Date;
-  /**
-   * `true` if the Elastic Cloud organization that owns this deployment is owned by an Elastician. Only available when running on Elastic Cloud.
-   */
-  isElasticStaffOwned?: boolean;
   /**
    * APM configuration keys.
    */
@@ -64,20 +56,16 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
-    registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
-    registerCloudUsageCollector(usageCollection, {
-      isCloudEnabled,
-      trialEndDate: this.config.trial_end_date,
-      isElasticStaffOwned: this.config.is_elastic_staff_owned,
-    });
+    const commonSetupContract = getCommonSetupContract(this.config);
+
+    registerCloudDeploymentMetadataAnalyticsContext(core.analytics, commonSetupContract);
+    registerCloudUsageCollector(usageCollection, { isCloudEnabled, ...commonSetupContract });
 
     return {
-      cloudId: this.config.id,
+      ...commonSetupContract,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       isCloudEnabled,
-      trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
-      isElasticStaffOwned: this.config.is_elastic_staff_owned,
       apm: {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,

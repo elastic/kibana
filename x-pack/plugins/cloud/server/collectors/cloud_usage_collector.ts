@@ -5,39 +5,44 @@
  * 2.0.
  */
 
+import { firstValueFrom, type Observable } from 'rxjs';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 interface Config {
   isCloudEnabled: boolean;
-  trialEndDate?: string;
+  trialEndDate?: Date;
   isElasticStaffOwned?: boolean;
+  inTrial$?: Observable<boolean>;
+  isPaying$?: Observable<boolean>;
 }
 
 interface CloudUsage {
   isCloudEnabled: boolean;
+  isElasticStaffOwned?: boolean;
   trialEndDate?: string;
   inTrial?: boolean;
-  isElasticStaffOwned?: boolean;
+  isPaying?: boolean;
 }
 
 export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, config: Config) {
-  const { isCloudEnabled, trialEndDate, isElasticStaffOwned } = config;
-  const trialEndDateMs = trialEndDate ? new Date(trialEndDate).getTime() : undefined;
+  const { isCloudEnabled, trialEndDate, isElasticStaffOwned, inTrial$, isPaying$ } = config;
   return usageCollection.makeUsageCollector<CloudUsage>({
     type: 'cloud',
     isReady: () => true,
     schema: {
       isCloudEnabled: { type: 'boolean' },
+      isElasticStaffOwned: { type: 'boolean' },
       trialEndDate: { type: 'date' },
       inTrial: { type: 'boolean' },
-      isElasticStaffOwned: { type: 'boolean' },
+      isPaying: { type: 'boolean' },
     },
-    fetch: () => {
+    fetch: async () => {
       return {
         isCloudEnabled,
         isElasticStaffOwned,
-        trialEndDate,
-        ...(trialEndDateMs ? { inTrial: Date.now() <= trialEndDateMs } : {}),
+        trialEndDate: trialEndDate?.toISOString(),
+        ...(inTrial$ ? { inTrial: await firstValueFrom(inTrial$) } : {}),
+        ...(isPaying$ ? { isPaying: await firstValueFrom(isPaying$) } : {}),
       };
     },
   });

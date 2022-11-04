@@ -5,31 +5,39 @@
  * 2.0.
  */
 
+import { map, type Observable, of } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
-import { of } from 'rxjs';
 
 export interface CloudDeploymentMetadata {
-  id?: string;
-  trial_end_date?: string;
-  is_elastic_staff_owned?: boolean;
+  cloudId?: string;
+  trialEndDate?: Date;
+  isElasticStaffOwned?: boolean;
+  inTrial$?: Observable<boolean>;
+  isPaying$?: Observable<boolean>;
 }
 
 export function registerCloudDeploymentMetadataAnalyticsContext(
   analytics: Pick<AnalyticsClient, 'registerContextProvider'>,
   cloudMetadata: CloudDeploymentMetadata
 ) {
-  if (!cloudMetadata.id) {
+  if (!cloudMetadata.cloudId) {
     return;
   }
   const {
-    id: cloudId,
-    trial_end_date: cloudTrialEndDate,
-    is_elastic_staff_owned: cloudIsElasticStaffOwned,
+    cloudId,
+    trialEndDate,
+    isElasticStaffOwned: cloudIsElasticStaffOwned,
+    isPaying$,
+    inTrial$,
   } = cloudMetadata;
 
   analytics.registerContextProvider({
-    name: 'Cloud Deployment Metadata',
-    context$: of({ cloudId, cloudTrialEndDate, cloudIsElasticStaffOwned }),
+    name: 'Cloud Deployment Static Metadata',
+    context$: of({
+      cloudId,
+      cloudTrialEndDate: trialEndDate?.toISOString(),
+      cloudIsElasticStaffOwned,
+    }),
     schema: {
       cloudId: {
         type: 'keyword',
@@ -48,4 +56,34 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
       },
     },
   });
+
+  if (inTrial$) {
+    analytics.registerContextProvider({
+      name: 'Cloud Deployment Dynamic Metadata - inTrial',
+      context$: inTrial$.pipe(map((cloudInTrial) => ({ cloudInTrial }))),
+      schema: {
+        cloudInTrial: {
+          type: 'boolean',
+          _meta: {
+            description: 'Whether the Elastic Cloud organization is in trial',
+          },
+        },
+      },
+    });
+  }
+
+  if (isPaying$) {
+    analytics.registerContextProvider({
+      name: 'Cloud Deployment Dynamic Metadata - isPaying',
+      context$: isPaying$.pipe(map((cloudIsPaying) => ({ cloudIsPaying }))),
+      schema: {
+        cloudIsPaying: {
+          type: 'boolean',
+          _meta: {
+            description: 'Whether the Elastic Cloud organization is a paying customer',
+          },
+        },
+      },
+    });
+  }
 }

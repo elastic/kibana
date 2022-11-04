@@ -26,6 +26,7 @@ const configSchema = schema.object({
   id: schema.maybe(schema.string()),
   organization_url: schema.maybe(schema.string()),
   profile_url: schema.maybe(schema.string()),
+  organization_created_at: schema.maybe(schema.string()),
   trial_end_date: schema.maybe(schema.string()),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
 });
@@ -40,6 +41,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     id: true,
     organization_url: true,
     profile_url: true,
+    organization_created_at: true,
     trial_end_date: true,
     is_elastic_staff_owned: true,
   },
