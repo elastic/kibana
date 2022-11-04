@@ -54,13 +54,14 @@ Object {
                 id="modalForm_generated-id"
               >
                 <div
-                  class="euiFormRow euiFormRow--hasLabel"
+                  class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
                   id="generated-id-row"
                 >
                   <div
                     class="euiFormRow__labelWrapper"
                   >
                     <label
+                      aria-invalid="false"
                       class="euiFormLabel euiFormRow__label"
                       for="generated-id"
                       id="generated-id-label"
@@ -72,13 +73,14 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--fullWidth"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          aria-invalid="false"
+                          class="euiFieldText euiFieldText--fullWidth"
                           data-test-subj="editModalNameTextField"
                           id="generated-id"
                           name="name"
@@ -90,7 +92,7 @@ Object {
                   </div>
                 </div>
                 <div
-                  class="euiFormRow euiFormRow--hasLabel"
+                  class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
                   id="generated-id-row"
                 >
                   <div
@@ -107,22 +109,15 @@ Object {
                   <div
                     class="euiFormRow__fieldWrapper"
                   >
-                    <div
-                      class="euiFormControlLayout"
+                    <textarea
+                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
+                      data-test-subj="editModalDescriptionTextField"
+                      id="generated-id"
+                      name="description"
+                      rows="6"
                     >
-                      <div
-                        class="euiFormControlLayout__childrenWrapper"
-                      >
-                        <input
-                          class="euiFieldText"
-                          data-test-subj="editModalDescriptionTextField"
-                          id="generated-id"
-                          name="description"
-                          type="text"
-                          value="list description"
-                        />
-                      </div>
-                    </div>
+                      list description
+                    </textarea>
                   </div>
                 </div>
               </form>

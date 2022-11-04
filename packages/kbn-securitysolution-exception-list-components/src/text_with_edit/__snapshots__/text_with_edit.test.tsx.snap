@@ -6,7 +6,29 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrow10"
+        >
+          <span
+            data-test-subj="TextWithEditTestText"
+          >
+            Test
+          </span>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+        />
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+    >
+      <div
+        class="euiFlexItem euiFlexItem--flexGrow10"
       >
         <span
           data-test-subj="TextWithEditTestText"
@@ -14,17 +36,9 @@ Object {
           Test
         </span>
       </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-    >
-      <span
-        data-test-subj="TextWithEditTestText"
-      >
-        Test
-      </span>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+      />
     </div>
   </div>,
   "debug": [Function],
@@ -87,13 +101,53 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrow10"
+        >
+          <span
+            data-test-subj="TextWithEditTestText"
+          >
+            Test
+          </span>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+        >
+          <button
+            aria-label="Edit Text List Header"
+            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+            data-test-subj="TextWithEditTestEditIcon"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="pencil"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+    >
+      <div
+        class="euiFlexItem euiFlexItem--flexGrow10"
       >
         <span
           data-test-subj="TextWithEditTestText"
         >
           Test
         </span>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+      >
         <button
           aria-label="Edit Text List Header"
           class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
@@ -108,30 +162,6 @@ Object {
           />
         </button>
       </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-    >
-      <span
-        data-test-subj="TextWithEditTestText"
-      >
-        Test
-      </span>
-      <button
-        aria-label="Edit Text List Header"
-        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
-        data-test-subj="TextWithEditTestEditIcon"
-        type="button"
-      >
-        <span
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          color="inherit"
-          data-euiicon-type="pencil"
-        />
-      </button>
     </div>
   </div>,
   "debug": [Function],

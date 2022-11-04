@@ -102,7 +102,7 @@ export const addIndexToDefault = (index: string) => {
           cy.get('[data-test-subj="toastCloseButton]"').click();
         }
       });
-      new Promise((resolve) => setTimeout(resolve, 20000));
+
       cy.get('button[data-test-subj="advancedSetting-saveButton"]').click();
       cy.get('button[data-test-subj="windowReloadButton"]').click();
       waitForPage(HOSTS_URL);
