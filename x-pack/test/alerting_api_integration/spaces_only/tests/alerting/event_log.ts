@@ -641,7 +641,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.new).to.be(numNewAlerts);
   }
 
-  if (flapping) {
+  if (flapping !== undefined) {
     expect(event?.kibana?.alert?.flapping).to.be(flapping);
   }
 

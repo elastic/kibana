@@ -93,6 +93,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
         start?: string;
         durationToDate?: string;
       } = {};
+
       for (let i = 0; i < instanceEvents.length; ++i) {
         switch (instanceEvents[i]?.event?.action) {
           case 'new-instance':
