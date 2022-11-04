@@ -320,7 +320,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldWarn: false,
                 isNoData: false,
                 bucketKey: {
-                  groupBy0: 'pod-01'
+                  groupBy0: 'pod-01',
                 },
                 context: {
                   cloud: undefined,
@@ -344,7 +344,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldWarn: false,
                 isNoData: false,
                 bucketKey: {
-                  groupBy0: 'pod-02'
+                  groupBy0: 'pod-02',
                 },
                 context: {
                   cloud: undefined,
@@ -403,7 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldWarn: false,
                 isNoData: false,
                 bucketKey: {
-                  groupBy0: 'container-05'
+                  groupBy0: 'container-05',
                 },
                 context: {
                   cloud: undefined,
