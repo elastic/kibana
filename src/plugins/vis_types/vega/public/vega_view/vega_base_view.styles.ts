@@ -136,13 +136,13 @@ export const vegaBaseViewStyles = (euiThemeContext: UseEuiTheme) => {
     }
 
     .vgaVis__message--warn .vgaVis__messageCode {
-      background-color: ${euiBackgroundColor(euiThemeContext, 'warning')}
-      color: ${euiTheme.colors.warningText}
+      background-color: ${euiBackgroundColor(euiThemeContext, 'warning')};
+      color: ${euiTheme.colors.warningText};
     }
 
     .vgaVis__message--err .vgaVis__messageCode {
-      background-color: ${euiBackgroundColor(euiThemeContext, 'danger')}
-      color: ${euiTheme.colors.dangerText}
+      background-color: ${euiBackgroundColor(euiThemeContext, 'danger')};
+      color: ${euiTheme.colors.dangerText};
     }
   `;
 };

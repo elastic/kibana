@@ -3,7 +3,7 @@
 exports[`NoDataCard props button 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
       class="euiCard__top emotion-euiCard__top-vertical"
@@ -77,7 +77,7 @@ exports[`NoDataCard props button 1`] = `
 exports[`NoDataCard props extends EuiCardProps 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable custom_class emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard custom_class emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
       class="euiCard__top emotion-euiCard__top-vertical"
@@ -151,7 +151,7 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
 exports[`NoDataCard props href 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
       class="euiCard__top emotion-euiCard__top-vertical"
@@ -225,7 +225,7 @@ exports[`NoDataCard props href 1`] = `
 exports[`NoDataCard props no access to Fleet 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard-isDisabled emotion-euiPanel-grow-m-l-subdued-EuiCard"
+    class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-subdued-EuiCard"
   >
     <div
       class="euiCard__top emotion-euiCard__top-vertical-disabled"
@@ -284,7 +284,7 @@ exports[`NoDataCard props no access to Fleet 1`] = `
 exports[`NoDataCard renders 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
       class="euiCard__top emotion-euiCard__top-vertical"

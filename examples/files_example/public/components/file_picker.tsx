@@ -27,6 +27,7 @@ export const MyFilePicker: FunctionComponent<Props> = ({ onClose, onDone, onUplo
       onDone={onDone}
       onUpload={(n) => onUpload(n.map(({ id }) => id))}
       pageSize={50}
+      multiple
     />
   );
 };
