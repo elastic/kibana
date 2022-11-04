@@ -22,6 +22,7 @@ import {
   RuleExecutorServices,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 
 import {
   RuleParams,
@@ -47,7 +48,7 @@ import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import { InfraBackendLibs } from '../../infra_types';
-import { UNGROUPED_FACTORY_KEY } from '../common/utils';
+import { getAlertDetailsUrl, UNGROUPED_FACTORY_KEY } from '../common/utils';
 import {
   getReasonMessageForGroupedCountAlert,
   getReasonMessageForGroupedRatioAlert,
@@ -101,13 +102,14 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     LogThresholdAlertState,
     LogThresholdAlertContext,
     LogThresholdActionGroups
-  >(async ({ services, params, startedAt }) => {
+  >(async ({ services, params, spaceId, startedAt }) => {
     const {
       alertFactory: { alertLimit },
       alertWithLifecycle,
       savedObjectsClient,
       scopedClusterClient,
       getAlertStartedDate,
+      getAlertUuid,
     } = services;
     const { basePath } = libs;
 
@@ -124,17 +126,30 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       if (actions && actions.length > 0) {
         const indexedStartedAt = getAlertStartedDate(id) ?? startedAt.toISOString();
         const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
-        const viewInAppUrl = basePath.publicBaseUrl
-          ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
-          : relativeViewInAppUrl;
+
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          relativeViewInAppUrl
+        );
 
         const sharedContext = {
           timestamp: startedAt.toISOString(),
           viewInAppUrl,
         };
+
         actions.forEach((actionSet) => {
           const { actionGroup, context } = actionSet;
-          alert.scheduleActions(actionGroup, { ...sharedContext, ...context });
+
+          const alertInstanceId = (context.group || id) as string;
+
+          const alertUuid = getAlertUuid(alertInstanceId);
+
+          alert.scheduleActions(actionGroup, {
+            ...sharedContext,
+            ...context,
+            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+          });
         });
       }
 
