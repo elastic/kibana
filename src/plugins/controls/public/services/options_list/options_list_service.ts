@@ -64,7 +64,7 @@ class OptionsListService implements ControlsOptionsListService {
     async (request: OptionsListRequest, abortSignal: AbortSignal) => {
       const index = request.dataView.title;
       const requestBody = this.getRequestBody(request);
-      const response = await this.http.fetch<OptionsListResponse>(
+      return await this.http.fetch<OptionsListResponse>(
         `/api/kibana/controls/optionsList/${index}`,
         {
           body: JSON.stringify(requestBody),
@@ -72,7 +72,6 @@ class OptionsListService implements ControlsOptionsListService {
           method: 'POST',
         }
       );
-      return response;
     },
     this.optionsListCacheResolver
   );
