@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export * from './slo';
-export * from './indicators';
-export * from './error_budget';
-export * from './duration';
-export * from './common';
+const DAYS_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
+
+export function twoDaysAgo(): Date {
+  const now = new Date();
+  now.setTime(now.getTime() - 2 * DAYS_IN_MILLISECONDS);
+  return now;
+}

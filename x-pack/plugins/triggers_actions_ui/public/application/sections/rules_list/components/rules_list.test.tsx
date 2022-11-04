@@ -575,6 +575,10 @@ describe('rules_list component with props', () => {
         'disabled',
         'enabled',
       ]);
+
+      await act(async () => {
+        await nextTick();
+      });
     });
   });
 
@@ -1104,279 +1108,315 @@ describe('rules_list component with items', () => {
     expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalled();
   }
 
-  it('renders table of rules', async () => {
-    // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers('legacy');
-    await setup();
-    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRow')).toHaveLength(mockedRulesData.length);
-
-    // Name and rule type column
-    const ruleNameColumns = wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-name"]');
-    expect(ruleNameColumns.length).toEqual(mockedRulesData.length);
-    mockedRulesData.forEach((rule, index) => {
-      expect(ruleNameColumns.at(index).text()).toEqual(`Name${rule.name}${ruleTypeFromApi.name}`);
+  describe('render table of rules', () => {
+    beforeAll(async () => {
+      // Use fake timers so we don't have to wait for the EuiToolTip timeout
+      jest.useFakeTimers('legacy');
+      await setup();
     });
 
-    // Tags column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-tagsPopover"]').length
-    ).toEqual(mockedRulesData.length);
-    // only show tags popover if tags exist on rule
-    const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagBadge"]');
-    expect(tagsBadges.length).toEqual(
-      mockedRulesData.filter((data) => data.tags.length > 0).length
-    );
-
-    // Last run column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastExecutionDate"]').length
-    ).toEqual(mockedRulesData.length);
-
-    // Last run tooltip
-    wrapper
-      .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
-      .first()
-      .simulate('mouseOver');
-
-    // Run the timers so the EuiTooltip will be visible
-    jest.runOnlyPendingTimers();
-
-    wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
-      'Start time of the last run.'
-    );
-
-    wrapper
-      .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"] EuiToolTipAnchor')
-      .first()
-      .simulate('mouseOut');
-
-    // Schedule interval column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-interval"]').length
-    ).toEqual(mockedRulesData.length);
-
-    // Schedule interval tooltip
-    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOver');
-
-    // Run the timers so the EuiTooltip will be visible
-    jest.runOnlyPendingTimers();
-
-    wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
-      'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
-    );
-
-    wrapper
-      .find('[data-test-subj="ruleInterval-config-tooltip-0"] EuiToolTipAnchor')
-      .first()
-      .simulate('mouseOut');
-
-    // Duration column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-duration"]').length
-    ).toEqual(mockedRulesData.length);
-    // show warning if duration is long
-    const durationWarningIcon = wrapper.find('EuiIconTip[data-test-subj="ruleDurationWarning"]');
-    expect(durationWarningIcon.length).toEqual(
-      mockedRulesData.filter(
-        (data) => data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout)
-      ).length
-    );
-
-    // Duration tooltip
-    wrapper.find('[data-test-subj="rulesTableCell-durationTooltip"]').first().simulate('mouseOver');
-
-    // Run the timers so the EuiTooltip will be visible
-    jest.runOnlyPendingTimers();
-
-    wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
-      'The length of time it took for the rule to run (mm:ss).'
-    );
-
-    // Last response column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastResponse"]').length
-    ).toEqual(mockedRulesData.length);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-active"]').length).toEqual(1);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').length).toEqual(1);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-unknown"]').length).toEqual(0);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').length).toEqual(2);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-warning"]').length).toEqual(1);
-    expect(wrapper.find('[data-test-subj="ruleStatus-error-tooltip"]').length).toEqual(2);
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="ruleStatus-error-license-fix"]').length
-    ).toEqual(1);
-
-    expect(wrapper.find('[data-test-subj="rulesListAutoRefresh"]').exists()).toBeTruthy();
-
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').first().text()).toEqual(
-      'Error'
-    );
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').last().text()).toEqual(
-      'License Error'
-    );
-
-    // Status control column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
-      mockedRulesData.length
-    );
-
-    // Monitoring column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-successRatio"]').length
-    ).toEqual(mockedRulesData.length);
-    const ratios = wrapper.find(
-      'EuiTableRowCell[data-test-subj="rulesTableCell-successRatio"] span[data-test-subj="successRatio"]'
-    );
-
-    mockedRulesData.forEach((rule, index) => {
-      if (rule.monitoring) {
-        expect(ratios.at(index).text()).toEqual(
-          `${rule.monitoring.execution.calculated_metrics.success_ratio * 100}%`
-        );
-      } else {
-        expect(ratios.at(index).text()).toEqual(`N/A`);
-      }
+    afterAll(() => {
+      jest.clearAllMocks();
     });
 
-    // P50 column is rendered initially
-    expect(
-      wrapper.find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`).exists()
-    ).toBeTruthy();
-
-    let percentiles = wrapper.find(
-      `EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
-    );
-
-    mockedRulesData.forEach((rule, index) => {
-      if (typeof rule.monitoring?.execution.calculated_metrics.p50 === 'number') {
-        // Ensure the table cells are getting the correct values
-        expect(percentiles.at(index).text()).toEqual(
-          getFormattedDuration(rule.monitoring.execution.calculated_metrics.p50)
-        );
-        // Ensure the tooltip is showing the correct content
-        expect(
-          wrapper
-            .find(
-              'EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] [data-test-subj="rule-duration-format-tooltip"]'
-            )
-            .at(index)
-            .props().content
-        ).toEqual(getFormattedMilliseconds(rule.monitoring.execution.calculated_metrics.p50));
-      } else {
-        expect(percentiles.at(index).text()).toEqual('N/A');
-      }
+    it('should render basic table and its row', async () => {
+      expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
+      expect(wrapper.find('EuiTableRow')).toHaveLength(mockedRulesData.length);
     });
 
-    // Click column to sort by P50
-    wrapper
-      .find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`)
-      .first()
-      .simulate('click');
-
-    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sort: {
-          field: percentileFields[Percentiles.P50],
-          direction: 'asc',
-        },
-      })
-    );
-
-    // Click column again to reverse sort by P50
-    wrapper
-      .find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`)
-      .first()
-      .simulate('click');
-
-    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sort: {
-          field: percentileFields[Percentiles.P50],
-          direction: 'desc',
-        },
-      })
-    );
-
-    // Hover over percentile selection button
-    wrapper
-      .find('[data-test-subj="percentileSelectablePopover-iconButton"]')
-      .first()
-      .simulate('click');
-
-    jest.runOnlyPendingTimers();
-    wrapper.update();
-
-    // Percentile Selection
-    expect(
-      wrapper.find('[data-test-subj="percentileSelectablePopover-selectable"]').exists()
-    ).toBeTruthy();
-
-    const percentileOptions = wrapper.find(
-      '[data-test-subj="percentileSelectablePopover-selectable"] li'
-    );
-    expect(percentileOptions.length).toEqual(3);
-
-    // Select P95
-    percentileOptions.at(1).simulate('click');
-
-    jest.runOnlyPendingTimers();
-    wrapper.update();
-
-    expect(
-      wrapper.find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`).exists()
-    ).toBeTruthy();
-
-    percentiles = wrapper.find(
-      `EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
-    );
-
-    mockedRulesData.forEach((rule, index) => {
-      if (typeof rule.monitoring?.execution.calculated_metrics.p95 === 'number') {
-        expect(percentiles.at(index).text()).toEqual(
-          getFormattedDuration(rule.monitoring.execution.calculated_metrics.p95)
-        );
-      } else {
-        expect(percentiles.at(index).text()).toEqual('N/A');
-      }
+    it('Name and rule type column', () => {
+      const ruleNameColumns = wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-name"]');
+      expect(ruleNameColumns.length).toEqual(mockedRulesData.length);
+      mockedRulesData.forEach((rule, index) => {
+        expect(ruleNameColumns.at(index).text()).toEqual(`Name${rule.name}${ruleTypeFromApi.name}`);
+      });
     });
 
-    // Click column to sort by P95
-    wrapper
-      .find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`)
-      .first()
-      .simulate('click');
+    it('Tags column', () => {
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-tagsPopover"]').length
+      ).toEqual(mockedRulesData.length);
+      // only show tags popover if tags exist on rule
+      const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagBadge"]');
+      expect(tagsBadges.length).toEqual(
+        mockedRulesData.filter((data) => data.tags.length > 0).length
+      );
+    });
 
-    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sort: {
-          field: percentileFields[Percentiles.P95],
-          direction: 'asc',
-        },
-      })
-    );
+    it('Last run column', () => {
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastExecutionDate"]').length
+      ).toEqual(mockedRulesData.length);
+    });
 
-    // Click column again to reverse sort by P95
-    wrapper
-      .find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`)
-      .first()
-      .simulate('click');
+    it('Last run tooltip', () => {
+      wrapper
+        .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
+        .first()
+        .simulate('mouseOver');
 
-    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sort: {
-          field: percentileFields[Percentiles.P95],
-          direction: 'desc',
-        },
-      })
-    );
+      // Run the timers so the EuiTooltip will be visible
+      jest.runOnlyPendingTimers();
 
-    // Clearing all mocks will also reset fake timers.
-    jest.clearAllMocks();
+      wrapper.update();
+      expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
+        'Start time of the last run.'
+      );
+
+      wrapper
+        .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"] EuiToolTipAnchor')
+        .first()
+        .simulate('mouseOut');
+    });
+
+    it('Schedule interval column', () => {
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-interval"]').length
+      ).toEqual(mockedRulesData.length);
+    });
+
+    it('Schedule interval tooltip', () => {
+      wrapper
+        .find('[data-test-subj="ruleInterval-config-tooltip-0"]')
+        .first()
+        .simulate('mouseOver');
+
+      // Run the timers so the EuiTooltip will be visible
+      jest.runOnlyPendingTimers();
+
+      wrapper.update();
+      expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
+        'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
+      );
+
+      wrapper
+        .find('[data-test-subj="ruleInterval-config-tooltip-0"] EuiToolTipAnchor')
+        .first()
+        .simulate('mouseOut');
+
+      // Duration column
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-duration"]').length
+      ).toEqual(mockedRulesData.length);
+      // show warning if duration is long
+      const durationWarningIcon = wrapper.find('EuiIconTip[data-test-subj="ruleDurationWarning"]');
+      expect(durationWarningIcon.length).toEqual(
+        mockedRulesData.filter(
+          (data) =>
+            data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout)
+        ).length
+      );
+
+      // Duration tooltip
+      wrapper
+        .find('[data-test-subj="rulesTableCell-durationTooltip"]')
+        .first()
+        .simulate('mouseOver');
+
+      // Run the timers so the EuiTooltip will be visible
+      jest.runOnlyPendingTimers();
+
+      wrapper.update();
+      expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
+        'The length of time it took for the rule to run (mm:ss).'
+      );
+    });
+
+    it('Duration tooltip', () => {
+      wrapper
+        .find('[data-test-subj="rulesTableCell-durationTooltip"]')
+        .first()
+        .simulate('mouseOver');
+    });
+
+    it('Last response column', () => {
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastResponse"]').length
+      ).toEqual(mockedRulesData.length);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-active"]').length).toEqual(1);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').length).toEqual(1);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-unknown"]').length).toEqual(0);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').length).toEqual(2);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-warning"]').length).toEqual(1);
+      expect(wrapper.find('[data-test-subj="ruleStatus-error-tooltip"]').length).toEqual(2);
+      expect(
+        wrapper.find('EuiButtonEmpty[data-test-subj="ruleStatus-error-license-fix"]').length
+      ).toEqual(1);
+
+      expect(wrapper.find('[data-test-subj="rulesListAutoRefresh"]').exists()).toBeTruthy();
+
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').first().text()).toEqual(
+        'Error'
+      );
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').last().text()).toEqual(
+        'License Error'
+      );
+    });
+
+    it('Status control column', () => {
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length
+      ).toEqual(mockedRulesData.length);
+
+      // Monitoring column
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-successRatio"]').length
+      ).toEqual(mockedRulesData.length);
+      const ratios = wrapper.find(
+        'EuiTableRowCell[data-test-subj="rulesTableCell-successRatio"] span[data-test-subj="successRatio"]'
+      );
+
+      mockedRulesData.forEach((rule, index) => {
+        if (rule.monitoring) {
+          expect(ratios.at(index).text()).toEqual(
+            `${rule.monitoring.execution.calculated_metrics.success_ratio * 100}%`
+          );
+        } else {
+          expect(ratios.at(index).text()).toEqual(`N/A`);
+        }
+      });
+    });
+
+    it('P50 column is rendered initially', () => {
+      expect(
+        wrapper.find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`).exists()
+      ).toBeTruthy();
+
+      const percentiles = wrapper.find(
+        `EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
+      );
+
+      mockedRulesData.forEach((rule, index) => {
+        if (typeof rule.monitoring?.execution.calculated_metrics.p50 === 'number') {
+          // Ensure the table cells are getting the correct values
+          expect(percentiles.at(index).text()).toEqual(
+            getFormattedDuration(rule.monitoring.execution.calculated_metrics.p50)
+          );
+          // Ensure the tooltip is showing the correct content
+          expect(
+            wrapper
+              .find(
+                'EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] [data-test-subj="rule-duration-format-tooltip"]'
+              )
+              .at(index)
+              .props().content
+          ).toEqual(getFormattedMilliseconds(rule.monitoring.execution.calculated_metrics.p50));
+        } else {
+          expect(percentiles.at(index).text()).toEqual('N/A');
+        }
+      });
+    });
+
+    it('Click column to sort by P50', () => {
+      wrapper
+        .find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`)
+        .first()
+        .simulate('click');
+
+      expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: percentileFields[Percentiles.P50],
+            direction: 'asc',
+          },
+        })
+      );
+
+      // Click column again to reverse sort by P50
+      wrapper
+        .find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`)
+        .first()
+        .simulate('click');
+
+      expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: percentileFields[Percentiles.P50],
+            direction: 'desc',
+          },
+        })
+      );
+
+      // Hover over percentile selection button
+      wrapper
+        .find('[data-test-subj="percentileSelectablePopover-iconButton"]')
+        .first()
+        .simulate('click');
+
+      jest.runOnlyPendingTimers();
+      wrapper.update();
+
+      // Percentile Selection
+      expect(
+        wrapper.find('[data-test-subj="percentileSelectablePopover-selectable"]').exists()
+      ).toBeTruthy();
+
+      const percentileOptions = wrapper.find(
+        '[data-test-subj="percentileSelectablePopover-selectable"] li'
+      );
+      expect(percentileOptions.length).toEqual(3);
+    });
+
+    it('Select P95', () => {
+      const percentileOptions = wrapper.find(
+        '[data-test-subj="percentileSelectablePopover-selectable"] li'
+      );
+
+      percentileOptions.at(1).simulate('click');
+
+      jest.runOnlyPendingTimers();
+      wrapper.update();
+
+      expect(
+        wrapper.find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`).exists()
+      ).toBeTruthy();
+
+      const percentiles = wrapper.find(
+        `EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
+      );
+
+      mockedRulesData.forEach((rule, index) => {
+        if (typeof rule.monitoring?.execution.calculated_metrics.p95 === 'number') {
+          expect(percentiles.at(index).text()).toEqual(
+            getFormattedDuration(rule.monitoring.execution.calculated_metrics.p95)
+          );
+        } else {
+          expect(percentiles.at(index).text()).toEqual('N/A');
+        }
+      });
+    });
+
+    it('Click column to sort by P95', () => {
+      wrapper
+        .find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`)
+        .first()
+        .simulate('click');
+
+      expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: percentileFields[Percentiles.P95],
+            direction: 'asc',
+          },
+        })
+      );
+
+      // Click column again to reverse sort by P95
+      wrapper
+        .find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`)
+        .first()
+        .simulate('click');
+
+      expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: percentileFields[Percentiles.P95],
+            direction: 'desc',
+          },
+        })
+      );
+    });
   });
 
   it('renders license errors and manage license modal on click', async () => {

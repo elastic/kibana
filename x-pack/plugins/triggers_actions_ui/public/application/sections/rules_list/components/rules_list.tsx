@@ -162,7 +162,7 @@ export const RulesList = ({
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
-  const [typesFilter, setTypesFilter] = useState<string[]>();
+  const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>(
     lastResponseFilter || []
@@ -324,11 +324,7 @@ export const RulesList = ({
 
   useEffect(() => {
     loadData();
-  }, [loadData, refresh]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData, percentileOptions]);
+  }, [loadData, refresh, percentileOptions]);
 
   useEffect(() => {
     (async () => {
@@ -554,14 +550,16 @@ export const RulesList = ({
   const toolsRight = [
     <TypeFilter
       key="type-filter"
-      onChange={(types: string[]) => setTypesFilter(types)}
+      onChange={setTypesFilter}
       options={filterOptions}
+      filters={typesFilter}
     />,
     showActionFilter && (
       <ActionTypeFilter
         key="action-type-filter"
         actionTypes={actionTypes}
-        onChange={(ids: string[]) => setActionTypesFilter(ids)}
+        onChange={setActionTypesFilter}
+        filters={typesFilter}
       />
     ),
     <RuleExecutionStatusFilter

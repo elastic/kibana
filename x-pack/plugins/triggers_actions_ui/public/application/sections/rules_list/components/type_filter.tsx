@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiTitle } from '@elastic/eui';
 
@@ -18,21 +18,15 @@ interface TypeFilterProps {
     }>;
   }>;
   onChange?: (selectedTags: string[]) => void;
+  filters: string[];
 }
 
 export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
   options,
-  onChange,
+  onChange: onFilterChange,
+  filters,
 }: TypeFilterProps) => {
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (onChange) {
-      onChange(selectedValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedValues]);
 
   return (
     <EuiPopover
@@ -41,9 +35,9 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
       button={
         <EuiFilterButton
           iconType="arrowDown"
-          hasActiveFilters={selectedValues.length > 0}
-          numActiveFilters={selectedValues.length}
-          numFilters={selectedValues.length}
+          hasActiveFilters={filters.length > 0}
+          numActiveFilters={filters.length}
+          numFilters={filters.length}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           data-test-subj="ruleTypeFilterButton"
         >
@@ -64,14 +58,16 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
               <EuiFilterSelectItem
                 key={index}
                 onClick={() => {
-                  const isPreviouslyChecked = selectedValues.includes(item.value);
+                  if (!onFilterChange) return;
+
+                  const isPreviouslyChecked = filters.includes(item.value);
                   if (isPreviouslyChecked) {
-                    setSelectedValues(selectedValues.filter((val) => val !== item.value));
+                    onFilterChange(filters.filter((val) => val !== item.value));
                   } else {
-                    setSelectedValues(selectedValues.concat(item.value));
+                    onFilterChange(filters.concat(item.value));
                   }
                 }}
-                checked={selectedValues.includes(item.value) ? 'on' : undefined}
+                checked={filters.includes(item.value) ? 'on' : undefined}
                 data-test-subj={`ruleType${item.value}FilterOption`}
               >
                 {item.name}
