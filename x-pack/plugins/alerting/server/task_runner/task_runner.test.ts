@@ -231,11 +231,8 @@ describe('Task Runner', () => {
     expect(call.startedAt).toStrictEqual(new Date(DATE_1970));
     expect(call.previousStartedAt).toStrictEqual(new Date(DATE_1970_5_MIN));
     expect(call.state).toEqual({});
-    expect(call.name).toBe(RULE_NAME);
-    expect(call.tags).toEqual(['rule-', '-tags']);
-    expect(call.createdBy).toBe('rule-creator');
-    expect(call.updatedBy).toBe('rule-updater');
     expect(call.rule).not.toBe(null);
+    expect(call.rule.id).toBe('1');
     expect(call.rule.name).toBe(RULE_NAME);
     expect(call.rule.tags).toEqual(['rule-', '-tags']);
     expect(call.rule.consumer).toBe('bar');
@@ -2069,11 +2066,8 @@ describe('Task Runner', () => {
     expect(call.startedAt).toEqual(new Date(DATE_1970));
     expect(call.previousStartedAt).toEqual(new Date(DATE_1970_5_MIN));
     expect(call.state).toEqual({});
-    expect(call.name).toBe(RULE_NAME);
-    expect(call.tags).toEqual(['rule-', '-tags']);
-    expect(call.createdBy).toBe('rule-creator');
-    expect(call.updatedBy).toBe('rule-updater');
     expect(call.rule).not.toBe(null);
+    expect(call.rule.id).toBe('1');
     expect(call.rule.name).toBe(RULE_NAME);
     expect(call.rule.tags).toEqual(['rule-', '-tags']);
     expect(call.rule.consumer).toBe('bar');
