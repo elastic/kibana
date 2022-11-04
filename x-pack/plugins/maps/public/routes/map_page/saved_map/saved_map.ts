@@ -558,7 +558,7 @@ export class SavedMap {
         ...mapSettings,
         // base64 encode custom icons to avoid svg strings breaking saved object stringification/parsing.
         customIcons: mapSettings.customIcons.map((icon) => {
-          return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
+          return { ...icon, svg: global.Buffer.from(icon.svg).toString('base64') };
         }),
       },
     } as SerializedMapState);
