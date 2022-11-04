@@ -7,7 +7,6 @@
   "requiredPlugins": [
     "data",
     "visualizations",
-    "charts",
     "expressions",
     "dataViews"
   ],

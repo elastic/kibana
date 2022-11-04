@@ -5,7 +5,6 @@
   "ui": true,
   "requiredPlugins": [
     "data",
-    "charts",
     "expressions",
     "fieldFormats",
     "uiActions",
@@ -21,7 +20,7 @@
     "unifiedSearch"
   ],
   "optionalPlugins": ["home", "share", "spaces", "savedObjectsTaggingOss"],
-  "requiredBundles": ["kibanaUtils", "savedSearch", "kibanaReact", "charts"],
+  "requiredBundles": ["kibanaUtils", "savedSearch", "kibanaReact"],
   "extraPublicDirs": ["common/constants", "common/utils", "common/expression_functions", "common/convert_to_lens"],
   "owner": {
     "name": "Vis Editors",

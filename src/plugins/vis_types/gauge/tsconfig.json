@@ -13,7 +13,6 @@
     ],
     "kbn_references": [
       { "path": "../../../core/tsconfig.json" },
-      { "path": "../../charts/tsconfig.json" },
       { "path": "../../data/tsconfig.json" },
       { "path": "../../expressions/tsconfig.json" },
       { "path": "../../chart_expressions/expression_gauge/tsconfig.json" },
