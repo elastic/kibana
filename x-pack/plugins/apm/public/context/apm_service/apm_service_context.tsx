@@ -97,7 +97,7 @@ export function getOrRedirectToTransactionType({
   transactionType?: string;
   transactionTypes: string[];
   agentName?: string;
-  history: History;
+  history?: History;
 }) {
   if (transactionType && transactionTypes.includes(transactionType)) {
     return transactionType;
@@ -120,6 +120,8 @@ export function getOrRedirectToTransactionType({
     : transactionTypes[0];
 
   // Replace transactionType in the URL in case it is not one of the types returned by the API
-  replace(history, { query: { transactionType: currentTransactionType } });
+  if (history) {
+    replace(history, { query: { transactionType: currentTransactionType } });
+  }
   return currentTransactionType;
 }

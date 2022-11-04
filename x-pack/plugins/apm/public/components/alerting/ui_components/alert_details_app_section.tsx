@@ -13,6 +13,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
+import { TopAlert } from '@kbn/observability-plugin/public/pages/alerts';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '@kbn/rule-data-utils';
+import { getOrRedirectToTransactionType } from '../../../context/apm_service/apm_service_context';
+import { useServiceAgentFetcher } from '../../../context/apm_service/use_service_agent_fetcher';
+import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { asPercent } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { getDurationFormatter } from '../../../../common/utils/formatters/duration';
@@ -38,6 +43,7 @@ import {
 
 export interface AlertDetailsAppSectionProps {
   rule: Rule<RuleTypeParams>;
+  alert: TopAlert;
   timeZone: string;
 }
 
@@ -49,6 +55,7 @@ const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType => {
 
 export function AlertDetailsAppSectionTransactionDuration({
   rule,
+  alert,
   timeZone,
 }: AlertDetailsAppSectionProps) {
   const params = rule.params;
@@ -56,18 +63,37 @@ export function AlertDetailsAppSectionTransactionDuration({
   const latencyAggregationType = getAggsTypeFromRule(
     params.aggregationType as string
   );
-  const serviceName = String(params.serviceName);
-  const transactionType = String(params.transactionType);
+
+  const serviceName = String(alert.fields[SERVICE_NAME]);
   const comparisonEnabled = false;
   const offset = '1d';
   const rangeFrom = 'now-60m';
   const rangeTo = 'now';
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { agentName } = useServiceAgentFetcher({
+    serviceName,
+    start,
+    end,
+  });
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName,
+    start,
+    end,
+  });
+
+  const transactionType = getOrRedirectToTransactionType({
+    transactionType: String(alert.fields[TRANSACTION_TYPE]),
+    transactionTypes,
+    agentName,
+  });
+
   const comparisonChartTheme = getComparisonChartTheme();
   const INITIAL_STATE = {
     currentPeriod: [],
     previousPeriod: [],
   };
+
   /* Latency Chart */
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -219,6 +245,7 @@ export function AlertDetailsAppSectionTransactionDuration({
   function yLabelFormat(y?: number | null) {
     return asPercent(y || 0, 1);
   }
+
   const {
     data: dataErrorRate = INITIAL_STATE_ERROR_RATE,
     status: statusErrorRate,
