@@ -39,6 +39,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   mode,
 }) => {
   const lensService = useKibana().services.lens;
+  const isLensAvailable = lensService?.canUseEditor();
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
@@ -67,6 +68,10 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   );
 
   const isDisabled = useMemo(() => !actionId || !logsDataView, [actionId, logsDataView]);
+
+  if (!isLensAvailable) {
+    return null;
+  }
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (

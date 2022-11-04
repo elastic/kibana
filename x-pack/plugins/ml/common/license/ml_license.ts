@@ -11,6 +11,7 @@ import { PLUGIN_ID } from '../constants/app';
 
 export const MINIMUM_LICENSE = 'basic';
 export const MINIMUM_FULL_LICENSE = 'platinum';
+export const TRIAL_LICENSE = 'trial';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -26,6 +27,7 @@ export class MlLicense {
   private _isMlEnabled: boolean = false;
   private _isMinimumLicense: boolean = false;
   private _isFullLicense: boolean = false;
+  private _isTrialLicense: boolean = false;
   private _initialized: boolean = false;
 
   public setup(
@@ -41,6 +43,7 @@ export class MlLicense {
       this._isMlEnabled = this._license.getFeature(PLUGIN_ID).isEnabled;
       this._isMinimumLicense = isMinimumLicense(this._license);
       this._isFullLicense = isFullLicense(this._license);
+      this._isTrialLicense = isTrialLicense(this._license);
 
       if (this._initialized === false && postInitFunctions !== undefined) {
         postInitFunctions.forEach((f) => f(this));
@@ -74,10 +77,18 @@ export class MlLicense {
   public isFullLicense() {
     return this._isFullLicense;
   }
+
+  public isTrialLicense() {
+    return this._isTrialLicense;
+  }
 }
 
 export function isFullLicense(license: ILicense) {
   return license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === 'valid';
+}
+
+export function isTrialLicense(license: ILicense) {
+  return license.check(PLUGIN_ID, TRIAL_LICENSE).state === 'valid';
 }
 
 export function isMinimumLicense(license: ILicense) {
