@@ -13352,8 +13352,6 @@
     "xpack.fleet.epm.pageSubtitle": "Choisissez une intégration pour commencer à collecter et à analyser vos données.",
     "xpack.fleet.epm.releaseBadge.betaDescription": "Il n'est pas recommandé d'utiliser cette intégration dans les environnements de production.",
     "xpack.fleet.epm.releaseBadge.betaLabel": "Bêta",
-    "xpack.fleet.epm.releaseBadge.experimentalDescription": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée ou retirée complètement dans une future version. Elastic s'efforcera au maximum de corriger tout problème, mais les fonctionnalités en version d'évaluation technique ne sont pas soumises aux accords de niveau de service d'assistance des fonctionnalités officielles en disponibilité générale.",
-    "xpack.fleet.epm.releaseBadge.experimentalLabel": "Version d'évaluation technique",
     "xpack.fleet.epm.screenshotErrorText": "Impossible de charger cette capture d'écran",
     "xpack.fleet.epm.screenshotsTitle": "Captures d'écran",
     "xpack.fleet.epm.updateAvailableTooltip": "Mise à jour disponible",

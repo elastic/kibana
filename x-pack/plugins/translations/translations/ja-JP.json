@@ -13338,8 +13338,6 @@
     "xpack.fleet.epm.pageSubtitle": "データの収集と分析を開始するには、統合を選択します。",
     "xpack.fleet.epm.releaseBadge.betaDescription": "この統合は本番環境用ではありません。",
     "xpack.fleet.epm.releaseBadge.betaLabel": "ベータ",
-    "xpack.fleet.epm.releaseBadge.experimentalDescription": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticは最善の努力を講じてすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
-    "xpack.fleet.epm.releaseBadge.experimentalLabel": "テクニカルプレビュー",
     "xpack.fleet.epm.screenshotErrorText": "このスクリーンショットを読み込めません",
     "xpack.fleet.epm.screenshotsTitle": "スクリーンショット",
     "xpack.fleet.epm.updateAvailableTooltip": "更新が利用可能です",
