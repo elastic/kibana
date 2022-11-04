@@ -14,6 +14,7 @@ import {
   IngestPipelineParams,
   SyncStatus,
 } from '../../../../../common/types/connectors';
+import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import {
   flashAPIErrors,
@@ -43,25 +44,26 @@ import { IndexNameLogic } from './index_name_logic';
 const FETCH_INDEX_POLLING_DURATION = 5000; // 1 seconds
 const FETCH_INDEX_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
 
-type FetchIndexApiValues = Actions<FetchIndexApiParams, FetchIndexApiResponse>;
-type StartSyncApiValues = Actions<StartSyncArgs, {}>;
+type FetchIndexApiActions = Actions<FetchIndexApiParams, FetchIndexApiResponse>;
+type StartSyncApiActions = Actions<StartSyncArgs, {}>;
 
 export interface IndexViewActions {
+  cancelSyncs(): void;
   clearFetchIndexTimeout(): void;
   createNewFetchIndexTimeout(duration: number): { duration: number };
   fetchCrawlerData: () => void;
   fetchIndex: () => void;
-  fetchIndexApiSuccess: FetchIndexApiValues['apiSuccess'];
-  makeFetchIndexRequest: FetchIndexApiValues['makeRequest'];
-  makeStartSyncRequest: StartSyncApiValues['makeRequest'];
+  fetchIndexApiSuccess: FetchIndexApiActions['apiSuccess'];
+  makeFetchIndexRequest: FetchIndexApiActions['makeRequest'];
+  makeStartSyncRequest: StartSyncApiActions['makeRequest'];
   recheckIndex: () => void;
-  resetFetchIndexApi: FetchIndexApiValues['apiReset'];
+  resetFetchIndexApi: FetchIndexApiActions['apiReset'];
   resetRecheckIndexLoading: () => void;
   setFetchIndexTimeoutId(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   startFetchIndexPoll(): void;
   startSync(): void;
-  startSyncApiError: StartSyncApiValues['apiError'];
-  startSyncApiSuccess: StartSyncApiValues['apiSuccess'];
+  startSyncApiError: StartSyncApiActions['apiError'];
+  startSyncApiSuccess: StartSyncApiActions['apiSuccess'];
   stopFetchIndexPoll(): void;
 }
 
@@ -74,6 +76,7 @@ export interface IndexViewValues {
   indexName: string;
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
+  isCanceling: boolean;
   isSyncing: boolean;
   isWaitingForSync: boolean;
   lastUpdated: string | null;
@@ -237,6 +240,14 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     index: [() => [selectors.data], (data) => (data ? indexToViewIndex(data) : undefined)],
     ingestionMethod: [() => [selectors.data], (data) => getIngestionMethod(data)],
     ingestionStatus: [() => [selectors.data], (data) => getIngestionStatus(data)],
+    isCanceling: [
+      () => [selectors.syncStatus],
+      (syncStatus: SyncStatus) => syncStatus === SyncStatus.CANCELING,
+    ],
+    isConnectorIndex: [
+      () => [selectors.data],
+      (data: ElasticsearchIndexWithIngestion | undefined) => isConnectorIndex(data),
+    ],
     isSyncing: [
       () => [selectors.syncStatus],
       (syncStatus: SyncStatus) => syncStatus === SyncStatus.IN_PROGRESS,

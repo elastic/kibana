@@ -14,6 +14,7 @@ import { ConnectorStatus } from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { fetchSyncJobsByConnectorId } from '../../lib/connectors/fetch_sync_jobs';
+import { cancelSyncs } from '../../lib/connectors/post_cancel_syncs';
 import { startConnectorSync } from '../../lib/connectors/start_sync';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
 import { updateConnectorNameAndDescription } from '../../lib/connectors/update_connector_name_and_description';
@@ -66,6 +67,22 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
 
         throw error;
       }
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/cancel_syncs',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      await cancelSyncs(client, request.params.connectorId);
+      return response.ok();
     })
   );
 
