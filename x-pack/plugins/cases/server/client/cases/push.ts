@@ -117,6 +117,7 @@ export const push = async (
     logger,
     authorization,
     securityStartPlugin,
+    spaceId,
     publicBaseUrl,
   } = clientArgs;
 
@@ -153,6 +154,7 @@ export const push = async (
       alerts,
       casesConnectors,
       userProfiles: profiles,
+      spaceId,
       publicBaseUrl,
     });
 
