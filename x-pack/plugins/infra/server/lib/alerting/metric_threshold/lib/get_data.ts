@@ -25,7 +25,12 @@ import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<
   string,
-  { warn: boolean; trigger: boolean; value: number | null; bucketKey: BucketKey } & AdditionalContext
+  {
+    warn: boolean;
+    trigger: boolean;
+    value: number | null;
+    bucketKey: BucketKey;
+  } & AdditionalContext
 >;
 
 export type BucketKey = Record<string, string>;
