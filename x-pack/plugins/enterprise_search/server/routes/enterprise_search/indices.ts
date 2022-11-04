@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
+import { AlwaysShowPattern } from '../../../common/types/indices';
 
 import type {
   CreateMlInferencePipelineResponse,
@@ -63,7 +64,11 @@ export function registerIndexRoutes({
     { path: '/internal/enterprise_search/search_indices', validate: false },
     elasticsearchErrorHandler(log, async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
-      const indices = await fetchIndices(client, '*', false, true, 'search-');
+      const patterns: AlwaysShowPattern = {
+        alias_pattern: 'search-',
+        index_pattern: '.ent-search-engine-documents',
+      };
+      const indices = await fetchIndices(client, '*', false, true, patterns);
 
       return response.ok({
         body: indices,

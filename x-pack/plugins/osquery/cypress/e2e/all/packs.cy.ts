@@ -17,7 +17,7 @@ import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { preparePack } from '../../tasks/packs';
 import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
 import { DEFAULT_POLICY } from '../../screens/fleet';
-import { getSavedQueriesDropdown } from '../../screens/live_query';
+import { getIdFormField, getSavedQueriesDropdown } from '../../screens/live_query';
 import { ROLES } from '../../test';
 import { getRandomInt } from '../../tasks/helpers';
 
@@ -47,6 +47,104 @@ describe('ALL - Packs', () => {
       runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_3');
     });
 
+    it('Check if result type is correct', () => {
+      cy.contains('Packs').click();
+      findAndClickButton('Add pack');
+      findFormFieldByRowsLabelAndType('Name', 'ResultType');
+      findAndClickButton('Add query');
+      cy.contains('Attach next query');
+      getIdFormField().type('Query1');
+      inputQuery('select * from uptime;');
+      cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
+      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
+      findAndClickButton('Add query');
+      cy.contains('Attach next query');
+      getIdFormField().type('Query2');
+      inputQuery('select * from uptime;');
+
+      cy.getBySel('resultsTypeField').click();
+      cy.contains('Differential').click();
+      cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
+
+      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
+      findAndClickButton('Add query');
+      cy.contains('Attach next query');
+      getIdFormField().type('Query3');
+      inputQuery('select * from uptime;');
+      cy.getBySel('resultsTypeField').click();
+      cy.contains('Differential (Ignore removals)').click();
+      cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
+
+      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
+      findAndClickButton('Save pack');
+      cy.react('ScheduledQueryNameComponent', {
+        props: {
+          name: 'ResultType',
+        },
+      }).click();
+
+      findAndClickButton('Edit');
+      cy.contains('Query1');
+      cy.contains('Query2');
+      cy.contains('Query3');
+      cy.react('CustomItemAction', {
+        props: { index: 0, item: { id: 'Query1' } },
+      }).click();
+      cy.getBySel('resultsTypeField').contains('Snapshot').click();
+      cy.contains('Differential').click();
+
+      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
+
+      cy.react('CustomItemAction', {
+        props: { index: 0, item: { id: 'Query2' } },
+      }).click();
+      cy.getBySel('resultsTypeField').contains('Differential').click();
+      cy.contains('Differential (Ignore removals)').click();
+
+      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
+      cy.react('CustomItemAction', {
+        props: { index: 0, item: { id: 'Query3' } },
+      }).click();
+      cy.getBySel('resultsTypeField').contains('(Ignore removals)').click();
+      cy.contains('Snapshot').click();
+
+      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
+      findFormFieldByRowsLabelAndType(
+        'Scheduled agent policies (optional)',
+        'fleet server {downArrow} {enter}'
+      );
+      findAndClickButton('Update pack');
+      closeModalIfVisible();
+
+      cy.contains(
+        'Create packs to organize sets of queries and to schedule queries for agent policies.'
+      );
+      const queries = {
+        Query1: {
+          interval: 3600,
+          query: 'select * from uptime;',
+          removed: true,
+          snapshot: false,
+        },
+        Query2: {
+          interval: 3600,
+          query: 'select * from uptime;',
+          removed: false,
+          snapshot: false,
+        },
+        Query3: {
+          interval: 3600,
+          query: 'select * from uptime;',
+        },
+      };
+      cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
+        const item = response.body.items.find(
+          (policy: { policy_id: string }) => policy.policy_id === 'fleet-server-policy'
+        );
+
+        expect(item.inputs[0].config.osquery.value.packs.ResultType.queries).to.deep.equal(queries);
+      });
+    });
     it('should add a pack from a saved query', () => {
       cy.contains('Packs').click();
       findAndClickButton('Add pack');
