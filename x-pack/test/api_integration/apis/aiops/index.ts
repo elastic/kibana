@@ -15,6 +15,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     if (AIOPS_ENABLED) {
       loadTestFile(require.resolve('./explain_log_rate_spikes'));
+      loadTestFile(require.resolve('./explain_log_rate_spikes_extended'));
     }
   });
 }
