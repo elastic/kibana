@@ -42,10 +42,6 @@ export const useTimeRange = ({
   );
 
   const timeRangeText = useMemo(() => {
-    if (!bucketInterval) {
-      return '';
-    }
-
     const timeRange = {
       from: dateMath.parse(from),
       to: dateMath.parse(to, { roundUp: true }),
@@ -60,7 +56,12 @@ export const useTimeRange = ({
                 defaultMessage: 'Auto',
               })} - `
             : ''
-        }${bucketInterval.description}`,
+        }${
+          bucketInterval?.description ??
+          i18n.translate('unifiedHistogram.histogramTimeRangeIntervalLoading', {
+            defaultMessage: 'loading...',
+          })
+        }`,
       },
     });
 
