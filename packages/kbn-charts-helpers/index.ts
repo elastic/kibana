@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './src/palettes';
-export * from './src/shared_components';
+export * from './src/colors';

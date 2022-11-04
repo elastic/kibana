@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemas } from '@kbn/coloring';
+import { ColorSchemas } from '@kbn/charts-helpers';
 import { getPercentageModeConfig } from './percentage_mode';
 import { ExtendedPaletteParams } from './types';
 

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemas, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { ColorSchemas } from '@kbn/charts-helpers';
 import { getConfiguration } from './gauge';
 import { GaugeVisParams } from '../../types';
 

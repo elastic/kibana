@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PaletteOutput, defaultCustomColors } from '@kbn/coloring';
+import { defaultCustomColors } from '@kbn/charts-helpers';
+import { PaletteOutput } from '@kbn/coloring';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { palette, CustomPaletteState, CustomPaletteArguments } from '.';
 

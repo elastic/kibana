@@ -7,7 +7,7 @@
  */
 
 import { $Values } from '@kbn/utility-types';
-import type { ColorMode } from '@kbn/coloring';
+import type { ColorMode } from '@kbn/charts-helpers';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Labels, CustomPaletteState, Style as ChartStyle } from '@kbn/charts-plugin/common';
 import { Style } from '@kbn/expressions-plugin/common';

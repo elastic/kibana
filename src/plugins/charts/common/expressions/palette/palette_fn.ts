@@ -7,7 +7,8 @@
  */
 
 import { last } from 'lodash';
-import { checkIsMaxContinuity, checkIsMinContinuity, defaultCustomColors } from '@kbn/coloring';
+import { defaultCustomColors } from '@kbn/charts-helpers';
+import { checkIsMaxContinuity, checkIsMinContinuity } from '@kbn/coloring';
 import type { PaletteExpressionFunctionDefinition } from './types';
 
 export const paletteExpressionFn: PaletteExpressionFunctionDefinition['fn'] = async (

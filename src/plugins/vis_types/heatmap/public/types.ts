@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { Position } from '@elastic/charts';
-import type { ColorSchemas } from '@kbn/coloring';
+import type { ColorSchemas } from '@kbn/charts-helpers';
 import type { ChartsPluginSetup, Style, Labels } from '@kbn/charts-plugin/public';
 import { Range } from '@kbn/expressions-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemas } from '@kbn/coloring';
+import { ColorSchemas } from '@kbn/charts-helpers';
 import { Vis } from '@kbn/visualizations-plugin/public';
 import { convertToLens } from '.';
 import { VisParams } from '../types';

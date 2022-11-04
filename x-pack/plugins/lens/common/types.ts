@@ -8,7 +8,8 @@
 import type { Filter, FilterMeta } from '@kbn/es-query';
 import type { Position } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
-import type { ColorMode, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { ColorMode } from '@kbn/charts-helpers';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/common';
 import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';

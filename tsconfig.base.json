@@ -398,6 +398,8 @@
       "@kbn/cases-components/*": ["packages/kbn-cases-components/*"],
       "@kbn/chart-icons": ["packages/kbn-chart-icons"],
       "@kbn/chart-icons/*": ["packages/kbn-chart-icons/*"],
+      "@kbn/charts-helpers": ["packages/kbn-charts-helpers"],
+      "@kbn/charts-helpers/*": ["packages/kbn-charts-helpers/*"],
       "@kbn/ci-stats-core": ["packages/kbn-ci-stats-core"],
       "@kbn/ci-stats-core/*": ["packages/kbn-ci-stats-core/*"],
       "@kbn/ci-stats-performance-metrics": ["packages/kbn-ci-stats-performance-metrics"],

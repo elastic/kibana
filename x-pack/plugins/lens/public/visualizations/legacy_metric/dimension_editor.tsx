@@ -14,12 +14,12 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import {
-  ColorMode,
   PaletteRegistry,
   CustomizablePalette,
   CUSTOM_PALETTE,
   FIXED_PROGRESSION,
 } from '@kbn/coloring';
+import { ColorMode } from '@kbn/charts-helpers';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import type { LegacyMetricState } from '../../../common/types';

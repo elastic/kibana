@@ -9,7 +9,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { from } from 'rxjs';
-import { ColorMode } from '@kbn/coloring';
+import { ColorMode } from '@kbn/charts-helpers';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';

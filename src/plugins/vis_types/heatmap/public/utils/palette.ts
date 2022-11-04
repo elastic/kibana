@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ColorSchemas, getHeatmapColors } from '@kbn/coloring';
+
+import { ColorSchemas, getHeatmapColors } from '@kbn/charts-helpers';
 import { Range } from '@kbn/expressions-plugin/common';
 
 export interface PaletteConfig {

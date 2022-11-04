@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ColorMode, colorSchemas } from '@kbn/coloring';
+import { ColorMode, colorSchemas } from '@kbn/charts-helpers';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {

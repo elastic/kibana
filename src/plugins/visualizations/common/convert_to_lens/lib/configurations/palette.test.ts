@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemas } from '@kbn/coloring';
+import { ColorSchemas } from '@kbn/charts-helpers';
 import { getPalette } from './palette';
 import { PaletteParams } from './types';
 

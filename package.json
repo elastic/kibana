@@ -144,6 +144,7 @@
     "@kbn/apm-utils": "link:bazel-bin/packages/kbn-apm-utils",
     "@kbn/cases-components": "link:bazel-bin/packages/kbn-cases-components",
     "@kbn/chart-icons": "link:bazel-bin/packages/kbn-chart-icons",
+    "@kbn/charts-helpers": "link:bazel-bin/packages/kbn-charts-helpers",
     "@kbn/coloring": "link:bazel-bin/packages/kbn-coloring",
     "@kbn/config": "link:bazel-bin/packages/kbn-config",
     "@kbn/config-mocks": "link:bazel-bin/packages/kbn-config-mocks",

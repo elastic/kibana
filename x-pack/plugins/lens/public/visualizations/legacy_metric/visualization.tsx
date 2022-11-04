@@ -11,13 +11,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
-import {
-  PaletteOutput,
-  PaletteRegistry,
-  CUSTOM_PALETTE,
-  shiftPalette,
-  ColorMode,
-} from '@kbn/coloring';
+import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, shiftPalette } from '@kbn/coloring';
+import { ColorMode } from '@kbn/charts-helpers';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';

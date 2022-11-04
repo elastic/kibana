@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
-import { ColorSchemas } from '@kbn/coloring';
+import { ColorSchemas } from '@kbn/charts-helpers';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';

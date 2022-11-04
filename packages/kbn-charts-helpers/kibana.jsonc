@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/charts-helpers",
+  "owner": "@elastic/kibana-vis-editors",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ColorSchemaParams, ColorSchemas, colorSchemas } from '@kbn/coloring';
+import { ColorSchemaParams, ColorSchemas, colorSchemas } from '@kbn/charts-helpers';
 import {
   ColorRanges,
   SetColorRangeValue,

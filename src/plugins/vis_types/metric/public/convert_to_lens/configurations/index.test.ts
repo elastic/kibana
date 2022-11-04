@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemas } from '@kbn/coloring';
+import { ColorSchemas } from '@kbn/charts-helpers';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { CollapseFunction } from '@kbn/visualizations-plugin/common';
 import { getConfiguration } from '.';

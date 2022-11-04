@@ -2704,6 +2704,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/charts-helpers@link:bazel-bin/packages/kbn-charts-helpers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core":
   version "0.0.0"
   uid ""

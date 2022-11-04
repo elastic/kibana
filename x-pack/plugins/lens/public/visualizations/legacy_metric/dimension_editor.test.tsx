@@ -13,12 +13,12 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { MetricDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import {
-  ColorMode,
   CustomizablePalette,
   PaletteOutput,
   PaletteRegistry,
   CustomPaletteParams,
 } from '@kbn/coloring';
+import { ColorMode } from '@kbn/charts-helpers';
 import { act } from 'react-dom/test-utils';
 
 import { PalettePanelContainer } from '../../shared_components';

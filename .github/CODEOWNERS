@@ -890,6 +890,7 @@ packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
+packages/kbn-charts-helpers @elastic/kibana-vis-editors
 packages/kbn-coloring @elastic/kibana-vis-editors
 packages/kbn-config @elastic/kibana-core
 packages/kbn-config-mocks @elastic/kibana-core

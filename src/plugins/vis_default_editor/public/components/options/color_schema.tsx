@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ColorSchemaParams, ColorSchema } from '@kbn/coloring';
+import type { ColorSchemaParams, ColorSchema } from '@kbn/charts-helpers';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { SelectOption } from './select';

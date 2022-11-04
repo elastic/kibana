@@ -25,7 +25,7 @@ import {
   LongLegendOptions,
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
-import { colorSchemas } from '@kbn/coloring';
+import { colorSchemas } from '@kbn/charts-helpers';
 import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
 import { LabelsPanel } from './labels_panel';

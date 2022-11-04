@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemaParams } from '@kbn/coloring';
+import { ColorSchemaParams } from '@kbn/charts-helpers';
 import { Labels, Style } from '@kbn/charts-plugin/public';
 import { RangeValues } from '@kbn/vis-default-editor-plugin/public';
 import { gaugeVisType } from '@kbn/vis-type-gauge-plugin/public';

@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './src/palettes';
-export * from './src/shared_components';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-charts-helpers'],
+};

@@ -7,7 +7,7 @@
  */
 
 import { get } from 'lodash';
-import { ColorMode } from '@kbn/coloring';
+import { ColorMode } from '@kbn/charts-helpers';
 import { getStopsWithColorsFromRanges } from '@kbn/visualizations-plugin/common/utils';
 import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { PaletteOutput, ColorMode } from '@kbn/coloring';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { ColorMode } from '@kbn/charts-helpers';
 import {
   Datatable,
   ExpressionFunctionDefinition,

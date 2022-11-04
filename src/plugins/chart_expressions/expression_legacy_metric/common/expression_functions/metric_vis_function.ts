@@ -7,8 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ColorMode } from '@kbn/coloring';
-
+import { ColorMode } from '@kbn/charts-helpers';
 import {
   prepareLogTable,
   Dimension,
