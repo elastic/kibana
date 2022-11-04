@@ -17,9 +17,8 @@ import { LEGEND_TYPES } from '../vega_chart/common';
 import {
   getColorSpec,
   getScatterplotMatrixVegaLiteSpec,
-  COLOR_OUTLIER,
-  COLOR_SELECTION,
   COLOR_RANGE_NOMINAL,
+  COLOR_RANGE_OUTLIER,
   COLOR_BLUR,
   USER_SELECTION,
   SINGLE_POINT_CLICK,
@@ -39,15 +38,15 @@ describe('getColorSpec()', () => {
     const colorSpec = getColorSpec(euiThemeLight, 'outlier_score');
 
     expect(colorSpec).toEqual({
-      condition: [
-        { selection: USER_SELECTION, value: COLOR_SELECTION },
-        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
-        {
-          test: "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
-          value: COLOR_OUTLIER,
+      condition: {
+        selection: USER_SELECTION,
+        field: 'is_outlier',
+        type: LEGEND_TYPES.NOMINAL,
+        scale: {
+          range: COLOR_RANGE_OUTLIER,
         },
-      ],
-      value: euiThemeLight.euiColorMediumShade,
+      },
+      value: COLOR_BLUR,
     });
   });
 
@@ -118,16 +117,15 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       type: 'circle',
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
-      condition: [
-        { selection: USER_SELECTION, value: COLOR_SELECTION },
-        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
-        // Note the escaped dot character
-        {
-          test: "(datum['ml\\.outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
-          value: COLOR_OUTLIER,
+      condition: {
+        selection: USER_SELECTION,
+        field: 'is_outlier',
+        type: LEGEND_TYPES.NOMINAL,
+        scale: {
+          range: COLOR_RANGE_OUTLIER,
         },
-      ],
-      value: euiThemeLight.euiColorMediumShade,
+      },
+      value: COLOR_BLUR,
     });
     expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
       { field: 'x', type: 'quantitative' },

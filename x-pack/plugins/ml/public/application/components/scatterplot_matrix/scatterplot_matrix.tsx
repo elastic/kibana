@@ -41,7 +41,6 @@ import { useCurrentEuiTheme } from '../color_range_legend';
 import { VegaChart } from '../vega_chart';
 import type { LegendType } from '../vega_chart/common';
 import { VegaChartLoading } from '../vega_chart/vega_chart_loading';
-import { AnalyticsJobType } from '../../data_frame_analytics/pages/analytics_management/hooks/use_create_analytics_form/state';
 
 import {
   getScatterplotMatrixVegaLiteSpec,
@@ -91,7 +90,6 @@ export interface ScatterplotMatrixProps {
   searchQuery?: ResultsSearchQuery;
   runtimeMappings?: RuntimeMappings;
   indexPattern?: DataView;
-  jobType?: AnalyticsJobType;
 }
 
 export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
@@ -103,7 +101,6 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   searchQuery,
   runtimeMappings,
   indexPattern,
-  jobType,
 }) => {
   const { esSearch } = useMlApiContext();
 
@@ -277,8 +274,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       resultsField,
       color,
       legendType,
-      dynamicSize,
-      jobType
+      dynamicSize
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resultsField, splom, color, legendType, dynamicSize]);

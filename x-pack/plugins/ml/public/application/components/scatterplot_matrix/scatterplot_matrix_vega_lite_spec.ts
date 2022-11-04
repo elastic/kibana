@@ -16,8 +16,6 @@ import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@e
 import { i18n } from '@kbn/i18n';
 
 import { LegendType, LEGEND_TYPES } from '../vega_chart/common';
-import { AnalyticsJobType } from '../../data_frame_analytics/pages/analytics_management/hooks/use_create_analytics_form/state';
-import { ANALYSIS_CONFIG_TYPE } from '../../data_frame_analytics/common/analytics';
 
 export const OUTLIER_SCORE_FIELD = 'outlier_score';
 
@@ -42,15 +40,15 @@ export const getColorSpec = (
   // This returns a Vega spec using a conditional to return the color.
   if (typeof escapedOutlierScoreField === 'string') {
     return {
-      condition: [
-        { selection: USER_SELECTION, value: COLOR_SELECTION },
-        { selection: SINGLE_POINT_CLICK, value: COLOR_SELECTION },
-        {
-          test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
-          value: COLOR_OUTLIER,
+      condition: {
+        selection: USER_SELECTION,
+        field: getEscapedVegaFieldName('is_outlier' ?? '00FF00'),
+        type: LEGEND_TYPES.NOMINAL,
+        scale: {
+          range: COLOR_RANGE_OUTLIER,
         },
-      ],
-      value: euiTheme.euiColorMediumShade,
+      },
+      value: COLOR_BLUR,
     };
   }
 
@@ -93,8 +91,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
   resultsField?: string,
   color?: string,
   legendType?: LegendType,
-  dynamicSize?: boolean,
-  jobType?: AnalyticsJobType
+  dynamicSize?: boolean
 ): TopLevelSpec => {
   const vegaValues = values;
   const vegaColumns = columns.map(getEscapedVegaFieldName);
@@ -231,8 +228,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
       ...(outliers
         ? {
             selection: {
-              [USER_SELECTION]: { type: 'interval', empty: 'none' },
-              [SINGLE_POINT_CLICK]: { type: 'single', empty: 'none' },
+              [USER_SELECTION]: { type: 'interval' },
+              [SINGLE_POINT_CLICK]: { type: 'single' },
               mlOutlierScoreThreshold: {
                 type: 'single',
                 fields: ['cutoff'],
@@ -254,7 +251,6 @@ export const getScatterplotMatrixVegaLiteSpec = (
               // Always allow user selection
               [USER_SELECTION]: {
                 type: 'interval',
-                ...(jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION ? { empty: 'none' } : {}),
               },
               [SINGLE_POINT_CLICK]: { type: 'single', empty: 'none' },
             },
