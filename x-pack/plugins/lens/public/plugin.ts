@@ -317,18 +317,14 @@ export class LensPlugin {
 
     visualizations.registerAlias(getLensAliasConfig());
 
-    const discoverLocator = share?.url.locators.get('DISCOVER_APP_LOCATOR');
-
-    if (discoverLocator) {
-      uiActionsEnhanced.registerDrilldown(
-        new OpenInDiscoverDrilldown({
-          dataViews: () => this.dataViewsService!,
-          locator: () => discoverLocator,
-          hasDiscoverAccess: () => this.hasDiscoverAccess,
-          application: () => startServices().core.application,
-        })
-      );
-    }
+    uiActionsEnhanced.registerDrilldown(
+      new OpenInDiscoverDrilldown({
+        dataViews: () => this.dataViewsService!,
+        locator: () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
+        hasDiscoverAccess: () => this.hasDiscoverAccess,
+        application: () => startServices().core.application,
+      })
+    );
 
     setupExpressions(
       expressions,
@@ -500,7 +496,6 @@ export class LensPlugin {
     );
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
-
     if (discoverLocator) {
       startDependencies.uiActions.addTriggerAction(
         CONTEXT_MENU_TRIGGER,
