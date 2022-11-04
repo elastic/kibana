@@ -12,6 +12,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { TriggersAndActionsUiServices } from '../../../application/app';
 import {
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
@@ -19,7 +20,7 @@ import {
 } from '../../../types';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
-export const createStartServicesMock = () => {
+export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
   return {
     ...core,
@@ -64,7 +65,7 @@ export const createStartServicesMock = () => {
       style: { cursor: 'pointer' },
     } as unknown as HTMLElement,
     theme$: themeServiceMock.createTheme$(),
-  };
+  } as TriggersAndActionsUiServices;
 };
 
 export const createWithKibanaMock = () => {

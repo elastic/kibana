@@ -32,17 +32,15 @@ describe('useAlertDataView', () => {
   ];
 
   beforeEach(() => {
-    mockUseKibanaReturnValue.http.get.mockImplementation(async () => ({
+    mockUseKibanaReturnValue.http.get = jest.fn().mockReturnValue({
       index_name: [
         '.alerts-observability.uptime.alerts-*',
         '.alerts-observability.metrics.alerts-*',
         '.alerts-observability.logs.alerts-*',
         '.alerts-observability.apm.alerts-*',
       ],
-    }));
-    mockUseKibanaReturnValue.data.dataViews.create.mockImplementation(
-      async () => mockedDataView as any as DataView
-    );
+    });
+    mockUseKibanaReturnValue.data.dataViews.create = jest.fn().mockReturnValue(mockedDataView);
   });
 
   afterEach(() => {
@@ -85,7 +83,7 @@ describe('useAlertDataView', () => {
 
   it('returns error with no data when error happens', async () => {
     const error = new Error('http error');
-    mockUseKibanaReturnValue.http.get.mockImplementation(async () => {
+    mockUseKibanaReturnValue.http.get = jest.fn().mockImplementation(async () => {
       throw error;
     });
 
