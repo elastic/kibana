@@ -194,13 +194,15 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
 
       const { getRecoveredAlerts } = services.alertFactory.done();
       const recoveredAlerts = getRecoveredAlerts();
-      processRecoveredAlerts(
-        recoveredAlerts,
-        startedAt,
-        getAlertStartedDate,
+      processRecoveredAlerts({
         basePath,
-        validatedParams
-      );
+        getAlertStartedDate,
+        getAlertUuid,
+        recoveredAlerts,
+        spaceId,
+        startedAt,
+        validatedParams,
+      });
     } catch (e) {
       throw new Error(e);
     }
@@ -891,22 +893,33 @@ type LogThresholdRecoveredAlert = {
   getId: () => string;
 } & LogThresholdAlert;
 
-const processRecoveredAlerts = (
-  recoveredAlerts: LogThresholdRecoveredAlert[],
-  startedAt: Date,
-  getAlertStartedDate: (alertId: string) => string | null,
-  basePath: IBasePath,
-  validatedParams: RuleParams
-) => {
+const processRecoveredAlerts = ({
+  basePath,
+  getAlertStartedDate,
+  getAlertUuid,
+  recoveredAlerts,
+  spaceId,
+  startedAt,
+  validatedParams,
+}: {
+  basePath: IBasePath;
+  getAlertStartedDate: (alertId: string) => string | null;
+  getAlertUuid: (alertId: string) => string | null;
+  recoveredAlerts: LogThresholdRecoveredAlert[];
+  spaceId: string;
+  startedAt: Date;
+  validatedParams: RuleParams;
+}) => {
   for (const alert of recoveredAlerts) {
     const recoveredAlertId = alert.getId();
     const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
     const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
-    const viewInAppUrl = basePath.publicBaseUrl
-      ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
-      : relativeViewInAppUrl;
+    const alertUuid = getAlertUuid(recoveredAlertId);
+
+    const viewInAppUrl = addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
 
     const baseContext = {
+      alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
       timestamp: startedAt.toISOString(),
       viewInAppUrl,
@@ -914,21 +927,21 @@ const processRecoveredAlerts = (
 
     if (isRatioRuleParams(validatedParams)) {
       const { criteria } = validatedParams;
-      const context = {
+
+      alert.setContext({
         ...baseContext,
         numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
         denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
         isRatio: true,
-      };
-      alert.setContext(context);
+      });
     } else {
       const { criteria } = validatedParams;
-      const context = {
+
+      alert.setContext({
         ...baseContext,
         conditions: createConditionsMessageForCriteria(criteria),
         isRatio: false,
-      };
-      alert.setContext(context);
+      });
     }
   }
 };
