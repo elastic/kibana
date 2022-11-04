@@ -23,7 +23,12 @@ import React, {
 import { EuiButton, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Process } from '../../../common/types/process_tree';
+import {
+  AlertTypeCount,
+  Process,
+  ProcessEvent,
+  ProcessEventAlertCategory,
+} from '../../../common/types/process_tree';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useVisible } from '../../hooks/use_visible';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
@@ -125,6 +130,22 @@ export function ProcessTreeNode({
     ),
     shouldAddListener: hasInvestigatedAlert,
   });
+
+  const alertTypeCounts = useMemo(() => {
+    const alertCounts: AlertTypeCount[] = [];
+    alerts?.forEach((alert: ProcessEvent, i) => {
+      const category = alert.event?.category?.[0] as ProcessEventAlertCategory;
+      if (alertCounts.some((alertItem) => alertItem.category === category)) return;
+      alertCounts.push({
+        category,
+        count:
+          alerts?.filter(
+            (processEventAlert: ProcessEvent) => processEventAlert.event?.category?.[0] === category
+          )?.length ?? 0,
+      });
+    });
+    return alertCounts;
+  }, [alerts]);
 
   useEffect(() => {
     if (process.id === selectedProcess?.id && nodeRef.current?.scrollIntoView) {
@@ -301,6 +322,7 @@ export function ProcessTreeNode({
           {hasAlerts && (
             <AlertButton
               onToggle={onAlertsToggle}
+              alertTypeCounts={alertTypeCounts}
               isExpanded={alertsExpanded}
               alertsCount={alerts.length}
             />
@@ -312,6 +334,7 @@ export function ProcessTreeNode({
       {alertsExpanded && (
         <ProcessTreeAlerts
           alerts={alerts}
+          alertTypeCounts={alertTypeCounts}
           investigatedAlertId={investigatedAlertId}
           isProcessSelected={isSelected}
           onAlertSelected={onProcessClicked}

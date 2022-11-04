@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
+import React, { useEffect, useCallback, useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiIcon,
+  EuiText,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
+import { capitalize } from 'lodash';
+import { ALERT_ICONS } from '../../../common/constants';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
+import { getAlertCategoryDisplayText } from '../../utils/alert_category_display_text';
 
 export interface ProcessTreeAlertDeps {
   alert: ProcessEvent;
@@ -32,7 +43,13 @@ export const ProcessTreeAlert = ({
   const styles = useStyles({ isInvestigated, isSelected });
 
   const { event } = alert;
+
   const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
+  const category = event?.category?.[0];
+  const alertIconType = useMemo(() => {
+    if (category && category in ALERT_ICONS) return ALERT_ICONS[category];
+    return 'danger';
+  }, [category]);
 
   useEffect(() => {
     if (isInvestigated && uuid) {
@@ -56,7 +73,8 @@ export const ProcessTreeAlert = ({
     return null;
   }
 
-  const { name } = rule;
+  const processEventAlertCategory = category ?? 'alert';
+  const alertCategoryDetailDisplayText = getAlertCategoryDisplayText(alert, category);
 
   return (
     <div key={uuid} css={styles.alert} data-id={uuid}>
@@ -76,11 +94,22 @@ export const ProcessTreeAlert = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="alert" color="danger" />
+          <EuiToolTip
+            position="top"
+            content={`${capitalize(processEventAlertCategory)} ${
+              capitalize(processEventAlertCategory) !== 'alert' ? 'alert' : ''
+            }`}
+          >
+            <EuiIcon type={alertIconType} color="danger" />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText css={styles.alertName} size="s">
-            {dataOrDash(name)}
+          <EuiText
+            data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}-text`}
+            css={styles.alertName}
+            size="s"
+          >
+            {alertCategoryDetailDisplayText}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

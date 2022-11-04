@@ -12,6 +12,18 @@ export interface AlertStatusEventEntityIdMap {
   };
 }
 
+export const enum ProcessEventAlertCategory {
+  file = 'file',
+  network = 'network',
+  process = 'process',
+}
+
+export interface AlertTypeCount {
+  category: ProcessEventAlertCategory;
+  count: number;
+}
+export type DefaultAlertFilterType = 'all';
+
 export const enum EventKind {
   event = 'event',
   signal = 'signal',
@@ -156,14 +168,34 @@ export interface ProcessEventAlert {
   rule?: ProcessEventAlertRule;
 }
 
+export interface ProcessEventIPAddress {
+  address?: string;
+  ip?: string;
+  port?: number;
+}
+
+export interface ProcessEventNetwork {
+  type?: string;
+  transport?: string;
+  protocol?: string;
+}
+
 export interface ProcessEvent {
   '@timestamp'?: string;
   event?: {
     kind?: EventKind;
-    category?: string;
+    category?: string[];
     action?: EventAction;
     id?: string;
   };
+  file?: {
+    extension?: string;
+    path?: string;
+    name?: string;
+  };
+  network?: ProcessEventNetwork;
+  destination?: ProcessEventIPAddress;
+  source?: ProcessEventIPAddress;
   user?: User;
   group?: Group;
   host?: ProcessEventHost;
