@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { ALERT_RULE_TYPE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
@@ -116,6 +116,7 @@ export function AlertDetails() {
       data-test-subj="alertDetails"
     >
       <AlertSummary alert={alert} />
+      <EuiSpacer size="l" />
       {AlertDetailsAppSection && rule && (
         <AlertDetailsAppSection alert={alert} rule={rule} timeZone={timeZone} />
       )}
