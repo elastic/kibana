@@ -10,22 +10,27 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingContent } from '@elastic/
 import { useTheme } from '@kbn/observability-plugin/public';
 import styled from 'styled-components';
 import { colourPalette } from './network_waterfall/step_detail/waterfall/data_formatting';
+
 export const ColorPalette = ({
   label,
   mimeType,
   percent,
   value,
   loading,
+  labelWidth = 40,
+  valueWidth = 60,
 }: {
   label: string;
   mimeType: string;
   percent: number;
   value: string;
   loading: boolean;
+  labelWidth?: number;
+  valueWidth?: number;
 }) => {
   return (
     <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false} style={{ width: 40 }}>
+      <EuiFlexItem grow={false} style={{ width: labelWidth }}>
         <EuiText size="s">{label}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
@@ -35,7 +40,7 @@ export const ColorPalette = ({
           loading={loading}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: 65, justifySelf: 'flex-end' }}>
+      <EuiFlexItem grow={false} style={{ width: valueWidth, justifySelf: 'flex-end' }}>
         <EuiText
           size="s"
           style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}
