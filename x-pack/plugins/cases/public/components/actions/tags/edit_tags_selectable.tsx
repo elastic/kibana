@@ -68,6 +68,12 @@ interface State {
   tagCounterMap: Map<string, number>;
 }
 
+const stateToIconMap: Record<TagState, ICONS> = {
+  [TagState.CHECKED]: ICONS.CHECKED,
+  [TagState.PARTIAL]: ICONS.PARTIAL,
+  [TagState.UNCHECKED]: ICONS.UNCHECKED,
+};
+
 /**
  * The EuiSelectable has two states values for its items: checked="on" for checked items
  * and check=undefined for unchecked items. Given that our use case needs
@@ -196,12 +202,8 @@ const stateToOptions = (tagsState: State['tags']): TagSelectableOption[] => {
   }) as TagSelectableOption[];
 };
 
-const getSelectionIcon = (tagState: TagState) => {
-  return tagState === TagState.CHECKED
-    ? ICONS.CHECKED
-    : tagState === TagState.PARTIAL
-    ? ICONS.PARTIAL
-    : ICONS.UNCHECKED;
+const getSelectionIcon = (tagState: TagState): ICONS => {
+  return stateToIconMap[tagState];
 };
 
 const getSelectedAndUnselectedTags = (newOptions: EuiSelectableOption[], tags: State['tags']) => {
