@@ -426,9 +426,22 @@ describe('bulkEnableRules', () => {
       ],
     });
 
-    await expect(rulesClient.bulkEnableRules({ filter: 'fake_filter' })).rejects.toThrow(
-      'Rule not authorized for bulk enable - UPS'
-    );
+    const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    expect(result).toStrictEqual({
+      errors: [
+        {
+          message: 'Rule not authorized for bulk enable - UPS',
+          rule: { id: 'id1', name: 'fakeName' },
+        },
+        {
+          message: 'Rule not authorized for bulk enable - UPS',
+          rule: { id: 'id2', name: 'fakeName' },
+        },
+      ],
+      taskIdsFailedToBeEnabled: [],
+      total: 2,
+    });
   });
 
   test('should if rule is already enabled', async () => {
