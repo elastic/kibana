@@ -15,8 +15,9 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
+import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
 import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {
   Aggs,
@@ -67,7 +68,11 @@ export const getStringFieldStatsRequest = (
 
   const searchBody = {
     query,
-    aggs: buildSamplerAggregation(aggs, samplerShardSize),
+    aggs: buildRandomSamplerAggregation(
+      aggs,
+      params.samplingProbability,
+      params.browserSessionSeed
+    ),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
 
@@ -114,17 +119,11 @@ export const fetchStringFieldsStats = (
 
           const stats = {
             fieldName: field.fieldName,
-            isTopValuesSampled:
-              field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
+            isTopValuesSampled: true,
             topValues,
-            topValuesSampleSize: topValues.reduce(
-              (acc, curr) => acc + curr.doc_count,
-              get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
-            ),
-            topValuesSamplerShardSize:
-              field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
-                ? SAMPLER_TOP_TERMS_SHARD_SIZE
-                : samplerShardSize,
+            topValuesSampleSize: get(aggregations, ['sample', 'doc_count']),
+            // @todo: remove
+            topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };
 
           batchStats.push(stats);

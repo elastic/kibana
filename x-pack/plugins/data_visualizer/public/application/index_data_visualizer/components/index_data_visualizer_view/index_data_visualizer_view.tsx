@@ -553,6 +553,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   loading={progress < 100}
                   showPreviewByDefault={dataVisualizerListState.showDistributions ?? true}
                   onChange={setDataVisualizerListState}
+                  totalCount={overallStats.totalCount}
                 />
               </EuiPanel>
             </EuiFlexItem>

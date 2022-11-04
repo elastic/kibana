@@ -14,8 +14,9 @@ import { isIndexBasedFieldVisConfig } from '../../types';
 
 interface Props extends FieldDataRowProps {
   showIcon?: boolean;
+  totalCount: number;
 }
-export const DocumentStat = ({ config, showIcon }: Props) => {
+export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
   const { stats } = config;
   if (stats === undefined) return null;
   const { count, sampleCount } = stats;
@@ -26,7 +27,7 @@ export const DocumentStat = ({ config, showIcon }: Props) => {
     count ?? (isIndexBasedFieldVisConfig(config) && config.existsInDocs === true ? undefined : 0);
   const docsPercent =
     docsCount !== undefined && sampleCount !== undefined
-      ? roundToDecimalPlace((docsCount / sampleCount) * 100)
+      ? roundToDecimalPlace((docsCount / totalCount) * 100)
       : 0;
 
   return docsCount !== undefined ? (
