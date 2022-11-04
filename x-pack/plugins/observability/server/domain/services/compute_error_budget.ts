@@ -13,6 +13,7 @@ import {
 } from '../../types/schema';
 import { toHighPrecision } from '../../utils/number';
 
+// More details about calculus: https://github.com/elastic/kibana/issues/143980
 export function computeErrorBudget(slo: SLO, sliData: IndicatorData): ErrorBudget {
   const { good, total, date_range: dateRange } = sliData;
   const initialErrorBudget = toHighPrecision(1 - slo.objective.target);
