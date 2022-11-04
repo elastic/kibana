@@ -108,7 +108,7 @@ export const createLogPositionStateContainer = (initialArguments: InitialLogPosi
       (state: LogPositionState) => (refreshInterval: Partial<RefreshInterval>) =>
         updateRefreshInterval(refreshInterval)(state),
     startLiveStreaming: (state: LogPositionState) => () =>
-      updateRefreshInterval({ pause: false, value: 5000 })(state),
+      updateRefreshInterval({ pause: false })(state),
     stopLiveStreaming: (state: LogPositionState) => () =>
       updateRefreshInterval({ pause: true })(state),
     jumpToTargetPosition: (state: LogPositionState) => (targetPosition: TimeKey | null) =>
