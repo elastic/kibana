@@ -6,9 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import React, { useCallback, useEffect } from 'react';
-import { AnyQuery, BoolQuery } from '@kbn/es-query';
+import { Query, BoolQuery } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { observabilityAlertFeatureIds } from '../../../config';
 import { ObservabilityAppServices } from '../../../application/types';
@@ -21,18 +22,20 @@ import {
 import { buildEsQuery } from '../../../utils/build_es_query';
 import { AlertStatus } from '../../../../common/typings';
 
-const getAlertStatusQuery = (status: string): AnyQuery[] => {
+const getAlertStatusQuery = (status: string): Query[] => {
   return status ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }] : [];
 };
 
-const DEFAULT_QUERIES: AnyQuery[] = [];
+const DEFAULT_QUERIES: Query[] = [];
 
 export function ObservabilityAlertSearchBar({
   setEsQuery,
   queries = DEFAULT_QUERIES,
+  urlStateStorage,
 }: {
   setEsQuery: (query: { bool: BoolQuery }) => void;
-  queries?: AnyQuery[];
+  queries?: Query[];
+  urlStateStorage?: IKbnUrlStateStorage;
 }) {
   const {
     data: {
@@ -43,7 +46,7 @@ export function ObservabilityAlertSearchBar({
   } = useKibana<ObservabilityAppServices>().services;
 
   const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, status, setStatus } =
-    useAlertsPageStateContainer();
+    useAlertsPageStateContainer(urlStateStorage);
 
   const onStatusChange = useCallback(
     (alertStatus: AlertStatus) => {

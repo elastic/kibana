@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -21,6 +22,7 @@ import {
   EuiSuperSelectOption,
   EuiButton,
   EuiFlyoutSize,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
 
 import {
@@ -32,20 +34,21 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
-import { AnyQuery, BoolQuery } from '@kbn/es-query';
+import { Query, BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  RulesDetailsPageProvider,
+  ruleDetailsPageStateContainer,
+  useRuleDetailsPageStateContainer,
+} from './containers/state_container';
+import { TabId } from './containers/state_container/state_container';
 import { alertsPageStateContainer, Provider } from '../alerts';
 import { ObservabilityAlertSearchBar } from '../../components/shared/alert_search_bar/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import {
-  RuleDetailsPathParams,
-  EVENT_LOG_LIST_TAB,
-  ALERT_LIST_TAB,
-  RULE_DETAILS_PAGE_ID,
-} from './types';
+import { RuleDetailsPathParams, EXECUTION_TAB, ALERTS_TAB, RULE_DETAILS_PAGE_ID } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -57,6 +60,8 @@ import { paths } from '../../config/paths';
 import { observabilityFeatureId } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 import { ObservabilityAppServices } from '../../application/types';
+
+let kbnUrlStateStorage;
 
 function InternalRuleDetailsPage() {
   const {
@@ -77,6 +82,17 @@ function InternalRuleDetailsPage() {
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const history = useHistory();
+  kbnUrlStateStorage = useMemo(
+    () =>
+      createKbnUrlStateStorage({
+        history,
+        useHash: false,
+        useHashQuery: false,
+      }),
+    [history]
+  );
+  const { setTab, tabId } = useRuleDetailsPageStateContainer(kbnUrlStateStorage);
 
   const filteredRuleTypes = useMemo(
     () => observabilityRuleTypeRegistry.list(),
@@ -96,7 +112,7 @@ function InternalRuleDetailsPage() {
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
   const ruleQuery = useRef([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
-  ] as AnyQuery[]);
+  ] as Query[]);
 
   const NOTIFY_WHEN_OPTIONS = useRef<Array<EuiSuperSelectOption<unknown>>>([]);
   useEffect(() => {
@@ -164,9 +180,9 @@ function InternalRuleDetailsPage() {
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
-  const tabs = [
+  const tabs: EuiTabbedContentTab[] = [
     {
-      id: EVENT_LOG_LIST_TAB,
+      id: EXECUTION_TAB,
       name: i18n.translate('xpack.observability.ruleDetails.rule.eventLogTabText', {
         defaultMessage: 'Execution history',
       }),
@@ -183,7 +199,7 @@ function InternalRuleDetailsPage() {
       ),
     },
     {
-      id: ALERT_LIST_TAB,
+      id: ALERTS_TAB,
       name: i18n.translate('xpack.observability.ruleDetails.rule.alertsTabText', {
         defaultMessage: 'Alerts',
       }),
@@ -191,7 +207,11 @@ function InternalRuleDetailsPage() {
       content: (
         <>
           <EuiSpacer size="m" />
-          <ObservabilityAlertSearchBar setEsQuery={setEsQuery} queries={ruleQuery.current} />
+          <ObservabilityAlertSearchBar
+            setEsQuery={setEsQuery}
+            queries={ruleQuery.current}
+            urlStateStorage={kbnUrlStateStorage}
+          />
           <EuiSpacer size="s" />
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
@@ -244,6 +264,8 @@ function InternalRuleDetailsPage() {
   const statusMessage = isLicenseError
     ? ALERT_STATUS_LICENSE_ERROR
     : rulesStatusesTranslationsMapping[rule.executionStatus.status];
+
+  const selectedTab = tabs.find((tab) => tab.id === tabId);
 
   return (
     <ObservabilityPageTemplate
@@ -333,7 +355,14 @@ function InternalRuleDetailsPage() {
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />
-      <EuiTabbedContent data-test-subj="ruleDetailsTabbedContent" tabs={tabs} />
+      <EuiTabbedContent
+        data-test-subj="ruleDetailsTabbedContent"
+        tabs={tabs}
+        selectedTab={selectedTab}
+        onTabClick={(tab) => {
+          setTab(tab.id as TabId);
+        }}
+      />
       {editFlyoutVisible &&
         getEditAlertFlyout({
           initialRule: rule,
@@ -366,7 +395,9 @@ function InternalRuleDetailsPage() {
 export function RuleDetailsPage() {
   return (
     <Provider value={alertsPageStateContainer}>
-      <InternalRuleDetailsPage />
+      <RulesDetailsPageProvider value={ruleDetailsPageStateContainer}>
+        <InternalRuleDetailsPage />
+      </RulesDetailsPageProvider>
     </Provider>
   );
 }

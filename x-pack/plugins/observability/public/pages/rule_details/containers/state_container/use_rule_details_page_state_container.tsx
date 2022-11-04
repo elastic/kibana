@@ -20,35 +20,28 @@ import { useTimefilterService } from '../../../../hooks/use_timefilter_service';
 import {
   useContainer,
   defaultState,
-  AlertsPageStateContainer,
-  AlertsPageContainerState,
+  RuleDetailsPageStateContainer,
+  RuleDetailsState,
 } from './state_container';
 
-export function useAlertsPageStateContainer(urlStateStorage?: IKbnUrlStateStorage) {
+const STATE_STORAGE_KEY = '_a';
+
+export function useRuleDetailsPageStateContainer(urlStateStorage?: IKbnUrlStateStorage) {
   const stateContainer = useContainer();
 
   useUrlStateSyncEffect(stateContainer, urlStateStorage);
 
-  const { setRangeFrom, setRangeTo, setKuery, setStatus } = stateContainer.transitions;
-  const { rangeFrom, rangeTo, kuery, status } = useContainerSelector(
-    stateContainer,
-    (state) => state
-  );
+  const { setTab } = stateContainer.transitions;
+  const { tabId } = useContainerSelector(stateContainer, (state) => state);
 
   return {
-    rangeFrom,
-    setRangeFrom,
-    rangeTo,
-    setRangeTo,
-    kuery,
-    setKuery,
-    status,
-    setStatus,
+    tabId,
+    setTab,
   };
 }
 
 function useUrlStateSyncEffect(
-  stateContainer: AlertsPageStateContainer,
+  stateContainer: RuleDetailsPageStateContainer,
   kbnUrlStateStorage?: IKbnUrlStateStorage
 ) {
   const history = useHistory();
@@ -69,20 +62,20 @@ function useUrlStateSyncEffect(
     syncUrlStateWithInitialContainerState(timefilterService, stateContainer, urlStateStorage);
 
     return stop;
-  }, [stateContainer, history, timefilterService]);
+  }, [stateContainer, history, timefilterService, kbnUrlStateStorage]);
 }
 
 function setupUrlStateSync(
-  stateContainer: AlertsPageStateContainer,
+  stateContainer: RuleDetailsPageStateContainer,
   stateStorage: IKbnUrlStateStorage
 ) {
   // This handles filling the state when an incomplete URL set is provided
-  const setWithDefaults = (changedState: Partial<AlertsPageContainerState> | null) => {
+  const setWithDefaults = (changedState: Partial<RuleDetailsState> | null) => {
     stateContainer.set({ ...defaultState, ...changedState });
   };
 
   return syncState({
-    storageKey: '_a',
+    storageKey: STATE_STORAGE_KEY,
     stateContainer: {
       ...stateContainer,
       set: setWithDefaults,
@@ -93,10 +86,10 @@ function setupUrlStateSync(
 
 function syncUrlStateWithInitialContainerState(
   timefilterService: TimefilterContract,
-  stateContainer: AlertsPageStateContainer,
+  stateContainer: RuleDetailsPageStateContainer,
   urlStateStorage: IKbnUrlStateStorage
 ) {
-  const urlState = urlStateStorage.get<Partial<AlertsPageContainerState>>('_a');
+  const urlState = urlStateStorage.get<Partial<RuleDetailsState>>('_a');
 
   if (urlState) {
     const newState = {
@@ -120,5 +113,5 @@ function syncUrlStateWithInitialContainerState(
     stateContainer.set(defaultState);
   }
 
-  urlStateStorage.set('_a', stateContainer.get());
+  urlStateStorage.set(STATE_STORAGE_KEY, stateContainer.get());
 }
