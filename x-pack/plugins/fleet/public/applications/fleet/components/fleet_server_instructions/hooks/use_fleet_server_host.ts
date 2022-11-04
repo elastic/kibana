@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { intersection } from 'lodash';
 
@@ -13,6 +13,7 @@ import {
   useGetFleetServerHosts,
   useComboInput,
   useInput,
+  useSwitchInput,
 } from '../../../hooks';
 import type { FleetServerHost } from '../../../types';
 
@@ -31,6 +32,7 @@ export interface FleetServerHostForm {
   inputs: {
     hostUrlsInput: ReturnType<typeof useComboInput>;
     nameInput: ReturnType<typeof useInput>;
+    isDefaultInput: ReturnType<typeof useSwitchInput>;
   };
 }
 
@@ -40,6 +42,11 @@ export const useFleetServerHost = (): FleetServerHostForm => {
 
   const isPreconfigured = fleetServerHost?.is_preconfigured ?? false;
   const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isPreconfigured);
+
+  const isDefaultInput = useSwitchInput(
+    fleetServerHost?.is_default ?? false,
+    isPreconfigured || fleetServerHost?.is_default
+  );
 
   const hostUrlsInput = useComboInput(
     'hostUrls',
@@ -53,18 +60,6 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   );
 
   const { data } = useGetFleetServerHosts();
-
-  useEffect(() => {
-    const fleetServerHosts = data?.items ?? [];
-    const defaultHost = fleetServerHosts.find((item) => item.is_default === true);
-
-    // Get the default host, otherwise the first fleet server found
-    if (defaultHost) {
-      setFleetServerHost(defaultHost);
-    } else {
-      setFleetServerHost(fleetServerHosts[0]);
-    }
-  }, [data?.items, fleetServerHost]);
 
   const saveFleetServerHost = useCallback(
     async (newFleetServerHost: FleetServerHost) => {
@@ -105,6 +100,7 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     inputs: {
       hostUrlsInput,
       nameInput,
+      isDefaultInput,
     },
   };
 };
