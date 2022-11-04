@@ -16,7 +16,7 @@ import {
   ISearchOptions,
 } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
-import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
+import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
 import { MAX_PERCENT, PERCENTILE_SPACING, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
@@ -35,7 +35,7 @@ export const getNumericFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fields: Field[]
 ) => {
-  const { index, query, runtimeFieldMap, samplerShardSize } = params;
+  const { index, query, runtimeFieldMap } = params;
 
   const size = 0;
 
@@ -79,18 +79,7 @@ export const getNumericFieldsStatsRequest = (
       } as AggregationsTermsAggregation,
     };
 
-    // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
-    // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
-    if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-      aggs[`${safeFieldName}_top`] = buildSamplerAggregation(
-        {
-          top,
-        },
-        0.05
-      );
-    } else {
-      aggs[`${safeFieldName}_top`] = top;
-    }
+    aggs[`${safeFieldName}_top`] = top;
   });
 
   const searchBody = {
@@ -158,7 +147,6 @@ export const fetchNumericFieldsStats = (
 
           const stats: NumericFieldStats = {
             fieldName: field.fieldName,
-            count: docCount,
             min: get(fieldStatsResp, 'min', 0),
             max: get(fieldStatsResp, 'max', 0),
             avg: get(fieldStatsResp, 'avg', 0),
@@ -166,11 +154,10 @@ export const fetchNumericFieldsStats = (
               field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
             topValues,
             topValuesSampleSize: get(aggregations, ['sample', 'doc_count']),
-            // @todo: remove
             topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };
 
-          if (stats.count > 0) {
+          if (docCount > 0) {
             const percentiles = get(
               aggregations,
               [...aggsPath, `${safeFieldName}_percentiles`, 'values'],

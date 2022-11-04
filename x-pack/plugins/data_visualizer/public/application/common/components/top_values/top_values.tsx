@@ -53,22 +53,13 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   const { fieldFormats } = data;
 
   if (stats === undefined || !stats.topValues) return null;
-  const {
-    topValues,
-    topValuesSampleSize,
-    count,
-    isTopValuesSampled,
-    fieldName,
-    sampleCount,
-    topValuesSamplerShardSize,
-  } = stats;
+  const { topValues, isTopValuesSampled, fieldName, sampleCount, topValuesSamplerShardSize } =
+    stats;
 
   const totalDocuments = stats.totalDocuments;
 
-  const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
-
   const topValuesOtherCount =
-    (progressBarMax ?? 0) -
+    (totalDocuments ?? 0) -
     (topValues ? topValues.map((value) => value.doc_count).reduce((v, acc) => acc + v, 0) : 0);
 
   const countsElement =
@@ -140,14 +131,14 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                 <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
                   <EuiProgress
                     value={value.doc_count}
-                    max={progressBarMax}
+                    max={totalDocuments}
                     color={barColor}
                     size="xs"
                     label={kibanaFieldFormat(value.key, fieldFormat)}
                     className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                     valueText={`${value.doc_count}${
-                      progressBarMax !== undefined
-                        ? ` (${getPercentLabel(value.doc_count, progressBarMax)})`
+                      totalDocuments !== undefined
+                        ? ` (${getPercentLabel(value.doc_count, totalDocuments)})`
                         : ''
                     }`}
                   />
@@ -222,7 +213,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
             <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
               <EuiProgress
                 value={topValuesOtherCount}
-                max={progressBarMax}
+                max={totalDocuments}
                 color={barColor}
                 size="xs"
                 label={
@@ -233,8 +224,8 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                 }
                 className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                 valueText={`${topValuesOtherCount}${
-                  progressBarMax !== undefined
-                    ? ` (${getPercentLabel(topValuesOtherCount, progressBarMax)})`
+                  totalDocuments !== undefined
+                    ? ` (${getPercentLabel(topValuesOtherCount, totalDocuments)})`
                     : ''
                 }`}
               />

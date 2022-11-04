@@ -27,7 +27,7 @@ export const getDateFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fields: Field[]
 ) => {
-  const { index, query, runtimeFieldMap, samplerShardSize } = params;
+  const { index, query, runtimeFieldMap } = params;
 
   const size = 0;
 
@@ -85,11 +85,6 @@ export const fetchDateFieldsStats = (
 
         const batchStats: DateFieldStats[] = fields.map((field, i) => {
           const safeFieldName = field.safeFieldName;
-          const docCount = get(
-            aggregations,
-            [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'],
-            0
-          );
           const fieldStatsResp = get(
             aggregations,
             [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
@@ -97,7 +92,6 @@ export const fetchDateFieldsStats = (
           );
           return {
             fieldName: field.fieldName,
-            count: docCount,
             earliest: get(fieldStatsResp, 'min', 0),
             latest: get(fieldStatsResp, 'max', 0),
           } as DateFieldStats;

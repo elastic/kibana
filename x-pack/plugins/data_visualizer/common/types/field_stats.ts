@@ -54,7 +54,7 @@ export const isIKibanaSearchResponse = (arg: unknown): arg is IKibanaSearchRespo
 
 export interface NumericFieldStats {
   fieldName: string;
-  count: number;
+  count?: number;
   min: number;
   max: number;
   avg: number;

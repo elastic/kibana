@@ -140,7 +140,7 @@ export const getDocumentCountStats = async (
         params: getSearchParams(
           getAggsWithRandomSampling(initialDefaultProbability),
           // Track total hits if time field is not defined
-          timeFieldName === undefined
+          !hasTimeField
         ),
       },
       searchOptions
@@ -187,13 +187,9 @@ export const getDocumentCountStats = async (
     const newProbability =
       (initialDefaultProbability * numDocs) / (numSampled - 2 * Math.sqrt(numSampled));
 
-    // If the number of docs sampled is indicative of query with < 10 million docs
+    // If the number of docs sampled is is too small
     // proceed to make a vanilla aggregation without any sampling
-    if (
-      numSampled === 0 ||
-      newProbability === Infinity ||
-      numSampled / initialDefaultProbability < 1e7
-    ) {
+    if (numSampled === 0 || newProbability === Infinity || numSampled < 5) {
       const vanillaAggResp = await search
         .search(
           {

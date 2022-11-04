@@ -14,27 +14,28 @@ import { isIndexBasedFieldVisConfig } from '../../types';
 
 interface Props extends FieldDataRowProps {
   showIcon?: boolean;
-  totalCount: number;
+  totalCount?: number;
 }
 export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
   const { stats } = config;
   if (stats === undefined) return null;
-  const { count, sampleCount } = stats;
+  const { count, sampleCount, totalDocuments } = stats;
+  const total = totalDocuments ?? sampleCount ?? totalCount;
 
   // If field exists is docs but we don't have count stats then don't show
   // Otherwise if field doesn't appear in docs at all, show 0%
-  const docsCount =
+  const valueCount =
     count ?? (isIndexBasedFieldVisConfig(config) && config.existsInDocs === true ? undefined : 0);
   const docsPercent =
-    docsCount !== undefined && sampleCount !== undefined
-      ? roundToDecimalPlace((docsCount / totalCount) * 100)
+    valueCount !== undefined && total !== undefined
+      ? roundToDecimalPlace((valueCount / total) * 100)
       : 0;
 
-  return docsCount !== undefined ? (
+  return valueCount !== undefined ? (
     <>
       {showIcon ? <EuiIcon type="document" size={'m'} className={'columnHeader__icon'} /> : null}
       <EuiText size={'xs'}>
-        {docsCount} ({docsPercent}%)
+        {valueCount} ({docsPercent}%)
       </EuiText>
     </>
   ) : null;

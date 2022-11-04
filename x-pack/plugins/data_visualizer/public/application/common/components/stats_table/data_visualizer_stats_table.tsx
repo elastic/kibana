@@ -60,7 +60,7 @@ interface DataVisualizerTableProps<T> {
   /** Callback to receive any updates when table or page state is changed **/
   onChange?: (update: Partial<DataVisualizerTableState>) => void;
   loading?: boolean;
-  totalCount: number;
+  totalCount?: number;
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -219,9 +219,29 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       {
         field: 'docCount',
-        name: i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
-          defaultMessage: 'Documents (%)',
-        }),
+        name: (
+          <div className={'columnHeader__title'}>
+            {dimensions.showIcon ? (
+              <EuiIcon type={'visBarVertical'} className={'columnHeader__icon'} />
+            ) : null}
+            {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
+              defaultMessage: 'Documents (%)',
+            })}
+            {
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.dataVisualizer.dataGrid.documentsCountColumnTooltip',
+                  {
+                    defaultMessage: 'Document count found based on a sample of records.',
+                  }
+                )}
+              >
+                <EuiIcon type="questionInCircle" />
+              </EuiToolTip>
+            }
+          </div>
+        ),
+
         render: (value: number | undefined, item: DataVisualizerTableItem) => (
           <DocumentStat config={item} showIcon={dimensions.showIcon} totalCount={totalCount} />
         ),

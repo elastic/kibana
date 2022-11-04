@@ -238,7 +238,6 @@ export const useDataVisualizerGridData = (
   const { overallStats, progress: overallStatsProgress } = useOverallStats(
     fieldStatsRequest,
     lastRefresh,
-    // @todo
     browserSessionSeed,
     dataVisualizerListState.probability
   );
@@ -272,14 +271,20 @@ export const useDataVisualizerGridData = (
     return { metricConfigs: existMetricFields, nonMetricConfigs: existNonMetricFields };
   }, [metricConfigs, nonMetricConfigs, overallStatsProgress.loaded]);
 
+  const probability = useMemo(
+    () =>
+      // If random sampler probability is already manually selected, or is available from the URL
+      // use that instead of using the probability calculated from the doc count
+      (dataVisualizerListState.probability === null
+        ? overallStats?.documentCountStats?.probability
+        : dataVisualizerListState.probability) ?? 1,
+    [dataVisualizerListState.probability, overallStats?.documentCountStats?.probability]
+  );
   const strategyResponse = useFieldStatsSearchStrategy(
     fieldStatsRequest,
     configsWithoutStats,
     dataVisualizerListState,
-    // @todo: use this in a function for maintainability
-    (dataVisualizerListState.probability === null
-      ? overallStats?.documentCountStats?.probability
-      : dataVisualizerListState.probability) ?? 1
+    probability
   );
 
   const combinedProgress = useMemo(

@@ -18,7 +18,7 @@ import type {
 import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
-import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
+import { SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {
   Aggs,
   Bucket,
@@ -33,7 +33,7 @@ export const getStringFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fields: Field[]
 ) => {
-  const { index, query, runtimeFieldMap, samplerShardSize } = params;
+  const { index, query, runtimeFieldMap } = params;
 
   const size = 0;
 
@@ -50,20 +50,7 @@ export const getStringFieldStatsRequest = (
       } as AggregationsTermsAggregation,
     };
 
-    // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
-    // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
-    if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-      aggs[`${safeFieldName}_top`] = {
-        sampler: {
-          shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-        },
-        aggs: {
-          top,
-        },
-      };
-    } else {
-      aggs[`${safeFieldName}_top`] = top;
-    }
+    aggs[`${safeFieldName}_top`] = top;
   });
 
   const searchBody = {
@@ -104,6 +91,7 @@ export const fetchStringFieldsStats = (
       map((resp) => {
         if (!isIKibanaSearchResponse(resp)) return resp;
         const aggregations = resp.rawResponse.aggregations;
+
         const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
         const batchStats: StringFieldStats[] = [];
 
@@ -122,7 +110,6 @@ export const fetchStringFieldsStats = (
             isTopValuesSampled: true,
             topValues,
             topValuesSampleSize: get(aggregations, ['sample', 'doc_count']),
-            // @todo: remove
             topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };
 

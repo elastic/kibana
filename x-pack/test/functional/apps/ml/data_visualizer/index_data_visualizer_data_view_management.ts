@@ -153,7 +153,6 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     await ml.dataVisualizerTable.assertSearchPanelExist();
-    await ml.dataVisualizerTable.assertSampleSizeInputExists();
     await ml.dataVisualizerTable.assertFieldTypeInputExists();
     await ml.dataVisualizerTable.assertFieldNameInputExists();
 
