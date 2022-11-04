@@ -16,6 +16,7 @@ import type {
   TermsIndexPatternColumn,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
+import { fieldSupportsBreakdown } from './field_supports_breakdown';
 
 export const getLensAttributes = ({
   filters,
@@ -30,7 +31,7 @@ export const getLensAttributes = ({
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
 }) => {
-  const showBreakdown = breakdownField?.aggregatable;
+  const showBreakdown = breakdownField && fieldSupportsBreakdown(breakdownField);
 
   let columnOrder = ['date_column', 'count_column'];
 

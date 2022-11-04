@@ -158,6 +158,8 @@ export const useDiscoverHistogram = ({
     (status: UnifiedHistogramFetchStatus, totalHits?: number) => {
       const { fetchStatus, recordRawType } = savedSearchData$.totalHits$.getValue();
 
+      // If we have a partial result already, we don't
+      // want to update the total hits back to loading
       if (fetchStatus === 'partial' && status === 'loading') {
         return;
       }

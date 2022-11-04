@@ -12,6 +12,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { UnifiedHistogramBreakdownContext } from '../types';
+import { fieldSupportsBreakdown } from './field_supports_breakdown';
 
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
@@ -25,15 +26,18 @@ export const BreakdownFieldSelector = ({
   onBreakdownFieldChange,
 }: BreakdownFieldSelectorProps) => {
   const fieldOptions = dataView.fields
-    .filter((field) => field.aggregatable)
-    .map((field) => ({ label: field.name }));
+    .filter((field) => fieldSupportsBreakdown(field))
+    .map((field) => ({ label: field.displayName, value: field.name }))
+    .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 
-  const selectedFields = breakdown?.field ? [{ label: breakdown.field.name }] : [];
+  const selectedFields = breakdown?.field
+    ? [{ label: breakdown.field.displayName, value: breakdown.field.name }]
+    : [];
 
   const onFieldChange = useCallback(
     (newOptions: EuiComboBoxOptionOption[]) => {
       const field = newOptions.length
-        ? dataView.fields.find((currentField) => currentField.name === newOptions[0].label)
+        ? dataView.fields.find((currentField) => currentField.name === newOptions[0].value)
         : undefined;
 
       onBreakdownFieldChange?.(field);
