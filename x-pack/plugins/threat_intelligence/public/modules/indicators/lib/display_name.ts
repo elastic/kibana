@@ -62,7 +62,7 @@ const fieldTypeCheck = (type: string) =>
  * Generates Painless condition checking if given `field` has value
  */
 const fieldValueCheck = (field: string) =>
-  `if (doc['${field}'].size()!=0 && doc['${field}'].value!=null)`;
+  `if (doc.containsKey('${field}') && !doc['${field}'].empty && doc['${field}'].size()!=0 && doc['${field}'].value!=null)`;
 
 /**
  * Converts Mapping to Painless script, computing `threat.indicator.name` value for given indicator types.
