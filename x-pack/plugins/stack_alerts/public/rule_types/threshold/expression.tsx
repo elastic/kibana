@@ -32,7 +32,7 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ThresholdVisualization } from './visualization';
-import { IndexThresholdAlertParams } from './types';
+import { IndexThresholdRuleParams } from './types';
 import './expression.scss';
 import { IndexSelectPopover } from '../components/index_select_popover';
 
@@ -71,8 +71,8 @@ function indexParamToArray(index: string | string[]): string[] {
   return isString(index) ? [index] : index;
 }
 
-export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
-  Omit<RuleTypeParamsExpressionProps<IndexThresholdAlertParams>, 'unifiedSearch'>
+export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
+  Omit<RuleTypeParamsExpressionProps<IndexThresholdRuleParams>, 'unifiedSearch'>
 > = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, charts, data }) => {
   const {
     index,
@@ -106,7 +106,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
       errors[errorKey].length >= 1 &&
-      ruleParams[errorKey as keyof IndexThresholdAlertParams] !== undefined
+      ruleParams[errorKey as keyof IndexThresholdRuleParams] !== undefined
   );
 
   const cannotShowVisualization = !!Object.keys(errors).find(
@@ -339,4 +339,4 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
 };
 
 // eslint-disable-next-line import/no-default-export
-export { IndexThresholdAlertTypeExpression as default };
+export { IndexThresholdRuleTypeExpression as default };

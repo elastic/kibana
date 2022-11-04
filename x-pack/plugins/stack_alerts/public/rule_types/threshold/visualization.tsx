@@ -35,10 +35,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AggregationType, Comparator } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import {
-  getThresholdAlertVisualizationData,
-  GetThresholdAlertVisualizationDataParams,
+  getThresholdRuleVisualizationData,
+  GetThresholdRuleVisualizationDataParams,
 } from './index_threshold_api';
-import { IndexThresholdAlertParams } from './types';
+import { IndexThresholdRuleParams } from './types';
 
 const customTheme = () => {
   return {
@@ -87,7 +87,7 @@ const getDomain = (alertInterval: string, startAt: Date) => {
 };
 
 interface Props {
-  ruleParams: IndexThresholdAlertParams;
+  ruleParams: IndexThresholdRuleParams;
   alertInterval: string;
   aggregationTypes: { [key: string]: AggregationType };
   comparators: {
@@ -336,11 +336,11 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
 
 // convert the data from the visualization API into something easier to digest with charts
 async function getVisualizationData(
-  model: IndexThresholdAlertParams,
-  visualizeOptions: GetThresholdAlertVisualizationDataParams['visualizeOptions'],
+  model: IndexThresholdRuleParams,
+  visualizeOptions: GetThresholdRuleVisualizationDataParams['visualizeOptions'],
   http: HttpSetup
 ) {
-  const vizData = await getThresholdAlertVisualizationData({
+  const vizData = await getThresholdRuleVisualizationData({
     model,
     visualizeOptions,
     http,

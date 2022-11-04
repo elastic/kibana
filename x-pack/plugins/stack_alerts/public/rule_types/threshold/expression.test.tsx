@@ -8,11 +8,11 @@
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import IndexThresholdAlertTypeExpression, { DEFAULT_VALUES } from './expression';
+import IndexThresholdRuleTypeExpression, { DEFAULT_VALUES } from './expression';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { IndexThresholdAlertParams } from './types';
+import { IndexThresholdRuleParams } from './types';
 import { validateExpression } from './validation';
 import {
   builtInAggregationTypes,
@@ -72,7 +72,7 @@ const dataMock = dataPluginMock.createStartContract();
 const dataViewMock = dataViewPluginMocks.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 
-describe('IndexThresholdAlertTypeExpression', () => {
+describe('IndexThresholdRuleTypeExpression', () => {
   function getAlertParams(overrides = {}) {
     return {
       index: 'test-index',
@@ -84,11 +84,11 @@ describe('IndexThresholdAlertTypeExpression', () => {
       ...overrides,
     };
   }
-  async function setup(ruleParams: IndexThresholdAlertParams) {
+  async function setup(ruleParams: IndexThresholdRuleParams) {
     const { errors } = validateExpression(ruleParams);
 
     const wrapper = mountWithIntl(
-      <IndexThresholdAlertTypeExpression
+      <IndexThresholdRuleTypeExpression
         ruleInterval="1m"
         ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
@@ -111,7 +111,7 @@ describe('IndexThresholdAlertTypeExpression', () => {
     return wrapper;
   }
 
-  test(`should render IndexThresholdAlertTypeExpression with expected components when aggType doesn't require field`, async () => {
+  test(`should render IndexThresholdRuleTypeExpression with expected components when aggType doesn't require field`, async () => {
     const wrapper = await setup(getAlertParams());
     expect(wrapper.find('[data-test-subj="indexSelectPopover"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="whenExpression"]').exists()).toBeTruthy();
@@ -124,7 +124,7 @@ describe('IndexThresholdAlertTypeExpression', () => {
     expect(wrapper.find('[data-test-subj="filterKuery"]').exists()).toBeTruthy();
   });
 
-  test(`should render IndexThresholdAlertTypeExpression with expected components when aggType does require field`, async () => {
+  test(`should render IndexThresholdRuleTypeExpression with expected components when aggType does require field`, async () => {
     const wrapper = await setup(getAlertParams({ aggType: 'avg' }));
     expect(wrapper.find('[data-test-subj="indexSelectPopover"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="whenExpression"]').exists()).toBeTruthy();
@@ -137,7 +137,7 @@ describe('IndexThresholdAlertTypeExpression', () => {
     expect(wrapper.find('[data-test-subj="filterKuery"]').exists()).toBeTruthy();
   });
 
-  test(`should render IndexThresholdAlertTypeExpression with visualization when there are no expression errors`, async () => {
+  test(`should render IndexThresholdRuleTypeExpression with visualization when there are no expression errors`, async () => {
     const wrapper = await setup(getAlertParams({ timeField: '@timestamp' }));
     expect(wrapper.find('[data-test-subj="visualizationPlaceholder"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="thresholdVisualization"]').exists()).toBeTruthy();

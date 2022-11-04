@@ -7,12 +7,12 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { TimeSeriesResult } from '@kbn/triggers-actions-ui-plugin/common';
-import { IndexThresholdAlertParams } from './types';
+import { IndexThresholdRuleParams } from './types';
 
 const INDEX_THRESHOLD_DATA_API_ROOT = '/internal/triggers_actions_ui/data';
 
-export interface GetThresholdAlertVisualizationDataParams {
-  model: IndexThresholdAlertParams;
+export interface GetThresholdRuleVisualizationDataParams {
+  model: IndexThresholdRuleParams;
   visualizeOptions: {
     rangeFrom: string;
     rangeTo: string;
@@ -21,11 +21,11 @@ export interface GetThresholdAlertVisualizationDataParams {
   http: HttpSetup;
 }
 
-export async function getThresholdAlertVisualizationData({
+export async function getThresholdRuleVisualizationData({
   model,
   visualizeOptions,
   http,
-}: GetThresholdAlertVisualizationDataParams): Promise<TimeSeriesResult> {
+}: GetThresholdRuleVisualizationDataParams): Promise<TimeSeriesResult> {
   const timeSeriesQueryParams = {
     index: model.index,
     timeField: model.timeField,

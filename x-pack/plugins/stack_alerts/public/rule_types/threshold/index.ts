@@ -9,9 +9,9 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { validateExpression } from './validation';
-import { IndexThresholdAlertParams } from './types';
+import { IndexThresholdRuleParams } from './types';
 
-export function getRuleType(): RuleTypeModel<IndexThresholdAlertParams> {
+export function getRuleType(): RuleTypeModel<IndexThresholdRuleParams> {
   return {
     id: '.index-threshold',
     description: i18n.translate('xpack.stackAlerts.threshold.ui.alertType.descriptionText', {
