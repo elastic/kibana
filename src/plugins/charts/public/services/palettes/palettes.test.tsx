@@ -7,7 +7,7 @@
  */
 
 import type { PaletteDefinition } from '@kbn/coloring';
-import { createColorPalette as createLegacyColorPalette } from '../..';
+import { createColorPalette as createLegacyColorPalette } from '@kbn/charts-helpers';
 import { buildPalettes } from './palettes';
 import { colorsServiceMock } from '../legacy_colors/mock';
 import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';

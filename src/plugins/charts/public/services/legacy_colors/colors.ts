@@ -9,9 +9,9 @@
 import _ from 'lodash';
 
 import { CoreSetup } from '@kbn/core/public';
+import { seedColors } from '@kbn/charts-helpers';
 
 import { MappedColors } from '../mapped_colors';
-import { seedColors } from '../../static/colors';
 
 /**
  * Accepts an array of strings or numbers that are used to create a

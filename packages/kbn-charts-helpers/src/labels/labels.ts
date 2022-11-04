@@ -17,6 +17,6 @@ export const LabelRotation = Object.freeze({
 
 export type LabelRotation = $Values<typeof LabelRotation>;
 
-export const defaultCountLabel = i18n.translate('charts.countText', {
+export const defaultCountLabel = i18n.translate('chartsHelpers.countText', {
   defaultMessage: 'Count',
 });

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { seedColors } from '../../static/colors';
-import { createColorPalette } from '../../static/colors';
+import { seedColors } from './seed_colors';
+import { createColorPalette } from './color_palette';
 
 describe('Color Palette', () => {
   const num1 = 45;

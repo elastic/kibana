@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { times, isNumber } from 'lodash';
 import { hsl } from 'color';
 
 import { seedColors } from './seed_colors';
@@ -39,14 +39,14 @@ const fraction = function (goal: number) {
  * new colors are generated up to the value of the input number.
  */
 export function createColorPalette(num: number): string[] {
-  if (!_.isNumber(num)) {
+  if (!isNumber(num)) {
     throw new TypeError('ColorPaletteUtilService expects a number');
   }
 
   const colors = seedColors;
   const seedLength = seedColors.length;
 
-  _.times(num - seedLength, function (i) {
+  times(num - seedLength, function (i) {
     colors.push(hsl((fraction(i + seedLength + 1) * 360 + offset) % 360, 50, 50).hex());
   });
 

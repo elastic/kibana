@@ -9,9 +9,9 @@
 import _ from 'lodash';
 import Color from 'color';
 
+import { seedColors } from '@kbn/charts-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
-import { seedColors } from '../../static/colors';
 import { MappedColors } from './mapped_colors';
 
 // Local state for config

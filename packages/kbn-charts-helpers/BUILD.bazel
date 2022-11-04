@@ -51,6 +51,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-i18n",
   "//packages/kbn-utility-types",
   "@npm//lodash",
+  "@npm//color",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -66,6 +67,7 @@ TYPES_DEPS = [
   "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
   "@npm//@types/lodash",
+  "@npm//@types/color",
 ]
 
 jsts_transpiler(

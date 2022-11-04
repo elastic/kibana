@@ -10,9 +10,9 @@ import _ from 'lodash';
 import Color from 'color';
 
 import { CoreSetup } from '@kbn/core/public';
+import { createColorPalette } from '@kbn/charts-helpers';
 
 import { COLOR_MAPPING_SETTING } from '../../../common';
-import { createColorPalette } from '../../static/colors';
 
 const standardizeColor = (color: string) => new Color(color).hex().toLowerCase();
 

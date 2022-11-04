@@ -7,8 +7,8 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { seedColors } from '@kbn/charts-helpers';
 import { COLOR_MAPPING_SETTING } from '../../../common';
-import { seedColors } from '../../static/colors';
 import { LegacyColorsService } from './colors';
 
 // Local state for config

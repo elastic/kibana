@@ -22,8 +22,9 @@ import {
   euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
+import { createColorPalette as createLegacyColorPalette } from '@kbn/charts-helpers';
 import { flatten, zip } from 'lodash';
-import { ChartsPluginSetup, createColorPalette as createLegacyColorPalette } from '../..';
+import { ChartsPluginSetup } from '../..';
 import { lightenColor } from './lighten_color';
 import { LegacyColorsService } from '../legacy_colors';
 import { MappedColors } from '../mapped_colors';
