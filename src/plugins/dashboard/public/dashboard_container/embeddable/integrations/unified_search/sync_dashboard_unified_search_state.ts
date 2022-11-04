@@ -34,7 +34,7 @@ export function syncUnifiedSearchState(this: DashboardContainer) {
     actions: { setFiltersAndQuery, setTimeRange },
   } = this.getReduxEmbeddableTools();
 
-  // get Observable for when the dashboard's saved filters or saved query change.
+  // get Observable for when the dashboard's saved filters or query change.
   const OnFiltersChange$ = new Subject<{ filters: Filter[]; query: Query }>();
   const unsubscribeFromSavedFilterChanges = onStateChange(() => {
     const {

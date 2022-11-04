@@ -124,7 +124,6 @@ describe('ShowShareModal', () => {
         },
       ],
       query: { query: 'bye', language: 'kuery' },
-      savedQuery: 'amazingSavedQuery',
     } as unknown as DashboardContainerByValueInput;
     const showModalProps = getPropsAndShare(unsavedDashboardState);
     ShowShareModal(showModalProps);

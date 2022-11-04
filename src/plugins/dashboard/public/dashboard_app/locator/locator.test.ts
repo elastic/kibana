@@ -170,24 +170,6 @@ describe('dashboard locator', () => {
     });
   });
 
-  test('savedQuery', async () => {
-    const definition = new DashboardAppLocatorDefinition({
-      useHashedUrl: false,
-      getDashboardFilterFields: async (dashboardId: string) => [],
-    });
-    const location = await definition.getLocation({
-      savedQuery: '__savedQueryId__',
-    });
-
-    expect(location).toMatchObject({
-      app: 'dashboards',
-      path: `#/create?_g=()`,
-      state: {
-        savedQuery: '__savedQueryId__',
-      },
-    });
-  });
-
   test('panels', async () => {
     const definition = new DashboardAppLocatorDefinition({
       useHashedUrl: false,

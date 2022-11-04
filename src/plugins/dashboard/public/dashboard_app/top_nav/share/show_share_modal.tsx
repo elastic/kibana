@@ -125,7 +125,7 @@ export function ShowShareModal({
 
   let unsavedStateForLocator: Pick<
     DashboardAppLocatorParams,
-    'options' | 'query' | 'savedQuery' | 'filters' | 'panels' | 'controlGroupInput'
+    'options' | 'query' | 'filters' | 'panels' | 'controlGroupInput'
   > = {};
   const { title } = currentDashboardState;
   const unsavedDashboardState = dashboardSessionStorage.getState(savedObjectId);
@@ -134,7 +134,6 @@ export function ShowShareModal({
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
-      // savedQuery: unsavedDashboardState.savedQuery, // TODO PORTABLE DASHBOARDS figure out saved query
       options: unsavedDashboardState.options as unknown as DashboardOptions & SerializableRecord,
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels

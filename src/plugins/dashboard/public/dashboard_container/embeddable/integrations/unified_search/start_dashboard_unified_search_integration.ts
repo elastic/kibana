@@ -45,7 +45,7 @@ export function startUnifiedSearchIntegration(
     this.kbnUrlStateStorage
   );
 
-  // apply initial dashboard saved query to the query bar.
+  // apply initial dashboard saved filters, query, and time range to the query bar.
   this.applySavedFiltersToUnifiedSearch(initialInput);
 
   const initialTimeRange = initialInput.timeRestore ? undefined : timefilterService.getTime();
