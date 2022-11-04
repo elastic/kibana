@@ -230,7 +230,7 @@ const Wrapper = styled.div<{
   height: ${(props) => (props.$customHeight ? `${props.$customHeight};` : `100%;`)};
   position: relative;
   &&& {
-    > .embPanel:nth-child(2) {
+    > :nth-child(2) {
       height: ${(props) =>
         props.$customHeight ? `${props.$customHeight};` : `calc(100% - 32px);`};
     }
