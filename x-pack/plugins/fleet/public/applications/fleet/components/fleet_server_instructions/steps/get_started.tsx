@@ -125,7 +125,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
                 onClick={() => setFleetServerHost(null)}
               >
                 <FormattedMessage
-                  id="xpack.fleet.fleetServerSetup.fleetServerHostsLabel"
+                  id="xpack.fleet.fleetServerSetup.addFleetServerHostBtn"
                   defaultMessage="Add new Fleet Server Hosts"
                 />
               </EuiButtonEmpty>
