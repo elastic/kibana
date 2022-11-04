@@ -61,7 +61,7 @@ function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
     ? // base64 decode svg string
       settings.customIcons.map((icon) => {
-        return { ...icon, svg: Buffer.from(icon.svg, 'base64').toString('utf-8') };
+        return { ...icon, svg: global.Buffer.from(icon.svg, 'base64').toString('utf-8') };
       })
     : [];
   return setMapSettings({
