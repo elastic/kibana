@@ -158,7 +158,7 @@ export interface SavedObjectsServiceStart {
    */
   getScopedClient: (
     req: KibanaRequest,
-    options?: SavedObjectsClientProviderOptions // check these
+    options?: SavedObjectsClientProviderOptions
   ) => SavedObjectsClientContract;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that

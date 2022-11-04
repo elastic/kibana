@@ -28,9 +28,9 @@ import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-m
 interface Params {
   defaultClientFactory: SavedObjectsClientFactory;
   typeRegistry: ISavedObjectTypeRegistry;
-  encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory | undefined;
-  securityExtensionFactory: SavedObjectsSecurityExtensionFactory | undefined;
-  spacesExtensionFactory: SavedObjectsSpacesExtensionFactory | undefined;
+  encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory;
+  securityExtensionFactory: SavedObjectsSecurityExtensionFactory;
+  spacesExtensionFactory: SavedObjectsSpacesExtensionFactory;
 }
 
 function createClientProvider(

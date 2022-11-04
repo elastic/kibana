@@ -42,9 +42,9 @@ export type ISavedObjectsClientProvider = Pick<
 export class SavedObjectsClientProvider {
   private _clientFactory: SavedObjectsClientFactory;
   private readonly _originalClientFactory: SavedObjectsClientFactory;
-  private readonly encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory | undefined;
-  private readonly securityExtensionFactory: SavedObjectsSecurityExtensionFactory | undefined;
-  private readonly spacesExtensionFactory: SavedObjectsSpacesExtensionFactory | undefined;
+  private readonly encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory;
+  private readonly securityExtensionFactory: SavedObjectsSecurityExtensionFactory;
+  private readonly spacesExtensionFactory: SavedObjectsSpacesExtensionFactory;
   private readonly _typeRegistry: ISavedObjectTypeRegistry;
 
   constructor({
@@ -56,9 +56,9 @@ export class SavedObjectsClientProvider {
   }: {
     defaultClientFactory: SavedObjectsClientFactory;
     typeRegistry: ISavedObjectTypeRegistry;
-    encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory | undefined;
-    securityExtensionFactory: SavedObjectsSecurityExtensionFactory | undefined;
-    spacesExtensionFactory: SavedObjectsSpacesExtensionFactory | undefined;
+    encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory;
+    securityExtensionFactory: SavedObjectsSecurityExtensionFactory;
+    spacesExtensionFactory: SavedObjectsSpacesExtensionFactory;
   }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
     this._typeRegistry = typeRegistry;
@@ -100,9 +100,9 @@ export class SavedObjectsClientProvider {
         : undefined;
     });
 
-    const encryptionExtension = extensions[0] as ISavedObjectsEncryptionExtension | undefined;
-    const securityExtension = extensions[1] as ISavedObjectsSecurityExtension | undefined;
-    const spacesExtension = extensions[2] as ISavedObjectsSpacesExtension | undefined;
+    const encryptionExtension = extensions[0] as ISavedObjectsEncryptionExtension;
+    const securityExtension = extensions[1] as ISavedObjectsSecurityExtension;
+    const spacesExtension = extensions[2] as ISavedObjectsSpacesExtension;
 
     return {
       encryptionExtension,

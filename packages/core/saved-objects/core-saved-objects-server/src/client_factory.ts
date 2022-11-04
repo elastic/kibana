@@ -32,31 +32,37 @@ export type SavedObjectsClientFactory = ({
 }) => SavedObjectsClientContract;
 
 /**
+ * Describes the base Saved Objects Extension factory.
+ * @public
+ */
+export type SavedObjectsExtensionFactory<T> = (params: {
+  typeRegistry: ISavedObjectTypeRegistry;
+  request: KibanaRequest;
+}) => T;
+
+/**
  * Describes the factory used to create instances of the Saved Objects Encryption Extension.
  * @public
  */
-export type SavedObjectsEncryptionExtensionFactory = (params: {
-  typeRegistry: ISavedObjectTypeRegistry;
-  request: KibanaRequest;
-}) => ISavedObjectsEncryptionExtension;
+export type SavedObjectsEncryptionExtensionFactory =
+  | SavedObjectsExtensionFactory<ISavedObjectsEncryptionExtension>
+  | undefined;
 
 /**
  * Describes the factory used to create instances of the Saved Objects Security Extension.
  * @public
  */
-export type SavedObjectsSecurityExtensionFactory = (params: {
-  typeRegistry: ISavedObjectTypeRegistry;
-  request: KibanaRequest;
-}) => ISavedObjectsSecurityExtension | undefined; // May be undefined if RBAC is disabled
+export type SavedObjectsSecurityExtensionFactory =
+  | SavedObjectsExtensionFactory<ISavedObjectsSecurityExtension>
+  | undefined; // May be undefined if RBAC is disabled
 
 /**
  * Describes the factory used to create instances of the Saved Objects Spaces Extension.
  * @public
  */
-export type SavedObjectsSpacesExtensionFactory = (params: {
-  typeRegistry: ISavedObjectTypeRegistry;
-  request: KibanaRequest;
-}) => ISavedObjectsSpacesExtension;
+export type SavedObjectsSpacesExtensionFactory =
+  | SavedObjectsExtensionFactory<ISavedObjectsSpacesExtension>
+  | undefined;
 
 /**
  * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.
@@ -71,7 +77,9 @@ export type SavedObjectsClientFactoryProvider = (
  * @public
  */
 export interface SavedObjectsClientProviderOptions {
+  /** Array of hidden types to include */
   includedHiddenTypes?: string[];
+  /** array of extensions to exclude (ENCRYPTION_EXTENSION_ID | SECURITY_EXTENSION_ID | SPACES_EXTENSION_ID) */
   excludedExtensions?: string[];
 }
 
