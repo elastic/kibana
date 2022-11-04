@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
@@ -28,22 +28,23 @@ const DataViewFlyoutContentContainer = ({
     services: { dataViews, notifications, http },
   } = useKibana<DataViewEditorContext>();
 
-  const dataViewEditorService = useRef(
-    new DataViewEditorService({
-      services: { http, dataViews },
-      initialValues: {
-        name: editData?.name,
-        type: editData?.type as INDEX_PATTERN_TYPE,
-        indexPattern: editData?.getIndexPattern(),
-      },
-      requireTimestampField,
-    })
+  const [dataViewEditorService] = useState(
+    () =>
+      new DataViewEditorService({
+        services: { http, dataViews },
+        initialValues: {
+          name: editData?.name,
+          type: editData?.type as INDEX_PATTERN_TYPE,
+          indexPattern: editData?.getIndexPattern(),
+        },
+        requireTimestampField,
+      })
   );
 
   useEffect(() => {
-    const service = dataViewEditorService.current;
+    const service = dataViewEditorService;
     return service.destroy;
-  }, []);
+  }, [dataViewEditorService]);
 
   const onSaveClick = async (dataViewSpec: DataViewSpec, persist: boolean = true) => {
     try {
@@ -89,7 +90,7 @@ const DataViewFlyoutContentContainer = ({
       editData={editData}
       showManagementLink={showManagementLink}
       allowAdHoc={allowAdHocDataView || false}
-      dataViewEditorService={dataViewEditorService.current}
+      dataViewEditorService={dataViewEditorService}
     />
   );
 };
