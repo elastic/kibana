@@ -11,16 +11,18 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
 import { isNestedFieldParent } from '../../../utils/nested_fields';
 
-export function getDataViewFieldList(dataView?: DataView, fieldCounts?: Record<string, number>) {
-  if (!dataView || !fieldCounts) return [];
-
-  const sourceFiltersValues = dataView.getSourceFiltering?.()?.excludes;
-  let dataViewFields: DataViewField[] = dataView.fields.getAll();
+export function getDataViewFieldList(
+  dataView: DataView | undefined,
+  fieldCounts: Record<string, number> = {},
+  isPlainRecord: boolean
+) {
+  const sourceFiltersValues = dataView?.getSourceFiltering?.()?.excludes;
+  let dataViewFields: DataViewField[] = dataView?.fields.getAll() || [];
 
   if (sourceFiltersValues) {
     const filter = fieldWildcardFilter(sourceFiltersValues, dataView.metaFields);
     dataViewFields = dataViewFields.filter((field) => {
-      return filter(field.name);
+      return filter(field.name) || fieldCounts[field.name]; // don't filter out a field which was present in hits (ex. for text-based queries)
     });
   }
 
@@ -29,7 +31,7 @@ export function getDataViewFieldList(dataView?: DataView, fieldCounts?: Record<s
   const unknownFields: DataViewField[] = [];
 
   difference(fieldNamesInDocs, fieldNamesInDataView).forEach((unknownFieldName) => {
-    if (isNestedFieldParent(unknownFieldName, dataView)) {
+    if (dataView && isNestedFieldParent(unknownFieldName, dataView)) {
       unknownFields.push({
         displayName: String(unknownFieldName),
         name: String(unknownFieldName),
@@ -44,5 +46,8 @@ export function getDataViewFieldList(dataView?: DataView, fieldCounts?: Record<s
     }
   });
 
-  return [...dataViewFields, ...unknownFields];
+  return [
+    ...(isPlainRecord ? dataViewFields.filter((field) => fieldCounts[field.name]) : dataViewFields),
+    ...unknownFields,
+  ];
 }

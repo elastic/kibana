@@ -128,7 +128,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [documentState, setDocumentState] = useState<DataDocumentsMsg>();
   const [allFields, setAllFields] = useState<DataViewField[] | null>(null);
-  const [allFieldsNames, setAllFieldsNames] = useState<string[] | null>(null);
+  const [fieldCounts, setFieldCounts] = useState<Record<string, number> | null>(null);
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((next) => {
@@ -139,12 +139,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   useEffect(() => {
     if (documentState?.fetchStatus === FetchStatus.COMPLETE) {
-      const fieldCounts = calcFieldCounts(documentState.result, selectedDataView);
+      const nextFieldCounts = calcFieldCounts(documentState.result, selectedDataView);
 
-      setAllFields(getDataViewFieldList(selectedDataView, fieldCounts));
-      setAllFieldsNames(Object.keys(fieldCounts));
+      setAllFields(getDataViewFieldList(selectedDataView, nextFieldCounts, isPlainRecord));
+      setFieldCounts(nextFieldCounts);
     }
-  }, [selectedDataView, documentState, setAllFields, setAllFieldsNames]);
+  }, [selectedDataView, documentState, setAllFields, setFieldCounts, isPlainRecord]);
 
   const query = useAppStateSelector((state) => state.query);
   const filters = useAppStateSelector((state) => state.filters);
@@ -206,19 +206,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !selectedDataView?.isPersisted();
 
   useEffect(() => {
-    if (!allFieldsNames) {
-      return;
-    }
     // For an external embeddable like the Field stats
     // it is useful to know what fields are populated in the docs fetched
     // or what fields are selected by the user
 
-    const availableFields = props.columns.length > 0 ? props.columns : allFieldsNames;
+    const availableFields =
+      props.columns.length > 0 ? props.columns : Object.keys(fieldCounts || {});
     availableFields$.next({
       fetchStatus: FetchStatus.COMPLETE,
       fields: availableFields,
     });
-  }, [selectedDataView, allFieldsNames, props.columns, availableFields$]);
+  }, [selectedDataView, fieldCounts, props.columns, availableFields$]);
 
   const editField = useMemo(
     () =>

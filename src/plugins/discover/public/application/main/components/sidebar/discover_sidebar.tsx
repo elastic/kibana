@@ -161,10 +161,22 @@ export function DiscoverSidebarComponent({
   >(undefined);
 
   useEffect(() => {
-    const nextSelectedFields = getSelectedFields(allFields, columns);
+    const nextSelectedFields = getSelectedFields(selectedDataView, columns);
     setSelectedFields(nextSelectedFields);
-    setMultiFieldsMap(calculateMultiFields(allFields, nextSelectedFields, useNewFieldsApi));
-  }, [allFields, columns, useNewFieldsApi, setSelectedFields, setMultiFieldsMap]);
+    if (isPlainRecord || !useNewFieldsApi) {
+      setMultiFieldsMap(undefined); // we don't have to calculate multifields in this case
+    } else {
+      setMultiFieldsMap(calculateMultiFields(allFields, nextSelectedFields, useNewFieldsApi));
+    }
+  }, [
+    selectedDataView,
+    allFields,
+    columns,
+    useNewFieldsApi,
+    setSelectedFields,
+    setMultiFieldsMap,
+    isPlainRecord,
+  ]);
 
   const deleteField = useMemo(
     () =>
@@ -218,9 +230,9 @@ export function DiscoverSidebarComponent({
   const onSupportedFieldFilter: GroupedFieldsParams<DataViewField>['onSupportedFieldFilter'] =
     useCallback(
       (field) => {
-        return shouldShowField(field, useNewFieldsApi);
+        return shouldShowField(field, useNewFieldsApi, isPlainRecord);
       },
-      [useNewFieldsApi]
+      [useNewFieldsApi, isPlainRecord]
     );
   const onOverrideFieldGroupDetails: GroupedFieldsParams<DataViewField>['onOverrideFieldGroupDetails'] =
     useCallback((groupName) => {
@@ -235,8 +247,8 @@ export function DiscoverSidebarComponent({
     }, []);
   const fieldsExistenceReader = useExistingFieldsReader();
   const { fieldGroups } = useGroupedFields({
-    dataViewId: (!isPlainRecord && selectedDataView?.id) || null, // TODO: check whether we need Empty fields for text-based query
-    fieldsExistenceReader,
+    dataViewId: (!isPlainRecord && selectedDataView?.id) || null,
+    fieldsExistenceReader: !isPlainRecord ? fieldsExistenceReader : undefined,
     allFields: allFields || EMPTY_FIELD_LIST,
     popularFieldsLimit: !isPlainRecord ? popularFieldsLimit : 0,
     sortedSelectedFields: selectedFields,
@@ -347,8 +359,10 @@ export function DiscoverSidebarComponent({
           <FieldListGrouped
             fieldGroups={fieldGroups}
             fieldsExistenceStatus={
-              allFields && selectedDataView?.id
-                ? fieldsExistenceReader.getFieldsExistenceStatus(selectedDataView.id)
+              allFields
+                ? isPlainRecord || !selectedDataView.id
+                  ? ExistenceFetchStatus.succeeded
+                  : fieldsExistenceReader.getFieldsExistenceStatus(selectedDataView.id)
                 : ExistenceFetchStatus.unknown
             }
             renderFieldItem={renderFieldItem}
