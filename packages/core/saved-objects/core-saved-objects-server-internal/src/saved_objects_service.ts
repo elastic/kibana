@@ -159,27 +159,27 @@ export class SavedObjectsService
         }
         this.clientFactoryProvider = provider;
       },
-      addEncryptionExtension: (factory) => {
+      setEncryptionExtension: (factory) => {
         if (this.started) {
-          throw new Error('cannot call `addEncryptionExtension` after service startup.');
+          throw new Error('cannot call `setEncryptionExtension` after service startup.');
         }
         if (this.encryptionExtensionFactory) {
           throw new Error('encryption extension is already set, and can only be set once');
         }
         this.encryptionExtensionFactory = factory;
       },
-      addSecurityExtension: (factory) => {
+      setSecurityExtension: (factory) => {
         if (this.started) {
-          throw new Error('cannot call `addSecurityExtension` after service startup.');
+          throw new Error('cannot call `setSecurityExtension` after service startup.');
         }
         if (this.securityExtensionFactory) {
           throw new Error('security extension is already set, and can only be set once');
         }
         this.securityExtensionFactory = factory;
       },
-      addSpacesExtension: (factory) => {
+      setSpacesExtension: (factory) => {
         if (this.started) {
-          throw new Error('cannot call `addSpacesExtension` after service startup.');
+          throw new Error('cannot call `setSpacesExtension` after service startup.');
         }
         if (this.spacesExtensionFactory) {
           throw new Error('spaces extension is already set, and can only be set once');

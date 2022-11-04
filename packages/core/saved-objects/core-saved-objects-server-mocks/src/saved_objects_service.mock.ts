@@ -63,9 +63,9 @@ const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObject
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<SavedObjectsServiceSetup> = {
     setClientFactoryProvider: jest.fn(),
-    addEncryptionExtension: jest.fn(),
-    addSecurityExtension: jest.fn(),
-    addSpacesExtension: jest.fn(),
+    setEncryptionExtension: jest.fn(),
+    setSecurityExtension: jest.fn(),
+    setSpacesExtension: jest.fn(),
     registerType: jest.fn(),
     getKibanaIndex: jest.fn(),
   };

@@ -40,7 +40,7 @@ export class SpacesSavedObjectsService {
       },
     });
 
-    core.savedObjects.addSpacesExtension(({ request }) => {
+    core.savedObjects.setSpacesExtension(({ request }) => {
       const spacesService = getSpacesService();
       const spacesClient = spacesService.createSpacesClient(request);
       const activeSpaceId = spacesService.getSpaceId(request);

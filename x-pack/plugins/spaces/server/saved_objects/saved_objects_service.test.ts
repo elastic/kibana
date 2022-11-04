@@ -38,7 +38,7 @@ describe('SpacesSavedObjectsService', () => {
       const service = new SpacesSavedObjectsService();
       service.setup({ core, getSpacesService: () => spacesService });
 
-      expect(core.savedObjects.addSpacesExtension).toHaveBeenCalledTimes(1);
+      expect(core.savedObjects.setSpacesExtension).toHaveBeenCalledTimes(1);
     });
   });
 });

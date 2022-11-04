@@ -36,7 +36,7 @@ export function setupSavedObjects({ audit, authz, savedObjects }: SetupSavedObje
       }
   );
 
-  savedObjects.addSecurityExtension(({ request }) => {
+  savedObjects.setSecurityExtension(({ request }) => {
     return authz.mode.useRbacForRequest(request)
       ? new SavedObjectsSecurityExtension({
           actions: authz.actions,

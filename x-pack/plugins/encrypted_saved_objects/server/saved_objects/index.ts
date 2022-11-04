@@ -83,7 +83,7 @@ export function setupSavedObjects({
 }: SetupSavedObjectsParams): ClientInstanciator {
   // Register custom saved object extension that will encrypt, decrypt and strip saved object
   // attributes where appropriate for any saved object repository request.
-  savedObjects.addEncryptionExtension(({ typeRegistry: baseTypeRegistry, request }) => {
+  savedObjects.setEncryptionExtension(({ typeRegistry: baseTypeRegistry, request }) => {
     return new SavedObjectsEncryptionExtension({
       baseTypeRegistry,
       service,

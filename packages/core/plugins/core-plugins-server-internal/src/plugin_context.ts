@@ -234,9 +234,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
-      addEncryptionExtension: deps.savedObjects.addEncryptionExtension,
-      addSecurityExtension: deps.savedObjects.addSecurityExtension,
-      addSpacesExtension: deps.savedObjects.addSpacesExtension,
+      setEncryptionExtension: deps.savedObjects.setEncryptionExtension,
+      setSecurityExtension: deps.savedObjects.setSecurityExtension,
+      setSpacesExtension: deps.savedObjects.setSpacesExtension,
       registerType: deps.savedObjects.registerType,
       getKibanaIndex: deps.savedObjects.getKibanaIndex,
     },
