@@ -129,11 +129,15 @@ const RendererContainer = styled.div`
   }
 `;
 
-const threatTacticContainerStyles = css`
+const ThreatTacticContainer = styled(EuiFlexGroup)`
   flex-wrap: nowrap;
   & .euiFlexGroup {
     flex-wrap: nowrap;
   }
+`;
+
+const ThreatTacticDescription = styled.div`
+  padding-left: ${(props) => props.theme.eui.euiSizeL};
 `;
 
 const EventDetailsComponent: React.FC<Props> = ({
@@ -226,9 +230,25 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
                 <EuiSpacer size="l" />
-
+                <ThreatTacticContainer direction="column" wrap={false} gutterSize="none">
+                  {threatDetails && threatDetails[0] && (
+                    <>
+                      <EuiTitle size="xxs">
+                        <h5>{threatDetails[0].title}</h5>
+                      </EuiTitle>
+                      <ThreatTacticDescription>
+                        {threatDetails[0].description}
+                      </ThreatTacticDescription>
+                    </>
+                  )}
+                </ThreatTacticContainer>
+                <EuiSpacer size="l" />
                 {renderer != null && detailsEcsData != null && (
                   <div>
+                    <EuiTitle size="xs">
+                      <h5>{i18n.ALERT_REASON}</h5>
+                    </EuiTitle>
+                    <EuiSpacer size="s" />
                     <RendererContainer data-test-subj="renderer">
                       {renderer.renderRow({
                         contextId: EVENT_DETAILS_CONTEXT_ID,
@@ -239,7 +259,6 @@ const EventDetailsComponent: React.FC<Props> = ({
                     </RendererContainer>
                   </div>
                 )}
-
                 <EuiHorizontalRule />
                 <AlertSummaryView
                   {...{
@@ -254,22 +273,6 @@ const EventDetailsComponent: React.FC<Props> = ({
                   goToTable={goToTableTab}
                 />
                 <EuiSpacer size="xl" />
-                <EuiFlexGroup
-                  direction="column"
-                  wrap={false}
-                  css={threatTacticContainerStyles}
-                  gutterSize="none"
-                >
-                  {threatDetails && threatDetails[0] && (
-                    <>
-                      <EuiTitle size="xxs">
-                        <h5>{threatDetails[0].title}</h5>
-                      </EuiTitle>
-                      {threatDetails[0].description}
-                    </>
-                  )}
-                </EuiFlexGroup>
-                <EuiSpacer size="l" />
                 <Insights
                   browserFields={browserFields}
                   eventId={id}
