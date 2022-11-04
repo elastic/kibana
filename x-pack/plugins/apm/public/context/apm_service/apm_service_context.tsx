@@ -120,6 +120,7 @@ export function getOrRedirectToTransactionType({
     : transactionTypes[0];
 
   // Replace transactionType in the URL in case it is not one of the types returned by the API
+  // Make history var optional, then check it here, as we are calling getOrRedirectToTransactionType without APM context i.e AlertDetailsAppSection for Observability
   if (history) {
     replace(history, { query: { transactionType: currentTransactionType } });
   }
