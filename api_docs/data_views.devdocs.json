@@ -308,8 +308,52 @@
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "presentationUtil",
@@ -346,10 +390,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -546,42 +586,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "canvas",
@@ -986,18 +990,6 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -4908,10 +4900,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4938,8 +4930,10 @@
                 "id": "def-public.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -8611,8 +8605,52 @@
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "presentationUtil",
@@ -8649,10 +8687,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -8849,42 +8883,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "canvas",
@@ -9289,18 +9287,6 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -12255,10 +12241,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -12285,8 +12271,10 @@
                 "id": "def-server.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -15995,8 +15983,52 @@
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "presentationUtil",
@@ -16033,10 +16065,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -16233,42 +16261,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
                 "plugin": "canvas",
@@ -16673,18 +16665,6 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -20235,10 +20215,10 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new data view instance."
+              "\nCreate data view instance."
             ],
             "signature": [
-              "({ id, name, title, ...restOfSpec }: ",
+              "(spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20265,8 +20245,10 @@
                 "id": "def-common.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, name, title, ...restOfSpec }",
-                "description": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -25377,7 +25359,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; delete: (indexPatternId: string) => Promise<{}>; create: ({ id, name, title, ...restOfSpec }: ",
+          ">; delete: (indexPatternId: string) => Promise<{}>; create: (spec: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

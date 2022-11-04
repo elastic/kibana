@@ -21,6 +21,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
   const basePath = isRemote ? remoteKibanaUrl : kibanaUrl;
   const monitorManagement = `${basePath}/app/synthetics/monitors`;
   const addMonitor = `${basePath}/app/synthetics/add-monitor`;
+  const overview = `${basePath}/app/synthetics`;
   return {
     ...loginPageProvider({
       page,
@@ -35,6 +36,10 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
         waitUntil: 'networkidle',
       });
       await this.waitForMonitorManagementLoadingToFinish();
+    },
+
+    async navigateToOverview() {
+      await page.goto(overview, { waitUntil: 'networkidle' });
     },
 
     async waitForMonitorManagementLoadingToFinish() {
@@ -82,7 +87,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
 
     async navigateToEditMonitor() {
       await this.clickByTestSubj('syntheticsMonitorListActions');
-      await page.click('text=Edit', { timeout: 2 * 60 * 1000 });
+      await page.click('text=Edit', { timeout: 2 * 60 * 1000, delay: 800 });
       await this.findByText('Edit monitor');
     },
 
