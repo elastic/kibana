@@ -9,6 +9,7 @@ import React from 'react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -45,6 +46,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     dataViewEditor: {
       openEditor: jest.fn(),
     } as unknown as DataViewEditorStart,
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     actionTypeRegistry: {
       has: jest.fn(),

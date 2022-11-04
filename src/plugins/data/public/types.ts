@@ -89,10 +89,6 @@ export interface DataPublicPluginStart {
    */
   search: ISearchStart;
   /**
-   * @deprecated Use fieldFormats plugin instead
-   */
-  fieldFormats: FieldFormatsStart;
-  /**
    * query service
    * {@link QueryStart}
    */

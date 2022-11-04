@@ -8,6 +8,7 @@
 
 import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { DashboardStartDependencies } from '../plugin';
 import { DashboardAnalyticsService } from './analytics/types';
@@ -51,6 +52,7 @@ export interface DashboardServices {
   dataViewEditor: DashboardDataViewEditorService; // this service is used only for the no data state
   documentationLinks: DashboardDocumentationLinksService;
   embeddable: DashboardEmbeddableService;
+  fieldFormats: FieldFormatsStart;
   http: DashboardHTTPService;
   initializerContext: DashboardInitializerContextService;
   navigation: DashboardNavigationService;

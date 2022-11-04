@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DashboardDataService } from './types';

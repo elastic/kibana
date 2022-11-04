@@ -17,7 +17,9 @@ export type DataServiceFactory = KibanaPluginServiceFactory<
 
 export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
   const {
-    data: { dataViews, fieldFormats, query, search },
+    data: { query, search },
+    dataViews,
+    fieldFormats,
   } = startPlugins;
 
   return {

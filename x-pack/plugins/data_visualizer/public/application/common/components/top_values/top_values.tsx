@@ -47,10 +47,8 @@ function getPercentLabel(docCount: number, topValuesSampleSize: number): string 
 
 export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed, onAddFilter }) => {
   const {
-    services: { data },
+    services: { fieldFormats },
   } = useDataVisualizerKibana();
-
-  const { fieldFormats } = data;
 
   if (stats === undefined || !stats.topValues) return null;
   const {

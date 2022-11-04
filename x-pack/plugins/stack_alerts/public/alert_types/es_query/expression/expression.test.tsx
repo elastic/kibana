@@ -12,6 +12,7 @@ import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { CommonAlertParams, EsQueryAlertParams, SearchType } from '../types';
 import { EsQueryAlertTypeExpression } from './expression';
@@ -121,6 +122,7 @@ const savedQueryMock = {
   },
 };
 
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 const dataMock = dataPluginMock.createStartContract();
 (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
   Promise.resolve(searchSourceMock)
@@ -167,6 +169,7 @@ const Wrapper: React.FC<{
       unifiedSearch={unifiedSearchMock}
       data={dataMock}
       dataViews={dataViewPluginMock}
+      fieldFormats={fieldFormatsMock}
       defaultActionGroupId=""
       actionGroups={[]}
       charts={chartsStartMock}

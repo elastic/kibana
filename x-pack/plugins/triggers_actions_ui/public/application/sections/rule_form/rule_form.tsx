@@ -125,6 +125,7 @@ export const RuleForm = ({
     data,
     unifiedSearch,
     dataViews,
+    fieldFormats,
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
@@ -521,6 +522,7 @@ export const RuleForm = ({
               charts={charts}
               data={data}
               dataViews={dataViews}
+              fieldFormats={fieldFormats}
               unifiedSearch={unifiedSearch}
             />
           </Suspense>
