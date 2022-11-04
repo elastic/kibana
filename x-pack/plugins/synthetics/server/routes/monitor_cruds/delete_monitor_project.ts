@@ -16,7 +16,7 @@ import { deleteMonitorBulk } from './bulk_cruds/delete_monitor_bulk';
 
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
+  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
   validate: {
     body: schema.object({
       monitors: schema.arrayOf(schema.string()),
