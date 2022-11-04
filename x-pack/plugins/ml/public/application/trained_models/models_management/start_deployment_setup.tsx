@@ -306,7 +306,7 @@ export const getUserInputThreadingParamsProvider =
                 }}
                 onClose={() => {
                   modalSession.close();
-                  reject();
+                  resolve();
                 }}
               />,
               theme$
@@ -314,7 +314,7 @@ export const getUserInputThreadingParamsProvider =
           )
         );
       } catch (e) {
-        reject();
+        resolve();
       }
     });
   };
