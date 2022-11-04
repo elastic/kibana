@@ -102,7 +102,7 @@ export function Chart({
     dataView.isTimeBased()
   );
 
-  const { filters, query, timeRange } = useRequestParams(services);
+  const { filters, query, timeRange } = useRequestParams({ services, request });
 
   useTotalHits({
     services,

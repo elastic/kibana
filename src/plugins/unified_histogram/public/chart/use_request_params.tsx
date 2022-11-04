@@ -9,9 +9,15 @@
 import { connectToQueryState, QueryState } from '@kbn/data-plugin/public';
 import { createStateContainer, useContainerState } from '@kbn/kibana-utils-plugin/public';
 import { useEffect, useMemo } from 'react';
-import type { UnifiedHistogramServices } from '../types';
+import type { UnifiedHistogramRequestContext, UnifiedHistogramServices } from '../types';
 
-export const useRequestParams = (services: UnifiedHistogramServices) => {
+export const useRequestParams = ({
+  services,
+  request,
+}: {
+  services: UnifiedHistogramServices;
+  request?: UnifiedHistogramRequestContext;
+}) => {
   const { data } = services;
 
   const queryStateContainer = useMemo(() => {
@@ -41,10 +47,12 @@ export const useRequestParams = (services: UnifiedHistogramServices) => {
     [data.query.queryString, queryState.query]
   );
 
+  // We need to update the absolute time range whenever the relative
+  // time range changes, or when the lastReloadRequestTime changes
   const timeRange = useMemo(
     () => data.query.timefilter.timefilter.getAbsoluteTime(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data.query.timefilter.timefilter, queryState.time]
+    [data.query.timefilter.timefilter, queryState.time, request?.lastReloadRequestTime]
   );
 
   return { filters, query, timeRange };
