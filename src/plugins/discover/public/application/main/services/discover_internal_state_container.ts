@@ -15,7 +15,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 
 export interface InternalState {
   dataView: DataView | undefined;
-  dataViewsAdHoc: DataView[];
+  dataViewAdHocList: DataView[];
 }
 
 interface InternalStateTransitions {
@@ -39,7 +39,7 @@ export function getInternalStateContainer() {
   return createStateContainer<InternalState, InternalStateTransitions, {}>(
     {
       dataView: undefined,
-      dataViewsAdHoc: [],
+      dataViewAdHocList: [],
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -48,16 +48,16 @@ export function getInternalStateContainer() {
       }),
       appendAdHocDataView: (prevState: InternalState) => (dataViewAdHoc: DataView) => ({
         ...prevState,
-        dataViewsAdHoc: prevState.dataViewsAdHoc.concat(dataViewAdHoc),
+        dataViewAdHocList: prevState.dataViewAdHocList.concat(dataViewAdHoc),
       }),
       removeAdHocDataViewById: (prevState: InternalState) => (id: string) => ({
         ...prevState,
-        dataViewsAdHoc: prevState.dataViewsAdHoc.filter((dataView) => dataView.id !== id),
+        dataViewAdHocList: prevState.dataViewAdHocList.filter((dataView) => dataView.id !== id),
       }),
       replaceAdHocDataViewWithId:
         (prevState: InternalState) => (prevId: string, newDataView: DataView) => ({
           ...prevState,
-          dataViewsAdHoc: prevState.dataViewsAdHoc.map((dataView) =>
+          dataViewAdHocList: prevState.dataViewAdHocList.map((dataView) =>
             dataView.id === prevId ? newDataView : dataView
           ),
         }),

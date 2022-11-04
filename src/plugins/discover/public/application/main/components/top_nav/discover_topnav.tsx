@@ -58,7 +58,7 @@ export const DiscoverTopNav = ({
   updateAdHocDataViewId,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
-  const adHocDataViewList = useInternalStateSelector((state) => state.dataViewsAdHoc);
+  const adHocDataViewList = useInternalStateSelector((state) => state.dataViewAdHocList);
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
   const showDatePicker = useMemo(

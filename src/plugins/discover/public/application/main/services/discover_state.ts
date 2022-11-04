@@ -52,7 +52,7 @@ interface DiscoverStateContainerParams {
   /**
    * Browser history
    */
-  history: History;
+  history?: History;
   /**
    * The current savedSearch
    */
@@ -129,10 +129,20 @@ export interface DiscoverStateContainer {
      */
     setDataView: (dataView: DataView) => void;
     /**
-     * Manage AdHoc data views
+     * Append a given ad-hoc data view to the list of ad-hoc data view
      */
     appendAdHocDataView: (dataView: DataView) => void;
+    /**
+     * Remove the ad-hoc data view of the given id from the list of ad-hoc data view
+     * @param id
+     */
     removeAdHocDataViewById: (id: string) => void;
+    /**
+     * Replace the data view of the given id with the given data view
+     * Used when the spec of a data view changed to prevent duplicates
+     * @param id
+     * @param dataView
+     */
     replaceAdHocDataViewWithId: (id: string, dataView: DataView) => void;
   };
 }

@@ -61,9 +61,8 @@ export function useDiscoverState({
       savedSearch,
       services,
     });
-    container.actions.setDataView(dataView);
+    container.actions.setDataView(savedSearch.searchSource.getField('index')!);
     return container;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history, savedSearch, services]);
 
   const { setUrlTracking } = useUrlTracking(savedSearch, dataView);

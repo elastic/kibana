@@ -16,6 +16,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
+import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 
 let history: History;
 let state: DiscoverStateContainer;
@@ -214,6 +216,37 @@ describe('createSearchSessionRestorationDataProvider', () => {
         pause: true,
         value: 0,
       });
+    });
+  });
+
+  describe('actions', () => {
+    beforeEach(async () => {
+      history = createBrowserHistory();
+      state = getDiscoverStateContainer({
+        services: discoverServiceMock,
+        history,
+        savedSearch: savedSearchMock,
+      });
+    });
+
+    test('setDataView', async () => {
+      state.actions.setDataView(dataViewMock);
+      expect(state.internalState.getState().dataView).toBe(dataViewMock);
+    });
+
+    test('appendAdHocDataView', async () => {
+      state.actions.appendAdHocDataView(dataViewMock);
+      expect(state.internalState.getState().dataViewAdHocList).toEqual([dataViewMock]);
+    });
+    test('removeAdHocDataViewById', async () => {
+      state.actions.appendAdHocDataView(dataViewMock);
+      state.actions.removeAdHocDataViewById(dataViewMock.id!);
+      expect(state.internalState.getState().dataViewAdHocList).toEqual([]);
+    });
+    test('replaceAdHocDataViewWithId', async () => {
+      state.actions.appendAdHocDataView(dataViewMock);
+      state.actions.replaceAdHocDataViewWithId(dataViewMock.id!, dataViewComplexMock);
+      expect(state.internalState.getState().dataViewAdHocList).toEqual([dataViewComplexMock]);
     });
   });
 });
