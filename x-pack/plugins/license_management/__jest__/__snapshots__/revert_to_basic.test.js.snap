@@ -5,7 +5,7 @@ exports[`RevertToBasic component should display when license is about to expire 
   class="euiFlexItem"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
   >
     <div
       class="euiCard__content emotion-euiCard__content-vertical"
@@ -75,7 +75,7 @@ exports[`RevertToBasic component should display when license is expired 1`] = `
   class="euiFlexItem"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
   >
     <div
       class="euiCard__content emotion-euiCard__content-vertical"
@@ -145,7 +145,7 @@ exports[`RevertToBasic component should display when trial is active 1`] = `
   class="euiFlexItem"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
   >
     <div
       class="euiCard__content emotion-euiCard__content-vertical"

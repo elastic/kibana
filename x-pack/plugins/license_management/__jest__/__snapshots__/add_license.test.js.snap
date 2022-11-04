@@ -2,7 +2,7 @@
 
 exports[`AddLicense component when license is active should display correct verbiage 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
 >
   <div
     class="euiCard__content emotion-euiCard__content-vertical"
@@ -47,7 +47,7 @@ exports[`AddLicense component when license is active should display correct verb
 
 exports[`AddLicense component when license is expired should display with correct verbiage 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
 >
   <div
     class="euiCard__content emotion-euiCard__content-vertical"

@@ -5,7 +5,7 @@ exports[`StartTrial component when trial is allowed display for basic license 1`
   class="euiFlexItem"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
   >
     <div
       class="euiCard__content emotion-euiCard__content-vertical"
@@ -75,7 +75,7 @@ exports[`StartTrial component when trial is allowed should display for expired e
   class="euiFlexItem"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
   >
     <div
       class="euiCard__content emotion-euiCard__content-vertical"
@@ -145,7 +145,7 @@ exports[`StartTrial component when trial is allowed should display for expired p
   class="euiFlexItem"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
   >
     <div
       class="euiCard__content emotion-euiCard__content-vertical"
@@ -215,7 +215,7 @@ exports[`StartTrial component when trial is allowed should display for gold lice
   class="euiFlexItem"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
   >
     <div
       class="euiCard__content emotion-euiCard__content-vertical"
