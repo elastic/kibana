@@ -31,6 +31,7 @@ interface GuideStepProps {
   stepConfig: StepConfig;
   stepNumber: number;
   handleButtonClick: () => void;
+  telemetryGuideId: string;
 }
 
 export const GuideStep = ({
@@ -39,6 +40,7 @@ export const GuideStep = ({
   stepNumber,
   stepConfig,
   handleButtonClick,
+  telemetryGuideId,
 }: GuideStepProps) => {
   const { euiTheme } = useEuiTheme();
   const styles = getGuidePanelStepStyles(euiTheme, stepStatus);
@@ -93,10 +95,9 @@ export const GuideStep = ({
         >
           <>
             <EuiSpacer size="s" />
-            <EuiText size="s" data-test-subj="guidePanelStepDescription">
-              {stepConfig.descriptionList.length === 1 ? (
-                <p>{stepConfig.descriptionList[0]}</p> // If there is only one description, render it as a paragraph
-              ) : (
+            <EuiText size="s" data-test-subj="guidePanelStepDescription" css={styles.description}>
+              {stepConfig.description && <p>{stepConfig.description}</p>}
+              {stepConfig.descriptionList && (
                 <ul>
                   {stepConfig.descriptionList.map((description, index) => {
                     return <li key={`description-${index}`}>{description}</li>;
@@ -112,7 +113,8 @@ export const GuideStep = ({
                   <EuiButton
                     onClick={() => handleButtonClick()}
                     fill
-                    data-test-subj="activeStepButton"
+                    // data-test-subj used for FS tracking and tests
+                    data-test-subj={`onboarding--stepButton--${telemetryGuideId}--step${stepNumber}`}
                   >
                     {getStepButtonLabel()}
                   </EuiButton>
