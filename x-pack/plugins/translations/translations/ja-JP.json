@@ -6169,7 +6169,6 @@
     "visualizations.listing.table.typeColumnName": "型",
     "visualizations.listingPageTitle": "Visualizeライブラリ",
     "visualizations.missedDataView.dataViewReconfigure": "データビュー管理ページで再作成",
-    "visualizations.missedDataView.editInVisualizeEditor": "Visualizeエディターで編集し、エラーを修正",
     "visualizations.newChart.conditionalMessage.advancedSettingsLink": "高度な設定",
     "visualizations.newChart.libraryMode.new": "新規",
     "visualizations.newChart.libraryMode.old": "古",
