@@ -35,6 +35,7 @@ interface ListExceptionItemsProps {
   emptyViewerBody: string;
   viewerStatus: ViewerStatus | '';
   ruleReferences: RuleReferences;
+  hideUtility?: boolean;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
   onPaginationChange: (arg: GetExceptionItemProps) => void;
@@ -51,6 +52,7 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
   emptyViewerBody,
   viewerStatus,
   ruleReferences,
+  hideUtility = false,
   onDeleteException,
   onEditExceptionItem,
   onPaginationChange,
@@ -77,13 +79,15 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
         securityLinkAnchorComponent={ListDetailsLinkAnchor}
         formattedDateComponent={FormattedDate}
         onCreateExceptionListItem={onCreateExceptionListItem}
-        exceptionsUtilityComponent={() => (
-          <ExceptionsUtility
-            exceptionsTitle={i18n.EXCEPTION_UTILITY_TITLE}
-            pagination={pagination}
-            lastUpdated={lastUpdated}
-          />
-        )}
+        exceptionsUtilityComponent={() =>
+          hideUtility ? null : (
+            <ExceptionsUtility
+              exceptionsTitle={i18n.EXCEPTION_UTILITY_TITLE}
+              pagination={pagination}
+              lastUpdated={lastUpdated}
+            />
+          )
+        }
       />
     </>
   );

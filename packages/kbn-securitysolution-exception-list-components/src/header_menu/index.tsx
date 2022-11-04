@@ -25,7 +25,7 @@ export interface Action {
   icon: string;
   label: string | boolean;
   disabled?: boolean;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent<Element, MouseEvent>) => void;
 }
 interface HeaderMenuComponentProps {
   disableActions: boolean;
@@ -66,9 +66,9 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
         icon={action.icon}
         disabled={action.disabled}
         layoutAlign="center"
-        onClick={() => {
+        onClick={(e) => {
           onClosePopover();
-          if (typeof action.onClick === 'function') action.onClick();
+          if (typeof action.onClick === 'function') action.onClick(e);
         }}
       >
         {action.label}

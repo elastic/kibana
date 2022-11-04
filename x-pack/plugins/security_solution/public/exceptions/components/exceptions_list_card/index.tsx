@@ -16,11 +16,14 @@ import {
   EuiText,
   EuiAccordion,
   useGeneratedHtmlId,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import { Action, HeaderMenu } from '@kbn/securitysolution-exception-list-components';
+import type { ExceptionListTypeEnum, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
+import styled from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExceptionListInfo } from '../../hooks/use_all_exception_lists';
 import { TitleBadge } from '../title_badge';
 import * as i18n from '../../translations/translations';
@@ -53,23 +56,25 @@ interface ExceptionsListCardProps {
 }
 const buttonCss = css`
   width: 100%;
+  z-index: 100;
   span {
     cursor: pointer;
     display: block;
   }
 `;
-
+const ExceptionPanel = styled(EuiPanel)`
+  margin: -${euiThemeVars.euiSizeS} ${euiThemeVars.euiSizeM} 0 ${euiThemeVars.euiSizeM};
+`;
+const ListHeaderContainer = styled(EuiFlexGroup)`
+  padding: ${euiThemeVars.euiSizeS};
+`;
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
   ({ exceptionsList, handleDelete, handleExport, readOnly }) => {
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    // TODO Move all the logic to the use_exceptions_list.card
     const [toggleAccordion, setToggleAccordion] = useState(false);
-
-    const onItemActionsClick = () => setIsPopoverOpen((isOpen) => !isOpen);
-    const onClosePopover = () => setIsPopoverOpen(false);
     const openAccordionId = useGeneratedHtmlId({ prefix: 'openAccordion' });
 
     const listCannotBeEdited = checkIfListCannotBeEdited(exceptionsList);
-    console.log(listCannotBeEdited);
     const {
       lastUpdated,
       exceptions,
@@ -83,16 +88,23 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       exceptionsList,
     });
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
-          <EuiPanel>
+          <EuiPanel hasShadow={false}>
             <EuiAccordion
               buttonProps={{ css: buttonCss }}
               id={openAccordionId}
+              arrowDisplay="none"
               onToggle={() => setToggleAccordion(!toggleAccordion)}
               buttonContent={
-                <EuiPanel hasShadow={false}>
-                  <EuiFlexGroup alignItems="flexStart">
+                <EuiPanel>
+                  <ListHeaderContainer gutterSize="m" alignItems="flexStart">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        iconType={toggleAccordion ? 'arrowRight' : 'arrowDown'}
+                        aria-label="Next"
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiFlexGroup
                         direction="column"
@@ -146,62 +158,66 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                         <EuiFlexItem>
                           <HeaderMenu
                             disableActions={readOnly}
-                            actions={
-                              [
-                                {
-                                  key: '1',
-                                  icon: 'exportAction',
-                                  label: i18n.EXPORT_EXCEPTION_LIST,
-                                  onClick: () => {
-                                    handleExport({
-                                      id: exceptionsList.id,
-                                      listId: exceptionsList.list_id,
-                                      namespaceType: exceptionsList.namespace_type,
-                                    })();
-                                  },
+                            actions={[
+                              {
+                                key: '1',
+                                icon: 'exportAction',
+                                label: i18n.EXPORT_EXCEPTION_LIST,
+                                onClick: (e) => {
+                                  handleExport({
+                                    id: exceptionsList.id,
+                                    listId: exceptionsList.list_id,
+                                    namespaceType: exceptionsList.namespace_type,
+                                  })();
+                                  e.stopPropagation();
+                                  e.preventDefault();
                                 },
-                                {
-                                  key: '2',
-                                  icon: 'trash',
-                                  disabled: listCannotBeEdited || readOnly,
-                                  label: i18n.DELETE_EXCEPTION_LIST,
-                                  onClick: () => {
-                                    handleDelete({
-                                      id: exceptionsList.id,
-                                      listId: exceptionsList.list_id,
-                                      namespaceType: exceptionsList.namespace_type,
-                                    })();
-                                  },
+                              },
+                              {
+                                key: '2',
+                                icon: 'trash',
+                                disabled: listCannotBeEdited,
+                                label: i18n.DELETE_EXCEPTION_LIST,
+                                onClick: (e) => {
+                                  handleDelete({
+                                    id: exceptionsList.id,
+                                    listId: exceptionsList.list_id,
+                                    namespaceType: exceptionsList.namespace_type,
+                                  })();
+                                  e.stopPropagation();
+                                  e.preventDefault();
                                 },
-                              ] as Action[]
-                            }
+                              },
+                            ]}
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
-                  </EuiFlexGroup>
+                  </ListHeaderContainer>
                 </EuiPanel>
               }
-            />
+            >
+              <ExceptionPanel hasBorder>
+                <ListExceptionItems
+                  isReadOnly={readOnly}
+                  exceptions={exceptions}
+                  listType={exceptionsList.type as ExceptionListTypeEnum}
+                  lastUpdated={lastUpdated}
+                  pagination={pagination}
+                  emptyViewerTitle={''}
+                  emptyViewerBody={''}
+                  hideUtility
+                  viewerStatus={exceptionViewerStatus}
+                  ruleReferences={ruleReferences}
+                  onDeleteException={onDeleteException}
+                  onEditExceptionItem={onEditExceptionItem}
+                  onPaginationChange={onPaginationChange}
+                  onCreateExceptionListItem={() => {}} // remove from here
+                />
+              </ExceptionPanel>
+            </EuiAccordion>
           </EuiPanel>
         </EuiFlexItem>
-        {/* <EuiFlexItem>
-          <ListExceptionItems
-            isReadOnly={false}
-            exceptions={exceptions}
-            listType={exceptionsList.type as ExceptionListTypeEnum}
-            lastUpdated={lastUpdated}
-            pagination={pagination}
-            emptyViewerTitle={''}
-            emptyViewerBody={''}
-            viewerStatus={exceptionViewerStatus}
-            ruleReferences={ruleReferences}
-            onDeleteException={onDeleteException}
-            onEditExceptionItem={onEditExceptionItem}
-            onPaginationChange={onPaginationChange}
-            onCreateExceptionListItem={() => console.log('ask devin')} // remove from here
-          />
-        </EuiFlexItem> */}
       </EuiFlexGroup>
     );
   }

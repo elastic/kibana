@@ -410,7 +410,6 @@ export const SharedLists = React.memo(() => {
               totalExceptionLists={exceptionListsWithRuleRefs.length}
               onRefresh={handleRefresh}
             />
-            <EuiSpacer size="m" />
             {exceptionListsWithRuleRefs.length > 0 && canUserCRUD !== null && canUserREAD !== null && (
               <React.Fragment data-test-subj="exceptionsTable">
                 {exceptionListsWithRuleRefs.map((excList) => (
