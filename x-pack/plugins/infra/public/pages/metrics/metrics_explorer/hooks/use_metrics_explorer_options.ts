@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { values } from 'lodash';
 import createContainer from 'constate';
-import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { Color } from '../../../../../common/color_palette';
 import { metricsExplorerMetricRT } from '../../../../../common/http_api/metrics_explorer';
@@ -16,6 +16,7 @@ import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../../hooks/use_kibana_timefilter_time';
+import { useStateWithLocalStorage } from '../../../../lib/settings_locale_storage';
 
 const metricsExplorerOptionsMetricRT = t.intersection([
   metricsExplorerMetricRT,
@@ -125,29 +126,6 @@ export const DEFAULT_METRICS_EXPLORER_VIEW_STATE = {
   chartOptions: DEFAULT_CHART_OPTIONS,
   currentTimerange: DEFAULT_TIMERANGE,
 };
-
-function parseJsonOrDefault<Obj>(value: string | null, defaultValue: Obj): Obj {
-  if (!value) {
-    return defaultValue;
-  }
-  try {
-    return JSON.parse(value) as Obj;
-  } catch (e) {
-    return defaultValue;
-  }
-}
-
-function useStateWithLocalStorage<State>(
-  key: string,
-  defaultState: State
-): [State, Dispatch<SetStateAction<State>>] {
-  const storageState = localStorage.getItem(key);
-  const [state, setState] = useState<State>(parseJsonOrDefault<State>(storageState, defaultState));
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(state));
-  }, [key, state]);
-  return [state, setState];
-}
 
 export const useMetricsExplorerOptions = () => {
   const TIME_DEFAULTS = { from: 'now-1h', to: 'now' };

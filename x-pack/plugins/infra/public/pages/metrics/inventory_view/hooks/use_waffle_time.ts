@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -14,6 +14,8 @@ import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
 import { useUrlState } from '../../../../utils/use_url_state';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
+import { useStateWithLocalStorage } from '../../../../lib/settings_locale_storage';
+
 export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
   currentTime: Date.now(),
   isAutoReloading: false,
@@ -33,8 +35,7 @@ export const useWaffleTime = () => {
     urlStateKey: 'waffleTime',
   });
 
-  const [state, setState] = useState<WaffleTimeState>(urlState);
-
+  const [state, setState] = useStateWithLocalStorage<WaffleTimeState>('waffleTime', urlState);
   useEffect(() => {
     setUrlState(state);
   }, [setUrlState, state]);

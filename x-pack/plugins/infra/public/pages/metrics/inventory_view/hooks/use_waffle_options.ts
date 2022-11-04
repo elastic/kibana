@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -23,6 +23,7 @@ import {
 } from '../../../../../common/http_api/snapshot_api';
 import { useUrlState } from '../../../../utils/use_url_state';
 import { InventoryItemType, ItemTypeRT } from '../../../../../common/inventory_models/types';
+import { useStateWithLocalStorage } from '../../../../lib/settings_locale_storage';
 
 export const DEFAULT_LEGEND: WaffleLegendOptions = {
   palette: 'cool',
@@ -55,7 +56,7 @@ export const useWaffleOptions = () => {
     urlStateKey: 'waffleOptions',
   });
 
-  const [state, setState] = useState<WaffleOptionsState>(urlState);
+  const [state, setState] = useStateWithLocalStorage<WaffleOptionsState>('waffleOptions', urlState);
 
   useEffect(() => setUrlState(state), [setUrlState, state]);
 

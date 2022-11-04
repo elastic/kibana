@@ -16,6 +16,7 @@ import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useUrlState } from '../../../../utils/use_url_state';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
+import { useStateWithLocalStorage } from '../../../../lib/settings_locale_storage';
 
 const validateKuery = (expression: string) => {
   try {
@@ -39,7 +40,7 @@ export const useWaffleFilters = () => {
     urlStateKey: 'waffleFilter',
   });
 
-  const [state, setState] = useState<WaffleFiltersState>(urlState);
+  const [state, setState] = useStateWithLocalStorage<WaffleFiltersState>('waffleFilter', urlState);
 
   useEffect(() => setUrlState(state), [setUrlState, state]);
 
@@ -61,10 +62,13 @@ export const useWaffleFilters = () => {
     [setState]
   );
 
-  const applyFilterQuery = useCallback((filterQuery: WaffleFiltersState) => {
-    setState(filterQuery);
-    setFilterQueryDraft(filterQuery.expression);
-  }, []);
+  const applyFilterQuery = useCallback(
+    (filterQuery: WaffleFiltersState) => {
+      setState(filterQuery);
+      setFilterQueryDraft(filterQuery.expression);
+    },
+    [setState]
+  );
 
   const isFilterQueryDraftValid = useMemo(
     () => validateKuery(filterQueryDraft),
