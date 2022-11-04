@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { ChangeEvent, FC, useState } from 'react';
+import React, { FC } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,10 +17,12 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  useGeneratedHtmlId,
+  EuiTextArea,
+  EuiProgress,
 } from '@elastic/eui';
 import * as i18n from '../../translations';
 import { ListDetails } from '../../types';
+import { useEditModal } from './use_edit_modal';
 
 interface EditModalProps {
   listDetails: ListDetails;
@@ -29,18 +31,16 @@ interface EditModalProps {
 }
 
 const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel }) => {
-  const modalFormId = useGeneratedHtmlId({ prefix: 'modalForm' });
-  const [newListDetails, setNewListDetails] = useState(listDetails);
-
-  const onChange = ({ target }: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = target;
-    setNewListDetails({ ...newListDetails, [name]: value });
-  };
-  const onSubmit = () => {
-    onSave(newListDetails);
-  };
+  const { error, modalFormId, newListDetails, showProgress, onBlur, onSubmit, onChange } =
+    useEditModal({
+      listDetails,
+      onSave,
+    });
   return (
-    <EuiModal data-test-subj="EditModal" onClose={onSubmit} initialFocus="[name=popswitch]">
+    <EuiModal data-test-subj="EditModal" onClose={onCancel} initialFocus="[name=popswitch]">
+      {showProgress && (
+        <EuiProgress data-test-subj="editModalProgess" size="xs" position="absolute" />
+      )}
       <EuiModalHeader>
         <EuiModalHeaderTitle data-test-subj="editModalTitle">
           <h1>{i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE(listDetails.name)}</h1>
@@ -54,8 +54,16 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
           component="form"
           onSubmit={onSubmit}
         >
-          <EuiFormRow label={i18n.EXCEPTION_LIST_HEADER_NAME_TEXTBOX}>
+          <EuiFormRow
+            error={error}
+            isInvalid={!!error}
+            fullWidth
+            label={i18n.EXCEPTION_LIST_HEADER_NAME_TEXTBOX}
+          >
             <EuiFieldText
+              fullWidth
+              isInvalid={!!error}
+              onBlur={onBlur}
               data-test-subj="editModalNameTextField"
               name="name"
               value={newListDetails.name}
@@ -63,12 +71,14 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
             />
           </EuiFormRow>
 
-          <EuiFormRow label={i18n.EXCEPTION_LIST_HEADER_DESCRIPTION_TEXTBOX}>
-            <EuiFieldText
+          <EuiFormRow fullWidth label={i18n.EXCEPTION_LIST_HEADER_DESCRIPTION_TEXTBOX}>
+            <EuiTextArea
+              fullWidth
               data-test-subj="editModalDescriptionTextField"
               name="description"
               value={newListDetails.description}
               onChange={onChange}
+              onBlur={onBlur}
             />
           </EuiFormRow>
         </EuiForm>
