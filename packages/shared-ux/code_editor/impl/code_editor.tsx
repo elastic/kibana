@@ -30,7 +30,7 @@ import { remeasureFonts } from './remeasure_fonts';
 import { dispose, PlaceholderWidget } from './placeholder_widget';
 
 
-import { CodeEditorStyles } from './code_editor.styles';
+import { CodeEditorStyles } from './code_editor.styles.ts';
 
 export interface Props {
   /** Width of editor. Defaults to 100%. */
