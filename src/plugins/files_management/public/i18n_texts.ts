@@ -23,7 +23,7 @@ export const i18nTexts = {
   emptyPromptTitle: i18n.translate('filesManagement.emptyPrompt.title', {
     defaultMessage: 'No files found',
   }),
-  emptyPromptDescription: i18n.translate('filesManagement.emptyPrompt.title', {
+  emptyPromptDescription: i18n.translate('filesManagement.emptyPrompt.description', {
     defaultMessage: 'Any files created in Kibana will be listed here.',
   }),
   size: i18n.translate('filesManagement.table.sizeColumnName', {
