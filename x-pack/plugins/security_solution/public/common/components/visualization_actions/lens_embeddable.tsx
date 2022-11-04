@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Reducer } from 'react';
-import React, { useCallback, useMemo, useState, useReducer } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -35,48 +34,21 @@ const LensComponentWrapper = styled.div<{ height?: string }>`
   }
 `;
 
-type Responses = string[] | undefined;
-type Requests = string[] | undefined;
-
-interface Action {
-  type: 'setData';
-  responses: string[] | undefined;
+const initialVisData: {
   requests: string[] | undefined;
+  responses: string[] | undefined;
   isLoading: boolean;
-}
-
-interface State {
-  responses: Responses;
-  requests: Requests;
-  isLoading: boolean;
-}
-
-const reducer = (state: State, action: Action) => {
-  switch (action.type) {
-    case 'setData':
-      return {
-        ...state,
-        responses: action.responses,
-        requests: action.requests,
-        isLoading: action.isLoading,
-      };
-    default:
-      return state;
-  }
-};
-
-const initialState = {
+} = {
   requests: undefined,
   responses: undefined,
   isLoading: true,
-  stats: undefined,
 };
 
 const style = { height: '100%', minWidth: '100px' };
 
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   getLensAttributes,
-  height,
+  height: wrapperHeight,
   id,
   inputsModelId = InputsModelId.global,
   lensAttributes,
@@ -87,8 +59,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
   const [isShowingModal, setIsShowingModal] = useState(false);
-  const [visData, dispatchData] = useReducer<Reducer<State, Action>>(reducer, initialState);
-
+  const [visData, setVisData] = useState(initialVisData);
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
   const attributes = useLensAttributes({
@@ -137,16 +108,22 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [dispatch, inputsModelId]
   );
 
-  const [request, ...additionalRequests] = visData.requests ?? [];
-  const [response, ...additionalResponses] = visData.responses ?? [];
+  const requests = useMemo(() => {
+    const [request, ...additionalRequests] = visData.requests ?? [];
+    return { request, additionalRequests };
+  }, [visData.requests]);
+
+  const responses = useMemo(() => {
+    const [response, ...additionalResponses] = visData.responses ?? [];
+    return { response, additionalResponses };
+  }, [visData.responses]);
 
   const onLoad = useCallback((isLoading, adapters) => {
     if (!adapters) {
       return;
     }
     const data = getRequestsAndResponses(adapters?.requests?.getRequests());
-    dispatchData({
-      type: 'setData',
+    setVisData({
       requests: data.requests,
       responses: data.responses,
       isLoading,
@@ -156,7 +133,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   return (
     <>
       {attributes && searchSessionId ? (
-        <LensComponentWrapper height={height}>
+        <LensComponentWrapper height={wrapperHeight}>
           <LensComponent
             id={id}
             style={style}
@@ -172,15 +149,15 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
           />
         </LensComponentWrapper>
       ) : null}
-      {isShowingModal && request !== null && response !== null && (
+      {isShowingModal && requests.request !== null && responses.response !== null && (
         <ModalInspectQuery
-          additionalRequests={additionalRequests}
-          additionalResponses={additionalResponses}
+          additionalRequests={requests.additionalRequests}
+          additionalResponses={responses.additionalResponses}
           closeModal={handleCloseModal}
           data-test-subj="inspect-modal"
           inputId={inputsModelId}
-          request={request}
-          response={response}
+          request={requests.request}
+          response={responses.response}
           title={inspectTitle}
         />
       )}

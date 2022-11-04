@@ -38,18 +38,9 @@ export interface LensEmbeddableComponentProps {
 }
 
 export enum RequestStatus {
-  /**
-   * The request hasn't finished yet.
-   */
-  PENDING,
-  /**
-   * The request has successfully finished.
-   */
-  OK,
-  /**
-   * The request failed.
-   */
-  ERROR,
+  PENDING, // The request hasn't finished yet.
+  OK, // The request has successfully finished.
+  ERROR, // The request failed.
 }
 
 export interface Request extends RequestParams {

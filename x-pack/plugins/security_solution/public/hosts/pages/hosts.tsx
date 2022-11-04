@@ -125,7 +125,6 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [globalFilterQuery, kqlError] = useMemo(
     () =>

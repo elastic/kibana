@@ -62,7 +62,7 @@ export interface GlobalGenericQuery {
 }
 
 export interface GlobalKqlQuery extends GlobalGenericQuery {
-  id: 'kql';
+  id: string;
   refetch: Refetch | RefetchKql | null;
 }
 

@@ -17,6 +17,7 @@ export interface HostsKpiProps {
   setQuery: GlobalTimeArgs['setQuery'];
   skip: boolean;
 }
+
 export enum HostsKpiChartColors {
   uniqueSourceIps = '#D36086',
   uniqueDestinationIps = '#9170B8',
