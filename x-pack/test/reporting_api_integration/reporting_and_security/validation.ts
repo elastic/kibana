@@ -27,8 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/143717
-  describe.skip('Job parameter validation', () => {
+  describe('Job parameter validation', () => {
     before(async () => {
       await reportingAPI.initEcommerce();
     });
