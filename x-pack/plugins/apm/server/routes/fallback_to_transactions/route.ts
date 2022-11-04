@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 import { getIsUsingTransactionEvents } from '../../lib/helpers/transactions/get_is_using_transaction_events';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -19,18 +18,16 @@ const fallbackToTransactionsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ fallbackToTransactions: boolean }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
     const {
+      config,
       params: {
         query: { kuery, start, end },
       },
     } = resources;
     return {
       fallbackToTransactions: await getIsUsingTransactionEvents({
-        config: setup.config,
+        config,
         apmEventClient,
         kuery,
         start,

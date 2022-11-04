@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { Setup } from '../../../lib/helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
+import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
-export async function listConfigurations({ setup }: { setup: Setup }) {
-  const { internalClient, indices } = setup;
-
+export async function listConfigurations(
+  internalESClient: APMInternalESClient
+) {
   const params = {
-    index: indices.apmAgentConfigurationIndex,
+    index: internalESClient.apmIndices.apmAgentConfigurationIndex,
     size: 200,
   };
 
   const [agentConfigs, configsAppliedToAgentsThroughFleet] = await Promise.all([
-    internalClient.search<AgentConfiguration>(
+    internalESClient.search<AgentConfiguration>(
       'list_agent_configuration',
       params
     ),
-    getConfigsAppliedToAgentsThroughFleet({ setup }),
+    getConfigsAppliedToAgentsThroughFleet(internalESClient),
   ]);
 
   return agentConfigs.hits.hits

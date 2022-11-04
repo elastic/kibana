@@ -8,7 +8,6 @@
 import * as t from 'io-ts';
 import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import { TraceSearchType } from '../../../common/trace_explorer';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
@@ -50,6 +49,7 @@ const tracesRoute = createApmServerRoute({
     }>;
   }> => {
     const {
+      config,
       params,
       request,
       plugins: { security },
@@ -57,15 +57,14 @@ const tracesRoute = createApmServerRoute({
 
     const { environment, kuery, start, end, probability } = params.query;
 
-    const [setup, apmEventClient, randomSampler] = await Promise.all([
-      setupRequest(resources),
+    const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
-      config: setup.config,
+      config,
       kuery,
       start,
       end,
@@ -105,14 +104,10 @@ const tracesByIdRoute = createApmServerRoute({
     >;
     linkedChildrenOfSpanCountBySpanId: Record<string, number>;
   }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
-    const { params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { params, config } = resources;
     const { traceId } = params.path;
     const { start, end } = params.query;
-    const { config } = setup;
     return getTraceItems(traceId, config, apmEventClient, start, end);
   },
 });
