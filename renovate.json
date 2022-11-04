@@ -97,9 +97,9 @@
     {
       "groupName": "vega related modules",
       "matchPackageNames": ["vega", "vega-lite", "vega-schema-url-parser", "vega-tooltip"],
-      "reviewers": ["team:kibana-vis-editors"],
+      "reviewers": ["team:kibana-visualizations"],
       "matchBaseBranches": ["main"],
-      "labels": ["Feature:Vega", "Team:VisEditors"],
+      "labels": ["Feature:Vega", "Team:Visualizations"],
       "enabled": true
     },
     {
