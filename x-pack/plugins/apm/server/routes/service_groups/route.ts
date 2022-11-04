@@ -154,15 +154,13 @@ const serviceGroupServicesRoute = createApmServerRoute({
     return { items };
   },
 });
-
+type ServiceGroupCounts = Record<string, { services: number; alerts: number }>;
 const serviceGroupCountsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-group/counts',
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<Record<string, { services: number; alerts: number }>> => {
+  handler: async (resources): Promise<ServiceGroupCounts> => {
     const { context } = resources;
     const {
       savedObjects: { client: savedObjectsClient },
@@ -188,8 +186,8 @@ const serviceGroupCountsRoute = createApmServerRoute({
         context,
       }),
     ]);
-    return serviceGroups.reduce(
-      (acc, { id }) => ({
+    const serviceGroupCounts: ServiceGroupCounts = serviceGroups.reduce(
+      (acc, { id }): ServiceGroupCounts => ({
         ...acc,
         [id]: {
           services: servicesCounts[id],
@@ -198,6 +196,7 @@ const serviceGroupCountsRoute = createApmServerRoute({
       }),
       {}
     );
+    return serviceGroupCounts;
   },
 });
 

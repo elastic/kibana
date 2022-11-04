@@ -35,6 +35,7 @@ export function ServiceGroupsCard({
   href,
   serviceGroupCounts,
 }: Props) {
+  const activeAlertsHref = useObservabilityActiveAlertsHref(serviceGroup.kuery);
   const cardProps: EuiCardProps = {
     style: { width: 286 },
     icon: (
@@ -44,7 +45,7 @@ export function ServiceGroupsCard({
             <EuiBadge
               iconType="alert"
               color="danger"
-              href={useObservabilityActiveAlertsHref(serviceGroup.kuery)}
+              href={activeAlertsHref}
               {...({
                 onClick(e: React.SyntheticEvent) {
                   e.stopPropagation(); // prevents extra click thru to EuiCard's href destination
