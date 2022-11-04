@@ -40,7 +40,7 @@ export const useWaffleTime = () => {
     setUrlState(state);
   }, [setUrlState, state]);
 
-  const { currentTime, isAutoReloading } = urlState;
+  const { currentTime, isAutoReloading } = state;
 
   const startAutoReload = useCallback(() => {
     setState((previous) => ({ ...previous, isAutoReloading: true }));
