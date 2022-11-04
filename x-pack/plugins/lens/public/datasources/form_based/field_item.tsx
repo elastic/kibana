@@ -239,9 +239,9 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
                   field: value.field.name,
                 },
               })
-            : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceDisabled', {
+            : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceNotAvailable', {
                 defaultMessage:
-                  "This field can't be added to the workspace automatically. You can still use it directly in the configuration panel.",
+                  'To visualize this field, drag it directly to the layer pane. Drag-and-drop to the workspace is unsupported.',
               });
 
           return (
@@ -382,7 +382,7 @@ function FieldItemPopoverContents(
             data-test-subj={`lnsFieldListPanel-exploreInDiscover-${dataViewField.name}`}
           >
             {i18n.translate('xpack.lens.indexPattern.fieldExploreInDiscover', {
-              defaultMessage: 'Explore values in Discover',
+              defaultMessage: 'Explore in Discover',
             })}
           </EuiButton>
         </EuiPopoverFooter>

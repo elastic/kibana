@@ -346,33 +346,36 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
     title = (
-      <EuiButtonGroup
-        buttonSize="compressed"
-        isFullWidth
-        legend={i18n.translate('unifiedFieldList.fieldStats.displayToggleLegend', {
-          defaultMessage: 'Toggle either the',
-        })}
-        options={[
-          {
-            label: i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
-              defaultMessage: 'Top values',
-            }),
-            id: 'topValues',
-            'data-test-subj': `${dataTestSubject}-buttonGroup-topValuesButton`,
-          },
-          {
-            label: i18n.translate('unifiedFieldList.fieldStats.fieldDistributionLabel', {
-              defaultMessage: 'Distribution',
-            }),
-            id: 'histogram',
-            'data-test-subj': `${dataTestSubject}-buttonGroup-distributionButton`,
-          },
-        ]}
-        onChange={(optionId: string) => {
-          setShowingHistogram(optionId === 'histogram');
-        }}
-        idSelected={showingHistogram ? 'histogram' : 'topValues'}
-      />
+      <>
+        <EuiButtonGroup
+          buttonSize="compressed"
+          isFullWidth
+          legend={i18n.translate('unifiedFieldList.fieldStats.displayToggleLegend', {
+            defaultMessage: 'Toggle either the',
+          })}
+          options={[
+            {
+              label: i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
+                defaultMessage: 'Top values',
+              }),
+              id: 'topValues',
+              'data-test-subj': `${dataTestSubject}-buttonGroup-topValuesButton`,
+            },
+            {
+              label: i18n.translate('unifiedFieldList.fieldStats.fieldDistributionLabel', {
+                defaultMessage: 'Distribution',
+              }),
+              id: 'histogram',
+              'data-test-subj': `${dataTestSubject}-buttonGroup-distributionButton`,
+            },
+          ]}
+          onChange={(optionId: string) => {
+            setShowingHistogram(optionId === 'histogram');
+          }}
+          idSelected={showingHistogram ? 'histogram' : 'topValues'}
+        />
+        <EuiSpacer size="xs" />
+      </>
     );
   } else if (field.type === 'date') {
     title = (

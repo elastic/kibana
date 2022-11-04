@@ -17660,7 +17660,6 @@
     "xpack.lens.indexPattern.min": "最小值",
     "xpack.lens.indexPattern.min.description": "单值指标聚合，返回从聚合文档提取的数值中的最小值。",
     "xpack.lens.indexPattern.missingFieldLabel": "缺失字段",
-    "xpack.lens.indexPattern.moveToWorkspaceDisabled": "此字段无法自动添加到工作区。您仍可以在配置面板中直接使用它。",
     "xpack.lens.indexPattern.moving_average.signature": "指标：数字，[window]：数字",
     "xpack.lens.indexPattern.movingAverage": "移动平均值",
     "xpack.lens.indexPattern.movingAverage.basicExplanation": "移动平均值在数据上滑动时间窗并显示平均值。仅日期直方图支持移动平均值。",

@@ -17652,7 +17652,6 @@
     "xpack.lens.indexPattern.min": "Minimum",
     "xpack.lens.indexPattern.min.description": "Agrégation d'indicateurs à valeur unique qui renvoie la valeur minimale des valeurs numériques extraites des documents agrégés.",
     "xpack.lens.indexPattern.missingFieldLabel": "Champ manquant",
-    "xpack.lens.indexPattern.moveToWorkspaceDisabled": "Ce champ ne peut pas être ajouté automatiquement à l'espace de travail. Vous pouvez toujours l'utiliser directement dans le panneau de configuration.",
     "xpack.lens.indexPattern.moving_average.signature": "indicateur : nombre, [window] : nombre",
     "xpack.lens.indexPattern.movingAverage": "Moyenne mobile",
     "xpack.lens.indexPattern.movingAverage.basicExplanation": "La moyenne mobile fait glisser une fenêtre sur les données et affiche la valeur moyenne. La moyenne mobile est prise en charge uniquement par les histogrammes des dates.",

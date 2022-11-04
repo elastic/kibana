@@ -17635,7 +17635,6 @@
     "xpack.lens.indexPattern.min": "最低",
     "xpack.lens.indexPattern.min.description": "集約されたドキュメントから抽出された数値の最小値を返す単一値メトリック集約。",
     "xpack.lens.indexPattern.missingFieldLabel": "見つからないフィールド",
-    "xpack.lens.indexPattern.moveToWorkspaceDisabled": "このフィールドは自動的にワークスペースに追加できません。構成パネルで直接使用することはできます。",
     "xpack.lens.indexPattern.moving_average.signature": "メトリック：数値、[window]：数値",
     "xpack.lens.indexPattern.movingAverage": "移動平均",
     "xpack.lens.indexPattern.movingAverage.basicExplanation": "移動平均はデータ全体でウィンドウをスライドし、平均値を表示します。移動平均は日付ヒストグラムでのみサポートされています。",
