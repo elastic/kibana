@@ -29,6 +29,7 @@ export function ServiceGroupsListItems({ items, serviceGroupCounts }: Props) {
     <EuiFlexGrid gutterSize="m">
       {items.map((item) => (
         <ServiceGroupsCard
+          key={item.id}
           serviceGroup={item}
           serviceGroupCounts={serviceGroupCounts[item.id]}
           href={router.link('/services', {

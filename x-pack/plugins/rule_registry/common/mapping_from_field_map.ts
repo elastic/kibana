@@ -11,7 +11,7 @@ import { FieldMap } from './field_map/types';
 
 export function mappingFromFieldMap(
   fieldMap: FieldMap,
-  dynamic: estypes.MappingDynamicMapping
+  dynamic: 'strict' | boolean
 ): estypes.MappingTypeMapping {
   const mappings = {
     dynamic,
