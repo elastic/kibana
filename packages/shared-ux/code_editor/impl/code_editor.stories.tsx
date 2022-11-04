@@ -27,9 +27,7 @@ const mock = new NoDataCardStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
 export const CodeEditor = (params: NoDataCardStorybookParams) => {
-  return (
-    <></>
-  );
+  return <></>;
 };
 
 CodeEditor.argTypes = argTypes;
