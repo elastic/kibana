@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { mapValues } from 'lodash';
+import { mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
@@ -49,8 +50,6 @@ export const initialState: LensAppState = {
   dataViews: {
     indexPatternRefs: [],
     indexPatterns: {},
-    existingFields: {},
-    isFirstExistenceFetch: true,
   },
 };
 
@@ -98,8 +97,8 @@ export const getPreloadedState = ({
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
 export const onActiveDataChange = createAction<{
-  activeData: TableInspectorAdapter;
-  requestWarnings?: string[];
+  activeData?: TableInspectorAdapter;
+  requestWarnings?: Array<ReactNode | string>;
 }>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const enableAutoApply = createAction<void>('lens/enableAutoApply');
@@ -265,8 +264,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     ) => {
       return {
         ...state,
-        activeData,
-        requestWarnings,
+        ...(activeData ? { activeData } : {}),
+        ...(requestWarnings ? { requestWarnings } : {}),
       };
     },
     [setSaveable.type]: (state, { payload }: PayloadAction<boolean>) => {
@@ -400,16 +399,23 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           layerIds.length
         ) === 'clear';
 
+      let removedLayerIds: string[] = [];
+
       state.datasourceStates = mapValues(
         state.datasourceStates,
         (datasourceState, datasourceId) => {
           const datasource = datasourceMap[datasourceId!];
+
+          const { newState, removedLayerIds: removedLayerIdsForThisDatasource } = isOnlyLayer
+            ? datasource.clearLayer(datasourceState.state, layerId)
+            : datasource.removeLayer(datasourceState.state, layerId);
+
+          removedLayerIds = [...removedLayerIds, ...removedLayerIdsForThisDatasource];
+
           return {
             ...datasourceState,
             ...(datasourceId === state.activeDatasourceId && {
-              state: isOnlyLayer
-                ? datasource.clearLayer(datasourceState.state, layerId)
-                : datasource.removeLayer(datasourceState.state, layerId),
+              state: newState,
             }),
           };
         }
@@ -419,10 +425,22 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const currentDataViewsId = activeDataSource.getUsedDataView(
         state.datasourceStates[state.activeDatasourceId!].state
       );
-      state.visualization.state =
-        isOnlyLayer || !activeVisualization.removeLayer
-          ? activeVisualization.clearLayer(state.visualization.state, layerId, currentDataViewsId)
-          : activeVisualization.removeLayer(state.visualization.state, layerId);
+
+      if (isOnlyLayer || !activeVisualization.removeLayer) {
+        state.visualization.state = activeVisualization.clearLayer(
+          state.visualization.state,
+          layerId,
+          currentDataViewsId
+        );
+      }
+
+      uniq(removedLayerIds).forEach(
+        (removedId) =>
+          (state.visualization.state = activeVisualization.removeLayer?.(
+            state.visualization.state,
+            removedId
+          ))
+      );
     },
     [changeIndexPattern.type]: (
       state,
@@ -977,9 +995,12 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             );
           }) ?? [];
         if (layerDatasourceId) {
-          state.datasourceStates[layerDatasourceId].state = datasourceMap[
-            layerDatasourceId
-          ].removeLayer(current(state).datasourceStates[layerDatasourceId].state, layerId);
+          const { newState } = datasourceMap[layerDatasourceId].removeLayer(
+            current(state).datasourceStates[layerDatasourceId].state,
+            layerId
+          );
+          state.datasourceStates[layerDatasourceId].state = newState;
+          // TODO - call removeLayer for any extra (linked) layers removed by the datasource
         }
       });
     },

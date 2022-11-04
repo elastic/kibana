@@ -7,9 +7,9 @@
  */
 
 import { Observable } from 'rxjs';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { HttpSetup } from '@kbn/core/public';
-import { GuideId, GuideState, GuideStepIds, StepStatus } from '../common/types';
+import type { GuideState, GuideId, GuideStepIds, StepStatus } from '@kbn/guided-onboarding';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuidedOnboardingPluginSetup {}
@@ -19,11 +19,7 @@ export interface GuidedOnboardingPluginStart {
 }
 
 export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
-}
-
-export interface ClientConfigType {
-  ui: boolean;
+  cloud?: CloudStart;
 }
 
 export interface GuidedOnboardingApi {
@@ -58,7 +54,10 @@ export interface GuidedOnboardingApi {
 export interface StepConfig {
   id: GuideStepIds;
   title: string;
-  descriptionList: string[];
+  // description is displayed as a single paragraph, can be combined with description list
+  description?: string;
+  // description list is displayed as an unordered list, can be combined with description
+  descriptionList?: string[];
   location?: {
     appID: string;
     path: string;

@@ -30,6 +30,7 @@ export function createLogger(isDev: boolean): Logger {
     trace: (...args) => (isDev ? console.trace(...args) : void 0),
     // eslint-disable-next-line no-console
     log: (...args) => (isDev ? console.log(...args) : void 0),
+    isLevelEnabled: () => true,
     get: () => logger,
   };
 

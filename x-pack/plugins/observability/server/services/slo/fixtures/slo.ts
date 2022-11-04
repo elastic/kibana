@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import uuid from 'uuid';
 
-import { Duration, DurationUnit } from '../../../types/schema';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   Indicator,
+  KQLCustomIndicator,
   SLO,
 } from '../../../types/models';
 import { CreateSLOParams } from '../../../types/rest_specs';
+import { sevenDays } from './duration';
+import { sevenDaysRolling } from './time_window';
 
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
@@ -44,13 +47,23 @@ export const createAPMTransactionDurationIndicator = (
   },
 });
 
+export const createKQLCustomIndicator = (
+  params: Partial<KQLCustomIndicator['params']> = {}
+): Indicator => ({
+  type: 'slo.kql.custom',
+  params: {
+    index: 'my-index*',
+    query_filter: 'labels.groupId: group-3',
+    numerator: 'latency < 300',
+    denominator: '',
+    ...params,
+  },
+});
+
 const defaultSLO: Omit<SLO, 'id' | 'revision' | 'created_at' | 'updated_at'> = {
   name: 'irrelevant',
   description: 'irrelevant',
-  time_window: {
-    duration: new Duration(7, DurationUnit.d),
-    is_rolling: true,
-  },
+  time_window: sevenDaysRolling(),
   budgeting_method: 'occurrences',
   objective: {
     target: 0.999,
@@ -65,20 +78,20 @@ export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSL
 
 export const createSLO = (params: Partial<SLO> = {}): SLO => {
   const now = new Date();
-  return {
+  return cloneDeep({
     ...defaultSLO,
     id: uuid.v1(),
     revision: 1,
     created_at: now,
     updated_at: now,
     ...params,
-  };
+  });
 };
 
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
   return createSLO({
     time_window: {
-      duration: new Duration(7, DurationUnit.d),
+      duration: sevenDays(),
       calendar: { start_time: new Date('2022-10-01T00:00:00.000Z') },
     },
     ...params,

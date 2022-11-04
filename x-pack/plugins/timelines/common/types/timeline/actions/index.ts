@@ -22,7 +22,7 @@ import { ColumnHeaderOptions } from '../columns';
 import { TimelineItem, TimelineNonEcsData } from '../../../search_strategy';
 import { Ecs } from '../../../ecs';
 
-export {
+export type {
   FieldBrowserOptions,
   CreateFieldComponent,
   GetFieldTableColumns,
@@ -92,7 +92,6 @@ export interface BulkActionsProps {
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
   customBulkActions?: CustomBulkActionProp[];
-  scopeId?: string;
 }
 
 export interface HeaderActionProps {

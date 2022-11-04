@@ -18,7 +18,13 @@
             "text": "CasesUiPlugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
           "<void, ",
           {
             "pluginId": "cases",
@@ -59,7 +65,13 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  "PluginInitializerContext",
+                  {
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
                   "<object>"
                 ],
                 "path": "x-pack/plugins/cases/public/plugin.ts",
@@ -79,7 +91,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>, plugins: ",
               "CasesPluginSetup",
               ") => ",
@@ -103,7 +121,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<object, unknown>"
                 ],
                 "path": "x-pack/plugins/cases/public/plugin.ts",
@@ -138,7 +162,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
               ", plugins: ",
               "CasesPluginStart",
               ") => ",
@@ -162,7 +192,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
@@ -285,9 +321,21 @@
         "description": [],
         "signature": [
           "<T extends ",
-          "AppDeepLink",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.AppDeepLink",
+            "text": "AppDeepLink"
+          },
           " = ",
-          "AppDeepLink",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.AppDeepLink",
+            "text": "AppDeepLink"
+          },
           ">({ basePath, extend, }: { basePath?: string | undefined; extend?: Partial<Record<",
           {
             "pluginId": "cases",
@@ -296,7 +344,7 @@
             "section": "def-public.ICasesDeepLinkId",
             "text": "ICasesDeepLinkId"
           },
-          ", Partial<T>>> | undefined; }) => { id: \"cases\"; path: string; deepLinks: ({ id: \"cases_create\"; path: string; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; } | { id: \"cases_configure\"; path: string; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; })[]; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; }"
+          ", Partial<T>>> | undefined; }) => { id: \"cases\"; path: string; deepLinks: ({ id: \"cases_create\"; path: string; title: any; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; } | { id: \"cases_configure\"; path: string; title: any; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; })[]; title: any; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
         "deprecated": false,
@@ -633,7 +681,7 @@
             "section": "def-public.CaseAttachmentsWithoutOwner",
             "text": "CaseAttachmentsWithoutOwner"
           },
-          " | undefined; }"
+          " | undefined; headerContent?: React.ReactNode; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
         "deprecated": false,
@@ -715,7 +763,13 @@
             "text": "ExternalReferenceStorageType"
           },
           ".elasticSearchDoc; }; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
-          "JsonValue",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.JsonValue",
+            "text": "JsonValue"
+          },
           "; } | null; type: ",
           {
             "pluginId": "cases",
@@ -733,7 +787,13 @@
             "text": "CommentType"
           },
           ".persistableState; owner: string; persistableStateAttachmentTypeId: string; persistableStateAttachmentState: { [x: string]: ",
-          "JsonValue",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.JsonValue",
+            "text": "JsonValue"
+          },
           "; }; }"
         ],
         "path": "x-pack/plugins/cases/public/types.ts",
@@ -778,8 +838,22 @@
           "label": "api",
           "description": [],
           "signature": [
-            "{ getRelatedCases: (alertId: string, query: { owner?: string | string[] | undefined; }) => Promise<{ id: string; title: string; }[]>; cases: { find: (query: { tags?: string | string[] | undefined; status?: ",
-            "CaseStatuses",
+            "{ getRelatedCases: (alertId: string, query: { owner?: string | string[] | undefined; }) => Promise<{ id: string; title: string; description: string; status: ",
+            {
+              "pluginId": "@kbn/cases-components",
+              "scope": "common",
+              "docId": "kibKbnCasesComponentsPluginApi",
+              "section": "def-common.CaseStatuses",
+              "text": "CaseStatuses"
+            },
+            "; createdAt: string; totals: { alerts: number; userComments: number; }; }[]>; cases: { find: (query: { tags?: string | string[] | undefined; status?: ",
+            {
+              "pluginId": "@kbn/cases-components",
+              "scope": "common",
+              "docId": "kibKbnCasesComponentsPluginApi",
+              "section": "def-common.CaseStatuses",
+              "text": "CaseStatuses"
+            },
             " | undefined; severity?: ",
             "CaseSeverity",
             " | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; fields?: string | string[] | undefined; from?: string | undefined; page?: number | undefined; perPage?: number | undefined; search?: string | undefined; searchFields?: string | string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<",
@@ -878,7 +952,7 @@
           "label": "hooks",
           "description": [],
           "signature": [
-            "{ getUseCasesAddToNewCaseFlyout: (props?: AddToNewCaseFlyoutProps) => { open: ({ attachments }?: { attachments?: ",
+            "{ getUseCasesAddToNewCaseFlyout: (props?: AddToNewCaseFlyoutProps) => { open: ({ attachments, headerContent, }?: { attachments?: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -886,7 +960,7 @@
               "section": "def-public.CaseAttachmentsWithoutOwner",
               "text": "CaseAttachmentsWithoutOwner"
             },
-            " | undefined; }) => void; close: () => void; }; getUseCasesAddToExistingCaseModal: (props?: AddToExistingFlyoutProps) => { open: ({ attachments }?: { attachments?: ",
+            " | undefined; headerContent?: React.ReactNode; }) => void; close: () => void; }; getUseCasesAddToExistingCaseModal: (props?: AddToExistingFlyoutProps) => { open: ({ attachments }?: { attachments?: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -1130,7 +1204,13 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => Promise<",
               {
                 "pluginId": "cases",
@@ -1155,7 +1235,13 @@
                   "a KibanaRequest"
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/cases/server/types.ts",
@@ -1469,10 +1555,7 @@
         "tags": [],
         "label": "CaseStatuses",
         "description": [],
-        "signature": [
-          "CaseStatuses"
-        ],
-        "path": "node_modules/@types/kbn__cases-components/index.d.ts",
+        "path": "packages/kbn-cases-components/src/status/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1512,7 +1595,13 @@
         "description": [],
         "signature": [
           "Omit<{ description: string; status: ",
-          "CaseStatuses",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseStatuses",
+            "text": "CaseStatuses"
+          },
           "; tags: string[]; title: string; connector: { id: string; type: ",
           "ConnectorTypes",
           ".casesWebhook; fields: null; name: string; } | { id: string; type: ",
@@ -1562,7 +1651,13 @@
             "text": "ExternalReferenceStorageType"
           },
           ".elasticSearchDoc; }; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
-          "JsonValue",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.JsonValue",
+            "text": "JsonValue"
+          },
           "; } | null; type: ",
           {
             "pluginId": "cases",
@@ -1580,7 +1675,13 @@
             "text": "ExternalReferenceStorageType"
           },
           ".savedObject; soType: string; }; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
-          "JsonValue",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.JsonValue",
+            "text": "JsonValue"
+          },
           "; } | null; type: ",
           {
             "pluginId": "cases",
@@ -1598,7 +1699,13 @@
             "text": "CommentType"
           },
           ".persistableState; owner: string; persistableStateAttachmentTypeId: string; persistableStateAttachmentState: { [x: string]: ",
-          "JsonValue",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.JsonValue",
+            "text": "JsonValue"
+          },
           "; }; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; })) & { id: string; version: string; })[] | undefined; }, \"comments\"> & { comments: ",
           "Comment",
           "[]; }"

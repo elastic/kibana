@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -12,42 +13,38 @@ import {
   TraceSearchType,
 } from '../../../../common/trace_explorer';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { TraceExplorerSamplesFetcherContextProvider } from '../../../hooks/use_trace_explorer_samples';
+import { APIClientRequestParamsOf } from '../../../services/rest/create_call_apm_api';
 import { ApmDatePicker } from '../../shared/date_picker/apm_date_picker';
-import { fromQuery, toQuery, push } from '../../shared/links/url_helpers';
-import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
-import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
+import { push } from '../../shared/links/url_helpers';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
+import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 import { TraceSearchBox } from './trace_search_box';
 
-const INITIAL_DATA = {
-  traceSamples: [],
-};
-
-export function TraceExplorer() {
-  const [query, setQuery] = useState<TraceSearchQuery>({
+export function TraceExplorer({ children }: { children: React.ReactElement }) {
+  const [searchQuery, setSearchQuery] = useState<TraceSearchQuery>({
     query: '',
     type: TraceSearchType.kql,
   });
 
   const {
+    query,
     query: {
       rangeFrom,
       rangeTo,
       environment,
       query: queryFromUrlParams,
       type: typeFromUrlParams,
-      traceId,
-      transactionId,
-      waterfallItemId,
-      detailTab,
     },
   } = useApmParams('/traces/explorer');
 
   const history = useHistory();
 
   useEffect(() => {
-    setQuery({
+    setSearchQuery({
       query: queryFromUrlParams,
       type: typeFromUrlParams,
     });
@@ -58,115 +55,95 @@ export function TraceExplorer() {
     rangeTo,
   });
 
-  const {
-    data = INITIAL_DATA,
-    status,
-    error,
-  } = useFetcher(
-    (callApmApi) => {
-      return callApmApi('GET /internal/apm/traces/find', {
-        params: {
-          query: {
-            start,
-            end,
-            environment,
-            query: queryFromUrlParams,
-            type: typeFromUrlParams,
-          },
-        },
-      });
-    },
-    [start, end, environment, queryFromUrlParams, typeFromUrlParams]
-  );
+  const params = useMemo<
+    APIClientRequestParamsOf<'GET /internal/apm/traces/find'>['params']
+  >(() => {
+    return {
+      query: {
+        start,
+        end,
+        environment,
+        query: queryFromUrlParams,
+        type: typeFromUrlParams,
+      },
+    };
+  }, [start, end, environment, queryFromUrlParams, typeFromUrlParams]);
 
-  useEffect(() => {
-    const nextSample = data.traceSamples[0];
-    const nextWaterfallItemId = '';
-    history.replace({
-      ...history.location,
-      search: fromQuery({
-        ...toQuery(history.location.search),
-        traceId: nextSample?.traceId ?? '',
-        transactionId: nextSample?.transactionId,
-        waterfallItemId: nextWaterfallItemId,
-      }),
-    });
-  }, [data, history]);
+  const router = useApmRouter();
 
-  const waterfallFetchResult = useWaterfallFetcher({
-    traceId,
-    transactionId,
-    start,
-    end,
-  });
-
-  const traceSamplesFetchResult = useMemo(
-    () => ({
-      data,
-      status,
-      error,
-    }),
-    [data, status, error]
-  );
+  const routePath = useApmRoutePath();
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiFlexGroup direction="row">
-          <EuiFlexItem grow>
-            <TraceSearchBox
-              query={query}
-              error={false}
-              loading={false}
-              onQueryCommit={() => {
-                history.push({
-                  ...history.location,
-                  search: fromQuery({
-                    ...toQuery(history.location.search),
-                    query: query.query,
-                    type: query.type,
-                  }),
-                });
-              }}
-              onQueryChange={(nextQuery) => {
-                setQuery(nextQuery);
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ApmDatePicker />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <WaterfallWithSummary
-          waterfallFetchResult={waterfallFetchResult}
-          traceSamplesFetchResult={traceSamplesFetchResult}
-          environment={environment}
-          onSampleClick={(sample) => {
-            push(history, {
-              query: {
-                traceId: sample.traceId,
-                transactionId: sample.transactionId,
-                waterfallItemId: '',
-              },
-            });
-          }}
-          onTabClick={(nextDetailTab) => {
-            push(history, {
-              query: {
-                detailTab: nextDetailTab,
-              },
-            });
-          }}
-          detailTab={detailTab}
-          waterfallItemId={waterfallItemId}
-          serviceName={
-            waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc
-              .service.name
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <TraceExplorerSamplesFetcherContextProvider params={params}>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row">
+            <EuiFlexItem grow>
+              <TraceSearchBox
+                query={searchQuery}
+                error={false}
+                loading={false}
+                onQueryCommit={() => {
+                  push(history, {
+                    query: {
+                      query: searchQuery.query,
+                      type: searchQuery.type,
+                    },
+                  });
+                }}
+                onQueryChange={(nextQuery) => {
+                  setSearchQuery(nextQuery);
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ApmDatePicker />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTabs>
+            <EuiTab
+              href={router.link('/traces/explorer/waterfall', {
+                query: {
+                  ...query,
+                  traceId: '',
+                  transactionId: '',
+                  waterfallItemId: '',
+                  detailTab: TransactionTab.timeline,
+                },
+              })}
+              isSelected={routePath === '/traces/explorer/waterfall'}
+            >
+              {i18n.translate('xpack.apm.traceExplorer.waterfallTab', {
+                defaultMessage: 'Waterfall',
+              })}
+            </EuiTab>
+            <EuiTab
+              href={router.link('/traces/explorer/critical_path', {
+                query,
+              })}
+              isSelected={routePath === '/traces/explorer/critical_path'}
+            >
+              <EuiFlexGroup direction="row" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  {i18n.translate('xpack.apm.traceExplorer.criticalPathTab', {
+                    defaultMessage: 'Aggregated critical path',
+                  })}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <TechnicalPreviewBadge
+                    icon="beaker"
+                    size="s"
+                    style={{ verticalAlign: 'middle' }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiTab>
+          </EuiTabs>
+        </EuiFlexItem>
+        <EuiFlexItem>{children}</EuiFlexItem>
+      </EuiFlexGroup>
+    </TraceExplorerSamplesFetcherContextProvider>
   );
 }
