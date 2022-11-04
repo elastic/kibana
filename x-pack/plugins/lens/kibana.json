@@ -31,6 +31,8 @@
     "unifiedFieldList"
   ],
   "optionalPlugins": [
+    "expressionLegacyMetricVis",
+    "expressionPartitionVis",
     "usageCollection",
     "taskManager",
     "globalSearch",
