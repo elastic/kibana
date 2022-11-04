@@ -4991,13 +4991,9 @@
           }
         },
         "flags": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "keyword",
-              "_meta": {
-                "description": "Flags received by the client"
-              }
-            }
+          "type": "pass_through",
+          "_meta": {
+            "description": "Flags received by the client"
           }
         },
         "flagNames": {
@@ -13335,6 +13331,29 @@
           }
         },
         "failed_tasks": {
+          "type": "long"
+        },
+        "recurring_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "adhoc_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "capacity": {
           "type": "long"
         }
       }

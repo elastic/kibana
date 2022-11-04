@@ -22,32 +22,10 @@ import {
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { GenericMetricsChart } from '../fetch_and_transform_metrics';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-
-/**
- * To calculate the compute usage we need to multiply the "system.memory.total" by "faas.billed_duration".
- * But the result of this calculation is in Bytes-milliseconds, as the "system.memory.total" is stored in bytes and the "faas.billed_duration" is stored in milliseconds.
- * But to calculate the overall cost AWS uses GB-second, so we need to convert the result to this unit.
- */
-const GB = 1024 ** 3;
-function calculateComputeUsageGBSeconds({
-  faasBilledDuration,
-  totalMemory,
-}: {
-  faasBilledDuration?: number | null;
-  totalMemory?: number | null;
-}) {
-  if (!isFiniteNumber(faasBilledDuration) || !isFiniteNumber(totalMemory)) {
-    return 0;
-  }
-
-  const totalMemoryGB = totalMemory / GB;
-  const faasBilledDurationSec = faasBilledDuration / 1000;
-  return totalMemoryGB * faasBilledDurationSec;
-}
+import { calcComputeUsageGBSeconds } from './helper';
 
 export async function getComputeUsageChart({
   environment,
@@ -71,6 +49,7 @@ export async function getComputeUsageChart({
   const aggs = {
     avgFaasBilledDuration: { avg: { field: FAAS_BILLED_DURATION } },
     avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+    countInvocations: { value_count: { field: FAAS_BILLED_DURATION } },
   };
 
   const params = {
@@ -137,16 +116,20 @@ export async function getComputeUsageChart({
               ),
               key: 'compute_usage',
               type: 'bar',
-              overallValue: calculateComputeUsageGBSeconds({
-                faasBilledDuration: aggregations?.avgFaasBilledDuration.value,
-                totalMemory: aggregations?.avgTotalMemory.value,
-              }),
+              overallValue:
+                calcComputeUsageGBSeconds({
+                  billedDuration: aggregations?.avgFaasBilledDuration.value,
+                  totalMemory: aggregations?.avgTotalMemory.value,
+                  countInvocations: aggregations?.countInvocations.value,
+                }) ?? 0,
               color: theme.euiColorVis0,
               data: timeseriesData.buckets.map((bucket) => {
-                const computeUsage = calculateComputeUsageGBSeconds({
-                  faasBilledDuration: bucket.avgFaasBilledDuration.value,
-                  totalMemory: bucket.avgTotalMemory.value,
-                });
+                const computeUsage =
+                  calcComputeUsageGBSeconds({
+                    billedDuration: bucket.avgFaasBilledDuration.value,
+                    totalMemory: bucket.avgTotalMemory.value,
+                    countInvocations: bucket.countInvocations.value,
+                  }) ?? 0;
                 return {
                   x: bucket.key,
                   y: computeUsage,
