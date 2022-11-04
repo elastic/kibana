@@ -17,13 +17,25 @@ import {
 } from './steps';
 
 export const QuickStartTab: React.FunctionComponent = () => {
-  const { fleetServerHost, fleetServerPolicyId, serviceToken, status, error, submit, inputs } =
-    useQuickStartCreateForm();
+  const {
+    fleetServerHost,
+    setFleetServerHost,
+    fleetServerHosts,
+    fleetServerPolicyId,
+    serviceToken,
+    status,
+    error,
+    submit,
+    inputs,
+  } = useQuickStartCreateForm();
+
   const { isFleetServerReady } = useWaitForFleetServer();
 
   const steps = [
     getGettingStartedStep({
+      fleetServerHosts,
       fleetServerHost,
+      setFleetServerHost,
       fleetServerPolicyId,
       serviceToken,
       status,

@@ -30,3 +30,7 @@ export interface PostFleetServerHostsRequest {
     is_default?: boolean;
   };
 }
+
+export interface PostFleetServerHostsResponse {
+  item: FleetServerHost;
+}
