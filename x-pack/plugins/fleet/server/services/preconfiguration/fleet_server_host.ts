@@ -20,7 +20,9 @@ import {
   deleteFleetServerHost,
   listFleetServerHosts,
   updateFleetServerHost,
+  getDefaultFleetServerHost,
 } from '../fleet_server_host';
+import { agentPolicyService } from '../agent_policy';
 
 export function getCloudFleetServersHosts() {
   const cloudSetup = appContextService.getCloud();
@@ -44,20 +46,7 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
 
   const legacyFleetServerHostsConfig = getConfigFleetServerHosts(config);
 
-  // is cloud
-  const cloudServerHosts = getCloudFleetServersHosts();
-
   const fleetServerHosts: FleetServerHost[] = (fleetServerHostsFromConfig || []).concat([
-    ...(cloudServerHosts
-      ? [
-          {
-            name: 'Default',
-            is_default: true,
-            id: DEFAULT_FLEET_SERVER_HOST_ID,
-            host_urls: cloudServerHosts,
-          },
-        ]
-      : []),
     ...(legacyFleetServerHostsConfig
       ? [
           {
@@ -82,12 +71,18 @@ export async function ensurePreconfiguredFleetServerHosts(
   esClient: ElasticsearchClient,
   preconfiguredFleetServerHosts: FleetServerHost[]
 ) {
-  await createOrUpdatePreconfiguredFleetServerHosts(soClient, preconfiguredFleetServerHosts);
+  await createOrUpdatePreconfiguredFleetServerHosts(
+    soClient,
+    esClient,
+    preconfiguredFleetServerHosts
+  );
+  await createCloudFleetServerHostIfNeeded(soClient);
   await cleanPreconfiguredFleetServerHosts(soClient, esClient, preconfiguredFleetServerHosts);
 }
 
 export async function createOrUpdatePreconfiguredFleetServerHosts(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   preconfiguredFleetServerHosts: FleetServerHost[]
 ) {
   const existingFleetServerHosts = await bulkGetFleetServerHosts(
@@ -134,10 +129,35 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
           },
           { fromPreconfiguration: true }
         );
-        // TODO Bump revision of all policies using that output
+        if (data.is_default) {
+          await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+        } else {
+          await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(soClient, esClient, id);
+        }
       }
     })
   );
+}
+
+export async function createCloudFleetServerHostIfNeeded(soClient: SavedObjectsClientContract) {
+  const cloudServerHosts = getCloudFleetServersHosts();
+  if (!cloudServerHosts || cloudServerHosts.length === 0) {
+    return;
+  }
+
+  const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
+  if (!defaultFleetServerHost) {
+    await createFleetServerHost(
+      soClient,
+      {
+        name: 'Default',
+        is_default: true,
+        host_urls: cloudServerHosts,
+        is_preconfigured: false,
+      },
+      { id: DEFAULT_FLEET_SERVER_HOST_ID, overwrite: true, fromPreconfiguration: true }
+    );
+  }
 }
 
 export async function cleanPreconfiguredFleetServerHosts(
