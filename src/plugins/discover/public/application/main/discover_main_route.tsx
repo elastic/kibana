@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, memo, useCallback } from 'react';
+import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { DataViewListItem } from '@kbn/data-plugin/public';
 import { DataViewSavedObjectConflictError } from '@kbn/data-views-plugin/public';
@@ -27,9 +27,9 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/bread
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getUrlTracker } from '../../kibana_services';
+import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
-import { HistoryLocationState } from '../../locator';
+import { MainHistoryLocationState } from '../../locator';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -39,7 +39,6 @@ interface DiscoverLandingParams {
 
 interface Props {
   isDev: boolean;
-  historyLocationState?: HistoryLocationState;
 }
 
 export function DiscoverMainRoute(props: Props) {
@@ -66,6 +65,14 @@ export function DiscoverMainRoute(props: Props) {
   useEffect(() => {
     setLoading(true);
   }, [id]);
+
+  /**
+   * Get location state of scoped history only on initial load
+   */
+  const historyLocationState = useMemo(
+    () => getScopedHistory().location.state as MainHistoryLocationState | undefined,
+    []
+  );
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -106,7 +113,7 @@ export function DiscoverMainRoute(props: Props) {
           data.dataViews,
           config,
           index,
-          props.historyLocationState?.dataViewSpec
+          historyLocationState?.dataViewSpec
         );
 
         const ipList = ip.list;
@@ -124,7 +131,7 @@ export function DiscoverMainRoute(props: Props) {
       data.dataViews,
       history,
       isDev,
-      props.historyLocationState?.dataViewSpec,
+      historyLocationState?.dataViewSpec,
       toastNotifications,
       services,
     ]
