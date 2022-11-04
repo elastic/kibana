@@ -31216,7 +31216,6 @@
     "xpack.synthetics.overview.heading": "Moniteurs",
     "xpack.synthetics.overview.monitors.label": "Moniteurs",
     "xpack.synthetics.overview.pageHeader.title": "Aperçu",
-    "xpack.synthetics.overview.pagination.ariaLabel": "Pagination pour l’aperçu du moniteur",
     "xpack.synthetics.overviewPage.overviewCrumb": "Aperçu",
     "xpack.synthetics.overviewPageLink.disabled.ariaLabel": "Bouton de pagination désactivé indiquant qu'aucune autre navigation ne peut être effectuée dans la liste des moniteurs.",
     "xpack.synthetics.overviewPageLink.next.ariaLabel": "Page de résultats suivante",

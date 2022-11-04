@@ -82,33 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(apiResponse.body.allMonitorIds.sort()).eql(
             savedMonitors.map((monitor) => monitor.id).sort()
           );
-          expect(apiResponse.body.pages).to.have.keys(['0', '1']);
-          expect(apiResponse.body.pages[1].length).eql(20);
-        } finally {
-          await Promise.all(
-            savedMonitors.map((monitor) => {
-              return deleteMonitor(monitor.id);
-            })
-          );
-        }
-      });
-
-      it('adjusts pagination correctly', async () => {
-        let savedMonitors: SimpleSavedObject[] = [];
-        try {
-          const savedResponse = await Promise.all(monitors.map(saveMonitor));
-          savedMonitors = savedResponse;
-
-          const apiResponse = await supertest.get(
-            SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW + '?perPage=5'
-          );
-
-          expect(apiResponse.body.total).eql(monitors.length * 2);
-          expect(apiResponse.body.allMonitorIds.sort()).eql(
-            savedMonitors.map((monitor) => monitor.id).sort()
-          );
-          expect(apiResponse.body.pages).to.have.keys(['0', '1', '2', '3', '4']);
-          expect(apiResponse.body.pages[1].length).eql(5);
+          expect(apiResponse.body.monitors.length).eql(40);
         } finally {
           await Promise.all(
             savedMonitors.map((monitor) => {
