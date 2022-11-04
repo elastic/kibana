@@ -142,7 +142,9 @@ const useRuleExecutionStatusColumn = ({
             <EuiFlexItem grow={false}>
               <RuleStatusBadge
                 status={value}
-                message={isFailedStatus ? item.execution_summary?.last_execution.message : null}
+                message={
+                  isFailedStatus ? item.execution_summary?.last_execution.message : undefined
+                }
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

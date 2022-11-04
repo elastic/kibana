@@ -15,7 +15,7 @@ import type { RuleExecutionStatus } from '../../../../../common/detection_engine
 
 interface RuleStatusBadgeProps {
   status: RuleExecutionStatus | null | undefined;
-  message: string | null | undefined;
+  message?: string;
 }
 
 /**
