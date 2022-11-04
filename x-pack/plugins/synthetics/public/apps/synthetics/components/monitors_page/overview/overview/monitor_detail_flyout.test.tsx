@@ -31,6 +31,7 @@ describe('Monitor Detail Flyout', () => {
           id: 'test-id',
           status: 'up',
           type: 'http',
+          check_group: 'check-group',
         },
         url: {
           full: 'https://www.elastic.co',
