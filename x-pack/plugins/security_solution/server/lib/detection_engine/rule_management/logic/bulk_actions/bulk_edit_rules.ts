@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BulkEditError, RulesClient } from '@kbn/alerting-plugin/server';
+import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import pMap from 'p-map';
 
 import {
@@ -82,7 +82,7 @@ export const bulkEditRules = async ({
   const rulesAction = ruleActions.pop();
 
   if (rulesAction) {
-    const unmuteErrors: BulkEditError[] = [];
+    const unmuteErrors: BulkOperationError[] = [];
     const rulesToUnmute = await pMap(
       result.rules,
       async (rule) => {
