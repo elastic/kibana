@@ -66,6 +66,7 @@ describe('Features Plugin', () => {
         "dev_tools",
         "advancedSettings",
         "indexPatterns",
+        "filesManagement",
         "savedObjectsManagement",
       ]
     `);
