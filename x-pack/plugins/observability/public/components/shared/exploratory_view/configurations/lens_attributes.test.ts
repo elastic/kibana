@@ -546,7 +546,7 @@ describe('Lens Attribute', () => {
             filter: {
               language: 'kuery',
               query:
-                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                'transaction.type: page-load and processor.event: transaction and transaction.type : * and transaction.type: page-load and processor.event: transaction and transaction.type : *',
             },
             isBucketed: false,
             label: 'test-series',
@@ -570,7 +570,7 @@ describe('Lens Attribute', () => {
             filter: {
               language: 'kuery',
               query:
-                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                '(transaction.type: page-load and processor.event: transaction and transaction.type : *) AND (transaction.type: page-load and processor.event: transaction and transaction.type : *)',
             },
             isBucketed: false,
             label: 'Part of Pages loaded',
@@ -587,7 +587,7 @@ describe('Lens Attribute', () => {
             filter: {
               language: 'kuery',
               query:
-                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                '(transaction.type: page-load and processor.event: transaction and transaction.type : *) AND (transaction.type: page-load and processor.event: transaction and transaction.type : *)',
             },
             isBucketed: false,
             label: 'Part of Pages loaded',

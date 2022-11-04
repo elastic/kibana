@@ -67,7 +67,7 @@ export const sampleAttributeWithReferenceLines = {
                 filter: {
                   language: 'kuery',
                   query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
+                    'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana) and transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
                 },
                 isBucketed: false,
                 label: 'test-series',
@@ -91,7 +91,7 @@ export const sampleAttributeWithReferenceLines = {
                 filter: {
                   language: 'kuery',
                   query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
+                    '(transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)) AND (transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana))',
                 },
                 isBucketed: false,
                 label: 'Part of Pages loaded',
@@ -110,7 +110,7 @@ export const sampleAttributeWithReferenceLines = {
                 filter: {
                   language: 'kuery',
                   query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
+                    '(transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)) AND (transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana))',
                 },
                 isBucketed: false,
                 label: 'Part of Pages loaded',
