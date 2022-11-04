@@ -61,6 +61,7 @@ export const wrapHitsFactory =
             indicesToQuery,
             alertTimestampOverride
           ),
+// alert UUID assigned here        
           [ALERT_UUID]: id,
         },
       };

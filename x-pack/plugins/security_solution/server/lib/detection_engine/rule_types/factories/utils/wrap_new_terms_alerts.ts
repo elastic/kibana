@@ -65,6 +65,7 @@ export const wrapNewTermsAlerts = ({
       _source: {
         ...baseAlert,
         [ALERT_NEW_TERMS]: eventAndTerms.newTerms,
+// alert UUID assigned here        
         [ALERT_UUID]: id,
       },
     };
