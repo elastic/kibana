@@ -39,19 +39,15 @@ describe('legacyRules_notification_alert_type', () => {
     logger = loggingSystemMock.createLogger();
 
     payload = {
-      alertId: '1111',
       executionId: 'b33f65d7-b33f-4aae-8d20-c93613dec9f9',
       services: alertServices,
       params: { ruleAlertId: '2222' },
       state: {},
       spaceId: '',
-      name: 'name',
-      tags: [],
       startedAt: new Date('2019-12-14T16:40:33.400Z'),
       previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
       rule: {
+        id: '1111',
         name: 'name',
         tags: [],
         consumer: 'foo',
