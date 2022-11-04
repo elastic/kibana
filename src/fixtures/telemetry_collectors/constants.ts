@@ -63,6 +63,7 @@ export interface MappedTypes {
 
 export type RecordWithKnownProps = Record<MappedTypeProps, number>;
 export type RecordWithKnownAllProps = Record<MappedTypeAllProps, number>;
+export type RecordStringUnknown = Record<string, unknown>;
 
 export type IndexedAccessType = Pick<WithUnion, 'prop1' | 'prop2'>;
 export type OmitIndexedAccessType = Omit<WithUnion, 'prop1' | 'prop2'>;
