@@ -20,12 +20,12 @@ import {
 import { css } from '@emotion/react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import { Action, HeaderMenu } from '@kbn/securitysolution-exception-list-components';
+import type { Action } from '@kbn/securitysolution-exception-list-components';
+import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import type { ExceptionListInfo } from '../../hooks/use_all_exception_lists';
 import { TitleBadge } from '../title_badge';
 import * as i18n from '../../translations/translations';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
-import { ListExceptionItems } from '../list_exception_items';
 import { checkIfListCannotBeEdited } from '../../utils/list.utils';
 
 interface ExceptionsListCardProps {
