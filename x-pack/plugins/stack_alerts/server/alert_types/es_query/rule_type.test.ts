@@ -640,7 +640,6 @@ async function invokeExecutor({
   state?: EsQueryRuleState;
 }) {
   return await ruleType.executor({
-    alertId: uuid.v4(),
     executionId: uuid.v4(),
     startedAt: new Date(),
     previousStartedAt: new Date(),
@@ -655,11 +654,8 @@ async function invokeExecutor({
       ...state,
     },
     spaceId: uuid.v4(),
-    name: uuid.v4(),
-    tags: [],
-    createdBy: null,
-    updatedBy: null,
     rule: {
+      id: uuid.v4(),
       name: uuid.v4(),
       tags: [],
       consumer: '',

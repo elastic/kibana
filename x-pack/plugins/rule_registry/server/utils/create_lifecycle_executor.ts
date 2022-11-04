@@ -89,12 +89,6 @@ export type LifecycleRuleExecutor<
   >
 ) => Promise<State | void>;
 
-/*
-  `alertId` will at some point be renamed to `ruleId` as that more
-  accurately describes the meaning of the variable.
-  See https://github.com/elastic/kibana/issues/100115
-*/
-
 const trackedAlertStateRt = rt.type({
   alertId: rt.string,
   alertUuid: rt.string,
@@ -269,7 +263,7 @@ export const createLifecycleExecutor =
           [ALERT_WORKFLOW_STATUS]: alertData?.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
-          [TAGS]: options.tags,
+          [TAGS]: options.rule.tags,
           [VERSION]: ruleDataClient.kibanaVersion,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };

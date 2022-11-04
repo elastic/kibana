@@ -20,7 +20,14 @@ import { isEsQueryRule } from './util';
 
 export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
   const esQueryRule = isEsQueryRule(options.params.searchType);
-  const { alertId: ruleId, name, services, params, state, spaceId, logger } = options;
+  const {
+    rule: { id: ruleId, name },
+    services,
+    params,
+    state,
+    spaceId,
+    logger,
+  } = options;
   const { alertFactory, scopedClusterClient, searchSourceClient } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
@@ -75,7 +82,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       conditions: getContextConditionsDescription(params.thresholdComparator, params.threshold),
     } as EsQueryRuleActionContext;
 
-    const actionContext = addMessages(options, baseActiveContext, params);
+    const actionContext = addMessages(name, baseActiveContext, params);
     const alertInstance = alertFactory.create(ConditionMetAlertInstanceId);
     alertInstance
       // store the params we would need to recreate the query that led to this alert instance
@@ -107,7 +114,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         true
       ),
     } as EsQueryRuleActionContext;
-    const recoveryContext = addMessages(options, baseRecoveryContext, params, true);
+    const recoveryContext = addMessages(name, baseRecoveryContext, params, true);
     alert.setContext(recoveryContext);
   }
 

@@ -29,7 +29,7 @@ describe('ActionContext', () => {
       hits: [],
       link: 'link-mock',
     };
-    const context = addMessages({ name: '[rule-name]' }, base, params);
+    const context = addMessages('[rule-name]', base, params);
     expect(context.title).toMatchInlineSnapshot(`"rule '[rule-name]' matched query"`);
     expect(context.message).toEqual(
       `rule '[rule-name]' is active:
@@ -60,7 +60,7 @@ describe('ActionContext', () => {
       hits: [],
       link: 'link-mock',
     };
-    const context = addMessages({ name: '[rule-name]' }, base, params, true);
+    const context = addMessages('[rule-name]', base, params, true);
     expect(context.title).toMatchInlineSnapshot(`"rule '[rule-name]' recovered"`);
     expect(context.message).toEqual(
       `rule '[rule-name]' is recovered:
@@ -91,7 +91,7 @@ describe('ActionContext', () => {
       hits: [],
       link: 'link-mock',
     };
-    const context = addMessages({ name: '[rule-name]' }, base, params);
+    const context = addMessages('[rule-name]', base, params);
     expect(context.title).toMatchInlineSnapshot(`"rule '[rule-name]' matched query"`);
     expect(context.message).toEqual(
       `rule '[rule-name]' is active:

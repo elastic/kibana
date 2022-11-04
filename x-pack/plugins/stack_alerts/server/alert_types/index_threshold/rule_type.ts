@@ -134,7 +134,12 @@ export function getRuleType(
   async function executor(
     options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
-    const { alertId: ruleId, name, services, params, logger } = options;
+    const {
+      rule: { id: ruleId, name },
+      services,
+      params,
+      logger,
+    } = options;
     const { alertFactory, scopedClusterClient } = services;
 
     const alertLimit = alertFactory.alertLimit.getValue();
@@ -229,7 +234,7 @@ export function getRuleType(
         value,
         conditions: humanFn,
       };
-      const actionContext = addMessages(options, baseContext, params);
+      const actionContext = addMessages(name, baseContext, params);
       const alert = alertFactory.create(alertId);
       alert.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
@@ -249,7 +254,7 @@ export function getRuleType(
           params.thresholdComparator
         )} ${params.threshold.join(' and ')}`,
       };
-      const recoveryContext = addMessages(options, baseContext, params, true);
+      const recoveryContext = addMessages(name, baseContext, params, true);
       recoveredAlert.setContext(recoveryContext);
     }
   }

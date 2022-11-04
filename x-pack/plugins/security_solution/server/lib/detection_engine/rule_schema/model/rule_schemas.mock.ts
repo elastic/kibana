@@ -195,6 +195,7 @@ export const getThreatRuleParams = (): ThreatRuleParams => {
 };
 
 export const getRuleConfigMock = (type: string = 'rule-type'): SanitizedRuleConfig => ({
+  id: sampleRuleGuid,
   actions: [],
   enabled: true,
   name: 'rule-name',

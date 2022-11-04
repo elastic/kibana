@@ -6,13 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RuleExecutorOptions, AlertInstanceContext } from '@kbn/alerting-plugin/server';
+import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { Params } from './rule_type_params';
 
 // rule type context provided to actions
-
-type RuleInfo = Pick<RuleExecutorOptions, 'name'>;
-
 export interface ActionContext extends BaseActionContext {
   // a short pre-constructed message which may be used in an action field
   title: string;
@@ -79,20 +76,20 @@ const RECOVERY_MESSAGE = (name: string, context: BaseActionContext, window: stri
   });
 
 export function addMessages(
-  ruleInfo: RuleInfo,
+  ruleName: string,
   baseContext: BaseActionContext,
   params: Params,
   isRecoveryMessage?: boolean
 ): ActionContext {
   const title = isRecoveryMessage
-    ? RECOVERY_TITLE(ruleInfo.name, baseContext.group)
-    : DEFAULT_TITLE(ruleInfo.name, baseContext.group);
+    ? RECOVERY_TITLE(ruleName, baseContext.group)
+    : DEFAULT_TITLE(ruleName, baseContext.group);
 
   const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
 
   const message = isRecoveryMessage
-    ? RECOVERY_MESSAGE(ruleInfo.name, baseContext, window)
-    : DEFAULT_MESSAGE(ruleInfo.name, baseContext, window);
+    ? RECOVERY_MESSAGE(ruleName, baseContext, window)
+    : DEFAULT_MESSAGE(ruleName, baseContext, window);
 
   return { ...baseContext, title, message };
 }
