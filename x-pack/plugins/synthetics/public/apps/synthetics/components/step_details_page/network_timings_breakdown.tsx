@@ -12,12 +12,12 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../plugin';
 
-export const NetworkTimingsBreakdown = () => {
+export const NetworkTimingsBreakdown = ({ monitorId }: { monitorId: string }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
 
-  const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
+  const { stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
 
   return (
     <>
@@ -37,7 +37,7 @@ export const NetworkTimingsBreakdown = () => {
             dataType: 'synthetics',
             name: 'Network timings',
             selectedMetricField: 'network_timings',
-            reportDefinitions: { 'monitor.check_group': [checkGroupId] },
+            reportDefinitions: { 'monitor.id': [monitorId] },
             time: {
               from: 'now-24h/h',
               to: 'now',
