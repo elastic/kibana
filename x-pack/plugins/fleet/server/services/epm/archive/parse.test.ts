@@ -70,6 +70,13 @@ describe('parseDataStreamElasticsearchEntry', () => {
       parseDataStreamElasticsearchEntry({ privileges: { index: ['priv1'], cluster: ['priv2'] } })
     ).toEqual({ privileges: { index: ['priv1'], cluster: ['priv2'] } });
   });
+  it('Should add privileges.indices', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        'privileges.indices': ['index1', 'index2'],
+      })
+    ).toEqual({ 'privileges.indices': ['index1', 'index2'] });
+  });
   it('Should add source_mode', () => {
     expect(parseDataStreamElasticsearchEntry({ source_mode: 'default' })).toEqual({
       source_mode: 'default',

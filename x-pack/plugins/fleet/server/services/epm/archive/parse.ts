@@ -517,7 +517,7 @@ export function parseDataStreamElasticsearchEntry(
   }
 
   if (elasticsearch?.['privileges.indices']) {
-    parsedElasticsearchEntry.privileges = { indices: elasticsearch['privileges.indices'] };
+    parsedElasticsearchEntry['privileges.indices'] = elasticsearch['privileges.indices'];
   }
 
   if (elasticsearch?.source_mode) {
