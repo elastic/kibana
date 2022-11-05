@@ -18,10 +18,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...baseConfig.getAll(),
 
     testFiles: [
-      // require.resolve('./apps/dashboard/group3'),
-      // require.resolve('./apps/discover/ccs_compatibility'),
-      // require.resolve('./apps/console/_console_ccs'),
-      // require.resolve('./apps/management/ccs_compatibility'),
+      require.resolve('./apps/dashboard/group3'),
+      require.resolve('./apps/discover/ccs_compatibility'),
+      require.resolve('./apps/console/_console_ccs'),
+      require.resolve('./apps/management/ccs_compatibility'),
       require.resolve('./apps/getting_started'),
     ],
 
