@@ -375,13 +375,27 @@ export class CsvGenerator {
           break;
         }
 
-        // TODO check for shard failures, log them and add a warning if found
-        {
-          const { hits: { hits: _hits, ...hitsMeta }, ...headerWithPit } = results;
-          const { pit_id: newPitId, ...header } = headerWithPit;
-          const meta = JSON.stringify({ header: { pit_id: `${this.truncatePitId(newPitId)}`, ...header }, hitsMeta });
-          this.logger.debug(`Results metadata: ${meta}`);
-        } // prettier-ignore
+        const {
+          hits: { hits: _hits, ...hitsMeta },
+          ...headerWithPit
+        } = results;
+
+        const { pit_id: newPitId, ...header } = headerWithPit;
+
+        const logInfo = {
+          header: { pit_id: `${this.truncatePitId(newPitId)}`, ...header },
+          hitsMeta,
+        };
+        this.logger.debug(`Results metadata: ${JSON.stringify(logInfo)}`);
+
+        // check for shard failures, log them and add a warning if found
+        const { _shards: shards } = header;
+        if (shards.failures) {
+          shards.failures.forEach(({ reason }) => {
+            warnings.push(`Shard failure: ${JSON.stringify(reason)}`);
+            this.logger.warn(JSON.stringify(reason));
+          });
+        }
 
         let table: Datatable | undefined;
         try {
