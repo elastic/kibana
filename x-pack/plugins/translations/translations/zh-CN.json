@@ -2221,7 +2221,6 @@
     "discover.helpMenu.appName": "Discover",
     "discover.inspectorRequestDataTitleChart": "图表数据",
     "discover.inspectorRequestDataTitleDocuments": "文档",
-    "discover.inspectorRequestDescriptionChart": "此请求将查询 Elasticsearch 以获取图表的聚合数据。",
     "discover.inspectorRequestDescriptionDocument": "此请求将查询 Elasticsearch 以获取文档。",
     "discover.json.codeEditorAriaLabel": "Elasticsearch 文档的只读 JSON 视图",
     "discover.json.copyToClipboardLabel": "复制到剪贴板",

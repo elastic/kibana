@@ -2221,7 +2221,6 @@
     "discover.helpMenu.appName": "Découverte",
     "discover.inspectorRequestDataTitleChart": "Données du graphique",
     "discover.inspectorRequestDataTitleDocuments": "Documents",
-    "discover.inspectorRequestDescriptionChart": "Cette requête interroge Elasticsearch afin de récupérer les données d'agrégation pour le graphique.",
     "discover.inspectorRequestDescriptionDocument": "Cette requête interroge Elasticsearch afin de récupérer les documents.",
     "discover.json.codeEditorAriaLabel": "Affichage JSON en lecture seule d’un document Elasticsearch",
     "discover.json.copyToClipboardLabel": "Copier dans le presse-papiers",

@@ -15,7 +15,7 @@ import { getChartAggConfigs } from './get_chart_agg_configs';
 /**
  * Convert the response from the chart request into a format that can be used
  * by the unified histogram chart. The returned object should be used to update
- * {@link UnifiedHistogramChartContext.bucketInterval} and {@link UnifiedHistogramChartContext.data}.
+ * time range interval of histogram.
  */
 export const buildBucketInterval = ({
   data,

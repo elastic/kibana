@@ -62,7 +62,10 @@ describe('test useSavedSearch message generators', () => {
         done();
       }
     });
-    sendLoadingMsg(main$, RecordRawType.DOCUMENT);
+    sendLoadingMsg(main$, {
+      foundDocuments: true,
+      recordRawType: RecordRawType.DOCUMENT,
+    });
   });
   test('sendErrorMsg', (done) => {
     const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.PARTIAL });
