@@ -131,6 +131,7 @@ beforeEach(async () => {
           },
           metaFields: ['_id', '_index', '_type', '_score'],
           getFormatterForField: jest.fn(),
+          getIndexPattern: () => 'dataview title',
         };
     }
   });

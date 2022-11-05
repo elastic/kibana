@@ -316,7 +316,7 @@ export class CsvGenerator {
     }
 
     const { maxSizeBytes, bom, escapeFormulaValues, timezone } = settings;
-    const indexPatternTitle = index.title;
+    const indexPatternTitle = index.getIndexPattern();
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
     let first = true;
