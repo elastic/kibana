@@ -336,6 +336,9 @@ export class DataViewEditorService {
       this.matchedIndicesForProvider$.pipe(first((data) => data !== undefined))
     );
 
+    // necessary to get new observable value if the field hasn't changed
+    this.loadIndices();
+
     // Wait until we have fetched the indices.
     // The result will then be sent to the field validator(s) (when calling await provider(););
     const [rollupIndex, matchedIndices] = await Promise.all([

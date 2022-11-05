@@ -60,7 +60,7 @@ const createMatchesIndicesValidator = ({
   rollupIndicesCapabilities,
   isRollup,
 }: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
-  validator: async ({ value, customData: { provider } }) => {
+  validator: async ({ customData: { provider } }) => {
     const { matchedIndices, rollupIndex } = (await provider()) as {
       matchedIndices: MatchedIndicesSet;
       rollupIndex?: string;
