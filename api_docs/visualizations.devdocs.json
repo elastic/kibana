@@ -1839,53 +1839,6 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-public.VisualizeEmbeddable.catchError",
-            "type": "Function",
-            "tags": [],
-            "label": "catchError",
-            "description": [],
-            "signature": [
-              "(error: string | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ErrorLike",
-                "text": "ErrorLike"
-              },
-              ") => JSX.Element"
-            ],
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "visualizations",
-                "id": "def-public.VisualizeEmbeddable.catchError.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "signature": [
-                  "string | ",
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.ErrorLike",
-                    "text": "ErrorLike"
-                  }
-                ],
-                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "visualizations",
             "id": "def-public.VisualizeEmbeddable.destroy",
             "type": "Function",
             "tags": [],
@@ -6405,15 +6358,7 @@
             "section": "def-public.ExpressionRenderError",
             "text": "ExpressionRenderError"
           },
-          ") => void; catchError: (error: string | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ErrorLike",
-            "text": "ErrorLike"
-          },
-          ") => JSX.Element; reload: () => Promise<void>; supportedTriggers: () => string[]; inputIsRefType: (input: ",
+          ") => void; reload: () => Promise<void>; supportedTriggers: () => string[]; inputIsRefType: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6427,7 +6372,15 @@
           "VisualizeByValueInput",
           ">; getInputAsRefType: () => Promise<",
           "VisualizeByReferenceInput",
-          ">; readonly runtimeId: number; readonly isContainer: boolean; readonly deferEmbeddableLoad: boolean; fatalError?: Error | undefined; refreshInputFromParent: () => void; getIsContainer: () => this is ",
+          ">; readonly runtimeId: number; readonly isContainer: boolean; readonly deferEmbeddableLoad: boolean; catchError?: ((error: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ErrorLike",
+            "text": "ErrorLike"
+          },
+          ", domNode: Element | HTMLElement) => any) | undefined; fatalError?: Error | undefined; refreshInputFromParent: () => void; getIsContainer: () => this is ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -8206,61 +8159,12 @@
         "signature": [
           "() => ",
           {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionFunctionDefinition",
-            "text": "ExpressionFunctionDefinition"
-          },
-          "<\"visdimension\", ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
-          },
-          ", ",
-          {
             "pluginId": "visualizations",
             "scope": "common",
             "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.Arguments",
-            "text": "Arguments"
-          },
-          ", ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.ExpressionValueVisDimension",
-            "text": "ExpressionValueVisDimension"
-          },
-          ", ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExecutionContext",
-            "text": "ExecutionContext"
-          },
-          "<",
-          {
-            "pluginId": "inspector",
-            "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          ">>"
+            "section": "def-common.ExpressionFunctionVisDimension",
+            "text": "ExpressionFunctionVisDimension"
+          }
         ],
         "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
         "deprecated": false,
@@ -13947,6 +13851,76 @@
           "[DimensionColumn[] | undefined, string]"
         ],
         "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.ExpressionFunctionVisDimension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionFunctionVisDimension",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"visdimension\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.Arguments",
+            "text": "Arguments"
+          },
+          ", ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.ExpressionValueVisDimension",
+            "text": "ExpressionValueVisDimension"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
