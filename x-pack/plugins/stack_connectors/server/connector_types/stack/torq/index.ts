@@ -51,7 +51,7 @@ const secretSchemaProps = {
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
     if (!secrets.token) {
-      return i18n.translate('xpack.actions.builtin.torq.secrets.tokenRequiredErrorMessage', {
+      return i18n.translate('xpack.stackConnectors.torq.secrets.tokenRequiredErrorMessage', {
         defaultMessage: 'token is required',
       });
     }
@@ -70,7 +70,7 @@ export function getActionType(): TorqActionType {
   return {
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.actions.builtin.torqTitle', {
+    name: i18n.translate('xpack.stackConnectors.torqTitle', {
       defaultMessage: 'Torq',
     }),
     supportedFeatureIds: [
@@ -115,7 +115,7 @@ function validateActionTypeConfig(
     configureUrlObj = new URL(configuredUrl);
   } catch (err) {
     throw new Error(
-      i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorNoHostname', {
+      i18n.translate('xpack.stackConnectors.torq.torqConfigurationErrorNoHostname', {
         defaultMessage: 'error configuring send to Torq action: unable to parse url: {err}',
         values: {
           err,
@@ -128,7 +128,7 @@ function validateActionTypeConfig(
     validatorServices.configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     throw new Error(
-      i18n.translate('xpack.actions.builtin.torq.torqConfigurationError', {
+      i18n.translate('xpack.stackConnectors.torq.torqConfigurationError', {
         defaultMessage: 'error configuring send to Torq action: {message}',
         values: {
           message: allowListError.message,
@@ -139,7 +139,7 @@ function validateActionTypeConfig(
 
   if (configureUrlObj.hostname !== 'hooks.torq.io' && configureUrlObj.hostname !== 'localhost') {
     throw new Error(
-      i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorInvalidHostname', {
+      i18n.translate('xpack.stackConnectors.torq.torqConfigurationErrorInvalidHostname', {
         defaultMessage:
           'error configuring send to Torq action: url must begin with https://hooks.torq.io',
       })
@@ -255,7 +255,7 @@ function errorResultInvalid(
   actionId: string,
   serviceMessage: string
 ): ActionTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.torq.invalidResponseErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.torq.invalidResponseErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, invalid response',
   });
   return {
@@ -270,7 +270,7 @@ function errorNotFound(
   actionId: string,
   serviceMessage: string
 ): ActionTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.torq.notFoundErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.torq.notFoundErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, make sure the webhook URL is valid',
   });
   return {
@@ -285,7 +285,7 @@ function errorResultRequestFailed(
   actionId: string,
   serviceMessage: string
 ): ActionTypeExecutorResult<unknown> {
-  const errMessage = i18n.translate('xpack.actions.builtin.torq.requestFailedErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.torq.requestFailedErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, request failed',
   });
   return {
@@ -300,7 +300,7 @@ function errorResultInvalidMethod(
   actionId: string,
   serviceMessage: string
 ): ActionTypeExecutorResult<unknown> {
-  const errMessage = i18n.translate('xpack.actions.builtin.torq.invalidMethodErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.torq.invalidMethodErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, method is not supported',
   });
   return {
@@ -315,7 +315,7 @@ function errorResultUnauthorised(
   actionId: string,
   serviceMessage: string
 ): ActionTypeExecutorResult<unknown> {
-  const errMessage = i18n.translate('xpack.actions.builtin.torq.invalidMethodErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.torq.invalidMethodErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, unauthorised',
   });
   return {
@@ -327,7 +327,7 @@ function errorResultUnauthorised(
 }
 
 function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.torq.unreachableErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.torq.unreachableErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, unexpected error',
   });
   return {
@@ -339,7 +339,7 @@ function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<
 
 function retryResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate(
-    'xpack.actions.builtin.torq.invalidResponseRetryLaterErrorMessage',
+    'xpack.stackConnectors.torq.invalidResponseRetryLaterErrorMessage',
     {
       defaultMessage: 'error triggering Torq workflow, retry later',
     }
@@ -363,7 +363,7 @@ function retryResultSeconds(
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();
   const errMessage = i18n.translate(
-    'xpack.actions.builtin.torq.invalidResponseRetryDateErrorMessage',
+    'xpack.stackConnectors.torq.invalidResponseRetryDateErrorMessage',
     {
       defaultMessage: 'error triggering Torq workflow, retry at {retryString}',
       values: {

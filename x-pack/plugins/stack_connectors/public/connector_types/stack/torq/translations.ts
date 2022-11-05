@@ -43,21 +43,21 @@ export const URL_NOT_TORQ_WEBHOOK = i18n.translate(
 );
 
 export const TORQ_TOKEN_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.torqAction.token',
+  'xpack.stackConnectors.torqAction.token',
   {
     defaultMessage: 'Torq integration token',
   }
 );
 
 export const BODY_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookBodyText',
+  'xpack.stackConnectors.error.requiredWebhookBodyText',
   {
     defaultMessage: 'Body is required.',
   }
 );
 
 export const INVALID_JSON = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requireValidJSONBody',
+  'xpack.stackConnectors.error.requireValidJSONBody',
   {
     defaultMessage: 'Body must be a valid JSON.',
   }
@@ -94,7 +94,7 @@ export const URL_HELP_TEXT = i18n.translate(
 );
 
 export const HOW_TO_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.torq.torqActionConnectorFields.calloutTitle',
+  'xpack.stackConnectors.torqActionConnectorFields.calloutTitle',
   {
     defaultMessage:
       'Create an Elastic Security integration on Torq, and then come back and paste the endpoint URL and token generated for your integration.',
