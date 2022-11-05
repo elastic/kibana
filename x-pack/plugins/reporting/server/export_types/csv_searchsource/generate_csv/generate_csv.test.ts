@@ -350,11 +350,14 @@ it('uses the pit ID to page all the data', async () => {
   );
 
   expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledTimes(1);
-  expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith({
-    ignore_unavailable: true,
-    index: 'logstash-*',
-    keep_alive: '30s',
-  });
+  expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
+    {
+      ignore_unavailable: true,
+      index: 'logstash-*',
+      keep_alive: '30s',
+    },
+    { maxRetries: 0, requestTimeout: '30s' }
+  );
 
   expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
   expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledWith({
