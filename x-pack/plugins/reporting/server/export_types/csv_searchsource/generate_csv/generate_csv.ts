@@ -58,24 +58,30 @@ export class CsvGenerator {
   private async openPointInTime(indexPatternTitle: string, settings: CsvExportSettings) {
     const { duration } = settings.scroll;
     let pitId: string | undefined;
-    this.logger.debug(`Open point-in-time for index: ${indexPatternTitle}`);
+    this.logger.debug(`Requesting point-in-time for: [${indexPatternTitle}]...`);
     try {
-      // open PIT and set field format config
-      // use _pit API
-      const response = await this.clients.es.asCurrentUser.openPointInTime({
-        index: indexPatternTitle,
-        keep_alive: duration,
-        ignore_unavailable: true,
-      });
+      // NOTE: if ES is overloaded, this request could time out
+      const response = await this.clients.es.asCurrentUser.openPointInTime(
+        {
+          index: indexPatternTitle,
+          keep_alive: duration,
+          ignore_unavailable: true,
+        },
+        {
+          requestTimeout: duration,
+          maxRetries: 0,
+        }
+      );
       pitId = response.id;
     } catch (err) {
       this.logger.error(err);
-      throw err;
     }
 
     if (!pitId) {
       throw new Error(`Could not receive a point-in-time ID!`);
     }
+
+    this.logger.debug(`Received PIT ID: ${this.truncatePitId(pitId)}`);
 
     return pitId;
   }
@@ -88,16 +94,15 @@ export class CsvGenerator {
     const { scroll: scrollSettings, includeFrozen } = settings;
     searchSource.setField('size', scrollSettings.size);
 
-    const pitId = searchSource.getField('pit')?.id;
     if (lastSortId) {
-      this.logger.debug(
-        `Executing search request with PIT ID: ${this.truncatePitId(pitId)}` +
-          `, and search_after: [${lastSortId}]`
-      );
       searchSource.setField('searchAfter', lastSortId);
-    } else {
-      this.logger.debug(`Executing search request with PIT ID: ${this.truncatePitId(pitId)}`);
     }
+
+    const pitId = searchSource.getField('pit')?.id;
+    this.logger.debug(
+      `Executing search request with PIT ID: ${this.truncatePitId(pitId)}` +
+        (lastSortId ? `, and search_after: [${lastSortId}]` : '')
+    );
 
     const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();
     if (searchBody == null) {
@@ -352,11 +357,9 @@ export class CsvGenerator {
         if (!results.pit_id) {
           throw new Error(`Search response did not contain a point-in-time ID!`);
         }
+
         // use the most recently received id for the next search request
-        this.logger.debug(
-          `Latest PIT ID from results: [${this.truncatePitId(results.pit_id)}]` +
-            ` Previous PIT ID used: [${this.truncatePitId(pitId)}]`
-        );
+        this.logger.debug(`Received PIT ID: [${this.truncatePitId(results.pit_id)}]`);
         pitId = results.pit_id;
 
         const { hits } = results;
