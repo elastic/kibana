@@ -17,8 +17,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { parseStream } from './parse_stream';
 
-type WithinRange = [number, number];
-
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const config = getService('config');
@@ -47,31 +45,31 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const expected = {
-    chunksLength: [111, 119] as WithinRange,
-    actionsLength: [110, 118] as WithinRange,
+    chunksLength: 181,
+    actionsLength: 180,
     noIndexChunksLength: 4,
     noIndexActionsLength: 3,
     changePointFilter: 'add_change_points',
     histogramFilter: 'add_change_points_histogram',
     errorFilter: 'add_error',
-    changePointsLength: [47, 51] as WithinRange,
+    changePointsLength: 48,
     changePoints: [
       {
         fieldName: 'beat.hostname.keyword',
         fieldValue: 'ip-172-27-97-204',
-        doc_count: [12559, 13072] as WithinRange,
-        bg_count: [29325, 30114] as WithinRange,
-        total_doc_count: [100442, 100442] as WithinRange,
-        total_bg_count: [280434, 280434] as WithinRange,
-        score: [25.52678334549752, 25.52678334549752] as WithinRange,
-        pValue: [8.200849696539114e-12, 8.200849696539114e-12] as WithinRange,
-        normalizedScore: [0.7788972485182145, 0.7788972485182145] as WithinRange,
+        doc_count: 12805,
+        bg_count: 29889,
+        total_doc_count: 100442,
+        total_bg_count: 280434,
+        score: 25.52678334549752,
+        pValue: 8.200849696539114e-12,
+        normalizedScore: 0.7788972485182145,
       },
       {
         fieldName: 'beat.name.keyword',
         fieldValue: 'i-0852e3f99b6c512fd',
-        doc_count: [12537, 12966] as WithinRange,
-        bg_count: [29253, 30005] as WithinRange,
+        doc_count: 12805,
+        bg_count: 29889,
         total_doc_count: 100380,
         total_bg_count: 281239,
         score: 23.45181596964945,
@@ -102,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const chunks: string[] = resp.body.toString().split('\n');
 
-      expect(chunks.length).to.within(...expected.chunksLength);
+      expect(chunks.length).to.be(expected.chunksLength);
 
       const lastChunk = chunks.pop();
       expect(lastChunk).to.be('');
@@ -113,7 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
         data = chunks.map((c) => JSON.parse(c));
       }).not.to.throwError();
 
-      expect(data.length).to.within(...expected.actionsLength);
+      expect(data.length).to.be(expected.actionsLength);
       data.forEach((d) => {
         expect(typeof d.type).to.be('string');
       });
@@ -130,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
           return a.fieldName > b.fieldName ? 1 : -1;
         });
 
-      expect(changePoints.length).to.within(...expected.changePointsLength);
+      expect(changePoints.length).to.be(expected.changePointsLength);
       // changePoints.forEach((cp, index) => {
       //   const ecp = expected.changePoints[index];
       //   expect(cp.fieldName).to.equal(ecp.fieldName);
@@ -203,7 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
         // If streaming works correctly we should receive more than one chunk.
         expect(chunkCounter).to.be.greaterThan(1);
 
-        expect(data.length).to.within(...expected.actionsLength);
+        expect(data.length).to.be(expected.actionsLength);
 
         const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
         expect(addChangePointsActions.length).to.greaterThan(0);
@@ -217,15 +215,15 @@ export default ({ getService }: FtrProviderContext) => {
             return a.fieldName > b.fieldName ? 1 : -1;
           });
 
-        expect(changePoints.length).to.within(...expected.changePointsLength);
+        expect(changePoints.length).to.be(expected.changePointsLength);
         changePoints.forEach((cp, index) => {
           const ecp = expected.changePoints.find(
             (d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue
           );
           expect(ecp).not.to.be(undefined);
           if (ecp !== undefined) {
-            expect(cp.doc_count).to.within(...ecp.doc_count);
-            expect(cp.bg_count).to.within(...ecp.bg_count);
+            expect(cp.doc_count).to.be(ecp.doc_count);
+            expect(cp.bg_count).to.be(ecp.bg_count);
           }
         });
 
