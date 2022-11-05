@@ -37,7 +37,7 @@ import { ProjectTimeQuery } from './query';
 const BASE64_FRAME_ID_LENGTH = 32;
 
 const CACHE_MAX_ITEMS = 100000;
-const CACHE_TTL_MICROSECONDS = 1000 * 60 * 5;
+const CACHE_TTL_MILLISECONDS = 1000 * 60 * 5;
 
 export type EncodedStackTrace = DedotObject<{
   // This field is a base64-encoded byte string. The string represents a
@@ -275,7 +275,7 @@ export async function mgetStackTraces({
 
 const frameLRU = new LRUCache<StackFrameID, StackFrame>({
   max: CACHE_MAX_ITEMS,
-  maxAge: CACHE_TTL_MICROSECONDS,
+  maxAge: CACHE_TTL_MILLISECONDS,
 });
 
 export async function mgetStackFrames({
@@ -347,7 +347,7 @@ export async function mgetStackFrames({
 
 const executableLRU = new LRUCache<FileID, Executable>({
   max: CACHE_MAX_ITEMS,
-  maxAge: CACHE_TTL_MICROSECONDS,
+  maxAge: CACHE_TTL_MILLISECONDS,
 });
 
 export async function mgetExecutables({
