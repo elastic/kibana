@@ -16,7 +16,10 @@ post:
     - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     content:
-      application/json: {}
+      application/json:
+        schema:
+          type: object
+          nullable: true
   responses:
     '200':
       description: Indicates a successful call.

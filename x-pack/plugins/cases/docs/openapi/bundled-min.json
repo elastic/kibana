@@ -357,6 +357,67 @@
           "url": "https://localhost:5601"
         }
       ]
+    },
+    "/s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push": {
+      "post": {
+        "summary": "Pushes a case to an external service.",
+        "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. You must also have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're pushing.\n",
+        "operationId": "pushCase",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/connector_id"
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "nullable": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/case_response_properties"
+                },
+                "examples": {
+                  "pushCaseResponse": {
+                    "$ref": "#/components/examples/push_case_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
     }
   },
   "components": {
@@ -398,6 +459,16 @@
         "schema": {
           "type": "string",
           "example": "9c235210-6834-11ea-a78c-6ffb38a34414"
+        }
+      },
+      "connector_id": {
+        "in": "path",
+        "name": "connectorId",
+        "description": "An identifier for the connector. To retrieve connector IDs, use the find connectors API.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "abed3a70-71bd-11ea-a0b2-c51ea50a58e2"
         }
       }
     },
@@ -2060,6 +2131,65 @@
             "fields": null
           },
           "external_service": null
+        }
+      },
+      "push_case_response": {
+        "summary": "The push case API returns a JSON object with details about the case and the external service.",
+        "value": {
+          "id": "b917f300-0ed9-11ed-bd18-65557fe66949",
+          "version": "WzE3NjgsM10=",
+          "comments": [],
+          "totalComment": 0,
+          "totalAlerts": 0,
+          "description": "A case description.",
+          "title": "Case title 1",
+          "tags": [
+            "tag 1"
+          ],
+          "settings": {
+            "syncAlerts": true
+          },
+          "owner": "cases",
+          "duration": null,
+          "severity": "low",
+          "closed_at": null,
+          "closed_by": null,
+          "created_at": "2022-07-29T00:59:39.444Z",
+          "created_by": {
+            "username": "elastic",
+            "email": null,
+            "full_name": null
+          },
+          "status": "open",
+          "updated_at": "2022-07-29T01:20:58.436Z",
+          "updated_by": {
+            "username": "elastic",
+            "full_name": null,
+            "email": null
+          },
+          "connector": {
+            "id": "09f8c0b0-0eda-11ed-bd18-65557fe66949",
+            "name": "My connector",
+            "type": ".jira",
+            "fields": {
+              "issueType": "10006",
+              "parent": null,
+              "priority": "Low"
+            }
+          },
+          "external_service": {
+            "pushed_at": "2022-07-29T01:20:58.436Z",
+            "pushed_by": {
+              "username": "elastic",
+              "full_name": null,
+              "email": null
+            },
+            "connector_name": "My connector",
+            "external_id": "71926",
+            "external_title": "ES-554",
+            "external_url": "https://cases.jira.com",
+            "connector_id": "09f8c0b0-0eda-11ed-bd18-65557fe66949"
+          }
         }
       }
     }
