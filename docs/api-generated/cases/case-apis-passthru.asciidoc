@@ -870,23 +870,7 @@ Any modifications made to this file will be overwritten.
   "connector" : {
     "name" : "none",
     "id" : "none",
-    "fields" : {
-      "destIp" : true,
-      "severity" : "severity",
-      "parent" : "parent",
-      "impact" : "impact",
-      "malwareUrl" : true,
-      "priority" : "priority",
-      "issueTypes" : [ "issueTypes", "issueTypes" ],
-      "issueType" : "issueType",
-      "sourceIp" : true,
-      "urgency" : "urgency",
-      "malwareHash" : true,
-      "caseId" : "caseId",
-      "severityCode" : "severityCode",
-      "category" : "category",
-      "subcategory" : "subcategory"
-    },
+    "fields" : "{}",
     "type" : ".none"
   },
   "updated_at" : "2022-06-01T19:58:48.169Z",
@@ -967,7 +951,6 @@ Any modifications made to this file will be overwritten.
     <li><a href="#status"><code>status</code> - </a></li>
     <li><a href="#updateCaseConfiguration_200_response_inner"><code>updateCaseConfiguration_200_response_inner</code> - </a></li>
     <li><a href="#updateCaseConfiguration_200_response_inner_connector"><code>updateCaseConfiguration_200_response_inner_connector</code> - </a></li>
-    <li><a href="#updateCaseConfiguration_200_response_inner_connector_fields"><code>updateCaseConfiguration_200_response_inner_connector_fields</code> - </a></li>
     <li><a href="#updateCaseConfiguration_200_response_inner_created_by"><code>updateCaseConfiguration_200_response_inner_created_by</code> - </a></li>
     <li><a href="#updateCaseConfiguration_200_response_inner_mappings_inner"><code>updateCaseConfiguration_200_response_inner_mappings_inner</code> - </a></li>
     <li><a href="#updateCaseConfiguration_200_response_inner_updated_by"><code>updateCaseConfiguration_200_response_inner_updated_by</code> - </a></li>
@@ -1433,31 +1416,10 @@ Any modifications made to this file will be overwritten.
     <h3><a name="updateCaseConfiguration_200_response_inner_connector"><code>updateCaseConfiguration_200_response_inner_connector</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">fields (optional)</div><div class="param-desc"><span class="param-type"><a href="#updateCaseConfiguration_200_response_inner_connector_fields">updateCaseConfiguration_200_response_inner_connector_fields</a></span>  </div>
-<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To create a case without a connector, use <code>none</code>. </div>
-<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. To create a case without a connector, use <code>none</code>. </div>
+      <div class="param">fields (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to <code>null</code>. </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector IDs, use the find connectors API. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector names, use the find connectors API. </div>
 <div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="updateCaseConfiguration_200_response_inner_connector_fields"><code>updateCaseConfiguration_200_response_inner_connector_fields</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.</div>
-    <div class="field-items">
-      <div class="param">caseId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The case identifier for Swimlane connectors. </div>
-<div class="param">category (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors. </div>
-<div class="param">destIp (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors. </div>
-<div class="param">impact (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The effect an incident had on business for ServiceNow ITSM connectors. </div>
-<div class="param">issueType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of issue for Jira connectors. </div>
-<div class="param">issueTypes (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The type of incident for IBM Resilient connectors. </div>
-<div class="param">malwareHash (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors. </div>
-<div class="param">malwareUrl (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors. </div>
-<div class="param">parent (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The key of the parent issue, when the issue type is sub-task for Jira connectors. </div>
-<div class="param">priority (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The priority of the issue for Jira and ServiceNow SecOps connectors. </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The severity of the incident for ServiceNow ITSM connectors. </div>
-<div class="param">severityCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The severity code of the incident for IBM Resilient connectors. </div>
-<div class="param">sourceIp (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors. </div>
-<div class="param">subcategory (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The subcategory of the incident for ServiceNow ITSM connectors. </div>
-<div class="param">urgency (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1500,9 +1462,9 @@ Any modifications made to this file will be overwritten.
     <h3><a name="updateCaseConfiguration_request_connector"><code>updateCaseConfiguration_request_connector</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>An object that contains the connector configuration.</div>
     <div class="field-items">
-      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set this object to <code>null</code>. </div>
-<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To create a case without a connector, use <code>none</code>. </div>
-<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. To create a case without a connector, use <code>none</code>. </div>
+      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to <code>null</code>. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector IDs, use the find connectors API. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector names, use the find connectors API. </div>
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
