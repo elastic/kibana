@@ -88,22 +88,15 @@ export class CsvGenerator {
     const { scroll: scrollSettings, includeFrozen } = settings;
     searchSource.setField('size', scrollSettings.size);
 
-    {
-      const pitId = searchSource.getField('pit')?.id;
-      if (!pitId) {
-        throw new Error(`Unable to retrieve point-in-time ID from search source!`);
-      }
-      if (lastSortId) {
-        this.logger.debug(
-          `Executing search request with point-in-time ID: ${this.truncatePitId(pitId)}` +
-            `, and search_after: [${lastSortId}]`
-        );
-        searchSource.setField('searchAfter', lastSortId);
-      } else {
-        this.logger.debug(
-          `Executing search request with point-in-time ID: ${this.truncatePitId(pitId)}`
-        );
-      }
+    const pitId = searchSource.getField('pit')?.id;
+    if (lastSortId) {
+      this.logger.debug(
+        `Executing search request with PIT ID: ${this.truncatePitId(pitId)}` +
+          `, and search_after: [${lastSortId}]`
+      );
+      searchSource.setField('searchAfter', lastSortId);
+    } else {
+      this.logger.debug(`Executing search request with PIT ID: ${this.truncatePitId(pitId)}`);
     }
 
     const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();
@@ -325,8 +318,7 @@ export class CsvGenerator {
     let totalRelation = 'eq';
     let searchAfter: estypes.SortResults | undefined;
 
-    const pitId = await this.openPointInTime(indexPatternTitle, settings);
-    searchSource.setField('pit', { id: pitId, keep_alive: settings.scroll.duration });
+    let pitId = await this.openPointInTime(indexPatternTitle, settings);
 
     // apply timezone from the job to all date field formatters
     try {
@@ -352,7 +344,20 @@ export class CsvGenerator {
         if (this.cancellationToken.isCancelled()) {
           break;
         }
+        // set the latest pit, which could be different from the last request
+        searchSource.setField('pit', { id: pitId, keep_alive: settings.scroll.duration });
+
         const results = await this.doSearch(searchSource, settings, searchAfter);
+
+        if (!results.pit_id) {
+          throw new Error(`Search response did not contain a point-in-time ID!`);
+        }
+        // use the most recently received id for the next search request
+        this.logger.debug(
+          `Latest PIT ID from results: [${this.truncatePitId(results.pit_id)}]` +
+            ` Previous PIT ID used: [${this.truncatePitId(pitId)}]`
+        );
+        pitId = results.pit_id;
 
         const { hits } = results;
         if (first && hits.total != null) {
@@ -437,7 +442,7 @@ export class CsvGenerator {
         this.logger.debug(`Closing point-in-time`);
         await this.clients.es.asCurrentUser.closePointInTime({ body: { id: pitId } });
       } else {
-        this.logger.warn(`No point-in-time ID to clear!`);
+        this.logger.warn(`No PIT ID to clear!`);
       }
     }
 
