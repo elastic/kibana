@@ -1247,13 +1247,13 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Rule.exception_lists",
+            "id": "def-common.Rule.exception_list",
             "type": "Array",
             "tags": [],
-            "label": "exception_lists",
+            "label": "exception_list",
             "description": [],
             "signature": [
-              "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[]"
+              "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[] | undefined"
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,

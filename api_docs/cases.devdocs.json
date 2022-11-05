@@ -565,7 +565,7 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: ",
+          "> | undefined; onClose?: (() => void) | undefined; basePath?: string | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -645,7 +645,7 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: ",
+          "> | undefined; onClose?: (() => void) | undefined; basePath?: string | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",

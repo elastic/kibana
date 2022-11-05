@@ -24,7 +24,7 @@
         "signature": [
           "\".index-threshold\""
         ],
-        "path": "x-pack/plugins/stack_alerts/server/alert_types/index_threshold/rule_type.ts",
+        "path": "x-pack/plugins/stack_alerts/server/rule_types/index_threshold/rule_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
