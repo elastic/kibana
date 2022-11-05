@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const deleteAllIndices = getService('esDeleteAllIndices');
   const PageObjects = getPageObjects([
     'console',
     'common',
