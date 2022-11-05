@@ -25,7 +25,18 @@ patch:
               description: An object that contains the connector configuration.
               type: object
               properties:
-                $ref: '../components/schemas/connector_properties.yaml'
+                fields:
+                  description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set this object to `null`.
+                  nullable: true
+                  type: object
+                id:
+                  description: The identifier for the connector. To create a case without a connector, use `none`.
+                  type: string
+                name:
+                  description: The name of the connector. To create a case without a connector, use `none`.
+                  type: string
+                type:
+                  $ref: '../components/schemas/connector_types.yaml'
               required:
                 - fields
                 - id
