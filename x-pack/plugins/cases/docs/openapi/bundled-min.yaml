@@ -103,6 +103,270 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /s/{spaceId}/api/cases/configure:
+    get:
+      summary: Retrieves external connection details, such as the closure type and default connector for cases.
+      operationId: getCaseConfiguration
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration.
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/owner'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    closure_type:
+                      $ref: '#/components/schemas/closure_types'
+                    connector:
+                      type: object
+                      properties:
+                        fields:
+                          description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
+                          nullable: true
+                          type: object
+                        id:
+                          description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
+                          type: string
+                          example: none
+                        name:
+                          description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
+                          type: string
+                          example: none
+                        type:
+                          $ref: '#/components/schemas/connector_types'
+                    created_at:
+                      type: string
+                      format: date-time
+                      example: '2022-06-01T17:07:17.767Z'
+                    created_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                          nullable: true
+                        full_name:
+                          type: string
+                          example: null
+                          nullable: true
+                        username:
+                          type: string
+                          example: elastic
+                    error:
+                      type: string
+                      nullable: true
+                      example: null
+                    id:
+                      type: string
+                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                    mappings:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          action_type:
+                            type: string
+                            example: overwrite
+                          source:
+                            type: string
+                            example: title
+                          target:
+                            type: string
+                            example: summary
+                    owner:
+                      $ref: '#/components/schemas/owners'
+                    updated_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      example: '2022-06-01T19:58:48.169Z'
+                    updated_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                          nullable: true
+                        full_name:
+                          type: string
+                          example: null
+                          nullable: true
+                        username:
+                          type: string
+                          example: elastic
+                      nullable: true
+                    version:
+                      type: string
+                      example: WzIwNzMsMV0=
+      servers:
+        - url: https://localhost:5601
+    post:
+      summary: Sets external connection details, such as the closure type and default connector for cases.
+      operationId: setCaseConfiguration
+      description: |
+        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                closure_type:
+                  $ref: '#/components/schemas/closure_types'
+                connector:
+                  description: An object that contains the connector configuration.
+                  type: object
+                  properties:
+                    fields:
+                      description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
+                      nullable: true
+                      type: object
+                    id:
+                      description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
+                      type: string
+                      example: none
+                    name:
+                      description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
+                      type: string
+                      example: none
+                    type:
+                      $ref: '#/components/schemas/connector_types'
+                  required:
+                    - fields
+                    - id
+                    - name
+                    - type
+                owner:
+                  $ref: '#/components/schemas/owners'
+                settings:
+                  description: An object that contains the case settings.
+                  type: object
+                  properties:
+                    syncAlerts:
+                      description: Turns alert syncing on or off.
+                      type: boolean
+                      example: true
+                  required:
+                    - syncAlerts
+              required:
+                - closure_type
+                - connector
+                - owner
+            examples:
+              setCaseConfigRequest:
+                $ref: '#/components/examples/set_case_configuration_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+                properties:
+                  closure_type:
+                    $ref: '#/components/schemas/closure_types'
+                  connector:
+                    type: object
+                    properties:
+                      fields:
+                        description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
+                        nullable: true
+                        type: object
+                      id:
+                        description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
+                        type: string
+                        example: none
+                      name:
+                        description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
+                        type: string
+                        example: none
+                      type:
+                        $ref: '#/components/schemas/connector_types'
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: '2022-06-01T17:07:17.767Z'
+                  created_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                        nullable: true
+                      full_name:
+                        type: string
+                        example: null
+                        nullable: true
+                      username:
+                        type: string
+                        example: elastic
+                  error:
+                    type: string
+                    nullable: true
+                    example: null
+                  id:
+                    type: string
+                    example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                  mappings:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        action_type:
+                          type: string
+                          example: overwrite
+                        source:
+                          type: string
+                          example: title
+                        target:
+                          type: string
+                          example: summary
+                  owner:
+                    $ref: '#/components/schemas/owners'
+                  updated_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: '2022-06-01T19:58:48.169Z'
+                  updated_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                        nullable: true
+                      full_name:
+                        type: string
+                        example: null
+                        nullable: true
+                      username:
+                        type: string
+                        example: elastic
+                    nullable: true
+                  version:
+                    type: string
+                    example: WzIwNzMsMV0=
+              examples:
+                setCaseConfigResponse:
+                  $ref: '#/components/examples/set_case_configuration_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure/{configurationId}:
     patch:
       summary: Updates external connection details, such as the closure type and default connector for cases.
@@ -192,14 +456,17 @@ paths:
                         email:
                           type: string
                           example: null
+                          nullable: true
                         full_name:
                           type: string
                           example: null
+                          nullable: true
                         username:
                           type: string
                           example: elastic
                     error:
                       type: string
+                      nullable: true
                       example: null
                     id:
                       type: string
@@ -231,9 +498,11 @@ paths:
                         email:
                           type: string
                           example: null
+                          nullable: true
                         full_name:
                           type: string
                           example: null
+                          nullable: true
                         username:
                           type: string
                           example: elastic
@@ -405,6 +674,18 @@ components:
       schema:
         type: string
         example: default
+    owner:
+      in: query
+      name: owner
+      description: |
+        A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read.
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/owners'
+          - type: array
+            items:
+              $ref: '#/components/schemas/owners'
+      example: cases
     configuration_id:
       in: path
       name: configurationId
@@ -1566,6 +1847,46 @@ components:
             connector_id: 05da469f-1fde-4058-99a3-91e4807e2de8
             external_id: '10003'
             connector_name: Jira
+    set_case_configuration_request:
+      summary: Set the closure type and default connector for Stack Management cases.
+      value:
+        owner: cases
+        connector:
+          id: 5e656730-e1ca-11ec-be9b-9b1838238ee6
+          name: my-jira-connector
+          type: .jira
+          fields: null
+        closure_type: close-by-user
+    set_case_configuration_response:
+      summary: This is an example response when the case configuration was updated.
+      value:
+        closure_type: close-by-user
+        owner: cases
+        created_at: '2022-06-01T17:07:17.767Z'
+        created_by:
+          username: elastic
+          email: null,
+          full_name: null
+        updated_at: null
+        updated_by: null
+        connector:
+          id: 5e656730-e1ca-11ec-be9b-9b1838238ee6
+          name: my-jira-connector
+          type: .jira
+          fields: null
+        mappings:
+          - source: title
+            target: summary
+            action_type: overwrite
+          - source: description
+            target: description
+            action_type: overwrite
+          - source: comments
+            target: comments
+            action_type: append
+        version: WzIwNzMsMV0=
+        error: null
+        id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
     add_comment_request:
       summary: Adds a comment to a case.
       value:

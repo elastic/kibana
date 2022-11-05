@@ -14,7 +14,7 @@ value:
     name: my-jira-connector
     type: .jira
     fields: null
-  mappings: [
+  mappings:
     - source: title
       target: summary
       action_type: overwrite

@@ -23,7 +23,9 @@ Any modifications made to this file will be overwritten.
   <li><a href="#deleteCase"><code><span class="http-method">delete</span> /s/{spaceId}/api/cases</code></a></li>
   <li><a href="#deleteCaseComments"><code><span class="http-method">delete</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
   <li><a href="#getAllCaseComments"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
+  <li><a href="#getCaseConfiguration"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/configure</code></a></li>
   <li><a href="#pushCase"><code><span class="http-method">post</span> /s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push</code></a></li>
+  <li><a href="#setCaseConfiguration"><code><span class="http-method">post</span> /s/{spaceId}/api/cases/configure</code></a></li>
   <li><a href="#updateCase"><code><span class="http-method">patch</span> /s/{spaceId}/api/cases</code></a></li>
   <li><a href="#updateCaseComment"><code><span class="http-method">patch</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
   <li><a href="#updateCaseConfiguration"><code><span class="http-method">patch</span> /s/{spaceId}/api/cases/configure/{configurationId}</code></a></li>
@@ -448,6 +450,89 @@ Any modifications made to this file will be overwritten.
         <a href="#case_response_properties">case_response_properties</a>
   </div> <!-- method -->
   <hr/>
+  <div class="method"><a name="getCaseConfiguration"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/configure</code></pre></div>
+    <div class="method-summary">Retrieves external connection details, such as the closure type and default connector for cases. (<span class="nickname">getCaseConfiguration</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case configuration.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">owner (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read. default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#getCaseConfiguration_200_response_inner">getCaseConfiguration_200_response_inner</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <pre class="example"><code>{
+  "closure_type" : "close-by-user",
+  "owner" : "cases",
+  "mappings" : [ {
+    "action_type" : "overwrite",
+    "source" : "title",
+    "target" : "summary"
+  }, {
+    "action_type" : "overwrite",
+    "source" : "title",
+    "target" : "summary"
+  } ],
+  "connector" : {
+    "name" : "none",
+    "id" : "none",
+    "fields" : "{}",
+    "type" : ".none"
+  },
+  "updated_at" : "2022-06-01T19:58:48.169Z",
+  "updated_by" : {
+    "full_name" : "full_name",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "created_at" : "2022-06-01T17:07:17.767Z",
+  "id" : "4a97a440-e1cd-11ec-be9b-9b1838238ee6",
+  "error" : "error",
+  "created_by" : {
+    "full_name" : "full_name",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "version" : "WzIwNzMsMV0="
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json; charset=utf-8</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+  </div> <!-- method -->
+  <hr/>
   <div class="method"><a name="pushCase"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
@@ -567,6 +652,102 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="setCaseConfiguration"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/cases/configure</code></pre></div>
+    <div class="method-summary">Sets external connection details, such as the closure type and default connector for cases. (<span class="nickname">setCaseConfiguration</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">setCaseConfiguration_request <a href="#setCaseConfiguration_request">setCaseConfiguration_request</a> (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#getCaseConfiguration_200_response_inner">getCaseConfiguration_200_response_inner</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <pre class="example"><code>{
+  "closure_type" : "close-by-user",
+  "owner" : "cases",
+  "mappings" : [ {
+    "action_type" : "overwrite",
+    "source" : "title",
+    "target" : "summary"
+  }, {
+    "action_type" : "overwrite",
+    "source" : "title",
+    "target" : "summary"
+  } ],
+  "connector" : {
+    "name" : "none",
+    "id" : "none",
+    "fields" : "{}",
+    "type" : ".none"
+  },
+  "updated_at" : "2022-06-01T19:58:48.169Z",
+  "updated_by" : {
+    "full_name" : "full_name",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "created_at" : "2022-06-01T17:07:17.767Z",
+  "id" : "4a97a440-e1cd-11ec-be9b-9b1838238ee6",
+  "error" : "error",
+  "created_by" : {
+    "full_name" : "full_name",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "version" : "WzIwNzMsMV0="
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json; charset=utf-8</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#getCaseConfiguration_200_response_inner">getCaseConfiguration_200_response_inner</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateCase"/>
@@ -847,7 +1028,7 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#updateCaseConfiguration_200_response_inner">updateCaseConfiguration_200_response_inner</a>]
+      array[<a href="#getCaseConfiguration_200_response_inner">getCaseConfiguration_200_response_inner</a>]
       
     </div>
 
@@ -944,18 +1125,21 @@ Any modifications made to this file will be overwritten.
     <li><a href="#create_case_request_assignees_inner"><code>create_case_request_assignees_inner</code> - </a></li>
     <li><a href="#create_case_request_connector"><code>create_case_request_connector</code> - </a></li>
     <li><a href="#external_service"><code>external_service</code> - </a></li>
+    <li><a href="#getCaseConfiguration_200_response_inner"><code>getCaseConfiguration_200_response_inner</code> - </a></li>
+    <li><a href="#getCaseConfiguration_200_response_inner_connector"><code>getCaseConfiguration_200_response_inner_connector</code> - </a></li>
+    <li><a href="#getCaseConfiguration_200_response_inner_created_by"><code>getCaseConfiguration_200_response_inner_created_by</code> - </a></li>
+    <li><a href="#getCaseConfiguration_200_response_inner_mappings_inner"><code>getCaseConfiguration_200_response_inner_mappings_inner</code> - </a></li>
+    <li><a href="#getCaseConfiguration_200_response_inner_updated_by"><code>getCaseConfiguration_200_response_inner_updated_by</code> - </a></li>
+    <li><a href="#getCaseConfiguration_owner_parameter"><code>getCaseConfiguration_owner_parameter</code> - </a></li>
     <li><a href="#owners"><code>owners</code> - </a></li>
     <li><a href="#rule"><code>rule</code> - Alerting rule</a></li>
+    <li><a href="#setCaseConfiguration_request"><code>setCaseConfiguration_request</code> - </a></li>
+    <li><a href="#setCaseConfiguration_request_connector"><code>setCaseConfiguration_request_connector</code> - </a></li>
+    <li><a href="#setCaseConfiguration_request_settings"><code>setCaseConfiguration_request_settings</code> - </a></li>
     <li><a href="#settings"><code>settings</code> - </a></li>
     <li><a href="#severity_property"><code>severity_property</code> - </a></li>
     <li><a href="#status"><code>status</code> - </a></li>
-    <li><a href="#updateCaseConfiguration_200_response_inner"><code>updateCaseConfiguration_200_response_inner</code> - </a></li>
-    <li><a href="#updateCaseConfiguration_200_response_inner_connector"><code>updateCaseConfiguration_200_response_inner_connector</code> - </a></li>
-    <li><a href="#updateCaseConfiguration_200_response_inner_created_by"><code>updateCaseConfiguration_200_response_inner_created_by</code> - </a></li>
-    <li><a href="#updateCaseConfiguration_200_response_inner_mappings_inner"><code>updateCaseConfiguration_200_response_inner_mappings_inner</code> - </a></li>
-    <li><a href="#updateCaseConfiguration_200_response_inner_updated_by"><code>updateCaseConfiguration_200_response_inner_updated_by</code> - </a></li>
     <li><a href="#updateCaseConfiguration_request"><code>updateCaseConfiguration_request</code> - </a></li>
-    <li><a href="#updateCaseConfiguration_request_connector"><code>updateCaseConfiguration_request_connector</code> - </a></li>
     <li><a href="#update_alert_comment_request_properties"><code>update_alert_comment_request_properties</code> - Update case comment request properties for alerts</a></li>
     <li><a href="#update_case_comment_request"><code>update_case_comment_request</code> - Update case comment request</a></li>
     <li><a href="#update_case_request"><code>update_case_request</code> - Update case request</a></li>
@@ -1363,6 +1547,66 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="getCaseConfiguration_200_response_inner"><code>getCaseConfiguration_200_response_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">closure_type (optional)</div><div class="param-desc"><span class="param-type"><a href="#closure_types">closure_types</a></span>  </div>
+<div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_connector">getCaseConfiguration_200_response_inner_connector</a></span>  </div>
+<div class="param">created_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">created_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_created_by">getCaseConfiguration_200_response_inner_created_by</a></span>  </div>
+<div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">mappings (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_mappings_inner">array[getCaseConfiguration_200_response_inner_mappings_inner]</a></span>  </div>
+<div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">updated_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_updated_by">getCaseConfiguration_200_response_inner_updated_by</a></span>  </div>
+<div class="param">version (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCaseConfiguration_200_response_inner_connector"><code>getCaseConfiguration_200_response_inner_connector</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">fields (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to <code>null</code>. </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector IDs, use the find connectors API. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector names, use the find connectors API. </div>
+<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCaseConfiguration_200_response_inner_created_by"><code>getCaseConfiguration_200_response_inner_created_by</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCaseConfiguration_200_response_inner_mappings_inner"><code>getCaseConfiguration_200_response_inner_mappings_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">action_type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">source (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">target (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCaseConfiguration_200_response_inner_updated_by"><code>getCaseConfiguration_200_response_inner_updated_by</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCaseConfiguration_owner_parameter"><code>getCaseConfiguration_owner_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="owners"><code>owners</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The application that owns the cases: Stack Management, Observability, or Elastic Security.</div>
     <div class="field-items">
@@ -1374,6 +1618,33 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule identifier. </div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule name. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="setCaseConfiguration_request"><code>setCaseConfiguration_request</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">closure_type </div><div class="param-desc"><span class="param-type"><a href="#closure_types">closure_types</a></span>  </div>
+<div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#setCaseConfiguration_request_connector">setCaseConfiguration_request_connector</a></span>  </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#setCaseConfiguration_request_settings">setCaseConfiguration_request_settings</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="setCaseConfiguration_request_connector"><code>setCaseConfiguration_request_connector</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An object that contains the connector configuration.</div>
+    <div class="field-items">
+      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to <code>null</code>. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector IDs, use the find connectors API. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector names, use the find connectors API. </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="setCaseConfiguration_request_settings"><code>setCaseConfiguration_request_settings</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An object that contains the case settings.</div>
+    <div class="field-items">
+      <div class="param">syncAlerts </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Turns alert syncing on or off. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1396,76 +1667,12 @@ Any modifications made to this file will be overwritten.
           </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="updateCaseConfiguration_200_response_inner"><code>updateCaseConfiguration_200_response_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">closure_type (optional)</div><div class="param-desc"><span class="param-type"><a href="#closure_types">closure_types</a></span>  </div>
-<div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#updateCaseConfiguration_200_response_inner_connector">updateCaseConfiguration_200_response_inner_connector</a></span>  </div>
-<div class="param">created_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">created_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#updateCaseConfiguration_200_response_inner_created_by">updateCaseConfiguration_200_response_inner_created_by</a></span>  </div>
-<div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">mappings (optional)</div><div class="param-desc"><span class="param-type"><a href="#updateCaseConfiguration_200_response_inner_mappings_inner">array[updateCaseConfiguration_200_response_inner_mappings_inner]</a></span>  </div>
-<div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">updated_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#updateCaseConfiguration_200_response_inner_updated_by">updateCaseConfiguration_200_response_inner_updated_by</a></span>  </div>
-<div class="param">version (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="updateCaseConfiguration_200_response_inner_connector"><code>updateCaseConfiguration_200_response_inner_connector</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">fields (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to <code>null</code>. </div>
-<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector IDs, use the find connectors API. </div>
-<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector names, use the find connectors API. </div>
-<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="updateCaseConfiguration_200_response_inner_created_by"><code>updateCaseConfiguration_200_response_inner_created_by</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="updateCaseConfiguration_200_response_inner_mappings_inner"><code>updateCaseConfiguration_200_response_inner_mappings_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">action_type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">source (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">target (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="updateCaseConfiguration_200_response_inner_updated_by"><code>updateCaseConfiguration_200_response_inner_updated_by</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
     <h3><a name="updateCaseConfiguration_request"><code>updateCaseConfiguration_request</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">closure_type (optional)</div><div class="param-desc"><span class="param-type"><a href="#closure_types">closure_types</a></span>  </div>
-<div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#updateCaseConfiguration_request_connector">updateCaseConfiguration_request_connector</a></span>  </div>
+<div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#setCaseConfiguration_request_connector">setCaseConfiguration_request_connector</a></span>  </div>
 <div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The version of the connector. To retrieve the version value, use the get configuration API. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="updateCaseConfiguration_request_connector"><code>updateCaseConfiguration_request_connector</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>An object that contains the connector configuration.</div>
-    <div class="field-items">
-      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to <code>null</code>. </div>
-<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector IDs, use the find connectors API. </div>
-<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. If you do not want a default connector, use <code>none</code>. To retrieve connector names, use the find connectors API. </div>
-<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

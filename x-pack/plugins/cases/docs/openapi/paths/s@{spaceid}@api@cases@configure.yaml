@@ -84,11 +84,9 @@ post:
       content:
          application/json; charset=utf-8:
           schema:
-            type: array
-            items: 
-              type: object
-              properties:
-                $ref: '../components/schemas/case_configure_response_properties.yaml'
+            type: object
+            properties:
+              $ref: '../components/schemas/case_configure_response_properties.yaml'
           examples:
             setCaseConfigResponse:
               $ref: '../components/examples/set_case_configuration_response.yaml'

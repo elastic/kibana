@@ -21,8 +21,8 @@ paths:
 #    $ref: 'paths/s@{spaceid}@api@cases@_find.yaml'
 #  '/s/{spaceId}/api/cases/alerts/{alertId}':
 #    $ref: 'paths/s@{spaceid}@api@cases@alerts@{alertid}.yaml'
-#  '/s/{spaceId}/api/cases/configure':
-#    $ref: paths/s@{spaceid}@api@cases@configure.yaml
+  '/s/{spaceId}/api/cases/configure':
+    $ref: paths/s@{spaceid}@api@cases@configure.yaml
   '/s/{spaceId}/api/cases/configure/{configurationId}':
     $ref: paths/s@{spaceid}@api@cases@configure@{configurationid}.yaml
 #  '/s/{spaceId}/api/cases/configure/connectors/_find':

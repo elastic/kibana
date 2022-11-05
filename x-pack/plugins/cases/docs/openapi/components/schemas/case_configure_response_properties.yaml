@@ -14,14 +14,17 @@ created_by:
     email:
       type: string
       example: null
+      nullable: true
     full_name:
       type: string
       example: null
+      nullable: true
     username: 
       type: string
       example: elastic
 error:
   type: string
+  nullable: true
   example: null
 id:
   type: string
@@ -31,15 +34,15 @@ mappings:
   items:
     type: object
     properties:
-        action_type:
-          type: string
-          example: overwrite
-        source:
-          type: string
-          example: title
-        target:
-          type: string
-          example: summary
+      action_type:
+        type: string
+        example: overwrite
+      source:
+        type: string
+        example: title
+      target:
+        type: string
+        example: summary
 owner:
   $ref: 'owners.yaml'
 updated_at:
@@ -53,9 +56,11 @@ updated_by:
     email:
       type: string
       example: null
+      nullable: true
     full_name:
       type: string
       example: null
+      nullable: true
     username: 
       type: string
       example: elastic
