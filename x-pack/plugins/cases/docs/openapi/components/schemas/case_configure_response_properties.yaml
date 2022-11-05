@@ -3,7 +3,7 @@ closure_type:
 connector: 
   type: object
   properties:
-    $ref: 'connector_properties.yaml'
+    $ref: 'case_configure_connector_properties.yaml'
 created_at:
   type: string
   format: date-time
