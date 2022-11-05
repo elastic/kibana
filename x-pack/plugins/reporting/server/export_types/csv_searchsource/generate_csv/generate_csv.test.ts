@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errors as esErrors } from '@elastic/elasticsearch';
+import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import {
@@ -50,6 +50,7 @@ const searchSourceMock = {
   ...searchSourceInstanceMock,
   getSearchRequestBody: jest.fn(() => ({})),
 };
+
 const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceMock),
@@ -58,19 +59,21 @@ const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
   extract: jest.fn(),
   getAllMigrations: jest.fn(),
 };
+
+const mockPitId = 'oju9fs3698s3902f02-8qg3-u9w36oiewiuyew6';
+
+const getMockRawResponse = (hits: Array<estypes.SearchHit<unknown>> = [], total = hits.length) => ({
+  took: 1,
+  timed_out: false,
+  pit_id: mockPitId,
+  _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+  hits: { hits, total, max_score: 0 },
+});
+
 const mockDataClientSearchDefault = jest.fn().mockImplementation(
   (): Rx.Observable<{ rawResponse: SearchResponse<unknown> }> =>
     Rx.of({
-      rawResponse: {
-        took: 1,
-        timed_out: false,
-        _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
-        hits: {
-          hits: [],
-          total: 0,
-          max_score: 0,
-        },
-      },
+      rawResponse: getMockRawResponse(),
     })
 );
 
@@ -84,8 +87,6 @@ const getMockConfig = (properties: DeepPartial<ReportingConfigType> = {}) => {
   const config = createMockConfig(createMockConfigSchema(properties));
   return config.get('csv');
 };
-
-const mockPitId = 'oju9fs3698s3902f02-8qg3-u9w36oiewiuyew6';
 
 beforeEach(async () => {
   content = '';
@@ -131,7 +132,7 @@ beforeEach(async () => {
           },
           metaFields: ['_id', '_index', '_type', '_score'],
           getFormatterForField: jest.fn(),
-          getIndexPattern: () => 'dataview title',
+          getIndexPattern: () => 'logstash-*',
         };
     }
   });
@@ -164,20 +165,15 @@ it('formats an empty search result to CSV content', async () => {
 it('formats a search result to CSV content', async () => {
   mockDataClient.search = jest.fn().mockImplementation(() =>
     Rx.of({
-      rawResponse: {
-        hits: {
-          hits: [
-            {
-              fields: {
-                date: `["2020-12-31T00:14:28.000Z"]`,
-                ip: `["110.135.176.89"]`,
-                message: `["This is a great message!"]`,
-              },
-            },
-          ],
-          total: 1,
-        },
-      },
+      rawResponse: getMockRawResponse([
+        {
+          fields: {
+            date: `["2020-12-31T00:14:28.000Z"]`,
+            ip: `["110.135.176.89"]`,
+            message: `["This is a great message!"]`,
+          },
+        } as unknown as estypes.SearchHit,
+      ]),
     })
   );
   const generateCsv = new CsvGenerator(
@@ -206,16 +202,16 @@ const HITS_TOTAL = 100;
 it('calculates the bytes of the content', async () => {
   mockDataClient.search = jest.fn().mockImplementation(() =>
     Rx.of({
-      rawResponse: {
-        hits: {
-          hits: range(0, HITS_TOTAL).map(() => ({
-            fields: {
-              message: ['this is a great message'],
-            },
-          })),
-          total: HITS_TOTAL,
-        },
-      },
+      rawResponse: getMockRawResponse(
+        range(0, HITS_TOTAL).map(
+          () =>
+            ({
+              fields: {
+                message: ['this is a great message'],
+              },
+            } as unknown as estypes.SearchHit)
+        )
+      ),
     })
   );
 
@@ -253,18 +249,18 @@ it('warns if max size was reached', async () => {
 
   mockDataClient.search = jest.fn().mockImplementation(() =>
     Rx.of({
-      rawResponse: {
-        hits: {
-          hits: range(0, HITS_TOTAL).map(() => ({
-            fields: {
-              date: ['2020-12-31T00:14:28.000Z'],
-              ip: ['110.135.176.89'],
-              message: ['super cali fragile istic XPLA docious'],
-            },
-          })),
-          total: HITS_TOTAL,
-        },
-      },
+      rawResponse: getMockRawResponse(
+        range(0, HITS_TOTAL).map(
+          () =>
+            ({
+              fields: {
+                date: ['2020-12-31T00:14:28.000Z'],
+                ip: ['110.135.176.89'],
+                message: ['super cali fragile istic XPLA docious'],
+              },
+            } as unknown as estypes.SearchHit)
+        )
+      ),
     })
   );
 
@@ -295,33 +291,35 @@ it('uses the pit ID to page all the data', async () => {
     .fn()
     .mockImplementationOnce(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: range(0, HITS_TOTAL / 10).map(() => ({
-              fields: {
-                date: ['2020-12-31T00:14:28.000Z'],
-                ip: ['110.135.176.89'],
-                message: ['hit from the initial search'],
-              },
-            })),
-            total: HITS_TOTAL,
-          },
-        },
+        rawResponse: getMockRawResponse(
+          range(0, HITS_TOTAL / 10).map(
+            () =>
+              ({
+                fields: {
+                  date: ['2020-12-31T00:14:28.000Z'],
+                  ip: ['110.135.176.89'],
+                  message: ['hit from the initial search'],
+                },
+              } as unknown as estypes.SearchHit)
+          ),
+          HITS_TOTAL
+        ),
       })
     )
     .mockImplementation(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: range(0, HITS_TOTAL / 10).map(() => ({
-              fields: {
-                date: ['2020-12-31T00:14:28.000Z'],
-                ip: ['110.135.176.89'],
-                message: ['hit from a subsequent scroll'],
-              },
-            })),
-          },
-        },
+        rawResponse: getMockRawResponse(
+          range(0, HITS_TOTAL / 10).map(
+            () =>
+              ({
+                fields: {
+                  date: ['2020-12-31T00:14:28.000Z'],
+                  ip: ['110.135.176.89'],
+                  message: ['hit from a subsequent scroll'],
+                },
+              } as unknown as estypes.SearchHit)
+          )
+        ),
       })
     );
 
@@ -354,7 +352,7 @@ it('uses the pit ID to page all the data', async () => {
   expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledTimes(1);
   expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith({
     ignore_unavailable: true,
-    index: undefined,
+    index: 'logstash-*',
     keep_alive: '30s',
   });
 
@@ -369,52 +367,26 @@ it('keeps order of the columns during the scroll', async () => {
     .fn()
     .mockImplementationOnce(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                fields: {
-                  a: ['a1'],
-                  b: ['b1'],
-                },
-              },
-            ],
-            total: 3,
-          },
-        },
+        rawResponse: getMockRawResponse(
+          [{ fields: { a: ['a1'], b: ['b1'] } } as unknown as estypes.SearchHit],
+          3
+        ),
       })
     )
     .mockImplementationOnce(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                fields: {
-                  b: ['b2'],
-                },
-              },
-            ],
-            total: 3,
-          },
-        },
+        rawResponse: getMockRawResponse(
+          [{ fields: { b: ['b2'] } } as unknown as estypes.SearchHit],
+          3
+        ),
       })
     )
     .mockImplementationOnce(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                fields: {
-                  a: ['a3'],
-                  c: ['c3'],
-                },
-              },
-            ],
-            total: 3,
-          },
-        },
+        rawResponse: getMockRawResponse(
+          [{ fields: { a: ['a3'], c: ['c3'] } } as unknown as estypes.SearchHit],
+          3
+        ),
       })
     );
 
@@ -443,21 +415,16 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
   it('cells can be multi-value', async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                _id: 'my-cool-id',
-                _index: 'my-cool-index',
-                _version: 4,
-                fields: {
-                  sku: [`This is a cool SKU.`, `This is also a cool SKU.`],
-                },
-              },
-            ],
-            total: 1,
+        rawResponse: getMockRawResponse([
+          {
+            _id: 'my-cool-id',
+            _index: 'my-cool-index',
+            _version: 4,
+            fields: {
+              sku: [`This is a cool SKU.`, `This is also a cool SKU.`],
+            },
           },
-        },
+        ]),
       })
     );
 
@@ -485,22 +452,17 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
   it('provides top-level underscored fields as columns', async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                _id: 'my-cool-id',
-                _index: 'my-cool-index',
-                _version: 4,
-                fields: {
-                  date: ['2020-12-31T00:14:28.000Z'],
-                  message: [`it's nice to see you`],
-                },
-              },
-            ],
-            total: 1,
+        rawResponse: getMockRawResponse([
+          {
+            _id: 'my-cool-id',
+            _index: 'my-cool-index',
+            _version: 4,
+            fields: {
+              date: ['2020-12-31T00:14:28.000Z'],
+              message: [`it's nice to see you`],
+            },
           },
-        },
+        ]),
       })
     );
 
@@ -539,28 +501,23 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
   it('sorts the fields when they are to be used as table column names', async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                _id: 'my-cool-id',
-                _index: 'my-cool-index',
-                _version: 4,
-                fields: {
-                  date: ['2020-12-31T00:14:28.000Z'],
-                  message_z: [`test field Z`],
-                  message_y: [`test field Y`],
-                  message_x: [`test field X`],
-                  message_w: [`test field W`],
-                  message_v: [`test field V`],
-                  message_u: [`test field U`],
-                  message_t: [`test field T`],
-                },
-              },
-            ],
-            total: 1,
+        rawResponse: getMockRawResponse([
+          {
+            _id: 'my-cool-id',
+            _index: 'my-cool-index',
+            _version: 4,
+            fields: {
+              date: ['2020-12-31T00:14:28.000Z'],
+              message_z: [`test field Z`],
+              message_y: [`test field Y`],
+              message_x: [`test field X`],
+              message_w: [`test field W`],
+              message_v: [`test field V`],
+              message_u: [`test field U`],
+              message_t: [`test field T`],
+            },
           },
-        },
+        ]),
       })
     );
 
@@ -600,22 +557,17 @@ describe('fields from job.columns (7.13+ generated)', () => {
   it('cells can be multi-value', async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                _id: 'my-cool-id',
-                _index: 'my-cool-index',
-                _version: 4,
-                fields: {
-                  product: 'coconut',
-                  category: [`cool`, `rad`],
-                },
-              },
-            ],
-            total: 1,
+        rawResponse: getMockRawResponse([
+          {
+            _id: 'my-cool-id',
+            _index: 'my-cool-index',
+            _version: 4,
+            fields: {
+              product: 'coconut',
+              category: [`cool`, `rad`],
+            },
           },
-        },
+        ]),
       })
     );
 
@@ -643,22 +595,17 @@ describe('fields from job.columns (7.13+ generated)', () => {
   it('columns can be top-level fields such as _id and _index', async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                _id: 'my-cool-id',
-                _index: 'my-cool-index',
-                _version: 4,
-                fields: {
-                  product: 'coconut',
-                  category: [`cool`, `rad`],
-                },
-              },
-            ],
-            total: 1,
+        rawResponse: getMockRawResponse([
+          {
+            _id: 'my-cool-id',
+            _index: 'my-cool-index',
+            _version: 4,
+            fields: {
+              product: 'coconut',
+              category: [`cool`, `rad`],
+            },
           },
-        },
+        ]),
       })
     );
 
@@ -686,22 +633,17 @@ describe('fields from job.columns (7.13+ generated)', () => {
   it('default column names come from tabify', async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                _id: 'my-cool-id',
-                _index: 'my-cool-index',
-                _version: 4,
-                fields: {
-                  product: 'coconut',
-                  category: [`cool`, `rad`],
-                },
-              },
-            ],
-            total: 1,
+        rawResponse: getMockRawResponse([
+          {
+            _id: 'my-cool-id',
+            _index: 'my-cool-index',
+            _version: 4,
+            fields: {
+              product: 'coconut',
+              category: [`cool`, `rad`],
+            },
           },
-        },
+        ]),
       })
     );
 
@@ -733,20 +675,15 @@ describe('formulas', () => {
   it(`escapes formula values in a cell, doesn't warn the csv contains formulas`, async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                fields: {
-                  date: ['2020-12-31T00:14:28.000Z'],
-                  ip: ['110.135.176.89'],
-                  message: [TEST_FORMULA],
-                },
-              },
-            ],
-            total: 1,
-          },
-        },
+        rawResponse: getMockRawResponse([
+          {
+            fields: {
+              date: ['2020-12-31T00:14:28.000Z'],
+              ip: ['110.135.176.89'],
+              message: [TEST_FORMULA],
+            },
+          } as unknown as estypes.SearchHit,
+        ]),
       })
     );
 
@@ -776,20 +713,15 @@ describe('formulas', () => {
   it(`escapes formula values in a header, doesn't warn the csv contains formulas`, async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                fields: {
-                  date: ['2020-12-31T00:14:28.000Z'],
-                  ip: ['110.135.176.89'],
-                  [TEST_FORMULA]: 'This is great data',
-                },
-              },
-            ],
-            total: 1,
-          },
-        },
+        rawResponse: getMockRawResponse([
+          {
+            fields: {
+              date: ['2020-12-31T00:14:28.000Z'],
+              ip: ['110.135.176.89'],
+              [TEST_FORMULA]: 'This is great data',
+            },
+          } as unknown as estypes.SearchHit,
+        ]),
       })
     );
 
@@ -827,20 +759,15 @@ describe('formulas', () => {
     });
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                fields: {
-                  date: ['2020-12-31T00:14:28.000Z'],
-                  ip: ['110.135.176.89'],
-                  message: [TEST_FORMULA],
-                },
-              },
-            ],
-            total: 1,
-          },
-        },
+        rawResponse: getMockRawResponse([
+          {
+            fields: {
+              date: ['2020-12-31T00:14:28.000Z'],
+              ip: ['110.135.176.89'],
+              message: [TEST_FORMULA],
+            },
+          } as unknown as estypes.SearchHit,
+        ]),
       })
     );
 
@@ -999,18 +926,18 @@ describe('error codes', () => {
       .fn()
       .mockImplementationOnce(() =>
         Rx.of({
-          rawResponse: {
-            hits: {
-              hits: range(0, 5).map(() => ({
-                fields: {
-                  date: ['2020-12-31T00:14:28.000Z'],
-                  ip: ['110.135.176.89'],
-                  message: ['super cali fragile istic XPLA docious'],
-                },
-              })),
-              total: 10,
-            },
-          },
+          rawResponse: getMockRawResponse(
+            range(0, 5).map(() => ({
+              _index: 'lasdf',
+              _id: 'lasdf123',
+              fields: {
+                date: ['2020-12-31T00:14:28.000Z'],
+                ip: ['110.135.176.89'],
+                message: ['super cali fragile istic XPLA docious'],
+              },
+            })),
+            10
+          ),
         })
       )
       .mockImplementationOnce(() => {
