@@ -186,14 +186,14 @@ export const crawlerIndex: CrawlerViewIndex = {
       },
     ],
     id: '4',
-    index_name: 'connector-crawler',
+    index_name: 'crawler',
     is_native: true,
     language: 'en',
     last_seen: null,
     last_sync_error: null,
     last_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
-    name: 'connector-crawler',
+    name: 'crawler',
     scheduling: {
       enabled: false,
       interval: '',
@@ -211,7 +211,7 @@ export const crawlerIndex: CrawlerViewIndex = {
   ingestionMethod: IngestionMethod.CRAWLER,
   ingestionStatus: IngestionStatus.INCOMPLETE,
   lastUpdated: null,
-  name: 'connector-crawler',
+  name: 'crawler',
   total: {
     docs: {
       count: 1,

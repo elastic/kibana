@@ -115,22 +115,6 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     },
   },
   {
-    count: 1,
-    crawler: {
-      id: '3',
-      index_name: 'crawler',
-    },
-    hidden: false,
-    name: 'crawler',
-    total: {
-      docs: {
-        count: 1,
-        deleted: 0,
-      },
-      store: { size_in_bytes: '8024' },
-    },
-  },
-  {
     connector: {
       api_key_id: null,
       configuration: { foo: { label: 'bar', value: 'barbar' } },
