@@ -15,8 +15,6 @@ import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 
-import { setupRequest } from '../../lib/helpers/setup_request';
-
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { fetchDurationFieldCandidates } from './queries/fetch_duration_field_candidates';
@@ -335,10 +333,7 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
     totalDocCount: number;
     fallbackResult?: import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation;
   }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
     const {
       body: {
         serviceName,
@@ -355,7 +350,6 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
     } = resources.params;
 
     return fetchSignificantCorrelations({
-      setup,
       apmEventClient,
       start,
       end,
@@ -406,10 +400,7 @@ const pValuesTransactionsRoute = createApmServerRoute({
     ccsWarning: boolean;
     fallbackResult?: import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation;
   }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       body: {
@@ -427,7 +418,6 @@ const pValuesTransactionsRoute = createApmServerRoute({
     } = resources.params;
 
     return fetchPValues({
-      setup,
       apmEventClient,
       start,
       end,
