@@ -48,7 +48,7 @@ export const DatasourceSelector = ({ onSelect, datasources, current }) => {
       ))}
     </div>
   );
-}
+};
 
 DatasourceSelector.propTypes = {
   onSelect: PropTypes.func.isRequired,
