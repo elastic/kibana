@@ -81,7 +81,7 @@ export class CsvGenerator {
       throw new Error(`Could not receive a point-in-time ID!`);
     }
 
-    this.logger.debug(`Received PIT ID: ${this.truncatePitId(pitId)}`);
+    this.logger.debug(`Opened PIT ID: ${this.truncatePitId(pitId)}`);
 
     return pitId;
   }
@@ -89,19 +89,19 @@ export class CsvGenerator {
   private async doSearch(
     searchSource: ISearchSource,
     settings: CsvExportSettings,
-    lastSortId?: estypes.SortResults
+    searchAfter?: estypes.SortResults
   ) {
     const { scroll: scrollSettings, includeFrozen } = settings;
     searchSource.setField('size', scrollSettings.size);
 
-    if (lastSortId) {
-      searchSource.setField('searchAfter', lastSortId);
+    if (searchAfter) {
+      searchSource.setField('searchAfter', searchAfter);
     }
 
     const pitId = searchSource.getField('pit')?.id;
     this.logger.debug(
-      `Executing search request with PIT ID: ${this.truncatePitId(pitId)}` +
-        (lastSortId ? `, and search_after: [${lastSortId}]` : '')
+      `Executing search request with PIT ID: [${this.truncatePitId(pitId)}]` +
+        (searchAfter ? ` search_after: [${searchAfter}]` : '')
     );
 
     const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();
@@ -354,14 +354,6 @@ export class CsvGenerator {
 
         const results = await this.doSearch(searchSource, settings, searchAfter);
 
-        if (!results.pit_id) {
-          throw new Error(`Search response did not contain a point-in-time ID!`);
-        }
-
-        // use the most recently received id for the next search request
-        this.logger.debug(`Received PIT ID: [${this.truncatePitId(results.pit_id)}]`);
-        pitId = results.pit_id;
-
         const { hits } = results;
         if (first && hits.total != null) {
           if (typeof hits.total === 'number') {
@@ -390,6 +382,15 @@ export class CsvGenerator {
           hitsMeta,
         };
         this.logger.debug(`Results metadata: ${JSON.stringify(logInfo)}`);
+
+        // use the most recently received id for the next search request
+        this.logger.debug(`Received PIT ID: [${this.truncatePitId(results.pit_id)}]`);
+        pitId = results.pit_id ?? pitId;
+
+        // Update last sort results for next query. PIT is used, so the sort results
+        // automatically include _shard_doc as a tiebreaker
+        searchAfter = hits.hits[hits.hits.length - 1]?.sort as estypes.SortResults | undefined;
+        this.logger.debug(`Received search_after: [${searchAfter}]`);
 
         // check for shard failures, log them and add a warning if found
         const { _shards: shards } = header;
@@ -429,10 +430,6 @@ export class CsvGenerator {
         const formatters = this.getFormatters(table);
         await this.generateRows(columns, table, builder, formatters, settings);
 
-        // Update last sort results for next query. PIT is used, so the sort results
-        // automatically include _shard_doc as a tiebreaker
-        searchAfter = hits.hits[hits.hits.length - 1]?.sort as estypes.SortResults | undefined;
-
         // update iterator
         currentRecord += table.rows.length;
       } while (totalRecords != null && currentRecord < totalRecords - 1);
@@ -468,7 +465,7 @@ export class CsvGenerator {
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       this.logger.warn(
         `ES scroll returned fewer total hits than expected! ` +
-          `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
+          `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}`
       );
       warnings.push(
         i18nTexts.csvRowCountError({ expected: totalRecords ?? NaN, received: this.csvRowCount })
