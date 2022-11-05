@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 import axios from 'axios';
 import { ActionTypeConfigType, getActionType, TorqActionType } from '.';
 
-import * as utils from '../../../../../actions/server/lib/axios_utils';
+import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Services } from '@kbn/actions-plugin/server/types';
@@ -19,8 +19,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 
 jest.mock('axios');
-jest.mock('../../../../../actions/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('../../../../../actions/server/lib/axios_utils');
+jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
   return {
     ...originalUtils,
     request: jest.fn(),
@@ -169,7 +169,7 @@ describe('execute Torq action', () => {
       config,
       secrets: { token: '1234' },
       params: { body: '{"msg": "some data"}' },
-      configurationUtilities: configurationUtilities,
+      configurationUtilities,
       logger: mockedLogger,
     });
 

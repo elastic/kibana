@@ -17,8 +17,8 @@ import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
 import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
-import * as i18n from './translations';
 import { ActionConnectorFieldsProps, PasswordField } from '@kbn/triggers-actions-ui-plugin/public';
+import * as i18n from './translations';
 
 const { urlField } = fieldValidators;
 

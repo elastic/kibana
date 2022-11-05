@@ -21,9 +21,9 @@ import {
 } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { getRetryAfterIntervalFromHeaders } from '../../lib/http_response_retry_header';
 import { promiseResult, isOk, Result } from '../../lib/result_type';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 
 export type TorqActionType = ActionType<
   ActionTypeConfigType,
@@ -266,10 +266,7 @@ function errorResultInvalid(
   };
 }
 
-function errorNotFound(
-  actionId: string,
-  serviceMessage: string
-): ActionTypeExecutorResult<void> {
+function errorNotFound(actionId: string, serviceMessage: string): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.torq.notFoundErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, make sure the webhook URL is valid',
   });

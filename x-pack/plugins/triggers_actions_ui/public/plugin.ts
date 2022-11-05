@@ -430,5 +430,5 @@ export class Plugin
     };
   }
 
-  public stop() { }
+  public stop() {}
 }

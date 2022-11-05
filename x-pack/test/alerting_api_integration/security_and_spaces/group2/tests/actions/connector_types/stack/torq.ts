@@ -186,7 +186,9 @@ export default function torqTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/error triggering Torq workflow, make sure the webhook URL is valid/);
+      expect(result.message).to.match(
+        /error triggering Torq workflow, make sure the webhook URL is valid/
+      );
     });
 
     it('should handle a 429 Torq error', async () => {

@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const URL_LABEL = i18n.translate(
-  'xpack.stackConnectors.torqAction.urlTextFieldLabel',
-  {
-    defaultMessage: 'Torq endpoint URL',
-  }
-);
+export const URL_LABEL = i18n.translate('xpack.stackConnectors.torqAction.urlTextFieldLabel', {
+  defaultMessage: 'Torq endpoint URL',
+});
 
 export const URL_INVALID = i18n.translate(
   'xpack.stackConnectors.torqAction.error.invalidUrlTextField',
@@ -21,12 +18,9 @@ export const URL_INVALID = i18n.translate(
   }
 );
 
-export const BODY_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.torqAction.bodyFieldLabel',
-  {
-    defaultMessage: 'Body',
-  }
-);
+export const BODY_FIELD_LABEL = i18n.translate('xpack.stackConnectors.torqAction.bodyFieldLabel', {
+  defaultMessage: 'Body',
+});
 
 export const BODY_FIELD_ARIA_LABEL = i18n.translate(
   'xpack.stackConnectors.torqAction.bodyCodeEditorAriaLabel',
@@ -42,26 +36,17 @@ export const URL_NOT_TORQ_WEBHOOK = i18n.translate(
   }
 );
 
-export const TORQ_TOKEN_LABEL = i18n.translate(
-  'xpack.stackConnectors.torqAction.token',
-  {
-    defaultMessage: 'Torq integration token',
-  }
-);
+export const TORQ_TOKEN_LABEL = i18n.translate('xpack.stackConnectors.torqAction.token', {
+  defaultMessage: 'Torq integration token',
+});
 
-export const BODY_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.error.requiredWebhookBodyText',
-  {
-    defaultMessage: 'Body is required.',
-  }
-);
+export const BODY_REQUIRED = i18n.translate('xpack.stackConnectors.error.requiredWebhookBodyText', {
+  defaultMessage: 'Body is required.',
+});
 
-export const INVALID_JSON = i18n.translate(
-  'xpack.stackConnectors.error.requireValidJSONBody',
-  {
-    defaultMessage: 'Body must be a valid JSON.',
-  }
-);
+export const INVALID_JSON = i18n.translate('xpack.stackConnectors.error.requireValidJSONBody', {
+  defaultMessage: 'Body must be a valid JSON.',
+});
 
 export const TORQ_SELECT_MESSAGE = i18n.translate(
   'xpack.stackConnectors.torqAction.selectMessageText',
@@ -85,13 +70,10 @@ export const TORQ_TOKEN_HELP_TEXT = i18n.translate(
   }
 );
 
-export const URL_HELP_TEXT = i18n.translate(
-  'xpack.stackConnectors.torqAction.urlHelpText',
-  {
-    defaultMessage:
-      'Enter the endpoint URL generated when you created the Elastic Security integration on Torq.',
-  }
-);
+export const URL_HELP_TEXT = i18n.translate('xpack.stackConnectors.torqAction.urlHelpText', {
+  defaultMessage:
+    'Enter the endpoint URL generated when you created the Elastic Security integration on Torq.',
+});
 
 export const HOW_TO_TEXT = i18n.translate(
   'xpack.stackConnectors.torqActionConnectorFields.calloutTitle',
