@@ -49,6 +49,14 @@ export function setupFleetServer() {
   });
 }
 
+export function deleteFleetServer() {
+  cy.task('deleteDocsByQuery', {
+    index: '.fleet-servers',
+    query: { match_all: {} },
+    ignoreUnavailable: true,
+  });
+}
+
 export function setFleetServerHost(host = 'https://fleetserver:8220') {
   cy.request({
     method: 'POST',

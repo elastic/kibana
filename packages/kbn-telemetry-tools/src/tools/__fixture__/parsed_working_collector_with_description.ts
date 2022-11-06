@@ -56,6 +56,10 @@ export const parsedCollectorWithDescription: ParsedUsageCollection = [
           },
         },
         my_str_array: { type: 'array', items: { type: 'keyword' } },
+        my_pass_through: {
+          type: 'pass_through',
+          _meta: { description: "Don't know what goes here. Simply passing it through." },
+        },
       },
     },
     fetch: {
@@ -102,6 +106,10 @@ export const parsedCollectorWithDescription: ParsedUsageCollection = [
             kind: SyntaxKind.StringKeyword,
             type: 'StringKeyword',
           },
+        },
+        my_pass_through: {
+          kind: SyntaxKind.UnknownKeyword,
+          type: 'UnknownKeyword',
         },
       },
     },

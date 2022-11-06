@@ -10,6 +10,7 @@ import type {
   GetFleetServerHostsResponse,
   PostFleetServerHostsRequest,
   PutFleetServerHostsRequest,
+  PostFleetServerHostsResponse,
 } from '../../../common/types/rest_spec/fleet_server_hosts';
 
 import { sendRequest, useRequest } from './use_request';
@@ -37,7 +38,7 @@ export function sendPutFleetServerHost(itemId: string, body: PutFleetServerHosts
 }
 
 export function sendPostFleetServerHost(body: PostFleetServerHostsRequest['body']) {
-  return sendRequest({
+  return sendRequest<PostFleetServerHostsResponse>({
     method: 'post',
     path: fleetServerHostsRoutesService.getCreatePath(),
     body,
