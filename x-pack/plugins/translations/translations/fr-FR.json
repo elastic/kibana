@@ -9946,7 +9946,6 @@
     "xpack.csp.rules.manageIntegrationButtonLabel": "Gérer l'intégration",
     "xpack.csp.rules.ruleFlyout.overviewTabLabel": "Aperçu",
     "xpack.csp.rules.ruleFlyout.remediationTabLabel": "Résolution",
-    "xpack.csp.rules.rulesErrorToast.updateFailedTitle": "Échec de la mise à jour",
     "xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel": "Intégrations Benchmark",
     "xpack.csp.rules.rulesTable.cisSectionColumnLabel": "Section CIS",
     "xpack.csp.rules.rulesTable.lastModifiedColumnLabel": "Dernière modification",

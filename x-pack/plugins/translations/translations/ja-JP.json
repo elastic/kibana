@@ -9933,7 +9933,6 @@
     "xpack.csp.rules.manageIntegrationButtonLabel": "統合を管理",
     "xpack.csp.rules.ruleFlyout.overviewTabLabel": "概要",
     "xpack.csp.rules.ruleFlyout.remediationTabLabel": "修正",
-    "xpack.csp.rules.rulesErrorToast.updateFailedTitle": "更新が失敗しました",
     "xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel": "ベンチマーク統合",
     "xpack.csp.rules.rulesTable.cisSectionColumnLabel": "CISセクション",
     "xpack.csp.rules.rulesTable.lastModifiedColumnLabel": "最終更新：",

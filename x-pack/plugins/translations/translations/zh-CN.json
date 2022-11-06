@@ -9951,7 +9951,6 @@
     "xpack.csp.rules.manageIntegrationButtonLabel": "管理集成",
     "xpack.csp.rules.ruleFlyout.overviewTabLabel": "概览",
     "xpack.csp.rules.ruleFlyout.remediationTabLabel": "补救",
-    "xpack.csp.rules.rulesErrorToast.updateFailedTitle": "更新失败",
     "xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel": "基准集成",
     "xpack.csp.rules.rulesTable.cisSectionColumnLabel": "CIS 部分",
     "xpack.csp.rules.rulesTable.lastModifiedColumnLabel": "最后修改时间",
