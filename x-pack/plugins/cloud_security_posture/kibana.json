@@ -22,5 +22,6 @@
     "cloud",
     "licensing"
   ],
-  "requiredBundles": ["kibanaReact", "usageCollection"]
+  "requiredBundles": ["kibanaReact"],
+  "optionalPlugins": ["usageCollection"]
 }
