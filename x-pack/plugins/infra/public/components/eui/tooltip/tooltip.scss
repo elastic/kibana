@@ -1,127 +1,123 @@
-
 @import './mixins.scss';
 
 /*
  * 1. Shift arrow 1px more than half its size to account for border radius
  */
 
- .euiToolTip {
-    @include euiToolTipStyle;
-    @include euiToolTipAnimation('top');
+.euiToolTip {
+  @include euiToolTipStyle;
+  @include euiToolTipAnimation('top');
+  position: absolute;
+  opacity: 0;
+
+  // Custom sizing
+  $arrowSize: $euiSizeM;
+  $arrowPlusSize: (($arrowSize/2) + 1px) * -1; /* 1 */
+  $arrowMinusSize: (($arrowSize/2) - 1px) * -1; /* 1 */
+
+  .euiToolTip__arrow {
+    content: '';
     position: absolute;
-    opacity: 0;
-  
-    // Custom sizing
-    $arrowSize: $euiSizeM;
-    $arrowPlusSize: (($arrowSize/2) + 1px) * -1; /* 1 */
-    $arrowMinusSize: (($arrowSize/2) - 1px) * -1; /* 1 */
-  
+    transform-origin: center;
+    border-radius: 2px;
+    background-color: $euiTooltipBackgroundColor;
+    width: $arrowSize;
+    height: $arrowSize;
+
+    transform: translateY($arrowPlusSize) rotateZ(45deg); /* 1 */
+  }
+
+  // Positions the arrow and animates in from the same side.
+  &.euiToolTip--right {
+    animation-name: euiToolTipRight;
+
     .euiToolTip__arrow {
-      content: '';
-      position: absolute;
-      transform-origin: center;
-      border-radius: 2px;
-      background-color: $euiTooltipBackgroundColor;
-      width: $arrowSize;
-      height: $arrowSize;
-  
-      transform: translateY($arrowPlusSize) rotateZ(45deg); /* 1 */
-    }
-  
-    // Positions the arrow and animates in from the same side.
-    &.euiToolTip--right {
-      animation-name: euiToolTipRight;
-  
-      .euiToolTip__arrow {
-        transform: translateX($arrowMinusSize) rotateZ(45deg); /* 1 */
-      }
-    }
-  
-    &.euiToolTip--bottom {
-      animation-name: euiToolTipBottom;
-  
-      .euiToolTip__arrow {
-        transform: translateY($arrowMinusSize) rotateZ(45deg); /* 1 */
-      }
-    }
-  
-    &.euiToolTip--left {
-      animation-name: euiToolTipLeft;
-  
-      .euiToolTip__arrow {
-        transform: translateX($arrowPlusSize) rotateZ(45deg); /* 1 */
-      }
-    }
-  
-    .euiToolTip__title {
-      @include euiToolTipTitle;
-    }
-  }
-  
-  .euiToolTipAnchor {
-    display: inline-block;
-  
-    // disabled elements don't fire mouse events which means leaving a disabled element
-    // wouldn't trigger the onMouseOut and hide the tooltip; disabling pointer events
-    // on disabled elements means any mouse events remain handled by parent elements
-    // https://jakearchibald.com/2017/events-and-disabled-form-fields/
-    *[disabled] {
-      pointer-events: none;
-    }
-  
-    &.euiToolTipAnchor--displayBlock {
-      display: block;
-    }
-  }
-  
-  // Keyframes to animate in the tooltip.
-  @keyframes euiToolTipTop {
-    0% {
-      opacity: 0;
-      transform: translateY(-$euiSize);
-    }
-  
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  @keyframes euiToolTipBottom {
-    0% {
-      opacity: 0;
-      transform: translateY($euiSize);
-    }
-  
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  @keyframes euiToolTipLeft {
-    0% {
-      opacity: 0;
-      transform: translateX(-$euiSize);
-    }
-  
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  @keyframes euiToolTipRight {
-    0% {
-      opacity: 0;
-      transform: translateX($euiSize);
-    }
-  
-    100% {
-      opacity: 1;
-      transform: translateY(0);
+      transform: translateX($arrowMinusSize) rotateZ(45deg); /* 1 */
     }
   }
 
+  &.euiToolTip--bottom {
+    animation-name: euiToolTipBottom;
 
-  
+    .euiToolTip__arrow {
+      transform: translateY($arrowMinusSize) rotateZ(45deg); /* 1 */
+    }
+  }
+
+  &.euiToolTip--left {
+    animation-name: euiToolTipLeft;
+
+    .euiToolTip__arrow {
+      transform: translateX($arrowPlusSize) rotateZ(45deg); /* 1 */
+    }
+  }
+
+  .euiToolTip__title {
+    @include euiToolTipTitle;
+  }
+}
+
+.euiToolTipAnchor {
+  display: inline-block;
+
+  // disabled elements don't fire mouse events which means leaving a disabled element
+  // wouldn't trigger the onMouseOut and hide the tooltip; disabling pointer events
+  // on disabled elements means any mouse events remain handled by parent elements
+  // https://jakearchibald.com/2017/events-and-disabled-form-fields/
+  *[disabled] {
+    pointer-events: none;
+  }
+
+  &.euiToolTipAnchor--displayBlock {
+    display: block;
+  }
+}
+
+// Keyframes to animate in the tooltip.
+@keyframes euiToolTipTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-$euiSize);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes euiToolTipBottom {
+  0% {
+    opacity: 0;
+    transform: translateY($euiSize);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes euiToolTipLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-$euiSize);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes euiToolTipRight {
+  0% {
+    opacity: 0;
+    transform: translateX($euiSize);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
