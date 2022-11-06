@@ -56,6 +56,7 @@ export {
   SelectableUrlList,
   ExploratoryView,
   DatePicker,
+  LoadWhenInView,
 } from './components/shared';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';

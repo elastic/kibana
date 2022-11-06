@@ -1104,6 +1104,8 @@
       "@kbn/monitoring-collection-plugin/*": ["x-pack/plugins/monitoring_collection/*"],
       "@kbn/monitoring-plugin": ["x-pack/plugins/monitoring"],
       "@kbn/monitoring-plugin/*": ["x-pack/plugins/monitoring/*"],
+      "@kbn/notifications-plugin": ["x-pack/plugins/notifications"],
+      "@kbn/notifications-plugin/*": ["x-pack/plugins/notifications/*"],
       "@kbn/observability-plugin": ["x-pack/plugins/observability"],
       "@kbn/observability-plugin/*": ["x-pack/plugins/observability/*"],
       "@kbn/osquery-plugin": ["x-pack/plugins/osquery"],

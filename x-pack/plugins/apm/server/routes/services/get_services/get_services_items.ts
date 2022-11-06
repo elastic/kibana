@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
@@ -17,14 +17,12 @@ import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
-export type ServicesItemsSetup = Setup;
-
 export const MAX_NUMBER_OF_SERVICES = 500;
 
 export async function getServicesItems({
   environment,
   kuery,
-  setup,
+  mlClient,
   apmEventClient,
   searchAggregatedTransactions,
   searchAggregatedServiceMetrics,
@@ -36,7 +34,7 @@ export async function getServicesItems({
 }: {
   environment: string;
   kuery: string;
-  setup: ServicesItemsSetup;
+  mlClient?: MlClient;
   apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   searchAggregatedServiceMetrics: boolean;
@@ -77,7 +75,7 @@ export async function getServicesItems({
         ...commonParams,
         apmEventClient,
       }),
-      getHealthStatuses({ ...commonParams, setup }).catch((err) => {
+      getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
         logger.error(err);
         return [];
       }),
