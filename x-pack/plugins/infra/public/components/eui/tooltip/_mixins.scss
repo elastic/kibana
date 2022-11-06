@@ -1,0 +1,36 @@
+
+$euiTooltipBackgroundColor: tintOrShade($euiColorFullShade, 25%, 100%) !default;
+$euiTooltipBorderColor: tintOrShade($euiColorFullShade, 35%, 80%) !default;
+
+$euiTooltipAnimations: (
+  top: euiToolTipTop,
+  left: euiToolTipBottom,
+  bottom: euiToolTipLeft,
+  right: euiToolTipRight,
+) !default;
+
+@mixin euiToolTipStyle($size: null) {
+    @include euiBottomShadow($color: $euiColorInk);
+    border-radius: $euiBorderRadius;
+    background-color: $euiTooltipBackgroundColor;
+    color: $euiColorGhost;
+    z-index: $euiZLevel9;
+    max-width: 256px;
+    overflow-wrap: break-word;
+    padding: $euiSizeS;
+  
+    .euiHorizontalRule {
+      background-color: $euiTooltipBorderColor;
+    }
+  }
+  
+  @mixin euiToolTipTitle {
+    font-weight: $euiFontWeightBold;
+    border-bottom: solid $euiBorderWidthThin $euiTooltipBorderColor;
+    padding-bottom: $euiSizeXS;
+    margin-bottom: $euiSizeXS;
+  }
+  
+  @mixin euiToolTipAnimation($side: 'top') {
+    animation: #{map-get($euiTooltipAnimations, $side)} $euiAnimSpeedSlow ease-out 0s forwards;
+  }

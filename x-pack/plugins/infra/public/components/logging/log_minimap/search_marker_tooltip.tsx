@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { calculatePopoverPosition, EuiPortal, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
-// @ts-expect-error style types not defined
-import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
+import '../../eui/tooltip/tooltip.scss';
+
+import { calculatePopoverPosition, EuiPortal } from '@elastic/eui';
 import * as React from 'react';
 
 import { AutoSizer } from '../../auto_sizer';
@@ -16,15 +16,11 @@ const POPOVER_ARROW_SIZE = 12; // px, to position it later
 
 interface SearchMarkerTooltipProps {
   markerPosition: ClientRect;
-  children: React.ReactNode;
 }
 
-export class _SearchMarkerTooltip extends React.PureComponent<
-  SearchMarkerTooltipProps & WithEuiThemeProps
-> {
+export class SearchMarkerTooltip extends React.PureComponent<SearchMarkerTooltipProps, {}> {
   public render() {
-    const { children, markerPosition, theme } = this.props;
-    const styles = euiToolTipStyles(theme);
+    const { children, markerPosition } = this.props;
 
     return (
       <EuiPortal>
@@ -43,7 +39,7 @@ export class _SearchMarkerTooltip extends React.PureComponent<
 
               return (
                 <div
-                  css={[styles.euiToolTip, styles.left]}
+                  className="euiToolTip euiToolTip--left euiToolTipPopover"
                   style={{
                     left,
                     top,
@@ -51,7 +47,7 @@ export class _SearchMarkerTooltip extends React.PureComponent<
                   ref={measureRef}
                 >
                   <div
-                    css={[styles.euiToolTip__arrow]} // TODO: Add styles.arrowPositions.left in next Kibana EUI upgrade
+                    className="euiToolTip__arrow"
                     style={{ left: width || 0, top: (height || 0) / 2 - POPOVER_ARROW_SIZE / 2 }}
                   />
                   <div>{children}</div>
@@ -64,5 +60,3 @@ export class _SearchMarkerTooltip extends React.PureComponent<
     );
   }
 }
-
-export const SearchMarkerTooltip = withEuiTheme<SearchMarkerTooltipProps>(_SearchMarkerTooltip);
