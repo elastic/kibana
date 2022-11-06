@@ -39,7 +39,13 @@
         "description": [],
         "signature": [
           "{ readonly isSetupOnHold: jest.MockInstance<boolean, []>; readonly holdSetupUntilResolved: jest.MockInstance<void, [reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>]>; } & ",
-          "PrebootServicePreboot"
+          {
+            "pluginId": "@kbn/core-preboot-server",
+            "scope": "server",
+            "docId": "kibKbnCorePrebootServerPluginApi",
+            "section": "def-server.PrebootServicePreboot",
+            "text": "PrebootServicePreboot"
+          }
         ],
         "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
         "deprecated": false,
