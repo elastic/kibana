@@ -13,6 +13,7 @@ import { cloudPosturePages } from '../common/navigation/constants';
 import type { CloudSecurityPosturePageId, CspPageNavigationItem } from '../common/navigation/types';
 import { pageToComponentMapping } from './constants';
 import { SecuritySolutionContext } from './security_solution_context';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 type CspRouteProps = RouteProps & {
   path: string;
@@ -50,7 +51,9 @@ export const addSpyRouteComponentToRoute = (
     render: (props: RouteComponentProps) => (
       <>
         <SpyRoute pageName={route.id} />
-        <Component {...props} />
+        <TrackApplicationView viewId={route.id}>
+          <Component {...props} />
+        </TrackApplicationView>
       </>
     ),
   };
