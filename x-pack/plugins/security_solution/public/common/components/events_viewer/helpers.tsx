@@ -8,9 +8,9 @@
 import { TableId } from '../../../../common/types';
 import type { CombineQueries } from '../../lib/kuery';
 import { buildTimeRangeFilter, combineQueries } from '../../lib/kuery';
-import type { ViewSelection } from '../event_rendered_view/selector';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
+import type { ViewSelection } from './summary_view_select';
 
 export const getCombinedFilterQuery = ({
   from,
@@ -41,23 +41,23 @@ export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>
     containerElement?.querySelector<HTMLDivElement>(`.${EVENTS_TABLE_CLASS_NAME}`)
   );
 
-export const isSelectableView = (timelineId: string): boolean =>
-  timelineId === TableId.alertsOnAlertsPage || timelineId === TableId.alertsOnRuleDetailsPage;
+export const isSelectableView = (tableId: string): boolean =>
+  tableId === TableId.alertsOnAlertsPage || tableId === TableId.alertsOnRuleDetailsPage;
 
 export const isViewSelection = (value: unknown): value is ViewSelection =>
   value === 'gridView' || value === 'eventRenderedView';
 
 /** always returns a valid default `ViewSelection` */
 export const getDefaultViewSelection = ({
-  timelineId,
+  tableId,
   value,
 }: {
-  timelineId: string;
+  tableId: string;
   value: unknown;
 }): ViewSelection => {
   const defaultViewSelection = 'gridView';
 
-  if (!isSelectableView(timelineId)) {
+  if (!isSelectableView(tableId)) {
     return defaultViewSelection;
   } else {
     return isViewSelection(value) ? value : defaultViewSelection;

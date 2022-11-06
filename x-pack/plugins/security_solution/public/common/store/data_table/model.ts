@@ -85,5 +85,6 @@ export type SubsetDataTableModel = Readonly<
     | 'queryFields'
     | 'title'
     | 'initialized'
+    | 'selectAll'
   >
 >;

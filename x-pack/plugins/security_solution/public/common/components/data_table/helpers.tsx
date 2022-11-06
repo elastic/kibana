@@ -17,17 +17,17 @@ import type { ColumnHeaderOptions, SortDirection } from '../../../../common/type
 /**
  * Creates mapping of eventID -> fieldData for given fieldsToKeep. Used to store additional field
  * data necessary for custom timeline actions in conjunction with selection state
- * @param timelineData
+ * @param data
  * @param eventIds
  * @param fieldsToKeep
  */
 export const getEventIdToDataMapping = (
-  timelineData: TimelineItem[],
+  data: TimelineItem[],
   eventIds: string[],
   fieldsToKeep: string[],
   hasAlertsCrud: boolean
 ): Record<string, TimelineNonEcsData[]> =>
-  timelineData.reduce((acc, v) => {
+  data.reduce((acc, v) => {
     const fvm =
       hasAlertsCrud && eventIds.includes(v._id)
         ? { [v._id]: v.data.filter((ti) => fieldsToKeep.includes(ti.field)) }

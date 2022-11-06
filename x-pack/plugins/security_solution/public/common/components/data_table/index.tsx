@@ -11,11 +11,12 @@ import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
+  EuiDataGridControlColumn,
 } from '@elastic/eui';
-import { EuiDataGrid, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
+import { EuiDataGrid, EuiProgress } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import React, { Suspense, useCallback, useEffect, useMemo, useContext, useRef, lazy } from 'react';
+import React, { useCallback, useEffect, useMemo, useContext, useRef } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 
@@ -24,17 +25,10 @@ import type { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type {
-  SetEventsDeleted,
-  SetEventsLoading,
-  ControlColumnProps,
-  DataTableCellAction,
-} from '../../../../common/types';
+import type { DataTableCellAction } from '../../../../common/types';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
-  OnRowSelected,
-  OnSelectAll,
   RowRenderer,
 } from '../../../../common/types/timeline';
 
@@ -43,7 +37,6 @@ import type { TimelineItem } from '../../../../common/search_strategy/timeline';
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
 import {
   addBuildingBlockStyle,
-  getEventIdToDataMapping,
   hasCellActions,
   mapSortDirectionToDirection,
   mapSortingColumns,
@@ -54,19 +47,16 @@ import { REMOVE_COLUMN } from './column_headers/translations';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import type { AlertWorkflowStatus, Refetch } from '../../types';
 import type { DataTableState, DataTableModel } from '../../store/data_table/types';
-import { AlertCount, defaultUnit } from '../toolbar/alert';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { useKibana } from '../../lib/kibana';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
 import { getPageRowIndex } from './pagination';
 
 const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.securitySolution.dataTable.ariaLabel', {
   defaultMessage: 'Alerts',
 });
 
-const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 interface OwnProps {
+  alertToolbar?: React.ReactNode;
   activePage: number;
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
@@ -81,7 +71,7 @@ interface OwnProps {
   id: string;
   indexNames: string[];
   itemsPerPageOptions: number[];
-  leadingControlColumns?: ControlColumnProps[];
+  leadingControlColumns: EuiDataGridControlColumn[];
   loadPage: (newActivePage: number) => void;
   onRuleChange?: () => void;
   pageSize: number;
@@ -90,14 +80,11 @@ interface OwnProps {
   rowRenderers: RowRenderer[];
   tabType: string;
   totalItems: number;
-  unit?: (total: number) => React.ReactNode;
   hasAlertsCrud?: boolean;
   showCheckboxes?: boolean;
 }
 
 const ES_LIMIT_COUNT = 9999;
-
-const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
 const gridStyle: EuiDataGridStyle = { border: 'none', fontSize: 's', header: 'underline' };
 
@@ -118,40 +105,31 @@ export type StatefulBodyProps = OwnProps & PropsFromRedux;
 
 export const DataTableComponent = React.memo<StatefulBodyProps>(
   ({
+    alertToolbar,
     activePage,
     additionalControls,
     browserFields,
     bulkActions = true,
-    clearSelected,
     columnHeaders,
     data,
     defaultCellActions,
     disabledCellActions,
     fieldBrowserOptions,
-    filterQuery,
     filters,
-    filterStatus,
     hasAlertsCrud,
     id,
-    indexNames,
     isLoading,
-    isSelectAllChecked,
     itemsPerPageOptions,
-    leadingControlColumns = EMPTY_CONTROL_COLUMNS,
-    loadingEventIds,
+    leadingControlColumns,
     loadPage,
-    onRuleChange,
     pageSize,
-    refetch,
     renderCellValue,
     rowRenderers,
     selectedEventIds,
-    setSelected,
     showCheckboxes,
     sort,
-    tabType,
     totalItems,
-    unit = defaultUnit,
+    defaultColumns,
   }) => {
     const {
       triggersActionsUi: { getFieldBrowser },
@@ -159,93 +137,10 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
     const dispatch = useDispatch();
-    const getDataTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-    const { queryFields, selectAll, defaultColumns } = useDeepEqualSelector((state) =>
-      getDataTable(state, id)
-    );
-
-    const alertCountText = useMemo(
-      () => `${totalItems.toLocaleString()} ${unit(totalItems)}`,
-      [totalItems, unit]
-    );
 
     const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
 
     const theme: EuiTheme = useContext(ThemeContext);
-    const onRowSelected: OnRowSelected = useCallback(
-      ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
-        setSelected({
-          id,
-          eventIds: getEventIdToDataMapping(data, eventIds, queryFields, hasAlertsCrud ?? false),
-          isSelected,
-          isSelectAllChecked: isSelected && selectedCount + 1 === data.length,
-        });
-      },
-      [setSelected, id, data, queryFields, hasAlertsCrud, selectedCount]
-    );
-
-    const onSelectPage: OnSelectAll = useCallback(
-      ({ isSelected }: { isSelected: boolean }) =>
-        isSelected
-          ? setSelected({
-              id,
-              eventIds: getEventIdToDataMapping(
-                data,
-                data.map((event) => event._id),
-                queryFields,
-                hasAlertsCrud ?? false
-              ),
-              isSelected,
-              isSelectAllChecked: isSelected,
-            })
-          : clearSelected({ id }),
-      [setSelected, id, data, queryFields, hasAlertsCrud, clearSelected]
-    );
-
-    // Sync to selectAll so parent components can select all events
-    useEffect(() => {
-      if (selectAll && !isSelectAllChecked) {
-        onSelectPage({ isSelected: true });
-      }
-    }, [isSelectAllChecked, onSelectPage, selectAll]);
-
-    const onAlertStatusActionSuccess = useMemo(() => {
-      if (bulkActions && bulkActions !== true) {
-        return bulkActions.onAlertStatusActionSuccess;
-      }
-    }, [bulkActions]);
-
-    const onAlertStatusActionFailure = useMemo(() => {
-      if (bulkActions && bulkActions !== true) {
-        return bulkActions.onAlertStatusActionFailure;
-      }
-    }, [bulkActions]);
-
-    const additionalBulkActions = useMemo(() => {
-      if (bulkActions && bulkActions !== true && bulkActions.customBulkActions !== undefined) {
-        return bulkActions.customBulkActions.map((action) => {
-          return {
-            ...action,
-            onClick: (eventIds: string[]) => {
-              const items = data.filter((item) => {
-                return eventIds.find((event) => item._id === event);
-              });
-              action.onClick(items);
-            },
-          };
-        });
-      }
-    }, [bulkActions, data]);
-
-    const showAlertStatusActions = useMemo(() => {
-      if (!hasAlertsCrud) {
-        return false;
-      }
-      if (typeof bulkActions === 'boolean') {
-        return bulkActions;
-      }
-      return bulkActions.alertStatusActions ?? true;
-    }, [bulkActions, hasAlertsCrud]);
 
     const showBulkActions = useMemo(() => {
       if (!hasAlertsCrud) {
@@ -292,38 +187,15 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
         additionalControls: (
           <>
             {isLoading && <EuiProgress size="xs" position="absolute" color="accent" />}
-            <AlertCount data-test-subj="server-side-event-count">{alertCountText}</AlertCount>
-            {showBulkActions ? (
-              <>
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <StatefulAlertBulkActions
-                    showAlertStatusActions={showAlertStatusActions}
-                    data-test-subj="bulk-actions"
-                    id={id}
-                    totalItems={totalItems}
-                    filterStatus={filterStatus}
-                    query={filterQuery}
-                    indexName={indexNames.join()}
-                    onActionSuccess={onAlertStatusActionSuccess}
-                    onActionFailure={onAlertStatusActionFailure}
-                    customBulkActions={additionalBulkActions}
-                    refetch={refetch}
-                  />
-                </Suspense>
-                {additionalControls ?? null}
-              </>
-            ) : (
-              <>
-                {additionalControls ?? null}
-                {getFieldBrowser({
-                  browserFields,
-                  options: fieldBrowserOptions,
-                  columnIds: columnHeaders.map(({ id: columnId }) => columnId),
-                  onResetColumns,
-                  onToggleColumn,
-                })}
-              </>
-            )}
+            {alertToolbar}
+            {additionalControls ?? null}
+            {getFieldBrowser({
+              browserFields,
+              options: fieldBrowserOptions,
+              columnIds: columnHeaders.map(({ id: columnId }) => columnId),
+              onResetColumns,
+              onToggleColumn,
+            })}
           </>
         ),
         ...(showBulkActions
@@ -341,18 +213,7 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
       }),
       [
         isLoading,
-        alertCountText,
-        showBulkActions,
-        showAlertStatusActions,
-        id,
-        totalItems,
-        filterStatus,
-        filterQuery,
-        indexNames,
-        onAlertStatusActionSuccess,
-        onAlertStatusActionFailure,
-        additionalBulkActions,
-        refetch,
+        alertToolbar,
         additionalControls,
         getFieldBrowser,
         browserFields,
@@ -360,6 +221,7 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
         columnHeaders,
         onResetColumns,
         onToggleColumn,
+        showBulkActions,
       ]
     );
 
@@ -427,69 +289,6 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
       [dispatch, id]
     );
 
-    const setEventsLoading = useCallback<SetEventsLoading>(
-      ({ eventIds, isLoading: loading }) => {
-        dispatch(dataTableActions.setEventsLoading({ id, eventIds, isLoading: loading }));
-      },
-      [dispatch, id]
-    );
-
-    const setEventsDeleted = useCallback<SetEventsDeleted>(
-      ({ eventIds, isDeleted }) => {
-        dispatch(dataTableActions.setEventsDeleted({ id, eventIds, isDeleted }));
-      },
-      [dispatch, id]
-    );
-
-    const [leadingTGridControlColumns] = useMemo(() => {
-      return [
-        showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
-      ].map((controlColumns) =>
-        transformControlColumns({
-          columnHeaders,
-          controlColumns,
-          data,
-          disabledCellActions,
-          fieldBrowserOptions,
-          loadingEventIds,
-          onRowSelected,
-          onRuleChange,
-          selectedEventIds,
-          showCheckboxes,
-          tabType,
-          timelineId: id,
-          isSelectAllChecked,
-          sort,
-          browserFields,
-          onSelectPage,
-          theme,
-          setEventsLoading,
-          setEventsDeleted,
-          pageSize,
-        })
-      );
-    }, [
-      showCheckboxes,
-      leadingControlColumns,
-      columnHeaders,
-      data,
-      disabledCellActions,
-      fieldBrowserOptions,
-      id,
-      loadingEventIds,
-      onRowSelected,
-      onRuleChange,
-      selectedEventIds,
-      tabType,
-      isSelectAllChecked,
-      sort,
-      browserFields,
-      onSelectPage,
-      theme,
-      pageSize,
-      setEventsLoading,
-      setEventsDeleted,
-    ]);
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
         columnHeaders.map((header) => {
@@ -630,7 +429,7 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
             columns={columnsWithCellActions}
             columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
             gridStyle={gridStyle}
-            leadingControlColumns={leadingTGridControlColumns}
+            leadingControlColumns={leadingControlColumns}
             toolbarVisibility={toolbarVisibility}
             rowCount={totalItems}
             renderCellValue={renderTGridCellValue}
@@ -665,25 +464,17 @@ const makeMapStateToProps = () => {
     { browserFields, id, hasAlertsCrud }: OwnProps
   ) => {
     const dataTable: DataTableModel = getDataTable(state, id);
-    const {
-      columns,
-      isSelectAllChecked,
-      loadingEventIds,
-      selectedEventIds,
-      showCheckboxes,
-      sort,
-      isLoading,
-    } = dataTable;
+    const { columns, selectedEventIds, showCheckboxes, sort, isLoading, defaultColumns } =
+      dataTable;
 
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
-      isSelectAllChecked,
-      loadingEventIds,
       isLoading,
       id,
       selectedEventIds,
       showCheckboxes: hasAlertsCrud === true && showCheckboxes,
       sort,
+      defaultColumns,
     };
   };
   return mapStateToProps;

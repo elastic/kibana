@@ -26,7 +26,7 @@ const heights = {
 
 export const TableContext = createContext<{ tableId: string | null }>({ tableId: null });
 
-export const TGridLoading: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
+export const TableLoading: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
   return (
     <EuiPanel color="subdued">
       <EuiFlexGroup
@@ -47,7 +47,7 @@ const panelStyle = {
   maxWidth: 500,
 };
 
-export const TGridEmpty: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
+export const EmptyTable: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
   const { http } = useKibana<CoreStart>().services;
 
   return (

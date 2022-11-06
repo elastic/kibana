@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
-import type { ViewSelection } from '../event_rendered_view/selector';
+import type { ViewSelection } from './summary_view_select';
 export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
 export const EVENTS_TABLE_CLASS_NAME = 'siemEventsTable';
 

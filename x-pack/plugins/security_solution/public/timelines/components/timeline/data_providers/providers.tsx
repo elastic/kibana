@@ -17,7 +17,7 @@ import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
   IS_DRAGGING_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
-import { useDraggableKeyboardWrapper } from '../../../../common/components/data_table/drag_and_drop';
+import { useDraggableKeyboardWrapper } from '../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { timelineActions } from '../../../store/timeline';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';

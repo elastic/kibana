@@ -7,7 +7,7 @@
 
 import type { ColumnHeaderType } from '../../../../../common/types';
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
-import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
+import { DEFAULT_TABLE_COLUMN_MIN_WIDTH, DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH } from '../constants';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';
 
@@ -15,43 +15,43 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
     esTypes: ['date'],
     type: 'date',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'message',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.category',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.action',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'host.name',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'source.ip',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'destination.ip',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'user.name',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   },
 ];

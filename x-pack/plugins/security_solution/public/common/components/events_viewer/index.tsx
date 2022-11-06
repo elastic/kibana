@@ -7,16 +7,25 @@
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useRef, useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useRef, useCallback, useMemo, useEffect, useState, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
-import type { ControlColumnProps, DataTableCellAction, TableId } from '../../../../common/types';
-import { dataTableActions, dataTableSelectors } from '../../store/data_table';
+import type {
+  ControlColumnProps,
+  DataTableCellAction,
+  OnRowSelected,
+  OnSelectAll,
+  SetEventsDeleted,
+  SetEventsLoading,
+  TableId,
+} from '../../../../common/types';
+import { dataTableActions } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 import type { inputsModel, State } from '../../store';
@@ -45,20 +54,22 @@ import {
   UpdatedFlexGroup,
   UpdatedFlexItem,
 } from './styles';
-import type { ViewSelection } from '../event_rendered_view/selector';
-import { SummaryViewSelector } from '../event_rendered_view/selector';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { getDefaultViewSelection, resolverIsShowing, getCombinedFilterQuery } from './helpers';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../event_rendered_view/helpers';
 import { useTimelineEvents } from './use_timelines_events';
-import { TableContext, TGridEmpty, TGridLoading } from './shared';
+import { TableContext, EmptyTable, TableLoading } from './shared';
 import { StatefulDataTableComponent } from '../data_table';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import type { AlertWorkflowStatus } from '../../types';
-import { StatefulEventRenderedView } from '../event_rendered_view';
+import { EventRenderedView } from '../event_rendered_view';
 import { useQueryInspector } from '../page/manage_query';
 import type { SetQuery } from '../../containers/use_global_time/types';
 import { defaultHeaders } from '../../store/data_table/defaults';
+import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
+import { getEventIdToDataMapping } from '../data_table/helpers';
+import type { ViewSelection } from './summary_view_select';
+import { SummaryViewSelector } from './summary_view_select';
+import { useAlertBulkActions } from './use_alert_bulk_actions';
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
@@ -121,6 +132,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   indexNames,
 }) => {
   const dispatch = useDispatch();
+  const theme: EuiTheme = useContext(ThemeContext);
+  const tableContext = useMemo(() => ({ tableId }), [tableId]);
+
   const {
     filters,
     query,
@@ -137,17 +151,21 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       sort,
       title,
       initialized,
+      selectedEventIds,
+      isSelectAllChecked,
+      loadingEventIds,
+      queryFields,
+      selectAll,
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const [tableView, setTableView] = useState<ViewSelection>(
     getDefaultViewSelection({
-      timelineId: tableId,
+      tableId,
       value: storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY),
     })
   );
 
-  const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
   const {
     browserFields,
     dataViewId,
@@ -162,10 +180,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
     'tGridEventRenderedViewEnabled'
   );
-  const editorActionsRef = useRef<FieldEditorActions>(null);
 
+  const editorActionsRef = useRef<FieldEditorActions>(null);
   useEffect(() => {
     if (!initialized) {
+      console.log('createDataTable');
       dispatch(
         dataTableActions.createDataTable({
           columns,
@@ -191,41 +210,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
 
-  const { Navigation } = useSessionViewNavigation({
-    scopeId: tableId,
-  });
-
-  const { DetailsPanel, SessionView } = useSessionView({
-    entityType,
-    scopeId: tableId,
-  });
-
-  const graphOverlay = useMemo(() => {
-    const shouldShowOverlay =
-      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
-    return shouldShowOverlay ? (
-      <GraphOverlay scopeId={tableId} SessionView={SessionView} Navigation={Navigation} />
-    ) : null;
-  }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
-  const setQuery = useCallback(
-    ({ id, inspect, loading, refetch }: SetQuery) =>
-      dispatch(
-        inputsActions.setQuery({
-          id,
-          inputId: InputsModelId.global,
-          inspect,
-          loading,
-          refetch,
-        })
-      ),
-    [dispatch]
-  );
-
-  const deleteQuery = useCallback(
-    ({ id }) => dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
-    [dispatch]
-  );
-
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
     newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
   };
@@ -250,15 +234,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   });
 
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
-  const tableContext = useMemo(() => ({ tableId }), [tableId]);
 
-  const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
+  const columnHeaders = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings, data } = useKibana().services;
-
-  const getManageDataTable = useMemo(() => dataTableSelectors.getManageDataTableById(), []);
-
-  const { queryFields } = useDeepEqualSelector((state) => getManageDataTable(state, tableId));
-
   const esQueryConfig = getEsQueryConfig(uiSettings);
 
   const filterQuery = useMemo(
@@ -289,8 +267,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const fields = useMemo(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    () => [...columnsHeader.map((c: { id: any }) => c.id), ...(queryFields ?? [])],
-    [columnsHeader, queryFields]
+    () => [...columnHeaders.map((c: { id: any }) => c.id), ...(queryFields ?? [])],
+    [columnHeaders, queryFields]
   );
 
   const sortField = useMemo(
@@ -302,6 +280,20 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         esTypes: esTypes ?? [],
       })),
     [sort]
+  );
+
+  const setQuery = useCallback(
+    ({ id, inspect, loading, refetch }: SetQuery) =>
+      dispatch(
+        inputsActions.setQuery({
+          id,
+          inputId: InputsModelId.global,
+          inspect,
+          loading,
+          refetch,
+        })
+      ),
+    [dispatch]
   );
 
   const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
@@ -322,6 +314,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       sort: sortField,
       startDate: start,
     });
+
+  const deleteQuery = useCallback(
+    ({ id }) => dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
+    [dispatch]
+  );
 
   useQueryInspector({
     queryId: tableId,
@@ -368,6 +365,158 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       })
     );
   }, [nonDeletedEvents, dispatch, tableId]);
+
+  const onChangeItemsPerPage = useCallback(
+    (itemsChangedPerPage) => {
+      dispatch(
+        dataTableActions.updateItemsPerPage({ id: tableId, itemsPerPage: itemsChangedPerPage })
+      );
+    },
+    [tableId, dispatch]
+  );
+
+  const onChangePage = useCallback(
+    (page) => {
+      loadPage(page);
+    },
+    [loadPage]
+  );
+
+  const setEventsLoading = useCallback<SetEventsLoading>(
+    ({ eventIds, isLoading }) => {
+      dispatch(dataTableActions.setEventsLoading({ id: tableId, eventIds, isLoading }));
+    },
+    [dispatch, tableId]
+  );
+
+  const setEventsDeleted = useCallback<SetEventsDeleted>(
+    ({ eventIds, isDeleted }) => {
+      dispatch(dataTableActions.setEventsDeleted({ id: tableId, eventIds, isDeleted }));
+    },
+    [dispatch, tableId]
+  );
+
+  const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
+
+  const onRowSelected: OnRowSelected = useCallback(
+    ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
+      dataTableActions.setSelected({
+        id: tableId,
+        eventIds: getEventIdToDataMapping(events, eventIds, queryFields, hasAlertsCrud ?? false),
+        isSelected,
+        isSelectAllChecked: isSelected && selectedCount + 1 === events.length,
+      });
+    },
+    [tableId, events, queryFields, hasAlertsCrud, selectedCount]
+  );
+
+  const onSelectPage: OnSelectAll = useCallback(
+    ({ isSelected }: { isSelected: boolean }) =>
+      isSelected
+        ? dataTableActions.setSelected({
+            id: tableId,
+            eventIds: getEventIdToDataMapping(
+              events,
+              events.map((event) => event._id),
+              queryFields ?? [],
+              hasAlertsCrud ?? false
+            ),
+            isSelected,
+            isSelectAllChecked: isSelected,
+          })
+        : dataTableActions.clearSelected({ id: tableId }),
+    [tableId, events, queryFields, hasAlertsCrud]
+  );
+
+  // Sync to selectAll so parent components can select all events
+  useEffect(() => {
+    if (selectAll && !isSelectAllChecked) {
+      onSelectPage({ isSelected: true });
+    }
+  }, [isSelectAllChecked, onSelectPage, selectAll]);
+
+  const [leadingTGridControlColumns] = useMemo(() => {
+    return [
+      showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
+    ].map((controlColumns) =>
+      transformControlColumns({
+        columnHeaders,
+        controlColumns,
+        data: events,
+        disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+        fieldBrowserOptions,
+        loadingEventIds,
+        onRowSelected,
+        onRuleChange,
+        selectedEventIds,
+        showCheckboxes,
+        tabType: 'query',
+        timelineId: tableId,
+        isSelectAllChecked,
+        sort,
+        browserFields,
+        onSelectPage,
+        theme,
+        setEventsLoading,
+        setEventsDeleted,
+        pageSize: pageInfo.querySize,
+      })
+    );
+  }, [
+    showCheckboxes,
+    leadingControlColumns,
+    columnHeaders,
+    events,
+    fieldBrowserOptions,
+    loadingEventIds,
+    onRowSelected,
+    onRuleChange,
+    selectedEventIds,
+    tableId,
+    isSelectAllChecked,
+    sort,
+    browserFields,
+    onSelectPage,
+    theme,
+    setEventsLoading,
+    setEventsDeleted,
+    pageInfo.querySize,
+  ]);
+
+  const alertToolbar = useAlertBulkActions({
+    tableId,
+    data: events,
+    totalItems: totalCountMinusDeleted,
+    refetch,
+    indexNames: selectedPatterns,
+    hasAlertsCrud,
+    showCheckboxes,
+    filterStatus: currentFilter,
+    filterQuery,
+    bulkActions,
+    selectedCount,
+    unit,
+  });
+
+  const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
+
+  const { Navigation } = useSessionViewNavigation({
+    scopeId: tableId,
+  });
+
+  const { DetailsPanel, SessionView } = useSessionView({
+    entityType,
+    scopeId: tableId,
+  });
+
+  const graphOverlay = useMemo(() => {
+    const shouldShowOverlay =
+      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
+    return shouldShowOverlay ? (
+      <GraphOverlay scopeId={tableId} SessionView={SessionView} Navigation={Navigation} />
+    ) : null;
+  }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -404,11 +553,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                 data-test-subj="events-viewer-panel"
                 $isFullScreen={globalFullScreen}
               >
-                {showFullLoading && <TGridLoading height="short" />}
+                {showFullLoading && <TableLoading height="short" />}
 
                 {graphOverlay}
 
-                {!hasAlerts && !loading && !graphOverlay && <TGridEmpty height="short" />}
+                {!hasAlerts && !loading && !graphOverlay && <EmptyTable height="short" />}
                 {hasAlerts && (
                   <FullWidthFlexGroupTable
                     $visible={!graphEventId && graphOverlay == null}
@@ -417,6 +566,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                     <ScrollableFlexItem grow={1}>
                       {tableView === 'gridView' && (
                         <StatefulDataTableComponent
+                          alertToolbar={alertToolbar}
                           activePage={pageInfo.activePage}
                           browserFields={browserFields}
                           data={nonDeletedEvents}
@@ -437,34 +587,25 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                           filterQuery={filterQuery}
                           hasAlertsCrud={hasAlertsCrud}
                           showCheckboxes={showCheckboxes}
-                          unit={unit}
                           filters={filters}
                           filterStatus={currentFilter}
                           onRuleChange={onRuleChange}
-                          leadingControlColumns={leadingControlColumns}
+                          leadingControlColumns={leadingTGridControlColumns}
                         />
                       )}
                       {tableView === 'eventRenderedView' && (
-                        <StatefulEventRenderedView
+                        <EventRenderedView
                           events={events}
-                          leadingControlColumns={leadingControlColumns}
+                          leadingControlColumns={leadingTGridControlColumns}
                           pageIndex={pageInfo.activePage}
                           pageSize={pageInfo.querySize}
                           pageSizeOptions={itemsPerPageOptions}
                           rowRenderers={rowRenderers}
-                          tableId={tableId}
+                          scopeId={tableId}
                           totalItemCount={totalCountMinusDeleted}
-                          loadPage={loadPage}
-                          indexNames={selectedPatterns}
-                          refetch={refetch}
-                          unit={unit}
-                          hasAlertsCrud={hasAlertsCrud}
-                          filterQuery={filterQuery}
-                          filterStatus={currentFilter}
-                          bulkActions={bulkActions}
-                          browserFields={browserFields}
-                          disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
-                          tabType={'query'}
+                          onChangePage={onChangePage}
+                          onChangeItemsPerPage={onChangeItemsPerPage}
+                          alertToolbar={alertToolbar}
                         />
                       )}
                     </ScrollableFlexItem>

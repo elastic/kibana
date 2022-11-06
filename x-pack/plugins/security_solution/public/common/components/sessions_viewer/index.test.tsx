@@ -15,6 +15,7 @@ import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { TableId } from '../../../../common/types';
 import { licenseService } from '../../hooks/use_license';
+import { mount } from 'enzyme';
 
 jest.mock('../../lib/kibana');
 
@@ -103,26 +104,26 @@ jest.mock('@kbn/timelines-plugin/public/mock/plugin_mock', () => {
 
 describe('SessionsView', () => {
   it('renders the session view', async () => {
-    const wrapper = render(
+    const wrapper = mount(
       <TestProviders>
         <SessionsView {...testProps} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      expect(wrapper.queryByTestId(TEST_ID)).toBeInTheDocument();
+      expect(wrapper.find(`[data-test-subj="${TEST_ID}"]`).exists()).toBeTruthy();
     });
   });
 
   it('renders correctly against snapshot', async () => {
-    const { asFragment } = render(
+    const wrapper = mount(
       <TestProviders>
         <SessionsView {...testProps} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      expect(asFragment()).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 

@@ -10,7 +10,7 @@ import type { Dispatch } from 'redux';
 import type { ActionCreator } from 'typescript-fsa';
 
 import { getFieldIdFromDraggable, getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '@kbn/timelines-plugin/common/types';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getScopedActions } from '../../../helpers';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { TableId } from '../../../../common/types';

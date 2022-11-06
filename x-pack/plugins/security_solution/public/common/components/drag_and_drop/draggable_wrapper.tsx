@@ -31,7 +31,7 @@ import { ProviderContainer } from './provider_container';
 
 import * as i18n from './translations';
 import { useHoverActions } from '../hover_actions/use_hover_actions';
-import { useDraggableKeyboardWrapper } from '../data_table/drag_and_drop';
+import { useDraggableKeyboardWrapper } from './draggable_keyboard_wrapper_hook';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder
 export const DragEffects = styled.div``;

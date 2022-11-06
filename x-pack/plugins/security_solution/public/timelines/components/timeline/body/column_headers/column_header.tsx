@@ -15,7 +15,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import { useDraggableKeyboardWrapper } from '../../../../../common/components/data_table/drag_and_drop';
+import { useDraggableKeyboardWrapper } from '../../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
 import { getDraggableFieldId } from '../../../../../common/components/drag_and_drop/helpers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline';
