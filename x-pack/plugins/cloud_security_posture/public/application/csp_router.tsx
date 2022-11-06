@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Redirect, Route, RouteComponentProps, type RouteProps, Switch } from 'react-router-dom';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH, type CspSecuritySolutionContext } from '..';
@@ -70,13 +71,17 @@ export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
   const SpyRoute = securitySolutionContext
     ? securitySolutionContext.getSpyRouteComponent()
     : undefined;
-
+  console.log('CspRouter', securitySolutionRoutes);
   const routerElement = (
     <QueryClientProvider client={queryClient}>
       <Switch>
         {securitySolutionRoutes.map((route) => {
           const routeProps = SpyRoute ? addSpyRouteComponentToRoute(route, SpyRoute) : route;
-          return <Route key={routeProps.path} {...routeProps} />;
+          return (
+            <TrackApplicationView viewId={route.id} key={routeProps.path}>
+              <Route {...routeProps} />
+            </TrackApplicationView>
+          );
         })}
         <Route exact path={CLOUD_SECURITY_POSTURE_BASE_PATH} component={RedirectToDashboard} />
       </Switch>
