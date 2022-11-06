@@ -21,7 +21,7 @@ export const fetchMonitorOverview = async (
 ): Promise<MonitorOverviewResult> => {
   return await apiService.get(
     SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
-    { perPage: pageState.perPage },
+    { perPage: pageState.perPage, sortOrder: pageState.sortOrder, sortField: pageState.sortField },
     MonitorOverviewResultCodec
   );
 };

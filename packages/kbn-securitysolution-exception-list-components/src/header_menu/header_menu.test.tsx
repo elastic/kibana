@@ -8,7 +8,7 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { HeaderMenu } from '.';
-import { actions } from '../mocks/header.mock';
+import { actions, actionsWithDisabledDelete } from '../mocks/header.mock';
 import { getSecurityLinkAction } from '../mocks/security_link_component.mock';
 
 describe('HeaderMenu', () => {
@@ -20,6 +20,16 @@ describe('HeaderMenu', () => {
     expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
     expect(wrapper.queryByTestId('EmptyButton')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('MenuPanel')).not.toBeInTheDocument();
+  });
+  it('should render button icon disabled', () => {
+    const wrapper = render(
+      <HeaderMenu disableActions={false} actions={actionsWithDisabledDelete} />
+    );
+
+    fireEvent.click(wrapper.getByTestId('ButtonIcon'));
+    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.getByTestId('ActionItemdelete')).toBeDisabled();
+    expect(wrapper.getByTestId('ActionItemedit')).toBeEnabled();
   });
 
   it('should render empty button icon with different icon settings', () => {
