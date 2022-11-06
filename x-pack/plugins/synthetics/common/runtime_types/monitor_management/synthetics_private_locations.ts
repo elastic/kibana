@@ -16,6 +16,7 @@ export const PrivateLocationCodec = t.intersection([
   }),
   t.partial({
     isServiceManaged: t.boolean,
+    isInvalid: t.boolean,
     /* Empty Lat lon was accidentally saved as an empty string instead of undefined or null
      * Need a migration to fix */
     geo: t.interface({ lat: t.union([t.string, t.number]), lon: t.union([t.string, t.number]) }),

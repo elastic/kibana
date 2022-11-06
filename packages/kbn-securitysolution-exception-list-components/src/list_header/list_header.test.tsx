@@ -27,7 +27,7 @@ describe('ExceptionListHeader', () => {
       onCancel: jest.fn(),
     });
   });
-  it('should render the List Header with name, default description and disabled actions  because of the ReadOnly mode', () => {
+  it('should render the List Header with name, default description and disabled actions because of the ReadOnly mode', () => {
     const wrapper = render(
       <ExceptionListHeader
         listId="List_Id"
@@ -42,8 +42,8 @@ describe('ExceptionListHeader', () => {
       />
     );
     expect(wrapper).toMatchSnapshot();
-    fireEvent.click(wrapper.getByTestId('RightSideMenuItemsContainer'));
-    expect(wrapper.queryByTestId('MenuActions')).not.toBeInTheDocument();
+    fireEvent.click(wrapper.getByTestId('RightSideMenuItemsMenuActionsItems'));
+    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsButtonIcon')).toBeDisabled();
     expect(wrapper.getByTestId('DescriptionText')).toHaveTextContent(
       i18n.EXCEPTION_LIST_HEADER_DESCRIPTION
     );
@@ -54,6 +54,29 @@ describe('ExceptionListHeader', () => {
     expect(wrapper.getByTestId('Breadcrumb')).toHaveTextContent(
       i18n.EXCEPTION_LIST_HEADER_BREADCRUMB
     );
+  });
+  it('should render the List Header with name, default description and disabled actions because user can not edit details', () => {
+    const wrapper = render(
+      <ExceptionListHeader
+        listId="List_Id"
+        name="List Name"
+        isReadonly={false}
+        canUserEditList={false}
+        linkedRules={[]}
+        securityLinkAnchorComponent={securityLinkAnchorComponentMock}
+        onEditListDetails={onEditListDetails}
+        onExportList={onExportList}
+        onDeleteList={onDeleteList}
+        onManageRules={onManageRules}
+      />
+    );
+    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsButtonIcon')).toBeEnabled();
+    fireEvent.click(wrapper.getByTestId('RightSideMenuItemsMenuActionsButtonIcon'));
+    expect(wrapper).toMatchSnapshot();
+
+    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem1')).toBeEnabled();
+    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem2')).toBeDisabled();
+    expect(wrapper.queryByTestId('EditTitleIcon')).not.toBeInTheDocument();
   });
   it('should render the List Header with name, default description and  actions', () => {
     const wrapper = render(
