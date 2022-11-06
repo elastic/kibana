@@ -215,6 +215,7 @@ function DiscoverDocumentsComponent({
               rowsPerPageState={state.rowsPerPage}
               onUpdateRowsPerPage={onUpdateRowsPerPage}
               onFieldEdited={onFieldEdited}
+              savedSearchId={savedSearch.id}
             />
           </div>
         </>
