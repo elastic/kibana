@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiIcon, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { FlexItem, MetricItem } from './utils';
+import { FlexItem, MetricItem, StatValue } from './utils';
 import type { MetricStatItem } from './types';
 import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
 
@@ -60,12 +60,9 @@ const MetricEmbeddableComponent = ({
             </MetricItem>
             {field.description != null && (
               <FlexItem>
-                <EuiStat
-                  title={field.description}
-                  description={''}
-                  titleSize="m"
-                  data-test-subj="stat-title"
-                />
+                <StatValue>
+                  <p data-test-subj="stat-title">{field.description}</p>
+                </StatValue>
               </FlexItem>
             )}
           </EuiFlexGroup>
