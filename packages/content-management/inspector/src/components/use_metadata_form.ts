@@ -63,9 +63,9 @@ export const useMetadataForm = ({ item }: { item: Item }) => {
         isValid = errorMessage === null;
       }
 
-      const timeoutRef = changingValueTimeout.current[fieldName];
-      if (timeoutRef) {
-        clearTimeout(timeoutRef);
+      const timeoutId = changingValueTimeout.current[fieldName];
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
       changingValueTimeout.current[fieldName] = null;
 
@@ -101,10 +101,12 @@ export const useMetadataForm = ({ item }: { item: Item }) => {
   );
 
   const setTitle: SetFieldValueFn<string> = useMemo(() => setFieldValue('title'), [setFieldValue]);
+
   const setDescription: SetFieldValueFn<string> = useMemo(
     () => setFieldValue('description'),
     [setFieldValue]
   );
+
   const setTags: SetFieldValueFn<string[]> = useMemo(() => setFieldValue('tags'), [setFieldValue]);
 
   const validate = useCallback(() => {
