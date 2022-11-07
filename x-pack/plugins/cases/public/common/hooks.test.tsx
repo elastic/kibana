@@ -11,8 +11,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from './mock';
 import { useIsMainApplication } from './hooks';
 import { useApplication } from '../components/cases_context/use_application';
+
 jest.mock('../components/cases_context/use_application');
-jest.mock('react-use/lib/useLocalStorage');
 
 const useApplicationMock = useApplication as jest.Mock;
 

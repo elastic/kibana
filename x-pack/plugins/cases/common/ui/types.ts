@@ -97,27 +97,14 @@ export interface QueryParams {
   sortField: SortFieldCase;
   sortOrder: 'asc' | 'desc';
 }
+export type UrlQueryParams = Partial<QueryParams>;
 
-export interface ParsedUrlQueryParams {
+export type ParsedUrlQueryParams = Partial<Omit<QueryParams, 'page' | 'perPage'>> & {
   page?: string;
   perPage?: string;
-  sortField?: SortFieldCase;
-  sortOrder?: 'asc' | 'desc';
-}
+};
 
-export interface UrlQueryParams {
-  page?: number;
-  perPage?: number;
-  sortField?: SortFieldCase;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface LocalStorageQueryParams {
-  perPage?: number;
-  sortField?: SortFieldCase;
-  sortOrder?: 'asc' | 'desc';
-}
-
+export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
 export interface FilterOptions {
   search: string;
   searchFields: string[];

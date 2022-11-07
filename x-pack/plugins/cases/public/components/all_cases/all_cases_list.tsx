@@ -24,17 +24,12 @@ import { CasesTable } from './table';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CasesMetrics } from './cases_metrics';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
-import {
-  DEFAULT_FILTER_OPTIONS,
-  DEFAULT_QUERY_PARAMS,
-  initialData,
-  useGetCases,
-} from '../../containers/use_get_cases';
+import { DEFAULT_FILTER_OPTIONS, initialData, useGetCases } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
 import { useIsLoadingCases } from './use_is_loading_cases';
-import { useUrlState } from './use_url_state';
+import { useAllCasesQueryParams } from './use_all_cases_query_params';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -75,7 +70,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       ...DEFAULT_FILTER_OPTIONS,
       ...initialFilterOptions,
     });
-    const { queryParams, setUrlQueryParams } = useUrlState(isSelectorView);
+    const { queryParams, setQueryParams } = useAllCasesQueryParams(isSelectorView);
     const [selectedCases, setSelectedCases] = useState<Case[]>([]);
 
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
@@ -108,8 +103,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const sorting = useMemo(
       () => ({
         sort: {
-          field: queryParams.sortField ?? DEFAULT_QUERY_PARAMS.sortField,
-          direction: queryParams.sortOrder ?? DEFAULT_QUERY_PARAMS.sortOrder,
+          field: queryParams.sortField,
+          direction: queryParams.sortOrder,
         },
       }),
       [queryParams.sortField, queryParams.sortOrder]
@@ -139,23 +134,23 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             perPage: page.size,
           };
         }
-        setUrlQueryParams(newQueryParams);
+        setQueryParams(newQueryParams);
         deselectCases();
       },
-      [queryParams, deselectCases, setUrlQueryParams]
+      [queryParams, deselectCases, setQueryParams]
     );
 
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
         if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.closed) {
-          setUrlQueryParams({ sortField: SortFieldCase.closedAt });
+          setQueryParams({ sortField: SortFieldCase.closedAt });
         } else if (
           newFilterOptions.status &&
           [CaseStatuses.open, CaseStatuses['in-progress'], StatusAll].includes(
             newFilterOptions.status
           )
         ) {
-          setUrlQueryParams({ sortField: SortFieldCase.createdAt });
+          setQueryParams({ sortField: SortFieldCase.createdAt });
         }
 
         deselectCases();
@@ -182,7 +177,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             : {}),
         }));
       },
-      [deselectCases, hasOwner, availableSolutions, owner, setUrlQueryParams]
+      [deselectCases, hasOwner, availableSolutions, owner, setQueryParams]
     );
 
     const { columns } = useCasesColumns({
@@ -198,8 +193,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const pagination = useMemo(
       () => ({
-        pageIndex: (queryParams?.page ?? DEFAULT_QUERY_PARAMS.page) - 1,
-        pageSize: queryParams?.perPage ?? DEFAULT_QUERY_PARAMS.perPage,
+        pageIndex: queryParams.page - 1,
+        pageSize: queryParams.perPage,
         totalItemCount: data.total ?? 0,
         pageSizeOptions: [10, 25, 50, 100],
       }),

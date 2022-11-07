@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { TestProviders } from '../../common/mock';
-import { useUrlState } from './use_url_state';
+import { useAllCasesQueryParams } from './use_all_cases_query_params';
 import { DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { stringify } from 'query-string';
@@ -40,7 +40,7 @@ jest.mock('react-router-dom', () => ({
     return mockLocation;
   }),
   useHistory: jest.fn().mockReturnValue({
-    replace: jest.fn(),
+    push: jest.fn(),
     location: {
       search: '',
     },
@@ -57,38 +57,38 @@ describe('hooks', () => {
       useLocalStorageMock.mockReturnValue([localStorageQueryParams, setLocalStorageQueryParams]);
     });
 
-    it('it calls setState with default values on first run', () => {
-      const { result } = renderHook(() => useUrlState(), {
+    it('calls setState with default values on first run', () => {
+      const { result } = renderHook(() => useAllCasesQueryParams(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
 
       expect(result.current.queryParams).toStrictEqual(DEFAULT_QUERY_PARAMS);
     });
 
-    it('it updates localstorage with default values on first run', () => {
-      renderHook(() => useUrlState(), {
+    it('updates localstorage with default values on first run', () => {
+      renderHook(() => useAllCasesQueryParams(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
 
       expect(setLocalStorageQueryParams).toHaveBeenCalledWith(LOCAL_STORAGE_DEFAULTS);
     });
 
-    it('it calls history.replace with default values on first run', () => {
-      renderHook(() => useUrlState(), {
+    it('calls history.push with default values on first run', () => {
+      renderHook(() => useAllCasesQueryParams(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
 
-      expect(useHistory().replace).toHaveBeenCalledWith({
+      expect(useHistory().push).toHaveBeenCalledWith({
         search: stringify(URL_DEFAULTS),
       });
     });
 
-    it('it takes into account existing localStorage values on first run', () => {
+    it('takes into account existing localStorage values on first run', () => {
       const existingLocalStorageValues = { perPage: DEFAULT_TABLE_LIMIT + 10, sortOrder: 'asc' };
 
       useLocalStorageMock.mockReturnValue([existingLocalStorageValues, setLocalStorageQueryParams]);
 
-      renderHook(() => useUrlState(), {
+      renderHook(() => useAllCasesQueryParams(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
 
@@ -98,7 +98,7 @@ describe('hooks', () => {
       });
     });
 
-    it('it takes into account existing urlParams on first run', () => {
+    it('takes into account existing urlParams on first run', () => {
       const nonDefaultUrlParams = {
         page: DEFAULT_TABLE_ACTIVE_PAGE + 1,
         perPage: DEFAULT_TABLE_LIMIT + 5,
@@ -107,11 +107,11 @@ describe('hooks', () => {
 
       mockLocation.search = stringify(nonDefaultUrlParams);
 
-      renderHook(() => useUrlState(), {
+      renderHook(() => useAllCasesQueryParams(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
 
-      expect(useHistory().replace).toHaveBeenCalledWith({
+      expect(useHistory().push).toHaveBeenCalledWith({
         search: stringify(expectedUrl),
       });
     });
@@ -125,7 +125,7 @@ describe('hooks', () => {
       mockLocation.search = stringify(nonDefaultUrlParams);
       useLocalStorageMock.mockReturnValue([existingLocalStorageValues, setLocalStorageQueryParams]);
 
-      const { result } = renderHook(() => useUrlState(), {
+      const { result } = renderHook(() => useAllCasesQueryParams(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
 
