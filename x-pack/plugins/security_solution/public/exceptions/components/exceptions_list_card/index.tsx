@@ -76,6 +76,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       createdAt,
       createdBy,
       listRulesCount,
+      exceptionItemsCount,
       exceptions,
       pagination,
       toggleAccordion,
@@ -139,10 +140,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                           <TitleBadge title={i18n.CREATED_BY} badgeString={createdBy} />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <TitleBadge
-                            title={i18n.EXCEPTIONS}
-                            badgeString={pagination.totalItemCount.toString()}
-                          />
+                          <TitleBadge title={i18n.EXCEPTIONS} badgeString={exceptionItemsCount} />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <TitleBadge title={i18n.RULES} badgeString={listRulesCount} />

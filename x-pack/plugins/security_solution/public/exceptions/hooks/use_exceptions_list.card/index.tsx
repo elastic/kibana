@@ -126,6 +126,7 @@ export const useExceptionsListCard = ({
     createdAt: new Date(createdAt).toDateString(),
     createdBy,
     listRulesCount: listRules.length.toString(),
+    exceptionItemsCount: pagination.totalItemCount.toString(),
 
     menuActionItems,
 
