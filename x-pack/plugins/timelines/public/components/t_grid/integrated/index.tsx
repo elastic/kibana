@@ -263,6 +263,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,
+      filterStatus,
     });
 
   useEffect(() => {
