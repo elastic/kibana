@@ -14,7 +14,10 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../mocks';
-import { FILE_STORAGE_DATA_INDEX, FILE_STORAGE_METADATA_INDEX } from '../constants/fleet_es_assets';
+import {
+  FILE_STORAGE_DATA_INDEX_PATTERN,
+  FILE_STORAGE_METADATA_INDEX_PATTERN,
+} from '../constants/fleet_es_assets';
 import { appContextService } from '../services';
 
 import { CheckDeletedFilesTask, TYPE, VERSION } from './check_deleted_files_task';
@@ -115,12 +118,12 @@ describe('check deleted files task', () => {
             hits: [
               {
                 _id: 'metadata-testid1',
-                _index: FILE_STORAGE_METADATA_INDEX,
+                _index: FILE_STORAGE_METADATA_INDEX_PATTERN,
                 _source: { file: { status: 'READY' } },
               },
               {
                 _id: 'metadata-testid2',
-                _index: FILE_STORAGE_METADATA_INDEX,
+                _index: FILE_STORAGE_METADATA_INDEX_PATTERN,
                 _source: { file: { status: 'READY' } },
               },
             ],
@@ -144,7 +147,7 @@ describe('check deleted files task', () => {
             hits: [
               {
                 _id: 'data-testid1',
-                _index: FILE_STORAGE_DATA_INDEX,
+                _index: FILE_STORAGE_DATA_INDEX_PATTERN,
                 _source: {
                   bid: 'metadata-testid1',
                 },
@@ -157,7 +160,7 @@ describe('check deleted files task', () => {
 
       expect(esClient.updateByQuery).toHaveBeenCalledWith(
         {
-          index: FILE_STORAGE_METADATA_INDEX,
+          index: FILE_STORAGE_METADATA_INDEX_PATTERN,
           query: {
             ids: {
               values: ['metadata-testid2'],
