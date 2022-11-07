@@ -7,9 +7,11 @@
 
 import React from 'react';
 
-import { Field, getUseField } from '../../common/shared_imports';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from './translations';
-import { CreateCaseForm, CreateCaseFormProps } from './form';
+import type { CreateCaseFormProps } from './form';
+import { CreateCaseForm } from './form';
 import { HeaderPage } from '../header_page';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';

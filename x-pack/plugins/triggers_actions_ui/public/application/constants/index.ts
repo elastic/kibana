@@ -12,7 +12,6 @@ export {
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '@kbn/alerting-plugin/common';
 export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
-export { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '@kbn/stack-connectors-plugin/common';
 
 export type Section = 'connectors' | 'rules' | 'alerts' | 'logs';
 
@@ -45,6 +44,7 @@ export const DEFAULT_RULE_INTERVAL = '1m';
 export const RULE_EXECUTION_LOG_COLUMN_IDS = [
   'rule_id',
   'rule_name',
+  'space_ids',
   'id',
   'timestamp',
   'execution_duration',

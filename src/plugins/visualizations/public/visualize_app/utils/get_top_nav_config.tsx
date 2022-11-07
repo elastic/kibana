@@ -8,6 +8,7 @@
 
 import React from 'react';
 import moment from 'moment';
+import EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
 import { EuiBetaBadgeProps } from '@elastic/eui';
 import { parse } from 'query-string';
@@ -40,7 +41,7 @@ import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
-import { VISUALIZE_EDITOR_TRIGGER } from '../../triggers';
+import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import './visualize_navigation.scss';
@@ -71,6 +72,7 @@ export interface TopNavConfigParams {
   hideLensBadge: () => void;
   setNavigateToLens: (flag: boolean) => void;
   showBadge: boolean;
+  eventEmitter?: EventEmitter;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -102,6 +104,7 @@ export const getTopNavConfig = (
     hideLensBadge,
     setNavigateToLens,
     showBadge,
+    eventEmitter,
   }: TopNavConfigParams,
   {
     data,
@@ -301,6 +304,10 @@ export const getTopNavConfig = (
               },
             }),
             run: async () => {
+              // lens doesn't support saved searches, should unlink before transition
+              if (eventEmitter && visInstance.vis.data.savedSearchId) {
+                eventEmitter.emit('unlinkFromSavedSearch', false);
+              }
               const updatedWithMeta = {
                 ...editInLensConfig,
                 savedObjectId: visInstance.vis.id,
@@ -311,7 +318,13 @@ export const getTopNavConfig = (
               if (editInLensConfig) {
                 hideLensBadge();
                 setNavigateToLens(true);
-                getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(updatedWithMeta);
+                getUiActions()
+                  .getTrigger(
+                    visInstance.vis.type.group === 'aggbased'
+                      ? AGG_BASED_VISUALIZATION_TRIGGER
+                      : VISUALIZE_EDITOR_TRIGGER
+                  )
+                  .exec(updatedWithMeta);
               }
             },
           },

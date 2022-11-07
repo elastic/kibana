@@ -22,15 +22,18 @@ import {
   useResizeObserver,
   EuiButton,
 } from '@elastic/eui';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
+import { triggerVisualizeActionsTextBasedLanguages } from '@kbn/unified-field-list-plugin/public';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
-import { FIELDS_LIMIT_SETTING } from '../../../../../common';
+import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
 import { groupFields } from './lib/group_fields';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
@@ -39,6 +42,7 @@ import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import type { DataTableRecord } from '../../../../types';
+import { getUiActions } from '../../../../kibana_services';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -116,7 +120,6 @@ export function DiscoverSidebarComponent({
   viewMode,
   createNewDataView,
   showDataViewPicker,
-  state,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
@@ -125,6 +128,7 @@ export function DiscoverSidebarComponent({
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
   const isPlainRecord = !onAddFilter;
+  const query = useAppStateSelector((state) => state.query);
 
   useEffect(() => {
     if (documents) {
@@ -185,7 +189,8 @@ export function DiscoverSidebarComponent({
         // In this case the fieldsPerPage needs to be adapted
         const fieldsRenderedHeight = availableFieldsContainer.current.clientHeight;
         const avgHeightPerItem = Math.round(fieldsRenderedHeight / fieldsToRender);
-        const newFieldsPerPage = Math.round(clientHeight / avgHeightPerItem) + 10;
+        const newFieldsPerPage =
+          (avgHeightPerItem > 0 ? Math.round(clientHeight / avgHeightPerItem) : 0) + 10;
         if (newFieldsPerPage >= FIELDS_PER_PAGE && newFieldsPerPage !== fieldsPerPage) {
           setFieldsPerPage(newFieldsPerPage);
           setFieldsToRender(newFieldsPerPage);
@@ -279,7 +284,7 @@ export function DiscoverSidebarComponent({
               },
               fieldName,
               onDelete: async () => {
-                onFieldEdited();
+                await onFieldEdited();
               },
             });
             if (setFieldEditorRef) {
@@ -308,6 +313,17 @@ export function DiscoverSidebarComponent({
   );
 
   const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
+
+  const visualizeAggregateQuery = useCallback(() => {
+    const aggregateQuery = query && isOfAggregateQueryType(query) ? query : undefined;
+    triggerVisualizeActionsTextBasedLanguages(
+      getUiActions(),
+      columns,
+      PLUGIN_ID,
+      selectedDataView,
+      aggregateQuery
+    );
+  }, [columns, selectedDataView, query]);
 
   if (!selectedDataView) {
     return null;
@@ -338,7 +354,7 @@ export function DiscoverSidebarComponent({
             trigger={{
               label: selectedDataView?.getName() || '',
               'data-test-subj': 'dataView-switch-link',
-              title: selectedDataView?.title || '',
+              title: selectedDataView?.getIndexPattern() || '',
               fullWidth: true,
             }}
           />
@@ -413,7 +429,6 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
-                                state={state}
                                 contextualFields={columns}
                               />
                             </li>
@@ -475,7 +490,6 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
-                                state={state}
                                 contextualFields={columns}
                               />
                             </li>
@@ -506,7 +520,6 @@ export function DiscoverSidebarComponent({
                             onEditField={editField}
                             onDeleteField={deleteField}
                             showFieldStats={showFieldStats}
-                            state={state}
                             contextualFields={columns}
                           />
                         </li>
@@ -528,6 +541,20 @@ export function DiscoverSidebarComponent({
             >
               {i18n.translate('discover.fieldChooser.addField.label', {
                 defaultMessage: 'Add a field',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        {isPlainRecord && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="lensApp"
+              data-test-subj="textBased-visualize"
+              onClick={visualizeAggregateQuery}
+              size="s"
+            >
+              {i18n.translate('discover.textBasedLanguages.visualize.label', {
+                defaultMessage: 'Visualize in Lens',
               })}
             </EuiButton>
           </EuiFlexItem>

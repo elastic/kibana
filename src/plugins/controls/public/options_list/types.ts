@@ -10,6 +10,11 @@ import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { ControlOutput } from '../types';
 import { OptionsListEmbeddableInput, OptionsListField } from '../../common/options_list/types';
 
+interface SearchString {
+  value: string;
+  valid: boolean;
+}
+
 // Component state is only used by public components.
 export interface OptionsListComponentState {
   field?: OptionsListField;
@@ -17,7 +22,7 @@ export interface OptionsListComponentState {
   availableOptions?: string[];
   invalidSelections?: string[];
   validSelections?: string[];
-  searchString: string;
+  searchString: SearchString;
 }
 
 // public only - redux embeddable state type

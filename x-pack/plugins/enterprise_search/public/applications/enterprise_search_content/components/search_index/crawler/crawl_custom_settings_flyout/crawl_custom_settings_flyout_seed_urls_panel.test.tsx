@@ -76,11 +76,13 @@ describe('CrawlCustomSettingsFlyoutSeedUrlsPanel', () => {
     });
 
     it('allows the user to select sitemap urls', () => {
-      expect(sitemapTab.find(SimplifiedSelectable).props()).toEqual({
-        options: MOCK_VALUES.sitemapUrls,
-        selectedOptions: MOCK_VALUES.selectedSitemapUrls,
-        onChange: MOCK_ACTIONS.onSelectSitemapUrls,
-      });
+      expect(sitemapTab.find(SimplifiedSelectable).props()).toEqual(
+        expect.objectContaining({
+          options: MOCK_VALUES.sitemapUrls,
+          selectedOptions: MOCK_VALUES.selectedSitemapUrls,
+          onChange: MOCK_ACTIONS.onSelectSitemapUrls,
+        })
+      );
     });
 
     it('allows the user to toggle whether to include robots.txt sitemaps', () => {
@@ -111,11 +113,13 @@ describe('CrawlCustomSettingsFlyoutSeedUrlsPanel', () => {
     });
 
     it('allows the user to select entry point urls', () => {
-      expect(entryPointsTab.find(SimplifiedSelectable).props()).toEqual({
-        options: MOCK_VALUES.entryPointUrls,
-        selectedOptions: MOCK_VALUES.selectedEntryPointUrls,
-        onChange: MOCK_ACTIONS.onSelectEntryPointUrls,
-      });
+      expect(entryPointsTab.find(SimplifiedSelectable).props()).toEqual(
+        expect.objectContaining({
+          options: MOCK_VALUES.entryPointUrls,
+          selectedOptions: MOCK_VALUES.selectedEntryPointUrls,
+          onChange: MOCK_ACTIONS.onSelectEntryPointUrls,
+        })
+      );
     });
 
     it('allows the user to add custom entry point urls', () => {

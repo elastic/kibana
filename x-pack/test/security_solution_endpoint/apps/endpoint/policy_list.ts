@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await fleetButton.click();
         await testSubjects.existOrFail('createPackagePolicy_pageTitle');
         expect(await testSubjects.getVisibleText('createPackagePolicy_pageTitle')).to.equal(
-          'Add Endpoint and Cloud Security integration'
+          'Add Elastic Defend integration'
         );
       });
       it('navigates back to the policy list page', async () => {

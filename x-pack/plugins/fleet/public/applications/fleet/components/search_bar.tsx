@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-
+import styled from 'styled-components';
 import { fromKueryExpression } from '@kbn/es-query';
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
@@ -19,6 +19,12 @@ import { useStartServices } from '../hooks';
 import { INDEX_NAME, AGENTS_PREFIX } from '../constants';
 
 const HIDDEN_FIELDS = [`${AGENTS_PREFIX}.actions`, '_id', '_index'];
+
+const NoWrapQueryStringInput = styled(QueryStringInput)`
+  .kbnQueryBar__textarea {
+    white-space: nowrap;
+  }
+`;
 
 interface Props {
   value: string;
@@ -39,6 +45,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
 }) => {
   const {
     data,
+    dataViews,
     unifiedSearch,
     storage,
     notifications,
@@ -48,7 +55,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
     usageCollection,
   } = useStartServices();
 
-  const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
+  const [dataView, setDataView] = useState<DataView | undefined>();
 
   const isQueryValid = useMemo(() => {
     if (!value || value === '') {
@@ -79,28 +86,24 @@ export const SearchBar: React.FunctionComponent<Props> = ({
             return true;
           }
         });
-        setIndexPatternFields(fields);
+        const fieldsMap = fields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
+          acc[curr.name] = curr;
+          return acc;
+        }, {});
+        const newDataView = await data.dataViews.create({ title: indexPattern, fields: fieldsMap });
+        setDataView(newDataView);
       } catch (err) {
-        setIndexPatternFields(undefined);
+        setDataView(undefined);
       }
     };
     fetchFields();
   }, [data.dataViews, fieldPrefix, indexPattern]);
 
   return (
-    <QueryStringInput
+    <NoWrapQueryStringInput
       iconType="search"
       disableLanguageSwitcher={true}
-      indexPatterns={
-        indexPatternFields
-          ? ([
-              {
-                title: indexPattern,
-                fields: indexPatternFields,
-              },
-            ] as DataView[])
-          : []
-      }
+      indexPatterns={dataView ? [dataView] : []}
       query={{
         query: value,
         language: 'kuery',
@@ -125,6 +128,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
         docLinks,
         uiSettings,
         data,
+        dataViews,
         storage,
         usageCollection,
       }}

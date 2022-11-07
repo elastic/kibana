@@ -113,6 +113,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                   <EuiSpacer size="s" />
                   <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="s">
                     <EuiCheckbox
+                      data-telemetry-id="entSearchContent-crawler-customCrawlSettings-includeRobotsSitemaps"
                       id={useGeneratedHtmlId({ prefix: 'includeRobotsCheckbox' })}
                       label={
                         <FormattedMessage
@@ -128,6 +129,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                     />
                   </EuiPanel>
                   <SimplifiedSelectable
+                    data-telemetry-id="entSearchContent-crawler-customCrawlSettings-selectDomain"
                     options={sitemapUrls}
                     selectedOptions={selectedSitemapUrls}
                     onChange={onSelectSitemapUrls}
@@ -144,6 +146,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                   />
                   <EuiHorizontalRule />
                   <UrlComboBox
+                    data-telemetry-id="entSearchContent-crawler-customCrawlSettings-customSitemapUrls"
                     label={i18n.translate(
                       'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.customSitemapUrlsTextboxLabel',
                       {
@@ -168,6 +171,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                 <>
                   <EuiSpacer size="s" />
                   <SimplifiedSelectable
+                    data-telemetry-id="entSearchContent-crawler-customCrawlSettings-selectDomain"
                     options={entryPointUrls}
                     selectedOptions={selectedEntryPointUrls}
                     onChange={onSelectEntryPointUrls}
@@ -184,6 +188,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                   />
                   <EuiHorizontalRule />
                   <UrlComboBox
+                    data-telemetry-id="entSearchContent-crawler-customCrawlSettings-customEntryPointUrls"
                     label={i18n.translate(
                       'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.customEntryPointUrlsTextboxLabel',
                       {

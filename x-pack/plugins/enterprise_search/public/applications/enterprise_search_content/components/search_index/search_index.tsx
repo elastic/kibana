@@ -11,6 +11,8 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
+import useObservable from 'react-use/lib/useObservable';
+
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -30,8 +32,6 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
 import { getHeaderActions } from './components/header_actions/header_actions';
-import { IndexCreatedCallout } from './components/index_created_callout/callout';
-import { IndexCreatedCalloutLogic } from './components/index_created_callout/callout_logic';
 import { ConnectorConfiguration } from './connector/connector_configuration';
 import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
@@ -58,12 +58,25 @@ export enum SearchIndexTabId {
 
 export const SearchIndex: React.FC = () => {
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
-  const { isCalloutVisible } = useValues(IndexCreatedCalloutLogic);
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
+
+  /**
+   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index
+   * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
+   */
+  const { guidedOnboarding } = useValues(KibanaLogic);
+  const isDataStepActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('search', 'add_data')
+  );
+  useEffect(() => {
+    if (isDataStepActive && indexData?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('search', 'add_data');
+    }
+  }, [isDataStepActive, indexData?.count]);
 
   useEffect(() => {
     if (
@@ -177,7 +190,6 @@ export const SearchIndex: React.FC = () => {
       }}
     >
       <>
-        {isCalloutVisible && <IndexCreatedCallout indexName={indexName} />}
         {indexName === indexData?.name && (
           <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
         )}

@@ -14,9 +14,10 @@ import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
-import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import { DashboardContainer } from '../embeddable';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 
 export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
 

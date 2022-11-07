@@ -33,10 +33,12 @@ export const MlStorageContextProvider: FC = ({ children }) => {
     services: { storage },
   } = useMlKibana();
 
-  const initialValue = ML_STORAGE_KEYS.reduce((acc, curr) => {
-    acc[curr as MlStorageKey] = storage.get(curr);
-    return acc;
-  }, {} as Exclude<MlStorage, null>);
+  const initialValue = useMemo(() => {
+    return ML_STORAGE_KEYS.reduce((acc, curr) => {
+      acc[curr as MlStorageKey] = storage.get(curr);
+      return acc;
+    }, {} as Exclude<MlStorage, null>);
+  }, [storage]);
 
   const [state, setState] = useState<MlStorage>(initialValue);
 
@@ -44,21 +46,20 @@ export const MlStorageContextProvider: FC = ({ children }) => {
     <K extends MlStorageKey, T extends TMlStorageMapped<K>>(key: K, value: T) => {
       storage.set(key, value);
 
-      const update = {
-        ...state,
+      setState((prevState) => ({
+        ...prevState,
         [key]: value,
-      };
-      setState(update);
+      }));
     },
-    [state, storage]
+    [storage]
   );
 
   const removeStorageValue = useCallback(
     (key: MlStorageKey) => {
       storage.remove(key);
-      setState(omit(state, key));
+      setState((prevState) => omit(prevState, key));
     },
-    [state, storage]
+    [storage]
   );
 
   useEffect(function updateStorageOnExternalChange() {
@@ -69,7 +70,8 @@ export const MlStorageContextProvider: FC = ({ children }) => {
         setState((prev) => {
           return {
             ...prev,
-            [event.key as MlStorageKey]: event.newValue,
+            [event.key as MlStorageKey]:
+              typeof event.newValue === 'string' ? JSON.parse(event.newValue) : event.newValue,
           };
         });
       } else {
@@ -106,21 +108,32 @@ export const MlStorageContextProvider: FC = ({ children }) => {
  * @param key
  * @param initValue
  */
-export function useStorage<K extends MlStorageKey>(
+export function useStorage<K extends MlStorageKey, T extends TMlStorageMapped<K>>(
   key: K,
-  initValue?: TMlStorageMapped<K>
-): [TMlStorageMapped<K> | undefined, (value: TMlStorageMapped<K>) => void] {
-  const { value, setValue } = useContext(MlStorageContext);
+  initValue?: T
+): [
+  typeof initValue extends undefined
+    ? TMlStorageMapped<K> | undefined
+    : Exclude<TMlStorageMapped<K>, undefined>,
+  (value: TMlStorageMapped<K>) => void
+] {
+  const { value, setValue, removeValue } = useContext(MlStorageContext);
 
   const resultValue = useMemo(() => {
-    return (value?.[key] ?? initValue) as TMlStorageMapped<K>;
+    return (value?.[key] ?? initValue) as typeof initValue extends undefined
+      ? TMlStorageMapped<K> | undefined
+      : Exclude<TMlStorageMapped<K>, undefined>;
   }, [value, key, initValue]);
 
   const setVal = useCallback(
     (v: TMlStorageMapped<K>) => {
-      setValue(key, v);
+      if (isDefined(v)) {
+        setValue(key, v);
+      } else {
+        removeValue(key);
+      }
     },
-    [setValue, key]
+    [setValue, removeValue, key]
   );
 
   return [resultValue, setVal];

@@ -10,10 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common/services';
 
-import { useGetPackageInfoByKey, useGetSettings } from '../../../../hooks';
+import { useGetPackageInfoByKey, useLink, useFleetServerHostsForPolicy } from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
-import { useCancelAddPackagePolicy } from '../hooks';
 
 import { useGetAgentPolicyOrDefault } from './hooks';
 
@@ -55,24 +54,23 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   queryParamsPolicyId,
 }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
-
-  const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
+  const { pkgkey, policyId, integration } = params;
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const [onSplash, setOnSplash] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [isManaged, setIsManaged] = useState(true);
+  const { getHref } = useLink();
   const [enrolledAgentIds, setEnrolledAgentIds] = useState<string[]>([]);
   const toggleIsManaged = (newIsManaged: boolean) => {
     setIsManaged(newIsManaged);
     setCurrentStep(0);
   };
 
-  const { isLoading: isSettingsLoading, data: settingsData } = useGetSettings();
-
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion);
+  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease: true });
 
   const {
     agentPolicy,
@@ -82,33 +80,35 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   } = useGetAgentPolicyOrDefault(queryParamsPolicyId);
 
   const packageInfo = useMemo(() => packageInfoData?.item, [packageInfoData]);
-  const settings = useMemo(() => settingsData?.item, [settingsData]);
 
   const integrationInfo = useMemo(() => {
-    if (!params.integration) return;
+    if (!integration) return;
     return packageInfo?.policy_templates?.find(
-      (policyTemplate) => policyTemplate.name === params.integration
+      (policyTemplate) => policyTemplate.name === integration
     );
-  }, [packageInfo?.policy_templates, params]);
+  }, [packageInfo?.policy_templates, integration]);
 
   const splashScreenNext = () => {
     setOnSplash(false);
   };
 
-  const { cancelClickHandler, cancelUrl } = useCancelAddPackagePolicy({
-    from,
-    pkgkey: params.pkgkey,
+  const { fleetServerHosts, isLoadingInitialRequest } = useFleetServerHostsForPolicy(agentPolicy);
+
+  const cancelUrl = getHref('add_integration_to_policy', {
+    pkgkey,
+    useMultiPageLayout: false,
+    ...(integration ? { integration } : {}),
+    ...(policyId ? { agentPolicyId: policyId } : {}),
   });
 
   if (onSplash || !packageInfo) {
     return (
       <AddFirstIntegrationSplashScreen
-        isLoading={isPackageInfoLoading || isSettingsLoading || isAgentPolicyLoading}
+        isLoading={isPackageInfoLoading || isLoadingInitialRequest || isAgentPolicyLoading}
         error={packageInfoError || agentPolicyError}
         integrationInfo={integrationInfo}
         packageInfo={packageInfo}
         cancelUrl={cancelUrl}
-        cancelClickHandler={cancelClickHandler}
         onNext={splashScreenNext}
       />
     );
@@ -125,7 +125,6 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
 
   const stepsBack = () => {
     if (currentStep === 0) {
-      cancelClickHandler(null);
       return;
     }
 
@@ -134,7 +133,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
 
   return (
     <MultiPageStepsLayout
-      settings={settings}
+      fleetServerHosts={fleetServerHosts}
       agentPolicy={agentPolicy}
       enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}
@@ -142,7 +141,6 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
       packageInfo={packageInfo}
       integrationInfo={integrationInfo}
       cancelUrl={cancelUrl}
-      cancelClickHandler={cancelClickHandler}
       onNext={stepsNext}
       onBack={stepsBack}
       isManaged={isManaged}

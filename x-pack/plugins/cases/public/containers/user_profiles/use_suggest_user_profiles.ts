@@ -6,16 +6,18 @@
  */
 
 import { useState } from 'react';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import useDebounce from 'react-use/lib/useDebounce';
-import { UserProfile } from '@kbn/security-plugin/common';
+import type { UserProfile } from '@kbn/security-plugin/common';
 import { noop } from 'lodash';
 import { DEFAULT_USER_SIZE, SEARCH_DEBOUNCE_MS } from '../../../common/constants';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
-import { ServerError } from '../../types';
-import { USER_PROFILES_CACHE_KEY, USER_PROFILES_SUGGEST_CACHE_KEY } from '../constants';
-import { suggestUserProfiles, SuggestUserProfilesArgs } from './api';
+import type { ServerError } from '../../types';
+import { casesQueriesKeys } from '../constants';
+import type { SuggestUserProfilesArgs } from './api';
+import { suggestUserProfiles } from './api';
 
 type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & { onDebounce?: () => void };
 
@@ -49,11 +51,7 @@ export const useSuggestUserProfiles = ({
   const toasts = useToasts();
 
   return useQuery<UserProfile[], ServerError>(
-    [
-      USER_PROFILES_CACHE_KEY,
-      USER_PROFILES_SUGGEST_CACHE_KEY,
-      { name: debouncedName, owners, size },
-    ],
+    casesQueriesKeys.suggestUsers({ name: debouncedName, owners, size }),
     () => {
       const abortCtrlRef = new AbortController();
       return suggestUserProfiles({

@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
 import type { GlobalTimeArgs } from '../../common/containers/use_global_time';
 
 import type { usersModel } from '../store';
 
 export type UsersTabsProps = GlobalTimeArgs & {
-  filterQuery: string;
-  pageFilters?: Filter[];
+  filterQuery?: string;
   indexNames: string[];
   type: usersModel.UsersType;
 };

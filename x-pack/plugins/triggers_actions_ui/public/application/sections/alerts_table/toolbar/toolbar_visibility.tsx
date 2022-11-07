@@ -53,7 +53,9 @@ const getDefaultVisibility = ({
 
   return {
     additionalControls,
-    showColumnSelector: true,
+    showColumnSelector: {
+      allowHide: false,
+    },
     showSortSelector: true,
   };
 };

@@ -96,6 +96,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
         >
           <EuiFormRow display="rowCompressed">
             <EuiSwitch
+              data-telemetry-id="entSearchContent-crawler-scheduleCrawl-crawlAutomatically"
               autoFocus
               checked={crawlAutomatically}
               label={
@@ -126,6 +127,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFieldNumber
+                  data-telemetry-id="entSearchContent-crawler-scheduleCrawl-crawlAutomatically-scheduleFrequency"
                   aria-label={i18n.translate(
                     'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.scheduleFrequencyLabel',
                     {
@@ -143,6 +145,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSelect
+                  data-telemetry-id="entSearchContent-crawler-scheduleCrawl-crawlAutomatically-scheduleUnits"
                   aria-label={i18n.translate(
                     'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.scheduleUnitsLabel',
                     {
@@ -188,7 +191,13 @@ export const AutomaticCrawlScheduler: React.FC = () => {
           </EuiText>
           <EuiSpacer />
           <EuiFormRow display="rowCompressed">
-            <EuiButton form={formId} type="submit" isLoading={isSubmitting} fill>
+            <EuiButton
+              data-telemetry-id="entSearchContent-crawler-scheduleCrawl-crawlAutomatically-save"
+              form={formId}
+              type="submit"
+              isLoading={isSubmitting}
+              fill
+            >
               {SAVE_BUTTON_LABEL}
             </EuiButton>
           </EuiFormRow>

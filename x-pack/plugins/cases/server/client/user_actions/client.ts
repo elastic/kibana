@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ICaseUserActionsResponse } from '../typedoc_interfaces';
-import { CasesClientArgs } from '../types';
+import type { ICaseUserActionsResponse } from '../typedoc_interfaces';
+import type { CasesClientArgs } from '../types';
 import { get } from './get';
 
 /**

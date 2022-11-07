@@ -7,7 +7,7 @@
 
 import { get, isEmpty } from 'lodash';
 
-import {
+import type {
   Logger,
   SavedObject,
   SavedObjectReference,
@@ -17,7 +17,7 @@ import {
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
 import {
   isConnectorUserAction,
@@ -26,10 +26,8 @@ import {
   isCreateCaseUserAction,
   isCommentUserAction,
 } from '../../../common/utils/user_actions';
-import {
+import type {
   ActionOperationValues,
-  Actions,
-  ActionTypes,
   ActionTypeValues,
   CaseAttributes,
   CaseUserActionAttributes,
@@ -38,16 +36,16 @@ import {
   CaseUserProfile,
   CaseAssignees,
   CommentRequest,
-  NONE_CONNECTOR_ID,
   User,
 } from '../../../common/api';
+import { Actions, ActionTypes, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
   CASE_COMMENT_SAVED_OBJECT,
 } from '../../../common/constants';
-import { ClientArgs } from '..';
+import type { ClientArgs } from '..';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
@@ -57,7 +55,7 @@ import {
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
 import { buildFilter, combineFilters, arraysDifference } from '../../client/utils';
-import {
+import type {
   BuilderParameters,
   BuilderReturnValue,
   CommonArguments,
@@ -66,9 +64,9 @@ import {
 } from './types';
 import { BuilderFactory } from './builder_factory';
 import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
-import { IndexRefresh } from '../types';
+import type { IndexRefresh } from '../types';
 import { isAssigneesArray, isStringArray } from './type_guards';
 
 interface GetCaseUserActionArgs extends ClientArgs {

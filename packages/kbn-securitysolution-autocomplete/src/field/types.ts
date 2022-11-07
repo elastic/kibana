@@ -14,6 +14,7 @@ export interface FieldProps extends FieldBaseProps {
   isDisabled: boolean;
   isLoading: boolean;
   placeholder: string;
+  acceptsCustomOptions?: boolean;
 }
 export interface FieldBaseProps {
   indexPattern: DataViewBase | undefined;

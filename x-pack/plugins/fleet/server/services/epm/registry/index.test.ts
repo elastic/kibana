@@ -35,6 +35,7 @@ jest.mock('../..', () => ({
     getKibanaBranch: () => 'main',
     getKibanaVersion: () => '99.0.0',
     getConfig: () => ({}),
+    getIsProductionMode: () => false,
   },
 }));
 

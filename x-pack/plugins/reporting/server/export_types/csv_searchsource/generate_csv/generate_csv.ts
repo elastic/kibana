@@ -164,11 +164,16 @@ export class CsvGenerator {
           cell = '-';
         }
 
-        try {
-          // expected values are a string of JSON where the value(s) is in an array
-          cell = JSON.parse(cell);
-        } catch (e) {
-          // ignore
+        const isIdField = tableColumn === '_id'; // _id field can not be formatted or mutated
+        if (!isIdField) {
+          try {
+            // unwrap the value
+            // expected values are a string of JSON where the value(s) is in an array
+            // examples: "[""Jan 1, 2020 @ 04:00:00.000""]","[""username""]"
+            cell = JSON.parse(cell);
+          } catch (e) {
+            // ignore
+          }
         }
 
         // We have to strip singular array values out of their array wrapper,
@@ -193,12 +198,13 @@ export class CsvGenerator {
    * Use the list of columns to generate the header row
    */
   private generateHeader(
-    columns: string[],
+    columns: Set<string>,
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
     this.logger.debug(`Building CSV header row...`);
-    const header = columns.map(this.escapeValues(settings)).join(settings.separator) + '\n';
+    const header =
+      Array.from(columns).map(this.escapeValues(settings)).join(settings.separator) + '\n';
 
     if (!builder.tryAppend(header)) {
       return {
@@ -213,7 +219,7 @@ export class CsvGenerator {
    * Format a Datatable into rows of CSV content
    */
   private async generateRows(
-    columns: string[],
+    columns: Set<string>,
     table: Datatable,
     builder: MaxSizeStringBuilder,
     formatters: Record<string, FieldFormat>,
@@ -315,6 +321,7 @@ export class CsvGenerator {
       this.logger.error(err);
     }
 
+    const columns = new Set<string>(this.job.columns ?? []);
     try {
       do {
         if (this.cancellationToken.isCancelled()) {
@@ -366,11 +373,8 @@ export class CsvGenerator {
           break;
         }
 
-        let columns: string[];
-        if (this.job.columns && this.job.columns.length > 0) {
-          columns = this.job.columns;
-        } else {
-          columns = this.getColumnsFromTabify(table);
+        if (!this.job.columns?.length) {
+          this.getColumnsFromTabify(table).forEach((column) => columns.add(column));
         }
 
         if (first) {
@@ -382,6 +386,7 @@ export class CsvGenerator {
           break; // empty report with just the header
         }
 
+        // FIXME: make tabifyDocs handle the formatting, to get the same formatting logic as Discover?
         const formatters = this.getFormatters(table);
         await this.generateRows(columns, table, builder, formatters, settings);
 

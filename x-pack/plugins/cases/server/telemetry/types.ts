@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { OWNERS } from './constants';
+import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { OWNERS } from './constants';
 
 export interface Buckets {
   buckets: Array<{

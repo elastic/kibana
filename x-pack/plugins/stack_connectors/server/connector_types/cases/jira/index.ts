@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { curry } from 'lodash';
 import { TypeOf } from '@kbn/config-schema';
 
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -43,9 +41,6 @@ import {
 import * as i18n from './translations';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
-interface GetConnectorTypeParams {
-  logger: Logger;
-}
 
 const supportedSubActions: string[] = [
   'getFields',
@@ -59,15 +54,12 @@ const supportedSubActions: string[] = [
 
 export const ConnectorTypeId = '.jira';
 // connector type definition
-export function getConnectorType(
-  params: GetConnectorTypeParams
-): ConnectorType<
+export function getConnectorType(): ConnectorType<
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
   ExecutorParams,
   JiraExecutorResultData | {}
 > {
-  const { logger } = params;
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
@@ -91,20 +83,19 @@ export function getConnectorType(
         schema: ExecutorParamsSchema,
       },
     },
-    executor: curry(executor)({ logger }),
+    executor,
   };
 }
 
 // action executor
 async function executor(
-  { logger }: { logger: Logger },
   execOptions: ConnectorTypeExecutorOptions<
     JiraPublicConfigurationType,
     JiraSecretConfigurationType,
     ExecutorParams
   >
 ): Promise<ConnectorTypeExecutorResult<JiraExecutorResultData | {}>> {
-  const { actionId, config, params, secrets, configurationUtilities } = execOptions;
+  const { actionId, config, params, secrets, configurationUtilities, logger } = execOptions;
   const { subAction, subActionParams } = params as ExecutorParams;
   let data: JiraExecutorResultData | null = null;
 

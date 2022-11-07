@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Ast, fromExpression } from '@kbn/interpreter';
 import { DatasourceStates } from '../../state_management';
 import { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
@@ -12,7 +11,8 @@ import { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from 
 export function getDatasourceExpressionsByLayers(
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates,
-  indexPatterns: IndexPatternMap
+  indexPatterns: IndexPatternMap,
+  searchSessionId?: string
 ): null | Record<string, Ast> {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
@@ -25,7 +25,7 @@ export function getDatasourceExpressionsByLayers(
     const layers = datasource.getLayers(state);
 
     layers.forEach((layerId) => {
-      const result = datasource.toExpression(state, layerId, indexPatterns);
+      const result = datasource.toExpression(state, layerId, indexPatterns, searchSessionId);
       if (result) {
         datasourceExpressions.push([layerId, result]);
       }
@@ -54,6 +54,7 @@ export function buildExpression({
   title,
   description,
   indexPatterns,
+  searchSessionId,
 }: {
   title?: string;
   description?: string;
@@ -63,6 +64,7 @@ export function buildExpression({
   datasourceStates: DatasourceStates;
   datasourceLayers: DatasourceLayers;
   indexPatterns: IndexPatternMap;
+  searchSessionId?: string;
 }): Ast | null {
   if (visualization === null) {
     return null;
@@ -71,7 +73,8 @@ export function buildExpression({
   const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
     datasourceMap,
     datasourceStates,
-    indexPatterns
+    indexPatterns,
+    searchSessionId
   );
 
   const visualizationExpression = visualization.toExpression(

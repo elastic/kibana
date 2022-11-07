@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { ThresholdNormalized } from '../../../../../common/detection_engine/rule_schema';
 import { calculateThresholdSignalUuid } from '../utils';
 import { getTransformedHits } from './bulk_create_threshold_signals';
 

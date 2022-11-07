@@ -25,7 +25,7 @@ export class ContactCardEmbeddableFactory
   public readonly type = CONTACT_CARD_EMBEDDABLE;
 
   constructor(
-    private readonly execTrigger: UiActionsStart['executeTriggerActions'],
+    protected readonly execTrigger: UiActionsStart['executeTriggerActions'],
     private readonly overlays: CoreStart['overlays']
   ) {}
 

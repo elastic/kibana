@@ -48,6 +48,8 @@ export {
   // Should probably be removed
   SO_SEARCH_LIMIT,
   // Statuses
+  // Authz
+  ENDPOINT_PRIVILEGES,
 } from './constants';
 export {
   // Route services

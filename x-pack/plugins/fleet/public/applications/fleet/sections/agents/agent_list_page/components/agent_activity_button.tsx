@@ -27,55 +27,52 @@ export const AgentActivityButton: React.FC<{
     setAgentActivityTourState(showAgentActivityTour);
   }, [showAgentActivityTour, setAgentActivityTourState]);
 
-  const button = (
-    <EuiButtonEmpty
-      onClick={() => {
-        onClickAgentActivity();
-        setAgentActivityTourState({ isOpen: false });
-      }}
-      data-test-subj="agentActivityButton"
-      iconType="clock"
-    >
-      <FormattedMessage
-        id="xpack.fleet.agentList.agentActivityButton"
-        defaultMessage="Agent activity"
-      />
-    </EuiButtonEmpty>
-  );
-
   const onFinish = () => {
     setAgentActivityTourState({ isOpen: false });
     setTourAsHidden();
   };
 
-  return isTourHidden ? (
-    button
-  ) : (
-    <EuiTourStep
-      content={
-        <EuiText>
+  return (
+    <>
+      <EuiTourStep
+        content={
+          <EuiText>
+            <FormattedMessage
+              id="xpack.fleet.agentActivityButton.tourContent"
+              defaultMessage="Review in progress, completed, and scheduled agent action activity history here anytime."
+            />
+          </EuiText>
+        }
+        isStepOpen={!isTourHidden && agentActivityTourState.isOpen}
+        onFinish={onFinish}
+        minWidth={360}
+        maxWidth={360}
+        step={1}
+        stepsTotal={1}
+        title={
           <FormattedMessage
-            id="xpack.fleet.agentActivityButton.tourContent"
-            defaultMessage="Review in progress, completed, and scheduled agent action activity history here anytime."
+            id="xpack.fleet.agentActivityButton.tourTitle"
+            defaultMessage="Agent activity history"
           />
-        </EuiText>
-      }
-      isStepOpen={agentActivityTourState.isOpen}
-      onFinish={onFinish}
-      minWidth={360}
-      maxWidth={360}
-      step={1}
-      stepsTotal={1}
-      title={
+        }
+        anchorPosition="upCenter"
+        footerAction={<EuiButtonEmpty onClick={onFinish}>OK</EuiButtonEmpty>}
+        anchor="#agentActivityButton"
+      />
+      <EuiButtonEmpty
+        onClick={() => {
+          onClickAgentActivity();
+          setAgentActivityTourState({ isOpen: false });
+        }}
+        data-test-subj="agentActivityButton"
+        iconType="clock"
+        id="agentActivityButton"
+      >
         <FormattedMessage
-          id="xpack.fleet.agentActivityButton.tourTitle"
-          defaultMessage="Agent activity history"
+          id="xpack.fleet.agentList.agentActivityButton"
+          defaultMessage="Agent activity"
         />
-      }
-      anchorPosition="upCenter"
-      footerAction={<EuiButtonEmpty onClick={onFinish}>OK</EuiButtonEmpty>}
-    >
-      {button}
-    </EuiTourStep>
+      </EuiButtonEmpty>
+    </>
   );
 };

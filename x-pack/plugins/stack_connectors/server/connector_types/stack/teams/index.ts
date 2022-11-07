@@ -6,13 +6,12 @@
  */
 
 import { URL } from 'url';
-import { curry, isString } from 'lodash';
+import { isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -59,7 +58,7 @@ const ParamsSchema = schema.object({
 
 export const ConnectorTypeId = '.teams';
 // connector type definition
-export function getConnectorType({ logger }: { logger: Logger }): TeamsConnectorType {
+export function getConnectorType(): TeamsConnectorType {
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
@@ -80,7 +79,7 @@ export function getConnectorType({ logger }: { logger: Logger }): TeamsConnector
         schema: ParamsSchema,
       },
     },
-    executor: curry(teamsExecutor)({ logger }),
+    executor: teamsExecutor,
   };
 }
 
@@ -117,13 +116,9 @@ function validateConnectorTypeConfig(
 // action executor
 
 async function teamsExecutor(
-  { logger }: { logger: Logger },
   execOptions: TeamsConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const actionId = execOptions.actionId;
-  const secrets = execOptions.secrets;
-  const params = execOptions.params;
-  const configurationUtilities = execOptions.configurationUtilities;
+  const { actionId, secrets, params, configurationUtilities, logger } = execOptions;
   const { webhookUrl } = secrets;
   const { message } = params;
   const data = { text: message };
@@ -140,6 +135,10 @@ async function teamsExecutor(
       configurationUtilities,
     })
   );
+
+  if (result == null) {
+    return errorResultUnexpectedNullResponse(actionId);
+  }
 
   if (isOk(result)) {
     const {
@@ -208,6 +207,17 @@ function errorResultInvalid(
     message: errMessage,
     actionId,
     serviceMessage,
+  };
+}
+
+function errorResultUnexpectedNullResponse(actionId: string): ConnectorTypeExecutorResult<void> {
+  const message = i18n.translate('xpack.stackConnectors.teams.unexpectedNullResponseErrorMessage', {
+    defaultMessage: 'unexpected null response from Microsoft Teams',
+  });
+  return {
+    status: 'error',
+    actionId,
+    message,
   };
 }
 

@@ -18,15 +18,15 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { isEqual } from 'lodash/fp';
-import * as i18n from '../../tags/translations';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   Form,
   FormDataProvider,
   useForm,
   getUseField,
-  Field,
-  FormSchema,
-} from '../../../common/shared_imports';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import * as i18n from '../../tags/translations';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { Tags } from '../../tags/tags';
 import { useCasesContext } from '../../cases_context/use_cases_context';

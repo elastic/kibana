@@ -82,7 +82,7 @@ export function makeFtrConfigProvider(
       kbnTestServer: {
         ...baseConfig.kbnTestServer,
         // delay shutdown by 15 seconds to ensure that APM can report the data it collects during test execution
-        delayShutdown: 15_000,
+        delayShutdown: process.env.TEST_PERFORMANCE_PHASE === 'TEST' ? 15_000 : 0,
 
         serverArgs: [
           ...baseConfig.kbnTestServer.serverArgs,
@@ -117,6 +117,9 @@ export function makeFtrConfigProvider(
             journeyName: config.getName(),
             ftrConfig: config.getRepoRelPath(),
             performancePhase: process.env.TEST_PERFORMANCE_PHASE,
+            branch: process.env.BUILDKITE_BRANCH,
+            gitRev: process.env.BUILDKITE_COMMIT,
+            ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
           })
             .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
             .join(','),

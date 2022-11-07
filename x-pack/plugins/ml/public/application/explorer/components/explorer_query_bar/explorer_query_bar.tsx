@@ -113,8 +113,17 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
 }) => {
   const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
   const { services } = useMlKibana();
-  const { unifiedSearch, data, storage, appName, notifications, http, docLinks, uiSettings } =
-    services;
+  const {
+    unifiedSearch,
+    data,
+    storage,
+    appName,
+    notifications,
+    http,
+    docLinks,
+    uiSettings,
+    dataViews,
+  } = services;
 
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(
@@ -171,7 +180,16 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
           dataTestSubj="explorerQueryInput"
           languageSwitcherPopoverAnchorPosition="rightDown"
           appName={appName}
-          deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
+          deps={{
+            unifiedSearch,
+            notifications,
+            http,
+            docLinks,
+            uiSettings,
+            data,
+            storage,
+            dataViews,
+          }}
         />
       }
       isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}

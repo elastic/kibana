@@ -176,6 +176,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           ) : null}
           {Object.keys(otherDays).map((day) => (
             <ActivitySection
+              key={day}
               title={<FormattedDate value={day} year="numeric" month="short" day="2-digit" />}
               actions={otherDays[day]}
               abortUpgrade={abortUpgrade}
@@ -215,9 +216,13 @@ const ActivitySection: React.FunctionComponent<{
       </EuiPanel>
       {actions.map((currentAction) =>
         currentAction.type === 'UPGRADE' && currentAction.status === 'IN_PROGRESS' ? (
-          <UpgradeInProgressActivityItem action={currentAction} abortUpgrade={abortUpgrade} />
+          <UpgradeInProgressActivityItem
+            action={currentAction}
+            abortUpgrade={abortUpgrade}
+            key={currentAction.actionId}
+          />
         ) : (
-          <ActivityItem action={currentAction} />
+          <ActivityItem action={currentAction} key={currentAction.actionId} />
         )
       )}
     </>
@@ -243,9 +248,31 @@ const actionNames: {
     completedText: 'force unenrolled',
     cancelledText: 'force unenrollment',
   },
+  UPDATE_TAGS: {
+    inProgressText: 'Updating tags of',
+    completedText: 'updated tags',
+    cancelledText: 'update tags',
+  },
   CANCEL: { inProgressText: 'Cancelling', completedText: 'cancelled', cancelledText: '' },
+  SETTINGS: {
+    inProgressText: 'Updating settings of',
+    completedText: 'updated settings',
+    cancelledText: 'update settings',
+  },
+  POLICY_CHANGE: {
+    inProgressText: 'Changing policy of',
+    completedText: 'changed policy',
+    cancelledText: 'change policy',
+  },
+  INPUT_ACTION: {
+    inProgressText: 'Input action in progress of',
+    completedText: 'input action completed',
+    cancelledText: 'input action',
+  },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
+
+const getAction = (type?: string) => actionNames[type ?? 'ACTION'] ?? actionNames.ACTION;
 
 const inProgressTitleColor = '#0077CC';
 
@@ -265,13 +292,13 @@ const inProgressTitle = (action: ActionStatus) => (
     defaultMessage="{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}"
     values={{
       nbAgents:
-        action.nbAgentsAck === action.nbAgentsActioned
+        action.nbAgentsAck >= action.nbAgentsActioned
           ? action.nbAgentsAck
           : action.nbAgentsAck === 0
           ? action.nbAgentsActioned
           : action.nbAgentsActioned - action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
       agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
-      inProgressText: actionNames[action.type ?? 'ACTION'].inProgressText,
+      inProgressText: getAction(action.type).inProgressText,
       reassignText:
         action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
       upgradeText: action.type === 'UPGRADE' ? `to version ${action.version}` : '',
@@ -301,7 +328,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
               ? action.nbAgentsAck
               : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
           agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
-          completedText: actionNames[action.type ?? 'ACTION'].completedText,
+          completedText: getAction(action.type).completedText,
         }}
       />
     </EuiText>
@@ -362,7 +389,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
           <p>
             <FormattedMessage
               id="xpack.fleet.agentActivityFlyout.failureDescription"
-              defaultMessage=" A problem occured during this operation."
+              defaultMessage=" A problem occurred during this operation."
             />
             &nbsp;
             {inProgressDescription(action.creationTime)}
@@ -379,7 +406,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
             id="xpack.fleet.agentActivityFlyout.cancelledTitle"
             defaultMessage="Agent {cancelledText} cancelled"
             values={{
-              cancelledText: actionNames[action.type ?? 'ACTION'].cancelledText,
+              cancelledText: getAction(action.type).cancelledText,
             }}
           />
         </EuiText>
@@ -405,7 +432,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
             id="xpack.fleet.agentActivityFlyout.expiredTitle"
             defaultMessage="Agent {expiredText} expired"
             values={{
-              expiredText: actionNames[action.type ?? 'ACTION'].cancelledText,
+              expiredText: getAction(action.type).cancelledText,
             }}
           />
         </EuiText>
@@ -431,14 +458,19 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
           <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
             <EuiFlexItem grow={false}>{displayByStatus[action.status].icon}</EuiFlexItem>
             <EuiFlexItem>
-              <EuiText color={displayByStatus[action.status].titleColor}>
+              <EuiText
+                color={displayByStatus[action.status].titleColor}
+                data-test-subj="statusTitle"
+              >
                 {displayByStatus[action.status].title}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText color="subdued">{displayByStatus[action.status].description}</EuiText>
+          <EuiText color="subdued" data-test-subj="statusDescription">
+            {displayByStatus[action.status].description}
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
@@ -479,7 +511,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               {isScheduled ? <EuiIcon type="clock" /> : <EuiLoadingSpinner size="m" />}
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText color={inProgressTitleColor}>
+              <EuiText color={inProgressTitleColor} data-test-subj="upgradeInProgressTitle">
                 {isScheduled && action.startTime ? (
                   <FormattedMessage
                     id="xpack.fleet.agentActivityFlyout.scheduleTitle"
@@ -499,7 +531,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
         <EuiFlexItem>
           <EuiFlexGroup direction="column" alignItems="flexStart">
             <EuiFlexItem>
-              <EuiText color="subdued">
+              <EuiText color="subdued" data-test-subj="upgradeInProgressDescription">
                 <p>
                   {isScheduled && action.startTime ? (
                     <>
@@ -534,7 +566,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                 size="s"
                 onClick={onClickAbortUpgrade}
                 isLoading={isAborting}
-                data-test-subj="currentBulkUpgrade.abortBtn"
+                data-test-subj="abortBtn"
               >
                 <FormattedMessage
                   id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"

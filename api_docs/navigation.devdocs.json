@@ -19,10 +19,10 @@
           },
           " implements ",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -70,10 +70,10 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -96,10 +96,10 @@
             "signature": [
               "(core: ",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>) => ",
@@ -124,10 +124,10 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -150,10 +150,10 @@
             "signature": [
               "(core: ",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ", { unifiedSearch }: ",
@@ -180,10 +180,10 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -700,7 +700,7 @@
           },
           "[] | undefined; badges?: (",
           "EuiBadgeProps",
-          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
+          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
@@ -709,7 +709,13 @@
             "text": "UnifiedSearchPublicPluginStart"
           },
           " | undefined; className?: string | undefined; visible?: boolean | undefined; setMenuMountPoint?: ((menuMount: ",
-          "MountPoint",
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-common.MountPoint",
+            "text": "MountPoint"
+          },
           "<HTMLElement> | undefined) => void) | undefined; }"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
@@ -795,7 +801,13 @@
               "text": "TopNavMenuProps"
             },
             "<",
-            "Query",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.Query",
+              "text": "Query"
+            },
             ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; AggregateQueryTopNavMenu: (props: ",
             {
               "pluginId": "navigation",
@@ -805,7 +817,13 @@
               "text": "TopNavMenuProps"
             },
             "<",
-            "AggregateQuery",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.AggregateQuery",
+              "text": "AggregateQuery"
+            },
             ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
           ],
           "path": "src/plugins/navigation/public/types.ts",

@@ -44,7 +44,7 @@ export const getColumns = ({
   eventId,
   onUpdateColumns,
   contextId,
-  timelineId,
+  scopeId,
   toggleColumn,
   getLinkValue,
   isDraggable,
@@ -55,7 +55,7 @@ export const getColumns = ({
   eventId: string;
   onUpdateColumns: OnUpdateColumns;
   contextId: string;
-  timelineId: string;
+  scopeId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   getLinkValue: (field: string) => string | null;
   isDraggable?: boolean;
@@ -90,7 +90,7 @@ export const getColumns = ({
                 fieldFromBrowserField={fieldFromBrowserField}
                 getLinkValue={getLinkValue}
                 toggleColumn={toggleColumn}
-                timelineId={timelineId}
+                scopeId={scopeId}
                 values={values}
               />
             );

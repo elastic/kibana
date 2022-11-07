@@ -5,54 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
 import { sortBy } from 'lodash';
-import { i18n } from '@kbn/i18n';
 
-import { UpdatedAtField } from './components';
 import type { State, UserContentCommonSchema } from './table_list_view';
 import type { Action } from './actions';
-import type { Services } from './services';
 
-interface Dependencies {
-  DateFormatterComp: Services['DateFormatterComp'];
-}
-
-function onInitialItemsFetch<T extends UserContentCommonSchema>(
-  items: T[],
-  { DateFormatterComp }: Dependencies
-) {
-  // We check if the saved object have the "updatedAt" metadata
-  // to render or not that column in the table
-  const hasUpdatedAtMetadata = Boolean(items.find((item) => Boolean(item.updatedAt)));
-
-  if (hasUpdatedAtMetadata) {
-    // Add "Last update" column and sort by that column initially
-    return {
-      tableSort: {
-        field: 'updatedAt' as keyof T,
-        direction: 'desc' as const,
-      },
-      tableColumns: [
-        {
-          field: 'updatedAt',
-          name: i18n.translate('contentManagement.tableList.lastUpdatedColumnTitle', {
-            defaultMessage: 'Last updated',
-          }),
-          render: (field: string, record: { updatedAt?: string }) => (
-            <UpdatedAtField dateTime={record.updatedAt} DateFormatterComp={DateFormatterComp} />
-          ),
-          sortable: true,
-          width: '150px',
-        },
-      ],
-    };
-  }
-
-  return {};
-}
-
-export function getReducer<T extends UserContentCommonSchema>({ DateFormatterComp }: Dependencies) {
+export function getReducer<T extends UserContentCommonSchema>() {
   return (state: State<T>, action: Action<T>): State<T> => {
     switch (action.type) {
       case 'onFetchItems': {
@@ -63,11 +21,20 @@ export function getReducer<T extends UserContentCommonSchema>({ DateFormatterCom
       }
       case 'onFetchItemsSuccess': {
         const items = action.data.response.hits;
-        // We only get the state on the initial fetch of items
-        // After that we don't want to reset the columns or change the sort after fetching
-        const { tableColumns, tableSort } = state.hasInitialFetchReturned
-          ? { tableColumns: undefined, tableSort: undefined }
-          : onInitialItemsFetch(items, { DateFormatterComp });
+        let tableSort;
+        let hasUpdatedAtMetadata = state.hasUpdatedAtMetadata;
+
+        if (!state.hasInitialFetchReturned) {
+          // We only get the state on the initial fetch of items
+          // After that we don't want to reset the columns or change the sort after fetching
+          hasUpdatedAtMetadata = Boolean(items.find((item) => Boolean(item.updatedAt)));
+          if (hasUpdatedAtMetadata) {
+            tableSort = {
+              field: 'updatedAt' as const,
+              direction: 'desc' as const,
+            };
+          }
+        }
 
         return {
           ...state,
@@ -75,9 +42,7 @@ export function getReducer<T extends UserContentCommonSchema>({ DateFormatterCom
           isFetchingItems: false,
           items: !state.searchQuery ? sortBy<T>(items, 'title') : items,
           totalItems: action.data.response.total,
-          tableColumns: tableColumns
-            ? [...state.tableColumns, ...tableColumns]
-            : state.tableColumns,
+          hasUpdatedAtMetadata,
           tableSort: tableSort ?? state.tableSort,
           pagination: {
             ...state.pagination,
@@ -102,7 +67,7 @@ export function getReducer<T extends UserContentCommonSchema>({ DateFormatterCom
         };
       }
       case 'onTableChange': {
-        const tableSort = action.data.sort ?? state.tableSort;
+        const tableSort = (action.data.sort as State['tableSort']) ?? state.tableSort;
         return {
           ...state,
           pagination: {
@@ -111,6 +76,12 @@ export function getReducer<T extends UserContentCommonSchema>({ DateFormatterCom
             pageSize: action.data.page.size,
           },
           tableSort,
+        };
+      }
+      case 'onTableSortChange': {
+        return {
+          ...state,
+          tableSort: action.data,
         };
       }
       case 'showConfirmDeleteItemsModal': {

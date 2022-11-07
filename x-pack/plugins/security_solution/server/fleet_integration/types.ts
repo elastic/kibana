@@ -18,12 +18,6 @@ export interface PolicyCreateEventFilters {
 
 export interface PolicyCreateCloudConfig {
   type: 'cloud';
-  cloudConfig: {
-    preventions: {
-      malware: boolean;
-      behavior_protection: boolean;
-    };
-  };
   eventFilters?: PolicyCreateEventFilters;
 }
 

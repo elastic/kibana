@@ -109,13 +109,13 @@ describe('Service Overview', () => {
       cy.contains('opbeans-node');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
-      cy.get('[data-test-subj="latencyChart"]');
-      cy.get('[data-test-subj="throughput"]');
-      cy.get('[data-test-subj="transactionsGroupTable"]');
-      cy.get('[data-test-subj="serviceOverviewErrorsTable"]');
-      cy.get('[data-test-subj="dependenciesTable"]');
-      cy.get('[data-test-subj="instancesLatencyDistribution"]');
-      cy.get('[data-test-subj="serviceOverviewInstancesTable"]');
+      cy.getByTestSubj('latencyChart');
+      cy.getByTestSubj('throughput');
+      cy.getByTestSubj('transactionsGroupTable');
+      cy.getByTestSubj('serviceOverviewErrorsTable');
+      cy.getByTestSubj('dependenciesTable');
+      cy.getByTestSubj('instancesLatencyDistribution');
+      cy.getByTestSubj('serviceOverviewInstancesTable');
     });
   });
 
@@ -134,17 +134,17 @@ describe('Service Overview', () => {
 
       cy.wait('@transactionTypesRequest');
 
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+      cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
         'request'
       );
-      cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+      cy.getByTestSubj('headerFilterTransactionType').select('Worker');
+      cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
         'Worker'
       );
       cy.contains('Transactions').click();
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+      cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
         'Worker'
       );
@@ -159,18 +159,18 @@ describe('Service Overview', () => {
       cy.visitKibana(baseUrl);
 
       cy.wait('@transactionTypesRequest');
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+      cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
         'request'
       );
-      cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+      cy.getByTestSubj('headerFilterTransactionType').select('Worker');
+      cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
         'Worker'
       );
 
       cy.contains('View transactions').click();
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+      cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
         'Worker'
       );
@@ -226,7 +226,7 @@ describe('Service Overview', () => {
         'suggestionsRequest'
       );
 
-      cy.get('[data-test-subj="environmentFilter"] input').type('production', {
+      cy.getByTestSubj('environmentFilter').find('input').type('production', {
         force: true,
       });
 
@@ -235,9 +235,7 @@ describe('Service Overview', () => {
         value: 'fieldValue=production',
       });
 
-      cy.get(
-        '[data-test-subj="comboBoxOptionsList environmentFilter-optionsList"]'
-      )
+      cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
         .contains('production')
         .click({ force: true });
 
@@ -271,11 +269,11 @@ describe('Service Overview', () => {
     });
 
     it('when selecting a different comparison window', () => {
-      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
+      cy.getByTestSubj('comparisonSelect').should('have.value', '1d');
 
       // selects another comparison type
-      cy.get('[data-test-subj="comparisonSelect"]').select('1w');
-      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1w');
+      cy.getByTestSubj('comparisonSelect').select('1w');
+      cy.getByTestSubj('comparisonSelect').should('have.value', '1w');
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNamesWithComparison,
         value: 'offset',

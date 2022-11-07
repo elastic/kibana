@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { UserProfile } from '@kbn/security-plugin/common';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { UserProfile } from '@kbn/security-plugin/common';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
-import { ServerError } from '../../types';
-import { USER_PROFILES_CACHE_KEY, USER_PROFILES_GET_CURRENT_CACHE_KEY } from '../constants';
+import type { ServerError } from '../../types';
+import { casesQueriesKeys } from '../constants';
 import { getCurrentUserProfile } from './api';
 
 export const useGetCurrentUserProfile = () => {
@@ -19,7 +20,7 @@ export const useGetCurrentUserProfile = () => {
   const toasts = useToasts();
 
   return useQuery<UserProfile, ServerError>(
-    [USER_PROFILES_CACHE_KEY, USER_PROFILES_GET_CURRENT_CACHE_KEY],
+    casesQueriesKeys.currentUser(),
     () => {
       return getCurrentUserProfile({ security });
     },

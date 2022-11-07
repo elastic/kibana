@@ -1317,6 +1317,12 @@ export class TimeSeriesExplorer extends React.Component {
             tableData={tableData}
             filter={this.tableFilter}
             sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+            selectedJobs={[
+              {
+                id: selectedJob.job_id,
+                modelPlotEnabled,
+              },
+            ]}
           />
         )}
       </TimeSeriesExplorerPage>

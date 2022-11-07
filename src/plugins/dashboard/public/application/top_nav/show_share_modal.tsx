@@ -8,29 +8,30 @@
 
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
+import { omit } from 'lodash';
 
-import { EuiCheckboxGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiCheckboxGroup } from '@elastic/eui';
+import { QueryState } from '@kbn/data-plugin/common';
 import type { Capabilities } from '@kbn/core/public';
-import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 
-import type { DashboardSavedObject } from '../..';
-import { shareModalStrings } from '../../dashboard_strings';
-import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
 import type { DashboardState } from '../../types';
 import { dashboardUrlParams } from '../dashboard_router';
-import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
-import { convertPanelMapToSavedPanels } from '../lib/convert_dashboard_panels';
+import { shareModalStrings } from '../../dashboard_strings';
+import { convertPanelMapToSavedPanels } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
+import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
+import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 
 const showFilterBarId = 'showFilterBar';
 
 export interface ShowShareModalProps {
   isDirty: boolean;
   anchorElement: HTMLElement;
-  savedDashboard: DashboardSavedObject;
   currentDashboardState: DashboardState;
 }
 
@@ -45,7 +46,6 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 export function ShowShareModal({
   isDirty,
   anchorElement,
-  savedDashboard,
   currentDashboardState,
 }: ShowShareModalProps) {
   const {
@@ -58,6 +58,7 @@ export function ShowShareModal({
         },
       },
     },
+    initializerContext: { kibanaVersion },
     share: { toggleShareContextMenu },
   } = pluginServices.getServices();
 
@@ -124,7 +125,9 @@ export function ShowShareModal({
     DashboardAppLocatorParams,
     'options' | 'query' | 'savedQuery' | 'filters' | 'panels' | 'controlGroupInput'
   > = {};
-  const unsavedDashboardState = dashboardSessionStorage.getState(savedDashboard.id);
+  const { savedObjectId, title } = currentDashboardState;
+  const unsavedDashboardState = dashboardSessionStorage.getState(savedObjectId);
+
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
@@ -133,13 +136,16 @@ export function ShowShareModal({
       savedQuery: unsavedDashboardState.savedQuery,
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels
-        ? convertPanelMapToSavedPanels(unsavedDashboardState.panels)
+        ? (convertPanelMapToSavedPanels(
+            unsavedDashboardState.panels,
+            kibanaVersion
+          ) as DashboardAppLocatorParams['panels'])
         : undefined,
     };
   }
 
   const locatorParams: DashboardAppLocatorParams = {
-    dashboardId: savedDashboard.id,
+    dashboardId: savedObjectId,
     preserveSavedFilters: true,
     refreshInterval: undefined, // We don't share refresh interval externally
     viewMode: ViewMode.VIEW, // For share locators we always load the dashboard in view mode
@@ -148,24 +154,30 @@ export function ShowShareModal({
     ...unsavedStateForLocator,
   };
 
+  let _g = getStateFromKbnUrl<QueryState>('_g', window.location.href);
+  if (_g?.filters && _g.filters.length === 0) {
+    _g = omit(_g, 'filters');
+  }
+  const baseUrl = setStateToKbnUrl('_g', _g);
+
+  const shareableUrl = setStateToKbnUrl(
+    '_a',
+    stateToRawDashboardState({ state: unsavedDashboardState ?? {} }),
+    { useHash: false, storeInHashQuery: true },
+    unhashUrl(baseUrl)
+  );
+
   toggleShareContextMenu({
     isDirty,
     anchorElement,
     allowEmbed: true,
     allowShortUrl,
-    shareableUrl: setStateToKbnUrl(
-      '_a',
-      stateToRawDashboardState({
-        state: currentDashboardState,
-      }),
-      { useHash: false, storeInHashQuery: true },
-      unhashUrl(window.location.href)
-    ),
-    objectId: savedDashboard.id,
+    shareableUrl,
+    objectId: savedObjectId,
     objectType: 'dashboard',
     sharingData: {
       title:
-        savedDashboard.title ||
+        title ||
         i18n.translate('dashboard.share.defaultDashboardTitle', {
           defaultMessage: 'Dashboard [{date}]',
           values: { date: moment().toISOString(true) },
@@ -182,5 +194,8 @@ export function ShowShareModal({
       },
     ],
     showPublicUrlSwitch,
+    snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
+      ? shareModalStrings.getSnapshotShareWarning()
+      : undefined,
   });
 }

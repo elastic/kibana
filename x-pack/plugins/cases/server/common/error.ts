@@ -6,7 +6,7 @@
  */
 
 import { Boom, isBoom } from '@hapi/boom';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 export interface HTTPError extends Error {
   statusCode: number;

@@ -9,11 +9,11 @@ import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS } from '@kbn/rule-data-utils';
-import { AlertStatusFilterButton } from '../../../../common/typings';
+import { AlertStatus } from '../../../../common/typings';
 import { AlertStatusFilter } from '../../../../common/typings';
 
 export interface AlertStatusFilterProps {
-  status: AlertStatusFilterButton;
+  status: AlertStatus;
   onChange: (id: string, value: string) => void;
 }
 
@@ -39,6 +39,11 @@ export const RECOVERED_ALERTS: AlertStatusFilter = {
   label: i18n.translate('xpack.observability.alerts.alertStatusFilter.recovered', {
     defaultMessage: 'Recovered',
   }),
+};
+
+export const ALERT_STATUS_QUERY = {
+  [ACTIVE_ALERTS.status]: ACTIVE_ALERTS.query,
+  [RECOVERED_ALERTS.status]: RECOVERED_ALERTS.query,
 };
 
 const options: EuiButtonGroupOptionProps[] = [

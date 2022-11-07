@@ -19,9 +19,14 @@ type Props = {
   onSeekLine(line: number): void;
 };
 
+export enum TTYPlayerLineMarkerType {
+  ProcessChanged = 'process_changed',
+  ProcessDataLimitReached = 'data_limited',
+}
+
 type TTYPlayerLineMarker = {
   line: number;
-  type: 'output' | 'data_limited';
+  type: TTYPlayerLineMarkerType;
   name: string;
 };
 
@@ -32,7 +37,10 @@ export const TTYPlayerControlsMarkers = ({
   onChange,
   onSeekLine,
 }: Props) => {
-  const progress = useMemo(() => (currentLine / linesLength) * 100, [currentLine, linesLength]);
+  const progress = useMemo(
+    () => (currentLine / (linesLength - 1)) * 100,
+    [currentLine, linesLength]
+  );
 
   const styles = useStyles(progress);
 
@@ -41,10 +49,11 @@ export const TTYPlayerControlsMarkers = ({
       return [];
     }
     return processStartMarkers.map(
-      ({ event, line }) =>
+      ({ event, line, maxBytesExceeded }) =>
         ({
-          type:
-            event.process?.io?.max_bytes_per_process_exceeded === true ? 'data_limited' : 'output',
+          type: maxBytesExceeded
+            ? TTYPlayerLineMarkerType.ProcessDataLimitReached
+            : TTYPlayerLineMarkerType.ProcessChanged,
           line,
           name: event.process?.name,
         } as TTYPlayerLineMarker)
@@ -90,7 +99,7 @@ export const TTYPlayerControlsMarkers = ({
           // markers positions are absolute, setting higher z-index on the selected one in case there
           // are severals next to each other
           const markerWrapperPositioning = {
-            left: `${(line / linesLength) * 100}%`,
+            left: `${(line / (linesLength - 1)) * 100}%`,
             zIndex: selected ? 3 : 2,
           };
 

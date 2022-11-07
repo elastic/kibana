@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type React from 'react';
+import type { AlertEcsData } from '../../common/contexts';
 
 export interface OsqueryActionResultsProps {
   agentIds?: string[];
   ruleName?: string[];
   alertId: string;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  ecsData: AlertEcsData;
 }

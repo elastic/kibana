@@ -6,16 +6,38 @@
  */
 
 /**
+ * Endpoint permissions derived from Kibana capabilities and privileges
+ */
+export interface EndpointPermissions {
+  /** if user has write permissions to the security solution app */
+  canWriteSecuritySolution: boolean;
+  /** if user has read permissions to the security solution app */
+  canReadSecuritySolution: boolean;
+}
+
+/**
  * Set of Endpoint Specific privileges that control application authorization. This interface is
  * used both on the client and server for consistency
  */
-export interface EndpointAuthz {
+export interface EndpointAuthz extends EndpointPermissions {
   /** If user has permissions to access Fleet */
   canAccessFleet: boolean;
   /** If user has permissions to access Endpoint management (includes check to ensure they also have access to fleet) */
   canAccessEndpointManagement: boolean;
   /** if user has permissions to create Artifacts by Policy */
   canCreateArtifactsByPolicy: boolean;
+  /** if user has write permissions to endpoint list */
+  canWriteEndpointList: boolean;
+  /** if user has read permissions to endpoint list */
+  canReadEndpointList: boolean;
+  /** if user has write permissions for policy management */
+  canWritePolicyManagement: boolean;
+  /** if user has read permissions for policy management */
+  canReadPolicyManagement: boolean;
+  /** if user has write permissions for actions log management */
+  canWriteActionsLogManagement: boolean;
+  /** if user has read permissions for actions log management */
+  canReadActionsLogManagement: boolean;
   /** If user has permissions to isolate hosts */
   canIsolateHost: boolean;
   /** If user has permissions to un-isolate (release) hosts */
@@ -28,6 +50,24 @@ export interface EndpointAuthz {
   canGetRunningProcesses: boolean;
   /** If user has permissions to use the Response Actions Console */
   canAccessResponseConsole: boolean;
+  /** If user has write permissions to use file operations */
+  canWriteFileOperations: boolean;
+  /** if user has write permissions for trusted applications */
+  canWriteTrustedApplications: boolean;
+  /** if user has read permissions for trusted applications */
+  canReadTrustedApplications: boolean;
+  /** if user has write permissions for host isolation exceptions */
+  canWriteHostIsolationExceptions: boolean;
+  /** if user has read permissions for host isolation exceptions */
+  canReadHostIsolationExceptions: boolean;
+  /** if user has write permissions for blocklist entries */
+  canWriteBlocklist: boolean;
+  /** if user has read permissions for blocklist entries */
+  canReadBlocklist: boolean;
+  /** if user has write permissions for event filters */
+  canWriteEventFilters: boolean;
+  /** if user has read permissions for event filters */
+  canReadEventFilters: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;

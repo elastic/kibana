@@ -475,6 +475,7 @@ export class JobCreator {
   }
 
   public get queryDelay(): string | null {
+    // @ts-expect-error `estypes.Duration = string | -1 | 0;`
     return this._datafeed_config.query_delay || null;
   }
 
@@ -487,6 +488,7 @@ export class JobCreator {
   }
 
   public get frequency(): string | null {
+    // @ts-expect-error `estypes.Duration = string | -1 | 0;`
     return this._datafeed_config.frequency || null;
   }
 

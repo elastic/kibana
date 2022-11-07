@@ -6,10 +6,12 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { CaseAttachmentsWithoutOwner } from '../../types';
-import {
+import type { CaseAttachmentsWithoutOwner } from '../../types';
+import type {
   StartAddAttachmentToExistingCaseTransaction,
   StartCreateCaseWithAttachmentsTransaction,
+} from './use_cases_transactions';
+import {
   useAddAttachmentToExistingCaseTransaction,
   useCreateCaseWithAttachmentsTransaction,
 } from './use_cases_transactions';

@@ -51,6 +51,9 @@ export function getBeforeSetup(
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
   taskManager.runSoon.mockResolvedValue({ id: '' });
+  taskManager.bulkRemoveIfExist.mockResolvedValue({
+    statuses: [{ id: 'taskId', type: 'alert', success: true }],
+  });
   const actionsClient = actionsClientMock.create();
 
   actionsClient.getBulk.mockResolvedValueOnce([

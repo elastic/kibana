@@ -25,6 +25,7 @@ __tmp__
 
 # Ignore example plugin builds
 /examples/*/build
+/x-pack/examples/*/build
 
 # Ignore certain functional test runner artifacts
 /test/*/failure_debug
@@ -78,6 +79,12 @@ npm-debug.log*
 ## @cypress/snapshot from apm plugin
 /snapshots.js
 
+# transpiled cypress config
+x-pack/plugins/fleet/cypress.config.d.ts
+x-pack/plugins/fleet/cypress.config.js
+x-pack/plugins/osquery/cypress.config.d.ts
+x-pack/plugins/osquery/cypress.config.js
+
 # release notes script output
 report.csv
 report.asciidoc
@@ -87,6 +94,8 @@ report.asciidoc
 
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
+tsconfig.base.type_check.json
+tsconfig.type_check.json
 
 # Yarn local mirror content
 .yarn-local-mirror

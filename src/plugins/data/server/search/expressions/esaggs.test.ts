@@ -51,6 +51,7 @@ describe('esaggs expression function - server', () => {
     metricsAtAllLevels: true,
     partialRows: false,
     timeFields: ['@timestamp', 'utc_time'],
+    probability: 1,
   };
 
   beforeEach(() => {

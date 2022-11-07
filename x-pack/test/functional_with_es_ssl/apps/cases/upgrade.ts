@@ -18,6 +18,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const toasts = getService('toasts');
 
   const updateConnector = async (id: string, req: Record<string, unknown>) => {
     const { body: connector } = await supertest
@@ -74,6 +75,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Case view page', function () {
+      it('does not show any error toasters', async () => {
+        expect(await toasts.getToastCount()).to.be(0);
+      });
+
       it('shows the title correctly', async () => {
         const title = await testSubjects.find('header-page-title');
         expect(await title.getVisibleText()).equal('Upgrade test in Kibana');
@@ -274,6 +279,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the add comment button', async () => {
         await testSubjects.exists('submit-comment');
+      });
+
+      it('shows the assignees section', async () => {
+        await testSubjects.exists('case-view-assignees');
       });
     });
   });

@@ -17,8 +17,8 @@ import {
   EuiIconTip,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { Case } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import type { Case } from '../../../common/ui/types';
+import type { CaseStatuses } from '../../../common/api';
 import * as i18n from '../case_view/translations';
 import { Actions } from './actions';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
@@ -107,7 +107,8 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                   <EuiDescriptionListDescription>
                     <StatusContextMenu
                       currentStatus={caseData.status}
-                      disabled={!permissions.update || isLoading}
+                      disabled={!permissions.update}
+                      isLoading={isLoading}
                       onStatusChanged={onStatusChanged}
                     />
                   </EuiDescriptionListDescription>

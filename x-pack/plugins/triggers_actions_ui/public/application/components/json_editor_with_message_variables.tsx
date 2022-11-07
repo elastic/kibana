@@ -148,6 +148,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
 
   return (
     <EuiFormRow
+      data-test-subj="actionJsonEditor"
       fullWidth
       error={errors}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}

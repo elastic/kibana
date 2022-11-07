@@ -66,6 +66,31 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.ElasticsearchClientConfig.maxIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxIdleSockets",
+            "description": [],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.ElasticsearchClientConfig.idleSocketTimeout",
+            "type": "Object",
+            "tags": [],
+            "label": "idleSocketTimeout",
+            "description": [],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
             "id": "def-server.ElasticsearchClientConfig.compression",
             "type": "boolean",
             "tags": [],
@@ -616,7 +641,28 @@
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
             "deprecated": true,
             "trackAdoption": false,
-            "references": []
+            "references": [
+              {
+                "plugin": "@kbn/core-elasticsearch-server-internal",
+                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/plugins/console/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/core-elasticsearch-server-internal",
+                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_service.test.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1053,17 +1099,15 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
-              "default",
-              "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -2254,6 +2298,35 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.IElasticsearchConfig.maxIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxIdleSockets",
+            "description": [
+              "\nThe maximum number of idle sockets to keep open between Kibana and Elasticsearch. If more sockets become idle, they will be closed."
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.IElasticsearchConfig.idleSocketTimeout",
+            "type": "Object",
+            "tags": [],
+            "label": "idleSocketTimeout",
+            "description": [
+              "\nThe timeout for idle sockets kept open between Kibana and Elasticsearch. If the socket is idle for longer than this timeout, it will be closed."
+            ],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
             "id": "def-server.IElasticsearchConfig.compression",
             "type": "boolean",
             "tags": [],
@@ -2669,17 +2742,15 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
-              "default",
-              "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -3873,17 +3944,15 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
-              "default",
-              "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -4962,7 +5031,13 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
@@ -5324,17 +5399,15 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "UpdateResponse",
-          "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+          "<TDocumentR>>; }; asyncSearch: ",
+          "default",
+          "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
           "default",
           "; helpers: ",
           "default",
           "; child: (opts: ",
           "ClientOptions",
           ") => ",
-          "default",
-          "; Internal: ",
-          "default",
-          "; asyncSearch: ",
           "default",
           "; autoscaling: ",
           "default",
@@ -6359,7 +6432,13 @@
           "\n A user credentials container.\nIt accommodates the necessary auth credentials to impersonate the current user.\n"
         ],
         "signature": [
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any> | ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
@@ -6401,7 +6480,13 @@
             "text": "UnauthorizedErrorHandlerToolkit"
           },
           ") => ",
-          "MaybePromise",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.MaybePromise",
+            "text": "MaybePromise"
+          },
           "<",
           {
             "pluginId": "@kbn/core-elasticsearch-server",

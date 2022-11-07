@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import type { ErrorToastOptions } from '@kbn/core/public';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { Case, CommentType } from '../../common';
+import { isValidOwner } from '../../common/utils/owner';
+import type { Case } from '../../common';
+import { CommentType } from '../../common';
 import { useKibana, useToasts } from './lib/kibana';
 import { generateCaseViewPath } from './navigation';
-import { CaseAttachmentsWithoutOwner } from '../types';
+import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
 import {
   CASE_ALERT_SUCCESS_SYNC_TEXT,
   CASE_ALERT_SUCCESS_TOAST,
@@ -95,8 +98,24 @@ function getToastContent({
   return undefined;
 }
 
-const isValidOwner = (owner: string): owner is keyof typeof OWNER_INFO =>
-  Object.keys(OWNER_INFO).includes(owner);
+const isServerError = (error: Error | ServerError): error is ServerError =>
+  Object.hasOwn(error, 'body');
+
+const getError = (error: Error | ServerError): Error => {
+  if (isServerError(error)) {
+    return new Error(error.body?.message);
+  }
+
+  return error;
+};
+
+const getErrorMessage = (error: Error | ServerError): string => {
+  if (isServerError(error)) {
+    return error.body?.message ?? '';
+  }
+
+  return error.message;
+};
 
 export const useCasesToast = () => {
   const { appId } = useCasesContext();
@@ -140,6 +159,14 @@ export const useCasesToast = () => {
           <CaseToastSuccessContent content={renderContent} onViewCaseClick={onViewCaseClick} />
         ),
       });
+    },
+    showErrorToast: (error: Error | ServerError, opts?: ErrorToastOptions) => {
+      if (error.name !== 'AbortError') {
+        toasts.addError(getError(error), { title: getErrorMessage(error), ...opts });
+      }
+    },
+    showSuccessToast: (title: string) => {
+      toasts.addSuccess(title);
     },
   };
 };

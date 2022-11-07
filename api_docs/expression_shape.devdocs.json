@@ -38,7 +38,13 @@
           "(theme$?: ",
           "Observable",
           "<",
-          "CoreTheme",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          },
           ">) => () => ",
           {
             "pluginId": "expressions",
@@ -71,7 +77,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx",
@@ -94,7 +106,13 @@
           "(theme$?: ",
           "Observable",
           "<",
-          "CoreTheme",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          },
           ">) => () => ",
           {
             "pluginId": "expressions",
@@ -127,7 +145,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx",
@@ -277,10 +301,10 @@
         "signature": [
           "(core: ",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreSetup",
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreSetup",
             "text": "CoreSetup"
           },
           "<object, unknown>) => () => ",
@@ -314,10 +338,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>"
@@ -341,10 +365,10 @@
         "signature": [
           "(core: ",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreSetup",
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreSetup",
             "text": "CoreSetup"
           },
           "<object, unknown>) => () => ",
@@ -378,10 +402,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>"
@@ -1526,7 +1550,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
@@ -1577,7 +1607,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
@@ -2518,7 +2554,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
@@ -2569,7 +2611,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",

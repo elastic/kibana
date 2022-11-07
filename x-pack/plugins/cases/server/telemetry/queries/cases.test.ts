@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { CaseAggregationResult } from '../types';
+import type { CaseAggregationResult } from '../types';
 import { getCasesTelemetryData } from './cases';
 
 describe('getCasesTelemetryData', () => {

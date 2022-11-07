@@ -15,7 +15,11 @@ import { AggregatedTransactionsBadge } from '../../shared/aggregated_transaction
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
-import { isServerlessAgent } from '../../../../common/agent_name';
+import {
+  isMobileAgentName,
+  isServerlessAgent,
+} from '../../../../common/agent_name';
+import { MobileTransactionCharts } from '../../shared/charts/transaction_charts/mobile_transaction_charts';
 
 export function TransactionOverview() {
   const {
@@ -32,8 +36,13 @@ export function TransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, serviceName, fallbackToTransactions, runtimeName } =
-    useApmServiceContext();
+  const {
+    transactionType,
+    serviceName,
+    fallbackToTransactions,
+    runtimeName,
+    agentName,
+  } = useApmServiceContext();
 
   const history = useHistory();
 
@@ -49,6 +58,7 @@ export function TransactionOverview() {
   }
 
   const isServerless = isServerlessAgent(runtimeName);
+  const isMobileAgent = isMobileAgentName(agentName);
 
   return (
     <>
@@ -62,15 +72,24 @@ export function TransactionOverview() {
           <EuiSpacer size="s" />
         </>
       )}
-      <TransactionCharts
-        kuery={kuery}
-        environment={environment}
-        start={start}
-        end={end}
-        isServerlessContext={isServerless}
-        comparisonEnabled={comparisonEnabled}
-        offset={offset}
-      />
+      {isMobileAgent ? (
+        <MobileTransactionCharts
+          kuery={kuery}
+          environment={environment}
+          start={start}
+          end={end}
+        />
+      ) : (
+        <TransactionCharts
+          kuery={kuery}
+          environment={environment}
+          start={start}
+          end={end}
+          isServerlessContext={isServerless}
+          comparisonEnabled={comparisonEnabled}
+          offset={offset}
+        />
+      )}
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
         <TransactionsTable

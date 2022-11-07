@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
+import { RiskDetailsTabBody } from '../../../risk_score/components/risk_details_tab_body';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { UsersTableType } from '../../store/model';
 import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomalies_user_table';
 import type { UsersDetailsTabsProps } from './types';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { usersDetailsPagePath } from '../constants';
-import { TimelineId } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
 import { EventsQueryTabBody } from '../../../common/components/events_tab';
-import { userNameExistsFilter } from './helpers';
 import { AuthenticationsQueryTabBody } from '../navigation';
-import { UserRiskTabBody } from '../navigation/user_risk_tab_body';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({
@@ -31,7 +31,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     to,
     type,
     detailName,
-    pageFilters = [],
+    userDetailFilter,
   }) => {
     const tabProps = {
       deleteQuery,
@@ -45,11 +45,6 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
       userName: detailName,
     };
 
-    const externalAlertPageFilters = useMemo(
-      () => [...userNameExistsFilter, ...pageFilters],
-      [pageFilters]
-    );
-
     return (
       <Switch>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.authentications})`}>
@@ -60,14 +55,17 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.events})`}>
           <EventsQueryTabBody
+            additionalFilters={userDetailFilter}
+            tableId={TableId.usersPageEvents}
             {...tabProps}
-            pageFilters={pageFilters}
-            timelineId={TimelineId.usersPageEvents}
-            externalAlertPageFilters={externalAlertPageFilters}
           />
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
-          <UserRiskTabBody {...tabProps} />
+          <RiskDetailsTabBody
+            {...tabProps}
+            riskEntity={RiskScoreEntity.user}
+            entityName={tabProps.userName}
+          />
         </Route>
       </Switch>
     );

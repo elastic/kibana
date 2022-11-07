@@ -5,19 +5,29 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { createReducer } from '@reduxjs/toolkit';
-import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
+import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../../common/runtime_types';
+import { checkIsStalePing } from '../../utils/monitor_test_result/check_pings';
+
+import { IHttpSerializedFetchError } from '../utils/http_error';
+
 import {
+  getMonitorLastRunAction,
   getMonitorRecentPingsAction,
   setMonitorDetailsLocationAction,
   getMonitorAction,
 } from './actions';
-import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../../common/runtime_types';
 
 export interface MonitorDetailsState {
-  pings: Ping[];
-  loading: boolean;
+  pings: {
+    total: number;
+    data: Ping[];
+    loading: boolean;
+  };
+  lastRun: {
+    data?: Ping;
+    loading: boolean;
+  };
   syntheticsMonitorLoading: boolean;
   syntheticsMonitor: EncryptedSyntheticsSavedMonitor | null;
   error: IHttpSerializedFetchError | null;
@@ -25,8 +35,8 @@ export interface MonitorDetailsState {
 }
 
 const initialState: MonitorDetailsState = {
-  pings: [],
-  loading: false,
+  pings: { total: 0, data: [], loading: false },
+  lastRun: { loading: false },
   syntheticsMonitor: null,
   syntheticsMonitorLoading: false,
   error: null,
@@ -38,17 +48,34 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(setMonitorDetailsLocationAction, (state, action) => {
       state.selectedLocationId = action.payload;
     })
-
-    .addCase(getMonitorRecentPingsAction.get, (state) => {
-      state.loading = true;
+    .addCase(getMonitorLastRunAction.get, (state, action) => {
+      state.lastRun.loading = true;
+      if (checkIsStalePing(action.payload.monitorId, state.lastRun.data)) {
+        state.lastRun.data = undefined;
+      }
+    })
+    .addCase(getMonitorLastRunAction.success, (state, action) => {
+      state.lastRun.loading = false;
+      state.lastRun.data = action.payload.pings[0];
+    })
+    .addCase(getMonitorLastRunAction.fail, (state, action) => {
+      state.lastRun.loading = false;
+      state.error = action.payload;
+    })
+    .addCase(getMonitorRecentPingsAction.get, (state, action) => {
+      state.pings.loading = true;
+      state.pings.data = state.pings.data.filter(
+        (ping) => !checkIsStalePing(action.payload.monitorId, ping)
+      );
     })
     .addCase(getMonitorRecentPingsAction.success, (state, action) => {
-      state.pings = action.payload.pings;
-      state.loading = false;
+      state.pings.total = action.payload.total;
+      state.pings.data = action.payload.pings;
+      state.pings.loading = false;
     })
     .addCase(getMonitorRecentPingsAction.fail, (state, action) => {
-      state.error = serializeHttpFetchError(action.payload as IHttpFetchError<ResponseErrorBody>);
-      state.loading = false;
+      state.error = action.payload;
+      state.pings.loading = false;
     })
 
     .addCase(getMonitorAction.get, (state) => {
@@ -59,7 +86,7 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
       state.syntheticsMonitorLoading = false;
     })
     .addCase(getMonitorAction.fail, (state, action) => {
-      state.error = serializeHttpFetchError(action.payload as IHttpFetchError<ResponseErrorBody>);
+      state.error = action.payload;
       state.syntheticsMonitorLoading = false;
     });
 });

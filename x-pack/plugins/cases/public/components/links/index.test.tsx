@@ -6,18 +6,15 @@
  */
 
 import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiText } from '@elastic/eui';
 
 import '../../common/mock/match_media';
-import {
-  ConfigureCaseButton,
-  ConfigureCaseButtonProps,
-  CaseDetailsLink,
-  CaseDetailsLinkProps,
-} from '.';
+import type { ConfigureCaseButtonProps, CaseDetailsLinkProps } from '.';
+import { ConfigureCaseButton, CaseDetailsLink } from '.';
 import { TestProviders } from '../../common/mock';
 import { useCaseViewNavigation } from '../../common/navigation/hooks';
 
@@ -77,7 +74,7 @@ describe('Configuration button', () => {
 
   test('it shows the tooltip when hovering the button', () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
 
     const msgTooltip = 'My message tooltip';
     const titleTooltip = 'My title';

@@ -72,8 +72,10 @@ export interface IndicesValues {
   deleteModalIndex: ElasticsearchViewIndex | null;
   deleteModalIndexName: string;
   deleteModalIngestionMethod: IngestionMethod;
+  deleteStatus: typeof DeleteIndexApiLogic.values.status;
   hasNoIndices: boolean;
   indices: ElasticsearchViewIndex[];
+  isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
   isFirstRequest: boolean;
   isLoading: boolean;
@@ -101,7 +103,12 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       DeleteIndexApiLogic,
       ['apiError as deleteError', 'apiSuccess as deleteSuccess', 'makeRequest as deleteIndex'],
     ],
-    values: [FetchIndicesAPILogic, ['data', 'status']],
+    values: [
+      FetchIndicesAPILogic,
+      ['data', 'status'],
+      DeleteIndexApiLogic,
+      ['status as deleteStatus'],
+    ],
   },
   listeners: ({ actions, values }) => ({
     apiError: (e) => flashAPIErrors(e),
@@ -180,6 +187,10 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     indices: [
       () => [selectors.data],
       (data) => (data?.indices ? data.indices.map(indexToViewIndex) : []),
+    ],
+    isDeleteLoading: [
+      () => [selectors.deleteStatus],
+      (status: IndicesValues['deleteStatus']) => [Status.LOADING].includes(status),
     ],
     isLoading: [
       () => [selectors.status, selectors.isFirstRequest],

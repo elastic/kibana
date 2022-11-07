@@ -84,6 +84,49 @@ type RegistryInputWithStreams = RegistryInput & {
   streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }>;
 };
 
+const StreamsSection: React.FunctionComponent<{
+  streams: RegistryInputWithStreams['streams'];
+}> = ({ streams }) => {
+  if (streams.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h6>
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.apiReference.streamsTitle"
+            defaultMessage="Streams"
+          />
+        </h6>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      {streams.map((dataStream) => (
+        <EuiAccordion
+          key={dataStream.data_stream.type + dataStream.data_stream.dataset}
+          id={dataStream.data_stream.type + dataStream.data_stream.dataset}
+          buttonContent={
+            <EuiText>
+              <EuiCode>{dataStream.data_stream.dataset}</EuiCode>({dataStream.title})
+            </EuiText>
+          }
+          initialIsOpen={false}
+          paddingSize={'m'}
+        >
+          <EuiText>{dataStream.description}</EuiText>
+          {dataStream.vars ? (
+            <>
+              <EuiSpacer size="m" />
+              <VarsTable vars={dataStream.vars} />
+            </>
+          ) : null}
+        </EuiAccordion>
+      ))}
+    </>
+  );
+};
+
 const Inputs: React.FunctionComponent<{
   packageInfo: PackageInfo;
   integration?: string | null;
@@ -141,36 +184,7 @@ const Inputs: React.FunctionComponent<{
               </>
             ) : null}
             <EuiSpacer size="m" />
-            <EuiTitle size="xs">
-              <h6>
-                <FormattedMessage
-                  id="xpack.fleet.epm.packageDetails.apiReference.streamsTitle"
-                  defaultMessage="Streams"
-                />
-              </h6>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            {input.streams.map((dataStream) => (
-              <EuiAccordion
-                key={dataStream.data_stream.type + dataStream.data_stream.dataset}
-                id={dataStream.data_stream.type + dataStream.data_stream.dataset}
-                buttonContent={
-                  <EuiText>
-                    <EuiCode>{dataStream.data_stream.dataset}</EuiCode>({dataStream.title})
-                  </EuiText>
-                }
-                initialIsOpen={false}
-                paddingSize={'m'}
-              >
-                <EuiText>{dataStream.description}</EuiText>
-                {dataStream.vars ? (
-                  <>
-                    <EuiSpacer size="m" />
-                    <VarsTable vars={dataStream.vars} />
-                  </>
-                ) : null}
-              </EuiAccordion>
-            ))}
+            <StreamsSection streams={input.streams} />
           </EuiAccordion>
         );
       }) ?? null}

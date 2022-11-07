@@ -8,8 +8,8 @@
 
 import _ from 'lodash';
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
-import { GridData } from '../../../../common';
-import { DashboardPanelState, DASHBOARD_GRID_COLUMN_COUNT } from '..';
+import { DashboardPanelState, GridData } from '../../../../common';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../dashboard_constants';
 
 export type PanelPlacementMethod<PlacementArgs extends IPanelPlacementArgs> = (
   args: PlacementArgs

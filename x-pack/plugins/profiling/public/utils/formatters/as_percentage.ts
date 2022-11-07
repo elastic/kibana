@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export function asPercentage(value: number, precision: number = 0) {
-  return `${Number(value * 100).toFixed(precision)}%`;
+import { asNumber } from './as_number';
+
+export function asPercentage(value: number) {
+  return `${asNumber(value * 100)}%`;
 }

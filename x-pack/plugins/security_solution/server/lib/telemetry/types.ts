@@ -6,6 +6,7 @@
  */
 
 import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
+import type { AllowlistFields } from './filterlists/types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -420,4 +421,18 @@ export interface TaskMetric {
   start_time: number;
   end_time: number;
   error_message?: string;
+}
+
+export interface TelemetryConfiguration {
+  telemetry_max_buffer_size: number;
+  max_security_list_telemetry_batch: number;
+  max_endpoint_telemetry_batch: number;
+  max_detection_rule_telemetry_batch: number;
+  max_detection_alerts_batch: number;
+}
+
+export interface TelemetryFilterListArtifact {
+  endpoint_alerts: AllowlistFields;
+  exception_lists: AllowlistFields;
+  prebuilt_rules_alerts: AllowlistFields;
 }

@@ -6,6 +6,8 @@
  */
 
 import { format } from './formatter';
+import { DataStream } from '../../../../../../common/runtime_types';
+import { DEFAULT_FIELDS } from '../../../../../../common/constants/monitor_defaults';
 
 describe('format', () => {
   let formValues: Record<string, unknown>;
@@ -88,6 +90,7 @@ describe('format', () => {
   it.each([[true], [false]])('correctly formats form fields to monitor type', (enabled) => {
     formValues.enabled = enabled;
     expect(format(formValues)).toEqual({
+      ...DEFAULT_FIELDS[DataStream.HTTP],
       __ui: {
         is_tls_enabled: false,
       },
@@ -134,7 +137,9 @@ describe('format', () => {
       timeout: '16',
       type: 'http',
       urls: 'sample url',
+      'url.port': null,
       username: '',
+      id: '',
     });
   });
 
@@ -221,6 +226,7 @@ describe('format', () => {
         },
       };
       expect(format(browserFormFields)).toEqual({
+        ...DEFAULT_FIELDS[DataStream.BROWSER],
         __ui: {
           script_source: {
             file_name: fileName,
@@ -283,6 +289,7 @@ describe('format', () => {
         type: 'browser',
         'url.port': null,
         urls: '',
+        id: '',
       });
     }
   );
@@ -301,6 +308,7 @@ describe('format', () => {
         },
       })
     ).toEqual({
+      ...DEFAULT_FIELDS[DataStream.HTTP],
       __ui: {
         is_tls_enabled: isTLSEnabled,
       },
@@ -347,7 +355,9 @@ describe('format', () => {
       timeout: '16',
       type: 'http',
       urls: 'sample url',
+      'url.port': null,
       username: '',
+      id: '',
     });
   });
 });

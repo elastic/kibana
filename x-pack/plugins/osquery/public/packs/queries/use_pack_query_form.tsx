@@ -10,7 +10,7 @@ import { useForm as useHookForm } from 'react-hook-form';
 import type { Draft } from 'immer';
 import { produce } from 'immer';
 import { useMemo } from 'react';
-import type { ECSMapping } from '../../../common/schemas/common';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
 export interface UsePackQueryFormProps {
   uniqueQueryIds: string[];

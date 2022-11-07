@@ -19,8 +19,11 @@ import {
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
 
+import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
+import { tableDefaults } from '../../store/data_table/defaults';
+import { dataTableSelectors } from '../../store/data_table';
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineSelectors } from '../../../timelines/store/timeline';
 import type { BrowserFields } from '../../containers/source';
 import { getAllFieldsByName } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
@@ -36,7 +39,7 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   eventId: string;
   isDraggable?: boolean;
-  timelineId: string;
+  scopeId: string;
   timelineTabType: TimelineTabs | 'flyout';
   isReadOnly?: boolean;
 }
@@ -166,10 +169,22 @@ const useFieldBrowserPagination = () => {
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, data, eventId, isDraggable, timelineTabType, timelineId, isReadOnly }) => {
+  ({ browserFields, data, eventId, isDraggable, timelineTabType, scopeId, isReadOnly }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
     const dispatch = useDispatch();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const getScope = useMemo(() => {
+      if (isTimelineScope(scopeId)) {
+        return timelineSelectors.getTimelineByIdSelector();
+      } else if (isInTableScope(scopeId)) {
+        return dataTableSelectors.getTableByIdSelector();
+      }
+    }, [scopeId]);
+    const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
+    const columnHeaders = useDeepEqualSelector((state) => {
+      const { columns } = (getScope && getScope(state, scopeId)) ?? defaults;
+      return getColumnHeaders(columns, browserFields);
+    });
+
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const items = useMemo(
       () =>
@@ -181,11 +196,6 @@ export const EventFieldsBrowser = React.memo<Props>(
         })),
       [data, fieldsByName]
     );
-
-    const columnHeaders = useDeepEqualSelector((state) => {
-      const { columns } = getTimeline(state, timelineId) ?? timelineDefaults;
-      return getColumnHeaders(columns, browserFields);
-    });
 
     const getLinkValue = useCallback(
       (field: string) => {
@@ -199,27 +209,30 @@ export const EventFieldsBrowser = React.memo<Props>(
       },
       [data, columnHeaders]
     );
-
+    const scopedActions = getScopedActions(scopeId);
     const toggleColumn = useCallback(
       (column: ColumnHeaderOptions) => {
+        if (!scopedActions) {
+          return;
+        }
         if (columnHeaders.some((c) => c.id === column.id)) {
           dispatch(
-            timelineActions.removeColumn({
+            scopedActions.removeColumn({
               columnId: column.id,
-              id: timelineId,
+              id: scopeId,
             })
           );
         } else {
           dispatch(
-            timelineActions.upsertColumn({
+            scopedActions.upsertColumn({
               column,
-              id: timelineId,
+              id: scopeId,
               index: 1,
             })
           );
         }
       },
-      [columnHeaders, dispatch, timelineId]
+      [columnHeaders, dispatch, scopeId, scopedActions]
     );
 
     const onSetRowProps = useCallback(({ ariaRowindex, field }: TimelineEventsDetailsItem) => {
@@ -232,8 +245,12 @@ export const EventFieldsBrowser = React.memo<Props>(
     }, []);
 
     const onUpdateColumns = useCallback(
-      (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
-      [dispatch, timelineId]
+      (columns) => {
+        if (scopedActions) {
+          dispatch(scopedActions.updateColumns({ id: scopeId, columns }));
+        }
+      },
+      [dispatch, scopeId, scopedActions]
     );
 
     const columns = useMemo(
@@ -243,8 +260,8 @@ export const EventFieldsBrowser = React.memo<Props>(
           columnHeaders,
           eventId,
           onUpdateColumns,
-          contextId: `event-fields-browser-for-${timelineId}-${timelineTabType}`,
-          timelineId,
+          contextId: `event-fields-browser-for-${scopeId}-${timelineTabType}`,
+          scopeId,
           toggleColumn,
           getLinkValue,
           isDraggable,
@@ -255,7 +272,7 @@ export const EventFieldsBrowser = React.memo<Props>(
         columnHeaders,
         eventId,
         onUpdateColumns,
-        timelineId,
+        scopeId,
         timelineTabType,
         toggleColumn,
         getLinkValue,

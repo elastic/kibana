@@ -136,9 +136,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return response;
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/129337
-  // Failing: See https://github.com/elastic/kibana/issues/129337
-  describe.skip('Rule Details', function () {
+  describe('Rule Details', function () {
     describe('Header', function () {
       const testRunUuid = uuid.v4();
       before(async () => {
@@ -170,9 +168,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const owner = await pageObjects.ruleDetailsUI.getAPIKeyOwner();
         expect(owner).to.be('elastic');
-
-        const { connectorType } = await pageObjects.ruleDetailsUI.getActionsLabels();
-        expect(connectorType).to.be(`Slack`);
       });
 
       it('renders toast when schedule is less than configured minimum', async () => {
@@ -200,19 +195,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('shouldnt allow you to snooze a disabled rule', async () => {
+      it('should allow you to snooze a disabled rule', async () => {
         const actionsDropdown = await testSubjects.find('statusDropdown');
 
         expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
 
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
+        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+        await snoozeBadge.click();
 
-        expect(await actionsMenuItemElem.at(2)?.getVisibleText()).to.eql('Snooze');
-        expect(await actionsMenuItemElem.at(2)?.getAttribute('disabled')).to.eql('true');
-        // close the dropdown
-        await actionsDropdown.click();
+        const snoozeIndefinite = await testSubjects.find('ruleSnoozeIndefiniteApply');
+        await snoozeIndefinite.click();
+
+        await retry.try(async () => {
+          await testSubjects.existOrFail('rulesListNotifyBadge-snoozedIndefinitely');
+        });
+
+        // Unsnooze the rule for the next test
+        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozedIndefinitely');
+        await snoozeBadge.click();
+
+        const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
+        await snoozeCancel.click();
       });
 
       it('should reenable a disabled the rule', async () => {
@@ -232,43 +235,73 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should snooze the rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
-
-        expect(await actionsDropdown.getVisibleText()).to.eql('Enabled');
-
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(2)?.click();
+        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+        await snoozeBadge.click();
 
         const snoozeIndefinite = await testSubjects.find('ruleSnoozeIndefiniteApply');
         await snoozeIndefinite.click();
 
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).to.eql('Snoozed');
-          const remainingSnoozeTime = await testSubjects.find('remainingSnoozeTime');
-          expect(await remainingSnoozeTime.getVisibleText()).to.eql('Indefinitely');
+          await testSubjects.existOrFail('rulesListNotifyBadge-snoozedIndefinitely');
         });
-      });
 
-      it('should unsnooze the rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
-
-        expect(await actionsDropdown.getVisibleText()).to.eql('Snoozed');
-
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(2)?.click();
+        // Unsnooze the rule for the next test
+        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozedIndefinitely');
+        await snoozeBadge.click();
 
         const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
         await snoozeCancel.click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      it('should snooze the rule for a set duration', async () => {
+        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+        await snoozeBadge.click();
+
+        const snooze8h = await testSubjects.find('linkSnooze8h');
+        await snooze8h.click();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).to.eql('Enabled');
+          await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
         });
+
+        // Unsnooze the rule for the next test
+        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozed');
+        await snoozeBadge.click();
+
+        const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
+        await snoozeCancel.click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      it('should add snooze schedule', async () => {
+        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+        await snoozeBadge.click();
+
+        const addScheduleButton = await testSubjects.find('ruleAddSchedule');
+        await addScheduleButton.click();
+
+        const saveScheduleButton = await testSubjects.find('scheduler-saveSchedule');
+        await saveScheduleButton.click();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
+        });
+
+        // Unsnooze the rule for the next test
+        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-scheduled');
+        await snoozeBadge.click();
+
+        const snoozeCancel = await testSubjects.find('ruleRemoveAllSchedules');
+        await snoozeCancel.click();
+
+        const confirmButton = await testSubjects.find('confirmModalConfirmButton');
+        await confirmButton.click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
       });
     });
 
@@ -404,7 +437,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
 
         // delete connector
-        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.common.navigateToApp('triggersActionsConnectors');
         await pageObjects.triggersActionsUI.searchConnectors(connector.name);
         await testSubjects.click('deleteConnector');
         await testSubjects.existOrFail('deleteIdsConfirmation');
@@ -414,8 +447,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
+        // Wait to ensure the table is finished loading
+        await pageObjects.triggersActionsUI.tableFinishedLoading();
+
         // click on first alert
-        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
+        await pageObjects.common.navigateToApp('triggersActions');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
@@ -468,7 +504,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
 
         // delete connector
-        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.common.navigateToApp('triggersActionsConnectors');
         await pageObjects.triggersActionsUI.searchConnectors(connector.name);
         await testSubjects.click('deleteConnector');
         await testSubjects.existOrFail('deleteIdsConfirmation');
@@ -478,8 +514,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
+        // Wait to ensure the table is finished loading
+        await pageObjects.triggersActionsUI.tableFinishedLoading();
+
         // click on first rule
-        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
+        await pageObjects.common.navigateToApp('triggersActions');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
@@ -510,6 +549,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(true);
         expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).to.eql(true);
+
+        // delete connector
+        await pageObjects.common.navigateToApp('triggersActions');
+        // refresh to see alert
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // verify content
+        await testSubjects.existOrFail('rulesList');
+
+        await pageObjects.common.navigateToApp('triggersActionsConnectors');
+        await pageObjects.triggersActionsUI.searchConnectors('new connector');
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
       });
     });
 
@@ -890,6 +945,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the event log list and can filter/sort', async () => {
         await browser.refresh();
+        await (await testSubjects.find('eventLogListTab')).click();
 
         // Check to see if the experimental is enabled, if not, just return
         const tabbedContentExists = await testSubjects.exists('ruleDetailsTabbedContent');

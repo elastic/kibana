@@ -19,10 +19,10 @@ const { size } = require('./size');
  * count(100) // returns 1
  */
 
-module.exports = { count };
-
 function count(a) {
   return size(a);
 }
 
 count.skipNumberValidation = true;
+
+module.exports = { count };

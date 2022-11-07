@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { config } from './config';
 
 describe('cloudExperiments config', () => {
   describe.each([true, false])('when disabled (dev: %p)', (dev) => {
     const ctx = { dev };
     test('should default to `enabled:false` and the rest empty', () => {
-      expect(config.schema.validate({}, ctx)).toStrictEqual({ enabled: false });
+      expect(config.schema.validate({}, ctx)).toStrictEqual({
+        enabled: false,
+        metadata_refresh_interval: moment.duration(1, 'h'),
+      });
     });
 
     test('it should allow any additional config', () => {
@@ -26,7 +30,11 @@ describe('cloudExperiments config', () => {
           'my-plugin.my-feature-flag': 1234,
         },
       };
-      expect(config.schema.validate(cfg, ctx)).toStrictEqual(cfg);
+      expect(config.schema.validate(cfg, ctx)).toStrictEqual({
+        ...cfg,
+        // Additional default fields
+        metadata_refresh_interval: moment.duration(1, 'h'),
+      });
     });
 
     test('it should allow any additional config (missing flag_overrides)', () => {
@@ -38,7 +46,10 @@ describe('cloudExperiments config', () => {
           client_log_level: 'none',
         },
       };
-      expect(config.schema.validate(cfg, ctx)).toStrictEqual(cfg);
+      expect(config.schema.validate(cfg, ctx)).toStrictEqual({
+        ...cfg,
+        metadata_refresh_interval: moment.duration(1, 'h'),
+      });
     });
 
     test('it should allow any additional config (missing launch_darkly)', () => {
@@ -48,7 +59,10 @@ describe('cloudExperiments config', () => {
           'my-plugin.my-feature-flag': 1234,
         },
       };
-      expect(config.schema.validate(cfg, ctx)).toStrictEqual(cfg);
+      expect(config.schema.validate(cfg, ctx)).toStrictEqual({
+        ...cfg,
+        metadata_refresh_interval: moment.duration(1, 'h'),
+      });
     });
   });
 
@@ -61,11 +75,15 @@ describe('cloudExperiments config', () => {
         ).toStrictEqual({
           enabled: true,
           flag_overrides: { my_flag: 1 },
+          metadata_refresh_interval: moment.duration(1, 'h'),
         });
       });
 
       test('in dev mode, it allows `launch_darkly` and `flag_overrides` to be empty', () => {
-        expect(config.schema.validate({ enabled: true }, ctx)).toStrictEqual({ enabled: true });
+        expect(config.schema.validate({ enabled: true }, ctx)).toStrictEqual({
+          enabled: true,
+          metadata_refresh_interval: moment.duration(1, 'h'),
+        });
       });
     });
 
@@ -98,6 +116,7 @@ describe('cloudExperiments config', () => {
             client_id: '1234',
             client_log_level: 'none',
           },
+          metadata_refresh_interval: moment.duration(1, 'h'),
         });
       });
 
@@ -126,6 +145,7 @@ describe('cloudExperiments config', () => {
           flag_overrides: {
             my_flag: 123,
           },
+          metadata_refresh_interval: moment.duration(1, 'h'),
         });
       });
     });

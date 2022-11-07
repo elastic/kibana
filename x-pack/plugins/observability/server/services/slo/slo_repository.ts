@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
-import { StoredSLO, SLO } from '../../types/models';
+import { StoredSLO, SLO, sloSchema } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLONotFound } from '../../errors';
 
@@ -22,24 +26,18 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract) {}
 
   async save(slo: SLO): Promise<SLO> {
-    const now = new Date().toISOString();
-    const savedSLO = await this.soClient.create<StoredSLO>(
-      SO_SLO_TYPE,
-      {
-        ...slo,
-        created_at: now,
-        updated_at: now,
-      },
-      { id: slo.id }
-    );
+    const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, toStoredSLO(slo), {
+      id: slo.id,
+      overwrite: true,
+    });
 
-    return toSLOModel(savedSLO.attributes);
+    return toSLO(savedSLO.attributes);
   }
 
   async findById(id: string): Promise<SLO> {
     try {
       const slo = await this.soClient.get<StoredSLO>(SO_SLO_TYPE, id);
-      return toSLOModel(slo.attributes);
+      return toSLO(slo.attributes);
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw new SLONotFound(`SLO [${id}] not found`);
@@ -60,14 +58,15 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   }
 }
 
-function toSLOModel(slo: StoredSLO): SLO {
-  return {
-    id: slo.id,
-    name: slo.name,
-    description: slo.description,
-    indicator: slo.indicator,
-    time_window: slo.time_window,
-    budgeting_method: slo.budgeting_method,
-    objective: slo.objective,
-  };
+function toStoredSLO(slo: SLO): StoredSLO {
+  return sloSchema.encode(slo);
+}
+
+function toSLO(storedSLO: StoredSLO): SLO {
+  return pipe(
+    sloSchema.decode(storedSLO),
+    fold(() => {
+      throw new Error('Invalid Stored SLO');
+    }, t.identity)
+  );
 }

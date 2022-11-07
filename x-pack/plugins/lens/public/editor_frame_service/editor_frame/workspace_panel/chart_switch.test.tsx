@@ -494,8 +494,8 @@ describe('chart_switch', () => {
 
     switchTo('visB', instance);
     expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a');
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'b');
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'c');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'b');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'c');
     expect(visualizationMap.visB.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
         keptLayerIds: ['a'],

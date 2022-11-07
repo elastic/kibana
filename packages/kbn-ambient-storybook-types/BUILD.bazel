@@ -31,6 +31,11 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  # Storybook react doesn't depend on these types even though their types use
+  # them, so we depend on them in this package and import them to make sure that they
+  # are available to users of the ambient types
+  "@npm//react-textarea-autosize",
+  "@npm//@storybook/react-docgen-typescript-plugin",
 ]
 
 js_library(

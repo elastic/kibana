@@ -15,6 +15,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { MlStorageContextProvider } from './contexts/storage';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -109,7 +110,9 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
               mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
             }}
           >
-            <MlRouter pageDeps={pageDeps} />
+            <MlStorageContextProvider>
+              <MlRouter pageDeps={pageDeps} />
+            </MlStorageContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </I18nContext>
@@ -142,6 +145,7 @@ export const renderApp = (
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
     dataViews: deps.data.dataViews,
+    share: deps.share,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

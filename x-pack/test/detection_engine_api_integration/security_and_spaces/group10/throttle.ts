@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import {
   DETECTION_ENGINE_RULES_URL,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('When creating throttle with "NOTIFICATION_THROTTLE_NO_ACTIONS" set and no actions, the rule should have its kibana alerting "mute_all" set to "true" and notify_when set to "onActiveAlert"', async () => {
-          const ruleWithThrottle: CreateRulesSchema = {
+          const ruleWithThrottle: RuleCreateProps = {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_NO_ACTIONS,
           };
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(getWebHookAction())
             .expect(200);
 
-          const ruleWithThrottle: CreateRulesSchema = {
+          const ruleWithThrottle: RuleCreateProps = {
             ...getRuleWithWebHookAction(hookAction.id),
             throttle: NOTIFICATION_THROTTLE_NO_ACTIONS,
           };
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('When creating throttle with "NOTIFICATION_THROTTLE_RULE" set and no actions, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to "onActiveAlert"', async () => {
-          const ruleWithThrottle: CreateRulesSchema = {
+          const ruleWithThrottle: RuleCreateProps = {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_RULE,
           };
@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // NOTE: This shows A side effect of how we do not set data on side cars anymore where the user is told they have no actions since the array is empty.
         it('When creating throttle with "NOTIFICATION_THROTTLE_RULE" set and no actions, since we do not have any actions, we should get back a throttle of "NOTIFICATION_THROTTLE_NO_ACTIONS"', async () => {
-          const ruleWithThrottle: CreateRulesSchema = {
+          const ruleWithThrottle: RuleCreateProps = {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_RULE,
           };
@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(getWebHookAction())
             .expect(200);
 
-          const ruleWithThrottle: CreateRulesSchema = {
+          const ruleWithThrottle: RuleCreateProps = {
             ...getRuleWithWebHookAction(hookAction.id),
             throttle: NOTIFICATION_THROTTLE_RULE,
           };
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('When creating throttle with "1h" set and no actions, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to "onThrottleInterval"', async () => {
-          const ruleWithThrottle: CreateRulesSchema = {
+          const ruleWithThrottle: RuleCreateProps = {
             ...getSimpleRule(),
             throttle: '1h',
           };
@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(getWebHookAction())
             .expect(200);
 
-          const ruleWithThrottle: CreateRulesSchema = {
+          const ruleWithThrottle: RuleCreateProps = {
             ...getRuleWithWebHookAction(hookAction.id),
             throttle: '1h',
           };
@@ -197,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('When creating throttle with "NOTIFICATION_THROTTLE_NO_ACTIONS" set and no actions, we should return "NOTIFICATION_THROTTLE_NO_ACTIONS" when doing a read', async () => {
-          const ruleWithThrottle: CreateRulesSchema = {
+          const ruleWithThrottle: RuleCreateProps = {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_NO_ACTIONS,
           };
@@ -208,7 +208,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // NOTE: This shows A side effect of how we do not set data on side cars anymore where the user is told they have no actions since the array is empty.
         it('When creating throttle with "NOTIFICATION_THROTTLE_RULE" set and no actions, since we do not have any actions, we should get back a throttle of "NOTIFICATION_THROTTLE_NO_ACTIONS" when doing a read', async () => {
-          const ruleWithThrottle: CreateRulesSchema = {
+          const ruleWithThrottle: RuleCreateProps = {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_RULE,
           };

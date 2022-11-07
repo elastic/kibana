@@ -23,7 +23,6 @@ export const PutSettingsRequestSchema = {
       })
     ),
     has_seen_add_data_notice: schema.maybe(schema.boolean()),
-    has_seen_fleet_migration_notice: schema.maybe(schema.boolean()),
     additional_yaml_config: schema.maybe(schema.string()),
     // Deprecated not used
     kibana_urls: schema.maybe(
@@ -36,5 +35,6 @@ export const PutSettingsRequestSchema = {
       })
     ),
     kibana_ca_sha256: schema.maybe(schema.string()),
+    prerelease_integrations_enabled: schema.maybe(schema.boolean()),
   }),
 };

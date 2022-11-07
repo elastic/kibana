@@ -337,6 +337,8 @@ Apply a set of design options to the entire dashboard.
 
 * *Sync color pallettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
 
+* *Sync cursor across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart and a heatmap chart, the cursor on all other related dashboard charts automatically appear.
+
 * *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart, the tooltips on all other related dashboard charts automatically appear.
 
 [float]

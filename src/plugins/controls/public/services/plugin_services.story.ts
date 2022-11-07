@@ -23,6 +23,7 @@ import { themeServiceFactory } from './theme/theme.story';
 
 import { optionsListServiceFactory } from './options_list/options_list.story';
 import { controlsServiceFactory } from './controls/controls.story';
+import { embeddableServiceFactory } from './embeddable/embeddable.story';
 
 export const providers: PluginServiceProviders<ControlsServices> = {
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
@@ -32,6 +33,7 @@ export const providers: PluginServiceProviders<ControlsServices> = {
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   theme: new PluginServiceProvider(themeServiceFactory),
+  embeddable: new PluginServiceProvider(embeddableServiceFactory),
 
   controls: new PluginServiceProvider(controlsServiceFactory),
   optionsList: new PluginServiceProvider(optionsListServiceFactory),

@@ -158,11 +158,12 @@
 }
 
 .embPanel__error {
-  text-align: center;
-  justify-content: center;
-  flex-direction: column;
-  overflow: auto;
-  padding: $euiSizeS;
+  padding: $euiSizeL;
+
+  & > * {
+    max-height: 100%;
+    overflow: auto;
+  }
 }
 
 .embPanel__label {

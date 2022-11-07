@@ -19,6 +19,12 @@ import {
   defaultUser,
   postCommentUserReq,
   getPostCaseRequest,
+  postCommentAlertReq,
+  postCommentActionsReq,
+  postCommentActionsReleaseReq,
+  postCommentAlertMultipleIdsReq,
+  persistableStateAttachment,
+  postExternalReferenceESReq,
 } from '../../../../common/lib/mock';
 import {
   getConfigurationRequest,
@@ -40,6 +46,7 @@ import {
   calculateDuration,
   getRecordingServiceNowSimulatorServer,
   getComment,
+  bulkCreateAttachments,
 } from '../../../../common/lib/utils';
 import {
   globalRead,
@@ -108,8 +115,102 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // the full string should look something like this:
-        // This is a brand new case of a bad meanie defacing data (created at 2022-09-12T20:22:14.328Z by super_full_name)
+        // This is a brand new case of a bad meanie defacing data.\n\nAdded by super_full_name.
         expect(serviceNowServer.incident?.description).to.contain('by super_full_name');
+      });
+
+      it('should map the fields and add the backlink to Kibana correctly', async () => {
+        const cookies = await loginUsers({ supertest: supertestWithoutAuth, users: [superUser] });
+
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+          auth: null,
+          headers: { Cookie: cookies[0].cookieString() },
+        });
+
+        await pushCase({
+          supertest,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+        });
+
+        expect(serviceNowServer.incident).eql({
+          short_description: postedCase.title,
+          description: `${postedCase.description}\n\nAdded by super_full_name.\nFor more details, view this case in Kibana.\nCase URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${postedCase.id}`,
+          severity: '2',
+          urgency: '2',
+          impact: '2',
+          category: 'software',
+          subcategory: 'os',
+          correlation_id: postedCase.id,
+          correlation_display: 'Elastic Case',
+          caller_id: 'admin',
+          opened_by: 'admin',
+        });
+      });
+
+      it('should format the comments correctly', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        const patchedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            postCommentUserReq,
+            postCommentAlertReq,
+            postCommentAlertMultipleIdsReq,
+            postCommentActionsReq,
+            postCommentActionsReleaseReq,
+            postExternalReferenceESReq,
+            persistableStateAttachment,
+          ],
+        });
+
+        await pushCase({
+          supertest,
+          caseId: patchedCase.id,
+          connectorId: connector.id,
+        });
+
+        /**
+         * If the request contains the work_notes property then
+         * it is a create comment request
+         */
+        const allCommentRequests = serviceNowServer.allRequestData.filter((request) =>
+          Boolean(request.work_notes)
+        );
+
+        /**
+         * For each of these comments a request is made:
+         * postCommentUserReq, postCommentActionsReq, postCommentActionsReleaseReq, and a comment with the
+         * total alerts attach to a case. All other type of comments should be filtered. Specifically,
+         * postCommentAlertReq, postCommentAlertMultipleIdsReq, postExternalReferenceESReq, and persistableStateAttachment
+         */
+        expect(allCommentRequests.length).be(4);
+
+        // User comment: postCommentUserReq
+        expect(allCommentRequests[0].work_notes).eql('This is a cool comment\n\nAdded by elastic.');
+
+        // Isolate host comment: postCommentActionsReq
+        expect(allCommentRequests[1].work_notes).eql(
+          'Isolated host host-name with comment: comment text\n\nAdded by elastic.'
+        );
+
+        // Unisolate host comment: postCommentActionsReleaseReq
+        expect(allCommentRequests[2].work_notes).eql(
+          'Released host host-name with comment: comment text\n\nAdded by elastic.'
+        );
+
+        // Total alerts
+        expect(allCommentRequests[3].work_notes).eql(
+          `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`
+        );
       });
     });
 
@@ -224,7 +325,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(theCaseAfterUpdate.external_service?.connector_id).to.eql(pushConnector.id);
       });
 
-      it('should create the mappings when pushing a case', async () => {
+      it('should push to a connector without mapping', async () => {
         // create a connector but not a configuration so that the mapping will not be present
         const connector = await createConnector({
           supertest,
@@ -257,7 +358,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // there should be no mappings initially
-        let mappings = await getConnectorMappingsFromES({ es });
+        const mappings = await getConnectorMappingsFromES({ es });
         expect(mappings.body.hits.hits.length).to.eql(0);
 
         await pushCase({
@@ -265,13 +366,6 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           connectorId: connector.id,
         });
-
-        // the mappings should now be created after the push
-        mappings = await getConnectorMappingsFromES({ es });
-        expect(mappings.body.hits.hits.length).to.be(1);
-        expect(
-          mappings.body.hits.hits[0]._source?.['cases-connector-mappings'].mappings.length
-        ).to.be.above(0);
       });
 
       it('pushes a comment appropriately', async () => {

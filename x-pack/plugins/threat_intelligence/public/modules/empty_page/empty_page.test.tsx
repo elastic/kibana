@@ -8,9 +8,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
-import { EmptyPage, INTEGRATION_LINK_ID, DOCS_LINK_TEST_ID } from './empty_page';
-import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
-import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
+import { DOCS_LINK_TEST_ID, EmptyPage, INTEGRATION_LINK_ID } from './empty_page';
+import { useIntegrationsPageLink, useTIDocumentationLink } from '../../hooks';
 
 jest.mock('../../hooks/use_integrations_page_link');
 jest.mock('../../hooks/use_documentation_link');

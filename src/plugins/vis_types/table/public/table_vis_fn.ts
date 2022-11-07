@@ -17,6 +17,7 @@ export interface TableVisRenderValue {
   visData: TableVisData;
   visType: typeof VIS_TYPE_TABLE;
   visConfig: TableVisConfig;
+  canNavigateToLens: boolean;
 }
 
 export type TableExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -177,6 +178,7 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
           ...args,
           title: (handlers.variables.embeddableTitle as string) ?? args.title,
         },
+        canNavigateToLens: handlers.variables.canNavigateToLens as boolean,
       },
     };
   },

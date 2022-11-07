@@ -21,7 +21,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { USERNAME_LABEL, PASSWORD_LABEL, TOKEN_LABEL } from '../../../../shared/constants';
+import { i18n } from '@kbn/i18n';
+
+import { USERNAME_LABEL, PASSWORD_LABEL } from '../../../../shared/constants';
 
 import { AuthenticationPanelLogic } from './authentication_panel_logic';
 import { AUTHENTICATION_LABELS } from './constants';
@@ -38,6 +40,7 @@ export const AuthenticationPanelEditContent: React.FC = () => {
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiCheckableCard
+            data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-basicAuthentication"
             id="basicAuthenticationCheckableCard"
             className="authenticationCheckable"
             label={
@@ -70,6 +73,7 @@ export const AuthenticationPanelEditContent: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCheckableCard
+            data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-authenticationHeader"
             id="authenticationHeaderCheckableCard"
             className="authenticationCheckable"
             label={
@@ -82,7 +86,14 @@ export const AuthenticationPanelEditContent: React.FC = () => {
             onChange={() => selectAuthOption('raw')}
           >
             <EuiForm>
-              <EuiFormRow label={TOKEN_LABEL}>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.enterpriseSearch.crawler.authenticationPanel.editForm.headerValueLabel',
+                  {
+                    defaultMessage: 'Header value',
+                  }
+                )}
+              >
                 <EuiFieldPassword
                   type="dual"
                   value={headerContent}

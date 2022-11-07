@@ -6,11 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface BulkGetTestDefinition extends TestDefinition {
   request: Array<{ type: string; id: string }>;
@@ -33,7 +34,10 @@ const createRequest = ({ type, id, namespaces }: BulkGetTestCase) => ({
   ...(namespaces && { namespaces }), // individual "object namespaces" string array
 });
 
-export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
+  const testDataLoader = getTestDataLoader(context);
+  const supertest = context.getService('supertestWithoutAuth');
+
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody =
     (testCases: BulkGetTestCase | BulkGetTestCase[], statusCode: 200 | 403): ExpectResponseBody =>
@@ -91,16 +95,31 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
       const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
       describeFn(description, () => {
-        before(() =>
-          esArchiver.load(
-            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-        after(() =>
-          esArchiver.unload(
-            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
+        before(async () => {
+          await testDataLoader.createFtrSpaces();
+          await testDataLoader.createFtrSavedObjectsData([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+            },
+            {
+              spaceName: SPACE_2.id,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+            },
+          ]);
+        });
+
+        after(async () => {
+          await testDataLoader.deleteFtrSavedObjectsData();
+          await testDataLoader.deleteFtrSpaces();
+        });
 
         for (const test of tests) {
           it(`should return ${test.responseStatusCode} ${test.title}`, async () => {

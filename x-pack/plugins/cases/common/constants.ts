@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CasesFeaturesAllRequired } from './ui/types';
+import { CASE_VIEW_PAGE_TABS } from './types';
+import type { CasesFeaturesAllRequired } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -17,6 +18,14 @@ export const APP_ID = 'cases' as const;
 export const FEATURE_ID = 'generalCases' as const;
 export const APP_OWNER = 'cases' as const;
 export const APP_PATH = '/app/management/insightsAndAlerting/cases' as const;
+export const CASES_CREATE_PATH = '/create' as const;
+export const CASES_CONFIGURE_PATH = '/configure' as const;
+export const CASE_VIEW_PATH = '/:detailName' as const;
+export const CASE_VIEW_COMMENT_PATH = `${CASE_VIEW_PATH}/:commentId` as const;
+export const CASE_VIEW_ALERT_TABLE_PATH =
+  `${CASE_VIEW_PATH}/?tabId=${CASE_VIEW_PAGE_TABS.ALERTS}` as const;
+export const CASE_VIEW_TAB_PATH = `${CASE_VIEW_PATH}/?tabId=:tabId` as const;
+
 /**
  * The main Cases application is in the stack management under the
  * Alerts and Insights section. To do that, Cases registers to the management
@@ -106,16 +115,19 @@ export const OWNER_INFO = {
     appId: 'securitySolutionUI',
     label: 'Security',
     iconType: 'logoSecurity',
+    appRoute: '/app/security',
   },
   [OBSERVABILITY_OWNER]: {
     appId: 'observability-overview',
     label: 'Observability',
     iconType: 'logoObservability',
+    appRoute: '/app/observability',
   },
   [GENERAL_CASES_OWNER]: {
     appId: 'management',
     label: 'Stack',
     iconType: 'casesApp',
+    appRoute: '/app/management/insightsAndAlerting',
   },
 } as const;
 
@@ -129,7 +141,7 @@ export const MAX_CONCURRENT_SEARCHES = 10 as const;
  * Validation
  */
 
-export const MAX_TITLE_LENGTH = 64 as const;
+export const MAX_TITLE_LENGTH = 160 as const;
 
 /**
  * Cases features
@@ -167,6 +179,7 @@ export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
 
 export const DEFAULT_USER_SIZE = 10;
 export const MAX_ASSIGNEES_PER_CASE = 10;
+export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
 
 /**
  * Delays

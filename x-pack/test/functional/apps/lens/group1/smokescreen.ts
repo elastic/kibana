@@ -263,7 +263,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // check for value labels
       data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-      expect(data?.bars?.[0].labels.length).to.eql(0);
+      expect(data?.bars?.[0].labels).not.to.eql(0);
     });
 
     it('should override axis title', async () => {
@@ -503,6 +503,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.editDimensionFormat('Number');
       await PageObjects.lens.closeDimensionEditor();
+
+      await PageObjects.lens.waitForVisualization();
 
       const values = await Promise.all(
         range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))

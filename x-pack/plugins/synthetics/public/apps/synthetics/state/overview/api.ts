@@ -9,6 +9,8 @@ import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   MonitorOverviewResult,
   MonitorOverviewResultCodec,
+  OverviewStatus,
+  OverviewStatusType,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
@@ -19,7 +21,10 @@ export const fetchMonitorOverview = async (
 ): Promise<MonitorOverviewResult> => {
   return await apiService.get(
     SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
-    { perPage: pageState.perPage },
+    { perPage: pageState.perPage, sortOrder: pageState.sortOrder, sortField: pageState.sortField },
     MonitorOverviewResultCodec
   );
 };
+
+export const fetchOverviewStatus = async (): Promise<OverviewStatus> =>
+  apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, {}, OverviewStatusType);
