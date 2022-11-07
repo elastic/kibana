@@ -82,10 +82,9 @@ export function AlertDetailsAppSectionTransactionDuration({
     )
     .asMilliseconds();
 
-  // This is part or the requirements (RFC).
   const TWENTY_TIMES_RULE_WINDOW_MS = 20 * ruleWindowSizeMS;
   /**
-   *
+   * This is part or the requirements (RFC).
    * If the alert is less than 20 units of `FOR THE LAST <x> <units>` then we should draw a time range of 20 units.
    * IE. The user set "FOR THE LAST 5 minutes" at a minimum we should show 100 minutes.
    */
