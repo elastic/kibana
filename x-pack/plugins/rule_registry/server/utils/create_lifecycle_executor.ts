@@ -188,7 +188,7 @@ export const createLifecycleExecutor =
 
         return state.trackedAlerts[alertId].alertUuid;
       },
-      ruleDataClient
+      ruleDataClient,
     };
 
     const nextWrappedState = await wrappedExecutor({

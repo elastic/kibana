@@ -7,8 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  ALERT_REASON, 
-  ALERT_RULE_PARAMETERS
+  ALERT_CONTEXT_CLOUD,
+  ALERT_CONTEXT_CONTAINER,
+  ALERT_CONTEXT_HOST,
+  ALERT_CONTEXT_LABELS,
+  ALERT_CONTEXT_ORCHESTRATOR,
+  ALERT_CONTEXT_TAGS,
+  ALERT_REASON,
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import {
@@ -81,7 +87,13 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
     const esClient = services.scopedClusterClient.asCurrentUser;
 
-    const { alertWithLifecycle, savedObjectsClient, getAlertStartedDate, getAlertUuid, ruleDataClient } = services;
+    const {
+      alertWithLifecycle,
+      savedObjectsClient,
+      getAlertStartedDate,
+      getAlertUuid,
+      ruleDataClient,
+    } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason, additionalContext) =>
       alertWithLifecycle({
         id,
@@ -262,7 +274,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           timestamp: indexedStartedDate,
           spaceId,
         }),
-        ...additionalContext
+        ...additionalContext,
       });
     }
 

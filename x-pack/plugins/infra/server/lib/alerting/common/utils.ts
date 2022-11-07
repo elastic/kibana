@@ -13,14 +13,14 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { PublicContract } from '@kbn/utility-types';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { PublicContract } from '@kbn/utility-types';
 import {
   ALERT_CONTEXT_CLOUD,
   ALERT_CONTEXT_CONTAINER,
@@ -158,11 +158,11 @@ export const fetchAlertbyAlertUUID = async (
               term: {
                 [ALERT_UUID]: alertUuid,
               },
-            }
+            },
           ],
         },
       },
-      size: 1
+      size: 1,
     },
     allow_no_indices: true,
   };

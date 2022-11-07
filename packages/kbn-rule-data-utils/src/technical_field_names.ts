@@ -180,7 +180,7 @@ const fields = {
   ALERT_CONTEXT_HOST,
   ALERT_CONTEXT_ORCHESTRATOR,
   ALERT_CONTEXT_LABELS,
-  ALERT_CONTEXT_TAGS
+  ALERT_CONTEXT_TAGS,
 };
 
 export {
@@ -256,7 +256,7 @@ export {
   ALERT_CONTEXT_HOST,
   ALERT_CONTEXT_ORCHESTRATOR,
   ALERT_CONTEXT_LABELS,
-  ALERT_CONTEXT_TAGS
+  ALERT_CONTEXT_TAGS,
 };
 
 export type TechnicalRuleDataFieldName = ValuesType<typeof fields & typeof namespaces>;
