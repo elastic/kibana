@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
+import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../services/package_prerelease';
+
 import { getRegistryDataStreamAssetBaseName } from '../../../../../../../../../common/services';
 
 import type {
@@ -148,7 +150,11 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   )}
                   {packagePolicyInputStream.release && packagePolicyInputStream.release !== 'ga' ? (
                     <EuiFlexItem grow={false}>
-                      <InlineReleaseBadge release={packagePolicyInputStream.release} />
+                      <InlineReleaseBadge
+                        release={mapPackageReleaseToIntegrationCardRelease(
+                          packagePolicyInputStream.release
+                        )}
+                      />
                     </EuiFlexItem>
                   ) : null}
                 </EuiFlexGroup>
