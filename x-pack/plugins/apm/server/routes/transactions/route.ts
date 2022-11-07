@@ -12,7 +12,6 @@ import {
   latencyAggregationTypeRt,
 } from '../../../common/latency_aggregation_types';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../services/get_service_transaction_groups';
 import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../services/get_service_transaction_group_detailed_statistics';
 import { getTransactionBreakdown } from './breakdown';
@@ -57,11 +56,8 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
     isAggregationAccurate: boolean;
     bucketSize: number;
   }> => {
-    const { params } = resources;
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
+    const { params, config } = resources;
+    const apmEventClient = await getApmEventClient(resources);
     const {
       path: { serviceName },
       query: {
@@ -73,7 +69,6 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
         end,
       },
     } = params;
-    const { config } = setup;
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
       config,
@@ -145,11 +140,8 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       impact: number;
     }>;
   }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
-    const { params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { params, config } = resources;
 
     const {
       path: { serviceName },
@@ -167,7 +159,7 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
     } = params;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      config: setup.config,
+      config,
       apmEventClient,
       kuery,
       start,
@@ -231,11 +223,8 @@ const transactionLatencyChartsRoute = createApmServerRoute({
           overallAvgDuration: null;
         };
   }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
-    const { params, logger } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { params, logger, config } = resources;
 
     const { serviceName } = params.path;
     const {
@@ -250,7 +239,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      config: setup.config,
+      config,
       apmEventClient,
       kuery,
       start,
@@ -373,11 +362,8 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
       legendValue: string;
     }>;
   }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
-    const { params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { params, config } = resources;
 
     const { serviceName } = params.path;
     const { environment, kuery, transactionName, transactionType, start, end } =
@@ -389,7 +375,7 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
       serviceName,
       transactionName,
       transactionType,
-      config: setup.config,
+      config,
       apmEventClient,
       start,
       end,
@@ -434,12 +420,9 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
           average: null;
         };
   }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
 
-    const { params } = resources;
+    const { params, config } = resources;
     const { serviceName } = params.path;
     const {
       environment,
@@ -452,7 +435,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      config: setup.config,
+      config,
       apmEventClient,
       kuery,
       start,
@@ -512,18 +495,15 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
           average: null;
         };
   }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
 
-    const { params } = resources;
+    const { params, config } = resources;
     const { serviceName } = params.path;
     const { environment, kuery, transactionType, start, end, offset } =
       params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      config: setup.config,
+      config,
       apmEventClient,
       kuery,
       start,
@@ -583,12 +563,9 @@ const transactionChartsColdstartRateByTransactionNameRoute =
             average: null;
           };
     }> => {
-      const [setup, apmEventClient] = await Promise.all([
-        setupRequest(resources),
-        getApmEventClient(resources),
-      ]);
+      const apmEventClient = await getApmEventClient(resources);
 
-      const { params } = resources;
+      const { params, config } = resources;
       const { serviceName } = params.path;
       const {
         environment,
@@ -601,7 +578,7 @@ const transactionChartsColdstartRateByTransactionNameRoute =
       } = params.query;
 
       const searchAggregatedTransactions = await getSearchTransactionsEvents({
-        config: setup.config,
+        config,
         apmEventClient,
         kuery,
         start,

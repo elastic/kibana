@@ -1918,7 +1918,7 @@
         "tags": [],
         "label": "CollectorFetchMethod",
         "description": [
-          "\nThe fetch method has the context of the Collector itself\n(this has access to all the properties of the collector like the logger)\nand the the first parameter is {@link CollectorFetchContext}."
+          "\nThe fetch method has the context of the Collector itself\n(this has access to all the properties of the collector like the logger)\nand the first parameter is {@link CollectorFetchContext}."
         ],
         "signature": [
           "(this: ",
