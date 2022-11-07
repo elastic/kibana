@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
 import React, { memo } from 'react';
 import { Switch, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
@@ -32,7 +31,7 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
-import { NoPermissions } from '../components/no_permissons';
+import { PrivilegedRoute } from '../components/privileged_route';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -75,16 +74,6 @@ const ResponseActionsTelemetry = () => (
     <SpyRoute pageName={SecurityPageName.responseActionsHistory} />
   </TrackApplicationView>
 );
-
-interface PrivilegedRouteProps {
-  path: string;
-  component: ComponentType<{}>;
-  privilege: boolean;
-}
-
-const PrivilegedRoute = ({ component, privilege, path }: PrivilegedRouteProps) => {
-  return <Route path={path} component={privilege ? component : NoPermissions} />;
-};
 
 export const ManagementContainer = memo(() => {
   const {
