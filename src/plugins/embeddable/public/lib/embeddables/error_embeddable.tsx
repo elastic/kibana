@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { EmbeddablePanelError } from '../panel/embeddable_panel_error';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';
@@ -33,20 +32,8 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public reload() {}
 
   public render() {
-    const title = typeof this.error === 'string' ? this.error : this.error.message;
-    const body = (
-      <Markdown markdown={title} openLinksInNewTab={true} data-test-subj="errorMessageMarkdown" />
-    );
+    const error = typeof this.error === 'string' ? { message: this.error, name: '' } : this.error;
 
-    return (
-      <div className="embPanel__content" data-test-subj="embeddableStackError">
-        <EuiEmptyPrompt
-          className="embPanel__error"
-          iconType="alert"
-          iconColor="danger"
-          body={body}
-        />
-      </div>
-    );
+    return <EmbeddablePanelError embeddable={this} error={error} />;
   }
 }

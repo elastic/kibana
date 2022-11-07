@@ -120,6 +120,9 @@ export function makeFtrConfigProvider(
             journeyName: config.getName(),
             ftrConfig: config.getRepoRelPath(),
             performancePhase: process.env.TEST_PERFORMANCE_PHASE,
+            branch: process.env.BUILDKITE_BRANCH,
+            gitRev: process.env.BUILDKITE_COMMIT,
+            ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
           })
             .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
             .join(','),
