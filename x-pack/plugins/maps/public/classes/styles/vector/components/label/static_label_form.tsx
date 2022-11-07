@@ -18,7 +18,11 @@ interface Props {
   styleProperty: StaticTextProperty;
 }
 
-export function StaticLabelForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }: Props) {
+export function StaticLabelForm({
+  onStaticStyleChange,
+  staticDynamicSelect,
+  styleProperty,
+}: Props) {
   const onValueChange = (event: ChangeEvent<HTMLInputElement>) => {
     onStaticStyleChange(styleProperty.getStyleName(), { value: event.target.value });
   };

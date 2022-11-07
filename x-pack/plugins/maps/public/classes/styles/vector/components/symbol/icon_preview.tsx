@@ -19,10 +19,7 @@ import {
 import { maplibregl, Map as MapboxMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
-import {
-  CUSTOM_ICON_PIXEL_RATIO,
-  createSdfIcon,
-} from '../../symbol_utils';
+import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../symbol_utils';
 
 export interface Props {
   svg: string;

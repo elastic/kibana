@@ -32,7 +32,7 @@ export function DynamicLabelForm({
     if (!field) {
       return;
     }
-    
+
     onDynamicStyleChange(styleProperty.getStyleName(), { ...styleOptions, field });
   };
 

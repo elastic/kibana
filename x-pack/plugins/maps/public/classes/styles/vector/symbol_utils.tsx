@@ -42,7 +42,17 @@ export const SYMBOL_OPTIONS = Object.entries(MAKI_ICONS).map(([value, { svg, lab
  * @param {number} [radius=0.25] - size of SDF around the cutoff as percent of output icon size
  * @return {ImageData} image that can be added to a MapLibre map with option `{ sdf: true }`
  */
-export async function createSdfIcon({ svg, renderSize = 64, cutoff = 0.25, radius = 0.25 }: { svg: string, renderSize?: number, cutoff?: number, radius?: number }): Promise<ImageData | null> {
+export async function createSdfIcon({
+  svg,
+  renderSize = 64,
+  cutoff = 0.25,
+  radius = 0.25,
+}: {
+  svg: string;
+  renderSize?: number;
+  cutoff?: number;
+  radius?: number;
+}): Promise<ImageData | null> {
   const buffer = 3;
   const size = renderSize + buffer * 4;
   const svgCanvas = document.createElement('canvas');

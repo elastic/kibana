@@ -270,7 +270,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
       const data = new RGBAImage({ width, height });
       RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
-      mbMap.addImage(imageId, data, { pixelRatio, sdf });
+      mbMap.addImage(imageId, data as RGBAImage & { width: number; height: number }, {
+        pixelRatio,
+        sdf,
+      });
     }
   }
 
