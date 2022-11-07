@@ -95,6 +95,8 @@ export const ManagementContainer = memo(() => {
     canReadEventFilters,
     canReadActionsLogManagement,
     canReadEndpointList,
+    canIsolateHost,
+    canAccessEndpointManagement, // is a superuser
   } = useUserPrivileges().endpointPrivileges;
 
   // Lets wait until we can verify permissions
@@ -124,9 +126,12 @@ export const ManagementContainer = memo(() => {
         component={EventFilterTelemetry}
         privilege={canReadEventFilters}
       />
-      <Route
+      <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
+        // remove superuser check in v2 rbac
+        // and replace canIsolateHost with canReadHostIsolationExceptions
+        privilege={canAccessEndpointManagement || canIsolateHost}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
