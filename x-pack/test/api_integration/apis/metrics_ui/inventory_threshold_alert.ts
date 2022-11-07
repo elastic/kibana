@@ -691,11 +691,11 @@ export default function ({ getService }: FtrProviderContext) {
               host: undefined,
               container: [
                 {
-                  "id": "container-03"
+                  id: 'container-03',
                 },
                 {
-                  "id": "container-04"
-                }
+                  id: 'container-04',
+                },
               ],
               orchestrator: undefined,
               labels: undefined,
@@ -719,11 +719,11 @@ export default function ({ getService }: FtrProviderContext) {
               host: undefined,
               container: [
                 {
-                  "id": "container-01"
+                  id: 'container-01',
                 },
                 {
-                  "id": "container-02"
-                }
+                  id: 'container-02',
+                },
               ],
               orchestrator: undefined,
               labels: undefined,

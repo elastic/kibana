@@ -15,11 +15,7 @@ import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { createMetricAggregations } from './create_metric_aggregations';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { createBucketSelector } from './create_bucket_selector';
-import {
-  KUBERNETES_POD_UID,
-  NUMBER_OF_DOCUMENTS,
-  termsAggField,
-} from '../../common/utils';
+import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
 
 export const createRequest = (
   index: string,
@@ -109,7 +105,12 @@ export const createRequest = (
       aggs: {
         nodes: {
           composite,
-          aggs: { ...metricAggregations, ...bucketSelector, ...additionalContextAgg, ...containerContextAgg },
+          aggs: {
+            ...metricAggregations,
+            ...bucketSelector,
+            ...additionalContextAgg,
+            ...containerContextAgg,
+          },
         },
       },
     },
