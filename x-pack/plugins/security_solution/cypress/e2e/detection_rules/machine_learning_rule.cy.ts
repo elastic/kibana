@@ -107,7 +107,7 @@ describe('Detection rules, machine learning', () => {
       );
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Machine Learning');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-      cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'StartedStarted');
+      cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'StoppedStopped');
       cy.get(MACHINE_LEARNING_JOB_ID).should(
         'have.text',
         getMachineLearningRule().machineLearningJobs.join('')
