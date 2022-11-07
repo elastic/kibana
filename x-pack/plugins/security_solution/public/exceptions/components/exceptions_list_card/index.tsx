@@ -19,10 +19,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { ExceptionListTypeEnum, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
+import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import type { ExceptionListInfo } from '../../hooks/use_all_exception_lists';
 import { TitleBadge } from '../title_badge';
 import * as i18n from '../../translations/translations';
@@ -72,27 +75,60 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
     const {
       listId,
       listName,
-      listDescription,
+      listType,
       createdAt,
       createdBy,
-      listRulesCount,
-      exceptionItemsCount,
       exceptions,
       pagination,
+      ruleReferences,
       toggleAccordion,
       openAccordionId,
       menuActionItems,
-      exceptionViewerStatus,
-      ruleReferences,
+      listRulesCount,
+      listDescription,
+      exceptionItemsCount,
       onEditExceptionItem,
       onDeleteException,
       onPaginationChange,
       setToggleAccordion,
+      exceptionViewerStatus,
+      showAddExceptionFlyout,
+      showEditExceptionFlyout,
+      exceptionToEdit,
+      onAddExceptionClick,
+      handleConfirmExceptionFlyout,
+      handleCancelExceptionItemFlyout,
     } = useExceptionsListCard({
       exceptionsList,
       handleExport,
       handleDelete,
     });
+
+    if (showAddExceptionFlyout)
+      return (
+        <AddExceptionFlyout
+          rules={null}
+          isBulkAction={false}
+          isEndpointItem={listType === ExceptionListTypeEnum.ENDPOINT}
+          onCancel={handleCancelExceptionItemFlyout}
+          onConfirm={handleConfirmExceptionFlyout}
+          data-test-subj="addExceptionItemFlyoutInList"
+          showAlertCloseOptions={false} // TODO ask if we need it
+          // ask if we need the add to rule/list section and which list should we link the exception here
+        />
+      );
+    if (showEditExceptionFlyout && exceptionToEdit)
+      return (
+        <EditExceptionFlyout
+          list={exceptionsList}
+          itemToEdit={exceptionToEdit}
+          showAlertCloseOptions
+          onCancel={handleCancelExceptionItemFlyout}
+          onConfirm={handleConfirmExceptionFlyout}
+          data-test-subj="editExceptionItemFlyoutInList"
+        />
+      );
+
     return (
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
@@ -170,7 +206,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   onDeleteException={onDeleteException}
                   onEditExceptionItem={onEditExceptionItem}
                   onPaginationChange={onPaginationChange}
-                  onCreateExceptionListItem={() => {}} // remove from here
+                  onCreateExceptionListItem={onAddExceptionClick} // remove from here
                   lastUpdated={null}
                 />
               </ExceptionPanel>

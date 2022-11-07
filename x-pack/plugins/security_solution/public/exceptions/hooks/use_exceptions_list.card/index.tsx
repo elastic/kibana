@@ -34,12 +34,14 @@ export const useExceptionsListCard = ({
 }) => {
   const [viewerStatus, setViewerStatus] = useState<ViewerStatus | string>(ViewerStatus.LOADING);
   const [exceptionToEdit, setExceptionToEdit] = useState<ExceptionListItemSchema>();
+  const [showAddExceptionFlyout, setShowAddExceptionFlyout] = useState(false);
   const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
 
   const {
     name: listName,
     list_id: listId,
     rules: listRules,
+    type: listType,
     created_by: createdBy,
     created_at: createdAt,
     description: listDescription,
@@ -119,6 +121,27 @@ export const useExceptionsListCard = ({
     ]
   );
 
+  // Once details Page is added all of these methods will be used from it as well
+  // as their own states
+  const onAddExceptionClick = useCallback(() => {
+    setShowAddExceptionFlyout(true);
+    fetchItems();
+  }, [fetchItems, setShowAddExceptionFlyout]);
+
+  const handleCancelExceptionItemFlyout = () => {
+    setShowAddExceptionFlyout(false);
+    setShowEditExceptionFlyout(false);
+  };
+  const handleConfirmExceptionFlyout = useCallback(
+    (didExceptionChange: boolean): void => {
+      setShowAddExceptionFlyout(false);
+      setShowEditExceptionFlyout(false);
+      if (!didExceptionChange) return;
+      fetchItems();
+    },
+    [fetchItems, setShowAddExceptionFlyout, setShowEditExceptionFlyout]
+  );
+
   return {
     listId,
     listName,
@@ -127,9 +150,9 @@ export const useExceptionsListCard = ({
     createdBy,
     listRulesCount: listRules.length.toString(),
     exceptionItemsCount: pagination.totalItemCount.toString(),
-
+    listType,
     menuActionItems,
-
+    showAddExceptionFlyout,
     toggleAccordion,
     openAccordionId,
     viewerStatus,
@@ -144,5 +167,8 @@ export const useExceptionsListCard = ({
     onDeleteException,
     onPaginationChange,
     setToggleAccordion,
+    onAddExceptionClick,
+    handleConfirmExceptionFlyout,
+    handleCancelExceptionItemFlyout,
   };
 };
