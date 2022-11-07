@@ -89,7 +89,7 @@ describe('IndexViewLogic', () => {
     describe('FetchIndexApiWrapperLogic.apiSuccess', () => {
       it('should update values', () => {
         CachedFetchIndexApiLogic.actions.apiSuccess({
-          ...connectorIndex,
+          ...CONNECTOR_VALUES.index,
           connector: { ...connectorIndex.connector!, sync_now: true },
         });
 
@@ -99,39 +99,38 @@ describe('IndexViewLogic', () => {
         });
 
         expect(IndexViewLogic.values.fetchIndexApiData).toEqual({
-          ...connectorIndex,
+          ...CONNECTOR_VALUES.index,
           connector: { ...connectorIndex.connector, sync_now: true },
         });
 
         expect(IndexViewLogic.values.fetchIndexApiData).toEqual({
-          ...connectorIndex,
+          ...CONNECTOR_VALUES.index,
+          connector: { ...connectorIndex.connector, sync_now: true },
+        });
+
+        expect(IndexViewLogic.values.index).toEqual({
+          ...CONNECTOR_VALUES.index,
+          connector: { ...connectorIndex.connector, sync_now: true },
+        });
+
+        expect(IndexViewLogic.values.indexData).toEqual({
+          ...CONNECTOR_VALUES.index,
           connector: { ...connectorIndex.connector, sync_now: true },
         });
 
         expect(IndexViewLogic.values).toEqual(
           expect.objectContaining({
-            ...CONNECTOR_VALUES,
-            index: {
-              ...CONNECTOR_VALUES.index,
-              connector: { ...CONNECTOR_VALUES.index.connector, sync_now: true },
-            },
-            indexData: {
-              ...CONNECTOR_VALUES.indexData,
-              connector: { ...CONNECTOR_VALUES.indexData.connector, sync_now: true },
-            },
+            ingestionMethod: CONNECTOR_VALUES.ingestionMethod,
+            ingestionStatus: CONNECTOR_VALUES.ingestionStatus,
             isCanceling: false,
             isConnectorIndex: true,
             isWaitingForSync: true,
+            lastUpdated: CONNECTOR_VALUES.lastUpdated,
             localSyncNowValue: true,
             pipelineData: undefined,
             syncStatus: SyncStatus.COMPLETED,
           })
         );
-
-        expect(IndexViewLogic.values.indexData).toEqual({
-          ...CONNECTOR_VALUES.indexData,
-          connector: { ...CONNECTOR_VALUES.indexData.connector, sync_now: true },
-        });
       });
 
       it('should update values with no connector', () => {

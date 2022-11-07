@@ -53,6 +53,7 @@ import {
   AttachMlInferencePipelineResponse,
 } from '../../../api/pipelines/attach_ml_inference_pipeline';
 import {
+  CreateMlInferencePipelineApiLogic,
   CreateMlInferencePipelineApiLogicArgs,
   CreateMlInferencePipelineResponse,
 } from '../../../api/pipelines/create_ml_inference_pipeline';

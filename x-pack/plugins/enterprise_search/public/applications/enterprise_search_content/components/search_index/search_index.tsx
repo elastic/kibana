@@ -73,10 +73,10 @@ export const SearchIndex: React.FC = () => {
     guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('search', 'add_data')
   );
   useEffect(() => {
-    if (isDataStepActive && indexData?.count) {
+    if (isDataStepActive && index?.count) {
       guidedOnboarding.guidedOnboardingApi?.completeGuideStep('search', 'add_data');
     }
-  }, [isDataStepActive, indexData?.count]);
+  }, [isDataStepActive, index?.count]);
 
   useEffect(() => {
     if (

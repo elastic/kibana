@@ -247,7 +247,7 @@ describe('PipelinesLogic', () => {
       it('re-fetches pipeline data', async () => {
         jest.spyOn(PipelinesLogic.actions, 'fetchMlInferenceProcessors');
         jest.spyOn(PipelinesLogic.actions, 'fetchCustomPipeline');
-        FetchIndexApiLogic.actions.apiSuccess(connectorIndex);
+        CachedFetchIndexApiLogic.actions.apiSuccess(connectorIndex);
         DetachMlInferencePipelineApiLogic.actions.apiSuccess({
           updated: 'mock-pipeline-name',
         });

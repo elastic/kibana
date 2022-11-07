@@ -247,7 +247,7 @@ export const MLInferenceLogic = kea<
     ],
     values: [
       CachedFetchIndexApiLogic,
-      ['fetchIndexApiData as index'],
+      ['indexData as index'],
       FetchMlInferencePipelinesApiLogic,
       ['data as mlInferencePipelinesData'],
       MappingsApiLogic,
