@@ -531,3 +531,316 @@ metadata:
     k8s-app: elastic-agent
 ---
 `;
+
+export const elasticAgentEndpointManagedManifest = `apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: elastic-agent
+  namespace: kube-system
+  labels:
+    app: elastic-agent
+spec:
+  selector:
+    matchLabels:
+      app: elastic-agent
+  template:
+    metadata:
+      labels:
+        app: elastic-agent
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      serviceAccountName: elastic-agent
+      hostNetwork: true
+      hostPID: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: elastic-agent
+        image: docker.elastic.co/beats/elastic-agent:VERSION
+        env:
+        - name: FLEET_ENROLL
+          value: '1'
+        - name: FLEET_INSECURE
+          value: 'true'
+        - name: FLEET_URL
+          value: https://fleet-server:8220
+        - name: FLEET_ENROLLMENT_TOKEN
+          value: token-id
+        - name: KIBANA_HOST
+          value: http://kibana:5601
+        - name: KIBANA_FLEET_USERNAME
+          value: elastic
+        - name: KIBANA_FLEET_PASSWORD
+          value: changeme
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: ELASTIC_ENDPOINT_K8S
+          value: 'true'
+        securityContext:
+          runAsUser: 0
+        resources:
+          limits:
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: proc
+          mountPath: /hostfs/proc
+          readOnly: true
+        - name: cgroup
+          mountPath: /hostfs/sys/fs/cgroup
+          readOnly: true
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: varlog
+          mountPath: /var/log
+          readOnly: true
+        - name: etc-full
+          mountPath: /hostfs/etc
+          readOnly: true
+        - name: var-lib
+          mountPath: /hostfs/var/lib
+          readOnly: true
+        - name: etc-mid
+          mountPath: /etc/machine-id
+          readOnly: true
+      - name: elastic-sec-endpoint
+        image: docker.elastic.co/elastic-security/elastic-sec-endpoint:VERSION
+        securityContext:
+          runAsUser: 0
+          privileged: true
+        volumeMounts:
+        - name: boot
+          mountPath: /boot
+        - name: debug
+          mountPath: /sys/kernel/debug
+        - name: bpf
+          mountPath: /sys/fs/bpf
+        - name: etc-passwd
+          mountPath: /mnt/host/etc/passwd
+          readOnly: true
+        - name: etc-group
+          mountPath: /mnt/host/etc/group
+          readOnly: true
+        env:
+        - name: ELASTIC_ENDPOINT_K8S
+          value: 'true'
+      - name: elastic-sec-attendant
+        image: docker.elastic.co/elastic-security/elastic-sec-attendant:VERSION
+      volumes:
+      - name: proc
+        hostPath:
+          path: /proc
+      - name: cgroup
+        hostPath:
+          path: /sys/fs/cgroup
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: etc-full
+        hostPath:
+          path: /etc
+      - name: var-lib
+        hostPath:
+          path: /var/lib
+      - name: etc-mid
+        hostPath:
+          path: /etc/machine-id
+          type: File
+      - name: etc-passwd
+        hostPath:
+          path: /etc/passwd
+          type: File
+      - name: etc-group
+        hostPath:
+          path: /etc/group
+          type: File
+      - name: boot
+        hostPath:
+          path: /boot
+      - name: debug
+        hostPath:
+          path: /sys/kernel/debug
+      - name: bpf
+        hostPath:
+          path: /sys/fs/bpf
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: elastic-agent
+subjects:
+- kind: ServiceAccount
+  name: elastic-agent
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: elastic-agent
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: kube-system
+  name: elastic-agent
+subjects:
+- kind: ServiceAccount
+  name: elastic-agent
+  namespace: kube-system
+roleRef:
+  kind: Role
+  name: elastic-agent
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: elastic-agent-kubeadm-config
+  namespace: kube-system
+subjects:
+- kind: ServiceAccount
+  name: elastic-agent
+  namespace: kube-system
+roleRef:
+  kind: Role
+  name: elastic-agent-kubeadm-config
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: elastic-agent
+  labels:
+    k8s-app: elastic-agent
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - nodes
+  - namespaces
+  - events
+  - pods
+  - services
+  - configmaps
+  - serviceaccounts
+  - persistentvolumes
+  - persistentvolumeclaims
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  - deployments
+  - replicasets
+  - daemonsets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ''
+  resources:
+  - nodes/stats
+  verbs:
+  - get
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  - cronjobs
+  verbs:
+  - get
+  - list
+  - watch
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrolebindings
+  - clusterroles
+  - rolebindings
+  - roles
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: elastic-agent
+  namespace: kube-system
+  labels:
+    k8s-app: elastic-agent
+rules:
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - create
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: elastic-agent-kubeadm-config
+  namespace: kube-system
+  labels:
+    k8s-app: elastic-agent
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - configmaps
+  resourceNames:
+  - kubeadm-config
+  verbs:
+  - get
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: elastic-agent
+  namespace: kube-system
+  labels:
+    k8s-app: elastic-agent
+---
+`;
