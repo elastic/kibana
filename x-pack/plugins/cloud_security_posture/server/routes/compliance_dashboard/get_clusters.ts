@@ -71,7 +71,7 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
 
     const meta = {
       clusterId: cluster.key,
-      clusterName: latestFindingHit._source.cluster?.name,
+      clusterName: latestFindingHit._source.orchestrator?.cluster?.name,
       benchmarkName: latestFindingHit._source.rule.benchmark.name,
       benchmarkId: latestFindingHit._source.rule.benchmark.id,
       lastUpdate: latestFindingHit._source['@timestamp'],
