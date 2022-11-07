@@ -115,12 +115,13 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   async executor({
     params,
     services: {
-      alertWithLifecycle,
-      scopedClusterClient,
-      savedObjectsClient,
-      getAlertStartedDate,
       alertFactory,
+      alertWithLifecycle,
+      getAlertStartedDate,
+      savedObjectsClient,
+      scopedClusterClient,
     },
+    spaceId,
     state,
     startedAt,
   }) {
@@ -178,7 +179,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
         });
         alertInstance.scheduleActions(DURATION_ANOMALY.id, {
           [ALERT_REASON_MSG]: alertReasonMessage,
-          [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+          [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
           ...summary,
         });
       });

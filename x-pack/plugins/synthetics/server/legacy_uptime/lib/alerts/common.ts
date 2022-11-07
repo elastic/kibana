@@ -9,6 +9,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../../common/runtime_types';
 
 export type UpdateUptimeAlertState = (
@@ -62,10 +63,18 @@ export const updateState: UpdateUptimeAlertState = (state, isTriggeredNow) => {
 export const generateAlertMessage = (messageTemplate: string, fields: Record<string, any>) => {
   return Mustache.render(messageTemplate, { context: { ...fields }, state: { ...fields } });
 };
-export const getViewInAppUrl = (relativeViewInAppUrl: string, basePath: IBasePath) =>
-  basePath.publicBaseUrl
-    ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
-    : relativeViewInAppUrl;
+
+export const getViewInAppUrl = (
+  basePath: IBasePath,
+  spaceId: string,
+  relativeViewInAppUrl: string
+) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
+
+export const getAlertDetailsUrl = (
+  basePath: IBasePath,
+  spaceId: string,
+  alertUuid: string | null
+) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
 export const setRecoveredAlertsContext = (alertFactory: RuleExecutorServices['alertFactory']) => {
   const { getRecoveredAlerts } = alertFactory.done();
