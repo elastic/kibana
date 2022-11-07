@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../common/lib/kibana';
 import { BulkDeleteResponse } from '../../types';
@@ -18,8 +18,11 @@ import {
   multipleRuleTitle,
 } from '../components/translations';
 
-export const useBulkDeleteResponse = (props: { onSearchPopulate?: (filter: string) => void }) => {
-  const { onSearchPopulate } = props;
+export const useBulkDeleteResponse = ({
+  onSearchPopulate,
+}: {
+  onSearchPopulate?: (filter: string) => void;
+}) => {
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -36,25 +39,22 @@ export const useBulkDeleteResponse = (props: { onSearchPopulate?: (filter: strin
   );
 
   const renderToastErrorBody = useCallback(
-    (response: BulkDeleteResponse) => {
+    (response: BulkDeleteResponse, messageType: 'warning' | 'danger') => {
       return (
-        <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
           {onSearchPopulate && (
             <EuiFlexItem grow={false}>
-              <div>
-                <EuiButtonEmpty
-                  iconType="search"
-                  size="xs"
-                  flush="left"
-                  onClick={() => onSearchPopulateInternal(response)}
-                  data-test-subj="bulkEditResponseFilterErrors"
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.filterByErrors"
-                    defaultMessage="Filter by errored rules"
-                  />
-                </EuiButtonEmpty>
-              </div>
+              <EuiButton
+                color={messageType}
+                size="s"
+                onClick={() => onSearchPopulateInternal(response)}
+                data-test-subj="bulkDeleteResponseFilterErrors"
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.filterByErrors"
+                  defaultMessage="Filter by errored rules"
+                />
+              </EuiButton>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -82,7 +82,7 @@ export const useBulkDeleteResponse = (props: { onSearchPopulate?: (filter: strin
       if (numberOfErrors === total) {
         toasts.addDanger({
           title: getFailedNotificationText(numberOfErrors, singleRuleTitle, multipleRuleTitle),
-          text: toMountPoint(renderToastErrorBody(response)),
+          text: toMountPoint(renderToastErrorBody(response, 'danger')),
         });
         return;
       }
@@ -95,7 +95,7 @@ export const useBulkDeleteResponse = (props: { onSearchPopulate?: (filter: strin
           singleRuleTitle,
           multipleRuleTitle
         ),
-        text: toMountPoint(renderToastErrorBody(response)),
+        text: toMountPoint(renderToastErrorBody(response, 'warning')),
       });
     },
     [toasts, renderToastErrorBody]

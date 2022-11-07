@@ -98,7 +98,7 @@ export const getPartialSuccessNotificationText = (
   multipleTitle: string
 ) =>
   i18n.translate(
-    'xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText',
+    'xpack.triggersActionsUI.components.deleteSelectedIdsPartialSuccessNotification.descriptionText',
     {
       defaultMessage:
         'Deleted {numberOfSuccess, number} {numberOfSuccess, plural, one {{singleTitle}} other {{multipleTitle}}}, {numberOfErrors, number} {numberOfErrors, plural, one {{singleTitle}} other {{multipleTitle}}} encountered errors',
