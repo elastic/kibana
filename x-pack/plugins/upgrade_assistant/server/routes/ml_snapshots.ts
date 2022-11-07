@@ -331,16 +331,17 @@ export function registerMlSnapshotRoutes({
       path: `${API_BASE_PATH}/ml_upgrade_mode`,
       validate: false,
     },
-    versionCheckHandlerWrapper(async ({ core, ...rest }, request, response) => {
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
         /**
          * Always return false if featureSet.mlSnapshots is set to false
-         * This disables showing the ML deprecations in the UA UI
+         * This disables possibly showing a needless warning about ML
+         * upgrade mode when there's never a need to upgrade ML job
+         * snapshots in minor version upgrades.
          * 
-         * This config should be set to false only on the `x.last` versions
-         * ML `upgrade_mode` can be enabeld from outside Kibana, the prurpose
-         * of this feature guard is to hide all ML related deprecations from the end user 
-         * until the next major upgrade.
+         * This config should be set to false only on the `x.last` versions, or when
+         * the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
+         * is incremented to something higher than 7.0.0 in the Elasticsearch code.
          */
         if (!featureSet.mlSnapshots) {
            return response.ok({

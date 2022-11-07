@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
-import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../common/types';
+import { EnrichedDeprecationInfo, ESUpgradeStatus, FeatureSet } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
 import {
@@ -16,7 +16,8 @@ import {
 } from './es_system_indices_migration';
 
 export async function getESUpgradeStatus(
-  dataClient: IScopedClusterClient
+  dataClient: IScopedClusterClient,
+  featureSet: FeatureSet,
 ): Promise<ESUpgradeStatus> {
   const deprecations = await dataClient.asCurrentUser.migration.deprecations();
 
@@ -61,7 +62,23 @@ export async function getESUpgradeStatus(
               correctiveAction: getCorrectiveAction(message, metadata),
             };
           }
-        );
+        ).filter(({ correctiveAction, type }) => {
+          /**
+           * This disables showing the ML deprecations in the UA if featureSet.mlSnapshots
+           * is set to `false`.
+           * 
+           * This config should be set to true only on the `x.last` versions, or when
+           * the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
+           * is incremented to something higher than 7.0.0 in the Elasticsearch code.
+           */
+          if (!featureSet.mlSnapshots) {
+            if (type === 'ml_settings' || correctiveAction?.type === 'mlSnapshot') {
+              return false;
+            }
+          }
+
+          return true;
+        });
 
         combinedDeprecations = combinedDeprecations.concat(enrichedDeprecationInfo);
       }

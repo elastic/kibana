@@ -13,8 +13,17 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 // -------------------------------
 const configSchema = schema.object({
   featureSet: schema.object({
-    // only enabled before major version upgrades. Currently this is manually set
-    // to true on every `x.last` version.
+    /**
+     * Ml Snapshot should only be enabled before major version upgrades. Currently this
+     * is manually set to `true` on every `x.last` version.
+     * ML Upgrade mode can be toggled from outside Kibana, the purpose
+     * of this feature guard is to hide all ML related deprecations from the end user 
+     * until the next major upgrade.
+     * 
+     * When we want to enable ML model snapshot deprecation warnings again we need
+     * to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
+     * to something higher than 7.0.0 in the Elasticsearch code.
+     */
     mlSnapshots: schema.boolean({ defaultValue: false }),
     migrateIndices: schema.boolean({ defaultValue: false }),
   }),

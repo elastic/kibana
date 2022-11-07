@@ -34,6 +34,12 @@ describe('ES deprecations API', () => {
   beforeEach(() => {
     mockRouter = createMockRouter();
     routeDependencies = {
+      config: {
+        featureSet: {
+          mlSnapshots: true,
+          migrateIndices: true,
+        },
+      },
       router: mockRouter,
       lib: { handleEsError },
     };
