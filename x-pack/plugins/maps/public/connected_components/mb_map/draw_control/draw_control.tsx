@@ -7,8 +7,11 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
+// @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
+// @ts-expect-error
 import mapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
+// @ts-expect-error
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
