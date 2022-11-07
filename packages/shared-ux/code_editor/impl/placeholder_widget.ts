@@ -8,42 +8,44 @@
 
 import { monaco } from '@kbn/monaco';
 
-export class PlaceholderWidget implements monaco.editor.IContentWidget {
-  constructor(
-    private readonly placeholderText: string,
-    private readonly editor: monaco.editor.ICodeEditor
-  ) {
-    editor.addContentWidget(this);
-  }
+export interface PlaceholderWidgetProps {
+  placeholderText: string;
+  editor: monaco.editor.ICodeEditor;
+  widget?: monaco.editor.IContentWidget;
+  domNode?: HTMLElement;
+}
 
-  private domNode: undefined | HTMLElement;
-
-  public getId(): string {
-    return 'KBN_CODE_EDITOR_PLACEHOLDER_WIDGET_ID';
-  }
-
-  public getDomNode(): HTMLElement {
-    if (!this.domNode) {
-      const domNode = document.createElement('div');
-      domNode.innerText = this.placeholderText;
-      domNode.className = 'kibanaCodeEditor__placeholderContainer';
-      this.editor.applyFontInfo(domNode);
-      this.domNode = domNode;
+export const createPlaceholderWidget = ({placeholderText, editor, domNode}: PlaceholderWidgetProps) => {
+  const widget = {
+    getDomNode: () => {
+      if (!domNode) {
+        const domNode = document.createElement('div');
+        domNode.innerText = placeholderText;
+        domNode.className = 'kibanaCodeEditor__placeholderContainer';
+        editor.applyFontInfo(domNode);
+        return domNode
+      }
+      return domNode},
+    getPosition: (): monaco.editor.IContentWidgetPosition | null => {
+      return {
+        position: {
+          column: 1,
+          lineNumber: 1,
+        },
+        preference: [monaco.editor.ContentWidgetPositionPreference.EXACT],
+      };
+    },
+    getId: (): string => {
+      return 'KBN_CODE_EDITOR_PLACEHOLDER_WIDGET_ID';
     }
-    return this.domNode;
   }
 
-  public getPosition(): monaco.editor.IContentWidgetPosition | null {
-    return {
-      position: {
-        column: 1,
-        lineNumber: 1,
-      },
-      preference: [monaco.editor.ContentWidgetPositionPreference.EXACT],
-    };
-  }
+  return widget;
+}
 
-  public dispose(): void {
-    this.editor.removeContentWidget(this);
+export const dispose = ({ editor, widget }: PlaceholderWidgetProps): void => {
+  if (!widget) {
+    new Error('There is no widget to dispose');
   }
+  return editor.removeContentWidget(widget!);
 }

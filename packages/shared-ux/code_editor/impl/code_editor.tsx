@@ -28,7 +28,7 @@ import classNames from 'classnames';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
-import { PlaceholderWidget } from './placeholder_widget';
+import { createPlaceholderWidget, dispose } from './placeholder_widget';
 
 import { CodeEditorStyles } from './editor.styles';
 
@@ -164,7 +164,7 @@ export const CodeEditor: React.FC<Props> = ({
   const isReadOnly = options?.readOnly ?? false;
 
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const _placeholderWidget = useRef<PlaceholderWidget | null>(null);
+  const _placeholderWidget = useRef<monaco.editor.ICodeEditor | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
@@ -408,7 +408,8 @@ export const CodeEditor: React.FC<Props> = ({
   useEffect(() => {
     if (placeholder && !value && _editor.current) {
       // Mounts editor inside constructor
-      _placeholderWidget.current = new PlaceholderWidget(placeholder, _editor.current);
+      //@ts-ignore 
+      _placeholderWidget.current = createPlaceholderWidget({placeholderText: placeholder, editor: _editor.current});
     }
     return () => {
       _placeholderWidget.current?.dispose();
