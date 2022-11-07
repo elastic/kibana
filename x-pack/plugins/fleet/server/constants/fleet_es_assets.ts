@@ -194,3 +194,7 @@ on_failure:
       field: error.message
       value:
         - 'failed in Fleet agent final_pipeline: {{ _ingest.on_failure_message }}'`;
+
+// File storage indexes supporting endpoint Upload/download
+export const FILE_STORAGE_METADATA_INDEX = '.fleet-*-files';
+export const FILE_STORAGE_DATA_INDEX = '.fleet-*-file-data';

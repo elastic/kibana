@@ -16,6 +16,7 @@ import {
   XYState,
 } from '@kbn/lens-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
+import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
 import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
 import { AllSeries, ReportTypes, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
@@ -106,17 +107,44 @@ export default function Embeddable({
   );
 
   let lensAttributes;
-  try {
-    if (reportType === ReportTypes.SINGLE_METRIC) {
-      lensAttributes = new SingleMetricLensAttributes(layerConfigs, reportType, lensFormulaHelper!);
-    } else {
-      lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
-    }
-    // eslint-disable-next-line no-empty
-  } catch (error) {}
+  let attributesJSON = customLensAttrs;
+  if (!customLensAttrs) {
+    try {
+      if (reportType === ReportTypes.SINGLE_METRIC) {
+        lensAttributes = new SingleMetricLensAttributes(
+          layerConfigs,
+          reportType,
+          lensFormulaHelper!
+        );
+        attributesJSON = lensAttributes?.getJSON('lnsLegacyMetric');
+      } else if (reportType === ReportTypes.HEATMAP) {
+        lensAttributes = new HeatMapLensAttributes(layerConfigs, reportType, lensFormulaHelper!);
+        attributesJSON = lensAttributes?.getJSON('lnsHeatmap');
+      } else {
+        lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
+        attributesJSON = lensAttributes?.getJSON();
+      }
+      // eslint-disable-next-line no-empty
+    } catch (error) {}
+  }
 
-  const attributesJSON = customLensAttrs ?? lensAttributes?.getJSON();
   const timeRange = customTimeRange ?? series?.time;
+
+  const actions = useActions({
+    withActions,
+    attributes,
+    reportType,
+    appId,
+    setIsSaveOpen,
+    setAddToCaseOpen,
+    lensAttributes: attributesJSON,
+    timeRange,
+  });
+
+  if (!attributesJSON) {
+    return null;
+  }
+
   if (typeof axisTitlesVisibility !== 'undefined') {
     (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
       axisTitlesVisibility;
@@ -136,17 +164,6 @@ export default function Embeddable({
       yLeft: false,
     };
   }
-
-  const actions = useActions({
-    withActions,
-    attributes,
-    reportType,
-    appId,
-    setIsSaveOpen,
-    setAddToCaseOpen,
-    lensAttributes: attributesJSON,
-    timeRange,
-  });
 
   if (!attributesJSON && layerConfigs.length < 1) {
     return null;

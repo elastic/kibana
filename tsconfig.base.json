@@ -44,6 +44,8 @@
       "@kbn/core-apps-browser-internal/*": ["packages/core/apps/core-apps-browser-internal/*"],
       "@kbn/core-apps-browser-mocks": ["packages/core/apps/core-apps-browser-mocks"],
       "@kbn/core-apps-browser-mocks/*": ["packages/core/apps/core-apps-browser-mocks/*"],
+      "@kbn/core-apps-server-internal": ["packages/core/apps/core-apps-server-internal"],
+      "@kbn/core-apps-server-internal/*": ["packages/core/apps/core-apps-server-internal/*"],
       "@kbn/core-base-browser-internal": ["packages/core/base/core-base-browser-internal"],
       "@kbn/core-base-browser-internal/*": ["packages/core/base/core-base-browser-internal/*"],
       "@kbn/core-base-browser-mocks": ["packages/core/base/core-base-browser-mocks"],
@@ -204,6 +206,12 @@
       "@kbn/core-lifecycle-server-internal/*": ["packages/core/lifecycle/core-lifecycle-server-internal/*"],
       "@kbn/core-lifecycle-server-mocks": ["packages/core/lifecycle/core-lifecycle-server-mocks"],
       "@kbn/core-lifecycle-server-mocks/*": ["packages/core/lifecycle/core-lifecycle-server-mocks/*"],
+      "@kbn/core-logging-browser-internal": ["packages/core/logging/core-logging-browser-internal"],
+      "@kbn/core-logging-browser-internal/*": ["packages/core/logging/core-logging-browser-internal/*"],
+      "@kbn/core-logging-browser-mocks": ["packages/core/logging/core-logging-browser-mocks"],
+      "@kbn/core-logging-browser-mocks/*": ["packages/core/logging/core-logging-browser-mocks/*"],
+      "@kbn/core-logging-common-internal": ["packages/core/logging/core-logging-common-internal"],
+      "@kbn/core-logging-common-internal/*": ["packages/core/logging/core-logging-common-internal/*"],
       "@kbn/core-logging-server": ["packages/core/logging/core-logging-server"],
       "@kbn/core-logging-server/*": ["packages/core/logging/core-logging-server/*"],
       "@kbn/core-logging-server-internal": ["packages/core/logging/core-logging-server-internal"],
@@ -1096,6 +1104,8 @@
       "@kbn/monitoring-collection-plugin/*": ["x-pack/plugins/monitoring_collection/*"],
       "@kbn/monitoring-plugin": ["x-pack/plugins/monitoring"],
       "@kbn/monitoring-plugin/*": ["x-pack/plugins/monitoring/*"],
+      "@kbn/notifications-plugin": ["x-pack/plugins/notifications"],
+      "@kbn/notifications-plugin/*": ["x-pack/plugins/notifications/*"],
       "@kbn/observability-plugin": ["x-pack/plugins/observability"],
       "@kbn/observability-plugin/*": ["x-pack/plugins/observability/*"],
       "@kbn/osquery-plugin": ["x-pack/plugins/osquery"],
@@ -1216,6 +1226,11 @@
     // We have to enable this option explicitly since `esModuleInterop` doesn't enable it automatically when ES2015 or
     // ESNext module format is used.
     "allowSyntheticDefaultImports": true,
+    // Several packages use .js files to provide types without requiring transpilation. In order for TS to support this
+    // regardless of where the pacakge is imported, we need to enable `allowJs` globally. In specific packages we might
+    // want to disable parsing of JS files, in which case `allowJs` should be set to `false` locally. These packages will
+    // not be able to import packages which include JS code, or import packages which depend on JS code.
+    "allowJs": true,
     // Emits __importStar and __importDefault helpers for runtime babel ecosystem compatibility.
     "esModuleInterop": true,
     // Resolve modules in the same way as Node.js. Aka make `require` works the

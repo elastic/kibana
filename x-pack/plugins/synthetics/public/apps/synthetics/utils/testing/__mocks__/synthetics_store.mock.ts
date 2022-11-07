@@ -87,11 +87,13 @@ export const mockState: SyntheticsAppState = {
   overview: {
     pageState: {
       perPage: 10,
+      sortOrder: 'asc',
+      sortField: 'name.keyword',
     },
     data: {
       total: 0,
       allMonitorIds: [],
-      pages: {},
+      monitors: [],
     },
     error: null,
     loaded: false,
@@ -102,6 +104,7 @@ export const mockState: SyntheticsAppState = {
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
   browserJourney: getBrowserJourneyMockSlice(),
+  networkEvents: {},
 };
 
 function getBrowserJourneyMockSlice() {
@@ -132,6 +135,63 @@ function getBrowserJourneyMockSlice() {
 
 function getMonitorDetailsMockSlice() {
   return {
+    lastRun: {
+      loading: false,
+      data: {
+        summary: { up: 1, down: 0 },
+        agent: {
+          name: 'cron-b010e1cc9518984e-27644714-4pd4h',
+          id: 'f8721d90-5aec-4815-a6f1-f4d4a6fb7482',
+          type: 'heartbeat',
+          ephemeral_id: 'd6a60494-5e52-418f-922b-8e90f0b4013c',
+          version: '8.3.0',
+        },
+        synthetics: {
+          journey: { name: 'inline', id: 'inline', tags: null },
+          type: 'heartbeat/summary',
+        },
+        monitor: {
+          duration: { us: 269722 },
+          origin: SourceType.UI,
+          name: 'One pixel monitor',
+          check_group: '051aba1c-0b74-11ed-9f0e-ba4e6fa109d5',
+          id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
+          timespan: { lt: '2022-07-24T17:24:06.094Z', gte: '2022-07-24T17:14:06.094Z' },
+          type: DataStream.BROWSER,
+          status: 'up',
+        },
+        url: {
+          scheme: 'data',
+          domain: '',
+          full: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
+        },
+        observer: {
+          geo: {
+            continent_name: 'North America',
+            city_name: 'Iowa',
+            country_iso_code: 'US',
+            name: 'North America - US Central',
+            location: '41.8780, 93.0977',
+          },
+          hostname: 'cron-b010e1cc9518984e-27644714-4pd4h',
+          ip: ['10.1.11.162'],
+          mac: ['ba:4e:6f:a1:09:d5'],
+        },
+        '@timestamp': '2022-07-24T17:14:05.079Z',
+        ecs: { version: '8.0.0' },
+        config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
+        data_stream: { namespace: 'default', type: 'synthetics', dataset: 'browser' },
+        'event.type': 'journey/end',
+        event: {
+          agent_id_status: 'auth_metadata_missing',
+          ingested: '2022-07-24T17:14:07Z',
+          type: 'heartbeat/summary',
+          dataset: 'browser',
+        },
+        timestamp: '2022-07-24T17:14:05.079Z',
+        docId: 'AkYzMYIBqL6WCtugsFck',
+      },
+    },
     pings: {
       total: 3,
       data: [
@@ -302,6 +362,7 @@ function getMonitorDetailsMockSlice() {
     },
     syntheticsMonitor: {
       id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
+      config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
       type: DataStream.BROWSER,
       enabled: true,
       schedule: { unit: ScheduleUnit.MINUTES, number: '10' },

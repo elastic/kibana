@@ -45,6 +45,7 @@ export interface KibanaMigratorOptions {
   kibanaVersion: string;
   logger: Logger;
   docLinks: DocLinksServiceStart;
+  waitForMigrationCompletion: boolean;
 }
 
 /**
@@ -65,7 +66,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly activeMappings: IndexMapping;
   private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
   private readonly docLinks: DocLinksServiceStart;
-
+  private readonly waitForMigrationCompletion: boolean;
   public readonly kibanaVersion: string;
 
   /**
@@ -79,6 +80,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     kibanaVersion,
     logger,
     docLinks,
+    waitForMigrationCompletion,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
@@ -93,6 +95,7 @@ export class KibanaMigrator implements IKibanaMigrator {
       typeRegistry,
       log: this.log,
     });
+    this.waitForMigrationCompletion = waitForMigrationCompletion;
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
@@ -148,6 +151,7 @@ export class KibanaMigrator implements IKibanaMigrator {
           return runResilientMigrator({
             client: this.client,
             kibanaVersion: this.kibanaVersion,
+            waitForMigrationCompletion: this.waitForMigrationCompletion,
             targetMappings: buildActiveMappings(indexMap[index].typeMappings),
             logger: this.log,
             preMigrationScript: indexMap[index].script,

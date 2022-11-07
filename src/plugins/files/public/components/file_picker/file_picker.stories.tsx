@@ -27,6 +27,7 @@ const defaultProps: FilePickerProps = {
   kind,
   onDone: action('done!'),
   onClose: action('close!'),
+  multiple: true,
 };
 
 export default {
@@ -198,3 +199,25 @@ TryFilter.decorators = [
     );
   },
 ];
+
+export const SingleSelect = Template.bind({});
+SingleSelect.decorators = [
+  (Story) => (
+    <FilesContext
+      client={
+        {
+          getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
+          list: async (): Promise<FilesClientResponses['list']> => ({
+            files: [createFileJSON(), createFileJSON(), createFileJSON()],
+            total: 1,
+          }),
+        } as unknown as FilesClient
+      }
+    >
+      <Story />
+    </FilesContext>
+  ),
+];
+SingleSelect.args = {
+  multiple: undefined,
+};

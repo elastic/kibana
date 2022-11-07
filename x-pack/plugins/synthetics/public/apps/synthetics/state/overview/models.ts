@@ -7,4 +7,6 @@
 
 export interface MonitorOverviewPageState {
   perPage: number;
+  sortOrder: 'asc' | 'desc';
+  sortField: string;
 }
