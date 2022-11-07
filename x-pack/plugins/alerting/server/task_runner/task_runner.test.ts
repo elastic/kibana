@@ -2424,8 +2424,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    // 1x(.server-log) and 1x(any-action) per alert
-    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(2);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
@@ -2468,7 +2467,7 @@ describe('Task Runner', () => {
 
     expect(logger.debug).nthCalledWith(
       3,
-      'Rule "1" skipped scheduling action "2" because the maximum number of allowed actions for connector type .server-log has been reached.'
+      'Rule "1" skipped scheduling action "1" because the maximum number of allowed actions for connector type .server-log has been reached.'
     );
 
     testAlertingEventLogCalls({
