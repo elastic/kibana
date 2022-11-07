@@ -21,6 +21,13 @@ export const API_KEY_LABEL = i18n.translate(
   }
 );
 
+export const MESSAGE_IS_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.requiredMessageTextField',
+  {
+    defaultMessage: 'Message is required.',
+  }
+);
+
 export const ACTION_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.actionLabel',
   {
@@ -31,42 +38,21 @@ export const ACTION_LABEL = i18n.translate(
 export const CREATE_ALERT_ACTION = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.createAlertAction',
   {
-    defaultMessage: 'Create Alert',
+    defaultMessage: 'Create alert',
   }
 );
 
 export const CLOSE_ALERT_ACTION = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.closeAlertAction',
   {
-    defaultMessage: 'Close Alert',
-  }
-);
-
-export const MESSAGE_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.messageLabel',
-  {
-    defaultMessage: 'Message',
+    defaultMessage: 'Close alert',
   }
 );
 
 export const NOTE_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.noteLabel',
   {
-    defaultMessage: 'Note (optional)',
-  }
-);
-
-export const DESCRIPTION_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.descriptionLabel',
-  {
-    defaultMessage: 'Description (optional)',
-  }
-);
-
-export const MESSAGE_IS_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.requiredMessageTextField',
-  {
-    defaultMessage: 'Message is required.',
+    defaultMessage: 'Note',
   }
 );
 
@@ -77,9 +63,51 @@ export const ALIAS_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const ALIAS_REQUIRED_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.aliasRequiredLabel',
+  {
+    defaultMessage: 'Alias (required)',
+  }
+);
+
 export const ALIAS_IS_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.requiredAliasTextField',
   {
     defaultMessage: 'Alias is required.',
+  }
+);
+
+export const MORE_OPTIONS = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.moreOptions',
+  {
+    defaultMessage: 'More options',
+  }
+);
+
+export const HIDE_OPTIONS = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.hideOptions',
+  {
+    defaultMessage: 'Hide options',
+  }
+);
+
+export const USER_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.userLabel',
+  {
+    defaultMessage: 'User',
+  }
+);
+
+export const SOURCE_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.sourceLabel',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const JSON_EDITOR_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.jsonEditorError',
+  {
+    defaultMessage: 'JSON editor error exists',
   }
 );

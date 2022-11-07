@@ -11,6 +11,20 @@ import userEvent from '@testing-library/user-event';
 import OpsgenieParamFields from './params';
 import { OpsgenieSubActions } from '../../../../common';
 import { OpsgenieActionParams } from '../../../../server/connector_types/stack';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
+import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
+
+const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
+
+jest.mock(kibanaReactPath, () => {
+  const original = jest.requireActual(kibanaReactPath);
+  return {
+    ...original,
+    CodeEditor: (props: any) => {
+      return <MockCodeEditor {...props} />;
+    },
+  };
+});
 
 describe('OpsgenieParamFields', () => {
   const editAction = jest.fn();
@@ -44,6 +58,7 @@ describe('OpsgenieParamFields', () => {
     index: 0,
     messageVariables: [],
     actionConnector: connector,
+    executionMode: ActionConnectorMode.Test,
   };
 
   const defaultCloseAlertProps = {
@@ -56,6 +71,7 @@ describe('OpsgenieParamFields', () => {
     index: 0,
     messageVariables: [],
     actionConnector: connector,
+    executionMode: ActionConnectorMode.Test,
   };
 
   beforeEach(() => {
@@ -65,7 +81,7 @@ describe('OpsgenieParamFields', () => {
   it('renders the create alert component', async () => {
     render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 
-    expect(screen.getByText('Message')).toBeInTheDocument();
+    expect(screen.getByText('Message (required)')).toBeInTheDocument();
     expect(screen.getByText('Alias')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-subActionSelect'));
 
@@ -77,12 +93,43 @@ describe('OpsgenieParamFields', () => {
     render(<OpsgenieParamFields {...defaultCloseAlertProps} />);
 
     expect(screen.queryByText('Message')).not.toBeInTheDocument();
-    expect(screen.getByText('Alias')).toBeInTheDocument();
+    expect(screen.getByText('Alias (required)')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-subActionSelect'));
 
     expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
     expect(screen.queryByDisplayValue('123')).not.toBeInTheDocument();
     expect(screen.getByDisplayValue('456')).toBeInTheDocument();
+  });
+
+  it('does not render the sub action select for creating an alert when execution mode is ActionForm', async () => {
+    render(
+      <OpsgenieParamFields
+        {...{ ...defaultCreateAlertProps, executionMode: ActionConnectorMode.ActionForm }}
+      />
+    );
+
+    expect(screen.getByText('Message (required)')).toBeInTheDocument();
+    expect(screen.getByText('Alias')).toBeInTheDocument();
+    expect(screen.queryByTestId('opsgenie-subActionSelect')).not.toBeInTheDocument();
+
+    expect(screen.getByDisplayValue('123')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('hello')).toBeInTheDocument();
+  });
+
+  it('does not render the sub action select for closing an alert when execution mode is ActionForm', async () => {
+    render(
+      <OpsgenieParamFields
+        {...{ ...defaultCloseAlertProps, executionMode: ActionConnectorMode.ActionForm }}
+      />
+    );
+
+    expect(screen.queryByTestId('opsgenie-subActionSelect')).not.toBeInTheDocument();
+  });
+
+  it('does not render the sub action select for closing an alert when execution mode is undefined', async () => {
+    render(<OpsgenieParamFields {...{ ...defaultCloseAlertProps, executionMode: undefined }} />);
+
+    expect(screen.queryByTestId('opsgenie-subActionSelect')).not.toBeInTheDocument();
   });
 
   it('calls editAction when the message field is changed', async () => {
@@ -231,7 +278,7 @@ describe('OpsgenieParamFields', () => {
     act(() =>
       userEvent.selectOptions(
         screen.getByTestId('opsgenie-subActionSelect'),
-        screen.getByText('Close Alert')
+        screen.getByText('Close alert')
       )
     );
 
