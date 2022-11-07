@@ -8,5 +8,6 @@
 export enum SYNTHETICS_API_URLS {
   SYNTHETICS_OVERVIEW = '/internal/synthetics/overview',
   PINGS = '/internal/synthetics/pings',
+  PING_STATUSES = '/internal/synthetics/ping_statuses',
   OVERVIEW_STATUS = `/internal/synthetics/overview/status`,
 }
