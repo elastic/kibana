@@ -25,6 +25,9 @@ const properties: Properties = {
   name: {
     type: 'text',
   },
+  user: {
+    type: 'flattened',
+  },
   Status: {
     type: 'keyword',
   },
@@ -48,7 +51,7 @@ const properties: Properties = {
 export const fileObjectType: SavedObjectsType<FileMetadata> = {
   name: FILE_SO_TYPE,
   hidden: true,
-  namespaceType: 'multiple-isolated',
+  namespaceType: 'agnostic',
   management: {
     importableAndExportable: false,
   },
