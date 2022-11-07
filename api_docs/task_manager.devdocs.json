@@ -1542,7 +1542,7 @@
           "section": "def-server.SavedObjectsBulkDeleteResponse",
           "text": "SavedObjectsBulkDeleteResponse"
         },
-        " | undefined>; } & { supportsEphemeralTasks: () => boolean; }"
+        " | undefined>; } & { supportsEphemeralTasks: () => boolean; getRegisteredTypes: () => string[]; }"
       ],
       "path": "x-pack/plugins/task_manager/server/plugin.ts",
       "deprecated": false,
