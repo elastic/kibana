@@ -246,15 +246,13 @@ function LocationSelect({
 export function MonitorDetailFlyout(props: Props) {
   const { id, onLocationChange } = props;
   const {
-    data: { pages },
+    data: { monitors },
   } = useSelector(selectOverviewState);
 
   const monitor: MonitorOverviewItem | undefined = useMemo(() => {
-    for (const key of Object.keys(pages)) {
-      const overviewItem = pages[key].filter(({ id: overviewItemId }) => overviewItemId === id)[0];
-      if (overviewItem) return overviewItem;
-    }
-  }, [id, pages]);
+    const overviewItem = monitors.filter(({ id: overviewItemId }) => overviewItemId === id)[0];
+    if (overviewItem) return overviewItem;
+  }, [id, monitors]);
 
   const setLocation = useCallback(
     (location: string) => onLocationChange(id, location),
