@@ -16,7 +16,11 @@ import { RouteDependencies } from '../types';
 /**
  * Note that this route is primarily intended for consumption by Cloud.
  */
-export function registerUpgradeStatusRoute({ config: { featureSet } ,router, lib: { handleEsError } }: RouteDependencies) {
+export function registerUpgradeStatusRoute({
+  config: { featureSet },
+  router,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/status`,

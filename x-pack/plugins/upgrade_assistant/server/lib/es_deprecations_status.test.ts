@@ -105,7 +105,7 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {
         '.ml-config': [
-          { 
+          {
             level: 'critical',
             message: 'Index created before 7.0',
             url: 'https://',
@@ -132,20 +132,22 @@ describe('getESUpgradeStatus', () => {
           level: 'warning',
           message: 'Datafeed [deprecation-datafeed] uses deprecated query options',
           url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-7.0.html#breaking_70_search_changes',
-          details: '[Deprecated field [use_dis_max] used, replaced by [Set [tie_breaker] to 1 instead]]',
+          details:
+            '[Deprecated field [use_dis_max] used, replaced by [Set [tie_breaker] to 1 instead]]',
           // @ts-ignore
-          resolve_during_rolling_upgrade: false
+          resolve_during_rolling_upgrade: false,
         },
         {
           level: 'critical',
-          message: 'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
+          message:
+            'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
           url: '',
           details: 'details',
           // @ts-ignore
           _meta: { snapshot_id: '1', job_id: 'deprecation_check_job' },
           // @ts-ignore
           resolve_during_rolling_upgrade: false,
-        }
+        },
       ],
       index_settings: {},
     });
@@ -161,28 +163,30 @@ describe('getESUpgradeStatus', () => {
       cluster_settings: [],
       node_settings: [
         {
-          "level": "critical",
-          "message": "Index created before 7.0",
-          "url": "https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html",
-          "details": "This index was created using version: 6.8.13",
+          level: 'critical',
+          message: 'Index created before 7.0',
+          url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
+          details: 'This index was created using version: 6.8.13',
           // @ts-ignore
-          "resolve_during_rolling_upgrade": false
+          resolve_during_rolling_upgrade: false,
         },
         {
-          "level": "critical",
-          "message": "Index created before 7.0",
-          "url":
-            "https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html",
-          "details": "This index was created using version: 6.8.13",
+          level: 'critical',
+          message: 'Index created before 7.0',
+          url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
+          details: 'This index was created using version: 6.8.13',
           // @ts-ignore
-          "resolve_during_rolling_upgrade": false
-        }
+          resolve_during_rolling_upgrade: false,
+        },
       ],
       ml_settings: [],
       index_settings: {},
     });
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet, reindexCorrectiveActions: false });
+    const upgradeStatus = await getESUpgradeStatus(esClient, {
+      ...featureSet,
+      reindexCorrectiveActions: false,
+    });
 
     expect(upgradeStatus.deprecations).toHaveLength(0);
     expect(upgradeStatus.totalCriticalDeprecations).toBe(0);
