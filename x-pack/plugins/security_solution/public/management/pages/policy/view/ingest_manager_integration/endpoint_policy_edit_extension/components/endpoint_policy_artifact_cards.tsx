@@ -6,9 +6,14 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  BLOCKLISTS_LABELS,
+  EVENT_FILTERS_LABELS,
+  HOST_ISOLATION_EXCEPTIONS_LABELS,
+  TRUSTED_APPS_LABELS,
+} from '../translations';
 import { useCanAccessSomeArtifacts } from '../../hooks/use_can_access_some_artifacts';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../../host_isolation_exceptions/view/hooks';
 import { BlocklistsApiClient } from '../../../../../blocklist/services';
@@ -28,93 +33,6 @@ import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from
 import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../../../blocklist/constants';
 import { useHttp } from '../../../../../../../common/lib/kibana';
 import { useEndpointPrivileges } from '../../../../../../../common/components/user_privileges/endpoint';
-
-export const BLOCKLISTS_LABELS = {
-  artifactsSummaryApiError: (error: string) =>
-    i18n.translate('xpack.securitySolution.endpoint.fleetIntegrationCard.blocklistsSummary.error', {
-      defaultMessage: 'There was an error trying to fetch blocklists stats: "{error}"',
-      values: { error },
-    }),
-  cardTitle: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.blocklist.fleetIntegration.title"
-      defaultMessage="Blocklist"
-    />
-  ),
-  linkLabel: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetIntegrationCard.blocklistsManageLabel"
-      defaultMessage="Manage blocklist"
-    />
-  ),
-};
-export const HOST_ISOLATION_EXCEPTIONS_LABELS = {
-  artifactsSummaryApiError: (error: string) =>
-    i18n.translate(
-      'xpack.securitySolution.endpoint.fleetIntegrationCard.hostIsolationExceptionsSummary.error',
-      {
-        defaultMessage:
-          'There was an error trying to fetch host isolation exceptions stats: "{error}"',
-        values: { error },
-      }
-    ),
-  cardTitle: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.hostIsolationExceptions.fleetIntegration.title"
-      defaultMessage="Host isolation exceptions"
-    />
-  ),
-  linkLabel: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetIntegrationCard.hostIsolationExceptionsManageLabel"
-      defaultMessage="Manage host isolation exceptions"
-    />
-  ),
-};
-export const EVENT_FILTERS_LABELS = {
-  artifactsSummaryApiError: (error: string) =>
-    i18n.translate(
-      'xpack.securitySolution.endpoint.fleetIntegrationCard.eventFiltersSummarySummary.error',
-      {
-        defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
-        values: { error },
-      }
-    ),
-  cardTitle: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.eventFilters.fleetIntegration.title"
-      defaultMessage="Event filters"
-    />
-  ),
-  linkLabel: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetIntegrationCard.eventFiltersManageLabel"
-      defaultMessage="Manage event filters"
-    />
-  ),
-};
-export const TRUSTED_APPS_LABELS = {
-  artifactsSummaryApiError: (error: string) =>
-    i18n.translate(
-      'xpack.securitySolution.endpoint.fleetIntegrationCard.trustedAppsSummarySummary.error',
-      {
-        defaultMessage: 'There was an error trying to fetch trusted apps stats: "{error}"',
-        values: { error },
-      }
-    ),
-  cardTitle: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.trustedApps.fleetIntegration.title"
-      defaultMessage="Trusted applications"
-    />
-  ),
-  linkLabel: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetIntegrationCard.trustedAppsManageLabel"
-      defaultMessage="Manage trusted applications"
-    />
-  ),
-};
 
 interface PolicyArtifactCardProps {
   policyId: string;
@@ -256,6 +174,7 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
 
           {canReadBlocklist && <BlocklistPolicyCard policyId={policyId} />}
         </div>
+
         <EuiSpacer size="l" />
       </>
     );
