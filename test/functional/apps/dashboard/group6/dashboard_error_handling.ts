@@ -51,14 +51,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // wrapping into own describe to make sure new tab is cleaned up even if test failed
     // see: https://github.com/elastic/kibana/pull/67280#discussion_r430528122
-    describe('recreate index pattern link works', () => {
-      it('recreate index pattern link works', async () => {
+    describe('when the saved object is missing', () => {
+      it('shows the missing data view error message', async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('dashboard with missing index pattern');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const errorEmbeddable = await testSubjects.find('visualization-missed-data-view-error');
+        const embeddableError = await testSubjects.find('embeddableError');
+        const errorMessage = await embeddableError.getVisibleText();
 
-        expect(await errorEmbeddable.isDisplayed()).to.be(true);
+        expect(errorMessage).to.contain('Could not find the data view');
       });
     });
   });

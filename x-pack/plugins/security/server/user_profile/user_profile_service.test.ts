@@ -90,8 +90,6 @@ describe('UserProfileService', () => {
     });
 
     it('returns `null` if session is not available', async () => {
-      mockStartParams.session.get.mockResolvedValue(null);
-
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.getCurrent({ request: mockRequest })).resolves.toBeNull();
 
@@ -104,9 +102,10 @@ describe('UserProfileService', () => {
     });
 
     it('returns `null` if session available, but not user profile id', async () => {
-      mockStartParams.session.get.mockResolvedValue(
-        sessionMock.createValue({ userProfileId: undefined })
-      );
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: undefined }),
+      });
 
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.getCurrent({ request: mockRequest })).resolves.toBeNull();
@@ -137,9 +136,10 @@ describe('UserProfileService', () => {
     });
 
     it('fails if profile retrieval fails', async () => {
-      mockStartParams.session.get.mockResolvedValue(
-        sessionMock.createValue({ userProfileId: mockUserProfile.uid })
-      );
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+      });
 
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
@@ -165,9 +165,10 @@ describe('UserProfileService', () => {
     });
 
     it('fails if cannot find user profile', async () => {
-      mockStartParams.session.get.mockResolvedValue(
-        sessionMock.createValue({ userProfileId: mockUserProfile.uid })
-      );
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+      });
 
       mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
         profiles: [],
@@ -192,9 +193,10 @@ describe('UserProfileService', () => {
     });
 
     it('properly parses returned profile', async () => {
-      mockStartParams.session.get.mockResolvedValue(
-        sessionMock.createValue({ userProfileId: mockUserProfile.uid })
-      );
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+      });
 
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.getCurrent({ request: mockRequest })).resolves
@@ -231,9 +233,10 @@ describe('UserProfileService', () => {
     });
 
     it('should get user profile and application data scoped to Kibana', async () => {
-      mockStartParams.session.get.mockResolvedValue(
-        sessionMock.createValue({ userProfileId: mockUserProfile.uid })
-      );
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+      });
 
       mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
         profiles: [
@@ -816,7 +819,6 @@ describe('UserProfileService', () => {
       const mockAtSpacePrivilegeCheck = { atSpace: jest.fn() };
       mockAtSpacePrivilegeCheck.atSpace.mockResolvedValue({
         hasPrivilegeUids: ['UID-0', 'UID-1', 'UID-8'],
-        errorUids: [],
       });
       mockAuthz.checkUserProfilesPrivileges.mockReturnValue(mockAtSpacePrivilegeCheck);
 
@@ -911,15 +913,12 @@ describe('UserProfileService', () => {
       mockAtSpacePrivilegeCheck.atSpace
         .mockResolvedValueOnce({
           hasPrivilegeUids: ['UID-0'],
-          errorUids: [],
         })
         .mockResolvedValueOnce({
           hasPrivilegeUids: ['UID-20'],
-          errorUids: [],
         })
         .mockResolvedValueOnce({
           hasPrivilegeUids: [],
-          errorUids: [],
         });
       mockAuthz.checkUserProfilesPrivileges.mockReturnValue(mockAtSpacePrivilegeCheck);
 
@@ -1020,7 +1019,6 @@ describe('UserProfileService', () => {
       const mockAtSpacePrivilegeCheck = { atSpace: jest.fn() };
       mockAtSpacePrivilegeCheck.atSpace.mockResolvedValue({
         hasPrivilegeUids: ['UID-0', 'UID-1', 'UID-8'],
-        errorUids: [],
       });
       mockAuthz.checkUserProfilesPrivileges.mockReturnValue(mockAtSpacePrivilegeCheck);
 
@@ -1083,6 +1081,109 @@ describe('UserProfileService', () => {
       expect(mockAtSpacePrivilegeCheck.atSpace).toHaveBeenCalledWith('some-space', {
         kibana: ['privilege-1', 'privilege-2'],
       });
+    });
+
+    it('properly handles privileges checks and logs errors when errors with reasons are returned from the privilege check', async () => {
+      // In this test we'd like to simulate the following case:
+      // 1. User requests 2 results with privileges check
+      // 2. Kibana will fetch 10 (min batch) results
+      // 3. Only UID-0, UID-1 and UID-8 profiles will have necessary privileges
+      mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles.mockResolvedValue({
+        profiles: Array.from({ length: 10 }).map((_, index) =>
+          userProfileMock.createWithSecurity({
+            uid: `UID-${index}`,
+            data: { some: 'data', kibana: { some: `kibana-data-${index}` } },
+          })
+        ),
+      } as unknown as SecuritySuggestUserProfilesResponse);
+
+      const mockAtSpacePrivilegeCheck = { atSpace: jest.fn() };
+
+      mockAtSpacePrivilegeCheck.atSpace.mockResolvedValue({
+        hasPrivilegeUids: ['UID-0', 'UID-1', 'UID-8'],
+        errors: {
+          count: 2,
+          details: {
+            'UID-3': { type: 'some type 3', reason: 'some reason 3' },
+            'UID-4': { type: 'some type 4', reason: 'some reason 4' },
+          },
+        },
+      });
+
+      mockAuthz.checkUserProfilesPrivileges.mockReturnValue(mockAtSpacePrivilegeCheck);
+
+      const startContract = userProfileService.start(mockStartParams);
+
+      await expect(
+        startContract.suggest({
+          name: 'some',
+          size: 2,
+          dataPath: 'one,two',
+          requiredPrivileges: {
+            spaceId: 'some-space',
+            privileges: { kibana: ['privilege-1', 'privilege-2'] },
+          },
+        })
+      ).resolves.toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "data": Object {
+                    "some": "kibana-data-0",
+                  },
+                  "enabled": true,
+                  "uid": "UID-0",
+                  "user": Object {
+                    "email": "some@email",
+                    "full_name": undefined,
+                    "username": "some-username",
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "some": "kibana-data-1",
+                  },
+                  "enabled": true,
+                  "uid": "UID-1",
+                  "user": Object {
+                    "email": "some@email",
+                    "full_name": undefined,
+                    "username": "some-username",
+                  },
+                },
+              ]
+            `);
+
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
+      ).toHaveBeenCalledTimes(1);
+
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
+      ).toHaveBeenCalledWith({
+        name: 'some',
+        size: 10,
+        data: 'kibana.one,kibana.two',
+      });
+
+      expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledTimes(1);
+
+      expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledWith(
+        new Set(Array.from({ length: 10 }).map((_, index) => `UID-${index}`))
+      );
+
+      expect(mockAtSpacePrivilegeCheck.atSpace).toHaveBeenCalledTimes(1);
+
+      expect(mockAtSpacePrivilegeCheck.atSpace).toHaveBeenCalledWith('some-space', {
+        kibana: ['privilege-1', 'privilege-2'],
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Privileges check API failed for UID UID-3 because some reason 3.'
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Privileges check API failed for UID UID-4 because some reason 4.'
+      );
     });
   });
 });

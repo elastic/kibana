@@ -39,6 +39,8 @@ const DEFAULT_VALUES = {
   indexName: 'index-name',
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
+  isCanceling: false,
+  isConnectorIndex: false,
   isInitialLoading: true,
   isSyncing: false,
   isWaitingForSync: false,
@@ -108,10 +110,20 @@ describe('IndexViewLogic', () => {
 
         expect(IndexViewLogic.values).toEqual(
           expect.objectContaining({
-            fetchIndexApiStatus: Status.SUCCESS,
-            isInitialLoading: false,
+            ...CONNECTOR_VALUES,
+            index: {
+              ...CONNECTOR_VALUES.index,
+              connector: { ...CONNECTOR_VALUES.index.connector, sync_now: true },
+            },
+            indexData: {
+              ...CONNECTOR_VALUES.indexData,
+              connector: { ...CONNECTOR_VALUES.indexData.connector, sync_now: true },
+            },
+            isCanceling: false,
+            isConnectorIndex: true,
             isWaitingForSync: true,
             localSyncNowValue: true,
+            pipelineData: undefined,
             syncStatus: SyncStatus.COMPLETED,
           })
         );

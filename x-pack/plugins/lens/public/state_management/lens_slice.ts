@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
@@ -49,8 +50,6 @@ export const initialState: LensAppState = {
   dataViews: {
     indexPatternRefs: [],
     indexPatterns: {},
-    existingFields: {},
-    isFirstExistenceFetch: true,
   },
 };
 
@@ -98,8 +97,8 @@ export const getPreloadedState = ({
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
 export const onActiveDataChange = createAction<{
-  activeData: TableInspectorAdapter;
-  requestWarnings?: string[];
+  activeData?: TableInspectorAdapter;
+  requestWarnings?: Array<ReactNode | string>;
 }>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const enableAutoApply = createAction<void>('lens/enableAutoApply');
@@ -265,8 +264,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     ) => {
       return {
         ...state,
-        activeData,
-        requestWarnings,
+        ...(activeData ? { activeData } : {}),
+        ...(requestWarnings ? { requestWarnings } : {}),
       };
     },
     [setSaveable.type]: (state, { payload }: PayloadAction<boolean>) => {

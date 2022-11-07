@@ -15,7 +15,7 @@ import {
   IngestPipelineParams,
   SyncStatus,
 } from '../../../../../common/types/connectors';
-
+import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import {
   flashAPIErrors,
@@ -43,22 +43,26 @@ import {
 import { CrawlerLogic } from './crawler/crawler_logic';
 import { IndexNameLogic } from './index_name_logic';
 
-type StartSyncApiValues = Actions<StartSyncArgs, {}>;
+type StartSyncApiActions = Actions<StartSyncArgs, {}>;
 
 export interface IndexViewActions {
+  cancelSyncs(): void;
+  clearFetchIndexTimeout(): void;
+  createNewFetchIndexTimeout(duration: number): { duration: number };
   fetchCrawlerData: () => void;
   fetchIndex: () => void;
   fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
   makeFetchIndexRequest: CachedFetchIndexApiLogicActions['makeRequest'];
-  makeStartSyncRequest: StartSyncApiValues['makeRequest'];
+  makeStartSyncRequest: StartSyncApiActions['makeRequest'];
   recheckIndex: () => void;
   resetFetchIndexApi: CachedFetchIndexApiLogicActions['apiReset'];
   resetRecheckIndexLoading: () => void;
   startFetchIndexPoll: CachedFetchIndexApiLogicActions['startPolling'];
   startSync(): void;
-  startSyncApiError: StartSyncApiValues['apiError'];
-  startSyncApiSuccess: StartSyncApiValues['apiSuccess'];
+  startSyncApiError: StartSyncApiActions['apiError'];
+  startSyncApiSuccess: StartSyncApiActions['apiSuccess'];
   stopFetchIndexPoll(): CachedFetchIndexApiLogicActions['stopPolling'];
+  stopFetchIndexPoll(): void;
 }
 
 export interface IndexViewValues {
@@ -71,6 +75,7 @@ export interface IndexViewValues {
   indexName: string;
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
+  isCanceling: boolean;
   isInitialLoading: typeof CachedFetchIndexApiLogic.values.isInitialLoading;
   isSyncing: boolean;
   isWaitingForSync: boolean;
@@ -202,8 +207,16 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       () => [selectors.indexData],
       (data: IndexViewValues['indexData']) => (data ? indexToViewIndex(data) : undefined),
     ],
-    ingestionMethod: [() => [selectors.fetchIndexApiData], (data) => getIngestionMethod(data)],
-    ingestionStatus: [() => [selectors.fetchIndexApiData], (data) => getIngestionStatus(data)],
+    ingestionMethod: [() => [selectors.indexData], (data) => getIngestionMethod(data)],
+    ingestionStatus: [() => [selectors.indexData], (data) => getIngestionStatus(data)],
+    isCanceling: [
+      () => [selectors.syncStatus],
+      (syncStatus: SyncStatus) => syncStatus === SyncStatus.CANCELING,
+    ],
+    isConnectorIndex: [
+      () => [selectors.indexData],
+      (data: ElasticsearchIndexWithIngestion | undefined) => isConnectorIndex(data),
+    ],
     isSyncing: [
       () => [selectors.syncStatus],
       (syncStatus: SyncStatus) => syncStatus === SyncStatus.IN_PROGRESS,

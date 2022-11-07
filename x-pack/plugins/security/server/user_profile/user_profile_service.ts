@@ -24,8 +24,7 @@ import type {
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { CheckUserProfilesPrivilegesResponse } from '../authorization/types';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
-import type { Session } from '../session_management';
-import { getPrintableSessionId } from '../session_management';
+import { getPrintableSessionId, type Session } from '../session_management';
 import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
@@ -316,14 +315,14 @@ export class UserProfileService {
       throw error;
     }
 
-    if (!userSession) {
+    if (userSession.error) {
       return null;
     }
 
-    if (!userSession.userProfileId) {
+    if (!userSession.value.userProfileId) {
       this.logger.debug(
         `User profile missing from the current session [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}].`
       );
       return null;
@@ -333,13 +332,13 @@ export class UserProfileService {
     try {
       // @ts-expect-error Invalid response format.
       body = (await clusterClient.asInternalUser.security.getUserProfile({
-        uid: userSession.userProfileId,
+        uid: userSession.value.userProfileId,
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       })) as { profiles: SecurityUserProfileWithMetadata[] };
     } catch (error) {
       this.logger.error(
         `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}]: ${getDetailedErrorMessage(error)}`
       );
       throw error;
@@ -348,7 +347,7 @@ export class UserProfileService {
     if (body.profiles.length === 0) {
       this.logger.error(
         `The user profile for the current user [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}] is not found.`
       );
       throw new Error(`User profile is not found.`);
@@ -506,11 +505,15 @@ export class UserProfileService {
         this.logger.error(`Privileges check API returned unknown profile UIDs: ${unknownUids}.`);
       }
 
-      // Log profile UIDs for which an error was encountered.
-      if (response.errorUids.length > 0) {
-        this.logger.error(
-          `Privileges check API failed for the following user profiles: ${response.errorUids}.`
-        );
+      // Log profile UIDs and reason for which an error was encountered.
+      if (response.errors?.count) {
+        const uids = Object.keys(response.errors.details);
+
+        for (const uid of uids) {
+          this.logger.error(
+            `Privileges check API failed for UID ${uid} because ${response.errors.details[uid].reason}.`
+          );
+        }
       }
     }
 

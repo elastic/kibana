@@ -37,10 +37,12 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//lodash",
   "@npm//moment-timezone",
+  "@npm//chalk",
   "@npm//elastic-apm-node",
   "//packages/kbn-safer-lodash-set",
   "//packages/kbn-config-schema",
   "//packages/kbn-std",
+  "//packages/core/logging/core-logging-common-internal",
 ]
 
 TYPES_DEPS = [
@@ -48,12 +50,14 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//rxjs",
-  "@npm//@types/moment-timezone",
+  "@npm//moment-timezone",
   "@npm//elastic-apm-node",
+  "@npm//chalk",
   "//packages/kbn-safer-lodash-set:npm_module_types",
   "//packages/kbn-logging:npm_module_types",
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/core/base/core-base-server-internal:npm_module_types",
+  "//packages/core/logging/core-logging-common-internal:npm_module_types",
   "//packages/core/logging/core-logging-server:npm_module_types",
 ]
 
@@ -78,7 +82,6 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   tsconfig = ":tsconfig",
@@ -88,6 +91,14 @@ js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+js_library(
+  name = "npm_module_types",
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -103,17 +114,8 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
+pkg_npm(
   name = "build_types",
-  srcs = [":npm_module_types"],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )
