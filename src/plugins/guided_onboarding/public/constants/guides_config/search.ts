@@ -57,8 +57,23 @@ export const searchConfig: GuideConfig = {
         }),
       ],
       location: {
-        appID: 'enterpriseSearch',
-        path: '/search_experiences',
+        appID: 'searchExperiences',
+        path: '',
+      },
+      manualCompletion: {
+        title: i18n.translate(
+          'guidedOnboarding.searchGuide.searchExperienceStep.manualCompletionPopoverTitle',
+          {
+            defaultMessage: 'Explore Search UI',
+          }
+        ),
+        description: i18n.translate(
+          'guidedOnboarding.searchGuide.searchExperienceStep.manualCompletionPopoverDescription',
+          {
+            defaultMessage: `Take your time to explore how to use Search UI to build world-class search experiences. When you’re ready, click the Setup guide button to continue.`,
+          }
+        ),
+        readyToCompleteOnNavigation: true,
       },
     },
   ],
