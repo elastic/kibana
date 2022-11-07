@@ -27,7 +27,7 @@ export type ConfigStat = Pick<
 export function createConfigurationAggregator(
   config: TaskManagerConfig,
   maxWorkers$: BehaviorSubject<number>,
-  pollInterval$: BehaviorSubject<number>,
+  pollInterval$: BehaviorSubject<number>
 ): AggregatedStatProvider<ConfigStat> {
   return combineLatest([
     of(pick(config, ...CONFIG_FIELDS_TO_EXPOSE)),
