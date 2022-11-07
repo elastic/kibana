@@ -21,6 +21,14 @@ import {
 } from '../../../../common/alerting/metrics/types';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { PublicContract } from '@kbn/utility-types';
+import {
+  ALERT_CONTEXT_CLOUD,
+  ALERT_CONTEXT_CONTAINER,
+  ALERT_CONTEXT_HOST,
+  ALERT_CONTEXT_LABELS, 
+  ALERT_CONTEXT_ORCHESTRATOR, 
+  ALERT_CONTEXT_TAGS
+} from '@kbn/rule-data-utils';
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
@@ -139,7 +147,7 @@ export const getAlertDetailsUrl = (
 
 export const fetchAlertbyAlertUUID = async (
   ruleDataClient: PublicContract<IRuleDataClient>,
-  alertId: string
+  alertUuid: string
 ) => {
   const request = {
     body: {
@@ -148,7 +156,7 @@ export const fetchAlertbyAlertUUID = async (
           filter: [
             {
               term: {
-                [ALERT_UUID]: alertId,
+                [ALERT_UUID]: alertUuid,
               },
             }
           ],
@@ -160,4 +168,29 @@ export const fetchAlertbyAlertUUID = async (
   };
   const { hits } = await ruleDataClient.getReader().search(request);
   return hits?.hits;
+};
+
+// fetch alert context from Alerts-As-Data
+export const getContextForRecoveredAlerts = async (
+  ruleDataClient: PublicContract<IRuleDataClient>,
+  alertUuid: string | null
+): Promise<{ [x: string]: any }> => {
+  const alertHits = alertUuid
+    ? await fetchAlertbyAlertUUID(ruleDataClient, alertUuid)
+    : undefined;
+
+  const alertHitsSource = alertHits && alertHits.length > 0
+    ? alertHits[0]._source
+    : undefined;
+
+  const additionalContext = {
+    cloud: alertHitsSource?.[ALERT_CONTEXT_CLOUD],
+    host: alertHitsSource?.[ALERT_CONTEXT_HOST],
+    orchestrator: alertHitsSource?.[ALERT_CONTEXT_ORCHESTRATOR],
+    container: alertHitsSource?.[ALERT_CONTEXT_CONTAINER],
+    labels: alertHitsSource?.[ALERT_CONTEXT_LABELS],
+    tags: alertHitsSource?.[ALERT_CONTEXT_TAGS]
+  };
+
+  return additionalContext;
 };

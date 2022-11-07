@@ -7,12 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  ALERT_CONTEXT_CLOUD,
-  ALERT_CONTEXT_CONTAINER,
-  ALERT_CONTEXT_HOST,
-  ALERT_CONTEXT_LABELS, 
-  ALERT_CONTEXT_ORCHESTRATOR, 
-  ALERT_CONTEXT_TAGS, 
   ALERT_REASON, 
   ALERT_RULE_PARAMETERS
 } from '@kbn/rule-data-utils';
@@ -41,8 +35,8 @@ import {
 } from '../common/messages';
 import {
   createScopedLogger,
-  fetchAlertbyAlertUUID,
   getAlertDetailsUrl,
+  getContextForRecoveredAlerts,
   getViewInInventoryAppUrl,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
@@ -252,18 +246,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       const recoveredAlertId = alert.getId();
       const indexedStartedDate = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
       const alertUuid = getAlertUuid(recoveredAlertId);
-
-      // fetch alert context from Alerts-As-Data
-      const alertHits = alertUuid ? await fetchAlertbyAlertUUID(ruleDataClient, alertUuid) : undefined;
-      const alertHitsSource = alertHits && alertHits.length > 0 ? alertHits[0]._source : undefined;
-      const additionalContext = {
-        cloud: alertHitsSource?.[ALERT_CONTEXT_CLOUD],
-        host: alertHitsSource?.[ALERT_CONTEXT_HOST],
-        orchestrator: alertHitsSource?.[ALERT_CONTEXT_ORCHESTRATOR],
-        container: alertHitsSource?.[ALERT_CONTEXT_CONTAINER],
-        labels: alertHitsSource?.[ALERT_CONTEXT_LABELS],
-        tags: alertHitsSource?.[ALERT_CONTEXT_TAGS]
-      };
+      const additionalContext = await getContextForRecoveredAlerts(ruleDataClient, alertUuid);
 
       alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),

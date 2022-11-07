@@ -29,6 +29,7 @@ import {
 import {
   createScopedLogger,
   getAlertDetailsUrl,
+  getContextForRecoveredAlerts,
   getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
@@ -81,7 +82,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', { alertId, executionId });
 
-    const { alertWithLifecycle, savedObjectsClient, getAlertUuid } = services;
+    const { alertWithLifecycle, savedObjectsClient, getAlertUuid, ruleDataClient } = services;
 
     const alertFactory: MetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
@@ -274,6 +275,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     for (const alert of recoveredAlerts) {
       const recoveredAlertId = alert.getId();
       const alertUuid = getAlertUuid(recoveredAlertId);
+      const additionalContext = await getContextForRecoveredAlerts(ruleDataClient, alertUuid);
 
       alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
@@ -283,6 +285,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         timestamp: startedAt.toISOString(),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
+        ...additionalContext
       });
     }
 
