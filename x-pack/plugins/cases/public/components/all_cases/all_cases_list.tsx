@@ -34,7 +34,7 @@ import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
 import { useIsLoadingCases } from './use_is_loading_cases';
-import { useUrlState } from '../../common/hooks';
+import { useUrlState } from './use_url_state';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>

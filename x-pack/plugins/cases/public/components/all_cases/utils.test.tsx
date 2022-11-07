@@ -7,7 +7,7 @@
 
 import { parseUrlQueryParams } from './utils';
 import { stringify } from 'query-string';
-import { DEFAULT_QUERY_PARAMS } from '../containers/use_get_cases';
+import { DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 
 describe('utils', () => {
   describe('parseUrlQueryParams', () => {

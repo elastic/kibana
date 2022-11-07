@@ -7,7 +7,7 @@
 
 import { parse } from 'query-string';
 
-import type { ParsedUrlQueryParams, UrlQueryParams } from '../../common/ui/types';
+import type { ParsedUrlQueryParams, UrlQueryParams } from '../../../common/ui/types';
 
 export const parseUrlQueryParams = (search: string): UrlQueryParams => {
   const parsedUrlParams: ParsedUrlQueryParams = parse(search);
