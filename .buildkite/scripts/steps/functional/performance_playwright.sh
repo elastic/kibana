@@ -80,7 +80,7 @@ while read -r journey; do
   echo "Wait 30 sec for ES"
   sleep 30
 
-  phases=("WARMUP","TEST")
+  phases=("WARMUP" "TEST")
   status=0
   for phase in "${phases[@]}"; do
     echo "--- $journey - $phase"
