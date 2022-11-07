@@ -20,6 +20,7 @@ import {
 import { selectOverviewState } from '../../../../state/overview';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
+import { useGetUrlParams } from '../../../../hooks/use_url_params';
 import { OverviewLoader } from './overview_loader';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
@@ -27,6 +28,7 @@ import { SortFields } from './sort_fields';
 import { NoMonitorsFound } from '../../common/no_monitors_found';
 
 export const OverviewGrid = memo(() => {
+  const { statusFilter } = useGetUrlParams();
   const {
     data: { monitors },
     status,
@@ -44,6 +46,7 @@ export const OverviewGrid = memo(() => {
     perPage,
     page,
     sortField,
+    statusFilter,
   });
 
   const intersectionRef = useRef(null);
@@ -139,14 +142,16 @@ const getCurrentMonitors = ({
   page,
   monitors,
   monitorsSortedByStatus,
+  statusFilter,
 }: {
   sortField: string;
   perPage: number;
   page: number;
   monitors: MonitorOverviewItem[];
   monitorsSortedByStatus: MonitorOverviewItem[];
+  statusFilter?: string;
 }) => {
-  if (sortField === 'status') {
+  if (sortField === 'status' || statusFilter) {
     return monitorsSortedByStatus.slice(0, perPage * page);
   } else {
     return monitors.slice(0, perPage * page);
