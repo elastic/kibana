@@ -97,7 +97,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     () => [
       {
         id: 'Actions',
-        width: 72,
+        width: 108,
         headerCellRender: () => (
           <FormattedMessage
             id="xpack.threatIntelligence.indicator.table.actionColumnLabel"

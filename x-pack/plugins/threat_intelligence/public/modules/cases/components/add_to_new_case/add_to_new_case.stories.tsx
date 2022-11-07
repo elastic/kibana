@@ -8,30 +8,24 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { EuiContextMenuPanel } from '@elastic/eui';
+import { AddToNewCase } from './add_to_new_case';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { generateMockUrlIndicator } from '../../../../../common/types/indicator';
-import { InvestigateInTimelineContextMenu, InvestigateInTimelineButtonIcon } from '.';
 
 export default {
-  title: 'InvestigateInTimeline',
+  title: 'AddToNewCase',
 };
 
 const mockIndicator = generateMockUrlIndicator();
 
-export const ContextMenu: Story<void> = () => {
-  const items = [<InvestigateInTimelineContextMenu data={mockIndicator} />];
+export const Default: Story<void> = () => {
+  const items = [
+    <AddToNewCase indicator={mockIndicator} onClick={() => window.alert('Clicked')} />,
+  ];
 
   return (
     <StoryProvidersComponent>
       <EuiContextMenuPanel items={items} />
-    </StoryProvidersComponent>
-  );
-};
-
-export const ButtonIcon: Story<void> = () => {
-  return (
-    <StoryProvidersComponent>
-      <InvestigateInTimelineButtonIcon data={mockIndicator} />
     </StoryProvidersComponent>
   );
 };
