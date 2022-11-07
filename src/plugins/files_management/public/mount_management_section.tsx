@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { KibanaContextProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
@@ -19,6 +19,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { StartDependencies } from './types';
 import { App } from './app';
+import { FilesManagementAppContextProvider } from './context';
 
 const queryClient = new QueryClient();
 
@@ -37,11 +38,11 @@ export const mountManagementSection = (
             FormattedRelative,
           }}
         >
-          <KibanaContextProvider
-            services={{ filesClient: startDeps.files.filesClientFactory.asUnscoped() }}
+          <FilesManagementAppContextProvider
+            filesClient={startDeps.files.filesClientFactory.asUnscoped()}
           >
             <App />
-          </KibanaContextProvider>
+          </FilesManagementAppContextProvider>
         </TableListViewKibanaProvider>
       </QueryClientProvider>
     </I18nProvider>,

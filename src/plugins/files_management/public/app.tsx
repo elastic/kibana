@@ -12,7 +12,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list';
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
-import { useKibana } from './context';
+import { useFilesManagementContext } from './context';
 import { i18nTexts } from './i18n_texts';
 import { EmptyPrompt, DiagnosticsFlyout, FileFlyout } from './components';
 
@@ -23,9 +23,7 @@ function naivelyFuzzify(query: string): string {
 }
 
 export const App: FunctionComponent = () => {
-  const {
-    services: { filesClient },
-  } = useKibana();
+  const { filesClient } = useFilesManagementContext();
   const [showDiagnosticsFlyout, setShowDiagnosticsFlyout] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<undefined | FileJSON>(undefined);
   return (

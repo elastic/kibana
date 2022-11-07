@@ -22,16 +22,14 @@ import numeral from '@elastic/numeral';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18nTexts } from '../i18n_texts';
-import { useKibana } from '../context';
+import { useFilesManagementContext } from '../context';
 
 interface Props {
   onClose: () => void;
 }
 
 export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
-  const {
-    services: { filesClient },
-  } = useKibana();
+  const { filesClient } = useFilesManagementContext();
   const { status, refetch, data } = useQuery(['filesDiagnostics'], async () => {
     return filesClient.getMetrics();
   });
