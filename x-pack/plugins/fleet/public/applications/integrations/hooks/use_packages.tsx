@@ -14,7 +14,7 @@ import type { GetPackagesResponse } from '../types';
 export function usePackages(prerelease?: boolean) {
   const [data, setData] = useState<GetPackagesResponse | undefined>();
   const [error, setError] = useState<RequestError | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isPrereleaseEnabled, setIsPrereleaseEnabled] = useState(prerelease);
 
   const fetchData = useCallback(async () => {
