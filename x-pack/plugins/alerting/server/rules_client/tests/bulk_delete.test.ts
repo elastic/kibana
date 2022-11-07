@@ -56,7 +56,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  jest.clearAllMocks();
 });
 
 setGlobalDate();
@@ -392,9 +392,11 @@ describe('bulkDelete', () => {
 
       const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
-      expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
         'Successfully deleted schedules for underlying tasks: taskId1'
+      );
+      expect(logger.error).toBeCalledWith(
+        'Failure to delete schedules for underlying tasks: taskId2'
       );
       expect(result).toStrictEqual({
         errors: [],

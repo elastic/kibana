@@ -1900,18 +1900,24 @@ export class RulesClient {
     );
 
     const taskIdsFailedToBeDeleted: string[] = [];
+    const taskIdsSuccessfullyDeleted: string[] = [];
     if (taskIdsToDelete.length > 0) {
       try {
         const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
         resultFromDeletingTasks?.statuses.forEach((status) => {
-          if (!status.success) {
+          if (status.success) {
+            taskIdsSuccessfullyDeleted.push(status.id);
+          } else {
             taskIdsFailedToBeDeleted.push(status.id);
           }
         });
         this.logger.debug(
-          `Successfully deleted schedules for underlying tasks: ${taskIdsToDelete
-            .filter((id) => !taskIdsFailedToBeDeleted.includes(id))
-            .join(', ')}`
+          `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
+            ', '
+          )}`
+        );
+        this.logger.error(
+          `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(', ')}`
         );
       } catch (error) {
         this.logger.error(
