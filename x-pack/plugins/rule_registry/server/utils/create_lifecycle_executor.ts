@@ -70,6 +70,7 @@ export interface LifecycleAlertServices<
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
   getAlertStartedDate: (alertInstanceId: string) => string | null;
   getAlertUuid: (alertInstanceId: string) => string | null;
+  ruleDataClient: PublicContract<IRuleDataClient>;
 }
 
 export type LifecycleRuleExecutor<
@@ -187,6 +188,7 @@ export const createLifecycleExecutor =
 
         return state.trackedAlerts[alertId].alertUuid;
       },
+      ruleDataClient
     };
 
     const nextWrappedState = await wrappedExecutor({

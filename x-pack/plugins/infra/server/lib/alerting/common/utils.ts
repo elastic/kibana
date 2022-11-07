@@ -11,7 +11,7 @@ import { Logger, LogMeta } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
-import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
@@ -19,6 +19,8 @@ import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { PublicContract } from '@kbn/utility-types';
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
@@ -134,3 +136,28 @@ export const getAlertDetailsUrl = (
   spaceId: string,
   alertUuid: string | null
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
+
+export const fetchAlertbyAlertUUID = async (
+  ruleDataClient: PublicContract<IRuleDataClient>,
+  alertId: string
+) => {
+  const request = {
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                [ALERT_UUID]: alertId,
+              },
+            }
+          ],
+        },
+      },
+      size: 1
+    },
+    allow_no_indices: true,
+  };
+  const { hits } = await ruleDataClient.getReader().search(request);
+  return hits?.hits;
+};
