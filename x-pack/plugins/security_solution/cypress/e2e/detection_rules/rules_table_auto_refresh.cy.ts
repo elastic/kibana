@@ -33,7 +33,7 @@ import { getNewRule } from '../../objects/rule';
 
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
-describe('Alerts detection rules table auto-refresh', () => {
+describe.skip('Alerts detection rules table auto-refresh', () => {
   before(() => {
     cleanKibana();
     login();
