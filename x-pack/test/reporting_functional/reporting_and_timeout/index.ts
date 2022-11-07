@@ -85,12 +85,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       /**
        * This test may fail when styling differences affect the result. To update the snapshot:
        *
-       * 1. Run the functional test.
-       * 2. Temporary screenshots are saved.
-       * 3. Run the command:
+       * 1. Run the functional test, to generate new temporary files for screenshot comparison.
+       * 2. Save the screenshot as the new baseline file:
        *      cp \
        *       x-pack/test/functional/screenshots/session/warnings_capture_session_b_actual.png \
        *       x-pack/test/reporting_functional/reporting_and_timeout/fixtures/baseline/warnings_capture_b.png
+       * 3. Commit the changes to the .png file
        */
     });
   });
