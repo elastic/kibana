@@ -103,6 +103,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             </EuiButtonIcon>
           )
         }
+        onClick={(e) => e.stopPropagation()}
         panelPaddingSize={panelPaddingSize}
         isOpen={isPopoverOpen}
         closePopover={onClosePopover}
