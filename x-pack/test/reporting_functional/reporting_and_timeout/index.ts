@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(
         await png.checkIfPngsMatch(pngSessionFilePath, baselinePng, screenshotDir)
-      ).to.be.lessThan(0.05);
+      ).to.be.lessThan(0.09);
 
       /**
        * This test may fail when styling differences affect the result. To update the snapshot:
