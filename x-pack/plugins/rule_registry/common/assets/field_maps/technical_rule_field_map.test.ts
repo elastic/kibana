@@ -203,17 +203,17 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date",
       },
-      "kibana.alert.suppression.fields": Object {
-        "array": true,
-        "required": false,
-        "type": "keyword",
-      },
       "kibana.alert.suppression.start": Object {
         "array": false,
         "required": false,
         "type": "date",
       },
-      "kibana.alert.suppression.values": Object {
+      "kibana.alert.suppression.terms.field": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.suppression.terms.value": Object {
         "array": true,
         "required": false,
         "type": "keyword",
