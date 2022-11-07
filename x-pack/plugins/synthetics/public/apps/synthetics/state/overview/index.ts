@@ -18,7 +18,7 @@ import {
   fetchOverviewStatusAction,
   quietFetchOverviewAction,
   setFlyoutConfig,
-  setOverviewPerPageAction,
+  setOverviewPageStateAction,
 } from './actions';
 
 export interface MonitorOverviewState {
@@ -36,10 +36,12 @@ const initialState: MonitorOverviewState = {
   data: {
     total: 0,
     allMonitorIds: [],
-    pages: {},
+    monitors: [],
   },
   pageState: {
-    perPage: 20,
+    perPage: 16,
+    sortOrder: 'asc',
+    sortField: 'status',
   },
   flyoutConfig: null,
   loading: false,
@@ -71,10 +73,10 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     .addCase(quietFetchOverviewAction.fail, (state, action) => {
       state.error = action.payload;
     })
-    .addCase(setOverviewPerPageAction, (state, action) => {
+    .addCase(setOverviewPageStateAction, (state, action) => {
       state.pageState = {
         ...state.pageState,
-        perPage: action.payload,
+        ...action.payload,
       };
       state.loaded = false;
     })

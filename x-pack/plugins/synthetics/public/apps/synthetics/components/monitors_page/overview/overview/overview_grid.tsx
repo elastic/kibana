@@ -4,38 +4,57 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import useThrottle from 'react-use/lib/useThrottle';
+import useIntersection from 'react-use/lib/useIntersection';
 import {
+  EuiFlexGroup,
   EuiFlexItem,
   EuiFlexGrid,
   EuiSpacer,
-  EuiTablePagination,
-  EuiFlexGroup,
+  EuiButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
+import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import {
   quietFetchOverviewAction,
   selectOverviewState,
   setFlyoutConfig,
-  setOverviewPerPageAction,
 } from '../../../../state/overview';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
+import { SortFields } from './sort_fields';
+import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
+import { OverviewLoader } from './overview_loader';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
 import { OverviewStatus } from './overview_status';
 
 export const OverviewGrid = () => {
   const {
-    data: { pages },
+    data: { monitors },
     flyoutConfig,
     loaded,
     pageState,
-    pageState: { perPage },
   } = useSelector(selectOverviewState);
+  const { perPage, sortField } = pageState;
+  const [loadNextPage, setLoadNextPage] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const { monitorsSortedByStatus } = useMonitorsSortedByStatus(
+    sortField === 'status' && monitors.length !== 0
+  );
+  const currentMonitors = getCurrentMonitors({
+    monitors,
+    monitorsSortedByStatus,
+    perPage,
+    page,
+    sortField,
+  });
+
   const dispatch = useDispatch();
-  const [page, setPage] = useState(0);
-  const currentMonitors = pages[page] || [];
+
   const setFlyoutConfigCallback = useCallback(
     (monitorId: string, location: string) => dispatch(setFlyoutConfig({ monitorId, location })),
     [dispatch]
@@ -45,16 +64,34 @@ export const OverviewGrid = () => {
     () => dispatch(quietFetchOverviewAction.get(pageState)),
     [dispatch, pageState]
   );
+  const intersectionRef = useRef(null);
+  const intersection = useIntersection(intersectionRef, {
+    root: null,
+    rootMargin: '640px', // Height of 4 rows of monitors, minus the gutters
+    threshold: 0.1,
+  });
+  const hasIntersected = intersection && intersection.intersectionRatio > 0;
 
-  const goToPage = (pageNumber: number) => {
-    setPage(pageNumber);
-  };
+  useThrottle(() => {
+    if (
+      hasIntersected &&
+      currentMonitors.length === page * perPage &&
+      currentMonitors.length !== monitors.length
+    ) {
+      setLoadNextPage(true);
+    } else {
+      setLoadNextPage(false);
+    }
+  }, 1000);
 
-  const changeItemsPerPage = (itemsPerPage: number) => {
-    dispatch(setOverviewPerPageAction(itemsPerPage));
-  };
+  useEffect(() => {
+    if (loadNextPage) {
+      setPage((p) => p + 1);
+      setLoadNextPage(false);
+    }
+  }, [loadNextPage]);
 
-  return loaded ? (
+  return (
     <>
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false}>
@@ -62,29 +99,51 @@ export const OverviewGrid = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <OverviewPaginationInfo page={page} />
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <OverviewPaginationInfo page={page} loading={!loaded} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SortFields onSortChange={() => setPage(1)} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer />
-      <EuiFlexGrid columns={4}>
-        {currentMonitors.map((monitor) => (
-          <EuiFlexItem
-            key={`${monitor.id}-${monitor.location?.id}`}
-            data-test-subj="syntheticsOverviewGridItem"
-          >
-            <OverviewGridItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+      {loaded && currentMonitors.length ? (
+        <EuiFlexGrid columns={4} data-test-subj="syntheticsOverviewGridItemContainer">
+          {currentMonitors.map((monitor) => (
+            <EuiFlexItem
+              key={`${monitor.id}-${monitor.location?.id}`}
+              data-test-subj="syntheticsOverviewGridItem"
+            >
+              <OverviewGridItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      ) : (
+        <OverviewLoader />
+      )}
+      <span ref={intersectionRef}>
+        <EuiSpacer size="l" />
+      </span>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        {currentMonitors.length === monitors.length && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">{SHOWING_ALL_MONITORS_LABEL}</EuiText>
           </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
-      <EuiTablePagination
-        aria-label={i18n.translate('xpack.synthetics.overview.pagination.ariaLabel', {
-          defaultMessage: 'Pagination for monitor overview',
-        })}
-        pageCount={Object.keys(pages).length}
-        activePage={page}
-        onChangePage={goToPage}
-        itemsPerPage={perPage}
-        onChangeItemsPerPage={changeItemsPerPage}
-        itemsPerPageOptions={[10, 20, 40]}
-      />
+        )}
+        {currentMonitors.length === monitors.length && currentMonitors.length > perPage && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={() => window.scrollTo(0, 0)}
+              iconType="sortUp"
+              iconSide="right"
+              size="xs"
+            >
+              {SCROLL_TO_TOP_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       {flyoutConfig?.monitorId && flyoutConfig?.location && (
         <MonitorDetailFlyout
           id={flyoutConfig.monitorId}
@@ -95,5 +154,36 @@ export const OverviewGrid = () => {
         />
       )}
     </>
-  ) : null;
+  );
 };
+
+const getCurrentMonitors = ({
+  sortField,
+  perPage,
+  page,
+  monitors,
+  monitorsSortedByStatus,
+}: {
+  sortField: string;
+  perPage: number;
+  page: number;
+  monitors: MonitorOverviewItem[];
+  monitorsSortedByStatus: MonitorOverviewItem[];
+}) => {
+  if (sortField === 'status') {
+    return monitorsSortedByStatus.slice(0, perPage * page);
+  } else {
+    return monitors.slice(0, perPage * page);
+  }
+};
+
+const SHOWING_ALL_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.overview.grid.showingAllMonitors.label',
+  {
+    defaultMessage: 'Showing all monitors',
+  }
+);
+
+const SCROLL_TO_TOP_LABEL = i18n.translate('xpack.synthetics.overview.grid.scrollToTop.label', {
+  defaultMessage: 'Back to top',
+});

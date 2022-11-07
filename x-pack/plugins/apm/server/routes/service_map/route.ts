@@ -13,7 +13,7 @@ import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map';
 import { notifyFeatureUsage } from '../../feature';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceMap } from './get_service_map';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
@@ -116,9 +116,9 @@ const serviceMapRoute = createApmServerRoute({
       savedObjects: { client: savedObjectsClient },
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
-    const [setup, apmEventClient, serviceGroup, maxNumberOfServices] =
+    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] =
       await Promise.all([
-        setupRequest(resources),
+        getMlClient(resources),
         getApmEventClient(resources),
         serviceGroupId
           ? getServiceGroup({
@@ -133,13 +133,14 @@ const serviceMapRoute = createApmServerRoute({
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
-      config: setup.config,
+      config,
       start,
       end,
       kuery: '',
     });
     return getServiceMap({
-      setup,
+      mlClient,
+      config,
       apmEventClient,
       serviceNames,
       environment,
@@ -180,10 +181,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       path: { serviceName },
@@ -192,7 +190,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
-      config: setup.config,
+      config,
       start,
       end,
       kuery: '',
