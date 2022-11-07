@@ -12,7 +12,7 @@ import { Markdown } from '@kbn/kibana-react-plugin/public';
 export const initialSection = (
   <Markdown
     markdown={i18n.translate(
-      'unifiedSearch.query.textBasedLanguagesEditor.documentation.markdown',
+      'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.markdown',
       {
         defaultMessage: `## How it works
 
@@ -35,12 +35,9 @@ export const commands = {
   label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.commands', {
     defaultMessage: 'Commands',
   }),
-  description: i18n.translate(
-    'unifiedSearch.query.textBasedLanguagesEditor.comparisonOperatorsDocumentationDescription',
-    {
-      defaultMessage: `Supported commands.`,
-    }
-  ),
+  description: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.commandsDescription', {
+    defaultMessage: `Supported commands.`,
+  }),
   items: [
     {
       label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.from', {
@@ -269,7 +266,7 @@ from "index" | stats average = avg("field") | eval new_average = average + 1
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.addOperator.markdown',
+            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.addOperator.markdown',
             {
               defaultMessage: `### Add (+)
 \`\`\`
@@ -285,7 +282,7 @@ from "index" | stats average = avg("field") | eval new_average = average + 1
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.SubtractOperator',
+        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.SubtractOperator',
         {
           defaultMessage: 'Subtract',
         }
@@ -293,7 +290,7 @@ from "index" | stats average = avg("field") | eval new_average = average + 1
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.subtractOperator.markdown',
+            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.subtractOperator.markdown',
             {
               defaultMessage: `### Subtract (-)
 \`\`\`
@@ -315,7 +312,7 @@ export const aggregateFunctions = {
     defaultMessage: 'Aggregate functions',
   }),
   description: i18n.translate(
-    'unifiedSearch.query.textBasedLanguagesEditor.aggregateFunctionsDocumentationDescription',
+    'unifiedSearch.query.textBasedLanguagesEditor.aggregateFunctionsDocumentationESQLDescription',
     {
       defaultMessage: `Calculates aggregate statistics, such as average, count, and sum, over the incoming search results set. This is similar to SQL aggregation.`,
     }
@@ -323,7 +320,7 @@ export const aggregateFunctions = {
   items: [
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.averageFunction',
+        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.averageFunction',
         {
           defaultMessage: 'Average',
         }
@@ -331,7 +328,7 @@ export const aggregateFunctions = {
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.averageFunction.markdown',
+            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.averageFunction.markdown',
             {
               defaultMessage: `### avg
 Returns the average of the values in a field.
@@ -348,7 +345,7 @@ from "index" | stats average = avg("field")
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.maxFunction',
+        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.maxFunction',
         {
           defaultMessage: 'Max',
         }
@@ -356,7 +353,7 @@ from "index" | stats average = avg("field")
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.maxFunction.markdown',
+            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.maxFunction.markdown',
             {
               defaultMessage: `### max
 Returns the maximum value in a field.
@@ -375,7 +372,7 @@ from "index" | stats max = max("field")
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.minFunction',
+        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.minFunction',
         {
           defaultMessage: 'Min',
         }
@@ -383,7 +380,7 @@ from "index" | stats max = max("field")
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.minFunction.markdown',
+            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.minFunction.markdown',
             {
               defaultMessage: `### min
 Returns the minimum value in a field.
@@ -402,7 +399,7 @@ from "index" | stats min = min("field")
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.sumFunction',
+        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.sumFunction',
         {
           defaultMessage: 'Sum',
         }
@@ -410,7 +407,7 @@ from "index" | stats min = min("field")
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.sumFunction.markdown',
+            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.sumFunction.markdown',
             {
               defaultMessage: `### sum
 Returns the sum of the values in a field.
