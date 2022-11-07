@@ -60,23 +60,23 @@ export const createRequest = (
   const containerContextAgg =
     nodeType === 'pod' && fieldsExisted && fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {
-        containerContext: {
-          terms: {
-            field: termsAggField[KUBERNETES_POD_UID],
-            size: NUMBER_OF_DOCUMENTS,
-          },
-          aggs: {
-            container: {
-              top_hits: {
-                size: 1,
-                _source: {
-                  includes: ['container.*'],
+          containerContext: {
+            terms: {
+              field: termsAggField[KUBERNETES_POD_UID],
+              size: NUMBER_OF_DOCUMENTS,
+            },
+            aggs: {
+              container: {
+                top_hits: {
+                  size: 1,
+                  _source: {
+                    includes: ['container.*'],
+                  },
                 },
               },
             },
           },
-        },
-      }
+        }
       : undefined;
 
   const includesList = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
