@@ -34,9 +34,9 @@ export const updateGlobalPacksCreateCallback = async (
   const agentPoliciesResult = await agentPolicyService?.getByIds(packsClient, [
     packagePolicy.policy_id,
   ]);
-  const list = map(agentPoliciesResult, 'id');
+  const agentPolicyResultIds = map(agentPoliciesResult, 'id');
   const agentPolicies = agentPoliciesResult
-    ? mapKeys(await agentPolicyService?.getByIds(packsClient, list), 'id')
+    ? mapKeys(await agentPolicyService?.getByIds(packsClient, agentPolicyResultIds), 'id')
     : {};
 
   const packsContainingShardForPolicy: PackSavedObject[] = [];

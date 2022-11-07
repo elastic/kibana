@@ -144,7 +144,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
               const allPacks: SavedObjectsFindResponse<PackSavedObjectAttributes> =
                 await client.find({
-                  // TODO find a way to find only those with shards object in the attributes
                   type: packSavedObjectType,
                 });
 
