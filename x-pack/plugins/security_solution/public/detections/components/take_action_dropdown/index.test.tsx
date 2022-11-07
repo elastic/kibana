@@ -26,7 +26,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import {
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
-} from '../endpoint_responder/responder_context_menu_item';
+} from '../endpoint_responder/translations';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import {
@@ -108,7 +108,7 @@ describe('take action dropdown', () => {
       onAddIsolationStatusClick: jest.fn(),
       refetch: jest.fn(),
       refetchFlyoutData: jest.fn(),
-      timelineId: TimelineId.active,
+      scopeId: TimelineId.active,
       onOsqueryClick: jest.fn(),
     };
 

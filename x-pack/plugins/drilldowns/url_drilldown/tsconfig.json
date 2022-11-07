@@ -4,10 +4,9 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": ["public/**/*"],
-  "references": [
+  "kbn_references": [
     { "path": "../../../../src/core/tsconfig.json" },
     { "path": "../../../../src/plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "../../../../src/plugins/embeddable/tsconfig.json" },

@@ -118,7 +118,6 @@ export class JourneyFtrHarness {
 
   private async onSetup() {
     await Promise.all([
-      this.setupApm(),
       this.setupBrowserAndPage(),
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         await this.esArchiver.load(esArchive);
@@ -127,6 +126,10 @@ export class JourneyFtrHarness {
         await this.kibanaServer.importExport.load(kbnArchive);
       }),
     ]);
+
+    // It is important that we start the APM transaction after we open the browser and all the test data is loaded
+    // so that the scalability data extractor can focus on just the APM data produced by Kibana running under test.
+    await this.setupApm();
   }
 
   private async tearDownBrowserAndPage() {
@@ -181,9 +184,12 @@ export class JourneyFtrHarness {
   }
 
   private async onTeardown() {
+    await this.tearDownBrowserAndPage();
+    // It is important that we complete the APM transaction after we close the browser and before we start
+    // unloading the test data so that the scalability data extractor can focus on just the APM data produced
+    // by Kibana running under test.
+    await this.teardownApm();
     await Promise.all([
-      this.tearDownBrowserAndPage(),
-      this.teardownApm(),
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         await this.esArchiver.unload(esArchive);
       }),
@@ -358,6 +364,7 @@ export class JourneyFtrHarness {
           })
         )
       ),
+      kibanaServer: this.kibanaServer,
     });
 
     return this.#_ctx;

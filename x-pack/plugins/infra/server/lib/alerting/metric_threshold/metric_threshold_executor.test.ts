@@ -55,8 +55,20 @@ const initialRuleState: TestRuleState = {
   groups: [],
 };
 
+const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
+
+const logger = {
+  trace: fakeLogger,
+  debug: fakeLogger,
+  info: fakeLogger,
+  warn: fakeLogger,
+  error: fakeLogger,
+  fatal: fakeLogger,
+  log: () => void 0,
+  get: () => logger,
+} as unknown as Logger;
+
 const mockOptions = {
-  alertId: '',
   executionId: '',
   startedAt: new Date(),
   previousStartedAt: null,
@@ -76,11 +88,8 @@ const mockOptions = {
     },
   },
   spaceId: '',
-  name: '',
-  tags: [],
-  createdBy: null,
-  updatedBy: null,
   rule: {
+    id: '',
     name: '',
     tags: [],
     consumer: '',
@@ -99,6 +108,7 @@ const mockOptions = {
     ruleTypeId: '',
     ruleTypeName: '',
   },
+  logger,
 };
 
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
@@ -143,6 +153,7 @@ describe('The metric threshold alert type', () => {
             shouldFire,
             shouldWarn,
             isNoData,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -252,6 +263,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -263,6 +275,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -283,6 +296,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -294,6 +308,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -314,6 +329,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -325,6 +341,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -345,6 +362,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -356,6 +374,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -376,6 +395,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -387,6 +407,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
           c: {
             ...baseNonCountCriterion,
@@ -398,6 +419,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'c' },
           },
         },
       ]);
@@ -415,6 +437,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -426,6 +449,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
           c: {
             ...baseNonCountCriterion,
@@ -437,6 +461,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: 'c' },
           },
         },
       ]);
@@ -447,7 +472,9 @@ describe('The metric threshold alert type', () => {
         'test.metric.1',
         stateResult1
       );
-      expect(stateResult2.missingGroups).toEqual(expect.arrayContaining(['c']));
+      expect(stateResult2.missingGroups).toEqual(
+        expect.arrayContaining([{ key: 'c', bucketKey: { groupBy0: 'c' } }])
+      );
       setEvaluationResults([
         {
           a: {
@@ -460,6 +487,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -471,6 +499,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -521,6 +550,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -532,6 +562,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
           c: {
             ...baseNonCountCriterion,
@@ -543,6 +574,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'c' },
           },
         },
       ]);
@@ -565,6 +597,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -576,6 +609,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
           c: {
             ...baseNonCountCriterion,
@@ -587,6 +621,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: 'c' },
           },
         },
       ]);
@@ -597,7 +632,9 @@ describe('The metric threshold alert type', () => {
         'test.metric.1',
         stateResult1
       );
-      expect(stateResult2.missingGroups).toEqual(expect.arrayContaining(['c']));
+      expect(stateResult2.missingGroups).toEqual(
+        expect.arrayContaining([{ key: 'c', bucketKey: { groupBy0: 'c' } }])
+      );
       setEvaluationResults([
         {
           a: {
@@ -610,6 +647,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -621,6 +659,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -678,6 +717,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
         {
@@ -691,6 +731,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -711,6 +752,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
         {},
@@ -732,6 +774,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -743,6 +786,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
         {
@@ -756,6 +800,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -767,6 +812,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -789,6 +835,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
         {
@@ -802,6 +849,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -853,6 +901,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
         },
       ]);
@@ -870,6 +919,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
         },
       ]);
@@ -915,6 +965,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'a' },
             },
             b: {
               ...baseCountCriterion,
@@ -926,6 +977,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'b' },
             },
           },
         ]);
@@ -944,6 +996,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: true,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'a' },
             },
             b: {
               ...baseCountCriterion,
@@ -955,6 +1008,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: true,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'b' },
             },
           },
         ]);
@@ -996,6 +1050,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1013,6 +1068,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1053,6 +1109,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1070,6 +1127,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1110,6 +1168,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1129,6 +1188,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1186,6 +1246,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1203,6 +1264,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1220,6 +1282,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -1231,6 +1294,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -1256,6 +1320,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -1267,6 +1332,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -1288,6 +1354,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -1299,6 +1366,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
           c: {
             ...baseNonCountCriterion,
@@ -1310,6 +1378,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'c' },
           },
         },
       ]);
@@ -1330,6 +1399,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -1341,6 +1411,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -1391,6 +1462,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: true,
+              bucketKey: { groupBy0: '*' },
             },
           },
         ]);
@@ -1408,6 +1480,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: true,
+              bucketKey: { groupBy0: '*' },
             },
           },
         ]);
@@ -1425,6 +1498,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: true,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'a' },
             },
             b: {
               ...baseNonCountCriterion,
@@ -1436,6 +1510,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: true,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'b' },
             },
           },
         ]);
@@ -1459,6 +1534,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: true,
+              bucketKey: { groupBy0: 'a' },
             },
             b: {
               ...baseNonCountCriterion,
@@ -1470,6 +1546,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: true,
+              bucketKey: { groupBy0: 'b' },
             },
           },
         ]);
@@ -1549,6 +1626,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1606,19 +1684,6 @@ const createMockStaticConfiguration = (sources: any) => ({
   },
   sources,
 });
-
-const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
-
-const logger = {
-  trace: fakeLogger,
-  debug: fakeLogger,
-  info: fakeLogger,
-  warn: fakeLogger,
-  error: fakeLogger,
-  fatal: fakeLogger,
-  log: () => void 0,
-  get: () => logger,
-} as unknown as Logger;
 
 const mockLibs: any = {
   sources: new InfraSources({

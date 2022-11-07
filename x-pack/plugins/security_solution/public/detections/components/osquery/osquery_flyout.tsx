@@ -8,7 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutFooter, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { useHandleAddToTimeline } from '../../../common/components/event_details/add_to_timeline_button';
+import type { Ecs } from '../../../../common/ecs';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
 import { ACTION_OSQUERY } from './translations';
@@ -21,17 +21,18 @@ export interface OsqueryFlyoutProps {
   agentId?: string;
   defaultValues?: {};
   onClose: () => void;
+  ecsData?: Ecs;
 }
-export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
+
+const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
   agentId,
   defaultValues,
   onClose,
+  ecsData,
 }) => {
   const {
     services: { osquery },
   } = useKibana();
-
-  const handleAddToTimeline = useHandleAddToTimeline();
 
   if (osquery?.OsqueryAction) {
     return (
@@ -52,7 +53,7 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
               agentId={agentId}
               formType="steps"
               defaultValues={defaultValues}
-              addToTimeline={handleAddToTimeline}
+              ecsData={ecsData}
             />
           </OsqueryActionWrapper>
         </EuiFlyoutBody>

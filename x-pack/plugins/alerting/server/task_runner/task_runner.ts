@@ -136,7 +136,8 @@ export class TaskRunner<
     inMemoryMetrics: InMemoryMetrics
   ) {
     this.context = context;
-    this.logger = context.logger;
+    const loggerId = ruleType.id.startsWith('.') ? ruleType.id.substring(1) : ruleType.id;
+    this.logger = context.logger.get(loggerId);
     this.usageCounter = context.usageCounter;
     this.ruleType = ruleType;
     this.ruleConsumer = null;
@@ -354,7 +355,6 @@ export class TaskRunner<
 
           updatedState = await this.context.executionContext.withContext(ctx, () =>
             this.ruleType.executor({
-              alertId: ruleId,
               executionId: this.executionId,
               services: {
                 savedObjectsClient,
@@ -371,11 +371,8 @@ export class TaskRunner<
               previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
               spaceId,
               namespace,
-              name,
-              tags,
-              createdBy,
-              updatedBy,
               rule: {
+                id: ruleId,
                 name,
                 tags,
                 consumer,
@@ -392,6 +389,7 @@ export class TaskRunner<
                 throttle,
                 notifyWhen,
               },
+              logger: this.logger,
             })
           );
 

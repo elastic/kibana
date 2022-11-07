@@ -17,6 +17,7 @@ import {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
+  Logger,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
@@ -89,20 +90,16 @@ export interface RuleExecutorOptions<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
 > {
-  alertId: string;
   executionId: string;
-  startedAt: Date;
-  previousStartedAt: Date | null;
-  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
+  logger: Logger;
   params: Params;
-  state: State;
+  previousStartedAt: Date | null;
   rule: SanitizedRuleConfig;
+  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
   spaceId: string;
+  startedAt: Date;
+  state: State;
   namespace?: string;
-  name: string;
-  tags: string[];
-  createdBy: string | null;
-  updatedBy: string | null;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {

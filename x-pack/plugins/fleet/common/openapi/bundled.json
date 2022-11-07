@@ -247,7 +247,35 @@
           }
         },
         "operationId": "get-package-categories"
-      }
+      },
+      "parameters": [
+        {
+          "in": "query",
+          "name": "prerelease",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          },
+          "description": "Whether to include prerelease packages in categories count (e.g. beta, rc, preview) "
+        },
+        {
+          "in": "query",
+          "name": "experimental",
+          "deprecated": true,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "in": "query",
+          "name": "include_policy_templates",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      ]
     },
     "/epm/packages/limited": {
       "get": {
@@ -304,6 +332,31 @@
             "default": false
           },
           "description": "Whether to exclude the install status of each package. Enabling this option will opt in to caching for the response via `cache-control` headers. If you don't need up-to-date installation info for a package, and are querying for a list of available packages, providing this flag can improve performance substantially."
+        },
+        {
+          "in": "query",
+          "name": "prerelease",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          },
+          "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+        },
+        {
+          "in": "query",
+          "name": "experimental",
+          "deprecated": true,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "in": "query",
+          "name": "category",
+          "schema": {
+            "type": "string"
+          }
         }
       ]
     },
@@ -1187,7 +1240,7 @@
             "schema": {
               "type": "array"
             },
-            "name": "agentsId",
+            "name": "agentsIds",
             "in": "query",
             "required": true
           }
@@ -3710,7 +3763,7 @@
     "/fleet_server_hosts": {
       "get": {
         "summary": "Fleet Server Hosts - List",
-        "description": "Return a list of Fleet server host",
+        "description": "Return a list of Fleet server hosts",
         "tags": [],
         "responses": {
           "200": {
@@ -4206,6 +4259,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "prerelease_integrations_enabled": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -4401,6 +4457,8 @@
           },
           "release": {
             "type": "string",
+            "deprecated": true,
+            "description": "release label is deprecated, derive from the version instead (packages follow semver)",
             "enum": [
               "experimental",
               "beta",
@@ -5016,6 +5074,14 @@
           "monitoring_output_id": {
             "type": "string",
             "nullable": true
+          },
+          "fleet_server_host_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -5165,10 +5231,20 @@
                 "type": "string"
               },
               "data_output_id": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
               },
               "monitoring_output_id": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
+              },
+              "fleet_server_host_id": {
+                "type": "string",
+                "nullable": true
+              },
+              "download_source_id": {
+                "type": "string",
+                "nullable": true
               },
               "revision": {
                 "type": "number"

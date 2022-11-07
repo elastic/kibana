@@ -59,6 +59,11 @@ export type EmbeddableInput = {
   syncColors?: boolean;
 
   /**
+   * Flag whether cursor should be synced with other panels on hover
+   */
+  syncCursor?: boolean;
+
+  /**
    * Flag whether tooltips should be synced with other panels on hover
    */
   syncTooltips?: boolean;

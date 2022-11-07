@@ -7,13 +7,8 @@
 
 import moment from 'moment-timezone';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import {
-  dateFormatter,
-  getDateDifferenceInDays,
-  barChartTimeAxisLabelFormatter,
-  calculateBarchartColumnTimeInterval,
-} from './dates';
-import { EMPTY_VALUE } from '../../../common/constants';
+import { dateFormatter, getDateDifferenceInDays, barChartTimeAxisLabelFormatter } from './dates';
+import { EMPTY_VALUE } from '../constants';
 
 const mockValidStringDate = '1 Jan 2022 00:00:00 GMT';
 const mockInvalidStringDate = 'invalid date';
@@ -86,34 +81,6 @@ describe('dates', () => {
       };
 
       expect(typeof barChartTimeAxisLabelFormatter(dateRange)).toBe('function');
-    });
-  });
-
-  describe('calculateBarchartTimeInterval', () => {
-    it('should handle number dates', () => {
-      const from = moment(mockValidStringDate).valueOf();
-      const to = moment(mockValidStringDate).add(1, 'days').valueOf();
-
-      const interval = calculateBarchartColumnTimeInterval(from, to);
-      expect(interval).toContain('ms');
-      expect(parseInt(interval, 10) > 0).toBeTruthy();
-    });
-
-    it('should handle moment dates', () => {
-      const from = moment(mockValidStringDate);
-      const to = moment(mockValidStringDate).add(1, 'days');
-
-      const interval = calculateBarchartColumnTimeInterval(from, to);
-      expect(interval).toContain('ms');
-      expect(parseInt(interval, 10) > 0).toBeTruthy();
-    });
-
-    it('should handle dateTo older than dateFrom', () => {
-      const from = moment(mockValidStringDate).add(1, 'days');
-      const to = moment(mockValidStringDate);
-
-      const interval = calculateBarchartColumnTimeInterval(from, to);
-      expect(parseInt(interval, 10) > 0).toBeFalsy();
     });
   });
 });

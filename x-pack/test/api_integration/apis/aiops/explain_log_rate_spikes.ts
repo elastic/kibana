@@ -34,8 +34,8 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const expected = {
-    chunksLength: 13,
-    actionsLength: 12,
+    chunksLength: 34,
+    actionsLength: 33,
     noIndexChunksLength: 4,
     noIndexActionsLength: 3,
     changePointFilter: 'add_change_points',
@@ -276,7 +276,7 @@ export default ({ getService }: FtrProviderContext) => {
       const errorActions = data.filter((d) => d.type === expected.errorFilter);
       expect(errorActions.length).to.be(1);
 
-      expect(errorActions[0].payload).to.be('Failed to fetch field candidates.');
+      expect(errorActions[0].payload).to.be('Failed to fetch index information.');
     });
   });
 };

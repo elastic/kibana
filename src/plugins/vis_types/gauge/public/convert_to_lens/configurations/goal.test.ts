@@ -8,6 +8,7 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CollapseFunction } from '@kbn/visualizations-plugin/common';
 import { GaugeVisParams } from '../../types';
 import { getConfiguration } from './goal';
 
@@ -69,7 +70,10 @@ describe('getConfiguration', () => {
         buckets,
         maxAccessor,
         columnsWithoutReferenced: [],
-        bucketCollapseFn: { [collapseFn]: [breakdownByAccessor] },
+        bucketCollapseFn: { [collapseFn]: [breakdownByAccessor] } as Record<
+          CollapseFunction,
+          string[]
+        >,
       })
     ).toEqual({
       breakdownByAccessor,
@@ -78,6 +82,7 @@ describe('getConfiguration', () => {
       layerType: 'data',
       maxAccessor,
       metricAccessor,
+      showBar: true,
       palette,
     });
   });

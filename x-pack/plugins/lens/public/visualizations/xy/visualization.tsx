@@ -156,6 +156,10 @@ export const getXyVisualization = ({
   },
 
   appendLayer(state, layerId, layerType, indexPatternId) {
+    if (layerType === 'metricTrendline') {
+      return state;
+    }
+
     const firstUsedSeriesType = getDataLayers(state.layers)?.[0]?.seriesType;
     return {
       ...state,
@@ -343,6 +347,7 @@ export const getXyVisualization = ({
           groupLabel: getAxisName('y', { isHorizontal }),
           accessors: mappedAccessors,
           filterOperations: isNumericDynamicMetric,
+          isMetricDimension: true,
           supportsMoreColumns: true,
           requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsXY_yDimensionPanel',

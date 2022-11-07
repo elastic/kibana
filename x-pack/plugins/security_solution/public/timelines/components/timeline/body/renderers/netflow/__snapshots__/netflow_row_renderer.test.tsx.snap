@@ -2,7 +2,12 @@
 
 exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 {
+  .c15 svg {
+  position: relative;
+  top: -1px;
+}
+
+.c0 {
   display: inline-block;
   font-size: 12px;
   line-height: 1.5;
@@ -14,11 +19,6 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
   padding: 0 8px;
   border: 1px solid #343741;
   border-radius: 4px;
-}
-
-.c15 svg {
-  position: relative;
-  top: -1px;
 }
 
 .c13,
@@ -254,7 +254,7 @@ tr:hover .c5:focus::before {
                           >
                             <div
                               data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-user_name-first_last"
+                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-user_name-first_last"
                             >
                               <div
                                 class="draggable-keyboard-wrapper"
@@ -266,9 +266,9 @@ tr:hover .c5:focus::before {
                                   aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                   class="c5"
                                   data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-user_name-first_last"
+                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-user_name-first_last"
                                   data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-user_name-first_last"
+                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-user_name-first_last"
                                   data-test-subj="providerContainer"
                                   draggable="false"
                                   role="button"
@@ -342,7 +342,7 @@ tr:hover .c5:focus::before {
                           >
                             <div
                               data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-process_name-rat"
+                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-process_name-rat"
                             >
                               <div
                                 class="draggable-keyboard-wrapper"
@@ -354,9 +354,9 @@ tr:hover .c5:focus::before {
                                   aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                   class="c5"
                                   data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-process_name-rat"
+                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-process_name-rat"
                                   data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-process_name-rat"
+                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-process_name-rat"
                                   data-test-subj="providerContainer"
                                   draggable="false"
                                   role="button"
@@ -439,7 +439,7 @@ tr:hover .c5:focus::before {
                           >
                             <div
                               data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-event_duration-1000000"
+                              data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_duration-1000000"
                             >
                               <div
                                 class="draggable-keyboard-wrapper"
@@ -451,9 +451,9 @@ tr:hover .c5:focus::before {
                                   aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                   class="c5"
                                   data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-event_duration-1000000"
+                                  data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_duration-1000000"
                                   data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-event_duration-1000000"
+                                  data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_duration-1000000"
                                   data-test-subj="providerContainer"
                                   draggable="false"
                                   role="button"
@@ -521,7 +521,7 @@ tr:hover .c5:focus::before {
                           >
                             <div
                               data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-event_start-2018-11-12T19:03:25_836Z"
+                              data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_start-2018-11-12T19:03:25_836Z"
                             >
                               <div
                                 class="draggable-keyboard-wrapper"
@@ -533,9 +533,9 @@ tr:hover .c5:focus::before {
                                   aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                   class="c5"
                                   data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-event_start-2018-11-12T19:03:25_836Z"
+                                  data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_start-2018-11-12T19:03:25_836Z"
                                   data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-event_start-2018-11-12T19:03:25_836Z"
+                                  data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_start-2018-11-12T19:03:25_836Z"
                                   data-test-subj="providerContainer"
                                   draggable="false"
                                   role="button"
@@ -599,7 +599,7 @@ tr:hover .c5:focus::before {
                           >
                             <div
                               data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-event_end-2018-11-12T19:03:25_936Z"
+                              data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_end-2018-11-12T19:03:25_936Z"
                             >
                               <div
                                 class="draggable-keyboard-wrapper"
@@ -611,9 +611,9 @@ tr:hover .c5:focus::before {
                                   aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                   class="c5"
                                   data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-event_end-2018-11-12T19:03:25_936Z"
+                                  data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_end-2018-11-12T19:03:25_936Z"
                                   data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-event_end-2018-11-12T19:03:25_936Z"
+                                  data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_end-2018-11-12T19:03:25_936Z"
                                   data-test-subj="providerContainer"
                                   draggable="false"
                                   role="button"
@@ -691,7 +691,7 @@ tr:hover .c5:focus::before {
                               >
                                 <div
                                   data-rbd-droppable-context-id="0"
-                                  data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_direction-outgoing"
+                                  data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_direction-outgoing"
                                 >
                                   <div
                                     class="draggable-keyboard-wrapper"
@@ -703,9 +703,9 @@ tr:hover .c5:focus::before {
                                       aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                       class="c5"
                                       data-rbd-drag-handle-context-id="0"
-                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_direction-outgoing"
+                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_direction-outgoing"
                                       data-rbd-draggable-context-id="0"
-                                      data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_direction-outgoing"
+                                      data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_direction-outgoing"
                                       data-test-subj="providerContainer"
                                       draggable="false"
                                       role="button"
@@ -779,7 +779,7 @@ tr:hover .c5:focus::before {
                               >
                                 <div
                                   data-rbd-droppable-context-id="0"
-                                  data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_protocol-http"
+                                  data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_protocol-http"
                                 >
                                   <div
                                     class="draggable-keyboard-wrapper"
@@ -791,9 +791,9 @@ tr:hover .c5:focus::before {
                                       aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                       class="c5"
                                       data-rbd-drag-handle-context-id="0"
-                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_protocol-http"
+                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_protocol-http"
                                       data-rbd-draggable-context-id="0"
-                                      data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_protocol-http"
+                                      data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_protocol-http"
                                       data-test-subj="providerContainer"
                                       draggable="false"
                                       role="button"
@@ -862,7 +862,7 @@ tr:hover .c5:focus::before {
                               >
                                 <div
                                   data-rbd-droppable-context-id="0"
-                                  data-rbd-droppable-id="droppableId.content.network-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_bytes-100"
+                                  data-rbd-droppable-id="droppableId.content.network-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_bytes-100"
                                 >
                                   <div
                                     class="draggable-keyboard-wrapper"
@@ -874,9 +874,9 @@ tr:hover .c5:focus::before {
                                       aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                       class="c5"
                                       data-rbd-drag-handle-context-id="0"
-                                      data-rbd-drag-handle-draggable-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_bytes-100"
+                                      data-rbd-drag-handle-draggable-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_bytes-100"
                                       data-rbd-draggable-context-id="0"
-                                      data-rbd-draggable-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_bytes-100"
+                                      data-rbd-draggable-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_bytes-100"
                                       data-test-subj="providerContainer"
                                       draggable="false"
                                       role="button"
@@ -938,7 +938,7 @@ tr:hover .c5:focus::before {
                               >
                                 <div
                                   data-rbd-droppable-context-id="0"
-                                  data-rbd-droppable-id="droppableId.content.network-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_packets-3"
+                                  data-rbd-droppable-id="droppableId.content.network-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_packets-3"
                                 >
                                   <div
                                     class="draggable-keyboard-wrapper"
@@ -950,9 +950,9 @@ tr:hover .c5:focus::before {
                                       aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                       class="c5"
                                       data-rbd-drag-handle-context-id="0"
-                                      data-rbd-drag-handle-draggable-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_packets-3"
+                                      data-rbd-drag-handle-draggable-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_packets-3"
                                       data-rbd-draggable-context-id="0"
-                                      data-rbd-draggable-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_packets-3"
+                                      data-rbd-draggable-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_packets-3"
                                       data-test-subj="providerContainer"
                                       draggable="false"
                                       role="button"
@@ -1014,7 +1014,7 @@ tr:hover .c5:focus::before {
                               >
                                 <div
                                   data-rbd-droppable-context-id="0"
-                                  data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_transport-tcp"
+                                  data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_transport-tcp"
                                 >
                                   <div
                                     class="draggable-keyboard-wrapper"
@@ -1026,9 +1026,9 @@ tr:hover .c5:focus::before {
                                       aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                       class="c5"
                                       data-rbd-drag-handle-context-id="0"
-                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_transport-tcp"
+                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_transport-tcp"
                                       data-rbd-draggable-context-id="0"
-                                      data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_transport-tcp"
+                                      data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_transport-tcp"
                                       data-test-subj="providerContainer"
                                       draggable="false"
                                       role="button"
@@ -1097,7 +1097,7 @@ tr:hover .c5:focus::before {
                               >
                                 <div
                                   data-rbd-droppable-context-id="0"
-                                  data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_community_id-we_live_in_a"
+                                  data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_community_id-we_live_in_a"
                                 >
                                   <div
                                     class="draggable-keyboard-wrapper"
@@ -1109,9 +1109,9 @@ tr:hover .c5:focus::before {
                                       aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                       class="c5"
                                       data-rbd-drag-handle-context-id="0"
-                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_community_id-we_live_in_a"
+                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_community_id-we_live_in_a"
                                       data-rbd-draggable-context-id="0"
-                                      data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-network_community_id-we_live_in_a"
+                                      data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_community_id-we_live_in_a"
                                       data-test-subj="providerContainer"
                                       draggable="false"
                                       role="button"
@@ -1227,7 +1227,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-test-abcd-source_ip-192_168_1_2-abcd"
+                                                    data-rbd-droppable-id="droppableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-timeline-test-abcd-source_ip-192_168_1_2-abcd"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -1239,9 +1239,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-test-abcd-source_ip-192_168_1_2-abcd"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-timeline-test-abcd-source_ip-192_168_1_2-abcd"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-test-abcd-source_ip-192_168_1_2-abcd"
+                                                        data-rbd-draggable-id="draggableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-timeline-test-abcd-source_ip-192_168_1_2-abcd"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -1320,7 +1320,7 @@ tr:hover .c5:focus::before {
                                                     >
                                                       <div
                                                         data-rbd-droppable-context-id="0"
-                                                        data-rbd-droppable-id="droppableId.content.port-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_port-9987"
+                                                        data-rbd-droppable-id="droppableId.content.port-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_port-9987"
                                                       >
                                                         <div
                                                           class="draggable-keyboard-wrapper"
@@ -1332,9 +1332,9 @@ tr:hover .c5:focus::before {
                                                             aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                             class="c5"
                                                             data-rbd-drag-handle-context-id="0"
-                                                            data-rbd-drag-handle-draggable-id="draggableId.content.port-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_port-9987"
+                                                            data-rbd-drag-handle-draggable-id="draggableId.content.port-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_port-9987"
                                                             data-rbd-draggable-context-id="0"
-                                                            data-rbd-draggable-id="draggableId.content.port-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_port-9987"
+                                                            data-rbd-draggable-id="draggableId.content.port-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_port-9987"
                                                             data-test-subj="providerContainer"
                                                             draggable="false"
                                                             role="button"
@@ -1431,7 +1431,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_continent_name-North America"
+                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_continent_name-North America"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -1443,9 +1443,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_continent_name-North America"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_continent_name-North America"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_continent_name-North America"
+                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_continent_name-North America"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -1509,7 +1509,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_country_name-United States"
+                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_country_name-United States"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -1521,9 +1521,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_country_name-United States"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_country_name-United States"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_country_name-United States"
+                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_country_name-United States"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -1597,7 +1597,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_country_iso_code-US"
+                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_country_iso_code-US"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -1609,9 +1609,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_country_iso_code-US"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_country_iso_code-US"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_country_iso_code-US"
+                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_country_iso_code-US"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -1675,7 +1675,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_region_name-Georgia"
+                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_region_name-Georgia"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -1687,9 +1687,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_region_name-Georgia"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_region_name-Georgia"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_region_name-Georgia"
+                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_region_name-Georgia"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -1753,7 +1753,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_city_name-Atlanta"
+                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_city_name-Atlanta"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -1765,9 +1765,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_city_name-Atlanta"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_city_name-Atlanta"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_geo_city_name-Atlanta"
+                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_city_name-Atlanta"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -1849,7 +1849,7 @@ tr:hover .c5:focus::before {
                                     >
                                       <div
                                         data-rbd-droppable-context-id="0"
-                                        data-rbd-droppable-id="droppableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_bytes-60"
+                                        data-rbd-droppable-id="droppableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_bytes-60"
                                       >
                                         <div
                                           class="draggable-keyboard-wrapper"
@@ -1861,9 +1861,9 @@ tr:hover .c5:focus::before {
                                             aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                             class="c5"
                                             data-rbd-drag-handle-context-id="0"
-                                            data-rbd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_bytes-60"
+                                            data-rbd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_bytes-60"
                                             data-rbd-draggable-context-id="0"
-                                            data-rbd-draggable-id="draggableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_bytes-60"
+                                            data-rbd-draggable-id="draggableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_bytes-60"
                                             data-test-subj="providerContainer"
                                             draggable="false"
                                             role="button"
@@ -1938,7 +1938,7 @@ tr:hover .c5:focus::before {
                                     >
                                       <div
                                         data-rbd-droppable-context-id="0"
-                                        data-rbd-droppable-id="droppableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_packets-2"
+                                        data-rbd-droppable-id="droppableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_packets-2"
                                       >
                                         <div
                                           class="draggable-keyboard-wrapper"
@@ -1950,9 +1950,9 @@ tr:hover .c5:focus::before {
                                             aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                             class="c5"
                                             data-rbd-drag-handle-context-id="0"
-                                            data-rbd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_packets-2"
+                                            data-rbd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_packets-2"
                                             data-rbd-draggable-context-id="0"
-                                            data-rbd-draggable-id="draggableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-source_packets-2"
+                                            data-rbd-draggable-id="draggableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_packets-2"
                                             data-test-subj="providerContainer"
                                             draggable="false"
                                             role="button"
@@ -2056,7 +2056,7 @@ tr:hover .c5:focus::before {
                                     >
                                       <div
                                         data-rbd-droppable-context-id="0"
-                                        data-rbd-droppable-id="droppableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_bytes-40"
+                                        data-rbd-droppable-id="droppableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_bytes-40"
                                       >
                                         <div
                                           class="draggable-keyboard-wrapper"
@@ -2068,9 +2068,9 @@ tr:hover .c5:focus::before {
                                             aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                             class="c5"
                                             data-rbd-drag-handle-context-id="0"
-                                            data-rbd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_bytes-40"
+                                            data-rbd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_bytes-40"
                                             data-rbd-draggable-context-id="0"
-                                            data-rbd-draggable-id="draggableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_bytes-40"
+                                            data-rbd-draggable-id="draggableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_bytes-40"
                                             data-test-subj="providerContainer"
                                             draggable="false"
                                             role="button"
@@ -2145,7 +2145,7 @@ tr:hover .c5:focus::before {
                                     >
                                       <div
                                         data-rbd-droppable-context-id="0"
-                                        data-rbd-droppable-id="droppableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_packets-1"
+                                        data-rbd-droppable-id="droppableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_packets-1"
                                       >
                                         <div
                                           class="draggable-keyboard-wrapper"
@@ -2157,9 +2157,9 @@ tr:hover .c5:focus::before {
                                             aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                             class="c5"
                                             data-rbd-drag-handle-context-id="0"
-                                            data-rbd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_packets-1"
+                                            data-rbd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_packets-1"
                                             data-rbd-draggable-context-id="0"
-                                            data-rbd-draggable-id="draggableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_packets-1"
+                                            data-rbd-draggable-id="draggableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_packets-1"
                                             data-test-subj="providerContainer"
                                             draggable="false"
                                             role="button"
@@ -2271,7 +2271,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-test-abcd-destination_ip-10_1_2_3-abcd"
+                                                    data-rbd-droppable-id="droppableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-timeline-test-abcd-destination_ip-10_1_2_3-abcd"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -2283,9 +2283,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-test-abcd-destination_ip-10_1_2_3-abcd"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-timeline-test-abcd-destination_ip-10_1_2_3-abcd"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-test-abcd-destination_ip-10_1_2_3-abcd"
+                                                        data-rbd-draggable-id="draggableId.content.formatted-ip-data-provider-netflow-row-renderer-render-row-timeline-test-abcd-destination_ip-10_1_2_3-abcd"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -2364,7 +2364,7 @@ tr:hover .c5:focus::before {
                                                     >
                                                       <div
                                                         data-rbd-droppable-context-id="0"
-                                                        data-rbd-droppable-id="droppableId.content.port-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_port-80"
+                                                        data-rbd-droppable-id="droppableId.content.port-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_port-80"
                                                       >
                                                         <div
                                                           class="draggable-keyboard-wrapper"
@@ -2376,9 +2376,9 @@ tr:hover .c5:focus::before {
                                                             aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                             class="c5"
                                                             data-rbd-drag-handle-context-id="0"
-                                                            data-rbd-drag-handle-draggable-id="draggableId.content.port-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_port-80"
+                                                            data-rbd-drag-handle-draggable-id="draggableId.content.port-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_port-80"
                                                             data-rbd-draggable-context-id="0"
-                                                            data-rbd-draggable-id="draggableId.content.port-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_port-80"
+                                                            data-rbd-draggable-id="draggableId.content.port-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_port-80"
                                                             data-test-subj="providerContainer"
                                                             draggable="false"
                                                             role="button"
@@ -2475,7 +2475,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_continent_name-North America"
+                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_continent_name-North America"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -2487,9 +2487,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_continent_name-North America"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_continent_name-North America"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_continent_name-North America"
+                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_continent_name-North America"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -2553,7 +2553,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_country_name-United States"
+                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_country_name-United States"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -2565,9 +2565,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_country_name-United States"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_country_name-United States"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_country_name-United States"
+                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_country_name-United States"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -2641,7 +2641,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_country_iso_code-US"
+                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_country_iso_code-US"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -2653,9 +2653,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_country_iso_code-US"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_country_iso_code-US"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_country_iso_code-US"
+                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_country_iso_code-US"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -2719,7 +2719,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_region_name-New York"
+                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_region_name-New York"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -2731,9 +2731,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_region_name-New York"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_region_name-New York"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_region_name-New York"
+                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_region_name-New York"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -2797,7 +2797,7 @@ tr:hover .c5:focus::before {
                                                 >
                                                   <div
                                                     data-rbd-droppable-context-id="0"
-                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_city_name-New York"
+                                                    data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_city_name-New York"
                                                   >
                                                     <div
                                                       class="draggable-keyboard-wrapper"
@@ -2809,9 +2809,9 @@ tr:hover .c5:focus::before {
                                                         aria-describedby="rbd-hidden-text-0-hidden-text-0"
                                                         class="c5"
                                                         data-rbd-drag-handle-context-id="0"
-                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_city_name-New York"
+                                                        data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_city_name-New York"
                                                         data-rbd-draggable-context-id="0"
-                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-destination_geo_city_name-New York"
+                                                        data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_city_name-New York"
                                                         data-test-subj="providerContainer"
                                                         draggable="false"
                                                         role="button"
@@ -2889,7 +2889,7 @@ tr:hover .c5:focus::before {
                       >
                         <div
                           data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
+                          data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
                         >
                           <div
                             class="draggable-keyboard-wrapper"
@@ -2901,9 +2901,9 @@ tr:hover .c5:focus::before {
                               aria-describedby="rbd-hidden-text-0-hidden-text-0"
                               class="c5"
                               data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
+                              data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
                               data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
+                              data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
                               data-test-subj="providerContainer"
                               draggable="false"
                               role="button"
@@ -3001,7 +3001,7 @@ tr:hover .c5:focus::before {
                       >
                         <div
                           data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
+                          data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
                         >
                           <div
                             class="draggable-keyboard-wrapper"
@@ -3013,9 +3013,9 @@ tr:hover .c5:focus::before {
                               aria-describedby="rbd-hidden-text-0-hidden-text-0"
                               class="c5"
                               data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
+                              data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
                               data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
+                              data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
                               data-test-subj="providerContainer"
                               draggable="false"
                               role="button"
@@ -3113,7 +3113,7 @@ tr:hover .c5:focus::before {
                       >
                         <div
                           data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
+                          data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
                         >
                           <div
                             class="draggable-keyboard-wrapper"
@@ -3125,9 +3125,9 @@ tr:hover .c5:focus::before {
                               aria-describedby="rbd-hidden-text-0-hidden-text-0"
                               class="c5"
                               data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
+                              data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
                               data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-test-abcd-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
+                              data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
                               data-test-subj="providerContainer"
                               draggable="false"
                               role="button"

@@ -9,9 +9,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useState } from 'react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { useInspector } from '../../../hooks/use_inspector';
+import { useInspector, useKibana } from '../../../hooks';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { useKibana } from '../../../hooks/use_kibana';
 import { useSourcererDataView } from '.';
 import {
   ChartSeries,

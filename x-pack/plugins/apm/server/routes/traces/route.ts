@@ -6,8 +6,8 @@
  */
 
 import * as t from 'io-ts';
+import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import { TraceSearchType } from '../../../common/trace_explorer';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
@@ -22,6 +22,11 @@ import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
 import { getTraceItems } from './get_trace_items';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import {
+  CriticalPathResponse,
+  getAggregatedCriticalPath,
+} from './get_aggregated_critical_path';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -44,6 +49,7 @@ const tracesRoute = createApmServerRoute({
     }>;
   }> => {
     const {
+      config,
       params,
       request,
       plugins: { security },
@@ -51,13 +57,14 @@ const tracesRoute = createApmServerRoute({
 
     const { environment, kuery, start, end, probability } = params.query;
 
-    const [setup, randomSampler] = await Promise.all([
-      setupRequest(resources),
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      ...setup,
+      apmEventClient,
+      config,
       kuery,
       start,
       end,
@@ -66,7 +73,7 @@ const tracesRoute = createApmServerRoute({
     return await getTopTracesPrimaryStats({
       environment,
       kuery,
-      setup,
+      apmEventClient,
       searchAggregatedTransactions,
       start,
       end,
@@ -97,12 +104,11 @@ const tracesByIdRoute = createApmServerRoute({
     >;
     linkedChildrenOfSpanCountBySpanId: Record<string, number>;
   }> => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { params, config } = resources;
     const { traceId } = params.path;
     const { start, end } = params.query;
-
-    return getTraceItems(traceId, setup, start, end);
+    return getTraceItems(traceId, config, apmEventClient, start, end);
   },
 });
 
@@ -121,8 +127,8 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
   }> => {
     const { params } = resources;
     const { traceId } = params.path;
-    const setup = await setupRequest(resources);
-    return getRootTransactionByTraceId(traceId, setup);
+    const apmEventClient = await getApmEventClient(resources);
+    return getRootTransactionByTraceId(traceId, apmEventClient);
   },
 });
 
@@ -141,9 +147,9 @@ const transactionByIdRoute = createApmServerRoute({
   }> => {
     const { params } = resources;
     const { transactionId } = params.path;
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     return {
-      transaction: await getTransaction({ transactionId, setup }),
+      transaction: await getTransaction({ transactionId, apmEventClient }),
     };
   },
 });
@@ -169,15 +175,15 @@ const findTracesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    samples: Array<{ traceId: string; transactionId: string }>;
+    traceSamples: Array<{ traceId: string; transactionId: string }>;
   }> => {
     const { start, end, environment, query, type } = resources.params.query;
 
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     return {
-      samples: await getTraceSamplesByQuery({
-        setup,
+      traceSamples: await getTraceSamplesByQuery({
+        apmEventClient,
         start,
         end,
         environment,
@@ -188,10 +194,49 @@ const findTracesRoute = createApmServerRoute({
   },
 });
 
+const aggregatedCriticalPathRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/traces/aggregated_critical_path',
+  params: t.type({
+    body: t.intersection([
+      t.type({
+        traceIds: t.array(t.string),
+        serviceName: t.union([nonEmptyStringRt, t.null]),
+        transactionName: t.union([nonEmptyStringRt, t.null]),
+      }),
+      rangeRt,
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{ criticalPath: CriticalPathResponse | null }> => {
+    const {
+      params: {
+        body: { traceIds, start, end, serviceName, transactionName },
+      },
+    } = resources;
+
+    const apmEventClient = await getApmEventClient(resources);
+
+    return getAggregatedCriticalPath({
+      traceIds,
+      start,
+      end,
+      apmEventClient,
+      serviceName,
+      transactionName,
+      logger: resources.logger,
+    });
+  },
+});
+
 export const traceRouteRepository = {
   ...tracesByIdRoute,
   ...tracesRoute,
   ...rootTransactionByTraceIdRoute,
   ...transactionByIdRoute,
   ...findTracesRoute,
+  ...aggregatedCriticalPathRoute,
 };

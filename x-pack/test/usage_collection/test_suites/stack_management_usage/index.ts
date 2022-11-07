@@ -19,7 +19,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await common.navigateToApp('home'); // Navigate to Home to make sure all the appIds are loaded
       await common.isChromeVisible(); // Make sure the page is fully loaded
-      registeredSettings = await browser.execute(() => window.__registeredUiSettings__);
+      registeredSettings = await browser.execute(() => {
+        // @ts-expect-error this code runs in the browser
+        return window.__registeredUiSettings__;
+      });
     });
 
     it('registers all UI Settings in the UsageStats interface', () => {

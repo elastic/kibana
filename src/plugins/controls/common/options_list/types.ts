@@ -15,8 +15,12 @@ export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
   selectedOptions?: string[];
+  existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
+  hideExclude?: boolean;
+  hideExists?: boolean;
+  exclude?: boolean;
 }
 
 export type OptionsListField = FieldSpec & {

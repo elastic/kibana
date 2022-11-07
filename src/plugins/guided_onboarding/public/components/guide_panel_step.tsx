@@ -21,7 +21,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import type { StepStatus } from '../../common/types';
+import type { StepStatus } from '@kbn/guided-onboarding';
 import type { StepConfig } from '../types';
 import { getGuidePanelStepStyles } from './guide_panel_step.styles';
 
@@ -31,6 +31,7 @@ interface GuideStepProps {
   stepConfig: StepConfig;
   stepNumber: number;
   handleButtonClick: () => void;
+  telemetryGuideId: string;
 }
 
 export const GuideStep = ({
@@ -39,6 +40,7 @@ export const GuideStep = ({
   stepNumber,
   stepConfig,
   handleButtonClick,
+  telemetryGuideId,
 }: GuideStepProps) => {
   const { euiTheme } = useEuiTheme();
   const styles = getGuidePanelStepStyles(euiTheme, stepStatus);
@@ -93,13 +95,15 @@ export const GuideStep = ({
         >
           <>
             <EuiSpacer size="s" />
-
-            <EuiText size="s">
-              <ul>
-                {stepConfig.descriptionList.map((description, index) => {
-                  return <li key={`description-${index}`}>{description}</li>;
-                })}
-              </ul>
+            <EuiText size="s" data-test-subj="guidePanelStepDescription" css={styles.description}>
+              {stepConfig.description && <p>{stepConfig.description}</p>}
+              {stepConfig.descriptionList && (
+                <ul>
+                  {stepConfig.descriptionList.map((description, index) => {
+                    return <li key={`description-${index}`}>{description}</li>;
+                  })}
+                </ul>
+              )}
             </EuiText>
 
             <EuiSpacer />
@@ -109,7 +113,8 @@ export const GuideStep = ({
                   <EuiButton
                     onClick={() => handleButtonClick()}
                     fill
-                    data-test-subj="activeStepButtonLabel"
+                    // data-test-subj used for FS tracking and tests
+                    data-test-subj={`onboarding--stepButton--${telemetryGuideId}--step${stepNumber}`}
                   >
                     {getStepButtonLabel()}
                   </EuiButton>
