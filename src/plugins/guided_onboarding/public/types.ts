@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { Observable } from 'rxjs';
 import { HttpSetup } from '@kbn/core/public';
 import type { GuideState, GuideId, GuideStepIds, StepStatus } from '@kbn/guided-onboarding';
@@ -57,7 +58,7 @@ export interface StepConfig {
   // description is displayed as a single paragraph, can be combined with description list
   description?: string;
   // description list is displayed as an unordered list, can be combined with description
-  descriptionList?: string[];
+  descriptionList?: Array<string | React.ReactNode>;
   location?: {
     appID: string;
     path: string;
