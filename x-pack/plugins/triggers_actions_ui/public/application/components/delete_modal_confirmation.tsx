@@ -10,12 +10,12 @@ import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
 import {
-  cancelButtonText,
-  getConfirmButtonText,
-  getConfirmModalText,
-  getFailedNotificationText,
-  getSuccessfulNotificationText,
-} from './translations';
+  getSuccessfulDeletionNotificationText,
+  getFailedDeletionNotificationText,
+  getConfirmDeletionButtonText,
+  getConfirmDeletionModalText,
+  CANCEL_BUTTON_TEXT,
+} from '../sections/rules_list/translations';
 
 export const DeleteModalConfirmation = ({
   idsToDelete,
@@ -65,7 +65,7 @@ export const DeleteModalConfirmation = ({
     <EuiConfirmModal
       buttonColor="danger"
       data-test-subj="deleteIdsConfirmation"
-      title={getConfirmButtonText(numIdsToDelete, singleTitle, multipleTitle)}
+      title={getConfirmDeletionButtonText(numIdsToDelete, singleTitle, multipleTitle)}
       onCancel={() => {
         setDeleteModalVisibility(false);
         onCancel();
@@ -80,20 +80,22 @@ export const DeleteModalConfirmation = ({
         const numErrors = errors.length;
         if (numSuccesses > 0) {
           toasts.addSuccess(
-            getSuccessfulNotificationText(numSuccesses, singleTitle, multipleTitle)
+            getSuccessfulDeletionNotificationText(numSuccesses, singleTitle, multipleTitle)
           );
         }
 
         if (numErrors > 0) {
-          toasts.addDanger(getFailedNotificationText(numErrors, singleTitle, multipleTitle));
+          toasts.addDanger(
+            getFailedDeletionNotificationText(numErrors, singleTitle, multipleTitle)
+          );
           await onErrors();
         }
         await onDeleted(successes);
       }}
-      cancelButtonText={cancelButtonText}
-      confirmButtonText={getConfirmButtonText(numIdsToDelete, singleTitle, multipleTitle)}
+      cancelButtonText={CANCEL_BUTTON_TEXT}
+      confirmButtonText={getConfirmDeletionButtonText(numIdsToDelete, singleTitle, multipleTitle)}
     >
-      <p>{getConfirmModalText(numIdsToDelete, singleTitle, multipleTitle)}</p>
+      <p>{getConfirmDeletionModalText(numIdsToDelete, singleTitle, multipleTitle)}</p>
       {showWarningText && (
         <EuiCallOut title={<>{warningText}</>} color="warning" iconType="alert" />
       )}

@@ -11,12 +11,12 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../common/lib/kibana';
 import { BulkDeleteResponse } from '../../types';
 import {
-  getFailedNotificationText,
-  getSuccessfulNotificationText,
-  getPartialSuccessNotificationText,
-  singleRuleTitle,
-  multipleRuleTitle,
-} from '../components/translations';
+  getSuccessfulDeletionNotificationText,
+  getFailedDeletionNotificationText,
+  getPartialSuccessDeletionNotificationText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
+} from '../sections/rules_list/translations';
 
 export const useBulkDeleteResponse = ({
   onSearchPopulate,
@@ -73,7 +73,11 @@ export const useBulkDeleteResponse = ({
       // All success
       if (!numberOfErrors) {
         toasts.addSuccess(
-          getSuccessfulNotificationText(numberOfSuccess, singleRuleTitle, multipleRuleTitle)
+          getSuccessfulDeletionNotificationText(
+            numberOfSuccess,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )
         );
         return;
       }
@@ -81,7 +85,11 @@ export const useBulkDeleteResponse = ({
       // All failure
       if (numberOfErrors === total) {
         toasts.addDanger({
-          title: getFailedNotificationText(numberOfErrors, singleRuleTitle, multipleRuleTitle),
+          title: getFailedDeletionNotificationText(
+            numberOfErrors,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          ),
           text: toMountPoint(renderToastErrorBody(response, 'danger')),
         });
         return;
@@ -89,11 +97,11 @@ export const useBulkDeleteResponse = ({
 
       // Some failure
       toasts.addWarning({
-        title: getPartialSuccessNotificationText(
+        title: getPartialSuccessDeletionNotificationText(
           numberOfSuccess,
           numberOfErrors,
-          singleRuleTitle,
-          multipleRuleTitle
+          SINGLE_RULE_TITLE,
+          MULTIPLE_RULE_TITLE
         ),
         text: toMountPoint(renderToastErrorBody(response, 'warning')),
       });

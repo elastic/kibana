@@ -7,7 +7,7 @@
 
 import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 import React from 'react';
-import { cancelButtonText } from './translations';
+import { CANCEL_BUTTON_TEXT } from '../sections/rules_list/translations';
 
 export const RulesDeleteModalConfirmation = ({
   confirmButtonText,
@@ -30,7 +30,7 @@ export const RulesDeleteModalConfirmation = ({
     title={confirmButtonText}
     onCancel={onCancel}
     onConfirm={onConfirm}
-    cancelButtonText={cancelButtonText}
+    cancelButtonText={CANCEL_BUTTON_TEXT}
     confirmButtonText={confirmButtonText}
   >
     <p>{confirmModalText}</p>

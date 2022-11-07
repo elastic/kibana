@@ -93,11 +93,11 @@ import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
 import { runRule } from '../../../lib/run_rule';
 import { bulkDeleteRules } from '../../../lib/rule_api';
 import {
-  singleRuleTitle,
-  multipleRuleTitle,
-  getConfirmButtonText,
-  getConfirmModalText,
-} from '../../../components/translations';
+  getConfirmDeletionButtonText,
+  getConfirmDeletionModalText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
+} from '../translations';
 import { useBulkDeleteResponse } from '../../../hooks/use_bulk_delete_response';
 
 const ENTER_KEY = 13;
@@ -1053,15 +1053,15 @@ export const RulesList = ({
         <RulesDeleteModalConfirmation
           onConfirm={onDeleteConfirm}
           onCancel={onDeleteCancel}
-          confirmButtonText={getConfirmButtonText(
+          confirmButtonText={getConfirmDeletionButtonText(
             numberRulesToDelete,
-            singleRuleTitle,
-            multipleRuleTitle
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
           )}
-          confirmModalText={getConfirmModalText(
+          confirmModalText={getConfirmDeletionModalText(
             numberRulesToDelete,
-            singleRuleTitle,
-            multipleRuleTitle
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
           )}
         />
       )}
