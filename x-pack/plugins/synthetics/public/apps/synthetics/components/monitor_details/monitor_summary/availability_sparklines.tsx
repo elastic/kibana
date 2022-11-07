@@ -27,24 +27,23 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
   const theme = useTheme();
 
   return (
-    <>
-      <ExploratoryViewEmbeddable
-        reportType={ReportTypes.KPI}
-        axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
-        legendIsVisible={false}
-        hideTicks={true}
-        attributes={[
-          {
-            seriesType: 'area',
-            time: props,
-            name: 'Monitor availability',
-            dataType: 'synthetics',
-            selectedMetricField: 'monitor_availability',
-            reportDefinitions: { 'monitor.id': [monitorId] },
-            color: theme.eui.euiColorVis1,
-          },
-        ]}
-      />
-    </>
+    <ExploratoryViewEmbeddable
+      customHeight="70px"
+      reportType={ReportTypes.KPI}
+      axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
+      legendIsVisible={false}
+      hideTicks={true}
+      attributes={[
+        {
+          seriesType: 'area',
+          time: props,
+          name: 'Monitor availability',
+          dataType: 'synthetics',
+          selectedMetricField: 'monitor_availability',
+          reportDefinitions: { 'monitor.id': [monitorId] },
+          color: theme.eui.euiColorVis1,
+        },
+      ]}
+    />
   );
 };
