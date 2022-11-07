@@ -16,8 +16,10 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
+import { BreakdownLegend } from './components/timings_breakdown/breakdown_legend';
 import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
 import { ObjectWeightList } from './components/object_weight_list';
+import { NetworkTimingsDonut } from './components/network_timings_donut';
 import { NetworkTimingsBreakdown } from './network_timings_breakdown';
 import { ObjectCountList } from './components/object_count_list';
 import { StepImage } from './components/step_image';
@@ -73,10 +75,13 @@ export const StepDetailPage = () => {
           <EuiPanel hasShadow={false} hasBorder>
             <EuiFlexGroup>
               <EuiFlexItem grow={1}>
-                {/* TODO: Add breakdown of network timings donut*/}
+                <NetworkTimingsDonut />
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <BreakdownLegend />
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
-                <NetworkTimingsBreakdown />
+                <NetworkTimingsBreakdown monitorId={data?.details?.journey.monitor.id!} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
