@@ -20,6 +20,7 @@ export const getMockServices = (overrides?: Partial<Services>) => {
     })),
     TagList,
     TagSelector,
+    notifyError: () => undefined,
     ...overrides,
   };
 

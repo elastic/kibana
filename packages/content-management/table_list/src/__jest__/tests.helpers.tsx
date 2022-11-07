@@ -33,7 +33,7 @@ export function WithServices<P>(Comp: ComponentType<P>, overrides: Partial<Servi
   return (props: P) => {
     const services = getMockServices(overrides);
     return (
-      <InspectorProvider openFlyout={jest.fn()}>
+      <InspectorProvider openFlyout={jest.fn()} notifyError={() => undefined}>
         <TableListViewProvider {...services}>
           <Comp {...(props as any)} />
         </TableListViewProvider>

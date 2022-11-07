@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React from 'react';
 import { act } from 'react-dom/test-utils';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import type { TestBed } from '@kbn/test-jest-helpers';
 import { getMockServices } from '../__jest__';
@@ -26,6 +27,7 @@ describe('<InspectorFlyoutContent />', () => {
     let testBed: TestBed;
 
     const savedObjectItem: InspectorFlyoutContentProps['item'] = {
+      id: '123',
       title: 'Foo',
       description: 'Some description',
       tags: [
@@ -109,6 +111,7 @@ describe('<InspectorFlyoutContent />', () => {
       });
 
       expect(onSave).toHaveBeenCalledWith({
+        id: '123',
         title: 'Foo',
         description: 'Some description',
         tags: ['id-1', 'id-2'],
@@ -126,6 +129,7 @@ describe('<InspectorFlyoutContent />', () => {
       });
 
       expect(onSave).toHaveBeenCalledWith({
+        id: '123',
         title: 'newTitle',
         description: 'newDescription',
         tags: ['id-1', 'id-2'],
@@ -168,6 +172,34 @@ describe('<InspectorFlyoutContent />', () => {
       expect(errorCallout.text()).toContain('A name is required.');
     });
 
+    test('should notify saving errors', async () => {
+      const notifyError = jest.fn();
+      const onSave = async () => {
+        throw new Error('Houston we got a problem');
+      };
+
+      await act(async () => {
+        testBed = await setup({ onSave, isReadonly: false, services: { notifyError } });
+      });
+
+      const { find, component } = testBed!;
+
+      component.update();
+
+      await act(async () => {
+        find('saveButton').simulate('click');
+      });
+
+      expect(notifyError).toHaveBeenCalledWith(
+        <FormattedMessage
+          defaultMessage="Unable to save {entityName}"
+          id="contentManagement.tableList.listing.unableToDeleteDangerMessage"
+          values={{ entityName: 'foo' }}
+        />,
+        'Houston we got a problem'
+      );
+    });
+
     test('should update the tag selection', async () => {
       const onSave = jest.fn();
 
@@ -190,6 +222,7 @@ describe('<InspectorFlyoutContent />', () => {
       const lastArgs = onSave.mock.calls[onSave.mock.calls.length - 1][0];
 
       expect(lastArgs).toEqual({
+        id: '123',
         title: 'Foo',
         description: 'Some description',
         tags: [], // No more tags selected
@@ -207,6 +240,7 @@ describe('<InspectorFlyoutContent />', () => {
       });
 
       expect(onSave).toHaveBeenCalledWith({
+        id: '123',
         title: 'Foo',
         description: 'Some description',
         tags: ['id-3', 'id-4'], // New selection
