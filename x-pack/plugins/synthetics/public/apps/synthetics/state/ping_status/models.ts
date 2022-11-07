@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export type FILE_STATUS = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'UPLOAD_ERROR' | 'DELETED';
+export interface PingStatusActionArgs {
+  monitorId: string;
+  locationId: string;
+  from: string | number;
+  to: string | number;
+  size: number;
+}
