@@ -14,7 +14,12 @@ import { EuiPanel } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
 import { TopAlert } from '@kbn/observability-plugin/public/pages/alerts';
-import { SERVICE_NAME, TRANSACTION_TYPE } from '@kbn/rule-data-utils';
+import {
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+  ALERT_DURATION,
+} from '@kbn/rule-data-utils';
+import moment from 'moment';
 import { getOrRedirectToTransactionType } from '../../../context/apm_service/apm_service_context';
 import { useServiceAgentFetcher } from '../../../context/apm_service/use_service_agent_fetcher';
 import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
@@ -52,7 +57,6 @@ const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType => {
   if (ruleAggType === '99th') return LatencyAggregationType.p99;
   return LatencyAggregationType.avg;
 };
-
 export function AlertDetailsAppSectionTransactionDuration({
   rule,
   alert,
@@ -63,14 +67,43 @@ export function AlertDetailsAppSectionTransactionDuration({
   const latencyAggregationType = getAggsTypeFromRule(
     params.aggregationType as string
   );
-
+  const alertDurationMS =
+    alert && alert.fields[ALERT_DURATION]
+      ? // duration is us, convert it to MS
+        (alert.fields[ALERT_DURATION] as unknown as number) / 1000
+      : 0;
   const serviceName = String(alert.fields[SERVICE_NAME]);
   const comparisonEnabled = false;
   const offset = '1d';
-  const rangeFrom = 'now-60m';
-  const rangeTo = 'now';
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const ruleWindowSizeMS = moment
+    .duration(
+      rule.params.windowSize as unknown as number,
+      rule.params.windowUnit as unknown as any
+    )
+    .asMilliseconds();
 
+  // This is part or the requirements (RFC).
+  const TWENTY_TIMES_RULE_WINDOW_MS = 20 * ruleWindowSizeMS;
+  /**
+   *
+   * If the alert is less than 20 units of `FOR THE LAST <x> <units>` then we should draw a time range of 20 units.
+   * IE. The user set "FOR THE LAST 5 minutes" at a minimum we should show 100 minutes.
+   */
+  const rangeFrom =
+    alertDurationMS < TWENTY_TIMES_RULE_WINDOW_MS
+      ? moment(alert.start)
+          .subtract(TWENTY_TIMES_RULE_WINDOW_MS, 'millisecond')
+          .toISOString()
+      : moment(alert.start)
+          .subtract(ruleWindowSizeMS, 'millisecond')
+          .toISOString();
+
+  const rangeTo = alert.active
+    ? 'now'
+    : moment(alert.start)
+        .subtract(ruleWindowSizeMS, 'millisecond')
+        .toISOString();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { agentName } = useServiceAgentFetcher({
     serviceName,
     start,
