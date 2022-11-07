@@ -156,10 +156,9 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
 
       // Create the options with the minimal amount of values to test the lifecycle executor
       const options = {
-        alertId: id,
         spaceId: 'default',
-        tags: ['test'],
         rule: {
+          id,
           name: 'test rule',
           ruleTypeId: 'observability.test.fake',
           ruleTypeName: 'test',
