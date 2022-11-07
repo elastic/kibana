@@ -145,8 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // https://github.com/elastic/kibana/issues/144558
-    it.skip('should return the task manager workload', async () => {
+    it('should return the task manager workload', async () => {
       const health = await getHealth();
       const {
         status,
