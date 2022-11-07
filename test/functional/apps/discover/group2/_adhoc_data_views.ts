@@ -58,6 +58,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should navigate back correctly from to surrounding and single views', async () => {
       await PageObjects.discover.createAdHocDataView('logstash', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      const first = await PageObjects.discover.getCurrentDataViewId();
+
+      await PageObjects.discover.addRuntimeField(
+        '_bytes-runtimefield',
+        `emit(doc["bytes"].value.toString())`
+      );
+      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+
+      const second = await PageObjects.discover.getCurrentDataViewId();
+      expect(first).not.to.equal(second);
 
       // navigate to context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -183,9 +193,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(+second).to.equal(+first * 2);
     });
 
-    it('should update id after data view field edit', async () => {
-      await PageObjects.common.navigateToApp('discover');
+    it('should open saved search by navigation to context from embeddable', async () => {
+      // navigate to context view
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      const [, surrDocs] = await dataGrid.getRowActions({ rowIndex: 0 });
+      await surrDocs.click();
+
+      // close popup
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      if (await testSubjects.exists('confirmModalConfirmButton')) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+
+      // open saved search
+      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const savedSearch = await find.byCssSelector(`[data-test-subj="breadcrumb last"]`);
+      const savedSearchName = await savedSearch.getVisibleText();
+      expect(savedSearchName).to.be.equal('logst*-ss-_bytes-runtimefield');
+
+      // test the header now
+      const header = await dataGrid.getHeaderFields();
+      expect(header.join(' ')).to.have.string('_bytes-runtimefield');
+    });
+
+    it('should update id after data view field edit', async () => {
       await PageObjects.discover.loadSavedSearch('logst*-ss-_bytes-runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -228,13 +263,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.goBack();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const firstToast = await toasts.getToastContent(1);
-      expect(firstToast).to.equal(
+      const [firstToast, secondToast] = await toasts.getAllToastElements();
+      expect(await firstToast.getVisibleText()).to.equal(
         `"${first}" is not a configured data view ID\nShowing the saved data view: "logstas*" (${second})`
       );
 
-      const secondToast = await toasts.getToastContent(2);
-      expect(secondToast).to.equal(
+      expect(await secondToast.getVisibleText()).to.equal(
         `Different index references\nData view id references in some of the applied filters differ from the current data view.`
       );
     });

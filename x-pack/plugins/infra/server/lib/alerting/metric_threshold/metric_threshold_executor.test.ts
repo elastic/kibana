@@ -69,7 +69,6 @@ const logger = {
 } as unknown as Logger;
 
 const mockOptions = {
-  alertId: '',
   executionId: '',
   startedAt: new Date(),
   previousStartedAt: null,
@@ -89,11 +88,8 @@ const mockOptions = {
     },
   },
   spaceId: '',
-  name: '',
-  tags: [],
-  createdBy: null,
-  updatedBy: null,
   rule: {
+    id: '',
     name: '',
     tags: [],
     consumer: '',
