@@ -111,6 +111,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           data-test-subj={getTestId('downloadButton')}
           flush="left"
           style={STYLE_INHERIT_FONT_FAMILY}
+          iconSize="s"
           download
         >
           <EuiText size={textSize}>{buttonTitle}</EuiText>
