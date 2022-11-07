@@ -129,6 +129,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const [documentState, setDocumentState] = useState<DataDocumentsMsg>();
   const [allFields, setAllFields] = useState<DataViewField[] | null>(null);
   const [fieldCounts, setFieldCounts] = useState<Record<string, number> | null>(null);
+  const dataViewFields = selectedDataView?.fields;
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((next) => {
@@ -138,16 +139,24 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [props.documents$, setDocumentState]);
 
   useEffect(() => {
-    if (documentState?.fetchStatus === FetchStatus.COMPLETE) {
-      const nextFieldCounts = calcFieldCounts(documentState.result, selectedDataView);
-
-      setAllFields(getDataViewFieldList(selectedDataView, nextFieldCounts, isPlainRecord));
-      setFieldCounts(nextFieldCounts);
-    } else if (documentState?.fetchStatus === FetchStatus.LOADING) {
-      setAllFields(null);
-      setFieldCounts(null);
+    if (documentState?.fetchStatus === FetchStatus.LOADING) {
+      setAllFields(null); // to show a loading indicator in the field list
     }
-  }, [selectedDataView, documentState, setAllFields, setFieldCounts, isPlainRecord]);
+
+    setTimeout(() => {
+      setFieldCounts(
+        documentState?.fetchStatus === FetchStatus.COMPLETE
+          ? calcFieldCounts(documentState.result, selectedDataView)
+          : null
+      );
+    }, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewFields, documentState, setFieldCounts, setAllFields]);
+
+  useEffect(() => {
+    setAllFields(getDataViewFieldList(selectedDataView, fieldCounts, isPlainRecord));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewFields, fieldCounts, setAllFields, isPlainRecord]);
 
   const query = useAppStateSelector((state) => state.query);
   const filters = useAppStateSelector((state) => state.filters);

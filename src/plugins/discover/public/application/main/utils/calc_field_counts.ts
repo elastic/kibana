@@ -17,12 +17,13 @@ export function calcFieldCounts(rows?: DataTableRecord[], dataView?: DataView) {
   if (!rows || !dataView) {
     return {};
   }
-  for (const hit of rows) {
+
+  rows.forEach((hit) => {
     const fields = Object.keys(hit.flattened);
-    for (const fieldName of fields) {
+    fields.forEach((fieldName) => {
       counts[fieldName] = (counts[fieldName] || 0) + 1;
-    }
-  }
+    });
+  });
 
   return counts;
 }

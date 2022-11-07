@@ -13,20 +13,21 @@ import { isNestedFieldParent } from '../../../utils/nested_fields';
 
 export function getDataViewFieldList(
   dataView: DataView | undefined,
-  fieldCounts: Record<string, number> = {},
+  fieldCounts: Record<string, number> | undefined | null,
   isPlainRecord: boolean
 ) {
+  const currentFieldCounts = fieldCounts || {};
   const sourceFiltersValues = dataView?.getSourceFiltering?.()?.excludes;
   let dataViewFields: DataViewField[] = dataView?.fields.getAll() || [];
 
   if (sourceFiltersValues) {
     const filter = fieldWildcardFilter(sourceFiltersValues, dataView.metaFields);
     dataViewFields = dataViewFields.filter((field) => {
-      return filter(field.name) || fieldCounts[field.name]; // don't filter out a field which was present in hits (ex. for text-based queries)
+      return filter(field.name) || currentFieldCounts[field.name]; // don't filter out a field which was present in hits (ex. for text-based queries)
     });
   }
 
-  const fieldNamesInDocs = Object.keys(fieldCounts);
+  const fieldNamesInDocs = Object.keys(currentFieldCounts);
   const fieldNamesInDataView = dataViewFields.map((fld) => fld.name);
   const unknownFields: DataViewField[] = [];
 
@@ -47,7 +48,9 @@ export function getDataViewFieldList(
   });
 
   return [
-    ...(isPlainRecord ? dataViewFields.filter((field) => fieldCounts[field.name]) : dataViewFields),
+    ...(isPlainRecord
+      ? dataViewFields.filter((field) => currentFieldCounts[field.name])
+      : dataViewFields),
     ...unknownFields,
   ];
 }
