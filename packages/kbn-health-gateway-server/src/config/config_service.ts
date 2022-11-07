@@ -8,7 +8,7 @@
 
 import { fromRoot, REPO_ROOT } from '@kbn/utils';
 import type { LoggerFactory } from '@kbn/logging';
-import { ConfigService as KbnConfigService, RawConfigService, Env } from '@kbn/config';
+import { ConfigService as KbnConfigService, CliArgs, Env, RawConfigService } from '@kbn/config';
 import { getArgValues } from './read_argv';
 
 const CONFIG_CLI_FLAGS = ['-c', '--config'];
@@ -16,7 +16,7 @@ const DEFAULT_CONFIG_PATH = fromRoot('config/gateway.yml');
 
 // These `cliArgs` are required by `Env` for use with Kibana,
 // however they have no effect on the health gateway.
-const KIBANA_CLI_ARGS = {
+const KIBANA_CLI_ARGS: CliArgs = {
   dev: false,
   silent: false,
   watch: false,
