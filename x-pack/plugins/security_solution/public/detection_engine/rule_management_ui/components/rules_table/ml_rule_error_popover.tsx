@@ -72,7 +72,6 @@ const MlRuleErrorPopoverComponent: React.FC<MlRuleErrorPopoverComponentProps> = 
       <EuiPopoverFooter>
         <SecuritySolutionLinkButton
           data-test-subj="open-rule-details"
-          // fill
           fullWidth
           deepLinkId={SecurityPageName.rules}
           path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.alerts)}

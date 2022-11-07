@@ -13,13 +13,13 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
@@ -35,7 +35,6 @@ import {
   getRulesUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { displaySuccessToast, useStateToaster } from '../../../../common/components/toasters';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { AccordionTitle } from '../../../../detections/components/rules/accordion_title';
@@ -119,11 +118,10 @@ const CreateRulePageComponent: React.FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { addError } = useAppToasts();
+  const { addSuccess, addWarning } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
   const { data: dataServices } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
-  const [, dispatchToaster] = useStateToaster();
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
     ruleStepsOrder[ruleStepsOrder.indexOf(step) + 1];
@@ -215,26 +213,33 @@ const CreateRulePageComponent: React.FC = () => {
   const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
   const { loading: isLoadingJobs, jobs: mlJobs } = useSecurityJobs();
   const startMlJobsIfNeeded = useCallback(async () => {
+    let success = true;
     if (!isMlRule(ruleType) || isLoadingJobs || isLoadingEnableDataFeed) {
-      return;
+      return success;
     }
 
     const jobIds = defineRuleData.machineLearningJobId;
     if (!jobIds.length) {
-      return;
+      return success;
     }
 
     const ruleJobs = mlJobs.filter((job) => jobIds.includes(job.id));
-    await Promise.all(
-      ruleJobs.map(async (job) => {
-        if (isJobStarted(job.jobState, job.datafeedState)) {
-          return;
-        }
+    try {
+      await Promise.all(
+        ruleJobs.map(async (job) => {
+          if (isJobStarted(job.jobState, job.datafeedState)) {
+            return;
+          }
 
-        const latestTimestampMs = job.latestTimestampMs ?? 0;
-        await enableDatafeed(job, latestTimestampMs, true);
-      })
-    );
+          const latestTimestampMs = job.latestTimestampMs ?? 0;
+          await enableDatafeed(job, latestTimestampMs, true);
+          success = success && isJobStarted(job.jobState, job.datafeedState);
+        })
+      );
+    } catch (error) {
+      success = false;
+    }
+    return success;
   }, [
     defineRuleData.machineLearningJobId,
     enableDatafeed,
@@ -323,8 +328,9 @@ const CreateRulePageComponent: React.FC = () => {
             stepIsValid(scheduleStep) &&
             stepIsValid(actionsStep)
           ) {
+            let failedToStartMlJobs = false;
             if (actionsStep.data.enabled) {
-              await startMlJobsIfNeeded();
+              failedToStartMlJobs = !(await startMlJobsIfNeeded());
             }
             const createdRule = await createRule(
               formatRule<RuleCreateProps>(
@@ -335,21 +341,27 @@ const CreateRulePageComponent: React.FC = () => {
               )
             );
 
-            const lastExecution = createdRule.execution_summary?.last_execution;
-            const lastExecutionStatus = lastExecution?.status;
-            const lastExecutionMessage = lastExecution?.message ?? '';
-            if (
-              lastExecutionStatus === RuleExecutionStatus.failed ||
-              lastExecutionStatus === RuleExecutionStatus['partial failure']
-            ) {
-              addError(lastExecutionMessage, {
-                title: i18n.FAILED_TO_RUN_RULES(createdRule.name),
+            if (failedToStartMlJobs) {
+              addWarning(i18n.FAILED_TO_RUN_ML_RULE(createdRule.name), {
+                text: (
+                  <>
+                    <p>{i18n.FAILED_TO_RUN_ML_RULE_TOAST_DESCRIPTION}</p>
+                    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          onClick={() => navigateToApp('ml', { openInNewTab: true })}
+                          color={'warning'}
+                        >
+                          {i18n.FAILED_TO_RUN_ML_RULE_TOAST_BUTTON}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                ),
+                iconType: 'iInCircle',
               });
             } else {
-              displaySuccessToast(
-                i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name),
-                dispatchToaster
-              );
+              addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
             }
 
             navigateToApp(APP_UI_ID, {
@@ -366,8 +378,8 @@ const CreateRulePageComponent: React.FC = () => {
       createRule,
       navigateToApp,
       startMlJobsIfNeeded,
-      addError,
-      dispatchToaster,
+      addWarning,
+      addSuccess,
     ]
   );
 
