@@ -43,7 +43,6 @@ import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_d
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { CreateDerivedIndexPattern } from '../../containers/metrics_source';
 import { WithWaffleTimeUrlState } from './inventory_view/hooks/use_waffle_time_url_state'; // WIP Time only
-import { WithWaffleFiltersUrlState } from './inventory_view/hooks/use_waffle_filters_url_state';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -103,7 +102,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                   <WaffleOptionsProvider>
                     <WithWaffleTimeUrlState />
                     <WaffleTimeProvider>
-                      <WithWaffleFiltersUrlState />
                       <WaffleFiltersProvider>
                         <SnapshotPage />
                       </WaffleFiltersProvider>
