@@ -22,8 +22,8 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { FilterableEmbeddable, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { getSampleDashboardInput } from '../mocks';
-import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../services/plugin_services';
+import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 import { FiltersNotificationModal, FiltersNotificationProps } from './filters_notification_modal';
 
 describe('LibraryNotificationPopover', () => {

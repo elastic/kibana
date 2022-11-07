@@ -16,19 +16,18 @@ import { withSuspense, LazyLabsFlyout } from '@kbn/presentation-util-plugin/publ
 
 import {
   getDashboardTitle,
-  unsavedChangesBadgeStrings,
-  dashboardFeatureCatalogStrings,
-  getDashboardBreadcrumb,
   leaveConfirmStrings,
+  getDashboardBreadcrumb,
+  unsavedChangesBadgeStrings,
 } from '../_dashboard_app_strings';
 import { UI_SETTINGS } from '../../../common';
-import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { pluginServices } from '../../services/plugin_services';
+import { useDashboardMenuItems } from './use_dashboard_menu_items';
 import { DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
+import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
-import { useDashboardMenuItems } from './use_dashboard_menu_items';
 
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
@@ -245,7 +244,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         className="euiScreenReaderOnly"
         ref={dashboardTitleRef}
         tabIndex={-1}
-      >{`${dashboardFeatureCatalogStrings.getTitle()} - ${dashboardTitle}`}</h1>
+      >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       <TopNavMenu {...getNavBarProps()} />
       {viewMode !== ViewMode.PRINT && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />

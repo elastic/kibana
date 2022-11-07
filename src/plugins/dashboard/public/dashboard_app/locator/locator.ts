@@ -16,7 +16,7 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public'
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 
 import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../../dashboard_constants';
-import { DashboardContainerByValueInput, SavedDashboardPanel } from '../../../common';
+import type { DashboardContainerByValueInput, SavedDashboardPanel } from '../../../common';
 
 /**
  * Useful for ensuring that we don't pass any non-serializable values to history.push (for example, functions).

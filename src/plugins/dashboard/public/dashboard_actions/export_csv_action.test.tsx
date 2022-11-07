@@ -19,9 +19,9 @@ import { LINE_FEED_CHARACTER } from '@kbn/data-plugin/common/exports/export_csv'
 import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { ExportCSVAction } from './export_csv_action';
-import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../services/plugin_services';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../mocks';
+import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 describe('Export CSV action', () => {
   let container: DashboardContainer;

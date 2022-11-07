@@ -231,29 +231,6 @@ export const dashboardUnsavedListingStrings = {
 };
 
 /*
-  Plugin
-*/
-export const dashboardFeatureCatalogStrings = {
-  getTitle: () =>
-    i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
-      defaultMessage: 'Dashboard',
-    }),
-  getSubtitle: () =>
-    i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
-      defaultMessage: 'Analyze data in dashboards.',
-    }),
-  getDescription: () =>
-    i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
-      defaultMessage: 'Display and share a collection of visualizations and saved searches.',
-    }),
-};
-
-export const getDashboardBreadcrumb = () =>
-  i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-    defaultMessage: 'Dashboard',
-  });
-
-/*
   Share Modal
 */
 export const shareModalStrings = {
@@ -287,6 +264,11 @@ export const shareModalStrings = {
 /*
   Dashboard Top Nav
 */
+export const getDashboardBreadcrumb = () =>
+  i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
+    defaultMessage: 'Dashboard',
+  });
+
 export const topNavStrings = {
   fullScreen: {
     label: i18n.translate('dashboard.topNave.fullScreenButtonAriaLabel', {

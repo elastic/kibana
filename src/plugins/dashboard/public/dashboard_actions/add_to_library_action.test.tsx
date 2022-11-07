@@ -23,10 +23,9 @@ import {
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
 import { getSampleDashboardInput } from '../mocks';
-import { DashboardContainer } from '../dashboard_container';
-
 import { pluginServices } from '../services/plugin_services';
 import { AddToLibraryAction } from './add_to_library_action';
+import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest

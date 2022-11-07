@@ -7,8 +7,8 @@
  */
 
 import { ExpandPanelAction } from './expand_panel_action';
-import { DashboardContainer } from '../dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../mocks';
+import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import {

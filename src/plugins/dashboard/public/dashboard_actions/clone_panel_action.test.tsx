@@ -20,9 +20,9 @@ import { ErrorEmbeddable, IContainer, isErrorEmbeddable } from '@kbn/embeddable-
 
 import { DashboardPanelState } from '../../common';
 import { ClonePanelAction } from './clone_panel_action';
-import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../services/plugin_services';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../mocks';
+import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 let container: DashboardContainer;
 let byRefOrValEmbeddable: ContactCardEmbeddable;

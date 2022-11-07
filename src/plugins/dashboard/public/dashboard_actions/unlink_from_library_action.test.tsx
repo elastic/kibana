@@ -25,9 +25,9 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
 import { getSampleDashboardInput } from '../mocks';
 import { DashboardPanelState } from '../../common';
-import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../services/plugin_services';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
+import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;

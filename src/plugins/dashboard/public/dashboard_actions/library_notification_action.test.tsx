@@ -23,10 +23,10 @@ import {
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
 import { getSampleDashboardInput } from '../mocks';
-import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../services/plugin_services';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { LibraryNotificationAction } from './library_notification_action';
+import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest

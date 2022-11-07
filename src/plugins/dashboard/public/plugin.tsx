@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -30,11 +31,10 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
-
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -62,7 +62,6 @@ import {
 } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
 import { DashboardMountContextProps } from './dashboard_app/types';
-import { dashboardFeatureCatalogStrings } from './dashboard_app/_dashboard_app_strings';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -267,9 +266,15 @@ export class DashboardPlugin
     if (home) {
       home.featureCatalogue.register({
         id: LEGACY_DASHBOARD_APP_ID,
-        title: dashboardFeatureCatalogStrings.getTitle(),
-        subtitle: dashboardFeatureCatalogStrings.getSubtitle(),
-        description: dashboardFeatureCatalogStrings.getDescription(),
+        title: i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
+          defaultMessage: 'Dashboard',
+        }),
+        subtitle: i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
+          defaultMessage: 'Analyze data in dashboards.',
+        }),
+        description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
+          defaultMessage: 'Display and share a collection of visualizations and saved searches.',
+        }),
         icon: 'dashboardApp',
         path: `/app/dashboards#${LANDING_PAGE_PATH}`,
         showOnHomePage: false,

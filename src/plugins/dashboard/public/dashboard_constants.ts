@@ -7,7 +7,7 @@
  */
 
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import { DashboardContainerByValueInput } from '../common';
+import type { DashboardContainerByValueInput } from '../common';
 
 // ------------------------------------------------------------------
 // URL Constants

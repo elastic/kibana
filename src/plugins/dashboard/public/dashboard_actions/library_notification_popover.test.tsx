@@ -25,8 +25,8 @@ import {
   LibraryNotificationProps,
 } from './library_notification_popover';
 import { getSampleDashboardInput } from '../mocks';
-import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../services/plugin_services';
+import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 describe('LibraryNotificationPopover', () => {
   const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);

@@ -56,7 +56,6 @@ test('DashboardContainer initializes embeddables', (done) => {
     },
   });
   const container = new DashboardContainer(initialInput);
-  await container.untilInitialized();
 
   const subscription = container.getOutput$().subscribe((output) => {
     if (container.getOutput().embeddableLoaded['123']) {
@@ -110,7 +109,6 @@ test('DashboardContainer.replacePanel', (done) => {
   });
 
   const container = new DashboardContainer(initialInput);
-  await container.untilInitialized();
   let counter = 0;
 
   const subscription = container.getInput$().subscribe(

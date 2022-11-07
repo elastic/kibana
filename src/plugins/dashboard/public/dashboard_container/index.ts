@@ -8,7 +8,7 @@
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
-export { DashboardContainer } from './embeddable/dashboard_container';
+export type { DashboardContainer } from './embeddable/dashboard_container';
 export {
   type DashboardContainerFactory,
   DashboardContainerFactoryDefinition,

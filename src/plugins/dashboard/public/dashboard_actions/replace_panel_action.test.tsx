@@ -16,9 +16,9 @@ import {
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { ReplacePanelAction } from './replace_panel_action';
-import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../services/plugin_services';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../mocks';
+import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest
