@@ -127,7 +127,7 @@ TYPES_DEPS = [
   "@npm//@types/history",
   "@npm//@types/jest",
   "@npm//@types/js-yaml",
-  "@npm//@types/joi",
+  "@npm//joi",
   "@npm//@types/lodash",
   "@npm//@types/minimatch",
   "@npm//@types/mustache",

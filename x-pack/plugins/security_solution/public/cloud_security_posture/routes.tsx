@@ -39,7 +39,6 @@ const CloudSecurityPosture = memo(() => {
   };
 
   return (
-    // TODO: Finer granularity of this needs to be implemented in the cloud security posture plugin
     <PluginTemplateWrapper>
       <TrackApplicationView viewId="cloud_security_posture">
         <SecuritySolutionPageWrapper noPadding noTimeline>
