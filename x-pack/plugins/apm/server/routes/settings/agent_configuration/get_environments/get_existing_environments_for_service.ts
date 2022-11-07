@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import { Setup } from '../../../../lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
+import { APMInternalESClient } from '../../../../lib/helpers/create_es_client/create_internal_es_client';
 
 export async function getExistingEnvironmentsForService({
   serviceName,
-  setup,
+  internalESClient,
   size,
 }: {
   serviceName: string | undefined;
-  setup: Setup;
+  internalESClient: APMInternalESClient;
   size: number;
 }) {
-  const { internalClient, indices } = setup;
-
   const bool = serviceName
     ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
     : { must_not: [{ exists: { field: SERVICE_NAME } }] };
 
   const params = {
-    index: indices.apmAgentConfigurationIndex,
+    index: internalESClient.apmIndices.apmAgentConfigurationIndex,
     body: {
       size: 0,
       query: { bool },
@@ -44,7 +42,7 @@ export async function getExistingEnvironmentsForService({
     },
   };
 
-  const resp = await internalClient.search(
+  const resp = await internalESClient.search(
     'get_existing_environments_for_service',
     params
   );
