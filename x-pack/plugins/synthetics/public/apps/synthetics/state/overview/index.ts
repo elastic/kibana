@@ -11,18 +11,20 @@ import { MonitorOverviewResult, OverviewStatus } from '../../../../../common/run
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
-import { MonitorOverviewPageState } from './models';
+import { MonitorOverviewPageState, MonitorOverviewFlyoutConfig } from './models';
 import {
   clearOverviewStatusErrorAction,
   fetchMonitorOverviewAction,
   fetchOverviewStatusAction,
   quietFetchOverviewAction,
+  setFlyoutConfig,
   setOverviewPageStateAction,
 } from './actions';
 
 export interface MonitorOverviewState {
   data: MonitorOverviewResult;
   pageState: MonitorOverviewPageState;
+  flyoutConfig: MonitorOverviewFlyoutConfig;
   loading: boolean;
   loaded: boolean;
   error: IHttpSerializedFetchError | null;
@@ -41,6 +43,7 @@ const initialState: MonitorOverviewState = {
     sortOrder: 'asc',
     sortField: 'status',
   },
+  flyoutConfig: null,
   loading: false,
   loaded: false,
   error: null,
@@ -76,6 +79,9 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         ...action.payload,
       };
       state.loaded = false;
+    })
+    .addCase(setFlyoutConfig, (state, action) => {
+      state.flyoutConfig = action.payload;
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       state.status = action.payload;
