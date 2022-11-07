@@ -101,7 +101,7 @@ export const AddFleetServerHostStepContent = ({
         value: '@@##ADD_FLEET_SERVER_HOST##@@',
       },
     ],
-    [fleetServerHosts]
+    [fleetServerHosts, theme.eui.euiColorPrimary]
   );
 
   const onSubmit = useCallback(async () => {

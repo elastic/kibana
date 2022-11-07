@@ -52,17 +52,22 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   const { data, resendRequest: refreshGetFleetServerHosts } = useGetFleetServerHosts();
 
   const fleetServerHosts = useMemo(() => data?.items ?? [], [data?.items]);
+  const defaultFleetServerHost = useMemo(
+    () => fleetServerHosts.find((item) => item.is_default === true),
+    [fleetServerHosts]
+  );
 
+  const setDefaultInputValue = isDefaultInput.setValue;
   useEffect(() => {
     const defaultHost = fleetServerHosts.find((item) => item.is_default === true);
     if (defaultHost) {
       setFleetServerHost(defaultHost);
-      isDefaultInput.setValue(false);
+      setDefaultInputValue(false);
     } else {
       setFleetServerHost(null);
-      isDefaultInput.setValue(true);
+      setDefaultInputValue(true);
     }
-  }, [fleetServerHosts]);
+  }, [defaultFleetServerHost, setDefaultInputValue]);
 
   const saveFleetServerHost = useCallback(
     async (newFleetServerHost: Omit<FleetServerHost, 'id'>) => {

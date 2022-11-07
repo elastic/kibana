@@ -84,7 +84,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
         value: '@@##ADD_FLEET_SERVER_HOST##@@',
       },
     ],
-    [fleetServerHosts]
+    [fleetServerHosts, theme.eui.euiColorPrimary]
   );
 
   if (status === 'success') {
