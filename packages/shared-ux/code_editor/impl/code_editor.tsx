@@ -406,8 +406,11 @@ export const CodeEditor: React.FC<Props> = ({
   useEffect(() => {
     if (placeholder && !value && _editor.current) {
       // Mounts editor inside constructor
-      //@ts-ignore 
-      _placeholderWidget.current = createPlaceholderWidget({placeholderText: placeholder, editor: _editor.current});
+      // @ts-ignore
+      _placeholderWidget.current = createPlaceholderWidget({
+        placeholderText: placeholder,
+        editor: _editor.current,
+      });
     }
     return () => {
       _placeholderWidget.current?.dispose();

@@ -15,7 +15,11 @@ export interface PlaceholderWidgetProps {
   domNode?: HTMLElement;
 }
 
-export const createPlaceholderWidget = ({placeholderText, editor, domNode}: PlaceholderWidgetProps) => {
+export const createPlaceholderWidget = ({
+  placeholderText,
+  editor,
+  domNode,
+}: PlaceholderWidgetProps) => {
   const widget = {
     getDomNode: () => {
       if (!domNode) {
@@ -23,9 +27,10 @@ export const createPlaceholderWidget = ({placeholderText, editor, domNode}: Plac
         domNode.innerText = placeholderText;
         domNode.className = 'kibanaCodeEditor__placeholderContainer';
         editor.applyFontInfo(domNode);
-        return domNode
+        return domNode;
       }
-      return domNode},
+      return domNode;
+    },
     getPosition: (): monaco.editor.IContentWidgetPosition | null => {
       return {
         position: {
@@ -37,15 +42,15 @@ export const createPlaceholderWidget = ({placeholderText, editor, domNode}: Plac
     },
     getId: (): string => {
       return 'KBN_CODE_EDITOR_PLACEHOLDER_WIDGET_ID';
-    }
-  }
+    },
+  };
 
   return widget;
-}
+};
 
 export const dispose = ({ editor, widget }: PlaceholderWidgetProps): void => {
   if (!widget) {
     new Error('There is no widget to dispose');
   }
   return editor.removeContentWidget(widget!);
-}
+};
