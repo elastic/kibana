@@ -49,9 +49,12 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//@elastic/eui",
+  "@npm//react-monaco-editor",
+  "@npm//react-resize-detector",
   "//packages/kbn-monaco",
   "//packages/kbn-i18n-react",
   "//packages/kbn-i18n",
+  "@npm//classnames",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -67,8 +70,11 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@elastic/eui",
+  "@npm//@types/react-resize-detector:npm_module_types",
   "//packages/kbn-monaco:npm_module_types",
+  "@npm//@types/react-monaco-editor",
   "//packages/kbn-ambient-ui-types",
+  "@npm//@types/classnames",
 ]
 
 jsts_transpiler(

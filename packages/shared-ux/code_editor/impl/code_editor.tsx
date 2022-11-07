@@ -28,7 +28,7 @@ import classNames from 'classnames';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
-import { createPlaceholderWidget, dispose } from './placeholder_widget';
+import { createPlaceholderWidget } from './placeholder_widget';
 
 export interface Props {
   /** Width of editor. Defaults to 100%. */
