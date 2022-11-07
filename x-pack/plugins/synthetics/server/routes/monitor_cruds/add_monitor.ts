@@ -118,7 +118,7 @@ export const createNewSavedObjectMonitor = async ({
   savedObjectsClient,
   normalizedMonitor,
 }: {
-  id?: string;
+  id: string;
   savedObjectsClient: SavedObjectsClientContract;
   normalizedMonitor: SyntheticsMonitor;
 }) => {
@@ -126,6 +126,8 @@ export const createNewSavedObjectMonitor = async ({
     syntheticsMonitorType,
     formatSecrets({
       ...normalizedMonitor,
+      [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+      [ConfigKey.CONFIG_ID]: id,
       revision: 1,
     }),
     id
@@ -199,7 +201,7 @@ export const syncNewMonitor = async ({
         errors: syncErrors,
         monitor: monitorSavedObject,
         isInlineScript: Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-        kibanaVersion: server.kibanaVersion,
+        stackVersion: server.stackVersion,
       })
     );
 

@@ -50,7 +50,7 @@ export function SyntheticsPackageProvider({ getService }: FtrProviderContext) {
         apiRequest = retry.try(() => {
           return supertest
             .get(INGEST_API_EPM_PACKAGES)
-            .query({ experimental: true })
+            .query({ prerelease: true })
             .set('kbn-xsrf', 'xxx')
             .expect(200)
             .catch((error) => {

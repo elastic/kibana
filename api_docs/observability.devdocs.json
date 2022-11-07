@@ -129,7 +129,7 @@
                 "label": "reportType",
                 "description": [],
                 "signature": [
-                  "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
+                  "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
                 ],
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
                 "deprecated": false,
@@ -760,6 +760,41 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.LoadWhenInView",
+        "type": "Function",
+        "tags": [],
+        "label": "LoadWhenInView",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "LoadWhenInViewProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.LoadWhenInView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "LoadWhenInViewProps"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -2306,7 +2341,7 @@
             "label": "reportType",
             "description": [],
             "signature": [
-              "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
+              "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -3773,6 +3808,26 @@
                 "docId": "kibGuidedOnboardingPluginApi",
                 "section": "def-public.GuidedOnboardingPluginStart",
                 "text": "GuidedOnboardingPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
               }
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -10447,6 +10502,196 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmAWSLambdaPriceFactor",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmAWSLambdaPriceFactor]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"json\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.value",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.description",
+                "type": "Any",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<{ arm: ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<number>; x86_64: ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<number>; }>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmAWSLambdaRequestCostPerMillion]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.value",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<number>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-server.uiSettings.enableCriticalPath",
             "type": "Object",
             "tags": [],
@@ -10769,6 +11014,36 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmAWSLambdaPriceFactor",
+        "type": "string",
+        "tags": [],
+        "label": "apmAWSLambdaPriceFactor",
+        "description": [],
+        "signature": [
+          "\"observability:apmAWSLambdaPriceFactor\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmAWSLambdaRequestCostPerMillion",
+        "type": "string",
+        "tags": [],
+        "label": "apmAWSLambdaRequestCostPerMillion",
+        "description": [],
+        "signature": [
+          "\"observability:apmAWSLambdaRequestCostPerMillion\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-common.apmLabsButton",

@@ -27,7 +27,7 @@ const LogFilterState: React.FC = ({ children }) => {
   const { derivedDataView } = useLogViewContext();
 
   return (
-    <LogFilterStateProvider indexPattern={derivedDataView}>
+    <LogFilterStateProvider dataView={derivedDataView}>
       <WithLogFilterUrlState />
       {children}
     </LogFilterStateProvider>

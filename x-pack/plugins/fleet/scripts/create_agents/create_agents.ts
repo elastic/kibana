@@ -99,8 +99,6 @@ async function createAgentPolicy(id: string) {
       namespace: 'default',
       description: '',
       monitoring_enabled: ['logs'],
-      data_output_id: 'fleet-default-output',
-      monitoring_output_id: 'fleet-default-output',
     }),
     headers: {
       Authorization: auth,

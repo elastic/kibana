@@ -68,6 +68,7 @@ export const queryPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> =
   status,
   sort,
   size: sizeParam,
+  pageIndex,
   locations,
   excludedLocations,
 }) => {
@@ -75,6 +76,7 @@ export const queryPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> =
 
   const searchBody = {
     size,
+    from: pageIndex !== undefined ? pageIndex * size : 0,
     ...(index ? { from: index * size } : {}),
     query: {
       bool: {

@@ -10,14 +10,12 @@ import moment from 'moment';
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { generateDataProvider } from '../utils';
 import { SecuritySolutionContext } from '../../../containers/security_solution_context';
+import { fieldAndValueValid, getIndicatorFieldAndValue, unwrapValue } from '../../indicators';
 import {
-  fieldAndValueValid,
-  getIndicatorFieldAndValue,
   Indicator,
   IndicatorFieldEventEnrichmentMap,
   RawIndicatorFieldId,
-  unwrapValue,
-} from '../../indicators';
+} from '../../../../common/types/indicator';
 
 export interface UseInvestigateInTimelineParam {
   /**

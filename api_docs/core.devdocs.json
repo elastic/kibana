@@ -7864,16 +7864,16 @@
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
+              },
+              {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/analytics/types.ts"
               },
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
               },
               {
                 "plugin": "osquery",
@@ -8502,16 +8502,16 @@
                 "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/plugin.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
               },
               {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/public/plugin.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/analytics-client",
@@ -12312,6 +12312,26 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.PluginInitializerContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LoggerFactory",
+                "text": "LoggerFactory"
+              }
+            ],
+            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.PluginInitializerContext.config",
             "type": "Object",
             "tags": [],
@@ -13255,6 +13275,14 @@
             "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/common/types.ts"
           },
@@ -13293,14 +13321,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
           },
           {
             "plugin": "alerting",
@@ -31125,16 +31145,16 @@
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
+              },
+              {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/analytics/types.ts"
               },
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
               },
               {
                 "plugin": "osquery",
@@ -31763,16 +31783,16 @@
                 "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/plugin.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
               },
               {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/public/plugin.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/analytics-client",
@@ -47584,6 +47604,14 @@
             "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/common/types.ts"
           },
@@ -47622,14 +47650,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
           },
           {
             "plugin": "alerting",

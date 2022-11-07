@@ -167,14 +167,19 @@ the same version could have plugins enabled at any time that would introduce
 new transforms or mappings.
   →  `OUTDATED_DOCUMENTS_SEARCH`
 
-3. If the `.kibana` alias exists we’re migrating from either a v1 or v2 index
+3. If `waitForMigrations` was set we're running on a background-tasks node and
+we should not participate in the migration but instead wait for the ui node(s)
+to complete the migration.
+  → `WAIT_FOR_MIGRATION_COMPLETION`
+
+4. If the `.kibana` alias exists we’re migrating from either a v1 or v2 index
 and the migration source index is the index the `.kibana` alias points to.
   → `WAIT_FOR_YELLOW_SOURCE`
 
-4. If `.kibana` is a concrete index, we’re migrating from a legacy index
+5. If `.kibana` is a concrete index, we’re migrating from a legacy index
   → `LEGACY_SET_WRITE_BLOCK`
 
-5. If there are no `.kibana` indices, this is a fresh deployment. Initialize a
+6. If there are no `.kibana` indices, this is a fresh deployment. Initialize a
    new saved objects index
   → `CREATE_NEW_TARGET`
 
@@ -259,6 +264,15 @@ new `.kibana` alias that points to `.kibana_pre6.5.0_001`.
    `index_not_found_exception` another instance has already completed this step.
   → `SET_SOURCE_WRITE_BLOCK`
 
+## WAIT_FOR_MIGRATION_COMPLETION
+### Next action
+`fetchIndices`
+### New control state
+1. If the ui node finished the migration
+  → `DONE`
+2. Otherwise wait 2s and check again
+  → WAIT_FOR_MIGRATION_COMPLETION
+  
 ## WAIT_FOR_YELLOW_SOURCE
 ### Next action
 `waitForIndexStatus` (status='yellow')
@@ -416,6 +430,13 @@ update the mappings and then use an update_by_query to ensure that all fields ar
   → `UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK`
 
 ## UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK
+### Next action
+`waitForPickupUpdatedMappingsTask`
+
+### New control state
+  → `MARK_VERSION_INDEX_READY`
+
+## MARK_VERSION_INDEX_READY
 ### Next action
 `updateAliases`
 

@@ -7,7 +7,7 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { RewriteRequestCase, verifyAccessAndContext, rewriteNamespaces } from './lib';
 import { GetGlobalExecutionKPIParams } from '../rules_client';
 import { ILicenseState } from '../lib';
 
@@ -15,14 +15,17 @@ const querySchema = schema.object({
   date_start: schema.string(),
   date_end: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const rewriteReq: RewriteRequestCase<GetGlobalExecutionKPIParams> = ({
   date_start: dateStart,
   date_end: dateEnd,
+  namespaces,
   ...rest
 }) => ({
   ...rest,
+  namespaces: rewriteNamespaces(namespaces),
   dateStart,
   dateEnd,
 });
