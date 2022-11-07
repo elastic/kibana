@@ -21,7 +21,8 @@ export const enum AlertsCasesTourSteps {
   reviewAlertDetailsFlyout = 3,
   addAlertToCase = 4,
   createCase = 5,
-  viewCase = 6,
+  submitCase = 6,
+  viewCase = 7,
 }
 
 export type StepConfig = Pick<
@@ -37,6 +38,7 @@ export type StepConfig = Pick<
 > & {
   anchor?: ElementTarget;
   dataTestSubj: string;
+  hideNextButton?: boolean;
   imageConfig?: {
     altText: string;
     src: string;
@@ -140,10 +142,27 @@ const alertsCasesConfig: StepConfig[] = [
       }
     ),
     anchor: `[data-test-subj="create-case-flyout"] [data-test-subj="caseTitle"] label`,
-    anchorPosition: 'leftDown',
+    anchorPosition: 'leftUp',
     dataTestSubj: getTourAnchor(AlertsCasesTourSteps.createCase, SecurityStepId.alertsCases),
     offset: 20,
-    repositionOnScroll: false,
+  },
+  {
+    ...defaultConfig,
+    step: AlertsCasesTourSteps.submitCase,
+    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.submitCase.tourTitle', {
+      defaultMessage: `Submit case`,
+    }),
+    content: i18n.translate(
+      'xpack.securitySolution.guided_onboarding.tour.submitCase.tourContent',
+      {
+        defaultMessage: `Press Create case to advance the tour.`,
+      }
+    ),
+    anchor: `[data-test-subj="create-case-flyout"] [data-test-subj="create-case-submit"]`,
+    anchorPosition: 'leftUp',
+    hideNextButton: true,
+    dataTestSubj: getTourAnchor(AlertsCasesTourSteps.submitCase, SecurityStepId.alertsCases),
+    offset: 20,
   },
   {
     ...defaultConfig,

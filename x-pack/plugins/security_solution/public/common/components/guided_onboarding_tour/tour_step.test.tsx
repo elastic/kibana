@@ -155,7 +155,7 @@ describe('SecurityTourStep', () => {
     });
     const mockCall = { ...mockTourStep.mock.calls[0][0] };
     expect(mockCall.step).toEqual(1);
-    expect(mockCall.stepsTotal).toEqual(6);
+    expect(mockCall.stepsTotal).toEqual(7);
   });
 
   it('forces the render for createCase step of the SecurityStepId.alertsCases tour step', () => {
@@ -288,5 +288,21 @@ describe('SecurityTourStep', () => {
       </TestProviders>
     );
     expect(mockTourStep).not.toHaveBeenCalled();
+  });
+
+  it('does not render next button if step hideNextButton=true ', () => {
+    (useTourContext as jest.Mock).mockReturnValue({
+      activeStep: 6,
+      incrementStep: jest.fn(),
+      isTourShown: () => true,
+    });
+    render(
+      <SecurityTourStep {...stepDefaultProps} step={6}>
+        {mockChildren}
+      </SecurityTourStep>,
+      { wrapper: TestProviders }
+    );
+    const mockCall = { ...mockTourStep.mock.calls[0][0] };
+    expect(mockCall.footerAction).toMatchInlineSnapshot(`<React.Fragment />`);
   });
 });

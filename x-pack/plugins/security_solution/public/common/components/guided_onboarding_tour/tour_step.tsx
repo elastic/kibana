@@ -73,10 +73,8 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
   ) {
     return children ? children : null;
   }
-
-  const { anchor, content, imageConfig, dataTestSubj, ...rest } = tourStep;
-
-  const footerAction: EuiTourStepProps['footerAction'] = (
+  const { anchor, content, imageConfig, dataTestSubj, hideNextButton = false, ...rest } = tourStep;
+  const footerAction: EuiTourStepProps['footerAction'] = !hideNextButton ? (
     <EuiButton
       size="s"
       onClick={onClickNext}
@@ -90,6 +88,10 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
         defaultMessage="Next"
       />
     </EuiButton>
+  ) : (
+    <>
+      {/* Passing empty element instead of undefined. If undefined "Skip tour" button is shown, we do not want that*/}
+    </>
   );
 
   const commonProps = {
