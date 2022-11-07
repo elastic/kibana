@@ -61,6 +61,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'SelectedFields-0',
       'PopularFields-0',
       'AvailableFields-0',
+      'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-0',
     ]);
@@ -88,6 +89,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'SelectedFields-0',
       'PopularFields-0',
       'AvailableFields-25',
+      'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
     ]);
@@ -116,6 +118,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'SelectedFields-0',
       'PopularFields-0',
       'AvailableFields-2',
+      'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-0',
     ]);
@@ -144,6 +147,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'SelectedFields-0',
       'PopularFields-0',
       'AvailableFields-23',
+      'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
     ]);
@@ -173,6 +177,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'SelectedFields-4',
       'PopularFields-0',
       'AvailableFields-25',
+      'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
     ]);
@@ -198,6 +203,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'SelectedFields-0',
       'PopularFields-0',
       'AvailableFields-28',
+      'UnmappedFields-0',
       'MetaFields-0',
     ]);
   });
@@ -261,6 +267,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'SelectedFields-0',
       'PopularFields-0',
       'AvailableFields-2',
+      'UnmappedFields-0',
       'EmptyFields-23',
       'MetaFields-3',
     ]);
@@ -284,6 +291,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'SelectedFields-0',
       'PopularFields-0',
       'AvailableFields-8',
+      'UnmappedFields-0',
       'MetaFields-0',
     ]);
   });

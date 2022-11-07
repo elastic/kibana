@@ -201,7 +201,7 @@ describe('discover responsive sidebar', function () {
     const metaFieldsCount = findTestSubject(comp, 'fieldListGroupedMetaFields-count');
 
     expect(selectedFieldsCount.text()).toBe('1');
-    expect(popularFieldsCount.text()).toBe('1');
+    expect(popularFieldsCount.text()).toBe('4');
     expect(availableFieldsCount.text()).toBe('3');
     expect(emptyFieldsCount.text()).toBe('20');
     expect(metaFieldsCount.text()).toBe('2');

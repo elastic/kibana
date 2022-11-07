@@ -156,7 +156,7 @@ describe('discover sidebar', function () {
     const popularFieldsCount = findTestSubject(comp, 'fieldListGroupedPopularFields-count');
     const selectedFieldsCount = findTestSubject(comp, 'fieldListGroupedSelectedFields-count');
     const availableFieldsCount = findTestSubject(comp, 'fieldListGroupedAvailableFields-count');
-    expect(popularFieldsCount.text()).toBe('1');
+    expect(popularFieldsCount.text()).toBe('4');
     expect(availableFieldsCount.text()).toBe('3');
     expect(selectedFieldsCount.text()).toBe('1');
   });
