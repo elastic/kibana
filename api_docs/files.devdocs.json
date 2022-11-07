@@ -1329,6 +1329,24 @@
             "path": "src/plugins/files/public/components/file_picker/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.multiple",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "multiple",
+            "description": [
+              "\nWhether you can select one or more files\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/files/public/components/file_picker/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

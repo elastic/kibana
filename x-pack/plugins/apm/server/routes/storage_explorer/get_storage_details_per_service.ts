@@ -11,7 +11,6 @@ import {
   rangeQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Setup } from '../../lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -34,7 +33,6 @@ import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getStorageDetailsPerProcessorEvent({
-  setup,
   apmEventClient,
   context,
   indexLifecyclePhase,
@@ -45,7 +43,6 @@ export async function getStorageDetailsPerProcessorEvent({
   kuery,
   serviceName,
 }: {
-  setup: Setup;
   apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
@@ -57,8 +54,8 @@ export async function getStorageDetailsPerProcessorEvent({
   serviceName: string;
 }) {
   const [{ indices: allIndicesStats }, response] = await Promise.all([
-    getTotalIndicesStats({ setup, context }),
-    apmEventClient.search('get_storage_details_per_service', {
+    getTotalIndicesStats({ apmEventClient, context }),
+    apmEventClient.search('get_storage_details_per_processor_event', {
       apm: {
         events: [
           ProcessorEvent.span,
@@ -158,7 +155,6 @@ export async function getStorageDetailsPerProcessorEvent({
 
 export async function getStorageDetailsPerIndex({
   apmEventClient,
-  setup,
   context,
   indexLifecyclePhase,
   randomSampler,
@@ -169,7 +165,6 @@ export async function getStorageDetailsPerIndex({
   serviceName,
 }: {
   apmEventClient: APMEventClient;
-  setup: Setup;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
@@ -185,9 +180,9 @@ export async function getStorageDetailsPerIndex({
     indicesInfo,
     response,
   ] = await Promise.all([
-    getTotalIndicesStats({ setup, context }),
-    getIndicesLifecycleStatus({ setup, context }),
-    getIndicesInfo({ setup, context }),
+    getTotalIndicesStats({ apmEventClient, context }),
+    getIndicesLifecycleStatus({ apmEventClient, context }),
+    getIndicesInfo({ apmEventClient, context }),
     apmEventClient.search('get_storage_details_per_index', {
       apm: {
         events: [
