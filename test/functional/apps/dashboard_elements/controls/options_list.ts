@@ -172,6 +172,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clearUnsavedChanges();
       });
 
+      it('cannot create options list for scripted field', async () => {
+        expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
+          'animals-*'
+        );
+        await dashboardControls.openCreateControlFlyout();
+        await testSubjects.missingOrFail('field-picker-select-isDog');
+        await dashboardControls.controlEditorCancel(true);
+      });
+
       after(async () => {
         await dashboardControls.clearAllControls();
       });
