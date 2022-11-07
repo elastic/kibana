@@ -30,8 +30,6 @@ import { remeasureFonts } from './remeasure_fonts';
 
 import { createPlaceholderWidget, dispose } from './placeholder_widget';
 
-import { CodeEditorStyles } from './editor.styles';
-
 export interface Props {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
@@ -331,12 +329,12 @@ export const CodeEditor: React.FC<Props> = ({
         }
       });
 
-    //   // Register themes
-    //   monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
-    //   monaco.editor.defineTheme(
-    //     'euiColorsTransparent',
-    //     useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
-    //   );
+      //   // Register themes
+      //   monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
+      //   monaco.editor.defineTheme(
+      //     'euiColorsTransparent',
+      //     useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+      //   );
     },
     [
       overrideEditorWillMount,
