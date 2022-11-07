@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceCount } from './get_service_count';
 import { getTransactionsPerMinute } from './get_transactions_per_minute';
 import { getHasData } from './has_data';
@@ -26,11 +25,11 @@ const observabilityOverviewHasDataRoute = createApmServerRoute({
     hasData: boolean;
     indices: import('./../../../../observability/common/typings').ApmIndicesConfig;
   }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
-    return await getHasData({ indices: setup.indices, apmEventClient });
+    const apmEventClient = await getApmEventClient(resources);
+    return await getHasData({
+      indices: apmEventClient.indices,
+      apmEventClient,
+    });
   },
 });
 
@@ -51,15 +50,12 @@ const observabilityOverviewRoute = createApmServerRoute({
       | { value: undefined; timeseries: never[] }
       | { value: number; timeseries: Array<{ x: number; y: number | null }> };
   }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
     const { bucketSize, intervalString, start, end } = resources.params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
-      config: setup.config,
+      config: resources.config,
       start,
       end,
       kuery: '',
