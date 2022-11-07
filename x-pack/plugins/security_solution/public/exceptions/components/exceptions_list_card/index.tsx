@@ -110,11 +110,11 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
           rules={null}
           isBulkAction={false}
           isEndpointItem={listType === ExceptionListTypeEnum.ENDPOINT}
+          sharedListToAddTo={[exceptionsList]}
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
-          data-test-subj="addExceptionItemFlyoutInList"
-          showAlertCloseOptions={false} // TODO ask if we need it
-          // ask if we need the add to rule/list section and which list should we link the exception here
+          data-test-subj="addExceptionItemFlyoutInSharedLists"
+          showAlertCloseOptions={false}
         />
       );
     if (showEditExceptionFlyout && exceptionToEdit)
@@ -123,9 +123,10 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
           list={exceptionsList}
           itemToEdit={exceptionToEdit}
           showAlertCloseOptions
+          openedFromListDetailPage
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
-          data-test-subj="editExceptionItemFlyoutInList"
+          data-test-subj="editExceptionItemFlyoutInSharedLists"
         />
       );
 
