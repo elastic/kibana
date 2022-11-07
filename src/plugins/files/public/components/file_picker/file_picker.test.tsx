@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 
@@ -60,7 +59,7 @@ describe('FilePicker', () => {
       actions: {
         select: (n: number) =>
           act(() => {
-            const file = testBed.find(testSubjects.fileGrid).childAt(n).find(EuiButtonEmpty);
+            const file = testBed.find(testSubjects.fileGrid).childAt(n).find('button').first();
             file.simulate('click');
             testBed.component.update();
           }),

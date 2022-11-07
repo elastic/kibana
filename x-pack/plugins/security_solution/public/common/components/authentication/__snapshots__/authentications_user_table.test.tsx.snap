@@ -92,7 +92,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
                   >
                     <button
                       aria-label="Open"
-                      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small"
+                      class="euiButtonIcon euiButtonIcon--small emotion-euiButtonIcon-empty-text-hoverStyles"
                       data-test-subj="query-toggle-header"
                       title="Open"
                       type="button"
@@ -126,7 +126,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
               >
                 <button
                   aria-label="Inspect"
-                  class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall inspectButtonComponent"
+                  class="euiButtonIcon euiButtonIcon--xSmall inspectButtonComponent emotion-euiButtonIcon-empty-disabled-hoverStyles"
                   data-test-subj="inspect-icon-button"
                   disabled=""
                   title="Inspect"
@@ -384,7 +384,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
           class="euiPopover__anchor css-16vtueo-render"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+            class="euiButtonEmpty euiButtonEmpty--xSmall css-wvaqcf-empty-text"
             type="button"
           >
             <span
@@ -409,7 +409,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <nav
-        class="euiPagination"
+        class="euiPagination emotion-euiPagination-EuiPagination"
         data-test-subj="numberedPagination"
       >
         <span
@@ -422,7 +422,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
         </span>
         <button
           aria-label="Previous page"
-          class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+          class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
           data-test-subj="pagination-button-previous"
           disabled=""
           type="button"
@@ -435,7 +435,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
           />
         </button>
         <ul
-          class="euiPagination__list"
+          class="euiPagination__list emotion-euiPagination__list"
         >
           <li
             class="euiPagination__item"
@@ -443,7 +443,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
             <button
               aria-current="true"
               aria-label="Page 1 of 5"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
+              class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-7ubx5w-empty-disabled-euiPaginationButton-isActive"
               data-test-subj="pagination-button-0"
               disabled=""
               type="button"
@@ -464,7 +464,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
           >
             <button
               aria-label="Page 2 of 5"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-23ziaw-empty-text-euiPaginationButton"
               data-test-subj="pagination-button-1"
               type="button"
             >
@@ -484,7 +484,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
           >
             <button
               aria-label="Page 3 of 5"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-23ziaw-empty-text-euiPaginationButton"
               data-test-subj="pagination-button-2"
               type="button"
             >
@@ -504,7 +504,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
           >
             <button
               aria-label="Page 4 of 5"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-23ziaw-empty-text-euiPaginationButton"
               data-test-subj="pagination-button-3"
               type="button"
             >
@@ -524,7 +524,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
           >
             <button
               aria-label="Page 5 of 5"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-23ziaw-empty-text-euiPaginationButton"
               data-test-subj="pagination-button-4"
               type="button"
             >
@@ -542,7 +542,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
         </ul>
         <button
           aria-label="Next page"
-          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+          class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-text-hoverStyles-euiPaginationArrowButton"
           data-test-subj="pagination-button-next"
           title="Next page"
           type="button"

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTab, EuiListGroupItem, EuiButton, EuiAccordion, EuiFieldText } from '@elastic/eui';
+import { EuiTab, EuiListGroupItem, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Settings, SettingsWorkspaceProps } from './settings';
@@ -267,7 +267,7 @@ describe('settings', () => {
     });
 
     it('should delete all nodes', () => {
-      instance.find('[data-test-subj="graphUnblocklistAll"]').find(EuiButton).simulate('click');
+      instance.find('button[data-test-subj="graphUnblocklistAll"]').simulate('click');
 
       expect(workspaceProps.unblockAll).toHaveBeenCalled();
     });
@@ -314,7 +314,7 @@ describe('settings', () => {
 
     it('should add url template', async () => {
       act(() => {
-        instance.find('EuiButton[data-test-subj="graphAddNewTemplate"]').simulate('click');
+        instance.find('button[data-test-subj="graphAddNewTemplate"]').simulate('click');
       });
       instance.update();
 

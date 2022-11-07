@@ -373,7 +373,7 @@ describe('AllCasesListGeneric', () => {
     );
 
     wrapper
-      .find(`[data-test-subj="cases-table-row-select-${theCase.id}"]`)
+      .find(`button[data-test-subj="cases-table-row-select-${theCase.id}"]`)
       .first()
       .simulate('click');
 

@@ -23,7 +23,7 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
       <span
-        class="euiToolTipAnchor eui-textBreakAll"
+        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
       >
         <span>
           test.test.test
@@ -57,7 +57,7 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
       <span
-        class="euiToolTipAnchor eui-textBreakAll"
+        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
       >
         <span>
           test.test.test
@@ -91,7 +91,7 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
       <span
-        class="euiToolTipAnchor eui-textBreakAll"
+        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
       >
         <span>
           test
@@ -125,7 +125,7 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
       <span
-        class="euiToolTipAnchor eui-textBreakAll"
+        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
       >
         <span>
           test.test.test

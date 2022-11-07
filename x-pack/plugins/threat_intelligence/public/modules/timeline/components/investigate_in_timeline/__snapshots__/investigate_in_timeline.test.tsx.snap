@@ -6,36 +6,28 @@ Object {
   "baseElement": <body>
     <div>
       <button
-        class="euiButton euiButton--primary euiButton--fill"
+        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
         data-test-subj="mockId"
         type="button"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="emotion-euiButtonDisplayContent"
         >
-          <span
-            class="euiButton__text"
-          >
-            Investigate in Timeline
-          </span>
+          Investigate in Timeline
         </span>
       </button>
     </div>
   </body>,
   "container": <div>
     <button
-      class="euiButton euiButton--primary euiButton--fill"
+      class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
       data-test-subj="mockId"
       type="button"
     >
       <span
-        class="euiButtonContent euiButton__content"
+        class="emotion-euiButtonDisplayContent"
       >
-        <span
-          class="euiButton__text"
-        >
-          Investigate in Timeline
-        </span>
+        Investigate in Timeline
       </span>
     </button>
   </div>,
@@ -160,11 +152,11 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
           aria-label="Investigate in Timeline"
-          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
           data-test-subj="mockId"
           type="button"
         >
@@ -180,11 +172,11 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <button
         aria-label="Investigate in Timeline"
-        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
         data-test-subj="mockId"
         type="button"
       >

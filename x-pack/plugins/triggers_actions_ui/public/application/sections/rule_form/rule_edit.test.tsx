@@ -212,7 +212,7 @@ describe('rule_edit', () => {
     await setup({ name: undefined });
 
     await act(async () => {
-      wrapper.find('[data-test-subj="saveEditedRuleButton"]').first().simulate('click');
+      wrapper.find('[data-test-subj="saveEditedRuleButton"]').last().simulate('click');
     });
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
       'Fail message'
@@ -244,7 +244,7 @@ describe('rule_edit', () => {
     jest.runOnlyPendingTimers();
 
     wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+    expect(wrapper.find('.euiToolTipPopover').last().text()).toBe(
       'Saving this rule will change its privileges and might change its behavior.'
     );
   });

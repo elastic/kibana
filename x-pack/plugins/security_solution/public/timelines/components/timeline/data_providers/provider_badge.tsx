@@ -51,18 +51,6 @@ const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
         inset 0 0 0 1px #bd271e;
     }
   }
-
-  .euiBadge.euiBadge--iconLeft &.euiBadge.euiBadge--iconRight .euiBadge__content {
-    flex-direction: row;
-  }
-
-  .euiBadge.euiBadge--iconLeft
-    &.euiBadge.euiBadge--iconRight
-    .euiBadge__content
-    .euiBadge__iconButton {
-    margin-right: 0;
-    margin-left: 4px;
-  }
 `;
 
 ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';

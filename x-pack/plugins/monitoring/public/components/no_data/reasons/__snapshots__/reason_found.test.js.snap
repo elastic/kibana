@@ -52,18 +52,14 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        class="euiButton euiButton--primary euiButton--fill"
+        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
         data-test-subj="enableCollectionInterval"
         type="button"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="emotion-euiButtonDisplayContent"
         >
-          <span
-            class="euiButton__text"
-          >
-            Turn on monitoring
-          </span>
+          Turn on monitoring
         </span>
       </button>
     </div>

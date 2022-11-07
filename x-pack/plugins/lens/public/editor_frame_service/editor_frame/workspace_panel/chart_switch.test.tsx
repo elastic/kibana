@@ -146,7 +146,7 @@ describe('chart_switch', () => {
   }
 
   function showFlyout(instance: ReactWrapper) {
-    instance.find('[data-test-subj="lnsChartSwitchPopover"]').first().simulate('click');
+    instance.find('button[data-test-subj="lnsChartSwitchPopover"]').first().simulate('click');
   }
 
   function switchTo(subType: string, instance: ReactWrapper) {

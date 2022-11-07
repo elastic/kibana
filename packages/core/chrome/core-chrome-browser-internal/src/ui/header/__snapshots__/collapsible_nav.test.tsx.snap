@@ -136,7 +136,7 @@ Array [
           aria-controls="generated-id"
           aria-expanded="true"
           aria-labelledby="generated-id"
-          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiAccordion__iconButton-isOpen-arrowRight"
+          class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton-isOpen-arrowRight"
           tabindex="-1"
           type="button"
         >
@@ -261,7 +261,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >
@@ -393,7 +393,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >
@@ -508,7 +508,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >
@@ -606,7 +606,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >

@@ -9,15 +9,15 @@ exports[`install footer should render 1`] = `
   >
     <button
       aria-label="Add Data Set Name"
-      class="euiButton euiButton--primary"
+      class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
       data-test-subj="addSampleDataSetdata-set-id"
       type="button"
     >
       <span
-        class="euiButtonContent euiButton__content"
+        class="emotion-euiButtonDisplayContent"
       >
         <span
-          class="euiButton__text"
+          class="eui-textTruncate"
         >
           Add data
         </span>

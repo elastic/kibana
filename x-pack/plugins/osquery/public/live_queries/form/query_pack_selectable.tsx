@@ -11,6 +11,21 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
 const StyledEuiCard = styled(EuiCard)`
+  /*
+  TODO: this css shouldn't be necessary after https://github.com/elastic/eui/issues/6345
+  tested this placeholder fix on mac in Chrome, Firefox, Safari, and Edge
+  with multiple zoom levels and with keyboard <tab> navigation
+  and in a responsive design / mobile view
+  */
+  padding-bottom: 60px;
+  position: relative;
+
+  button {
+    position: absolute;
+    bottom: 0;
+  }
+  /* end todo css */
+
   padding: 16px 92px 16px 16px !important;
 
   .euiTitle {

@@ -76,7 +76,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <a
-            class="euiButtonEmpty euiButtonEmpty--primary"
+            class="euiButtonEmpty css-9t7nyf-empty-primary"
             data-test-subj="cancelUploadButton"
             href="/home"
             rel="noreferrer"
@@ -96,18 +96,14 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
             data-test-subj="uploadLicenseButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
-              <span
-                class="euiButton__text"
-              >
-                Upload
-              </span>
+              Upload
             </span>
           </button>
         </div>
@@ -216,7 +212,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <a
-            class="euiButtonEmpty euiButtonEmpty--primary"
+            class="euiButtonEmpty css-9t7nyf-empty-primary"
             data-test-subj="cancelUploadButton"
             href="/home"
             rel="noreferrer"
@@ -236,18 +232,14 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
             data-test-subj="uploadLicenseButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
-              <span
-                class="euiButton__text"
-              >
-                Upload
-              </span>
+              Upload
             </span>
           </button>
         </div>
@@ -356,7 +348,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <a
-            class="euiButtonEmpty euiButtonEmpty--primary"
+            class="euiButtonEmpty css-9t7nyf-empty-primary"
             data-test-subj="cancelUploadButton"
             href="/home"
             rel="noreferrer"
@@ -376,18 +368,14 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
             data-test-subj="uploadLicenseButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
-              <span
-                class="euiButton__text"
-              >
-                Upload
-              </span>
+              Upload
             </span>
           </button>
         </div>
@@ -496,7 +484,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <a
-            class="euiButtonEmpty euiButtonEmpty--primary"
+            class="euiButtonEmpty css-9t7nyf-empty-primary"
             data-test-subj="cancelUploadButton"
             href="/home"
             rel="noreferrer"
@@ -516,18 +504,14 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
             data-test-subj="uploadLicenseButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
-              <span
-                class="euiButton__text"
-              >
-                Upload
-              </span>
+              Upload
             </span>
           </button>
         </div>
@@ -636,7 +620,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <a
-            class="euiButtonEmpty euiButtonEmpty--primary"
+            class="euiButtonEmpty css-9t7nyf-empty-primary"
             data-test-subj="cancelUploadButton"
             href="/home"
             rel="noreferrer"
@@ -656,18 +640,14 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
             data-test-subj="uploadLicenseButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
-              <span
-                class="euiButton__text"
-              >
-                Upload
-              </span>
+              Upload
             </span>
           </button>
         </div>

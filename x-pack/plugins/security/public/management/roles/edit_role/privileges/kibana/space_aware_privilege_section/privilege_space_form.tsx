@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ButtonColor } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -329,7 +329,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         throw new Error(`Unsupported mode: ${mode}`);
     }
 
-    let buttonColor: ButtonColor = 'primary';
+    let buttonColor: EuiButtonColor = 'primary';
     if (this.requiresGlobalPrivilegeWarning()) {
       buttonColor = 'warning';
     }

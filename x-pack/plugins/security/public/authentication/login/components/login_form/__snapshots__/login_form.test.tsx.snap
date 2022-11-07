@@ -133,6 +133,7 @@ exports[`LoginForm renders as expected 1`] = `
             isDisabled={false}
             isLoading={false}
             onClick={[Function]}
+            size="m"
             type="submit"
           >
             <FormattedMessage
