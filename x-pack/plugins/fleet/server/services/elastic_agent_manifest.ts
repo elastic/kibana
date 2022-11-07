@@ -532,7 +532,9 @@ metadata:
 ---
 `;
 
-export const elasticAgentEndpointManagedManifest = `apiVersion: apps/v1
+export const elasticAgentEndpointManagedManifest = `---
+# For more information refer https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: elastic-agent
