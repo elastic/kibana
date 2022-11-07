@@ -7,51 +7,43 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { useState } from 'react';
 
-interface Props {
-  placeholder: string;
-  editor: monaco.editor.ICodeEditor;
-}
-
-/**
- * Creates a space for a widget alongside the code editor
- */
-export const PlaceholderWidget = (props: Props) => {
-  const [placeholderText, setPlaceholderText] = useState('');
-  const [editor, setEditor] = useState();
-
-
-};
-
-export const getDomNode = (domNode: undefined | HTMLElement): HTMLElement => {
-  if (!domNode) {
-    let domNode = document.createElement('div');
-    setPlaceholderText(domNode.innerText);
-    domNode.className = 'kibanaCodeEditor__placeholderContainer';
-    setEditor.applyFontInfo(domNode);
-    domNode = domNode;
+export class PlaceholderWidget implements monaco.editor.IContentWidget {
+  constructor(
+    private readonly placeholderText: string,
+    private readonly editor: monaco.editor.ICodeEditor
+  ) {
+    editor.addContentWidget(this);
   }
-  return domNode;
-};
 
-export const getId = (): string => {
-  return 'KBN_CODE_EDITOR_PLACEHOLDER_WIDGET_ID';
-};
+  private domNode: undefined | HTMLElement;
 
-export const getPosition = (): monaco.editor.IContentWidgetPosition | null => {
-  return {
-    position: {
-      column: 1,
-      lineNumber: 1,
-    },
-    preference: [monaco.editor.ContentWidgetPositionPreference.EXACT],
-  };
-};
+  public getId(): string {
+    return 'KBN_CODE_EDITOR_PLACEHOLDER_WIDGET_ID';
+  }
 
-export const dispose = (
-  editor: monaco.editor.ICodeEditor,
-  placeholderWidget: monaco.editor.IContentWidget
-): void => {
-  editor.removeContentWidget(placeholderWidget);
-};
+  public getDomNode(): HTMLElement {
+    if (!this.domNode) {
+      const domNode = document.createElement('div');
+      domNode.innerText = this.placeholderText;
+      domNode.className = 'kibanaCodeEditor__placeholderContainer';
+      this.editor.applyFontInfo(domNode);
+      this.domNode = domNode;
+    }
+    return this.domNode;
+  }
+
+  public getPosition(): monaco.editor.IContentWidgetPosition | null {
+    return {
+      position: {
+        column: 1,
+        lineNumber: 1,
+      },
+      preference: [monaco.editor.ContentWidgetPositionPreference.EXACT],
+    };
+  }
+
+  public dispose(): void {
+    this.editor.removeContentWidget(this);
+  }
+}

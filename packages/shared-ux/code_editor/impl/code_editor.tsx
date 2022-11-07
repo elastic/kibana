@@ -27,7 +27,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
-import { dispose, getDomNode, PlaceholderWidget } from './placeholder_widget';
+
+import { PlaceholderWidget } from './placeholder_widget';
+
+import { CodeEditorStyles } from './editor.styles';
 
 export interface Props {
   /** Width of editor. Defaults to 100%. */
@@ -161,7 +164,7 @@ export const CodeEditor: React.FC<Props> = ({
   const isReadOnly = options?.readOnly ?? false;
 
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const _placeholderWidget = useRef<typeof PlaceholderWidget | null>(null);
+  const _placeholderWidget = useRef<PlaceholderWidget | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
@@ -328,12 +331,12 @@ export const CodeEditor: React.FC<Props> = ({
         }
       });
 
-      // Register themes
-      //   monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
-      //   monaco.editor.defineTheme(
-      //     'euiColorsTransparent',
-      //     useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
-      //   );
+    //   // Register themes
+    //   monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
+    //   monaco.editor.defineTheme(
+    //     'euiColorsTransparent',
+    //     useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+    //   );
     },
     [
       overrideEditorWillMount,
@@ -405,10 +408,10 @@ export const CodeEditor: React.FC<Props> = ({
   useEffect(() => {
     if (placeholder && !value && _editor.current) {
       // Mounts editor inside constructor
-      _placeholderWidget.current = getDomNode(placeholder, _editor.current);
+      _placeholderWidget.current = new PlaceholderWidget(placeholder, _editor.current);
     }
     return () => {
-      dispose(_editor, _placeholderWidget);
+      _placeholderWidget.current?.dispose();
       _placeholderWidget.current = null;
     };
   }, [placeholder, value]);
@@ -416,7 +419,11 @@ export const CodeEditor: React.FC<Props> = ({
   const { CopyButton } = useCopy({ isCopyable, value });
 
   return (
-    <div className="kibanaCodeEditor" onKeyDown={onKeyDown}>
+    <div
+      className="kibanaCodeEditor"
+      onKeyDown={onKeyDown}
+      style={{ backgroundColor: 'yellowgreen' }}
+    >
       {renderPrompt()}
 
       <FullScreenDisplay>
@@ -564,3 +571,7 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
 
   return { showCopyButton, CopyButton };
 };
+
+// React.lazy requires default export
+// eslint-disable-next-line import/no-default-export
+export default CodeEditor;
