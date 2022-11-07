@@ -12,6 +12,7 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
 import { EXCEPTIONS_PATH, SecurityPageName } from '../../common/constants';
 import { ExceptionListsTable } from './manage_exceptions/exceptions_table';
+import { ExceptionListsDetailView } from './manage_exceptions/detail_view';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 import { useReadonlyHeader } from '../use_readonly_header';
@@ -41,9 +42,35 @@ const Exceptions = React.memo(ExceptionsContainerComponent);
 
 const renderExceptionsRoutes = () => <Exceptions />;
 
+const ExceptionsListDetailRoute = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.sharedExceptionListDetails}>
+      <ExceptionListsDetailView />
+      <SpyRoute pageName={SecurityPageName.sharedExceptionListDetails} />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
+);
+
+const ExceptionListDetailContainerComponent: React.FC = () => {
+  return (
+    <Switch>
+      <Route path={'/exceptions/shared/:exceptionListId'} component={ExceptionsListDetailRoute} />
+      <Route component={NotFoundPage} />
+    </Switch>
+  );
+};
+
+const ExceptionListDetails = React.memo(ExceptionListDetailContainerComponent);
+
+const renderExceptionListDetailsRoute = () => <ExceptionListDetails />;
+
 export const routes = [
   {
     path: EXCEPTIONS_PATH,
     render: renderExceptionsRoutes,
+  },
+  {
+    path: '/exceptions/shared/:exceptionListId',
+    component: ExceptionListDetails,
   },
 ];
