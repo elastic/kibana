@@ -36,7 +36,7 @@ import {
 } from './saved_object_types';
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
-import type {UpgradeAssistantConfig } from './config';
+import type { UpgradeAssistantConfig } from './config';
 import type { FeatureSet } from '../common/types';
 
 interface PluginsSetup {
@@ -69,8 +69,8 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.logger = logger.get();
     this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
-    
-    const { featureSet }  = config.get();
+
+    const { featureSet } = config.get();
     this.initialFeatureSet = featureSet;
   }
 

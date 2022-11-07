@@ -23,7 +23,7 @@ export interface RouteDependencies {
     handleEsError: typeof handleEsError;
   };
   config: {
-    featureSet: FeatureSet,
+    featureSet: FeatureSet;
     isSecurityEnabled: () => boolean;
   };
 }

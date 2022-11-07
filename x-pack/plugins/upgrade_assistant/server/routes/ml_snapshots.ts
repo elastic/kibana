@@ -344,7 +344,7 @@ export function registerMlSnapshotRoutes({
          * is incremented to something higher than 7.0.0 in the Elasticsearch code.
          */
         if (!featureSet.mlSnapshots) {
-           return response.ok({
+          return response.ok({
             body: {
               mlUpgradeModeEnabled: false,
             },

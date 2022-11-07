@@ -198,7 +198,7 @@ describe('ML snapshots APIs', () => {
 
     it('returns false if featureSet.mlSnapshots is set to false even if upgrade_mode is true', async () => {
       registerMockRouter({ mlSnapshots: false });
-    
+
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.info as jest.Mock
       ).mockResolvedValue({

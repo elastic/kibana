@@ -32,11 +32,7 @@ import { getUpgradeStep } from './upgrade_step';
 import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 import { getLogsStep } from './logs_step';
 
-type OverviewStep =
-  | 'backup'
-  | 'migrate_system_indices'
-  | 'fix_issues'
-  | 'logs';
+type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 
 export const Overview = withRouter(({ history }: RouteComponentProps) => {
   const {
@@ -47,7 +43,6 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
     },
     plugins: { cloud },
   } = useAppContext();
-
 
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_OVERVIEW_PAGE_LOAD);
@@ -114,28 +109,31 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
         </EuiPageHeader>
         <EuiSpacer size="l" />
         <EuiSteps
-          steps={[
-            getBackupStep({
-              cloud,
-              isComplete: isStepComplete('backup'),
-              setIsComplete: setCompletedStep.bind(null, 'backup'),
-            }),
-            migrateIndices && getMigrateSystemIndicesStep({
-              docLinks,
-              isComplete: isStepComplete('migrate_system_indices'),
-              setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
-            }),
-            getFixIssuesStep({
-              isComplete: isStepComplete('fix_issues'),
-              setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
-            }),
-            getLogsStep({
-              isComplete: isStepComplete('logs'),
-              setIsComplete: setCompletedStep.bind(null, 'logs'),
-              navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
-            }),
-            getUpgradeStep(),
-          ].filter(Boolean) as EuiStepProps[]}
+          steps={
+            [
+              getBackupStep({
+                cloud,
+                isComplete: isStepComplete('backup'),
+                setIsComplete: setCompletedStep.bind(null, 'backup'),
+              }),
+              migrateIndices &&
+                getMigrateSystemIndicesStep({
+                  docLinks,
+                  isComplete: isStepComplete('migrate_system_indices'),
+                  setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
+                }),
+              getFixIssuesStep({
+                isComplete: isStepComplete('fix_issues'),
+                setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
+              }),
+              getLogsStep({
+                isComplete: isStepComplete('logs'),
+                setIsComplete: setCompletedStep.bind(null, 'logs'),
+                navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
+              }),
+              getUpgradeStep(),
+            ].filter(Boolean) as EuiStepProps[]
+          }
         />
       </EuiPageContentBody>
     </EuiPageBody>
