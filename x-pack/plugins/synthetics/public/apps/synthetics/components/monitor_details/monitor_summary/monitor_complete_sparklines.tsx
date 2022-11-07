@@ -7,20 +7,20 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { useEuiTheme } from '@elastic/eui';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
 interface Props {
   from: string;
   to: string;
 }
-export const MonitorErrorSparklines = (props: Props) => {
+export const MonitorCompleteSparklines = (props: Props) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
 
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const monitorId = useMonitorQueryId();
 
   const { euiTheme } = useEuiTheme();
 
@@ -36,9 +36,9 @@ export const MonitorErrorSparklines = (props: Props) => {
           time: props,
           reportDefinitions: { 'monitor.id': [monitorId] },
           dataType: 'synthetics',
-          selectedMetricField: 'state.up',
-          name: 'Monitor errors',
-          color: euiTheme.colors.danger,
+          selectedMetricField: 'state.id',
+          name: 'Monitor complete',
+          color: euiTheme.colors.success,
           operationType: 'unique_count',
         },
       ]}

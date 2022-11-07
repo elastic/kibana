@@ -16,6 +16,10 @@ import { TestRunsTable } from '../monitor_summary/test_runs_table';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 import { MonitorCompleteCount } from '../monitor_summary/monitor_complete_count';
 import { MonitorTotalRunsCount } from '../monitor_summary/monitor_total_runs_count';
+import { MonitorErrorSparklines } from '../monitor_summary/monitor_error_sparklines';
+import { AvailabilitySparklines } from '../monitor_summary/availability_sparklines';
+import { DurationSparklines } from '../monitor_summary/duration_sparklines';
+import { MonitorCompleteSparklines } from '../monitor_summary/monitor_complete_sparklines';
 
 export const MonitorHistory = () => {
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
@@ -32,18 +36,46 @@ export const MonitorHistory = () => {
               <EuiTitle size="xs">
                 <h3>{STATS_LABEL}</h3>
               </EuiTitle>
-              <EuiFlexGrid columns={2}>
+              <EuiFlexGrid columns={2} gutterSize="s">
                 <EuiFlexItem>
-                  <MonitorCompleteCount from={dateRangeStart} to={dateRangeEnd} />
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem>
+                      <MonitorCompleteCount from={dateRangeStart} to={dateRangeEnd} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <MonitorCompleteSparklines from={dateRangeStart} to={dateRangeEnd} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <AvailabilityPanel from={dateRangeStart} to={dateRangeEnd} />
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem>
+                      <AvailabilityPanel from={dateRangeStart} to={dateRangeEnd} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <AvailabilitySparklines from={dateRangeStart} to={dateRangeEnd} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <MonitorErrorsCount from={dateRangeStart} to={dateRangeEnd} />
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem>
+                      <MonitorErrorsCount from={dateRangeStart} to={dateRangeEnd} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <MonitorErrorSparklines from={dateRangeStart} to={dateRangeEnd} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <DurationPanel from={dateRangeStart} to={dateRangeEnd} />
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem>
+                      <DurationPanel from={dateRangeStart} to={dateRangeEnd} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <DurationSparklines from={dateRangeStart} to={dateRangeEnd} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <MonitorTotalRunsCount from={dateRangeStart} to={dateRangeEnd} />
