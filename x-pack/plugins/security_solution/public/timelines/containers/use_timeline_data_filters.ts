@@ -22,24 +22,23 @@ export function useTimelineDataFilters(isActiveTimelines: boolean) {
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
   const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
-  const isActive = useMemo(() => isActiveTimelines === true, [isActiveTimelines]);
 
   const shouldUpdate = useDeepEqualSelector((state) => {
-    if (isActive) {
+    if (isActiveTimelines) {
       return getIsLoadingSelector(state.inputs.timeline);
     } else {
       return getIsLoadingSelector(state.inputs.global);
     }
   });
   const from = useDeepEqualSelector((state) => {
-    if (isActive) {
+    if (isActiveTimelines) {
       return getStartSelector(state.inputs.timeline);
     } else {
       return getStartSelector(state.inputs.global);
     }
   });
   const to = useDeepEqualSelector((state) => {
-    if (isActive) {
+    if (isActiveTimelines) {
       return getEndSelector(state.inputs.timeline);
     } else {
       return getEndSelector(state.inputs.global);
