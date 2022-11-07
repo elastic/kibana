@@ -21,11 +21,11 @@ describe('error queries', () => {
   });
 
   it('fetches a single error group', async () => {
-    mock = await inspectSearchParams((setup, apmEventClient) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getErrorGroupSample({
         groupId: 'groupId',
         serviceName: 'serviceName',
-        apmEventClient,
+        apmEventClient: mockApmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -37,12 +37,12 @@ describe('error queries', () => {
   });
 
   it('fetches multiple error groups', async () => {
-    mock = await inspectSearchParams((setup, apmEventClient) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getErrorGroupMainStatistics({
         sortDirection: 'asc',
         sortField: 'foo',
         serviceName: 'serviceName',
-        apmEventClient,
+        apmEventClient: mockApmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -54,12 +54,12 @@ describe('error queries', () => {
   });
 
   it('fetches multiple error groups when sortField = lastSeen', async () => {
-    mock = await inspectSearchParams((setup, apmEventClient) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getErrorGroupMainStatistics({
         sortDirection: 'asc',
         sortField: 'lastSeen',
         serviceName: 'serviceName',
-        apmEventClient,
+        apmEventClient: mockApmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
