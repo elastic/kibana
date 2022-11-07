@@ -444,7 +444,7 @@ export function defineRoutes(
           body: actions.getAllTypes(),
         });
       } catch (e) {
-        return res.badRequest({ body: err });
+        return res.badRequest({ body: e });
       }
     }
   );
