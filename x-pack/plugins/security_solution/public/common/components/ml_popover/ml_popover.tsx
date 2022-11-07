@@ -60,9 +60,8 @@ export const MlPopover = React.memo(() => {
   const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
   const handleJobStateChange = useCallback(
     async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
-      const result = await enableDatafeed(job, latestTimestampMs, enable);
+      await enableDatafeed(job, latestTimestampMs, enable);
       refreshJobs();
-      return result;
     },
     [refreshJobs, enableDatafeed]
   );
