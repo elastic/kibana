@@ -286,7 +286,7 @@ const internalRuleCreateRequired = t.type({
   actions: RuleActionArrayCamel,
   params: ruleParams,
 });
-const internalRuleCreateOptional = t.type({
+const internalRuleCreateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
   notifyWhen,
 });
@@ -305,7 +305,7 @@ const internalRuleUpdateRequired = t.type({
   actions: RuleActionArrayCamel,
   params: ruleParams,
 });
-const internalRuleUpdateOptional = t.type({
+const internalRuleUpdateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
   notifyWhen,
 });

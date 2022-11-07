@@ -574,8 +574,7 @@ export class RulesClient {
       throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
-    const usesGlobalFreqParams =
-      typeof data.notifyWhen !== 'undefined' && typeof data.throttle !== 'undefined';
+    const usesGlobalFreqParams = this.usesValidGlobalFreqParams(data);
     await this.validateActions(ruleType, data.actions, usesGlobalFreqParams);
 
     // Throw error if schedule interval is less than the minimum and we are enforcing it
@@ -1715,8 +1714,7 @@ export class RulesClient {
 
     // Validate
     const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
-    const usesGlobalFreqParams =
-      typeof data.notifyWhen !== 'undefined' && typeof data.throttle !== 'undefined';
+    const usesGlobalFreqParams = this.usesValidGlobalFreqParams(data);
     await this.validateActions(ruleType, data.actions, usesGlobalFreqParams);
 
     // Throw error if schedule interval is less than the minimum and we are enforcing it
@@ -2238,10 +2236,7 @@ export class RulesClient {
             for (const operation of operations) {
               switch (operation.field) {
                 case 'actions':
-                  const usesGlobalFreqParams = Boolean(
-                    typeof attributes.notifyWhen !== 'undefined' &&
-                      typeof attributes.throttle !== 'undefined'
-                  );
+                  const usesGlobalFreqParams = this.usesValidGlobalFreqParams(attributes);
                   await this.validateActions(ruleType, operation.value, usesGlobalFreqParams);
                   ruleActions = applyBulkEditOperation(operation, ruleActions);
                   break;
@@ -3510,6 +3505,21 @@ export class RulesClient {
     return includeLegacyId
       ? ({ ...rule, legacyId } as PartialRuleWithLegacyId<Params>)
       : (rule as PartialRule<Params>);
+  }
+
+  private usesValidGlobalFreqParams({
+    notifyWhen,
+    throttle,
+  }: Pick<RawRule, 'notifyWhen' | 'throttle'>) {
+    const hasNotifyWhen = typeof notifyWhen !== 'undefined';
+    const hasThrottle = typeof throttle !== 'undefined';
+    if (hasNotifyWhen && hasThrottle) return true;
+    if (!hasNotifyWhen && !hasThrottle) return false;
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerting.rulesClient.usesValidGlobalFreqParams.oneUndefined', {
+        defaultMessage: 'Global notifyWhen and throttle must both be defined or both be undefined',
+      })
+    );
   }
 
   private async validateActions(
