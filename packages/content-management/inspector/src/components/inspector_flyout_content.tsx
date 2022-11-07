@@ -86,7 +86,7 @@ export const InspectorFlyoutContent: FC<Props> = ({
         } catch (error) {
           notifyError(
             <FormattedMessage
-              id="contentManagement.tableList.listing.unableToDeleteDangerMessage"
+              id="contentManagement.inspector.metadataForm.unableToSaveDangerMessage"
               defaultMessage="Unable to save {entityName}"
               values={{ entityName }}
             />,
