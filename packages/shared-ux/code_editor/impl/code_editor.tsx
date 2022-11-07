@@ -28,7 +28,7 @@ import classNames from 'classnames';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
-import { createPlaceholderWidget, dispose } from './placeholder_widget';
+import { createPlaceholderWidget } from './placeholder_widget';
 
 export interface Props {
   /** Width of editor. Defaults to 100%. */
@@ -406,8 +406,11 @@ export const CodeEditor: React.FC<Props> = ({
   useEffect(() => {
     if (placeholder && !value && _editor.current) {
       // Mounts editor inside constructor
-      //@ts-ignore 
-      _placeholderWidget.current = createPlaceholderWidget({placeholderText: placeholder, editor: _editor.current});
+      // @ts-ignore
+      _placeholderWidget.current = createPlaceholderWidget({
+        placeholderText: placeholder,
+        editor: _editor.current,
+      });
     }
     return () => {
       _placeholderWidget.current?.dispose();
