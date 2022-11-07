@@ -335,6 +335,7 @@
     "@kbn/guided-onboarding": "link:bazel-bin/packages/kbn-guided-onboarding",
     "@kbn/handlebars": "link:bazel-bin/packages/kbn-handlebars",
     "@kbn/hapi-mocks": "link:bazel-bin/packages/kbn-hapi-mocks",
+    "@kbn/health-gateway-server": "link:bazel-bin/packages/kbn-health-gateway-server",
     "@kbn/home-sample-data-card": "link:bazel-bin/packages/home/sample_data_card",
     "@kbn/home-sample-data-tab": "link:bazel-bin/packages/home/sample_data_tab",
     "@kbn/home-sample-data-types": "link:bazel-bin/packages/home/sample_data_types",

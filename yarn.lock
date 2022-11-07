@@ -3595,6 +3595,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/health-gateway-server@link:bazel-bin/packages/kbn-health-gateway-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/home-sample-data-card@link:bazel-bin/packages/home/sample_data_card":
   version "0.0.0"
   uid ""
