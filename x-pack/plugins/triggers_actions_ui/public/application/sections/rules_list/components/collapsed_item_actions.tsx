@@ -43,7 +43,11 @@ export type ComponentOpts = {
   onEditRule: (item: RuleTableItem) => void;
   onUpdateAPIKey: (id: string[]) => void;
   onRunRule: (item: RuleTableItem) => void;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
+  onCloneRule: (func: () => Promise<string>) => void;
+} & Pick<
+  BulkOperationsComponentOpts,
+  'cloneRule' | 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'
+>;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
@@ -57,6 +61,8 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   snoozeRule,
   unsnoozeRule,
   onRunRule,
+  onCloneRule,
+  cloneRule,
 }: ComponentOpts) => {
   const {
     ruleTypeRegistry,
@@ -106,6 +112,20 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       }
     },
     [onLoading, unsnoozeRule, item, onRuleChanged, toasts, onClose]
+  );
+
+  const cloneRuleInternal = useCallback(
+    async (ruleId: string) => {
+      setIsPopoverOpen(!isPopoverOpen);
+      try {
+        const cloneItem = await cloneRule(item.id);
+        return cloneItem.id;
+      } catch (e) {
+        toasts.addDanger(SNOOZE_FAILED_MESSAGE);
+        throw e;
+      }
+    },
+    [cloneRule, isPopoverOpen, item.id, toasts]
   );
 
   const isRuleTypeEditableInContext = ruleTypeRegistry.has(item.ruleTypeId)
@@ -208,6 +228,17 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
                 'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.disableTitle',
                 { defaultMessage: 'Disable' }
               ),
+        },
+        {
+          disabled: !item.isEditable && item.consumer !== AlertConsumers.SIEM,
+          'data-test-subj': 'cloneRule',
+          onClick: async () => {
+            onCloneRule(cloneRuleInternal.bind(this, item.id));
+          },
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.duplicateRuleTitle',
+            { defaultMessage: 'Duplicate rule' }
+          ),
         },
         {
           disabled: !item.isEditable || !isRuleTypeEditableInContext,
