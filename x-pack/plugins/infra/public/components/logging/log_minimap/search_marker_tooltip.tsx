@@ -52,6 +52,7 @@ export class _SearchMarkerTooltip extends React.PureComponent<
                 >
                   <div
                     css={[styles.euiToolTip__arrow]} // TODO: Add styles.arrowPositions.left in next Kibana EUI upgrade
+                    className="euiToolTip__arrow" // TODO: Remove this when the above is done
                     style={{ left: width || 0, top: (height || 0) / 2 - POPOVER_ARROW_SIZE / 2 }}
                   />
                   <div>{children}</div>
