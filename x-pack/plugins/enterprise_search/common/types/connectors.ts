@@ -26,9 +26,13 @@ export enum ConnectorStatus {
 }
 
 export enum SyncStatus {
-  IN_PROGRESS = 'in_progress',
+  CANCELING = 'canceling',
+  CANCELED = 'canceled',
   COMPLETED = 'completed',
   ERROR = 'error',
+  IN_PROGRESS = 'in_progress',
+  PENDING = 'pending',
+  SUSPENDED = 'suspended',
 }
 
 export interface IngestPipelineParams {

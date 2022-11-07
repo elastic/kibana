@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { LayoutDirection } from '@elastic/charts';
 import { CustomPaletteParams, CUSTOM_PALETTE, PaletteRegistry } from '@kbn/coloring';
-import {
-  EXPRESSION_METRIC_NAME,
-  EXPRESSION_METRIC_TRENDLINE_NAME,
-} from '@kbn/expression-metric-vis-plugin/public';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import type {
+  TrendlineExpressionFunctionDefinition,
+  MetricVisExpressionFunctionDefinition,
+} from '@kbn/expression-metric-vis-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { Ast } from '@kbn/interpreter';
 import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import { CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
@@ -33,51 +34,47 @@ const getTrendlineExpression = (
   state: MetricVisualizationState,
   datasourceExpressionsByLayers: Record<string, Ast>
 ): Ast | undefined => {
-  if (!state.trendlineLayerId || !state.trendlineMetricAccessor || !state.trendlineTimeAccessor) {
+  const { trendlineLayerId, trendlineMetricAccessor, trendlineTimeAccessor } = state;
+  if (!trendlineLayerId || !trendlineMetricAccessor || !trendlineTimeAccessor) {
     return;
   }
 
-  const datasourceExpression = datasourceExpressionsByLayers[state.trendlineLayerId];
+  const datasourceExpression = datasourceExpressionsByLayers[trendlineLayerId];
 
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: EXPRESSION_METRIC_TRENDLINE_NAME,
-        arguments: {
-          metric: [state.trendlineMetricAccessor],
-          timeField: [state.trendlineTimeAccessor],
-          breakdownBy:
-            state.trendlineBreakdownByAccessor && !state.collapseFn
-              ? [state.trendlineBreakdownByAccessor]
-              : [],
-          inspectorTableId: [state.trendlineLayerId],
-          ...(datasourceExpression
-            ? {
-                table: [
-                  {
-                    ...datasourceExpression,
-                    chain: [
-                      ...datasourceExpression.chain,
-                      ...(state.collapseFn
-                        ? [
-                            buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
-                              by: [state.trendlineTimeAccessor],
-                              metric: [state.trendlineMetricAccessor],
-                              fn: [state.collapseFn],
-                            }).toAst(),
-                          ]
-                        : []),
-                    ],
-                  },
-                ],
-              }
-            : {}),
+  if (!datasourceExpression) {
+    return;
+  }
+
+  const metricTrendlineFn = buildExpressionFunction<TrendlineExpressionFunctionDefinition>(
+    'metricTrendline',
+    {
+      metric: trendlineMetricAccessor,
+      timeField: trendlineTimeAccessor,
+      breakdownBy:
+        state.trendlineBreakdownByAccessor && !state.collapseFn
+          ? state.trendlineBreakdownByAccessor
+          : undefined,
+      inspectorTableId: trendlineLayerId,
+      table: [
+        {
+          ...datasourceExpression,
+          chain: [
+            ...datasourceExpression.chain,
+            ...(state.collapseFn
+              ? [
+                  buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
+                    by: [trendlineTimeAccessor],
+                    metric: [trendlineMetricAccessor],
+                    fn: [state.collapseFn],
+                  }).toAst(),
+                ]
+              : []),
+          ],
         },
-      },
-    ],
-  };
+      ],
+    }
+  );
+  return buildExpression([metricTrendlineFn]).toAst();
 };
 
 export const toExpression = (
@@ -135,38 +132,35 @@ export const toExpression = (
 
   const trendlineExpression = getTrendlineExpression(state, datasourceExpressionsByLayers);
 
+  const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
+    metric: state.metricAccessor,
+    secondaryMetric: state.secondaryMetricAccessor,
+    secondaryPrefix: state.secondaryPrefix,
+    max: showingBar(state) ? state.maxAccessor : undefined,
+    breakdownBy:
+      state.breakdownByAccessor && !state.collapseFn ? state.breakdownByAccessor : undefined,
+    trendline: trendlineExpression ? [trendlineExpression] : [],
+    subtitle: state.subtitle ?? undefined,
+    progressDirection: state.progressDirection as LayoutDirection,
+    color: state.color || getDefaultColor(state),
+    palette: state.palette?.params
+      ? [
+          paletteService
+            .get(CUSTOM_PALETTE)
+            .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
+        ]
+      : [],
+    maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
+    minTiles: maxPossibleTiles ?? undefined,
+    inspectorTableId: state.layerId,
+  });
+
   return {
     type: 'expression',
     chain: [
       ...(datasourceExpression?.chain ?? []),
       ...(collapseExpressionFunction ? [collapseExpressionFunction] : []),
-      {
-        type: 'function',
-        function: EXPRESSION_METRIC_NAME,
-        arguments: {
-          metric: state.metricAccessor ? [state.metricAccessor] : [],
-          secondaryMetric: state.secondaryMetricAccessor ? [state.secondaryMetricAccessor] : [],
-          secondaryPrefix:
-            typeof state.secondaryPrefix !== 'undefined' ? [state.secondaryPrefix] : [],
-          max: showingBar(state) ? [state.maxAccessor] : [],
-          breakdownBy:
-            state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
-          trendline: trendlineExpression ? [trendlineExpression] : [],
-          subtitle: state.subtitle ? [state.subtitle] : [],
-          progressDirection: state.progressDirection ? [state.progressDirection] : [],
-          color: [state.color || getDefaultColor(state)],
-          palette: state.palette?.params
-            ? [
-                paletteService
-                  .get(CUSTOM_PALETTE)
-                  .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
-              ]
-            : [],
-          maxCols: [state.maxCols ?? DEFAULT_MAX_COLUMNS],
-          minTiles: maxPossibleTiles ? [maxPossibleTiles] : [],
-          inspectorTableId: [state.layerId],
-        },
-      },
+      metricFn.toAst(),
     ],
   };
 };

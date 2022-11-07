@@ -108,7 +108,6 @@ export interface EditorFrameProps {
 export type VisualizationMap = Record<string, Visualization>;
 export type DatasourceMap = Record<string, Datasource>;
 export type IndexPatternMap = Record<string, IndexPattern>;
-export type ExistingFieldsMap = Record<string, Record<string, boolean>>;
 
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
@@ -589,7 +588,6 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   state: T;
   activeData?: Record<string, Datatable>;
   indexPatterns: IndexPatternMap;
-  existingFields: Record<string, Record<string, boolean>>;
   hideTooltip?: boolean;
   invalid?: boolean;
   invalidMessage?: string;
@@ -614,6 +612,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
+  isMetricDimension?: boolean;
   layerType: LayerType | undefined;
   supportStaticValue: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
@@ -638,6 +637,7 @@ export interface DragDropOperation {
   filterOperations: (operation: OperationMetadata) => boolean;
   indexPatternId?: string;
   isNewColumn?: boolean;
+  isMetricDimension?: boolean;
   prioritizedOperation?: string;
 }
 
@@ -795,6 +795,8 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
   supportStaticValue?: boolean;
+  // used by text based datasource to restrict the field selection only to number fields for the metric dimensions
+  isMetricDimension?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
   formatSelectorOptions?: FormatSelectorOptions; // only relevant if supportFieldFormat is true

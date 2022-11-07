@@ -156,6 +156,7 @@ describe('heatmap', () => {
             },
             groupId: GROUP_ID.CELL,
             groupLabel: 'Cell value',
+            isMetricDimension: true,
             accessors: [
               {
                 columnId: 'v-accessor',
@@ -214,6 +215,7 @@ describe('heatmap', () => {
             },
             groupId: GROUP_ID.CELL,
             groupLabel: 'Cell value',
+            isMetricDimension: true,
             accessors: [],
             filterOperations: isCellValueSupported,
             supportsMoreColumns: true,
@@ -270,6 +272,7 @@ describe('heatmap', () => {
             },
             groupId: GROUP_ID.CELL,
             groupLabel: 'Cell value',
+            isMetricDimension: true,
             accessors: [
               {
                 columnId: 'v-accessor',
@@ -560,10 +563,10 @@ describe('heatmap', () => {
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [false],
-                        isYAxisTitleVisible: [true],
+                        isYAxisTitleVisible: [false],
                         // X-axis
                         isXAxisLabelVisible: [false],
-                        isXAxisTitleVisible: [true],
+                        isXAxisTitleVisible: [false],
                         xTitle: [''],
                         yTitle: [''],
                       },
