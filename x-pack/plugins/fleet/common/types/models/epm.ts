@@ -351,6 +351,7 @@ export interface RegistryElasticsearch {
   'index_template.settings'?: estypes.IndicesIndexSettings;
   'index_template.mappings'?: estypes.MappingTypeMapping;
   'ingest_pipeline.name'?: string;
+  source_mode?: 'default' | 'synthetic';
 }
 
 export interface RegistryDataStreamPrivileges {
@@ -418,9 +419,11 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
 };
 
+export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
+
 export interface IntegrationCardItem {
   url: string;
-  release?: 'beta' | 'experimental' | 'ga';
+  release?: IntegrationCardReleaseLabel;
   description: string;
   name: string;
   title: string;

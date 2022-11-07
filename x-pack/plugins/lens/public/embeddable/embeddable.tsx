@@ -663,6 +663,25 @@ export class Embeddable
     }
   }
 
+  private getError(): Error | undefined {
+    const message =
+      typeof this.errors?.[0]?.longMessage === 'string'
+        ? this.errors[0].longMessage
+        : this.errors?.[0]?.shortMessage;
+
+    if (message != null) {
+      return new Error(message);
+    }
+
+    if (!this.expression) {
+      return new Error(
+        i18n.translate('xpack.lens.embeddable.failure', {
+          defaultMessage: "Visualization couldn't be displayed",
+        })
+      );
+    }
+  }
+
   /**
    *
    * @param {HTMLElement} domNode
@@ -683,7 +702,7 @@ export class Embeddable
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
-      error: undefined,
+      error: this.getError(),
     });
     this.renderComplete.dispatchInProgress();
 
@@ -715,7 +734,8 @@ export class Embeddable
           style={input.style}
           executionContext={this.getExecutionContext()}
           canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-          onRuntimeError={() => {
+          onRuntimeError={(message) => {
+            this.updateOutput({ error: new Error(message) });
             this.logError('runtime');
           }}
           noPadding={this.visDisplayOptions?.noPadding}
