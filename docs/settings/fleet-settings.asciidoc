@@ -33,6 +33,9 @@ The address to use to reach the {package-manager} registry.
 The proxy address to use to reach the {package-manager} registry if an internet connection is not directly available.
 Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details.
 
+`xpack.fleet.packageVerification.gpgKeyPath`::
+The path on disk to the GPG key used to verify the {package-manager} packages. In the event that Elastic's public key
+is reissued as a security precuation, you can use this setting to specify the new key.
 
 ==== {fleet} settings
 
