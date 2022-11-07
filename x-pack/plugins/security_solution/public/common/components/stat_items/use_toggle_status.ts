@@ -19,15 +19,15 @@ export const useToggleStatus = ({
   const toggleQuery = useCallback(
     (status: boolean) => {
       setToggleStatus(status);
-      // toggle on = skipQuery false
+      // toggleStatus on = skipQuery false
       setQuerySkip(!status);
     },
     [setQuerySkip, setToggleStatus]
   );
-  const toggle = useCallback(() => toggleQuery(!toggleStatus), [toggleQuery, toggleStatus]);
+  const onToggle = useCallback(() => toggleQuery(!toggleStatus), [toggleQuery, toggleStatus]);
 
   return {
-    toggleStatus,
-    toggle,
+    isToggleExpanded: toggleStatus,
+    onToggle,
   };
 };

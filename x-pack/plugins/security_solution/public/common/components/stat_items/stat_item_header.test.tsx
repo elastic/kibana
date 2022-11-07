@@ -10,17 +10,21 @@ import React from 'react';
 import { StatItemHeader } from './stat_item_header';
 
 describe('StatItemHeader', () => {
-  const mockToggle = jest.fn();
+  const mockOnToggle = jest.fn();
 
   beforeEach(() => {});
 
   it('renders expand button', () => {
-    const { getByRole } = render(<StatItemHeader toggle={mockToggle} toggleStatus={true} />);
+    const { getByRole } = render(
+      <StatItemHeader onToggle={mockOnToggle} isToggleExpanded={true} />
+    );
     expect(getByRole('button')).toHaveAttribute('title', 'Open');
   });
 
   it('renders collapse button', () => {
-    const { getByRole } = render(<StatItemHeader toggle={mockToggle} toggleStatus={false} />);
+    const { getByRole } = render(
+      <StatItemHeader onToggle={mockOnToggle} isToggleExpanded={false} />
+    );
     expect(getByRole('button')).toHaveAttribute('title', 'Closed');
   });
 });

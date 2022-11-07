@@ -68,14 +68,18 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       [from, to]
     );
 
-    const { toggleStatus, toggle } = useToggleStatus({ id, setQuerySkip });
+    const { isToggleExpanded, onToggle } = useToggleStatus({ id, setQuerySkip });
 
     const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
 
     return (
       <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
         <EuiPanel hasBorder>
-          <StatItemHeader toggle={toggle} toggleStatus={toggleStatus} description={description} />
+          <StatItemHeader
+            onToggle={onToggle}
+            isToggleExpanded={isToggleExpanded}
+            description={description}
+          />
           {loading && (
             <EuiFlexGroup justifyContent="center" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -83,7 +87,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {toggleStatus && !loading && (
+          {isToggleExpanded && !loading && (
             <>
               {isChartEmbeddablesEnabled ? (
                 <MetricEmbeddable

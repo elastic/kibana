@@ -10,27 +10,27 @@ import { FlexGroup, StyledTitle } from './utils';
 import * as i18n from '../../containers/query_toggle/translations';
 
 const StatItemHeaderComponent = ({
-  toggle,
-  toggleStatus,
+  onToggle,
+  isToggleExpanded,
   description,
 }: {
-  toggle: () => void;
-  toggleStatus: boolean;
+  onToggle: () => void;
+  isToggleExpanded: boolean;
   description?: string;
 }) => (
   <FlexGroup gutterSize={'none'}>
-    <EuiFlexItem className={toggleStatus ? '' : 'no-margin'}>
+    <EuiFlexItem className={isToggleExpanded ? '' : 'no-margin'}>
       <EuiFlexGroup gutterSize={'none'} responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
+            aria-label={i18n.QUERY_BUTTON_TITLE(isToggleExpanded)}
             data-test-subj="query-toggle-stat"
             color="text"
             display="empty"
-            iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
-            onClick={toggle}
+            iconType={isToggleExpanded ? 'arrowDown' : 'arrowRight'}
+            onClick={onToggle}
             size="xs"
-            title={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
+            title={i18n.QUERY_BUTTON_TITLE(isToggleExpanded)}
           />
         </EuiFlexItem>
         <EuiFlexItem>
