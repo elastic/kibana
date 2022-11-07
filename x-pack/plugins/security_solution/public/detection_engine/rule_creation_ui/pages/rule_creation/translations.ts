@@ -66,14 +66,14 @@ export const FAILED_TO_RUN_ML_RULE = (ruleName: string) =>
   });
 
 export const FAILED_TO_RUN_ML_RULE_TOAST_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.create.failedToRunMlRuleButtonLabel',
+  'xpack.securitySolution.detectionEngine.rules.create.failedToRunMlRuleToastDescription',
   {
     defaultMessage: 'Please go to Machine Learning to run related jobs before enabling this rule.',
   }
 );
 
 export const FAILED_TO_RUN_ML_RULE_TOAST_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.create.failedToRunMlRuleButtonLabel',
+  'xpack.securitySolution.detectionEngine.rules.create.failedToRunMlRuleToastButtonLabel',
   {
     defaultMessage: 'Go to Machine Learning page',
   }
