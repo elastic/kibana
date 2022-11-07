@@ -681,8 +681,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 # Logstash
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
 
-# Reporting
-
 # EUI design
 /src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-global-experience
 
