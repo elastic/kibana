@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
             // markers
             { color: '#5078AA', percentage: 15 },
             // grey boilerplate
-            { color: '#6A717D', percentage: 30 },
+            { color: '#6A717D', percentage: 12 },
           ],
           scatterplotMatrixColorStatsResults: [
             // outlier markers
