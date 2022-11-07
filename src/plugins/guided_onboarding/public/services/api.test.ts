@@ -193,14 +193,15 @@ describe('GuidedOnboarding ApiService', () => {
         });
     });
 
-    it(`doesn't duplicate requests when used with useObservable`, async () => {
+    it(`doesn't duplicate requests when there are several subscriptions and no guide state`, async () => {
       httpClient.get.mockResolvedValue({
         state: [],
       });
       apiService.setup(httpClient);
 
-      apiService.isGuideStepActive$(testGuide, testGuideFirstStep).subscribe();
+      subscription = apiService.isGuideStepActive$(testGuide, testGuideFirstStep).subscribe();
 
+      // wait for the get request to resolve
       await new Promise((resolve) => process.nextTick(resolve));
       anotherSubscription = apiService
         .isGuideStepActive$(testGuide, testGuideFirstStep)
