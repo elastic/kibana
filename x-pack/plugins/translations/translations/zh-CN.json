@@ -13357,8 +13357,6 @@
     "xpack.fleet.epm.pageSubtitle": "选择集成以开始收集并分析数据。",
     "xpack.fleet.epm.releaseBadge.betaDescription": "在生产环境中不推荐使用此集成。",
     "xpack.fleet.epm.releaseBadge.betaLabel": "公测版",
-    "xpack.fleet.epm.releaseBadge.experimentalDescription": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将尽最大努力来修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
-    "xpack.fleet.epm.releaseBadge.experimentalLabel": "技术预览",
     "xpack.fleet.epm.screenshotErrorText": "无法加载此屏幕截图",
     "xpack.fleet.epm.screenshotsTitle": "屏幕截图",
     "xpack.fleet.epm.updateAvailableTooltip": "有可用更新",
