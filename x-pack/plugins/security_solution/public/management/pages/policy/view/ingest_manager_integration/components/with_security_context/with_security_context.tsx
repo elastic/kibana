@@ -8,7 +8,7 @@
 import type { ComponentType } from 'react';
 import React, { memo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import type { StartPlugins } from '../../../../../../types';
+import type { StartPlugins } from '../../../../../../../types';
 import { createFleetContextReduxStore } from './store';
 import { RenderContextProviders } from './render_context_providers';
 

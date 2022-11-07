@@ -27,7 +27,7 @@ import {
   getPolicyTrustedAppsPath,
 } from '../../../../../../common/routing';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../../../trusted_apps/constants';
-import { FleetIntegrationArtifactsCard } from '../../endpoint_package_custom_extension/components/fleet_integration_artifacts_card';
+import { FleetIntegrationArtifactsCard } from './fleet_integration_artifacts_card';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../../../blocklist/constants';

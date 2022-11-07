@@ -19,7 +19,7 @@ export const getLazyEndpointPolicyResponseExtension = (
 ) => {
   return lazy<PackagePolicyResponseExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPolicyResponseExtension }] = await Promise.all([
-      import('./with_security_context/with_security_context'),
+      import('./components/with_security_context/with_security_context'),
       import('./endpoint_policy_response_extension'),
     ]);
 

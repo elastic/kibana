@@ -6,16 +6,16 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useMemo } from 'react';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { PolicyDetailsRouteState } from '../../../../../../../../common/endpoint/types';
 import { useAppUrl, useToasts } from '../../../../../../../common/lib/kibana';
-import { ExceptionItemsSummary } from './exception_items_summary';
-import { LinkWithIcon } from './link_with_icon';
-import { StyledEuiFlexItem } from './styled_components';
+import { ExceptionItemsSummary } from '../../components/exception_items_summary';
+import { LinkWithIcon } from '../../components/link_with_icon';
+import { StyledEuiFlexItem } from '../../endpoint_package_custom_extension/components/styled_components';
 import { useSummaryArtifact } from '../../../../../../hooks/artifacts';
 import type { ExceptionsListApiClient } from '../../../../../../services/exceptions_list/exceptions_list_api_client';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';

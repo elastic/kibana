@@ -105,6 +105,9 @@ const BlockListArtifactCard = memo<PackageCustomExtensionComponentProps>((props)
 });
 BlockListArtifactCard.displayName = 'BlockListArtifactCard';
 
+/**
+ * The UI displayed in Fleet's Endpoint integration page, under the `Advanced` tab
+ */
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   (props) => {
     const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
