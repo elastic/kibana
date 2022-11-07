@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/public';
-import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import { registerAlertTypes } from './alert_types';
+import { CoreSetup, Plugin } from '@kbn/core/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import { registerRuleTypes } from './rule_types';
 
 export type Setup = void;
 export type Start = void;
@@ -22,7 +22,7 @@ export class StackAlertsPublicPlugin implements Plugin<Setup, Start, StackAlerts
   constructor() {}
 
   public setup(core: CoreSetup, { triggersActionsUi, alerting }: StackAlertsPublicSetupDeps) {
-    registerAlertTypes({
+    registerRuleTypes({
       ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
       alerting,
     });

@@ -27,13 +27,19 @@ const rt = {
 export type Endpoint<M = unknown> = CreateRouteDefinition<typeof rt, { file: FileJSON<M> }>;
 
 export const handler: CreateHandler<Endpoint> = async ({ fileKind, files }, req, res) => {
-  const { fileService } = await files;
+  const { fileService, security } = await files;
   const {
     body: { name, alt, meta, mimeType },
   } = req;
-  const file = await fileService
-    .asCurrentUser()
-    .create({ fileKind, name, alt, meta, mime: mimeType });
+  const user = security?.authc.getCurrentUser(req);
+  const file = await fileService.asCurrentUser().create({
+    fileKind,
+    name,
+    alt,
+    meta,
+    user: user ? { name: user.username, id: user.profile_uid } : undefined,
+    mime: mimeType,
+  });
   const body: Endpoint['output'] = {
     file: file.toJSON(),
   };
