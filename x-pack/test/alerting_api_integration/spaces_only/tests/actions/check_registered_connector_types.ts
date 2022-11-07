@@ -15,7 +15,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
   // This test is intended to fail when new connector types are registered.
   // To resolve, add the new connector type ID to this list. This will trigger
   // a CODEOWNERS review by Response Ops.
-  describe.only('check registered connector types', () => {
+  describe('check registered connector types', () => {
     it('should list all registered connector types', async () => {
       const registeredConnectorTypes = await supertest
         .get('/api/alerts_fixture/registered_connector_types')
