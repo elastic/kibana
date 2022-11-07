@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export type FILE_STATUS = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'UPLOAD_ERROR' | 'DELETED';
+import { SessionError, SessionErrorReason } from './session_error';
+
+export class SessionMissingError extends SessionError {
+  constructor() {
+    super(SessionErrorReason.SESSION_MISSING, SessionErrorReason.SESSION_MISSING);
+  }
+}

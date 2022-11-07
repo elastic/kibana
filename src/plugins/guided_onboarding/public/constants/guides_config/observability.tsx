@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { EuiLink } from '@elastic/eui';
 import type { GuideConfig } from '../../types';
 
 export const observabilityConfig: GuideConfig = {
@@ -31,9 +35,26 @@ export const observabilityConfig: GuideConfig = {
         defaultMessage: 'Add and verify your data',
       }),
       integration: 'kubernetes',
-      description: i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.description', {
-        defaultMessage: 'Start by adding your data by setting up the Kubernetes integration.',
-      }),
+      descriptionList: [
+        <FormattedMessage
+          id="guidedOnboarding.observabilityGuide.addDataStep.descriptionList.item1"
+          defaultMessage="Deploy {kubeStateMetricsLink} service to your Kubernetes."
+          values={{
+            kubeStateMetricsLink: (
+              <EuiLink
+                external
+                target="_blank"
+                href="https://github.com/kubernetes/kube-state-metrics"
+              >
+                kube-state-metrics
+              </EuiLink>
+            ),
+          }}
+        />,
+        i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.descriptionList.item2', {
+          defaultMessage: 'Add the Elastic Kubernetes integration.',
+        }),
+      ],
       location: {
         appID: 'integrations',
         path: '/detail/kubernetes/overview',
