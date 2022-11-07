@@ -44,6 +44,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     defaultProps = {
       fieldGroups: {},
       fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+      scrollToTopResetCounter: 0,
       fieldsExistInIndex: true,
       screenReaderDescriptionForSearchInputId: 'testId',
       renderFieldItem: jest.fn(({ field, itemIndex, groupIndex }) => (

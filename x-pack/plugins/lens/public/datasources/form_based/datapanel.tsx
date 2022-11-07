@@ -347,7 +347,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [core.uiSettings]
   );
 
-  const { fieldGroups } = useGroupedFields<IndexPatternField>({
+  const { fieldGroups, scrollToTopResetCounter } = useGroupedFields<IndexPatternField>({
     dataViewId: currentIndexPatternId,
     allFields,
     services: {
@@ -615,6 +615,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
             fieldsExistInIndex={!!allFields.length}
             renderFieldItem={renderFieldItem}
             screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+            scrollToTopResetCounter={scrollToTopResetCounter}
             data-test-subj="lnsIndexPattern"
           />
         </EuiFlexItem>

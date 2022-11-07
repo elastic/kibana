@@ -246,7 +246,7 @@ export function DiscoverSidebarComponent({
       }
     }, []);
   const fieldsExistenceReader = useExistingFieldsReader();
-  const { fieldGroups } = useGroupedFields({
+  const { fieldGroups, scrollToTopResetCounter } = useGroupedFields({
     dataViewId: (!isPlainRecord && selectedDataView?.id) || null,
     fieldsExistenceReader: !isPlainRecord ? fieldsExistenceReader : undefined,
     allFields: allFields || EMPTY_FIELD_LIST,
@@ -260,15 +260,6 @@ export function DiscoverSidebarComponent({
     onSupportedFieldFilter,
     onOverrideFieldGroupDetails,
   });
-
-  // console.log({
-  //   fields,
-  //   oldSelectedFields,
-  //   popularFields,
-  //   unpopularFields,
-  //   fieldGroups,
-  //   columns,
-  // });
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
     ({ field, groupName }) => (
@@ -367,6 +358,7 @@ export function DiscoverSidebarComponent({
             }
             renderFieldItem={renderFieldItem}
             fieldsExistInIndex={Boolean(allFields?.length)}
+            scrollToTopResetCounter={scrollToTopResetCounter}
           />
         </EuiFlexItem>
         {!!editField && (

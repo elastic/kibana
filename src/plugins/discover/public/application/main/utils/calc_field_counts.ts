@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord } from '../../../types';
 
 /**
  * This function is calculating stats of the available fields, for usage in sidebar and sharing
  * Note that this values aren't displayed, but used for internal calculations
  */
-export function calcFieldCounts(rows?: DataTableRecord[], dataView?: DataView) {
+export function calcFieldCounts(rows?: DataTableRecord[]) {
   const counts: Record<string, number> = {};
-  if (!rows || !dataView) {
+  if (!rows) {
     return {};
   }
 

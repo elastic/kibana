@@ -108,7 +108,7 @@ export function TextBasedDataPanel({
     }
   }, []);
 
-  const { fieldGroups } = useGroupedFields<DatatableColumn>({
+  const { fieldGroups, scrollToTopResetCounter } = useGroupedFields<DatatableColumn>({
     dataViewId: null,
     allFields: fieldList,
     services: {
@@ -202,6 +202,7 @@ export function TextBasedDataPanel({
               fieldsExistInIndex={Boolean(fieldList.length)}
               renderFieldItem={renderFieldItem}
               screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+              scrollToTopResetCounter={scrollToTopResetCounter}
               data-test-subj="lnsTextBasedLanguages"
             />
           </EuiFlexItem>

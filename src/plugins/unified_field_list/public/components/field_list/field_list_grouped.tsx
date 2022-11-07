@@ -7,7 +7,7 @@
  */
 
 import { partition, throttle } from 'lodash';
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
@@ -33,6 +33,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   fieldsExistenceStatus: ExistenceFetchStatus;
   fieldsExistInIndex: boolean;
   renderFieldItem: FieldsAccordionProps<T>['renderFieldItem'];
+  scrollToTopResetCounter: number;
   screenReaderDescriptionForSearchInputId?: string;
   'data-test-subj'?: string;
 }
@@ -42,6 +43,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   fieldsExistenceStatus,
   fieldsExistInIndex,
   renderFieldItem,
+  scrollToTopResetCounter,
   screenReaderDescriptionForSearchInputId,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
@@ -59,6 +61,14 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       fieldGroupsToShow.map(([key, { isInitiallyOpen }]) => [key, isInitiallyOpen])
     )
   );
+
+  useEffect(() => {
+    // Reset the scroll if we have made material changes to the field list
+    if (scrollContainer && scrollToTopResetCounter) {
+      scrollContainer.scrollTop = 0;
+      setPageSize(PAGINATION_SIZE);
+    }
+  }, [scrollToTopResetCounter, scrollContainer]);
 
   const lazyScroll = useCallback(() => {
     if (scrollContainer) {

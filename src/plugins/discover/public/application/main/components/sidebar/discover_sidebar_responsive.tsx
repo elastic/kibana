@@ -28,12 +28,7 @@ import { useExistingFieldsFetcher } from '@kbn/unified-field-list-plugin/public'
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import {
-  AvailableFields$,
-  DataDocuments$,
-  DataDocumentsMsg,
-  RecordRawType,
-} from '../../hooks/use_saved_search';
+import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
 // import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
@@ -126,32 +121,20 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [documentState, setDocumentState] = useState<DataDocumentsMsg>();
   const [allFields, setAllFields] = useState<DataViewField[] | null>(null);
   const [fieldCounts, setFieldCounts] = useState<Record<string, number> | null>(null);
   const dataViewFields = selectedDataView?.fields;
 
   useEffect(() => {
-    const subscription = props.documents$.subscribe((next) => {
-      setDocumentState(next);
+    const subscription = props.documents$.subscribe((documentState) => {
+      if (documentState?.fetchStatus === FetchStatus.COMPLETE) {
+        setFieldCounts(calcFieldCounts(documentState.result));
+      } else {
+        setFieldCounts(null);
+      }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, setDocumentState]);
-
-  useEffect(() => {
-    if (documentState?.fetchStatus === FetchStatus.LOADING) {
-      setAllFields(null); // to show a loading indicator in the field list
-    }
-
-    setTimeout(() => {
-      setFieldCounts(
-        documentState?.fetchStatus === FetchStatus.COMPLETE
-          ? calcFieldCounts(documentState.result, selectedDataView)
-          : null
-      );
-    }, 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewFields, documentState, setFieldCounts, setAllFields]);
+  }, [props.documents$, setAllFields, setFieldCounts]);
 
   useEffect(() => {
     setAllFields(getDataViewFieldList(selectedDataView, fieldCounts, isPlainRecord));
