@@ -17,6 +17,7 @@ import {
   LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
+  SESSION_ERROR_REASON_HEADER,
 } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { AuditServiceSetup } from '../audit';
@@ -24,7 +25,12 @@ import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } fro
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import type { Session, SessionValue } from '../session_management';
+import {
+  type Session,
+  SessionExpiredError,
+  SessionUnexpectedError,
+  type SessionValue,
+} from '../session_management';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
@@ -290,7 +296,7 @@ export class Authenticator {
     assertRequest(request);
     assertLoginAttempt(attempt);
 
-    const existingSessionValue = await this.getSessionValue(request);
+    const { value: existingSessionValue } = await this.getSessionValue(request);
 
     // Login attempt can target specific provider by its name (e.g. chosen at the Login Selector UI)
     // or a group of providers with the specified type (e.g. in case of 3rd-party initiated login
@@ -357,8 +363,9 @@ export class Authenticator {
   async authenticate(request: KibanaRequest): Promise<AuthenticationResult> {
     assertRequest(request);
 
-    const existingSessionValue = await this.getSessionValue(request);
-    if (this.shouldRedirectToLoginSelector(request, existingSessionValue)) {
+    const existingSession = await this.getSessionValue(request);
+
+    if (this.shouldRedirectToLoginSelector(request, existingSession.value)) {
       const providerNameSuggestedByHint = request.url.searchParams.get(
         AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER
       );
@@ -378,40 +385,114 @@ export class Authenticator {
                 providerNameSuggestedByHint
               )}`
             : ''
+        }${
+          existingSession.error instanceof SessionExpiredError
+            ? `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                existingSession.error.code
+              )}`
+            : ''
         }`
       );
     }
 
+    const requestIsRedirectable = canRedirectRequest(request);
+
     const suggestedProviderName =
-      existingSessionValue?.provider.name ??
+      existingSession.value?.provider.name ??
       request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
     for (const [providerName, provider] of this.providerIterator(suggestedProviderName)) {
       // Check if current session has been set by this provider.
       const ownsSession =
-        existingSessionValue?.provider.name === providerName &&
-        existingSessionValue?.provider.type === provider.type;
+        existingSession.value?.provider.name === providerName &&
+        existingSession.value?.provider.type === provider.type;
 
-      const authenticationResult = await provider.authenticate(
+      let authenticationResult = await provider.authenticate(
         request,
-        ownsSession ? existingSessionValue!.state : null
+        ownsSession ? existingSession.value!.state : null
       );
 
       if (!authenticationResult.notHandled()) {
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
           authenticationResult,
-          existingSessionValue,
+          existingSessionValue: existingSession.value,
         });
-        return enrichWithUserProfileId(
-          canRedirectRequest(request)
-            ? this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult)
-            : authenticationResult,
-          sessionUpdateResult ? sessionUpdateResult.value : null
-        );
+
+        if (requestIsRedirectable) {
+          if (
+            existingSession.error instanceof SessionExpiredError &&
+            authenticationResult.redirectURL?.startsWith(
+              `${this.options.basePath.get(request)}/login?`
+            )
+          ) {
+            // TODO: Make this less verbose!
+            authenticationResult = AuthenticationResult.redirectTo(
+              authenticationResult.redirectURL +
+                `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                  existingSession.error.code
+                )}`,
+              {
+                user: authenticationResult.user,
+                userProfileGrant: authenticationResult.userProfileGrant,
+                authResponseHeaders: authenticationResult.authResponseHeaders,
+                state: authenticationResult.state,
+              }
+            );
+          }
+          return enrichWithUserProfileId(
+            this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult),
+            sessionUpdateResult ? sessionUpdateResult.value : null
+          );
+        } else {
+          if (existingSession.error instanceof SessionExpiredError) {
+            // TODO: Make this less verbose! Possible alternatives:
+            // 1. Make authResponseHeaders editable
+            // 2. Create utility function outside of the AuthenticationResult class to create clones of AuthenticationResult objects with certain properties augmented
+            // 3. Create utility function inside of the AuthenticationResult class to create clones of AuthenticationResult objects with certain properties augmented
+            // Whatever we choose, we probably want to consider doing the same for editing the `redirectURL` and the `user`, both of which we need to edit in this file
+            if (authenticationResult.succeeded()) {
+              authenticationResult = AuthenticationResult.succeeded(authenticationResult.user!, {
+                userProfileGrant: authenticationResult.userProfileGrant,
+                authHeaders: authenticationResult.authHeaders,
+                state: authenticationResult.state,
+                authResponseHeaders: {
+                  ...authenticationResult.authResponseHeaders,
+                  [SESSION_ERROR_REASON_HEADER]: existingSession.error.code,
+                },
+              });
+            } else if (authenticationResult.failed()) {
+              authenticationResult = AuthenticationResult.failed(authenticationResult.error!, {
+                authResponseHeaders: {
+                  ...authenticationResult.authResponseHeaders,
+                  [SESSION_ERROR_REASON_HEADER]: existingSession.error.code,
+                },
+              });
+            } else {
+              // Currently we can only get to here if the request is 1) not redirectable, and 2) handled. This leaves only the states `succeeded` and `failed` that we have to handle
+              throw new Error(`Unexpected state: ${(authenticationResult as any).status}`);
+            }
+          }
+          return enrichWithUserProfileId(
+            authenticationResult,
+            sessionUpdateResult ? sessionUpdateResult.value : null
+          );
+        }
       }
     }
 
-    return AuthenticationResult.notHandled();
+    if (
+      existingSession.error instanceof SessionExpiredError ||
+      existingSession.error instanceof SessionUnexpectedError
+    ) {
+      const options = requestIsRedirectable
+        ? undefined
+        : {
+            authResponseHeaders: { [SESSION_ERROR_REASON_HEADER]: existingSession.error.code },
+          };
+      return AuthenticationResult.failed(existingSession.error, options);
+    } else {
+      return AuthenticationResult.notHandled();
+    }
   }
 
   /**
@@ -421,7 +502,7 @@ export class Authenticator {
   async reauthenticate(request: KibanaRequest) {
     assertRequest(request);
 
-    const existingSessionValue = await this.getSessionValue(request);
+    const { value: existingSessionValue } = await this.getSessionValue(request);
     if (!existingSessionValue) {
       this.logger.warn('Session is no longer available and cannot be re-authenticated.');
       return AuthenticationResult.notHandled();
@@ -453,7 +534,7 @@ export class Authenticator {
   async logout(request: KibanaRequest) {
     assertRequest(request);
 
-    const sessionValue = await this.getSessionValue(request);
+    const { value: sessionValue } = await this.getSessionValue(request);
     const suggestedProviderName =
       sessionValue?.provider.name ??
       request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
@@ -493,8 +574,9 @@ export class Authenticator {
   async acknowledgeAccessAgreement(request: KibanaRequest) {
     assertRequest(request);
 
-    const existingSessionValue = await this.getSessionValue(request);
+    const { value: existingSessionValue } = await this.getSessionValue(request);
     const currentUser = this.options.getCurrentUser(request);
+
     if (!existingSessionValue || !currentUser) {
       throw new Error('Cannot acknowledge access agreement for unauthenticated user.');
     }
@@ -594,24 +676,24 @@ export class Authenticator {
    * @param request Request instance.
    */
   private async getSessionValue(request: KibanaRequest) {
-    const existingSessionValue = await this.session.get(request);
+    const existingSession = await this.session.get(request);
 
     // If we detect that for some reason we have a session stored for the provider that is not
     // available anymore (e.g. when user was logged in with one provider, but then configuration has
     // changed and that provider is no longer available), then we should clear session entirely.
     if (
-      existingSessionValue &&
-      this.providers.get(existingSessionValue.provider.name)?.type !==
-        existingSessionValue.provider.type
+      existingSession.value &&
+      this.providers.get(existingSession.value.provider.name)?.type !==
+        existingSession.value.provider.type
     ) {
       this.logger.warn(
-        `Attempted to retrieve session for the "${existingSessionValue.provider.type}/${existingSessionValue.provider.name}" provider, but it is not configured.`
+        `Attempted to retrieve session for the "${existingSession.value.provider.type}/${existingSession.value.provider.name}" provider, but it is not configured.`
       );
-      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
-      return null;
+      await this.invalidateSessionValue({ request, sessionValue: existingSession.value });
+      return { error: new SessionUnexpectedError(), value: null };
     }
 
-    return existingSessionValue;
+    return existingSession;
   }
 
   /**
@@ -916,6 +998,7 @@ export class Authenticator {
           state: authenticationResult.state,
           user: authenticationResult.user,
           authResponseHeaders: authenticationResult.authResponseHeaders,
+          userProfileGrant: authenticationResult.userProfileGrant,
         })
       : authenticationResult;
   }
