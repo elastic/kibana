@@ -1396,7 +1396,7 @@
     "webpack-dev-server": "^4.9.3",
     "webpack-merge": "^4.2.2",
     "webpack-sources": "^1.4.1",
-    "xml-crypto": "^3.0.0",
+    "xml-crypto": "^3.0.1",
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1"
   }
