@@ -13,7 +13,7 @@ export const TinesBaseApiResponseSchema = schema.object(
   {
     meta: schema.object(
       {
-        next_page: schema.nullable(schema.string()),
+        pages: schema.number(),
       },
       { unknowns: 'ignore' }
     ),

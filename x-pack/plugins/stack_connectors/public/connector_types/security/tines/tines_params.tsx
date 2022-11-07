@@ -7,11 +7,14 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
@@ -34,12 +37,16 @@ import * as i18n from './translations';
 type StoryOption = EuiComboBoxOptionOption<TinesStoryObject>;
 type WebhookOption = EuiComboBoxOptionOption<TinesWebhookObject>;
 
-const createOption = <T extends TinesStoryObject | TinesWebhookObject>(
-  data: T
-): EuiComboBoxOptionOption<T> => ({
-  key: data.id.toString(),
-  value: data,
-  label: data.name,
+const createStoryOption = (story: TinesStoryObject): StoryOption => ({
+  key: story.id.toString(),
+  value: story,
+  label: story.published ? story.name : `${story.name} (${i18n.STORY_DRAFT_TEXT})`,
+});
+
+const createWebhookOption = (webhook: TinesWebhookObject): WebhookOption => ({
+  key: webhook.id.toString(),
+  value: webhook,
+  label: webhook.name,
 });
 
 const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteActionParams>> = ({
@@ -52,7 +59,13 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
 }) => {
   const { toasts } = useKibana().notifications;
   const { subAction, subActionParams } = actionParams;
-  const { body, webhook } = subActionParams ?? {};
+  const { body, webhook, webhookUrl } = subActionParams ?? {};
+
+  const [connectorId, setConnectorId] = useState<string | undefined>(actionConnector?.id);
+  const [selectedStoryOption, setSelectedStoryOption] = useState<StoryOption | null | undefined>();
+  const [selectedWebhookOption, setSelectedWebhookOption] = useState<
+    WebhookOption | null | undefined
+  >();
 
   const isTesting = useMemo(() => !messageVariables?.length, [messageVariables]);
 
@@ -70,14 +83,8 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     [editAction, index, subActionParams]
   );
 
-  const [connectorId, setConnectorId] = useState<string | undefined>(actionConnector?.id);
-  const [selectedStoryOption, setSelectedStoryOption] = useState<StoryOption | null | undefined>();
-  const [selectedWebhookOption, setSelectedWebhookOption] = useState<
-    WebhookOption | null | undefined
-  >();
-
   const {
-    response: stories,
+    response: { stories, incompleteResponse: incompleteStories } = {},
     isLoading: isLoadingStories,
     error: storiesError,
   } = useSubAction<TinesStoriesActionParams, TinesStoriesActionResponse>({
@@ -86,7 +93,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
   });
 
   const {
-    response: webhooks,
+    response: { webhooks, incompleteResponse: incompleteWebhooks } = {},
     isLoading: isLoadingWebhooks,
     error: webhooksError,
   } = useSubAction<TinesWebhooksActionParams, TinesWebhooksActionResponse>({
@@ -105,8 +112,8 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     }
   }, [actionConnector?.id, connectorId]);
 
-  const storiesOptions = useMemo(() => stories?.map(createOption) ?? [], [stories]);
-  const webhooksOptions = useMemo(() => webhooks?.map(createOption) ?? [], [webhooks]);
+  const storiesOptions = useMemo(() => stories?.map(createStoryOption) ?? [], [stories]);
+  const webhooksOptions = useMemo(() => webhooks?.map(createWebhookOption) ?? [], [webhooks]);
 
   useEffect(() => {
     if (storiesError) {
@@ -117,12 +124,31 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     }
   }, [toasts, storiesError, webhooksError]);
 
+  const showFallbackFrom = useMemo<'Story' | 'Webhook' | 'any' | null>(() => {
+    if (incompleteStories && !selectedStoryOption) {
+      return 'Story';
+    }
+    if (incompleteWebhooks && !selectedWebhookOption) {
+      return 'Webhook';
+    }
+    if (webhookUrl) {
+      return 'any'; // no incompleteResponse but webhookUrl is stored in the connector
+    }
+    return null;
+  }, [
+    webhookUrl,
+    incompleteStories,
+    incompleteWebhooks,
+    selectedStoryOption,
+    selectedWebhookOption,
+  ]);
+
   useEffect(() => {
     if (selectedStoryOption === undefined && webhook?.storyId && stories) {
       // Set the initial selected story option from saved storyId when stories are loaded
       const selectedStory = stories.find(({ id }) => id === webhook.storyId);
       if (selectedStory) {
-        setSelectedStoryOption(createOption(selectedStory));
+        setSelectedStoryOption(createStoryOption(selectedStory));
       } else {
         toasts.warning({ title: i18n.STORY_NOT_FOUND_WARNING });
         editSubActionParams({ webhook: undefined });
@@ -141,7 +167,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       // Set the initial selected webhook option from saved webhookId when webhooks are loaded
       const selectedWebhook = webhooks.find(({ id }) => id === webhook.id);
       if (selectedWebhook) {
-        setSelectedWebhookOption(createOption(selectedWebhook));
+        setSelectedWebhookOption(createWebhookOption(selectedWebhook));
       } else {
         toasts.warning({ title: i18n.WEBHOOK_NOT_FOUND_WARNING });
         editSubActionParams({ webhook: { storyId: webhook?.storyId } });
@@ -152,7 +178,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       // Selected webhook changed, update webhook param, preserve storyId if the selected webhook has been reset
       editSubActionParams({
         webhook: selectedWebhookOption
-          ? selectedWebhookOption?.value
+          ? selectedWebhookOption.value
           : { storyId: webhook?.storyId },
       });
     }
@@ -186,12 +212,14 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
         >
           <EuiComboBox
             aria-label={i18n.STORY_PLACEHOLDER}
-            placeholder={i18n.STORY_ARIA_LABEL}
+            placeholder={
+              webhookUrl ? i18n.DISABLED_BY_WEBHOOK_URL_PLACEHOLDER : i18n.STORY_ARIA_LABEL
+            }
             singleSelection={{ asPlainText: true }}
             options={storiesOptions}
             selectedOptions={selectedStoryOptions}
             onChange={onChangeStory}
-            isDisabled={isLoadingStories}
+            isDisabled={isLoadingStories || !!webhookUrl}
             isLoading={isLoadingStories}
             fullWidth
             data-test-subj="tines-storySelector"
@@ -207,19 +235,53 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           <EuiComboBox
             aria-label={i18n.WEBHOOK_ARIA_LABEL}
             placeholder={
-              selectedStoryOption ? i18n.WEBHOOK_PLACEHOLDER : i18n.WEBHOOK_DISABLED_PLACEHOLDER
+              webhookUrl
+                ? i18n.DISABLED_BY_WEBHOOK_URL_PLACEHOLDER
+                : selectedStoryOption
+                ? i18n.WEBHOOK_PLACEHOLDER
+                : i18n.WEBHOOK_DISABLED_PLACEHOLDER
             }
             singleSelection={{ asPlainText: true }}
             options={webhooksOptions}
             selectedOptions={selectedWebhookOptions}
             onChange={onChangeWebhook}
-            isDisabled={!selectedStoryOption || isLoadingWebhooks}
+            isDisabled={!selectedStoryOption || isLoadingWebhooks || !!webhookUrl}
             isLoading={isLoadingWebhooks}
             fullWidth
             data-test-subj="tines-webhookSelector"
           />
         </EuiFormRow>
       </EuiFlexItem>
+
+      {showFallbackFrom != null && (
+        <EuiFlexItem>
+          {showFallbackFrom !== 'any' && (
+            <>
+              <EuiCallOut title={i18n.WEBHOOK_URL_FALLBACK_TITLE} color="primary">
+                {i18n.WEBHOOK_URL_FALLBACK_TEXT(showFallbackFrom)}
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </>
+          )}
+          <EuiFormRow
+            fullWidth
+            error={errors.webhookUrl}
+            isInvalid={!!errors.webhookUrl?.length}
+            label={i18n.WEBHOOK_URL_LABEL}
+            helpText={i18n.WEBHOOK_URL_HELP}
+          >
+            <EuiFieldText
+              placeholder={i18n.WEBHOOK_URL_PLACEHOLDER}
+              value={webhookUrl}
+              onChange={(ev) => {
+                editSubActionParams({ webhookUrl: ev.target.value });
+              }}
+              fullWidth
+              data-test-subj="tines-webhookUrlInput"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      )}
       {isTesting && (
         <EuiFlexItem>
           <JsonEditorWithMessageVariables

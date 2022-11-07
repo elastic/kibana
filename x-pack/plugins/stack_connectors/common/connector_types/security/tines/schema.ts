@@ -16,8 +16,12 @@ export const TinesStoriesActionParamsSchema = null;
 export const TinesStoryObjectSchema = schema.object({
   id: schema.number(),
   name: schema.string(),
+  published: schema.boolean(),
 });
-export const TinesStoriesActionResponseSchema = schema.arrayOf(TinesStoryObjectSchema);
+export const TinesStoriesActionResponseSchema = schema.object({
+  stories: schema.arrayOf(TinesStoryObjectSchema),
+  incompleteResponse: schema.boolean(),
+});
 
 // Webhooks action schema
 export const TinesWebhooksActionParamsSchema = schema.object({ storyId: schema.number() });
@@ -28,11 +32,15 @@ export const TinesWebhookObjectSchema = schema.object({
   path: schema.string(),
   secret: schema.string(),
 });
-export const TinesWebhooksActionResponseSchema = schema.arrayOf(TinesWebhookObjectSchema);
+export const TinesWebhooksActionResponseSchema = schema.object({
+  webhooks: schema.arrayOf(TinesWebhookObjectSchema),
+  incompleteResponse: schema.boolean(),
+});
 
 // Run action schema
 export const TinesRunActionParamsSchema = schema.object({
-  webhook: TinesWebhookObjectSchema,
+  webhook: schema.maybe(TinesWebhookObjectSchema),
+  webhookUrl: schema.maybe(schema.string()),
   body: schema.string(),
 });
 export const TinesRunActionResponseSchema = schema.object({}, { unknowns: 'ignore' });

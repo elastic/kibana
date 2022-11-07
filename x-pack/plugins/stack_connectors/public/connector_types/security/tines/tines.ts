@@ -26,6 +26,7 @@ interface ValidationErrors {
   subAction: string[];
   story: string[];
   webhook: string[];
+  webhookUrl: string[];
   body: string[];
 }
 
@@ -49,20 +50,34 @@ export function getConnectorType(): ConnectorTypeModel<
         subAction: [],
         story: [],
         webhook: [],
+        webhookUrl: [],
         body: [],
       };
       const { subAction, subActionParams } = actionParams;
 
-      if (!subActionParams?.webhook?.storyId) {
-        errors.story.push(translations.STORY_REQUIRED);
-      }
+      if (subActionParams?.webhookUrl) {
+        try {
+          const parsedUrl = new URL(subActionParams.webhookUrl);
+          if (parsedUrl.protocol !== 'https:') {
+            errors.webhookUrl.push(translations.INVALID_PROTOCOL_WEBHOOK_URL);
+          } else if (!parsedUrl.hostname.endsWith('.tines.com')) {
+            errors.webhookUrl.push(translations.INVALID_HOSTNAME_WEBHOOK_URL);
+          }
+        } catch (err) {
+          errors.webhookUrl.push(translations.INVALID_WEBHOOK_URL);
+        }
+      } else {
+        if (!subActionParams?.webhook?.storyId) {
+          errors.story.push(translations.STORY_REQUIRED);
+        }
 
-      if (!subActionParams?.webhook?.id) {
-        errors.webhook.push(translations.WEBHOOK_REQUIRED);
-      } else if (!subActionParams?.webhook?.path) {
-        errors.webhook.push(translations.WEBHOOK_PATH_REQUIRED);
-      } else if (!subActionParams?.webhook?.secret) {
-        errors.webhook.push(translations.WEBHOOK_SECRET_REQUIRED);
+        if (!subActionParams?.webhook?.id) {
+          errors.webhook.push(translations.WEBHOOK_REQUIRED);
+        } else if (!subActionParams?.webhook?.path) {
+          errors.webhook.push(translations.WEBHOOK_PATH_REQUIRED);
+        } else if (!subActionParams?.webhook?.secret) {
+          errors.webhook.push(translations.WEBHOOK_SECRET_REQUIRED);
+        }
       }
 
       if (subAction === SUB_ACTION.TEST) {

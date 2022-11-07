@@ -57,7 +57,7 @@ export const TOKEN_REQUIRED = i18n.translate(
 export const STORY_LABEL = i18n.translate(
   'xpack.stackConnectors.security.tines.params.storyFieldLabel',
   {
-    defaultMessage: 'Tines story',
+    defaultMessage: 'Tines Story',
   }
 );
 export const STORY_HELP = i18n.translate('xpack.stackConnectors.security.tines.params.storyHelp', {
@@ -73,6 +73,12 @@ export const STORY_ARIA_LABEL = i18n.translate(
   'xpack.stackConnectors.security.tines.params.storyFieldAriaLabel',
   {
     defaultMessage: 'Select a Tines story',
+  }
+);
+export const STORY_DRAFT_TEXT = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.storyDraftText',
+  {
+    defaultMessage: 'draft',
   }
 );
 
@@ -104,6 +110,43 @@ export const WEBHOOK_ARIA_LABEL = i18n.translate(
   'xpack.stackConnectors.security.tines.params.webhookFieldAriaLabel',
   {
     defaultMessage: 'Select a Tines webhook action',
+  }
+);
+
+export const WEBHOOK_URL_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.webhookUrlFieldLabel',
+  {
+    defaultMessage: 'Webhook URL',
+  }
+);
+export const WEBHOOK_URL_FALLBACK_TITLE = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.webhookUrlFallbackTitle',
+  {
+    defaultMessage: 'Tines API results limit reached',
+  }
+);
+export const WEBHOOK_URL_FALLBACK_TEXT = (type: 'Story' | 'Webhook') =>
+  i18n.translate('xpack.stackConnectors.security.tines.params.webhookUrlFallbackText', {
+    values: { type },
+    defaultMessage:
+      'Not possible to retrieve more than 500 results from the Tines {type} API. If your {type} does not appear in the list, please fill the Webhook URL below',
+  });
+export const WEBHOOK_URL_HELP = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.webhookUrlHelp',
+  {
+    defaultMessage: 'The Story and Webhook selectors will be ignored if the Webhook URL is defined',
+  }
+);
+export const WEBHOOK_URL_PLACEHOLDER = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.webhookUrlPlaceholder',
+  {
+    defaultMessage: 'Paste the Webhook URL here',
+  }
+);
+export const DISABLED_BY_WEBHOOK_URL_PLACEHOLDER = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.disabledByWebhookUrlPlaceholder',
+  {
+    defaultMessage: 'Remove the Webhook URL to use this selector',
   }
 );
 
@@ -197,5 +240,23 @@ export const WEBHOOK_SECRET_REQUIRED = i18n.translate(
   'xpack.stackConnectors.security.tines.params.error.requiredWebhookSecretText',
   {
     defaultMessage: 'Webhook action secret is missing.',
+  }
+);
+export const INVALID_WEBHOOK_URL = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.error.invalidWebhookUrlText',
+  {
+    defaultMessage: 'Webhook URL is invalid.',
+  }
+);
+export const INVALID_HOSTNAME_WEBHOOK_URL = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.error.invalidHostnameWebhookUrlText',
+  {
+    defaultMessage: 'Webhook URL does not have a valid ".tines.com" domain.',
+  }
+);
+export const INVALID_PROTOCOL_WEBHOOK_URL = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.error.invalidProtocolWebhookUrlText',
+  {
+    defaultMessage: 'Webhook URL does not have a valid "https" protocol.',
   }
 );
