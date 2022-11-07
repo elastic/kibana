@@ -146,7 +146,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                         <EuiFlexItem>
                           <TitleBadge
                             title={i18n.EXCEPTIONS}
-                            badgeString={exceptions.length.toString()}
+                            badgeString={exceptions.length.toString()} // TODO get all no of exceptions
                           />
                         </EuiFlexItem>
                         <EuiFlexItem>
@@ -158,6 +158,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                         <EuiFlexItem>
                           <HeaderMenu
                             disableActions={readOnly}
+                            dataTestSubj="exceptionsListCardOverflowActions"
                             actions={[
                               {
                                 key: '1',
