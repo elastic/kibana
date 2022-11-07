@@ -25,11 +25,8 @@ import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionListInfo } from './use_all_exception_lists';
 import { TitleBadge } from './title_badge';
 import * as i18n from './translations';
-import {
-  SecuritySolutionLinkAnchor,
-  useGetSecuritySolutionLinkProps,
-} from '../../common/components/links';
-import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
+import { useGetSecuritySolutionLinkProps } from '../../common/components/links';
+import { SecurityPageName } from '../../../common/constants';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
