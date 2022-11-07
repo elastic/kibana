@@ -3516,6 +3516,7 @@ export class RulesClient {
           snoozeSchedule,
         })
       : null;
+    const includeMonitoring = monitoring && !excludeFromPublicApi;
     const rule = {
       id,
       notifyWhen,
@@ -3541,7 +3542,7 @@ export class RulesClient {
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
-      ...(monitoring
+      ...(includeMonitoring
         ? { monitoring: convertMonitoringFromRawAndVerify(this.logger, id, monitoring) }
         : {}),
       ...(nextRun ? { nextRun: new Date(nextRun) } : {}),

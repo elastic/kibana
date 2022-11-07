@@ -288,8 +288,8 @@ export type RulesClientApi = PublicMethodsOf<RulesClient>;
 export interface PublicRuleMonitoringService {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
   setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
-  setLastRunMetricsTotalAlertDetected: (totalAlertDetected: number) => void;
-  setLastRunMetricsTotalAlertCreated: (totalAlertCreated: number) => void;
+  setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
+  setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
   setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
 }
 

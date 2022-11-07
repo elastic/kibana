@@ -60,8 +60,8 @@ export class RuleMonitoringService {
         this.setLastRunMetricsTotalSearchDurationMs.bind(this),
       setLastRunMetricsTotalIndexingDurationMs:
         this.setLastRunMetricsTotalIndexingDurationMs.bind(this),
-      setLastRunMetricsTotalAlertDetected: this.setLastRunMetricsTotalAlertDetected.bind(this),
-      setLastRunMetricsTotalAlertCreated: this.setLastRunMetricsTotalAlertCreated.bind(this),
+      setLastRunMetricsTotalAlertDetected: this.setLastRunMetricsTotalAlertsDetected.bind(this),
+      setLastRunMetricsTotalAlertCreated: this.setLastRunMetricsTotalAlertsCreated.bind(this),
       setLastRunMetricsGapDurationS: this.setLastRunMetricsGapDurationS.bind(this),
     };
   }
@@ -74,11 +74,11 @@ export class RuleMonitoringService {
     this.monitoring.run.last_run.metrics.total_indexing_duration_ms = totalIndexingDurationMs;
   }
 
-  private setLastRunMetricsTotalAlertDetected(totalAlertDetected: number) {
+  private setLastRunMetricsTotalAlertsDetected(totalAlertDetected: number) {
     this.monitoring.run.last_run.metrics.total_alerts_detected = totalAlertDetected;
   }
 
-  private setLastRunMetricsTotalAlertCreated(totalAlertCreated: number) {
+  private setLastRunMetricsTotalAlertsCreated(totalAlertCreated: number) {
     this.monitoring.run.last_run.metrics.total_alerts_created = totalAlertCreated;
   }
 

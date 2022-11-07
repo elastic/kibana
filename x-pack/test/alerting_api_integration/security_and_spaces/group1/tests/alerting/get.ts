@@ -81,6 +81,8 @@ const getTestUtils = (
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
+                ...(response.next_run ? { next_run: response.next_run } : {}),
+                ...(response.last_run ? { last_run: response.last_run } : {}),
                 ...(describeType === 'internal'
                   ? {
                       monitoring: response.body.monitoring,
