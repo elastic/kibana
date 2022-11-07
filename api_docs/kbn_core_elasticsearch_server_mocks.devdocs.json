@@ -31,7 +31,13 @@
             "label": "client",
             "description": [],
             "signature": [
-              "ClusterClientMock"
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+                "section": "def-server.ClusterClientMock",
+                "text": "ClusterClientMock"
+              }
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
             "deprecated": false,
@@ -46,13 +52,37 @@
             "description": [],
             "signature": [
               "jest.MockInstance<",
-              "CustomClusterClientMock",
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+                "section": "def-server.CustomClusterClientMock",
+                "text": "CustomClusterClientMock"
+              },
               ", [type: string, config?: Partial<",
-              "ElasticsearchClientConfig",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClientConfig",
+                "text": "ElasticsearchClientConfig"
+              },
               "> | undefined]> & ((type: string, config?: Partial<",
-              "ElasticsearchClientConfig",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClientConfig",
+                "text": "ElasticsearchClientConfig"
+              },
               "> | undefined) => ",
-              "CustomClusterClientMock",
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+                "section": "def-server.CustomClusterClientMock",
+                "text": "CustomClusterClientMock"
+              },
               ")"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
@@ -80,7 +110,13 @@
                 "description": [],
                 "signature": [
                   "Partial<",
-                  "ElasticsearchClientConfig",
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-server.ElasticsearchClientConfig",
+                    "text": "ElasticsearchClientConfig"
+                  },
                   "> | undefined"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
@@ -104,9 +140,21 @@
         "description": [],
         "signature": [
           "{ setUnauthorizedErrorHandler: jest.MockInstance<void, [handler: ",
-          "UnauthorizedErrorHandler",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.UnauthorizedErrorHandler",
+            "text": "UnauthorizedErrorHandler"
+          },
           "]>; } & Omit<",
-          "ElasticsearchServiceSetup",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchServiceSetup",
+            "text": "ElasticsearchServiceSetup"
+          },
           ", \"legacy\"> & { legacy: { config$: ",
           "BehaviorSubject",
           "<",

@@ -9,9 +9,10 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import { Subject } from 'rxjs';
-import { omit, defaults } from 'lodash';
+import { omit, defaults, get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
 
 import {
   SavedObject,
@@ -33,6 +34,7 @@ import {
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -41,6 +43,7 @@ export interface StoreOpts {
   definitions: TaskTypeDictionary;
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: ISavedObjectsSerializer;
+  adHocTaskCounter: AdHocTaskCounter;
 }
 
 export interface SearchOpts {
@@ -94,6 +97,7 @@ export class TaskStore {
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
+  private adHocTaskCounter: AdHocTaskCounter;
 
   /**
    * Constructs a new TaskStore.
@@ -111,6 +115,7 @@ export class TaskStore {
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
+    this.adHocTaskCounter = opts.adHocTaskCounter;
   }
 
   /**
@@ -139,6 +144,9 @@ export class TaskStore {
         taskInstanceToAttributes(taskInstance),
         { id: taskInstance.id, refresh: false }
       );
+      if (get(taskInstance, 'schedule.interval', null) == null) {
+        this.adHocTaskCounter.increment();
+      }
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -167,6 +175,11 @@ export class TaskStore {
       savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
         objects,
         { refresh: false }
+      );
+      this.adHocTaskCounter.increment(
+        taskInstances.filter((task) => {
+          return get(task, 'schedule.interval', null) == null;
+        }).length
       );
     } catch (e) {
       this.errors$.next(e);
@@ -288,6 +301,22 @@ export class TaskStore {
   public async remove(id: string): Promise<void> {
     try {
       await this.savedObjectsRepository.delete('task', id);
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+  }
+
+  /**
+   * Bulk removes the specified tasks from the index.
+   *
+   * @param {SavedObjectsBulkDeleteObject[]} savedObjectsToDelete
+   * @returns {Promise<SavedObjectsBulkDeleteResponse>}
+   */
+  public async bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
+    try {
+      const savedObjectsToDelete = taskIds.map((taskId) => ({ id: taskId, type: 'task' }));
+      return await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete);
     } catch (e) {
       this.errors$.next(e);
       throw e;

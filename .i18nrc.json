@@ -9,10 +9,7 @@
     "charts": "src/plugins/charts",
     "console": "src/plugins/console",
     "contentManagement": "packages/content-management",
-    "core": [
-      "src/core",
-      "packages/core"
-    ],
+    "core": ["src/core", "packages/core"],
     "customIntegrations": "src/plugins/custom_integrations",
     "dashboard": "src/plugins/dashboard",
     "controls": "src/plugins/controls",
@@ -41,8 +38,10 @@
     "expressionTagcloud": "src/plugins/chart_expressions/expression_tagcloud",
     "eventAnnotation": "src/plugins/event_annotation",
     "fieldFormats": "src/plugins/field_formats",
+    "files": "src/plugins/files",
     "flot": "packages/kbn-flot-charts/lib",
     "guidedOnboarding": "src/plugins/guided_onboarding",
+    "guidedOnboardingPackage": "packages/kbn-guided-onboarding",
     "home": "src/plugins/home",
     "homePackages": "packages/home",
     "indexPatternEditor": "src/plugins/data_view_editor",

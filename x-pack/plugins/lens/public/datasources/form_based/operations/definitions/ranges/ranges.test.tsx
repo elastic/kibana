@@ -86,14 +86,6 @@ const defaultOptions = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
-  existingFields: {
-    my_index_pattern: {
-      timestamp: true,
-      bytes: true,
-      memory: true,
-      source: true,
-    },
-  },
   dateRange: {
     fromDate: 'now-1y',
     toDate: 'now',
@@ -187,7 +179,7 @@ describe('ranges', () => {
   }
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   beforeEach(() => {

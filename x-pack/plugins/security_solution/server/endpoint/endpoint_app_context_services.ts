@@ -167,7 +167,7 @@ export class EndpointAppContextService {
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
     const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
-    const isEndpointRbacEnabled = this.experimentalFeatures.endpointRbacEnabled;
+    const { endpointRbacEnabled, endpointRbacV1Enabled } = this.experimentalFeatures;
 
     let endpointPermissions = defaultEndpointPermissions();
     if (this.security) {
@@ -185,7 +185,7 @@ export class EndpointAppContextService {
       this.getLicenseService(),
       fleetAuthz,
       userRoles,
-      isEndpointRbacEnabled,
+      endpointRbacEnabled || endpointRbacV1Enabled,
       endpointPermissions
     );
   }

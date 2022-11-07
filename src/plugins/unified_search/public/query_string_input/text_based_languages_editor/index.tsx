@@ -443,7 +443,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               {documentationSections && (
                 <EuiFlexItem grow={false}>
                   <LanguageDocumentationPopover
-                    language={language}
+                    language={String(language).toUpperCase()}
                     sections={documentationSections}
                     buttonProps={{
                       color: 'text',
@@ -564,7 +564,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               {documentationSections && (
                 <EuiFlexItem grow={false}>
                   <LanguageDocumentationPopover
-                    language={language}
+                    language={String(language).toUpperCase()}
                     sections={documentationSections}
                     buttonProps={{
                       display: 'empty',

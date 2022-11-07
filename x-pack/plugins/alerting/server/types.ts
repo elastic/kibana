@@ -90,21 +90,16 @@ export interface RuleExecutorOptions<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
 > {
-  alertId: string;
   executionId: string;
-  startedAt: Date;
-  previousStartedAt: Date | null;
-  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
-  params: Params;
-  state: State;
-  rule: SanitizedRuleConfig;
-  spaceId: string;
-  namespace?: string;
-  name: string;
-  tags: string[];
-  createdBy: string | null;
-  updatedBy: string | null;
   logger: Logger;
+  params: Params;
+  previousStartedAt: Date | null;
+  rule: SanitizedRuleConfig;
+  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
+  spaceId: string;
+  startedAt: Date;
+  state: State;
+  namespace?: string;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {

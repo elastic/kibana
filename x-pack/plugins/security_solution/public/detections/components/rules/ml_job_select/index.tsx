@@ -67,7 +67,7 @@ const renderJobOption = (option: MlJobOption) => (
 export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], field }) => {
   const jobIds = field.value as string[];
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const { loading, jobs } = useSecurityJobs(false);
+  const { loading, jobs } = useSecurityJobs();
   const mlUrl = useKibana().services.application.getUrlForApp('ml');
   const handleJobSelect = useCallback(
     (selectedJobOptions: MlJobOption[]): void => {
