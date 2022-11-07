@@ -117,11 +117,9 @@ export interface SearchSourceFields {
   index?: DataView;
   timeout?: string;
   terminate_after?: number;
-
   searchAfter?: estypes.SortResults;
   /**
    * Allow querying to use a point-in-time ID for paging results
-   * Requires searchAfter when the page index is > 1.
    */
   pit?: estypes.SearchPointInTimeReference;
 
