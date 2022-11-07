@@ -8,14 +8,14 @@ import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 export const CompactFormattedNumber = ({
-  number,
+  number = 0,
   abbreviateAbove = 999999,
 }: {
   number: number;
   /** numbers higher than the value of this field will be abbreviated using compact notation and have a tooltip displaying the full value */
   abbreviateAbove?: number;
 }) => {
-  if (number < abbreviateAbove) {
+  if (number <= abbreviateAbove) {
     return <span>{number.toLocaleString('en-US')}</span>;
   }
 

@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiCard, EuiIcon, EuiStat, useEuiTheme } from '@elastic/eui';
 import type { EuiStatProps, EuiCardProps } from '@elastic/eui';
 
-export type CspCounterCardProps = Pick<EuiStatProps, 'title' | 'description' | 'titleColor'> &
-  Pick<EuiCardProps, 'onClick'>;
+export type CspCounterCardProps = Pick<EuiCardProps, 'onClick' | 'id'> &
+  Pick<EuiStatProps, 'title' | 'description' | 'titleColor' | 'isLoading'>;
 
 export const CspCounterCard = ({ counter }: { counter: CspCounterCardProps }) => {
   const { euiTheme } = useEuiTheme();
@@ -21,7 +22,7 @@ export const CspCounterCard = ({ counter }: { counter: CspCounterCardProps }) =>
       hasBorder
       onClick={counter.onClick}
       paddingSize="m"
-      css={`
+      css={css`
         position: relative;
 
         .euiCard__title {
@@ -33,14 +34,16 @@ export const CspCounterCard = ({ counter }: { counter: CspCounterCardProps }) =>
           transition: ${euiTheme.animation.normal};
         }
       `}
+      data-test-subj={counter.id}
     >
       <EuiStat
         descriptionElement="h5"
         titleSize="s"
+        isLoading={counter.isLoading}
         description={counter.description}
         title={counter.title || 0}
         titleColor={counter.titleColor}
-        css={`
+        css={css`
           display: flex;
           flex-direction: column;
           gap: ${euiTheme.size.m};
@@ -49,7 +52,7 @@ export const CspCounterCard = ({ counter }: { counter: CspCounterCardProps }) =>
       {counter.onClick && (
         <EuiIcon
           type="link"
-          css={`
+          css={css`
             position: absolute;
             top: ${euiTheme.size.m};
             right: ${euiTheme.size.m};

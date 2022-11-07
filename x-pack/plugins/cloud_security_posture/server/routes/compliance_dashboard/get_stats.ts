@@ -24,7 +24,7 @@ export interface FindingsEvaluationsQueryResult {
   passed_findings: {
     doc_count: number;
   };
-  resources_evaluated: {
+  resources_evaluated?: {
     value: number;
   };
 }
@@ -36,6 +36,9 @@ export const findingsEvaluationAggsQuery = {
   passed_findings: {
     filter: { term: { 'result.evaluation': 'passed' } },
   },
+};
+
+const uniqueResourcesCountQuery = {
   resources_evaluated: {
     cardinality: {
       field: 'resource.id',
@@ -49,7 +52,10 @@ export const getEvaluationsQuery = (
 ): SearchRequest => ({
   query,
   size: 0,
-  aggs: findingsEvaluationAggsQuery,
+  aggs: {
+    ...findingsEvaluationAggsQuery,
+    ...uniqueResourcesCountQuery,
+  },
   pit: {
     id: pitId,
   },
@@ -58,7 +64,7 @@ export const getEvaluationsQuery = (
 export const getStatsFromFindingsEvaluationsAggs = (
   findingsEvaluationsAggs: FindingsEvaluationsQueryResult
 ): ComplianceDashboardData['stats'] => {
-  const resourcesEvaluated = findingsEvaluationsAggs.resources_evaluated.value;
+  const resourcesEvaluated = findingsEvaluationsAggs.resources_evaluated?.value;
   const failedFindings = findingsEvaluationsAggs.failed_findings.doc_count || 0;
   const passedFindings = findingsEvaluationsAggs.passed_findings.doc_count || 0;
   const totalFindings = failedFindings + passedFindings;
@@ -70,7 +76,7 @@ export const getStatsFromFindingsEvaluationsAggs = (
     totalPassed: passedFindings,
     totalFindings,
     postureScore,
-    resourcesEvaluated,
+    ...(resourcesEvaluated && { resourcesEvaluated }),
   };
 };
 
