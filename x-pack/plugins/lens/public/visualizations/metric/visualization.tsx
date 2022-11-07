@@ -671,61 +671,38 @@ export const getMetricVisualization = ({
   },
 
   getVisualizationInfo(state: MetricVisualizationState) {
-    const accessors = {
-      metric:
-        state.layerType === 'metricTrendline'
-          ? state.trendlineMetricAccessor
-          : state.metricAccessor,
-      secondaryMetric:
-        state.layerType === 'metricTrendline'
-          ? state.trendlineSecondaryMetricAccessor
-          : state.secondaryMetricAccessor,
-      max: state.layerType === 'metricTrendline' ? undefined : state.maxAccessor,
-      breakdownBy:
-        state.layerType === 'metricTrendline'
-          ? state.trendlineBreakdownByAccessor
-          : state.breakdownByAccessor,
-      time: state.layerType === 'metricTrendline' ? state.trendlineTimeAccessor : undefined,
-    };
     const dimensions = [];
-    if (accessors.metric) {
+    if (state.metricAccessor) {
       dimensions.push({
-        id: accessors.metric,
+        id: state.metricAccessor,
         name: i18n.translate('xpack.lens.primaryMetric.label', {
           defaultMessage: 'Primary metric',
         }),
       });
     }
 
-    if (accessors.secondaryMetric) {
+    if (state.secondaryMetricAccessor) {
       dimensions.push({
-        id: accessors.secondaryMetric,
+        id: state.secondaryMetricAccessor,
         name: i18n.translate('xpack.lens.metric.secondaryMetric', {
           defaultMessage: 'Secondary metric',
         }),
       });
     }
 
-    if (accessors.max) {
+    if (state.maxAccessor) {
       dimensions.push({
-        id: accessors.max,
+        id: state.maxAccessor,
         name: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
       });
     }
 
-    if (accessors.breakdownBy) {
+    if (state.breakdownByAccessor) {
       dimensions.push({
-        id: accessors.breakdownBy,
+        id: state.breakdownByAccessor,
         name: i18n.translate('xpack.lens.metric.breakdownBy', {
           defaultMessage: 'Break down by',
         }),
-      });
-    }
-
-    if (accessors.time) {
-      dimensions.push({
-        id: accessors.time,
-        name: i18n.translate('xpack.lens.metric.timeField', { defaultMessage: 'Time field' }),
       });
     }
 

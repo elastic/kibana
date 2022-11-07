@@ -109,6 +109,13 @@ export interface LensUnwrapResult {
   metaInfo?: LensUnwrapMetaInfo;
 }
 
+interface ChartInfo {
+  layers: ChartLayerDescriptor[];
+  visualizationType: string;
+  filters: Document['state']['filters'];
+  query: Document['state']['query'];
+}
+
 export interface ChartLayerDescriptor {
   dataView?: DataView;
   layerId: string;
@@ -1099,7 +1106,7 @@ export class Embeddable
     };
   }
 
-  public getChartInfo(): Readonly<ChartLayerDescriptor[] | undefined> {
+  public getChartInfo(): Readonly<ChartInfo | undefined> {
     const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
     if (!activeDatasourceId || !this.savedVis?.visualizationType) {
       return undefined;
@@ -1115,7 +1122,7 @@ export class Embeddable
       this.savedVis.visualizationType
     ].getVisualizationInfo?.(this.savedVis?.state.visualization);
 
-    return chartInfo?.layers.map((l) => {
+    const layers = chartInfo?.layers.map((l) => {
       const dataSource = dataSourceInfo.find((info) => info.layerId === l.layerId);
       const updatedDimensions = l.dimensions.map((d) => {
         return {
@@ -1129,6 +1136,14 @@ export class Embeddable
         dimensions: updatedDimensions,
       };
     });
+    return layers
+      ? {
+          layers,
+          visualizationType: this.savedVis.visualizationType,
+          filters: this.savedVis.state.filters,
+          query: this.savedVis.state.query,
+        }
+      : undefined;
   }
 
   private get visDisplayOptions(): VisualizationDisplayOptions | undefined {
