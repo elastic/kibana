@@ -133,9 +133,9 @@ describe('RuleMonitoringService', () => {
 
     it('should set totalAlertsDetected', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsTotalAlertDetected } =
+      const { setLastRunMetricsTotalAlertsDetected } =
         ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsTotalAlertDetected(345);
+      setLastRunMetricsTotalAlertsDetected(345);
 
       const {
         run: {
@@ -147,9 +147,9 @@ describe('RuleMonitoringService', () => {
 
     it('should set totalAlertsCreated', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsTotalAlertCreated } =
+      const { setLastRunMetricsTotalAlertsCreated } =
         ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsTotalAlertCreated(456);
+      setLastRunMetricsTotalAlertsCreated(456);
 
       const {
         run: {
