@@ -208,3 +208,17 @@ export const CREATE_BUTTON = i18n.translate(
     defaultMessage: 'Create',
   }
 );
+
+export const CREATE_SHARED_LIST_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.manageExceptions.createSharedListButton',
+  {
+    defaultMessage: 'create shared list',
+  }
+);
+
+export const CREATE_BUTTON_ITEM_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.manageExceptions.createItemButton',
+  {
+    defaultMessage: 'create exception item',
+  }
+);

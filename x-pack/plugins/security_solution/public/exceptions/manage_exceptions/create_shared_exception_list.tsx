@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notifications-browser';
+import { i18n as translate } from '@kbn/i18n';
 
 import { useCreateSharedExceptionListWithOptionalSignal } from './use_create_shared_list';
 import {
@@ -85,8 +86,19 @@ export const CreateSharedListFlyout = memo(
     const handleCreateSuccess = useCallback(
       (response) => {
         addSuccess({
-          text: `list with name ${listName} was created!`,
-          title: `created list`,
+          text: translate.translate(
+            'xpack.securitySolution.exceptions.createSharedExceptionListSuccessDescription',
+            {
+              defaultMessage: 'list with name ${listName} was created!',
+              values: { listName },
+            }
+          ),
+          title: translate.translate(
+            'xpack.securitySolution.exceptions.createSharedExceptionListSuccessTitle',
+            {
+              defaultMessage: 'created list',
+            }
+          ),
         });
         handleRefresh();
 
@@ -98,7 +110,14 @@ export const CreateSharedListFlyout = memo(
     const handleCreateError = useCallback(
       (error) => {
         if (!error.message.includes('AbortError') && !error?.body?.message.includes('AbortError')) {
-          addError(error, { title: 'creation error' });
+          addError(error, {
+            title: translate.translate(
+              'xpack.securitySolution.exceptions.createSharedExceptionListErrorTitle',
+              {
+                defaultMessage: 'creation error',
+              }
+            ),
+          });
         }
       },
       [addError]

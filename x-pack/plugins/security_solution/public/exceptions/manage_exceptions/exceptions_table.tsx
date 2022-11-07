@@ -406,7 +406,7 @@ export const ExceptionListsTable = React.memo(() => {
                     setDisplayCreateSharedListFlyout(true);
                   }}
                 >
-                  {'create shared list'}
+                  {i18n.CREATE_SHARED_LIST_BUTTON}
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   key={'createItem'}
@@ -415,7 +415,7 @@ export const ExceptionListsTable = React.memo(() => {
                     setDisplayAddExceptionItemFlyout(true);
                   }}
                 >
-                  {'create exception item'}
+                  {i18n.CREATE_BUTTON_ITEM_BUTTON}
                 </EuiContextMenuItem>,
               ]}
             />
