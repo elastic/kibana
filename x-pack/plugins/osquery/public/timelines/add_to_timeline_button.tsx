@@ -4,11 +4,3 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { services as xpackFunctionalServices } from '../../functional/services';
-import { EsArchiverProvider } from './es_archiver';
-
-export const services = {
-  ...xpackFunctionalServices,
-  esArchiver: EsArchiverProvider,
-};

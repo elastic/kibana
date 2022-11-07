@@ -125,7 +125,7 @@ export async function getServerlessFunctionLatency({
   ]);
 
   const [series] = billedDurationMetrics.series;
-  const data = series.data.map(({ x, y }) => ({
+  const data = series?.data?.map(({ x, y }) => ({
     x,
     // Billed duration is stored in ms, convert it to microseconds so it uses the same unit as the other chart
     y: isFiniteNumber(y) ? y * 1000 : y,
@@ -133,14 +133,16 @@ export async function getServerlessFunctionLatency({
 
   return {
     ...billedDurationMetrics,
-    series: [
-      {
-        ...series,
-        // Billed duration is stored in ms, convert it to microseconds
-        overallValue: series.overallValue * 1000,
-        data,
-      },
-      ...serverlessDurationSeries,
-    ],
+    series: series
+      ? [
+          {
+            ...series,
+            // Billed duration is stored in ms, convert it to microseconds
+            overallValue: series.overallValue * 1000,
+            data,
+          },
+          ...serverlessDurationSeries,
+        ]
+      : [],
   };
 }

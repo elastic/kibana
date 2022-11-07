@@ -10,7 +10,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface Usage {
   initialized: boolean;
-  flags: Record<string, string>;
+  flags: Record<string, unknown>;
   flagNames: string[];
 }
 
@@ -37,10 +37,8 @@ export function registerUsageCollector(
         },
         // We'll likely map "flags" as `flattened`, so "flagNames" helps out to discover the key names
         flags: {
-          DYNAMIC_KEY: {
-            type: 'keyword',
-            _meta: { description: 'Flags received by the client' },
-          },
+          type: 'pass_through',
+          _meta: { description: 'Flags received by the client' },
         },
         flagNames: {
           type: 'array',

@@ -147,6 +147,7 @@ export const tasks: TelemetryTask[] = [
         await search({
           index: indices.transaction,
           body: {
+            timeout,
             query: {
               bool: {
                 filter: [
@@ -354,6 +355,7 @@ export const tasks: TelemetryTask[] = [
       const response = await search({
         index: [indices.transaction],
         body: {
+          timeout,
           query: {
             bool: {
               filter: [{ range: { '@timestamp': { gte: 'now-1d' } } }],
@@ -1031,8 +1033,9 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'cardinality',
-    executor: async ({ search }) => {
+    executor: async ({ indices, search }) => {
       const allAgentsCardinalityResponse = await search({
+        index: [indices.transaction],
         body: {
           size: 0,
           timeout,
@@ -1057,6 +1060,7 @@ export const tasks: TelemetryTask[] = [
       });
 
       const rumAgentCardinalityResponse = await search({
+        index: [indices.transaction],
         body: {
           size: 0,
           timeout,

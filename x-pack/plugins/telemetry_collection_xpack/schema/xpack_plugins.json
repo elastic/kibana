@@ -4979,13 +4979,9 @@
           }
         },
         "flags": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "keyword",
-              "_meta": {
-                "description": "Flags received by the client"
-              }
-            }
+          "type": "pass_through",
+          "_meta": {
+            "description": "Flags received by the client"
           }
         },
         "flagNames": {

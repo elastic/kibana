@@ -17,7 +17,11 @@ type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 
 type TelemetryTaskExecutor = (params: {
   indices: ApmIndicesConfig;
-  search<TSearchRequest extends ESSearchRequest>(
+  search<
+    TSearchRequest extends ESSearchRequest & { index: string | string[] } & {
+      body: { timeout: string };
+    }
+  >(
     params: TSearchRequest
   ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
   indicesStats(
