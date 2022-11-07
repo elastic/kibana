@@ -99,7 +99,7 @@ TYPES_DEPS = [
   "@npm//@types/he",
   "@npm//@types/history",
   "@npm//@types/jest",
-  "@npm//@types/joi",
+  "@npm//joi",
   "@npm//@types/lodash",
   "@npm//@types/mustache",
   "@npm//@types/node",
