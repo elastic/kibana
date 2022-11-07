@@ -19,7 +19,7 @@ import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 const DEFAULT_VALUES = {
   configState: {},
   configView: [],
-  index: undefined,
+  index: null,
   isEditing: false,
   localConfigState: {},
   localConfigView: [],

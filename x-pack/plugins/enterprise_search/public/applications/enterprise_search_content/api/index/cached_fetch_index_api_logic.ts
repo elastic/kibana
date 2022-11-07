@@ -92,6 +92,7 @@ export const CachedFetchIndexApiLogic = kea<
         clearTimeout(values.pollTimeoutId);
       }
       actions.makeRequest({ indexName });
+
       actions.createPollTimeout(FETCH_INDEX_POLLING_DURATION);
     },
     stopPolling: () => {

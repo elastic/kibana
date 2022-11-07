@@ -71,6 +71,7 @@ export interface IndexViewValues {
   indexName: string;
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
+  isInitialLoading: typeof CachedFetchIndexApiLogic.values.isInitialLoading;
   isSyncing: boolean;
   isWaitingForSync: boolean;
   lastUpdated: string | null;
@@ -79,7 +80,6 @@ export interface IndexViewValues {
   recheckIndexLoading: boolean;
   resetFetchIndexLoading: boolean;
   syncStatus: SyncStatus | null;
-  wrapperIsInitialLoad: typeof CachedFetchIndexApiLogic.values.isInitialLoading;
 }
 
 export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewActions>>({
@@ -115,12 +115,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       IndexNameLogic,
       ['indexName'],
       CachedFetchIndexApiLogic,
-      [
-        'fetchIndexApiData',
-        'status as fetchIndexApiStatus',
-        'indexData',
-        'isInitialLoading as wrapperIsInitialLoad',
-      ],
+      ['fetchIndexApiData', 'status as fetchIndexApiStatus', 'indexData', 'isInitialLoading'],
     ],
   },
   events: ({ actions }) => ({

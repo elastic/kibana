@@ -54,7 +54,7 @@ export enum SearchIndexTabId {
 }
 
 export const SearchIndex: React.FC = () => {
-  const { index, wrapperIsInitialLoad } = useValues(IndexViewLogic);
+  const { index, isInitialLoading } = useValues(IndexViewLogic);
 
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
@@ -164,7 +164,7 @@ export const SearchIndex: React.FC = () => {
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
       pageViewTelemetry={tabId}
-      isLoading={wrapperIsInitialLoad}
+      isLoading={isInitialLoading}
       pageHeader={{
         pageTitle: indexName,
         rightSideItems: getHeaderActions(index),
