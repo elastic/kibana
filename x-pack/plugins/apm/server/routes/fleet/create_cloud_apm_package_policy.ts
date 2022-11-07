@@ -21,9 +21,9 @@ import {
   APMPluginStartDependencies,
 } from '../../types';
 import { getApmPackagePolicyDefinition } from './get_apm_package_policy_definition';
-import { Setup } from '../../lib/helpers/setup_request';
 import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
 import { ELASTIC_CLOUD_APM_AGENT_POLICY_ID } from '../../../common/fleet';
+import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 
 export async function createCloudApmPackgePolicy({
   cloudPluginSetup,
@@ -31,7 +31,7 @@ export async function createCloudApmPackgePolicy({
   savedObjectsClient,
   esClient,
   logger,
-  setup,
+  internalESClient,
   request,
 }: {
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
@@ -39,7 +39,7 @@ export async function createCloudApmPackgePolicy({
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   logger: Logger;
-  setup: Setup;
+  internalESClient: APMInternalESClient;
   request: KibanaRequest;
 }): Promise<PackagePolicy> {
   const { attributes } = await savedObjectsClient.get(
@@ -57,7 +57,7 @@ export async function createCloudApmPackgePolicy({
     request,
   });
   const mergedAPMPackagePolicy = await mergePackagePolicyWithApm({
-    setup,
+    internalESClient,
     packagePolicy: apmPackagePolicyDefinition,
     fleetPluginStart,
   });
