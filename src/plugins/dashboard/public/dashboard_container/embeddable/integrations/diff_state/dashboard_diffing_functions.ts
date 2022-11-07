@@ -12,8 +12,8 @@ import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common
 import { compareFilters, COMPARE_ALL_OPTIONS, isFilterPinned } from '@kbn/es-query';
 
 import { DashboardContainer } from '../../dashboard_container';
+import { DashboardContainerByValueInput } from '../../../../../common';
 import { areTimesEqual, getPanelLayoutsAreEqual } from './dashboard_diffing_utils';
-import { DashboardContainerByValueInput, DashboardOptions } from '../../../../../common';
 
 export interface DiffFunctionProps<Key extends keyof DashboardContainerByValueInput> {
   currentValue: DashboardContainerByValueInput[Key];
@@ -79,19 +79,6 @@ export const dashboardDiffingFunctions: DashboardDiffFunctions = {
 
     // If any promise resolves, return false. The catch here is only called if all promises reject which means all panels are equal.
     return await Promise.any(explicitInputComparePromises).catch(() => true);
-  },
-
-  options: ({ currentValue, lastValue }) => {
-    const optionKeys = [
-      ...new Set([
-        ...(Object.keys(currentValue) as Array<keyof DashboardOptions>),
-        ...(Object.keys(lastValue) as Array<keyof DashboardOptions>),
-      ]),
-    ];
-    for (const key of optionKeys) {
-      if (Boolean(currentValue[key]) !== Boolean(lastValue[key])) return false;
-    }
-    return true;
   },
 
   filters: ({ currentValue, lastValue }) =>

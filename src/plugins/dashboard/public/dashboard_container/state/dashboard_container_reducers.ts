@@ -98,23 +98,23 @@ export const dashboardContainerReducers = {
   // Options Reducers
   // ------------------------------------------------------------------------------
   setUseMargins: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.explicitInput.options.useMargins = action.payload;
+    state.explicitInput.useMargins = action.payload;
   },
 
   setSyncCursor: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.explicitInput.options.syncCursor = action.payload;
+    state.explicitInput.syncCursor = action.payload;
   },
 
   setSyncColors: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.explicitInput.options.syncColors = action.payload;
+    state.explicitInput.syncColors = action.payload;
   },
 
   setSyncTooltips: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.explicitInput.options.syncTooltips = action.payload;
+    state.explicitInput.syncTooltips = action.payload;
   },
 
   setHidePanelTitles: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.explicitInput.options.hidePanelTitles = action.payload;
+    state.explicitInput.hidePanelTitles = action.payload;
   },
 
   // ------------------------------------------------------------------------------

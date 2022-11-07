@@ -93,10 +93,16 @@ export const saveDashboardStateToSavedObject = async ({
     title,
     panels,
     filters,
-    options,
     timeRestore,
     description,
     controlGroupInput,
+
+    // Dashboard options
+    useMargins,
+    syncColors,
+    syncCursor,
+    syncTooltips,
+    hidePanelTitles,
   } = currentState;
 
   /**
@@ -118,7 +124,13 @@ export const saveDashboardStateToSavedObject = async ({
   /**
    * Stringify options and panels
    */
-  const optionsJSON = JSON.stringify(options);
+  const optionsJSON = JSON.stringify({
+    useMargins,
+    syncColors,
+    syncCursor,
+    syncTooltips,
+    hidePanelTitles,
+  });
   const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, kibanaVersion));
 
   /**

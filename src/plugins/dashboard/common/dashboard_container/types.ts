@@ -50,15 +50,17 @@ export interface DashboardContainerByValueInput extends EmbeddableInput {
   tags: string[];
   viewMode: ViewMode;
   description?: string;
-  options: DashboardOptions;
   isEmbeddedExternally?: boolean;
   executionContext?: KibanaExecutionContext;
+
+  // dashboard options: TODO, build a new system to avoid all shared state appearing here.
+  hidePanelTitles: DashboardOptions['hidePanelTitles'];
+  syncTooltips: DashboardOptions['syncTooltips'];
+  useMargins: DashboardOptions['useMargins'];
+  syncColors: DashboardOptions['syncColors'];
+  syncCursor: DashboardOptions['syncCursor'];
 
   // dashboard contents
   controlGroupInput?: PersistableControlGroupInput;
   panels: DashboardPanelMap;
 }
-
-// remove these?
-// expandedPanelId?: string;
-// isFullScreenMode: boolean;

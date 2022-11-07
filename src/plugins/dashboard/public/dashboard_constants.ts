@@ -75,11 +75,11 @@ export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerByValueInput, 'id'>
   panels: {},
   title: '',
   tags: [],
-  options: {
-    useMargins: true,
-    syncColors: false,
-    syncCursor: true,
-    syncTooltips: false,
-    hidePanelTitles: false,
-  },
+
+  // options
+  useMargins: true,
+  syncColors: false,
+  syncCursor: true,
+  syncTooltips: false,
+  hidePanelTitles: false,
 };

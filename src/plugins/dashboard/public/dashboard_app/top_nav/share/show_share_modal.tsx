@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup } from '@elastic/eui';
 import { QueryState } from '@kbn/data-plugin/common';
 import type { Capabilities } from '@kbn/core/public';
-import { SerializableRecord } from '@kbn/utility-types';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
@@ -23,7 +22,7 @@ import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common'
 import { dashboardUrlParams } from '../../dashboard_router';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { pluginServices } from '../../../services/plugin_services';
-import { convertPanelMapToSavedPanels, DashboardOptions } from '../../../../common';
+import { convertPanelMapToSavedPanels } from '../../../../common';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator/locator';
 
 const showFilterBarId = 'showFilterBar';
@@ -122,17 +121,13 @@ export function ShowShareModal({
     );
   };
 
-  let unsavedStateForLocator: Pick<
-    DashboardAppLocatorParams,
-    'options' | 'query' | 'filters' | 'panels' | 'controlGroupInput'
-  > = {};
+  let unsavedStateForLocator: DashboardAppLocatorParams = {};
   const unsavedDashboardState = dashboardSessionStorage.getState(savedObjectId);
 
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
-      options: unsavedDashboardState.options as unknown as DashboardOptions & SerializableRecord,
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels
         ? (convertPanelMapToSavedPanels(
@@ -140,6 +135,13 @@ export function ShowShareModal({
             kibanaVersion
           ) as DashboardAppLocatorParams['panels'])
         : undefined,
+
+      // options
+      useMargins: unsavedDashboardState?.useMargins,
+      syncColors: unsavedDashboardState?.syncColors,
+      syncCursor: unsavedDashboardState?.syncCursor,
+      syncTooltips: unsavedDashboardState?.syncTooltips,
+      hidePanelTitles: unsavedDashboardState?.hidePanelTitles,
     };
   }
 

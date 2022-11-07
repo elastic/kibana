@@ -68,13 +68,13 @@ export function getSampleDashboardInput(
   overrides?: Partial<DashboardContainerByValueInput>
 ): DashboardContainerByValueInput {
   return {
-    options: {
-      useMargins: true,
-      syncColors: false,
-      syncCursor: true,
-      syncTooltips: false,
-      hidePanelTitles: false,
-    },
+    // options
+    useMargins: true,
+    syncColors: false,
+    syncCursor: true,
+    syncTooltips: false,
+    hidePanelTitles: false,
+
     id: '123',
     tags: [],
     filters: [],

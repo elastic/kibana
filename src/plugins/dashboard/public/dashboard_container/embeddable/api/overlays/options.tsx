@@ -20,11 +20,11 @@ export const DashboardOptions = () => {
   } = useDashboardContainerContext();
   const dispatch = useEmbeddableDispatch();
 
-  const useMargins = select((state) => state.explicitInput.options.useMargins);
-  const syncColors = select((state) => state.explicitInput.options.syncColors);
-  const syncTooltips = select((state) => state.explicitInput.options.syncTooltips);
-  const hidePanelTitles = select((state) => state.explicitInput.options.hidePanelTitles);
-  const syncCursor = select((state) => state.explicitInput.options.syncCursor);
+  const useMargins = select((state) => state.explicitInput.useMargins);
+  const syncColors = select((state) => state.explicitInput.syncColors);
+  const syncCursor = select((state) => state.explicitInput.syncCursor);
+  const syncTooltips = select((state) => state.explicitInput.syncTooltips);
+  const hidePanelTitles = select((state) => state.explicitInput.hidePanelTitles);
 
   return (
     <EuiForm data-test-subj="dashboardOptionsMenu">

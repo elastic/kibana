@@ -152,6 +152,7 @@ export const loadDashboardStateFromSavedObject = async ({
     dashboardId: savedObjectId,
     dashboardInput: {
       ...DEFAULT_DASHBOARD_INPUT,
+      ...options,
 
       id: embeddableId,
       refreshInterval,
@@ -159,7 +160,6 @@ export const loadDashboardStateFromSavedObject = async ({
       description,
       timeRange,
       filters,
-      options,
       panels,
       query,
       title,

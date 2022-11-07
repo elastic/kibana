@@ -9,12 +9,11 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 
 import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../../dashboard_constants';
 import { DashboardContainerByValueInput, SavedDashboardPanel } from '../../../common';
@@ -35,37 +34,18 @@ export const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
 
 export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';
 
-/**
- * We use `type` instead of `interface` to avoid having to extend this type with
- * `SerializableRecord`. See https://github.com/microsoft/TypeScript/issues/15300.
- */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type DashboardAppLocatorParams = {
+export type DashboardAppLocatorParams = Partial<
+  Omit<
+    DashboardContainerByValueInput,
+    'panels' | 'controlGroupInput' | 'executionContext' | 'isEmbeddedExternally'
+  >
+> & {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
    * a new, unsaved dashboard will be loaded up.
    */
   dashboardId?: string;
-  /**
-   * Optionally set the time range in the time picker.
-   */
-  timeRange?: TimeRange;
 
-  /**
-   * Optionally set the refresh interval.
-   */
-  refreshInterval?: RefreshInterval;
-
-  /**
-   * Optionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the
-   * saved dashboard has filters saved with it, this will _replace_ those filters.
-   */
-  filters?: Filter[];
-  /**
-   * Optionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the
-   * saved dashboard has a query saved with it, this will _replace_ that query.
-   */
-  query?: Query;
   /**
    * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
    * whether to hash the data in the url to avoid url length issues.
@@ -81,11 +61,6 @@ export type DashboardAppLocatorParams = {
   preserveSavedFilters?: boolean;
 
   /**
-   * View mode of the dashboard.
-   */
-  viewMode?: ViewMode;
-
-  /**
    * Search search session ID to restore.
    * (Background search)
    */
@@ -95,13 +70,6 @@ export type DashboardAppLocatorParams = {
    * List of dashboard panels
    */
   panels?: Array<SavedDashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
-
-  /**
-   * List of tags to set to the state
-   */
-  tags?: string[];
-
-  options?: DashboardContainerByValueInput['options'] & SerializableRecord;
 
   /**
    * Control group input

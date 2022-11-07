@@ -105,13 +105,11 @@ describe('ShowShareModal', () => {
           },
         },
       },
-      options: {
-        hidePanelTitles: true,
-        useMargins: true,
-        syncColors: true,
-        syncCursor: true,
-        syncTooltips: true,
-      },
+      hidePanelTitles: true,
+      useMargins: true,
+      syncColors: true,
+      syncCursor: true,
+      syncTooltips: true,
       filters: [
         {
           meta: {

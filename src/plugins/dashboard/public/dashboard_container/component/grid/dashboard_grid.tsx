@@ -134,7 +134,7 @@ export const DashboardGrid = ({ onDataLoaded }: DashboardGridProps) => {
 
   const panels = select((state) => state.explicitInput.panels);
   const viewMode = select((state) => state.explicitInput.viewMode);
-  const useMargins = select((state) => state.explicitInput.options.useMargins);
+  const useMargins = select((state) => state.explicitInput.useMargins);
   const expandedPanelId = select((state) => state.componentState.expandedPanelId);
 
   const layout = useMemo(() => Object.values(panels).map((panel) => panel.gridData), [panels]);
@@ -216,7 +216,6 @@ export const DashboardGrid = ({ onDataLoaded }: DashboardGridProps) => {
         index={index + 1}
         type={type}
         expandedPanelId={expandedPanelId}
-        focusedPanelId={''} // TODO PORTABLE DASHBOARDS Panel focus / blur? Is this even used?
         onPanelStatusChange={onPanelStatusChange}
       />
     ));

@@ -57,8 +57,8 @@ export const DashboardViewport = ({ onDataLoaded }: DashboardViewportProps) => {
 
   const viewMode = select((state) => state.explicitInput.viewMode);
   const dashboardTitle = select((state) => state.explicitInput.title);
+  const useMargins = select((state) => state.explicitInput.useMargins);
   const description = select((state) => state.explicitInput.description);
-  const useMargins = select((state) => state.explicitInput.options.useMargins);
   const isFullScreenMode = select((state) => state.componentState.fullScreenMode);
 
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
