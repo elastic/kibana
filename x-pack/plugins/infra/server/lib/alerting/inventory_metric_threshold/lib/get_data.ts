@@ -101,7 +101,7 @@ export const getData = async (
     for (const bucket of nodes.buckets) {
       const metricId = customMetric && customMetric.field ? customMetric.id : metric;
 
-      const containerList = bucket.containerContext ? createContainerList(bucket.containerContext) : void 0;
+      const containerList = bucket.containerContext ? createContainerList(bucket.containerContext) : undefined;
 
       const bucketHits = bucket.additionalContext?.hits?.hits;
       const additionalContextSource =

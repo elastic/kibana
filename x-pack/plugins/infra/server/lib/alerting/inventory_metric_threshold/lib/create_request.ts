@@ -81,7 +81,7 @@ export const createRequest = (
           },
         },
       }
-      : void 0;
+      : undefined;
 
   const includesList = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
   const excludesList = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
