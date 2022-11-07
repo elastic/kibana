@@ -48,7 +48,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//rxjs",
-  "@npm//@types/moment-timezone",
+  "@npm//moment-timezone",
   "@npm//elastic-apm-node",
   "//packages/kbn-safer-lodash-set:npm_module_types",
   "//packages/kbn-logging:npm_module_types",
