@@ -17,6 +17,7 @@ import { TaskStore } from '../task_store';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
+import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 
 export type { MonitoringStats, RawMonitoringStats } from './monitoring_stats_stream';
 export {
@@ -32,6 +33,7 @@ export function createMonitoringStats(
   config: TaskManagerConfig,
   managedConfig: ManagedConfiguration,
   logger: Logger,
+  adHocTaskCounter: AdHocTaskCounter,
   taskPollingLifecycle?: TaskPollingLifecycle,
   ephemeralTaskLifecycle?: EphemeralTaskLifecycle
 ): Observable<MonitoringStats> {
@@ -42,6 +44,7 @@ export function createMonitoringStats(
       config,
       managedConfig,
       logger,
+      adHocTaskCounter,
       taskPollingLifecycle,
       ephemeralTaskLifecycle
     ),

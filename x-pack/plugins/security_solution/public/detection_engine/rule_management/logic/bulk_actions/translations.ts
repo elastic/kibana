@@ -6,7 +6,11 @@
  */
 
 import type { HTTPError } from '../../../../../common/detection_engine/types';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditPayload } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import {
+  BulkActionEditType,
+  BulkActionType,
+} from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { BulkActionResponse, BulkActionSummary } from '../../api/api';
 
@@ -32,7 +36,10 @@ export function summarizeBulkSuccess(action: BulkActionType): string {
   }
 }
 
-export function explainBulkSuccess(action: BulkActionType, summary: BulkActionSummary): string {
+export function explainBulkSuccess(
+  action: Exclude<BulkActionType, BulkActionType.edit>,
+  summary: BulkActionSummary
+): string {
   switch (action) {
     case BulkActionType.export:
       return getExportSuccessToastMessage(summary.succeeded, summary.total);
@@ -48,10 +55,27 @@ export function explainBulkSuccess(action: BulkActionType, summary: BulkActionSu
 
     case BulkActionType.disable:
       return i18n.RULES_BULK_DISABLE_SUCCESS_DESCRIPTION(summary.succeeded);
-
-    case BulkActionType.edit:
-      return i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded);
   }
+}
+
+export function explainBulkEditSuccess(
+  editPayload: BulkActionEditPayload[],
+  summary: BulkActionSummary
+): string {
+  if (
+    editPayload.some(
+      (x) =>
+        x.type === BulkActionEditType.add_index_patterns ||
+        x.type === BulkActionEditType.set_index_patterns ||
+        x.type === BulkActionEditType.delete_index_patterns
+    )
+  ) {
+    return `${i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded)}. ${
+      i18n.RULES_BULK_EDIT_SUCCESS_INDEX_EDIT_DESCRIPTION
+    }`;
+  }
+
+  return i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded);
 }
 
 export function summarizeBulkError(action: BulkActionType): string {

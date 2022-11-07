@@ -8,10 +8,10 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
-import { useParams } from 'react-router-dom';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 import { KpiWrapper } from './kpi_wrapper';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
 interface AvailabilityPanelprops {
   from: string;
@@ -24,7 +24,8 @@ export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
       observability: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
-  const { monitorId } = useParams<{ monitorId: string }>();
+
+  const monitorId = useMonitorQueryId();
 
   return (
     <KpiWrapper>
@@ -37,7 +38,7 @@ export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
             name: 'Monitor availability',
             dataType: 'synthetics',
             selectedMetricField: 'monitor_availability',
-            reportDefinitions: { config_id: [monitorId] },
+            reportDefinitions: { 'monitor.id': [monitorId] },
           },
         ]}
       />
