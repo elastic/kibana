@@ -25,7 +25,6 @@ export async function getESUpgradeStatus(
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
     const systemIndices = await getESSystemIndicesMigrationStatus(dataClient.asCurrentUser);
     const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
-    console.log('deprecations::', deprecations)
     return Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {
       if (deprecationType === 'index_settings') {
         // We need to exclude all index related deprecations for system indices since

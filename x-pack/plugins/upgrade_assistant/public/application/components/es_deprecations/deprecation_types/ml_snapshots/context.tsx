@@ -42,7 +42,6 @@ export const MlSnapshotsStatusProvider: React.FunctionComponent<Props> = ({
   mlUpgradeModeEnabled,
   children,
 }) => {
-  console.log('ok..')
   const { updateSnapshotStatus, snapshotState, upgradeSnapshot, deleteSnapshot } = useSnapshotState(
     {
       jobId,
