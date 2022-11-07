@@ -42,4 +42,21 @@ describe('AnalyticsNoDataPageComponent', () => {
     expect(noDataConfig.docsLink).toEqual('http://www.test.com');
     expect(noDataConfig.action.elasticAgent).not.toBeNull();
   });
+
+  it('allows ad-hoc data view creation', async () => {
+    const component = mountWithIntl(
+      <AnalyticsNoDataPageProvider {...services}>
+        <AnalyticsNoDataPage
+          onDataViewCreated={onDataViewCreated}
+          kibanaGuideDocLink={'http://www.test.com'}
+          allowAdHocDataView={true}
+        />
+      </AnalyticsNoDataPageProvider>
+    );
+
+    await act(() => new Promise(setImmediate));
+
+    expect(component.find(KibanaNoDataPage).length).toBe(1);
+    expect(component.find(KibanaNoDataPage).props().allowAdHocDataView).toBe(true);
+  });
 });
