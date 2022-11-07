@@ -359,7 +359,7 @@ export class ExecutionHandler<
     } = this;
 
     const muted = mutedAlertIdsSet!.has(alertId);
-    const throttled = alert.isThrottled(throttle);
+    const throttled = alert.isThrottled(throttle ?? null);
 
     if (muted) {
       if (
