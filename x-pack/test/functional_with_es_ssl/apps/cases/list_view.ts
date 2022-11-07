@@ -115,8 +115,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       describe('tags', () => {
-        const caseIds: string[] = [];
-        before(async () => {
+        let caseIds: string[] = [];
+        beforeEach(async () => {
+          caseIds = [];
           const case1 = await cases.api.createCase({ title: 'case 1', tags: ['one', 'three'] });
           const case2 = await cases.api.createCase({ title: 'case 2', tags: ['two', 'four'] });
           const case3 = await cases.api.createCase({ title: 'case 3', tags: ['two', 'five'] });
@@ -129,7 +130,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.casesTable.waitForCasesToBeListed();
         });
 
-        after(async () => {
+        afterEach(async () => {
           await cases.api.deleteAllCases();
           await cases.casesTable.waitForCasesToBeDeleted();
         });
