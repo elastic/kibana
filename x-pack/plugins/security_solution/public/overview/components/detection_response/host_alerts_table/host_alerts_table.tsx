@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
