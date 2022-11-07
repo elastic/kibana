@@ -72,6 +72,13 @@ echo "✅ ES is ready and will run in the background"
 curl -I -XGET "${TEST_ES_URL}/_cat/indices"
 curl -I -XGET "${TEST_ES_URL}/_cat/count?v=true"
 
+echo "--- Run warmup journey"
+node scripts/functional_tests \
+  --config "x-pack/performance/journeys/warmup.ts" \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+  --debug \
+  --bail
+
 while read -r journey; do
   if [ "$journey" == "" ] || [ "$journey" == "x-pack/performance/journeys/warmup.ts" ] ; then
     continue;
