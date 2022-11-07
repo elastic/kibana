@@ -43,6 +43,9 @@ it('matches snapshot', () => {
       "kibana.alert.end": Object {
         "type": "date",
       },
+      "kibana.alert.flapping": Object {
+        "type": "boolean",
+      },
       "kibana.alert.instance.id": Object {
         "required": true,
         "type": "keyword",

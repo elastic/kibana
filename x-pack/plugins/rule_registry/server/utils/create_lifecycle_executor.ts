@@ -37,6 +37,7 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
+  // ALERT_FLAPPING,
 } from '../../common/technical_rule_data_field_names';
 import { CommonAlertFieldNameLatest, CommonAlertIdFieldNameLatest } from '../../common/schemas';
 import { IRuleDataClient } from '../rule_data_client';

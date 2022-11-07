@@ -66,6 +66,7 @@ const alert = {
     end: '2020-01-01T03:00:00.000Z',
     duration: '2343252346',
   },
+  flapping: false,
 };
 
 const action = {
