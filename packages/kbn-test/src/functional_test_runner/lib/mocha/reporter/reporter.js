@@ -77,7 +77,7 @@ export function MochaReporterProvider({ getService }) {
 
         log.setWriters([
           new ToolingLogTextWriter({
-            level: 'error',
+            level: 'info',
             ignoreSources: ['ProcRunner', '@kbn/es Cluster'],
             writeTo: process.stdout,
           }),
