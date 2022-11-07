@@ -468,7 +468,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
   if (!fetchError && hasNoItems) {
     return (
-      <PageTemplate isEmptyState={true} data-test-subj={pageDataTestSubject}>
+      <PageTemplate panelled isEmptyState={true} data-test-subj={pageDataTestSubject}>
         <KibanaPageTemplate.Section
           aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
         >
@@ -479,7 +479,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   }
 
   return (
-    <PageTemplate data-test-subj={pageDataTestSubject}>
+    <PageTemplate panelled data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{tableListTitle}</span>}
         rightSideItems={[
