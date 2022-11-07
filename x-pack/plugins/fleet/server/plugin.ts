@@ -109,7 +109,7 @@ import { setupFleet } from './services/setup';
 import { BulkActionsResolver } from './services/agents';
 import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
-import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
+import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -462,7 +462,7 @@ export class FleetPlugin
     this.telemetryEventsSender.start(plugins.telemetry, core);
     this.bulkActionsResolver?.start(plugins.taskManager);
     this.fleetUsageSender?.start(plugins.taskManager);
-    startFleetUsageLogger(plugins.taskManager);
+    // startFleetUsageLogger(plugins.taskManager);
 
     const logger = appContextService.getLogger();
 

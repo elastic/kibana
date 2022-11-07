@@ -58,39 +58,32 @@ node scripts/es snapshot&
 export esPid=$!
 
 # Pings the es server every second for up to 2 minutes until it is green
-curl --retry 120 \
---retry-delay 1 \
---retry-connrefused \
--I -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow" \
-> /dev/null
-
-echo "Wait 30 sec for ES"
-sleep 30
+curl \
+  --fail \
+  --silent \
+  --retry 120 \
+  --retry-delay 1 \
+  --retry-connrefused \
+  -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow" \
+  > /dev/null
 
 echo "✅ ES is ready and will run in the background"
 
 curl -I -XGET "${TEST_ES_URL}/_cat/indices"
 curl -I -XGET "${TEST_ES_URL}/_cat/count?v=true"
 
-echo "--- Warmup journey with APM disabled"
-
-node scripts/functional_tests \
-   --config "x-pack/performance/journeys/warmup" \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-  --debug \
-  --bail
-
 while read -r journey; do
   if [ "$journey" == "" ] || [ "$journey" == "x-pack/performance/journeys/warmup.ts" ] ; then
     continue;
   fi
 
-  phases=("TEST")
+  echo "Wait 30 sec for ES"
+  sleep 30
+
+  phases=("WARMUP","TEST")
   status=0
   for phase in "${phases[@]}"; do
     echo "--- $journey - $phase"
-    echo "Wait 30 sec b/w journeys"
-    sleep 30
 
     export TEST_PERFORMANCE_PHASE="$phase"
 
@@ -111,11 +104,9 @@ while read -r journey; do
     fi
   done
 
+  # remove trap, we're manually shutting down
+  trap - EXIT;
 done <<< "$journeys"
-
-<<<<<<< HEAD
-# remove trap, we're manually shutting down
-trap - EXIT;
 
 echo "--- 🔎 Shutdown ES"
 killall node
@@ -133,7 +124,7 @@ while is_running $esPid; do
     sleep 5;
   fi
 done
-=======
+
 echo "--- Upload journey step screenshots"
 JOURNEY_SCREENSHOTS_DIR="${KIBANA_DIR}/data/journey_screenshots"
 if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
@@ -141,7 +132,6 @@ if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
   buildkite-agent artifact upload "**/*fullscreen*.png"
   cd "$KIBANA_DIR"
 fi
->>>>>>> upstream
 
 echo "--- report/record failed journeys"
 if [ "${failedJourneys[*]}" != "" ]; then
