@@ -148,7 +148,7 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: OVERVIEW_ROUTE,
-      component: () => <OverviewPage />,
+      component: OverviewPage,
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {
         pageTitle: (

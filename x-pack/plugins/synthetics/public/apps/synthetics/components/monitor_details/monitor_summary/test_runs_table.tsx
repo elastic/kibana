@@ -230,7 +230,7 @@ const TEST_RUNS = i18n.translate('xpack.synthetics.monitorDetails.summary.testRu
   defaultMessage: 'Test Runs',
 });
 
-const LAST_10_TEST_RUNS = i18n.translate(
+export const LAST_10_TEST_RUNS = i18n.translate(
   'xpack.synthetics.monitorDetails.summary.lastTenTestRuns',
   {
     defaultMessage: 'Last 10 Test Runs',
