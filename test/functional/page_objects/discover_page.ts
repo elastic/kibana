@@ -466,7 +466,7 @@ export class DiscoverPageObject extends FtrService {
     if (await this.isFieldSelected(field)) {
       return;
     }
-    if (['_score', '_id', '_index', '_type'].includes(field)) {
+    if (['_score', '_id', '_index'].includes(field)) {
       await this.toggleFieldListSection('meta'); // expand Meta section
     }
     await this.clickFieldListItemToggle(field);
