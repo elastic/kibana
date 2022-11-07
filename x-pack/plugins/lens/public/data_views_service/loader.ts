@@ -8,13 +8,8 @@
 import { isNestedField } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
-import { CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { loadFieldExisting } from '@kbn/unified-field-list-plugin/public';
 import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
 import { documentField } from '../datasources/form_based/document_field';
-import { DateRange } from '../../common';
-import { DataViewsState } from '../state_management';
 
 type ErrorHandler = (err: Error) => void;
 type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
@@ -246,121 +241,4 @@ export async function ensureIndexPattern({
     [id]: indexPatterns[id],
   };
   return newIndexPatterns;
-}
-
-async function refreshExistingFields({
-  dateRange,
-  indexPatternList,
-  dslQuery,
-  core,
-  data,
-  dataViews,
-}: {
-  dateRange: DateRange;
-  indexPatternList: IndexPattern[];
-  dslQuery: object;
-  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
-  data: DataPublicPluginStart;
-  dataViews: DataViewsContract;
-}) {
-  try {
-    const emptinessInfo = await Promise.all(
-      indexPatternList.map(async (pattern) => {
-        if (pattern.hasRestrictions) {
-          return {
-            indexPatternTitle: pattern.title,
-            existingFieldNames: pattern.fields.map((field) => field.name),
-          };
-        }
-
-        const dataView = await dataViews.get(pattern.id);
-        return await loadFieldExisting({
-          dslQuery,
-          fromDate: dateRange.fromDate,
-          toDate: dateRange.toDate,
-          timeFieldName: pattern.timeFieldName,
-          data,
-          uiSettingsClient: core.uiSettings,
-          dataViewsService: dataViews,
-          dataView,
-        });
-      })
-    );
-    return { result: emptinessInfo, status: 200 };
-  } catch (e) {
-    return { result: undefined, status: e.res?.status as number };
-  }
-}
-
-type FieldsPropsFromDataViewsState = Pick<
-  DataViewsState,
-  'existingFields' | 'isFirstExistenceFetch' | 'existenceFetchTimeout' | 'existenceFetchFailed'
->;
-export async function syncExistingFields({
-  updateIndexPatterns,
-  isFirstExistenceFetch,
-  currentIndexPatternTitle,
-  onNoData,
-  existingFields,
-  ...requestOptions
-}: {
-  dateRange: DateRange;
-  indexPatternList: IndexPattern[];
-  existingFields: Record<string, Record<string, boolean>>;
-  updateIndexPatterns: (
-    newFieldState: FieldsPropsFromDataViewsState,
-    options: { applyImmediately: boolean }
-  ) => void;
-  isFirstExistenceFetch: boolean;
-  currentIndexPatternTitle: string;
-  dslQuery: object;
-  onNoData?: () => void;
-  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
-  data: DataPublicPluginStart;
-  dataViews: DataViewsContract;
-}) {
-  const { indexPatternList } = requestOptions;
-  const newExistingFields = { ...existingFields };
-
-  const { result, status } = await refreshExistingFields(requestOptions);
-
-  if (result) {
-    if (isFirstExistenceFetch) {
-      const fieldsCurrentIndexPattern = result.find(
-        (info) => info.indexPatternTitle === currentIndexPatternTitle
-      );
-      if (fieldsCurrentIndexPattern && fieldsCurrentIndexPattern.existingFieldNames.length === 0) {
-        onNoData?.();
-      }
-    }
-
-    for (const { indexPatternTitle, existingFieldNames } of result) {
-      newExistingFields[indexPatternTitle] = booleanMap(existingFieldNames);
-    }
-  } else {
-    for (const { title, fields } of indexPatternList) {
-      newExistingFields[title] = booleanMap(fields.map((field) => field.name));
-    }
-  }
-
-  updateIndexPatterns(
-    {
-      existingFields: newExistingFields,
-      ...(result
-        ? { isFirstExistenceFetch: status !== 200 }
-        : {
-            isFirstExistenceFetch,
-            existenceFetchFailed: status !== 408,
-            existenceFetchTimeout: status === 408,
-          }),
-    },
-    { applyImmediately: true }
-  );
-}
-
-function booleanMap(keys: string[]) {
-  return keys.reduce((acc, key) => {
-    acc[key] = true;
-    return acc;
-  }, {} as Record<string, boolean>);
 }

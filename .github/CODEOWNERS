@@ -22,31 +22,31 @@
 /src/plugins/saved_objects_finder/ @elastic/kibana-data-discovery
 
 # Vis Editors
-/x-pack/plugins/lens/ @elastic/kibana-vis-editors
-/src/plugins/charts/ @elastic/kibana-vis-editors
-/src/plugins/vis_default_editor/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/metric/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/table/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/tagcloud/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/timelion/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/timeseries/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/vega/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/vislib/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/xy/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/pie/ @elastic/kibana-vis-editors
-/src/plugins/vis_types/heatmap/ @elastic/kibana-vis-editors
-/src/plugins/visualize/ @elastic/kibana-vis-editors
-/src/plugins/visualizations/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_metric/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_heatmap/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_gauge/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_partition_vis/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_xy/ @elastic/kibana-vis-editors
-/src/plugins/url_forwarding/ @elastic/kibana-vis-editors
-/x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
-/x-pack/test/api_integration/apis/lens/ @elastic/kibana-vis-editors
-/test/functional/apps/visualize/ @elastic/kibana-vis-editors
+/x-pack/plugins/lens/ @elastic/kibana-visualizations
+/src/plugins/charts/ @elastic/kibana-visualizations
+/src/plugins/vis_default_editor/ @elastic/kibana-visualizations
+/src/plugins/vis_types/metric/ @elastic/kibana-visualizations
+/src/plugins/vis_types/table/ @elastic/kibana-visualizations
+/src/plugins/vis_types/tagcloud/ @elastic/kibana-visualizations
+/src/plugins/vis_types/timelion/ @elastic/kibana-visualizations
+/src/plugins/vis_types/timeseries/ @elastic/kibana-visualizations
+/src/plugins/vis_types/vega/ @elastic/kibana-visualizations
+/src/plugins/vis_types/vislib/ @elastic/kibana-visualizations
+/src/plugins/vis_types/xy/ @elastic/kibana-visualizations
+/src/plugins/vis_types/pie/ @elastic/kibana-visualizations
+/src/plugins/vis_types/heatmap/ @elastic/kibana-visualizations
+/src/plugins/visualize/ @elastic/kibana-visualizations
+/src/plugins/visualizations/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_metric/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_heatmap/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_gauge/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_partition_vis/ @elastic/kibana-visualizations
+/src/plugins/chart_expressions/expression_xy/ @elastic/kibana-visualizations
+/src/plugins/url_forwarding/ @elastic/kibana-visualizations
+/x-pack/test/functional/apps/lens @elastic/kibana-visualizations
+/x-pack/test/api_integration/apis/lens/ @elastic/kibana-visualizations
+/test/functional/apps/visualize/ @elastic/kibana-visualizations
 
 # Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-services
@@ -84,11 +84,12 @@
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
 /src/plugins/dashboard/public/application/embeddable/viewport/print_media @elastic/kibana-app-services
-x-pack/plugins/files @elastic/kibana-app-services
-x-pack/examples/files_example @elastic/kibana-app-services
+/src/plugins/files @elastic/kibana-app-services
+/examples/files_example @elastic/kibana-app-services
 /x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 /test/plugin_functional/test_suites/panel_actions @elastic/kibana-app-services
 /test/plugin_functional/test_suites/data_plugin @elastic/kibana-app-services
+/x-pack/plugins/notifications/ @elastic/kibana-app-services
 
 ### Observability Plugins
 
@@ -205,6 +206,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/ml-ui
 /x-pack/test/screenshot_creation/apps/ml_docs @elastic/ml-ui
 /x-pack/test/screenshot_creation/services/ml_screenshots.ts @elastic/ml-ui
+/docs/api/machine-learning/ @elastic/mlr-docs
 
 # Additional plugins and packages maintained by the ML team.
 /x-pack/plugins/aiops/ @elastic/ml-ui
@@ -225,8 +227,8 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
-/x-pack/plugins/stack_alerts/server/alert_types/geo_containment @elastic/kibana-gis
-/x-pack/plugins/stack_alerts/public/alert_types/geo_containment @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/server/rule_types/geo_containment @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/public/rule_types/geo_containment @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 /x-pack/plugins/file_upload @elastic/kibana-gis
 
@@ -352,6 +354,8 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/functional/services/cases/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops
 /x-pack/test/api_integration/apis/cases/ @elastic/response-ops
+/docs/api/cases @elastic/mlr-docs
+/x-pack/plugins/cases/docs/openapi @elastic/mlr-docs
 
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
@@ -705,6 +709,7 @@ packages/core/application/core-application-browser-mocks @elastic/kibana-core
 packages/core/application/core-application-common @elastic/kibana-core
 packages/core/apps/core-apps-browser-internal @elastic/kibana-core
 packages/core/apps/core-apps-browser-mocks @elastic/kibana-core
+packages/core/apps/core-apps-server-internal @elastic/kibana-core
 packages/core/base/core-base-browser-internal @elastic/kibana-core
 packages/core/base/core-base-browser-mocks @elastic/kibana-core
 packages/core/base/core-base-common @elastic/kibana-core
@@ -785,6 +790,9 @@ packages/core/lifecycle/core-lifecycle-browser-mocks @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-server @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-server-internal @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-server-mocks @elastic/kibana-core
+packages/core/logging/core-logging-browser-internal @elastic/kibana-core
+packages/core/logging/core-logging-browser-mocks @elastic/kibana-core
+packages/core/logging/core-logging-common-internal @elastic/kibana-core
 packages/core/logging/core-logging-server @elastic/kibana-core
 packages/core/logging/core-logging-server-internal @elastic/kibana-core
 packages/core/logging/core-logging-server-mocks @elastic/kibana-core
@@ -877,12 +885,12 @@ packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-bazel-packages @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-cases-components @elastic/response-ops
-packages/kbn-chart-icons @elastic/kibana-vis-editors
+packages/kbn-chart-icons @elastic/kibana-visualizations
 packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
-packages/kbn-coloring @elastic/kibana-vis-editors
+packages/kbn-coloring @elastic/kibana-visualizations
 packages/kbn-config @elastic/kibana-core
 packages/kbn-config-mocks @elastic/kibana-core
 packages/kbn-config-schema @elastic/kibana-core
@@ -925,7 +933,7 @@ packages/kbn-io-ts-utils @elastic/apm-ui
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
-packages/kbn-language-documentation-popover @elastic/kibana-vis-editors
+packages/kbn-language-documentation-popover @elastic/kibana-visualizations
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-vscode-config @elastic/kibana-operations
@@ -942,7 +950,7 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-react-field @elastic/kibana-app-services
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
-packages/kbn-rule-data-utils @elastic/apm-ui
+packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform
@@ -974,8 +982,8 @@ packages/kbn-telemetry-tools @elastic/kibana-core
 packages/kbn-test @elastic/kibana-operations
 packages/kbn-test-jest-helpers @elastic/kibana-operations
 packages/kbn-test-subj-selector @elastic/kibana-operations
-packages/kbn-timelion-grammar @elastic/kibana-vis-editors
-packages/kbn-tinymath @elastic/kibana-vis-editors
+packages/kbn-timelion-grammar @elastic/kibana-visualizations
+packages/kbn-tinymath @elastic/kibana-visualizations
 packages/kbn-tooling-log @elastic/kibana-operations
 packages/kbn-type-summarizer @elastic/kibana-operations
 packages/kbn-type-summarizer-cli @elastic/kibana-operations
