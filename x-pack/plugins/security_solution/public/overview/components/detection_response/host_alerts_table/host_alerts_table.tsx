@@ -43,7 +43,6 @@ type GetTableColumns = (
 const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuery';
 
 export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableProps) => {
-
   const { openTimelineWithFilters } = useNavigateToTimeline();
 
   const openHostInTimeline = useCallback(

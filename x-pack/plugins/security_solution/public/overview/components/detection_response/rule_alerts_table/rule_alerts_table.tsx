@@ -118,7 +118,6 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
     skip: !toggleStatus,
   });
 
-
   const { openTimelineWithFilters } = useNavigateToTimeline();
 
   const openRuleInTimeline = useCallback(
