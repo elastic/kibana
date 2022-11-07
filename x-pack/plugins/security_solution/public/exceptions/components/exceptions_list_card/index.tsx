@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo } from 'react';
 
 import {
   EuiLink,
@@ -15,7 +15,6 @@ import {
   EuiPanel,
   EuiText,
   EuiAccordion,
-  useGeneratedHtmlId,
   EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -27,9 +26,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExceptionListInfo } from '../../hooks/use_all_exception_lists';
 import { TitleBadge } from '../title_badge';
 import * as i18n from '../../translations/translations';
-import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
-import { checkIfListCannotBeEdited } from '../../utils/list.utils';
 import { ListExceptionItems } from '../list_exception_items';
+import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
@@ -55,6 +53,7 @@ interface ExceptionsListCardProps {
   readOnly: boolean;
 }
 const buttonCss = css`
+  // Ask KIBANA Team why Emotion is not working fully under xpack
   width: 100%;
   z-index: 100;
   span {
@@ -70,22 +69,28 @@ const ListHeaderContainer = styled(EuiFlexGroup)`
 `;
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
   ({ exceptionsList, handleDelete, handleExport, readOnly }) => {
-    // TODO Move all the logic to the use_exceptions_list.card
-    const [toggleAccordion, setToggleAccordion] = useState(false);
-    const openAccordionId = useGeneratedHtmlId({ prefix: 'openAccordion' });
-
-    const listCannotBeEdited = checkIfListCannotBeEdited(exceptionsList);
     const {
-      lastUpdated,
+      listId,
+      listName,
+      listDescription,
+      createdAt,
+      createdBy,
+      listRulesCount,
       exceptions,
       pagination,
+      toggleAccordion,
+      openAccordionId,
+      menuActionItems,
       exceptionViewerStatus,
       ruleReferences,
       onEditExceptionItem,
       onDeleteException,
       onPaginationChange,
+      setToggleAccordion,
     } = useExceptionsListCard({
       exceptionsList,
+      handleExport,
+      handleDelete,
     });
     return (
       <EuiFlexGroup gutterSize="none">
@@ -108,22 +113,18 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                     <EuiFlexItem>
                       <EuiFlexGroup
                         direction="column"
-                        key={exceptionsList.list_id}
+                        key={listId}
                         alignItems="flexStart"
                         gutterSize="none"
                       >
                         <EuiFlexItem grow>
                           <EuiText size="m">
-                            <EuiLink data-test-subj="exception-list-name">
-                              {exceptionsList.name}
-                            </EuiLink>
+                            <EuiLink data-test-subj="exception-list-name">{listName}</EuiLink>
                           </EuiText>
                         </EuiFlexItem>
                         <EuiFlexItem grow>
                           <EuiText size="xs">
-                            <EuiTextColor color="subdued">
-                              {exceptionsList.description}
-                            </EuiTextColor>
+                            <EuiTextColor color="subdued">{listDescription}</EuiTextColor>
                           </EuiText>
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -132,64 +133,25 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                     <EuiFlexItem>
                       <EuiFlexGroup alignItems="center">
                         <EuiFlexItem>
-                          <TitleBadge
-                            title={i18n.DATE_CREATED}
-                            badgeString={new Date(exceptionsList.created_at).toDateString()}
-                          />
+                          <TitleBadge title={i18n.DATE_CREATED} badgeString={createdAt} />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <TitleBadge
-                            title={i18n.CREATED_BY}
-                            badgeString={exceptionsList.created_by}
-                          />
+                          <TitleBadge title={i18n.CREATED_BY} badgeString={createdBy} />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <TitleBadge
                             title={i18n.EXCEPTIONS}
-                            badgeString={exceptions.length.toString()} // TODO get all no of exceptions
+                            badgeString={pagination.totalItemCount.toString()}
                           />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <TitleBadge
-                            title={i18n.RULES}
-                            badgeString={exceptionsList.rules.length.toString()}
-                          />
+                          <TitleBadge title={i18n.RULES} badgeString={listRulesCount} />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <HeaderMenu
                             disableActions={readOnly}
                             dataTestSubj="exceptionsListCardOverflowActions"
-                            actions={[
-                              {
-                                key: '1',
-                                icon: 'exportAction',
-                                label: i18n.EXPORT_EXCEPTION_LIST,
-                                onClick: (e) => {
-                                  handleExport({
-                                    id: exceptionsList.id,
-                                    listId: exceptionsList.list_id,
-                                    namespaceType: exceptionsList.namespace_type,
-                                  })();
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                },
-                              },
-                              {
-                                key: '2',
-                                icon: 'trash',
-                                disabled: listCannotBeEdited,
-                                label: i18n.DELETE_EXCEPTION_LIST,
-                                onClick: (e) => {
-                                  handleDelete({
-                                    id: exceptionsList.id,
-                                    listId: exceptionsList.list_id,
-                                    namespaceType: exceptionsList.namespace_type,
-                                  })();
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                },
-                              },
-                            ]}
+                            actions={menuActionItems}
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -203,10 +165,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   isReadOnly={readOnly}
                   exceptions={exceptions}
                   listType={exceptionsList.type as ExceptionListTypeEnum}
-                  lastUpdated={lastUpdated}
                   pagination={pagination}
-                  emptyViewerTitle={''}
-                  emptyViewerBody={''}
                   hideUtility
                   viewerStatus={exceptionViewerStatus}
                   ruleReferences={ruleReferences}
@@ -214,6 +173,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   onEditExceptionItem={onEditExceptionItem}
                   onPaginationChange={onPaginationChange}
                   onCreateExceptionListItem={() => {}} // remove from here
+                  lastUpdated={null}
                 />
               </ExceptionPanel>
             </EuiAccordion>

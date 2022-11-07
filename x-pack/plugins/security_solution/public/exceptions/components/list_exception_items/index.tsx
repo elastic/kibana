@@ -31,8 +31,8 @@ interface ListExceptionItemsProps {
   listType: ExceptionListTypeEnum;
   lastUpdated: string | number | null;
   pagination: Pagination;
-  emptyViewerTitle: string;
-  emptyViewerBody: string;
+  emptyViewerTitle?: string;
+  emptyViewerBody?: string;
   viewerStatus: ViewerStatus | '';
   ruleReferences: RuleReferences;
   hideUtility?: boolean;
