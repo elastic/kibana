@@ -109,7 +109,6 @@ while is_running $esPid; do
   if [ $dur -ge $timeout ]; then
     echo "es still running after $dur seconds, killing ES and node forcefully";
     killall -SIGKILL java
-    killall -SIGKILL node
     sleep 5;
   fi
 done
