@@ -14,6 +14,7 @@ import {
   fetchMonitorOverviewAction,
   fetchOverviewStatusAction,
   quietFetchOverviewAction,
+  setFlyoutConfig,
   setOverviewPageStateAction,
 } from './actions';
 
@@ -28,6 +29,7 @@ const initialState: MonitorOverviewState = {
     sortOrder: 'asc',
     sortField: 'status',
   },
+  flyoutConfig: null,
   loading: false,
   loaded: false,
   error: null,
@@ -65,6 +67,9 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchOverviewStatusAction.get, (state) => {
       state.status = null;
+    })
+    .addCase(setFlyoutConfig, (state, action) => {
+      state.flyoutConfig = action.payload;
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       state.status = action.payload;

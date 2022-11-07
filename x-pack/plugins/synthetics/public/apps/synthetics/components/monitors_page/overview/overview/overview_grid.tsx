@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState, useRef, memo } from 'react';
+import React, { useEffect, useState, useRef, memo, useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import useThrottle from 'react-use/lib/useThrottle';
-import { useSelector } from 'react-redux';
 import useIntersection from 'react-use/lib/useIntersection';
 import {
   EuiFlexGroup,
@@ -17,8 +17,12 @@ import {
   EuiButtonEmpty,
   EuiText,
 } from '@elastic/eui';
-import { selectOverviewState } from '../../../../state/overview';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import {
+  quietFetchOverviewAction,
+  selectOverviewState,
+  setFlyoutConfig,
+} from '../../../../state/overview';
 import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
 import { useGetUrlParams } from '../../../../hooks/use_url_params';
 import { OverviewLoader } from './overview_loader';
@@ -26,12 +30,14 @@ import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
 import { SortFields } from './sort_fields';
 import { NoMonitorsFound } from '../../common/no_monitors_found';
+import { MonitorDetailFlyout } from './monitor_detail_flyout';
 
 export const OverviewGrid = memo(() => {
   const { statusFilter } = useGetUrlParams();
   const {
     data: { monitors },
     status,
+    flyoutConfig,
     loaded,
     pageState,
   } = useSelector(selectOverviewState);
@@ -49,6 +55,17 @@ export const OverviewGrid = memo(() => {
     statusFilter,
   });
 
+  const dispatch = useDispatch();
+
+  const setFlyoutConfigCallback = useCallback(
+    (monitorId: string, location: string) => dispatch(setFlyoutConfig({ monitorId, location })),
+    [dispatch]
+  );
+  const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
+  const forceRefreshCallback = useCallback(
+    () => dispatch(quietFetchOverviewAction.get(pageState)),
+    [dispatch, pageState]
+  );
   const intersectionRef = useRef(null);
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -103,7 +120,7 @@ export const OverviewGrid = memo(() => {
               key={`${monitor.id}-${monitor.location?.id}`}
               data-test-subj="syntheticsOverviewGridItem"
             >
-              <OverviewGridItem monitor={monitor} />
+              <OverviewGridItem monitor={monitor} onClick={setFlyoutConfigCallback} />
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>
@@ -132,6 +149,15 @@ export const OverviewGrid = memo(() => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {flyoutConfig?.monitorId && flyoutConfig?.location && (
+        <MonitorDetailFlyout
+          id={flyoutConfig.monitorId}
+          location={flyoutConfig.location}
+          onClose={hideFlyout}
+          onEnabledChange={forceRefreshCallback}
+          onLocationChange={setFlyoutConfigCallback}
+        />
+      )}
     </>
   );
 });

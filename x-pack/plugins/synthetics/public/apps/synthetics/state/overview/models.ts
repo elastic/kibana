@@ -18,7 +18,13 @@ export interface MonitorOverviewPageState {
   sortField: string;
 }
 
+export type MonitorOverviewFlyoutConfig = {
+  monitorId: string;
+  location: string;
+} | null;
+
 export interface MonitorOverviewState {
+  flyoutConfig: MonitorOverviewFlyoutConfig;
   data: MonitorOverviewResult;
   pageState: MonitorOverviewPageState;
   loading: boolean;
