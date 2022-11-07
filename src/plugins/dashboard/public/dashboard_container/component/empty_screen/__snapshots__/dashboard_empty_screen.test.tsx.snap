@@ -2,7 +2,7 @@
 
 exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
 <div
-  class="dshEmptyWidget testClass"
+  class="dshEmptyWidget"
   data-test-subj="emptyDashboardWidget"
 >
   <span
