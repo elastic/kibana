@@ -79,6 +79,8 @@ node scripts/functional_tests \
   --debug \
   --bail
 
+killall -SIGKILL node || true
+
 journey="x-pack/performance/journeys/ecommerce_dashboard.ts"
 for ((i=1;i<=20;i++)); do
     echo "--- $journey - $i"
@@ -92,7 +94,7 @@ for ((i=1;i<=20;i++)); do
       --debug \
       --bail
 
-    killall -SIGKILL node
+    killall -SIGKILL node || true
 done
 
 echo "--- 🔎 Shutdown ES"
