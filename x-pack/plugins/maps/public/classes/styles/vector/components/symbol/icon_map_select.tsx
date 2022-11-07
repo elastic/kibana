@@ -26,7 +26,7 @@ const DEFAULT_ICON_STOPS: IconStop[] = [
   { stop: '', icon: PREFERRED_ICONS[1], iconSource: ICON_SOURCE.MAKI },
 ];
 
-interface StyleOptionChanges {
+export interface StyleOptionChanges {
   customIconStops?: IconStop[];
   iconPaletteId?: string | null;
   useCustomIconMap: boolean;
