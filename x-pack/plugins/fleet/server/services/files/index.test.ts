@@ -10,8 +10,8 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { ES_SEARCH_LIMIT } from '../../../common/constants';
 import {
-  FILE_STORAGE_DATA_INDEX,
-  FILE_STORAGE_METADATA_INDEX,
+  FILE_STORAGE_DATA_INDEX_PATTERN,
+  FILE_STORAGE_METADATA_INDEX_PATTERN,
 } from '../../constants/fleet_es_assets';
 
 import { fileIdsWithoutChunksByIndex, getFilesByStatus, updateFilesStatus } from '.';
@@ -61,7 +61,7 @@ describe('files service', () => {
 
       expect(esClientMock.search).toBeCalledWith(
         {
-          index: FILE_STORAGE_METADATA_INDEX,
+          index: FILE_STORAGE_METADATA_INDEX_PATTERN,
           body: {
             size: ES_SEARCH_LIMIT,
             query: {
@@ -124,7 +124,7 @@ describe('files service', () => {
 
       expect(esClientMock.search).toBeCalledWith(
         {
-          index: FILE_STORAGE_DATA_INDEX,
+          index: FILE_STORAGE_DATA_INDEX_PATTERN,
           body: {
             size: ES_SEARCH_LIMIT,
             query: {
