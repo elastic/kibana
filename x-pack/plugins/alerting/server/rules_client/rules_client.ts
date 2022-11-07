@@ -2807,7 +2807,9 @@ export class RulesClient {
           await this.taskManager.removeIfExists(attributes.scheduledTaskId);
         } else {
           this.logger.info(`disableWithOCC / scheduledTaskId: ${attributes.scheduledTaskId}`);
-          await this.taskManager.bulkDisable([attributes.scheduledTaskId]);
+          const task = await this.taskManager.bulkDisable([attributes.scheduledTaskId]);
+          this.logger.info(`disableWithOCC / task: ${JSON.stringify(task)}`);
+          return task;
         }
       }
     }
