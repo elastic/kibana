@@ -9,7 +9,7 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import type { FileJSON } from '../../../common';
+import type { FileJSON, FileImageMetadata } from '../../../common';
 import { FilesClient, FilesClientResponses } from '../../types';
 import { register } from '../stories_shared';
 import { base64dLogo } from '../image/image.constants.stories';
@@ -27,6 +27,7 @@ const defaultProps: FilePickerProps = {
   kind,
   onDone: action('done!'),
   onClose: action('close!'),
+  multiple: true,
 };
 
 export default {
@@ -58,7 +59,7 @@ export const Empty = Template.bind({});
 
 const d = new Date();
 let id = 0;
-function createFileJSON(file?: Partial<FileJSON>): FileJSON {
+function createFileJSON(file?: Partial<FileJSON<FileImageMetadata>>): FileJSON<FileImageMetadata> {
   return {
     alt: '',
     created: d.toISOString(),
@@ -198,3 +199,25 @@ TryFilter.decorators = [
     );
   },
 ];
+
+export const SingleSelect = Template.bind({});
+SingleSelect.decorators = [
+  (Story) => (
+    <FilesContext
+      client={
+        {
+          getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
+          list: async (): Promise<FilesClientResponses['list']> => ({
+            files: [createFileJSON(), createFileJSON(), createFileJSON()],
+            total: 1,
+          }),
+        } as unknown as FilesClient
+      }
+    >
+      <Story />
+    </FilesContext>
+  ),
+];
+SingleSelect.args = {
+  multiple: undefined,
+};

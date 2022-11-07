@@ -8,6 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutFooter, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import type { Ecs } from '../../../../common/ecs';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
 import { ACTION_OSQUERY } from './translations';
@@ -20,11 +21,14 @@ export interface OsqueryFlyoutProps {
   agentId?: string;
   defaultValues?: {};
   onClose: () => void;
+  ecsData?: Ecs;
 }
-export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
+
+const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
   agentId,
   defaultValues,
   onClose,
+  ecsData,
 }) => {
   const {
     services: { osquery },
@@ -49,6 +53,7 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
               agentId={agentId}
               formType="steps"
               defaultValues={defaultValues}
+              ecsData={ecsData}
             />
           </OsqueryActionWrapper>
         </EuiFlyoutBody>

@@ -518,7 +518,7 @@ describe('geo_containment', () => {
       boundaryIndexId: 'testBoundaryIndexId',
       boundaryGeoField: 'testBoundaryGeoField',
     };
-    const alertId = 'testAlertId';
+    const ruleId = 'testAlertId';
     const geoContainmentState = {
       shapesFilters: {
         testShape: 'thisIsAShape',
@@ -567,7 +567,10 @@ describe('geo_containment', () => {
         // @ts-ignore
         services: alertServicesWithSearchMock,
         params: geoContainmentParams,
-        alertId,
+        // @ts-ignore
+        rule: {
+          id: ruleId,
+        },
         // @ts-ignore
         state: {},
       });
@@ -587,7 +590,10 @@ describe('geo_containment', () => {
         // @ts-ignore
         services: alertServicesWithSearchMock,
         params: geoContainmentParams,
-        alertId,
+        // @ts-ignore
+        rule: {
+          id: ruleId,
+        },
         state: geoContainmentState,
       });
       if (executionResult && executionResult.shapesFilters) {
@@ -606,7 +612,10 @@ describe('geo_containment', () => {
         // @ts-ignore
         services: alertServicesWithSearchMock,
         params: geoContainmentParams,
-        alertId,
+        // @ts-ignore
+        rule: {
+          id: ruleId,
+        },
         state: geoContainmentState,
       });
       if (executionResult && executionResult.shapesFilters) {
@@ -642,7 +651,10 @@ describe('geo_containment', () => {
         // @ts-ignore
         services: alertServicesWithSearchMock,
         params: geoContainmentParams,
-        alertId,
+        // @ts-ignore
+        rule: {
+          id: ruleId,
+        },
         state: geoContainmentState,
       });
       if (executionResult && executionResult.prevLocationMap) {
