@@ -13,6 +13,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { unitOfTime } from 'moment';
 import moment from 'moment';
+import { wrapErrorIfNeeded } from '../../utils';
 import type { UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
 import {
@@ -95,14 +96,14 @@ export const getFileInfo = async (
       fileHasChunks = await doesFileHaveChunks(esClient, fileId);
 
       if (!fileHasChunks) {
-        logger.debug(
+        logger.warn(
           `File with id [${fileId}] has no data chunks. Status will be adjusted to DELETED`
         );
       }
     }
 
     const status = fileHasChunks ? actualStatus : 'DELETED';
-    const ttl = status === 'READY' ? await calculateFileTtl(esClient, created) : -1;
+    const ttl = status === 'READY' ? await calculateFileTtl(esClient, created, logger) : -1;
 
     return {
       name,
@@ -140,21 +141,28 @@ const doesFileHaveChunks = async (
 
 const calculateFileTtl = async (
   esClient: ElasticsearchClient,
-  createdDate: string
+  createdDate: string,
+  logger?: Logger
 ): Promise<number | undefined> => {
-  const policyName = 'foo'; // FIXME:PT get const from fleet
-  const ilmPolicy = await esClient.ilm.getLifecycle({ name: policyName }, { ignore: [404] });
-  const deleteMinAge = ilmPolicy[policyName]?.policy.phases?.delete?.min_age;
+  try {
+    const policyName = 'foo'; // FIXME:PT get const from fleet
+    const ilmPolicy = await esClient.ilm.getLifecycle({ name: policyName }, { ignore: [404] });
+    const deleteMinAge = ilmPolicy[policyName]?.policy.phases?.delete?.min_age;
 
-  if (!deleteMinAge) {
-    return undefined;
+    if (!deleteMinAge) {
+      return undefined;
+    }
+
+    const duration = parseDuration(String(deleteMinAge));
+    const expiresOn = moment(createdDate).add(duration.age, duration.unit);
+    const daysLeft = expiresOn.diff(moment(), 'days');
+
+    return daysLeft < 0 ? -1 : daysLeft;
+  } catch (e) {
+    logger?.error(wrapErrorIfNeeded(e));
   }
 
-  const duration = parseDuration(String(deleteMinAge));
-  const expiresOn = moment(createdDate).add(duration.age, duration.unit);
-  const daysLeft = expiresOn.diff(moment(), 'days');
-
-  return daysLeft < 0 ? -1 : daysLeft;
+  return undefined;
 };
 
 interface ParsedDuration {
