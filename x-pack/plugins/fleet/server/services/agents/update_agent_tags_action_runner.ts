@@ -12,7 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Agent } from '../../types';
 
-import { AGENTS_INDEX } from '../../constants';
+import { AGENTS_INDEX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
 import { appContextService } from '..';
 
@@ -87,22 +87,25 @@ export async function updateTagsBatch(
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
+  const hostedAgentError = `Cannot modify tags on a hosted agent`;
 
   const filteredAgents = await filterHostedPolicies(
     soClient,
     givenAgents,
     errors,
-    `Cannot modify tags on a hosted agent`
+    hostedAgentError
   );
+  const agentIds = filteredAgents.map((agent) => agent.id);
 
   let query: estypes.QueryDslQueryContainer | undefined;
-  if (options.kuery) {
-    const hostedPolicies = await agentPolicyService.list(soClient, { kuery: 'is_managed:true' });
+  if (options.kuery !== undefined) {
+    const hostedPolicies = await agentPolicyService.list(soClient, {
+      kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+    });
     const hostedIds = hostedPolicies.items.map((item) => item.id);
 
     query = getElasticsearchQuery(options.kuery, false, false, hostedIds);
   } else {
-    const agentIds = filteredAgents.map((agent) => agent.id);
     query = {
       terms: {
         _id: agentIds,
@@ -155,23 +158,26 @@ export async function updateTagsBatch(
   // creating an action doc so that update tags  shows up in activity
   await createAgentAction(esClient, {
     id: actionId,
-    agents: [],
+    agents: options.kuery !== undefined ? [] : agentIds,
     created_at: new Date().toISOString(),
     type: 'UPDATE_TAGS',
     total,
   });
+  // writing action errors from errors map (applicable if agentIds were checked for hosted agent)
+  await createErrorActionResults(esClient, actionId, errors, hostedAgentError);
+
+  // writing successful action results
   if (res.updated ?? 0 > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-      Array(res.updated)
-        .fill('')
-        .map(() => ({
-          agentId: '',
-          actionId,
-        }))
+      (options.kuery !== undefined ? Array(res.updated).fill('') : agentIds).map((agentId) => ({
+        agentId,
+        actionId,
+      }))
     );
   }
 
+  // writing failures from es update
   if (res.failures && res.failures.length > 0) {
     await bulkCreateAgentActionResults(
       esClient,
@@ -183,12 +189,19 @@ export async function updateTagsBatch(
     );
   }
 
-  await createErrorActionResults(
-    esClient,
-    actionId,
-    errors,
-    'cannot modified tags on hosted agents'
-  );
+  // writing hosted agent errors - hosted agents filtered out when kuery is passed
+  if (res.total ?? total < total) {
+    await bulkCreateAgentActionResults(
+      esClient,
+      Array(total - (res.total ?? total))
+        .fill('')
+        .map(() => ({
+          agentId: '',
+          actionId,
+          error: hostedAgentError,
+        }))
+    );
+  }
 
   return { actionId, updated: res.updated, took: res.took };
 }
