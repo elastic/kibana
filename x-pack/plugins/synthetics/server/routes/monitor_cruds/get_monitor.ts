@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { ConfigKey } from '../../../common/runtime_types';
+import { ConfigKey, MonitorOverviewItem, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -112,55 +112,42 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     query: querySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const { perPage = 5 } = request.query;
-    const { saved_objects: monitors } = await getMonitors(
-      {
-        perPage: 1000,
-        sortField: 'name.keyword',
-        sortOrder: 'asc',
-        page: 1,
-      },
-      syntheticsMonitorClient.syntheticsService,
-      savedObjectsClient
-    );
-
-    const allMonitorIds: string[] = [];
-    const pages: Record<number, unknown[]> = {};
-    let currentPage = 0;
-    let currentItem = 0;
-    let total = 0;
-
-    monitors.forEach((monitor) => {
-      /* collect all monitor ids for use
-       * in filtering overview requests */
-      const id = monitor.id;
-      allMonitorIds.push(id);
-
-      /* for reach location, add a config item */
-      const locations = monitor.attributes[ConfigKey.LOCATIONS];
-      locations.forEach((location) => {
-        const config = {
-          id,
-          name: monitor.attributes[ConfigKey.NAME],
-          location,
-          isEnabled: monitor.attributes[ConfigKey.ENABLED],
-        };
-        if (!pages[currentPage]) {
-          pages[currentPage] = [config];
-        } else {
-          pages[currentPage].push(config);
-        }
-        currentItem++;
-        total++;
-        if (currentItem % perPage === 0) {
-          currentPage++;
-          currentItem = 0;
-        }
-      });
+    const { sortField, sortOrder } = request.query;
+    const finder = savedObjectsClient.createPointInTimeFinder<SyntheticsMonitor>({
+      type: syntheticsMonitorType,
+      sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
+      sortOrder,
+      perPage: 500,
     });
 
+    const allMonitorIds: string[] = [];
+    let total = 0;
+    const allMonitors: MonitorOverviewItem[] = [];
+
+    for await (const result of finder.find()) {
+      /* collect all monitor ids for use
+       * in filtering overview requests */
+      result.saved_objects.forEach((monitor) => {
+        const id = monitor.id;
+        allMonitorIds.push(id);
+
+        /* for reach location, add a config item */
+        const locations = monitor.attributes[ConfigKey.LOCATIONS];
+        locations.forEach((location) => {
+          const config = {
+            id,
+            name: monitor.attributes[ConfigKey.NAME],
+            location,
+            isEnabled: monitor.attributes[ConfigKey.ENABLED],
+          };
+          allMonitors.push(config);
+          total++;
+        });
+      });
+    }
+
     return {
-      pages,
+      monitors: allMonitors,
       total,
       allMonitorIds,
     };

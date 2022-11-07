@@ -12,7 +12,7 @@ import path from 'path';
 
 import { merge } from '@kbn/std';
 import yaml from 'js-yaml';
-import { pick, uniq } from 'lodash';
+import { pick } from 'lodash';
 import semverMajor from 'semver/functions/major';
 import semverPrerelease from 'semver/functions/prerelease';
 
@@ -62,13 +62,13 @@ const expandDottedField = (dottedFieldName: string, val: unknown): object => {
   }
 };
 
-export const expandDottedObject = (dottedObj: object) => {
+export const expandDottedObject = (dottedObj: object = {}) => {
   if (typeof dottedObj !== 'object' || Array.isArray(dottedObj)) {
     return dottedObj;
   }
   return Object.entries(dottedObj).reduce(
     (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
-    {}
+    {} as Record<string, any>
   );
 };
 
@@ -217,7 +217,13 @@ function parseAndVerifyArchive(paths: string[], topLevelDirOverride?: string): A
     );
   }
 
-  const parsedDataStreams = parseAndVerifyDataStreams(paths, parsed.name, parsed.version);
+  const parsedDataStreams = parseAndVerifyDataStreams(
+    paths,
+    parsed.name,
+    parsed.version,
+    topLevelDirOverride
+  );
+
   if (parsedDataStreams.length) {
     parsed.data_streams = parsedDataStreams;
   }
@@ -250,26 +256,27 @@ function parseAndVerifyReadme(paths: string[], pkgName: string, pkgVersion: stri
 export function parseAndVerifyDataStreams(
   paths: string[],
   pkgName: string,
-  pkgVersion: string
+  pkgVersion: string,
+  pkgBasePathOverride?: string
 ): RegistryDataStream[] {
   // A data stream is made up of a subdirectory of name-version/data_stream/, containing a manifest.yml
-  let dataStreamPaths: string[] = [];
+  const dataStreamPaths = new Set<string>();
   const dataStreams: RegistryDataStream[] = [];
-  const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
+  const pkgBasePath = pkgBasePathOverride || pkgToPkgKey({ name: pkgName, version: pkgVersion });
+  const dataStreamsBasePath = path.join(pkgBasePath, 'data_stream');
+  // pick all paths matching name-version/data_stream/DATASTREAM_NAME/...
+  // from those, pick all unique data stream names
+  paths.forEach((filePath) => {
+    if (!filePath.startsWith(dataStreamsBasePath)) return;
 
-  // pick all paths matching name-version/data_stream/DATASTREAM_PATH/...
-  // from those, pick all unique data stream paths
-  paths
-    .filter((filePath) => filePath.startsWith(`${pkgKey}/data_stream/`))
-    .forEach((filePath) => {
-      const parts = filePath.split('/');
-      if (parts.length > 2 && parts[2]) dataStreamPaths.push(parts[2]);
-    });
-
-  dataStreamPaths = uniq(dataStreamPaths);
+    const streamWithoutPrefix = filePath.slice(dataStreamsBasePath.length);
+    const [dataStreamPath] = streamWithoutPrefix.split('/').filter((v) => v); // remove undefined incase of leading /
+    if (dataStreamPath) dataStreamPaths.add(dataStreamPath);
+  });
 
   dataStreamPaths.forEach((dataStreamPath) => {
-    const manifestFile = `${pkgKey}/data_stream/${dataStreamPath}/${MANIFEST_NAME}`;
+    const fullDataStreamPath = path.join(dataStreamsBasePath, dataStreamPath);
+    const manifestFile = path.join(fullDataStreamPath, MANIFEST_NAME);
     const manifestBuffer = MANIFESTS[manifestFile];
     if (!paths.includes(manifestFile) || !manifestBuffer) {
       throw new PackageInvalidArchiveError(
@@ -295,52 +302,19 @@ export function parseAndVerifyDataStreams(
       elasticsearch,
       ...restOfProps
     } = manifest;
+
     if (!(dataStreamTitle && type)) {
       throw new PackageInvalidArchiveError(
         `Invalid manifest for data stream '${dataStreamPath}': one or more fields missing of 'title', 'type'`
       );
     }
 
-    let ingestPipeline;
-    const ingestPipelinePaths = paths.filter((filePath) =>
-      filePath.startsWith(`${pkgKey}/data_stream/${dataStreamPath}/elasticsearch/ingest_pipeline`)
-    );
-
-    if (
-      ingestPipelinePaths.length &&
-      (ingestPipelinePaths.some((ingestPipelinePath) =>
-        ingestPipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_YML)
-      ) ||
-        ingestPipelinePaths.some((ingestPipelinePath) =>
-          ingestPipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON)
-        ))
-    ) {
-      ingestPipeline = DEFAULT_INGEST_PIPELINE_VALUE;
-    }
-
+    const ingestPipeline = parseDefaultIngestPipeline(fullDataStreamPath, paths);
     const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
-
-    const parsedElasticsearchEntry: Record<string, any> = {};
-
-    if (ingestPipeline) {
-      parsedElasticsearchEntry['ingest_pipeline.name'] = DEFAULT_INGEST_PIPELINE_VALUE;
-    }
-
-    if (elasticsearch?.privileges) {
-      parsedElasticsearchEntry.privileges = elasticsearch.privileges;
-    }
-
-    if (elasticsearch?.index_template?.mappings) {
-      parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
-        elasticsearch.index_template.mappings
-      );
-    }
-
-    if (elasticsearch?.index_template?.settings) {
-      parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
-        elasticsearch.index_template.settings
-      );
-    }
+    const parsedElasticsearchEntry = parseDataStreamElasticsearchEntry(
+      elasticsearch,
+      ingestPipeline
+    );
 
     // Build up the stream object here so we can conditionally insert nullable fields. The package registry omits undefined
     // fields, so we're mimicking that behavior here.
@@ -533,4 +507,53 @@ export function parseAndVerifyInputs(manifestInputs: any, location: string): Reg
     });
   }
   return inputs;
+}
+
+export function parseDataStreamElasticsearchEntry(
+  elasticsearch?: Record<string, any>,
+  ingestPipeline?: string
+) {
+  const parsedElasticsearchEntry: Record<string, any> = {};
+  const expandedElasticsearch = expandDottedObject(elasticsearch);
+  if (ingestPipeline) {
+    parsedElasticsearchEntry['ingest_pipeline.name'] = ingestPipeline;
+  }
+
+  if (expandedElasticsearch?.privileges) {
+    parsedElasticsearchEntry.privileges = expandedElasticsearch.privileges;
+  }
+
+  if (expandedElasticsearch?.source_mode) {
+    parsedElasticsearchEntry.source_mode = expandedElasticsearch.source_mode;
+  }
+
+  if (expandedElasticsearch?.index_template?.mappings) {
+    parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
+      expandedElasticsearch.index_template.mappings
+    );
+  }
+
+  if (expandedElasticsearch?.index_template?.settings) {
+    parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
+      expandedElasticsearch.index_template.settings
+    );
+  }
+
+  return parsedElasticsearchEntry;
+}
+
+const isDefaultPipelineFile = (pipelinePath: string) =>
+  pipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_YML) ||
+  pipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON);
+
+export function parseDefaultIngestPipeline(fullDataStreamPath: string, paths: string[]) {
+  const ingestPipelineDirPath = path.join(fullDataStreamPath, '/elasticsearch/ingest_pipeline');
+  const defaultIngestPipelinePaths = paths.filter(
+    (pipelinePath) =>
+      pipelinePath.startsWith(ingestPipelineDirPath) && isDefaultPipelineFile(pipelinePath)
+  );
+
+  if (!defaultIngestPipelinePaths.length) return undefined;
+
+  return DEFAULT_INGEST_PIPELINE_VALUE;
 }
