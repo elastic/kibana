@@ -9,6 +9,7 @@ import React, { CSSProperties } from 'react';
 import xml2js from 'xml2js';
 import uuid from 'uuid/v4';
 import { Canvg } from 'canvg';
+// @ts-expect-error
 import calcSDF from 'bitmap-sdf';
 import {
   CUSTOM_ICON_SIZE,

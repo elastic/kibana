@@ -8,9 +8,7 @@
 import React from 'react';
 
 import { Props, StylePropEditor } from '../style_prop_editor';
-// @ts-expect-error
 import { DynamicIconForm } from './dynamic_icon_form';
-// @ts-expect-error
 import { StaticIconForm } from './static_icon_form';
 import { IconDynamicOptions, IconStaticOptions } from '../../../../../../common/descriptor_types';
 

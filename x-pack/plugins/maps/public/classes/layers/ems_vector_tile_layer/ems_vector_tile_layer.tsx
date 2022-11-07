@@ -11,7 +11,6 @@ import { type blendMode, type EmsSpriteSheet, TMSService } from '@elastic/ems-cl
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
-// @ts-expect-error
 import { RGBAImage } from './image_utils';
 import { AbstractLayer, type LayerIcon } from '../layer';
 import {

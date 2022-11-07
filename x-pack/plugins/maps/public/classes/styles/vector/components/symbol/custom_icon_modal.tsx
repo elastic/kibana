@@ -29,7 +29,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { IconPreview } from './icon_preview';
 import { getCustomIconId } from '../../symbol_utils';
-// @ts-expect-error
 import { ValidatedRange } from '../../../../../components/validated_range';
 import { CustomIcon } from '../../../../../../common/descriptor_types';
 import { APP_ID } from '../../../../../../common';

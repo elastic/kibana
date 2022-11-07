@@ -9,7 +9,6 @@ import React, { Component, Fragment } from 'react';
 import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error
 import { IconStops } from './icon_stops';
 import { getIconPaletteOptions, PREFERRED_ICONS } from '../../symbol_utils';
 import {
