@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import { ENCRYPTION_EXTENSION_ID } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   ISavedObjectTypeRegistry,
   KibanaRequest,
@@ -13,7 +14,6 @@ import type {
   SavedObjectsBulkUpdateObject,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { ENCRYPTION_EXTENSION_ID } from '@kbn/core/server';
 import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 

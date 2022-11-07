@@ -22,7 +22,7 @@ export interface SimpleSavedObject<T = unknown> {
   attributes: T;
   /**  version of the saved object */
   _version?: SavedObjectType<T>['version'];
-  /** ID of the saved object, unique per type */
+  /** ID of the saved object */
   id: SavedObjectType<T>['id'];
   /** Type of the saved object */
   type: SavedObjectType<T>['type'];

@@ -9,7 +9,7 @@ import { Request } from '@hapi/hapi';
 import { RulesClientFactory, RulesClientFactoryOpts } from './rules_client_factory';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { CoreKibanaRequest, SECURITY_EXTENSION_ID } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
@@ -25,6 +25,7 @@ import { alertingAuthorizationMock } from './authorization/alerting_authorizatio
 import { alertingAuthorizationClientFactoryMock } from './alerting_authorization_client_factory.mock';
 import { AlertingAuthorization } from './authorization';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');

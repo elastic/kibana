@@ -14,8 +14,6 @@ import {
   IKibanaResponse,
   Logger,
   SavedObject,
-  SECURITY_EXTENSION_ID,
-  SPACES_EXTENSION_ID,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
@@ -25,6 +23,7 @@ import {
   TaskInstance,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 

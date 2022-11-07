@@ -12,9 +12,10 @@ import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE, FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '../constants';
 import { upgradeAgentPolicySchemaVersion } from '../services/setup/upgrade_agent_policy_schema_version';

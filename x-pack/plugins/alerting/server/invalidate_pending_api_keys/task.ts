@@ -11,7 +11,6 @@ import {
   SavedObjectsFindResponse,
   KibanaRequest,
   SavedObjectsClientContract,
-  SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -20,6 +19,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { InvalidateAPIKeyResult } from '../rules_client';
 import { AlertingConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';

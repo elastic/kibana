@@ -10,13 +10,13 @@ import {
   Logger,
   SavedObjectsServiceStart,
   PluginInitializerContext,
-  SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';

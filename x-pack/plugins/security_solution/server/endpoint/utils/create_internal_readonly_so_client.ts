@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { EndpointError } from '../../../common/endpoint/errors';
 
 type SavedObjectsClientContractKeys = keyof SavedObjectsClientContract;

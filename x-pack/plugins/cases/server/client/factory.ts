@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
   IBasePath,
 } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';

@@ -24,7 +24,6 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
@@ -48,6 +47,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';

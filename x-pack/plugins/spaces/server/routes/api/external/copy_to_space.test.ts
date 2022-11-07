@@ -8,8 +8,9 @@
 import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { RouteValidatorConfig } from '@kbn/core/server';
-import { kibanaResponseFactory, SPACES_EXTENSION_ID } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,

@@ -8,7 +8,6 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/utils';
-import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
@@ -28,6 +27,8 @@ import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plu
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
