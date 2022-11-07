@@ -9,65 +9,83 @@ Short description.
 [[supported-visualizations-tabular]]
 === Tabular
 
-Tabular visualizations organize your data in tables, which are highly customizable and allow you to align the text, format the values, apply different colors to cell and text values, and more. 
+Tabular visualizations organize your data into tables, which are highly customizable and allow you to align the text, format the values, apply different colors to cell and text values, and more. 
 
-[image]
-
-[cols=2*]
-|===
-
-| *1*
-| *Header* [Description]
-
-| *2*
-| *Rows* [Description]
-
-| *3*
-| *Columns* [Description]
-
-| *4*
-| *Sorting* [Description]
-
-| *5*
-| *Minimum value* [Description]
-
-| *5*
-| *Maximum value* [Description]
-
-| *5*
-| *Bar and color values* [Description]
-|===
-
-Use tables to display the following quantitive and qualitative data:
+Use data tables to display the following quantitive and qualitative data:
 
 * Text, such as names, geographic locations, and URLs
 * Plain numbers, such as value amounts, percentages, and dates
 
-Best practices:
+Add tables to your dashboard to answer the following types of questions:
 
-* Priortize the data by ordering columns by level of relevance.
-* Leave adequate spacing between columns and rows to make the table easy to read and the information easy to consume. 
-* Add tables to your dashboard to answer the following questions:
+* How many visits did a webpage on my site receive compared to other webpages?
+* What log errors did I receive over the last week?
+* What was my revenue this week compared to last week?
 
-** How many visits did a webpage on my site receive compared to other webpages?
-** What log errors did I receive over the last week?
-** What was my revenue this week compared to last week?
+[discrete]
+[[components-of-a-data-table]]
+==== Components of a data table
 
-Alternative visualizations:
+All data tables include the same set of components for visualizing your data.
 
-* *Line* To display a large amount of overview or summary data, a line chart is an effective way to digest the changes and trends.
+[role="screenshot"]
+image:images/lens_anatomyOfADataTable_8.6.png[Data table with callouts for each data table part]
++
+[cols=2*]
+|===
+| *1*
+| *Column* Displays the qualitative or quantitive field values.
 
-* *Bar* To compare many metrics over time, display them on a bar chart to easily compare the metrics. 
+| *2*
+| *Sorting* Allows you to organize the column data in ascending or descending order, or hide the column from the data table.
+
+| *3*
+| *Column header* A name that describes the data that appears in the column.
+
+| *4*
+| *Row* Displays the qualitative field values and the associated qualitative field values.
+
+| *5*
+| *Value* The value of a field. 
+
+| *6*
+| *Summary row* Displays the aggregated value of the column.
+
+| *7*
+| *Pagination* Allows you to navigate to another page of the data table.
+|===
+
+[discrete]
+[[supported-visualizations-data-table-best-practices]]
+==== Data table best practices
+
+To create data tables that best display your data, review the best practices. 
+
+Priortize the data by ordering the columns by level of relevance. For example, by date.
++
+[role="screenshot"]
+image:images/lens_dataTableOrderingBestPractices_8.6.0.gif[Data table that shows the total number of e-commerce orders by date]
+
+Leave adequate spacing between the columns and rows. 
++
+[role="screenshot"]
+image:images/lens_dataTableBestPractices_8.6.0.png[Data table that shows the total number of e-commerce orders with cell padding]
+
+[discrete]
+[[supported-visualizations-data-table-alternatives]]
+==== Alternative data table visualizations
+
+Consider the alertnative data table visualizations for best displaying your data. 
+
+* *Line* To display a large amount of overview or summary data, use a line chart to easily view the changes and trends.
+
+* *Bar* To compare many metrics over time, use a bar chart to easily compare the metrics. 
 
 [discrete]
 [[supported-visualizations-bar]]
 === Bar
 
-Bar charts, or bar graphs, display data in rectangular bars, where the height and length from the common baseline are proportional to the values the bars represent. You can display bar charts vertically or horizontally, and if you have many fields, you can use stacked bar charts. 
-
-In vertical bar charts, categories appear along the horizontal axis. In horizontal bar charts, categories appear along the vertical axis. 
-
-Stacked bar charts show how a larger category is divided into subcategories, where each subcategory is displayed in a different color. Depending on the data, the largest and most important, or least variable subcategories are displayed along the baseline.
+Bar charts, or bar graphs, display data in rectangular bars, where the height and length from the common baseline are proportional to the values the bars represent. 
 
 {kib} supports the following bar charts:
 
@@ -77,6 +95,10 @@ Stacked bar charts show how a larger category is divided into subcategories, whe
 * Bar vertical
 * Bar vertical percentage
 * Bar vertical stacked
+
+Stacked bar charts show how a larger category is divided into subcategories, where each subcategory is displayed in a different color. Depending on the data, the largest and most important, or least variable, subcategories are displayed along the baseline. Use stacked bar charts to display many fields. 
+
+Grouped bar charts represent multiple data sets that are aligned and allow you to compare the data side-by-side. Use grouped bar charts when you want to compare individual bars to the associated group of bars, and each bar group across all grouped bars.
 
 Use bar charts to visually compare the differences between categorical data, such as logs, host names, or days of the week, and for when you want to visually detect small changes in the values across categories. For example, add bar charts to your dashboard to answer the following types of questions:
 
@@ -106,7 +128,7 @@ image:images/lens_anatomyOfABarChart_8.6.png[Horizontal bar chart with callouts 
 | *Axis tick label* The labeled category or measurement that appears along the corresponding axis.
 
 | *3*
-| *Vertical axis* The quantitive axis that represents the scale of a measured value, which is represented by the height of the bars, and displays a set of incremental ticks to guide analysis. In a vertical bar chart, represents categorical data.
+| *Vertical axis* Displays a set of incremental ticks that guide analysis. In horizontal bar charts, represents the scale of a measured value, which is represented by the height of the bars. In vertical bar charts, represents categorical data.
 
 | *4*
 | *Bar* Increases from a common baseline where the height corresponds to the categorical data along the vertical axis. In a vertical bar chart, appears along the horizontal access.
@@ -115,7 +137,7 @@ image:images/lens_anatomyOfABarChart_8.6.png[Horizontal bar chart with callouts 
 | *Baseline* The common base value for each bar, which is always zero. You can display bars above and below the baseline. 
 
 | *6*
-| *Horizontal axis* The axis that represents the categorical data that appear as a set of incremental ticks to guide analysis. In a vertical bar chart, represents the scale of a measured value.
+| *Horizontal axis* Displays a set of incremental ticks that guide analysis. In vertical bar charts, represents the categorical data. In a vertical bar chart, represents the scale of a measured value.
 
 | *7*
 | *Tick* A visually aligned and labeled category or measurement that appears along the corresponding axis.
