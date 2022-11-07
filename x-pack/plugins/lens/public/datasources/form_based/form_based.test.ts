@@ -1815,6 +1815,7 @@ describe('IndexPattern Data Source', () => {
               columnOrder: [],
               columns: {},
               linkToLayers: ['some-layer'],
+              sampling: 1,
             },
           },
         },
@@ -1843,7 +1844,7 @@ describe('IndexPattern Data Source', () => {
         newState: {
           ...state,
           layers: {
-            first: state.layers.first,
+            first: { ...state.layers.first, linkToLayers: undefined, sampling: 1 },
           },
         },
       });

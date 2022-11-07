@@ -442,6 +442,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmAWSLambdaPriceFactor': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmAWSLambdaRequestCostPerMillion': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -543,6 +551,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmTraceExplorerTab': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmEnableCriticalPath': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

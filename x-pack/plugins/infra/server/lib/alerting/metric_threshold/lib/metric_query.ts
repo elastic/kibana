@@ -12,11 +12,56 @@ import { createPercentileAggregation } from './create_percentile_aggregation';
 import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
 import { wrapInCurrentPeriod } from './wrap_in_period';
 
-const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, any> | null = (
+const getParsedFilterQuery: (filterQuery: string | undefined) => Array<Record<string, any>> = (
   filterQuery
 ) => {
-  if (!filterQuery) return null;
-  return JSON.parse(filterQuery);
+  if (!filterQuery) return [];
+  return [JSON.parse(filterQuery)];
+};
+
+export const calculateCurrentTimeframe = (
+  metricParams: MetricExpressionParams,
+  timeframe: { start: number; end: number }
+) => ({
+  ...timeframe,
+  start: moment(timeframe.end)
+    .subtract(
+      metricParams.aggType === Aggregators.RATE ? metricParams.timeSize * 2 : metricParams.timeSize,
+      metricParams.timeUnit
+    )
+    .valueOf(),
+});
+
+export const createBaseFilters = (
+  metricParams: MetricExpressionParams,
+  timeframe: { start: number; end: number },
+  filterQuery?: string
+) => {
+  const { metric } = metricParams;
+  const rangeFilters = [
+    {
+      range: {
+        '@timestamp': {
+          gte: moment(timeframe.start).toISOString(),
+          lte: moment(timeframe.end).toISOString(),
+        },
+      },
+    },
+  ];
+
+  const metricFieldFilters = metric
+    ? [
+        {
+          exists: {
+            field: metric,
+          },
+        },
+      ]
+    : [];
+
+  const parsedFilterQuery = getParsedFilterQuery(filterQuery);
+
+  return [...rangeFilters, ...metricFieldFilters, ...parsedFilterQuery];
 };
 
 export const getElasticsearchMetricQuery = (
@@ -39,17 +84,7 @@ export const getElasticsearchMetricQuery = (
 
   // We need to make a timeframe that represents the current timeframe as oppose
   // to the total timeframe (which includes the last period).
-  const currentTimeframe = {
-    ...timeframe,
-    start: moment(timeframe.end)
-      .subtract(
-        metricParams.aggType === Aggregators.RATE
-          ? metricParams.timeSize * 2
-          : metricParams.timeSize,
-        metricParams.timeUnit
-      )
-      .valueOf(),
-  };
+  const currentTimeframe = calculateCurrentTimeframe(metricParams, timeframe);
 
   const metricAggregations =
     aggType === Aggregators.COUNT
@@ -129,38 +164,13 @@ export const getElasticsearchMetricQuery = (
     aggs.groupings.composite.after = afterKey;
   }
 
-  const rangeFilters = [
-    {
-      range: {
-        '@timestamp': {
-          gte: moment(timeframe.start).toISOString(),
-          lte: moment(timeframe.end).toISOString(),
-        },
-      },
-    },
-  ];
-
-  const metricFieldFilters = metric
-    ? [
-        {
-          exists: {
-            field: metric,
-          },
-        },
-      ]
-    : [];
-
-  const parsedFilterQuery = getParsedFilterQuery(filterQuery);
+  const baseFilters = createBaseFilters(metricParams, timeframe, filterQuery);
 
   return {
     track_total_hits: true,
     query: {
       bool: {
-        filter: [
-          ...rangeFilters,
-          ...metricFieldFilters,
-          ...(parsedFilterQuery ? [parsedFilterQuery] : []),
-        ],
+        filter: baseFilters,
       },
     },
     size: 0,

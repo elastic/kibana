@@ -17,7 +17,7 @@ describe('<EditPolicy /> policy name validation', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {

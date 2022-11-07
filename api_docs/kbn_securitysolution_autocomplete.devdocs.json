@@ -208,7 +208,13 @@
         ],
         "signature": [
           "(param: string | undefined, field: ",
-          "DataViewFieldBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          },
           " | undefined, isRequired: boolean, touched: boolean) => string | null | undefined"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
@@ -238,7 +244,13 @@
             "label": "field",
             "description": [],
             "signature": [
-              "DataViewFieldBase",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
@@ -336,7 +348,13 @@
             "text": "AutocompleteListsData"
           },
           ", field?: (",
-          "DataViewFieldBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          },
           " & { esTypes?: string[] | undefined; }) | undefined) => ",
           {
             "pluginId": "@kbn/securitysolution-autocomplete",
@@ -384,7 +402,13 @@
             ],
             "signature": [
               "(",
-              "DataViewFieldBase",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
               " & { esTypes?: string[] | undefined; }) | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
@@ -521,9 +545,21 @@
         ],
         "signature": [
           "(field: ",
-          "DataViewFieldBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          },
           " | undefined) => ",
-          "OperatorOption",
+          {
+            "pluginId": "@kbn/securitysolution-list-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
+            "section": "def-common.OperatorOption",
+            "text": "OperatorOption"
+          },
           "[]"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/get_operators/index.ts",
@@ -540,7 +576,13 @@
               "DataViewFieldBase selected field"
             ],
             "signature": [
-              "DataViewFieldBase",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_operators/index.ts",
@@ -629,7 +671,13 @@
         ],
         "signature": [
           "(param: string | undefined, field: ",
-          "DataViewFieldBase",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          },
           " | undefined, isRequired: boolean, touched: boolean) => string | undefined"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
@@ -663,7 +711,13 @@
               "the selected field"
             ],
             "signature": [
-              "DataViewFieldBase",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
@@ -916,7 +970,13 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
-              "DataViewBase",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
@@ -931,7 +991,13 @@
             "label": "operatorType",
             "description": [],
             "signature": [
-              "ListOperatorTypeEnum"
+              {
+                "pluginId": "@kbn/securitysolution-io-ts-list-types",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+                "section": "def-common.ListOperatorTypeEnum",
+                "text": "ListOperatorTypeEnum"
+              }
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
             "deprecated": false,
@@ -956,7 +1022,13 @@
             "label": "selectedField",
             "description": [],
             "signature": [
-              "DataViewFieldBase",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",

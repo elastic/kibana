@@ -109,7 +109,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <span
-                              color="success"
+                              color="warning"
                               data-euiicon-type="dot"
                             />
                           </div>

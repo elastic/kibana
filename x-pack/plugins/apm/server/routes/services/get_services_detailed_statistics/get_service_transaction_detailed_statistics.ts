@@ -25,18 +25,18 @@ import {
 } from '../../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup } from '../../../lib/helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServiceTransactionDetailedStats({
   serviceNames,
   environment,
   kuery,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   offset,
   start,
@@ -46,14 +46,13 @@ export async function getServiceTransactionDetailedStats({
   serviceNames: string[];
   environment: string;
   kuery: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   offset?: string;
   start: number;
   end: number;
   randomSampler: RandomSampler;
 }) {
-  const { apmEventClient } = setup;
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -182,7 +181,7 @@ export async function getServiceDetailedStatsPeriods({
   serviceNames,
   environment,
   kuery,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   offset,
   start,
@@ -192,7 +191,7 @@ export async function getServiceDetailedStatsPeriods({
   serviceNames: string[];
   environment: string;
   kuery: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   offset?: string;
   start: number;
@@ -204,7 +203,7 @@ export async function getServiceDetailedStatsPeriods({
       serviceNames,
       environment,
       kuery,
-      setup,
+      apmEventClient,
       searchAggregatedTransactions,
       start,
       end,
