@@ -16,7 +16,7 @@ export const INITIAL_METRICS = {
   gap_duration_s: null,
 };
 
-export const getDefaultMonitoring = (timestamp: string) => {
+export const getDefaultMonitoring = (timestamp: string): RawRuleMonitoring => {
   return {
     run: {
       history: [],

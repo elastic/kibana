@@ -2426,6 +2426,109 @@ describe('successful migrations', () => {
       });
     });
 
+    describe('8.6.0', () => {
+      test('migrates executionStatus success', () => {
+        const migration860 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.6.0'
+        ];
+
+        let ruleWithExecutionStatus = getMockData({
+          executionStatus: {
+            status: 'ok',
+            lastExecutionDate: '2022-01-02T00:00:00.000Z',
+            lastDuration: 60000,
+          },
+        });
+
+        let migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
+        expect(migratedRule.attributes.lastRun.outcome).toEqual('succeeded');
+        expect(migratedRule.attributes.lastRun.warning).toEqual(null);
+        ruleWithExecutionStatus = getMockData({
+          executionStatus: {
+            status: 'active',
+            lastExecutionDate: '2022-01-02T00:00:00.000Z',
+            lastDuration: 60000,
+          },
+        });
+
+        migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
+        expect(migratedRule.attributes.lastRun.outcome).toEqual('succeeded');
+        expect(migratedRule.attributes.lastRun.warning).toEqual(null);
+      });
+
+      test('migrates executionStatus warning and error', () => {
+        const migration860 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.6.0'
+        ];
+
+        let ruleWithExecutionStatus = getMockData({
+          executionStatus: {
+            status: 'warning',
+            lastExecutionDate: '2022-01-02T00:00:00.000Z',
+            lastDuration: 60000,
+            warning: {
+              reason: 'warning reason',
+              message: 'warning message',
+            },
+          },
+        });
+
+        let migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
+        expect(migratedRule.attributes.lastRun.outcome).toEqual('warning');
+        expect(migratedRule.attributes.lastRun.outcomeMsg).toEqual('warning message');
+        expect(migratedRule.attributes.lastRun.warning).toEqual('warning reason');
+
+        ruleWithExecutionStatus = getMockData({
+          executionStatus: {
+            status: 'error',
+            lastExecutionDate: '2022-01-02T00:00:00.000Z',
+            lastDuration: 60000,
+            error: {
+              reason: 'failed reason',
+              message: 'failed message',
+            },
+          },
+        });
+
+        migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
+        expect(migratedRule.attributes.lastRun.outcome).toEqual('failed');
+        expect(migratedRule.attributes.lastRun.outcomeMsg).toEqual('failed message');
+        expect(migratedRule.attributes.lastRun.warning).toEqual('failed reason');
+      });
+
+      test('migrates empty monitoring', () => {
+        const migration860 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.6.0'
+        ];
+
+        const ruleWithoutMonitoring = getMockData();
+        const migratedRule = migration860(ruleWithoutMonitoring, migrationContext);
+
+        expect(migratedRule.attributes.monitoring).toBeUndefined();
+      });
+
+      test('migrates empty monitoring when executionStatus exists', () => {
+        const migration860 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.6.0'
+        ];
+
+        const ruleWithMonitoring = getMockData({
+          executionStatus: {
+            status: 'ok',
+            lastExecutionDate: '2022-01-02T00:00:00.000Z',
+            lastDuration: 60000,
+          },
+        });
+        const migratedRule = migration860(ruleWithMonitoring, migrationContext);
+
+        expect(migratedRule.attributes.monitoring.run.history).toEqual([]);
+        expect(migratedRule.attributes.monitoring.run.last_run.timestamp).toEqual(
+          '2022-01-02T00:00:00.000Z'
+        );
+        expect(migratedRule.attributes.monitoring.run.last_run.metrics.duration).toEqual(60000);
+      });
+    });
+
     describe('Metrics Inventory Threshold rule', () => {
       test('Migrates incorrect action group spelling', () => {
         const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[

@@ -9,6 +9,7 @@ import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createEsoMigration, pipeMigrations } from '../utils';
 import { RawRule, RuleLastRunOutcomeValues } from '../../../types';
+import { getDefaultMonitoring } from '../../../lib/monitoring';
 
 const succeededStatus = ['ok', 'active', 'succeeded'];
 const warningStatus = ['warning'];
@@ -16,7 +17,7 @@ const failedStatus = ['error', 'failed'];
 
 const getLastRun = (attributes: RawRule) => {
   const { executionStatus } = attributes;
-  const { status, warning, error } = executionStatus;
+  const { status, warning, error } = executionStatus || {};
 
   let outcome;
   if (succeededStatus.includes(status)) {
@@ -36,7 +37,7 @@ const getLastRun = (attributes: RawRule) => {
   return {
     outcome,
     outcomeMsg: warning?.message || error?.message || null,
-    warning: warning?.reason || null,
+    warning: warning?.reason || error?.reason || null,
     alertsCount: {},
   };
 };
@@ -44,10 +45,19 @@ const getLastRun = (attributes: RawRule) => {
 const getMonitoring = (attributes: RawRule) => {
   const { executionStatus, monitoring } = attributes;
   if (!monitoring) {
-    return null;
+    if (!executionStatus) {
+      return null;
+    }
+
+    // monitoring now has data from executionStatus, therefore, we should migrate
+    // these fields even if monitoring doesn't exist.
+    const defaultMonitoring = getDefaultMonitoring(executionStatus.lastExecutionDate);
+    if (executionStatus.lastDuration) {
+      defaultMonitoring.run.last_run.metrics.duration = executionStatus.lastDuration;
+    }
+    return defaultMonitoring;
   }
 
-  // Question: Do we want to backfill the history?
   const { lastExecutionDate, lastDuration } = executionStatus;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,9 +83,6 @@ function migrateLastRun(
   const lastRun = getLastRun(attributes);
   const monitoring = getMonitoring(attributes);
 
-  // Question: Do we want to migrate running and next_rule? It might be
-  // very unreliable since we don't know for sure (long running rules) when the rule finishes running
-  // and therefore next_run would be incorrect.
   return {
     ...doc,
     attributes: {

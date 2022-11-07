@@ -6,7 +6,7 @@
  */
 
 import { getDefaultMonitoring, getExecutionDurationPercentiles } from '../lib/monitoring';
-import { RuleMonitoring, RuleMonitoringHistory } from '../types';
+import { RuleMonitoring, RuleMonitoringHistory, PublicRuleMonitoringService } from '../types';
 
 export class RuleMonitoringService {
   private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());
@@ -54,14 +54,14 @@ export class RuleMonitoringService {
     };
   }
 
-  public getLastRunMetricsSetters() {
+  public getLastRunMetricsSetters(): PublicRuleMonitoringService {
     return {
       setLastRunMetricsTotalSearchDurationMs:
         this.setLastRunMetricsTotalSearchDurationMs.bind(this),
       setLastRunMetricsTotalIndexingDurationMs:
         this.setLastRunMetricsTotalIndexingDurationMs.bind(this),
-      setLastRunMetricsTotalAlertDetected: this.setLastRunMetricsTotalAlertsDetected.bind(this),
-      setLastRunMetricsTotalAlertCreated: this.setLastRunMetricsTotalAlertsCreated.bind(this),
+      setLastRunMetricsTotalAlertsDetected: this.setLastRunMetricsTotalAlertsDetected.bind(this),
+      setLastRunMetricsTotalAlertsCreated: this.setLastRunMetricsTotalAlertsCreated.bind(this),
       setLastRunMetricsGapDurationS: this.setLastRunMetricsGapDurationS.bind(this),
     };
   }
