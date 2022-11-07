@@ -99,5 +99,5 @@ function getConfigFleetServerHosts() {
 }
 
 export function createDefaultSettings(): BaseSettings {
-  return {};
+  return { prerelease_integrations_enabled: false };
 }

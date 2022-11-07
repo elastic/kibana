@@ -33,6 +33,7 @@ export function ActionsCommonServiceProvider({ getService, getPageObject }: FtrP
 
       if (isEnabled && isDisplayed) {
         await flyOutCancelButton.click();
+        await testSubjects.missingOrFail('edit-connector-flyout-close-btn');
       }
     },
   };

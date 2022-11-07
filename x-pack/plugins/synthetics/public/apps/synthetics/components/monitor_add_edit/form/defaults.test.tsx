@@ -72,10 +72,13 @@ describe('defaults', () => {
     type: 'browser',
     'url.port': null,
     urls: '',
+    id: '',
+    config_id: '',
   } as SyntheticsMonitor;
 
   it('correctly formats monitor type to form type', () => {
     expect(formatDefaultFormValues(monitorValues)).toEqual({
+      ...monitorValues,
       __ui: {
         script_source: {
           file_name: '',

@@ -164,6 +164,7 @@ export interface BulkEditResponse {
 
 export enum ActionConnectorMode {
   Test = 'test',
+  ActionForm = 'actionForm',
 }
 
 export interface ActionParamsProps<TParams> {

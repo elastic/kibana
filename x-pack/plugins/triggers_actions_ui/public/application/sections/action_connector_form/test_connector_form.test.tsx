@@ -71,11 +71,17 @@ const ExecutionModeComponent: React.FC<Pick<ActionParamsProps<{}>, 'executionMod
   return (
     <EuiForm component="form">
       <EuiFormRow label="Execution mode" helpText="Execution mode help text.">
-        {executionMode === ActionConnectorMode.Test ? (
-          <EuiFieldText data-test-subj="executionModeFieldTest" />
-        ) : (
-          <EuiFieldText data-test-subj="executionModeFieldNotTest" />
-        )}
+        <>
+          {executionMode === ActionConnectorMode.Test && (
+            <EuiFieldText data-test-subj="executionModeFieldTest" />
+          )}
+          {executionMode === ActionConnectorMode.ActionForm && (
+            <EuiFieldText data-test-subj="executionModeFieldActionForm" />
+          )}
+          {executionMode === undefined && (
+            <EuiFieldText data-test-subj="executionModeFieldUndefined" />
+          )}
+        </>
       </EuiFormRow>
     </EuiForm>
   );
@@ -152,7 +158,11 @@ describe('test_connector_form', () => {
       </I18nProvider>
     );
 
-    await waitFor(() => expect(screen.getByTestId('executionModeFieldTest')).toBeInTheDocument());
+    await waitFor(() => {
+      expect(screen.getByTestId('executionModeFieldTest')).toBeInTheDocument();
+      expect(screen.queryByTestId('executionModeFieldActionForm')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
+    });
   });
 
   it('renders successful results', async () => {

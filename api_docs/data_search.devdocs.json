@@ -1460,6 +1460,25 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.SearchResponseWarning",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchResponseWarning",
+        "description": [
+          "\nA warning object for a search response with warnings"
+        ],
+        "signature": [
+          "SearchResponseTimeoutWarning",
+          " | ",
+          "SearchResponseShardFailureWarning"
+        ],
+        "path": "src/plugins/data/public/search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []
@@ -10572,7 +10591,7 @@
             "references": [
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/lib/fetch_search_source_query.ts"
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.ts"
               },
               {
                 "plugin": "alerting",
@@ -10604,11 +10623,11 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/rule_type.test.ts"
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/rule_type.test.ts"
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
               },
               {
                 "plugin": "securitySolution",

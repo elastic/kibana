@@ -10,7 +10,7 @@ import { screen, render, within, fireEvent, waitFor } from '@testing-library/rea
 import { CloseAlert } from './close_alert';
 import userEvent from '@testing-library/user-event';
 
-describe('CreateAlert', () => {
+describe('CloseAlert', () => {
   const editSubAction = jest.fn();
   const editOptionalSubAction = jest.fn();
 

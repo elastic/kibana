@@ -92,12 +92,12 @@
       {
         "parentPluginId": "enterpriseSearch",
         "id": "def-server.CONNECTORS_VERSION",
-        "type": "string",
+        "type": "number",
         "tags": [],
         "label": "CONNECTORS_VERSION",
         "description": [],
         "signature": [
-          "\"1\""
+          "1"
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
