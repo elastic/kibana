@@ -104,7 +104,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     }
 
     return (
-      <FileDownloadLinkContainer>
+      <FileDownloadLinkContainer data-test-subj={dataTestSubj}>
         <EuiButtonEmpty
           href={downloadUrl}
           iconType="download"
