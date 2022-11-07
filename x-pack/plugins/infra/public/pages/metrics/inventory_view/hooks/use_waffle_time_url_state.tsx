@@ -14,7 +14,7 @@ interface WaffleTimeState {
   isAutoReloading: boolean;
 }
 
-export const WithWaffleUrlState = () => {
+export const WithWaffleTimeUrlState = () => {
   const { currentTime, isAutoReloading, setWaffleTimeState } = useWaffleTime();
 
   const urlState = useMemo(

@@ -84,8 +84,6 @@ export const useWaffleViewState = () => {
 
       if (newState.time) {
         setWaffleTimeState({
-          // Overrides the url state on load! Find a way to fix it
-          // ? currentTime: viewState.time,
           currentTime: newState.time,
           isAutoReloading: newState.autoReload,
         });

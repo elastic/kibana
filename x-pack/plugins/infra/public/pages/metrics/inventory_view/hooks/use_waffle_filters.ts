@@ -44,7 +44,7 @@ export const useWaffleFilters = () => {
 
   useEffect(() => setUrlState(state), [setUrlState, state]);
 
-  const [filterQueryDraft, setFilterQueryDraft] = useState<string>(urlState.expression);
+  const [filterQueryDraft, setFilterQueryDraft] = useState<string>(state.expression);
 
   const filterQueryAsJson = useMemo(
     () => convertKueryToElasticSearchQuery(urlState.expression, indexPattern),
