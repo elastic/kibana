@@ -122,19 +122,7 @@ export class CoreSystem {
     };
 
     this.i18n = new I18nService();
-
-    const tmpCoreContext: CoreContext = {
-      coreId: Symbol('core'),
-      env: {
-        mode: {
-          ...injectedMetadata.env.mode,
-          dev: true,
-        },
-        packageInfo: injectedMetadata.env.packageInfo,
-      },
-      logger: this.loggingSystem.asLoggerFactory(),
-    };
-    this.analytics = new AnalyticsService(tmpCoreContext);
+    this.analytics = new AnalyticsService(this.coreContext);
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
