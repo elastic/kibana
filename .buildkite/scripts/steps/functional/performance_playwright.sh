@@ -77,7 +77,7 @@ while read -r journey; do
     continue;
   fi
 
-  echo "Wait 30 sec for ES"
+  echo "--- Wait 30 sec for ES"
   sleep 30
 
   phases=("WARMUP" "TEST")
