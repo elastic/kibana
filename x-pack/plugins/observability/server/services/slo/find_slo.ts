@@ -43,5 +43,5 @@ function toPagination(params: FindSLOParams): Pagination {
 }
 
 function toCriteria(params: FindSLOParams): Criteria {
-  return { nameFilter: params.name_filter };
+  return { name: params.name };
 }

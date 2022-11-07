@@ -27,7 +27,7 @@ describe('FindSLO', () => {
       const result = await findSLO.execute({});
 
       expect(mockRepository.find).toHaveBeenCalledWith(
-        { nameFilter: undefined },
+        { name: undefined },
         { page: 1, perPage: 25 }
       );
 
@@ -73,7 +73,7 @@ describe('FindSLO', () => {
       await findSLO.execute({});
 
       expect(mockRepository.find).toHaveBeenCalledWith(
-        { nameFilter: undefined },
+        { name: undefined },
         { page: 1, perPage: 25 }
       );
     });
@@ -82,10 +82,10 @@ describe('FindSLO', () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
 
-      await findSLO.execute({ name_filter: 'Availability' });
+      await findSLO.execute({ name: 'Availability' });
 
       expect(mockRepository.find).toHaveBeenCalledWith(
-        { nameFilter: 'Availability' },
+        { name: 'Availability' },
         { page: 1, perPage: 25 }
       );
     });
@@ -94,10 +94,10 @@ describe('FindSLO', () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
 
-      await findSLO.execute({ name_filter: 'My SLO*', page: '2', per_page: '100' });
+      await findSLO.execute({ name: 'My SLO*', page: '2', per_page: '100' });
 
       expect(mockRepository.find).toHaveBeenCalledWith(
-        { nameFilter: 'My SLO*' },
+        { name: 'My SLO*' },
         { page: 2, perPage: 100 }
       );
     });
@@ -109,7 +109,7 @@ describe('FindSLO', () => {
       await findSLO.execute({ page: '-1', per_page: '0' });
 
       expect(mockRepository.find).toHaveBeenCalledWith(
-        { nameFilter: undefined },
+        { name: undefined },
         { page: 1, perPage: 25 }
       );
     });

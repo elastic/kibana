@@ -45,7 +45,7 @@ const getSLOParamsSchema = t.type({
 
 const findSLOParamsSchema = t.partial({
   query: t.partial({
-    name_filter: t.string,
+    name: t.string,
     page: t.string,
     per_page: t.string,
   }),

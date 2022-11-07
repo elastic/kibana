@@ -17,7 +17,7 @@ import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLONotFound } from '../../errors';
 
 export interface Criteria {
-  nameFilter?: string;
+  name?: string;
 }
 
 export interface Pagination {
@@ -94,8 +94,8 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
 
 function buildFilterKuery(criteria: Criteria): string | undefined {
   const filters: string[] = [];
-  if (!!criteria.nameFilter) {
-    filters.push(`slo.attributes.name: ${criteria.nameFilter}`);
+  if (!!criteria.name) {
+    filters.push(`slo.attributes.name: ${criteria.name}`);
   }
   return filters.length > 0 ? filters.join(' and ') : undefined;
 }

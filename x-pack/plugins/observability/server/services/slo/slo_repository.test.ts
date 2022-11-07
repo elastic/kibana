@@ -114,7 +114,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
       soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
 
-      const result = await repository.find({ nameFilter: 'availability' }, DEFAULT_PAGINATION);
+      const result = await repository.find({ name: 'availability' }, DEFAULT_PAGINATION);
 
       expect(result).toEqual({
         page: 1,
