@@ -25,6 +25,15 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notifications-browser';
 
 import { useCreateSharedExceptionListWithOptionalSignal } from './use_create_shared_list';
+import {
+  CREATE_SHARED_LIST_TITLE,
+  CREATE_SHARED_LIST_NAME_FIELD,
+  CREATE_SHARED_LIST_DESCRIPTION,
+  CREATE_BUTTON,
+  CLOSE_FLYOUT,
+  CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER,
+  CREATE_SHARED_LIST_NAME_FIELD_PLACEHOLDER,
+} from './translations';
 
 export const CreateSharedListFlyout = memo(
   ({
@@ -118,23 +127,23 @@ export const CreateSharedListFlyout = memo(
         onClose={handleCloseFlyout}
         data-test-subj="createSharedExceptionListFlyout"
       >
-        <EuiFlyoutHeader>
+        <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 data-test-subj="createSharedExceptionListTitle">{'hello world!'}</h2>
+            <h2 data-test-subj="createSharedExceptionListTitle">{CREATE_SHARED_LIST_TITLE}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiText>{'Shared exception list name'}</EuiText>
+          <EuiText>{CREATE_SHARED_LIST_NAME_FIELD}</EuiText>
           <EuiFieldText
-            placeholder="New exception list"
+            placeholder={CREATE_SHARED_LIST_NAME_FIELD_PLACEHOLDER}
             value={listName}
             onChange={(e) => onListNameChange(e)}
             aria-label="Use aria labels when no actual label is in use"
           />
           <EuiSpacer />
-          <EuiText>{'Description (optional)'}</EuiText>
+          <EuiText>{CREATE_SHARED_LIST_DESCRIPTION}</EuiText>
           <EuiTextArea
-            placeholder="New exception list"
+            placeholder={CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER}
             value={description}
             onChange={(e) => onDescriptionChange(e)}
             aria-label="Stop the hackers"
@@ -144,7 +153,7 @@ export const CreateSharedListFlyout = memo(
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={handleCloseFlyout} flush="left">
-                {'Close'}
+                {CLOSE_FLYOUT}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -153,7 +162,7 @@ export const CreateSharedListFlyout = memo(
                 onClick={hanadleCreateSharedExceptionList}
                 disabled={listName === ''}
               >
-                {'Create shared exception list'}
+                {CREATE_BUTTON}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

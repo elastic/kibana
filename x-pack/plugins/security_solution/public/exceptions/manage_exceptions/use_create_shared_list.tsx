@@ -16,9 +16,6 @@ export const createSharedExceptionList = async ({
   http,
   signal,
 }: {
-  // TODO: Replace these with kbn packaged versions once we have those available to us
-  // These originally came from this location below before moving them to this hacked "any" types:
-  // import { HttpStart, NotificationsStart } from '../../../../../src/core/public';
   http: HttpStart;
   signal: AbortSignal;
   name: string;
