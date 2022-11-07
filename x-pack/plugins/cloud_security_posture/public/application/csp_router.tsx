@@ -8,12 +8,12 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Redirect, Route, RouteComponentProps, type RouteProps, Switch } from 'react-router-dom';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH, type CspSecuritySolutionContext } from '..';
 import { cloudPosturePages } from '../common/navigation/constants';
 import type { CloudSecurityPosturePageId, CspPageNavigationItem } from '../common/navigation/types';
 import { pageToComponentMapping } from './constants';
 import { SecuritySolutionContext } from './security_solution_context';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 type CspRouteProps = RouteProps & {
   path: string;
