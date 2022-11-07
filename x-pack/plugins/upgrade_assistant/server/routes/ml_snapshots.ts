@@ -136,6 +136,7 @@ const getModelSnapshotUpgradeStatus = async (
 };
 
 export function registerMlSnapshotRoutes({
+  config: { featureSet },
   router,
   log,
   lib: { handleEsError },
@@ -330,8 +331,25 @@ export function registerMlSnapshotRoutes({
       path: `${API_BASE_PATH}/ml_upgrade_mode`,
       validate: false,
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(async ({ core, ...rest }, request, response) => {
       try {
+        /**
+         * Always return false if featureSet.mlSnapshots is set to false
+         * This disables showing the ML deprecations in the UA UI
+         * 
+         * This config should be set to false only on the `x.last` versions
+         * ML `upgrade_mode` can be enabeld from outside Kibana, the prurpose
+         * of this feature guard is to hide all ML related deprecations from the end user 
+         * until the next major upgrade.
+         */
+        if (!featureSet.mlSnapshots) {
+           return response.ok({
+            body: {
+              mlUpgradeModeEnabled: false,
+            },
+          });
+        }
+
         const {
           elasticsearch: { client: esClient },
         } = await core;

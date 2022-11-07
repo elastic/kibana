@@ -15,6 +15,7 @@ import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { BreadcrumbService } from './application/lib/breadcrumbs';
 import { ApiService } from './application/lib/api';
+import type { FeatureSet } from '../common/types';
 
 export interface KibanaVersionContext {
   currentMajor: number;
@@ -35,7 +36,7 @@ export interface StartDependencies {
 }
 
 export interface ClientConfigType {
-  readonly: boolean;
+  featureSet: FeatureSet;
   ui: {
     enabled: boolean;
   };
@@ -43,6 +44,7 @@ export interface ClientConfigType {
 
 export interface AppDependencies {
   kibanaVersionInfo: KibanaVersionContext;
+  featureSet: FeatureSet;
   plugins: {
     cloud?: CloudSetup;
     share: SharePluginSetup;

@@ -107,6 +107,7 @@ const renderTableRowCells = (
   deprecation: EnrichedDeprecationInfo,
   mlUpgradeModeEnabled: boolean
 ) => {
+  console.log('deprecation::', deprecation);
   switch (deprecation.correctiveAction?.type) {
     case 'mlSnapshot':
       return (
@@ -163,6 +164,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   const {
     services: { api },
   } = useAppContext();
+  console.log('ok mom')
 
   const { data } = api.useLoadMlUpgradeMode();
   const mlUpgradeModeEnabled = !!data?.mlUpgradeModeEnabled;

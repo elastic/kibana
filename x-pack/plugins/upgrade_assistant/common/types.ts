@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObject } from '@kbn/core/types';
 
-export type DeprecationSource = 'Kibana' | 'Elasticsearch' | 'Cluster';
+export type DeprecationSource = 'Kibana' | 'Elasticsearch';
 
 export type ClusterUpgradeState = 'isPreparingForUpgrade' | 'isUpgrading' | 'isUpgradeComplete';
 
@@ -276,4 +276,9 @@ export interface SystemIndicesMigrationStatus {
 export interface SystemIndicesMigrationStarted {
   features: SystemIndicesMigrationFeature[];
   accepted: boolean;
+}
+
+export interface FeatureSet {
+  migrateIndices: boolean;
+  mlSnapshots: boolean;
 }

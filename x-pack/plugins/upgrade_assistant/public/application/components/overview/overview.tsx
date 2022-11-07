@@ -17,6 +17,8 @@ import {
   EuiPageBody,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
+import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,17 +36,18 @@ type OverviewStep =
   | 'backup'
   | 'migrate_system_indices'
   | 'fix_issues'
-  | 'logs'
-  | 'upgrade_readiness';
+  | 'logs';
 
 export const Overview = withRouter(({ history }: RouteComponentProps) => {
   const {
+    featureSet: { migrateIndices },
     services: {
       breadcrumbs,
       core: { docLinks },
     },
     plugins: { cloud },
   } = useAppContext();
+
 
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_OVERVIEW_PAGE_LOAD);
@@ -59,7 +62,6 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
     migrate_system_indices: false,
     fix_issues: false,
     logs: false,
-    upgrade_readiness: false,
   });
 
   const isStepComplete = (step: OverviewStep) => completedStepsMap[step];
@@ -79,7 +81,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             defaultMessage: 'Upgrade Assistant',
           })}
           description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-            defaultMessage: 'Get ready for the next version of Elastic!',
+            defaultMessage: 'Get ready for the next version of the Elastic Stack!',
           })}
           rightSideItems={[
             <EuiButtonEmpty
@@ -98,7 +100,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
           <EuiText>
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.checkUpcomingVersion"
-              defaultMessage="If you are not on the latest version of the Elastic stack, use the Upgrade Assistant to prepare for the next upgrade."
+              defaultMessage="If you are not on the latest version of the Elastic Stack, use the Upgrade Assistant to prepare for the next upgrade."
             />
           </EuiText>
           <EuiText data-test-subj="whatsNewLink">
@@ -118,7 +120,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               isComplete: isStepComplete('backup'),
               setIsComplete: setCompletedStep.bind(null, 'backup'),
             }),
-            getMigrateSystemIndicesStep({
+            migrateIndices && getMigrateSystemIndicesStep({
               docLinks,
               isComplete: isStepComplete('migrate_system_indices'),
               setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
@@ -133,7 +135,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
             }),
             getUpgradeStep(),
-          ]}
+          ].filter(Boolean) as EuiStepProps[]}
         />
       </EuiPageContentBody>
     </EuiPageBody>

@@ -24,6 +24,7 @@ export class UpgradeAssistantUIPlugin
     { management, cloud, share, usageCollection }: SetupDependencies
   ) {
     const {
+      featureSet,
       ui: { enabled: isUpgradeAssistantUiEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
@@ -59,6 +60,7 @@ export class UpgradeAssistantUIPlugin
           docTitle.change(pluginName);
 
           const appDependencies: AppDependencies = {
+            featureSet,
             kibanaVersionInfo,
             plugins: {
               cloud,

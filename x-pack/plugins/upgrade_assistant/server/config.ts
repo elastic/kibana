@@ -12,6 +12,12 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 // even for minors releases.
 // -------------------------------
 const configSchema = schema.object({
+  featureSet: schema.object({
+    // only enabled before major version upgrades. Currently this is manually set
+    // to true on every `x.last` version.
+    mlSnapshots: schema.boolean({ defaultValue: false }),
+    migrateIndices: schema.boolean({ defaultValue: false }),
+  }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
@@ -22,6 +28,7 @@ export type UpgradeAssistantConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<UpgradeAssistantConfig> = {
   exposeToBrowser: {
     ui: true,
+    featureSet: true,
   },
   schema: configSchema,
   deprecations: () => [],

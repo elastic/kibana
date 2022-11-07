@@ -35,8 +35,9 @@ import {
   mlSavedObjectType,
 } from './saved_object_types';
 import { handleEsError } from './shared_imports';
-
 import { RouteDependencies } from './types';
+import type {UpgradeAssistantConfig } from './config';
+import type { FeatureSet } from '../common/types';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -54,6 +55,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly credentialStore: CredentialStore;
   private readonly kibanaVersion: string;
+  private readonly initialFeatureSet: FeatureSet;
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
@@ -63,10 +65,13 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private securityPluginStart?: SecurityPluginStart;
   private worker?: ReindexWorker;
 
-  constructor({ logger, env }: PluginInitializerContext) {
+  constructor({ logger, env, config }: PluginInitializerContext<UpgradeAssistantConfig>) {
     this.logger = logger.get();
     this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
+    
+    const { featureSet }  = config.get();
+    this.initialFeatureSet = featureSet;
   }
 
   private getWorker() {
@@ -132,6 +137,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
         handleEsError,
       },
       config: {
+        featureSet: this.initialFeatureSet,
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
     };
