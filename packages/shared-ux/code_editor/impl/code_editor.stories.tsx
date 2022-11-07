@@ -8,9 +8,12 @@
 
 import React from 'react';
 
-import { CodeEditorStorybookMock, CodeEditorStorybookParams } from '@kbn/shared-ux-code-editor-mocks';
+import {
+  CodeEditorStorybookMock,
+  CodeEditorStorybookParams,
+} from '@kbn/shared-ux-code-editor-mocks';
 
-import { CodeEditor } from './code_editor'; 
+import { CodeEditor } from './code_editor';
 import mdx from './README.mdx';
 
 export default {
