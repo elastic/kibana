@@ -764,6 +764,41 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.LoadWhenInView",
+        "type": "Function",
+        "tags": [],
+        "label": "LoadWhenInView",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "LoadWhenInViewProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.LoadWhenInView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "LoadWhenInViewProps"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.NavigationWarningPromptProvider",
         "type": "Function",
         "tags": [],
