@@ -120,34 +120,13 @@ export const useDiscoverHistogram = ({
    * Request
    */
 
-  const [lastReloadRequestTime, setLastReloadRequestTime] = useState(0);
-  const { fetchStatus: mainFetchStatus } = useDataState(savedSearchData$.main$);
-
-  // Reload unified histogram when a refetch is triggered,
-  // with a debounce to avoid multiple requests
-  const [, cancelDebounce] = useDebounce(
-    () => {
-      if (mainFetchStatus === FetchStatus.LOADING) {
-        setLastReloadRequestTime(Date.now());
-      }
-    },
-    100,
-    [mainFetchStatus]
-  );
-
-  // A refetch is triggered when the data view is changed,
-  // but we don't want to reload unified histogram in this case,
-  // so cancel the debounced effect on unmount
-  useEffect(() => cancelDebounce, [cancelDebounce]);
-
   const searchSessionId = searchSessionManager.getLastSearchSessionId();
   const request = useMemo(
     () => ({
       searchSessionId,
       adapter: inspectorAdapters.requests,
-      lastReloadRequestTime,
     }),
-    [inspectorAdapters.requests, lastReloadRequestTime, searchSessionId]
+    [inspectorAdapters.requests, searchSessionId]
   );
 
   /**
@@ -245,8 +224,33 @@ export const useDiscoverHistogram = ({
     [field, isPlainRecord, isTimeBased]
   );
 
+  /**
+   * Reload
+   */
+
+  const [lastReloadRequestTime, setLastReloadRequestTime] = useState(0);
+  const { fetchStatus: mainFetchStatus } = useDataState(savedSearchData$.main$);
+
+  // Reload unified histogram when a refetch is triggered,
+  // with a debounce to avoid multiple requests
+  const [, cancelDebounce] = useDebounce(
+    () => {
+      if (mainFetchStatus === FetchStatus.LOADING) {
+        setLastReloadRequestTime(Date.now());
+      }
+    },
+    100,
+    [mainFetchStatus]
+  );
+
+  // A refetch is triggered when the data view is changed,
+  // but we don't want to reload unified histogram in this case,
+  // so cancel the debounced effect on unmount
+  useEffect(() => cancelDebounce, [cancelDebounce]);
+
   return {
     topPanelHeight,
+    lastReloadRequestTime,
     request,
     hits,
     chart,

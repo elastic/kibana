@@ -13,9 +13,11 @@ import type { UnifiedHistogramRequestContext, UnifiedHistogramServices } from '.
 
 export const useRequestParams = ({
   services,
+  lastReloadRequestTime,
   request,
 }: {
   services: UnifiedHistogramServices;
+  lastReloadRequestTime: number | undefined;
   request?: UnifiedHistogramRequestContext;
 }) => {
   const { data } = services;
@@ -52,7 +54,7 @@ export const useRequestParams = ({
   const timeRange = useMemo(
     () => data.query.timefilter.timefilter.getAbsoluteTime(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data.query.timefilter.timefilter, queryState.time, request?.lastReloadRequestTime]
+    [data.query.timefilter.timefilter, queryState.time, lastReloadRequestTime]
   );
 
   return { filters, query, timeRange };

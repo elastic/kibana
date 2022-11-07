@@ -97,6 +97,7 @@ export const DiscoverMainContent = ({
 
   const {
     topPanelHeight,
+    lastReloadRequestTime,
     request,
     hits,
     chart,
@@ -125,6 +126,7 @@ export const DiscoverMainContent = ({
       className="dscPageContent__inner"
       services={services}
       dataView={dataView}
+      lastReloadRequestTime={lastReloadRequestTime}
       request={request}
       hits={hits}
       chart={chart}

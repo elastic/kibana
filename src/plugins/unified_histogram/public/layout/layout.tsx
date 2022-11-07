@@ -29,6 +29,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   services: UnifiedHistogramServices;
   dataView: DataView;
   /**
+   * Can be updated to `Date.now()` to force a refresh
+   */
+  lastReloadRequestTime?: number;
+  /**
    * Context object for requests made by unified histogram components -- optional
    */
   request?: UnifiedHistogramRequestContext;
@@ -91,6 +95,7 @@ export const UnifiedHistogramLayout = ({
   className,
   services,
   dataView,
+  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -153,6 +158,7 @@ export const UnifiedHistogramLayout = ({
           className={chartClassName}
           services={services}
           dataView={dataView}
+          lastReloadRequestTime={lastReloadRequestTime}
           request={request}
           hits={hits}
           chart={chart}

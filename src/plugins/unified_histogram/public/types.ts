@@ -74,10 +74,6 @@ export interface UnifiedHistogramRequestContext {
    * The adapter to use for requests
    */
   adapter?: RequestAdapter;
-  /**
-   * Can be updated to `Date.now()` to force a refresh
-   */
-  lastReloadRequestTime?: number;
 }
 
 /**

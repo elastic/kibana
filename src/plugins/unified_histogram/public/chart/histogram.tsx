@@ -32,6 +32,7 @@ import { useTimeRange } from './use_time_range';
 export interface HistogramProps {
   services: UnifiedHistogramServices;
   dataView: DataView;
+  lastReloadRequestTime: number | undefined;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
@@ -46,6 +47,7 @@ export interface HistogramProps {
 export function Histogram({
   services: { data, lens, uiSettings },
   dataView,
+  lastReloadRequestTime,
   request,
   hits,
   chart: { timeInterval },
@@ -128,7 +130,7 @@ export function Histogram({
           executionContext={{
             description: 'fetch chart data and total hits',
           }}
-          lastReloadRequestTime={request?.lastReloadRequestTime}
+          lastReloadRequestTime={lastReloadRequestTime}
           onLoad={onLoad}
         />
       </div>

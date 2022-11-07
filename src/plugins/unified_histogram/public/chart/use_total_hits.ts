@@ -22,6 +22,7 @@ import type {
 
 export const useTotalHits = ({
   services,
+  lastReloadRequestTime,
   request,
   chartVisible,
   hits,
@@ -32,6 +33,7 @@ export const useTotalHits = ({
   onTotalHitsChange,
 }: {
   services: UnifiedHistogramServices;
+  lastReloadRequestTime: number | undefined;
   request: UnifiedHistogramRequestContext | undefined;
   chartVisible: boolean;
   hits: UnifiedHistogramHitsContext | undefined;
@@ -47,7 +49,7 @@ export const useTotalHits = ({
   useEffect(() => {
     const newTotalHitsDeps = getTotalHitsDeps({
       chartVisible,
-      request,
+      lastReloadRequestTime,
       hits,
       dataView,
       filters,
@@ -76,6 +78,7 @@ export const useTotalHits = ({
     dataView,
     filters,
     hits,
+    lastReloadRequestTime,
     onTotalHitsChange,
     query,
     request,
@@ -86,7 +89,7 @@ export const useTotalHits = ({
 
 const getTotalHitsDeps = ({
   chartVisible,
-  request,
+  lastReloadRequestTime,
   hits,
   dataView,
   filters,
@@ -94,7 +97,7 @@ const getTotalHitsDeps = ({
   timeRange,
 }: {
   chartVisible: boolean;
-  request: UnifiedHistogramRequestContext | undefined;
+  lastReloadRequestTime: number | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
   dataView: DataView;
   filters: Filter[];
@@ -108,7 +111,7 @@ const getTotalHitsDeps = ({
     filters,
     query,
     timeRange,
-    request?.lastReloadRequestTime,
+    lastReloadRequestTime,
   ]);
 
 const fetchTotalHits = async ({
