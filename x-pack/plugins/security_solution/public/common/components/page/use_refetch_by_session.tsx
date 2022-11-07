@@ -12,18 +12,24 @@ import { useKibana } from '../../lib/kibana';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
+import type { Refetch } from '../../store/inputs/model';
 
 interface UseRefetchByRestartingSessionProps {
   inputId?: InputsModelId;
   queryId: string;
+  skip?: boolean;
 }
 
 export const useRefetchByRestartingSession = ({
   inputId,
   queryId,
-}: UseRefetchByRestartingSessionProps) => {
+}: UseRefetchByRestartingSessionProps): {
+  searchSessionId: string;
+  refetchByRestartingSession: Refetch;
+} => {
   const dispatch = useDispatch();
   const { data } = useKibana().services;
+
   const session = useRef(data.search.session);
   const searchSessionId = useMemo(() => session.current.start(), [session]);
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
@@ -41,6 +47,10 @@ export const useRefetchByRestartingSession = ({
         selectedInspectIndex,
         isInspected: false,
         inputId: InputsModelId.global,
+        /** Lens Embeddables do not have a function we can call to refetch data
+         * like most of our components, it refetches when receiving a new search
+         * session ID.
+         **/
         searchSessionId: session.current.start(),
       })
     );

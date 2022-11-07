@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { useNetworkKpiUniqueFlows } from '../../../containers/kpi_network/unique_flows';
+import { useHostsKpiUniqueIps } from '../../../containers/kpi_hosts/unique_ips';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import { NetworkKpiUniqueFlows } from '.';
+import { HostsKpiUniqueIps } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
-import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
+import { KpiBaseComponentManage } from '../common';
 
 jest.mock('../../../../common/containers/query_toggle');
-jest.mock('../../../containers/kpi_network/unique_flows');
-jest.mock('../../../../hosts/components/kpi_hosts/common', () => ({
+jest.mock('../../../containers/kpi_hosts/unique_ips');
+jest.mock('../common', () => ({
   KpiBaseComponentManage: jest
     .fn()
     .mockReturnValue(<span data-test-subj="KpiBaseComponentManage" />),
@@ -29,8 +29,8 @@ jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({
   useRefetchByRestartingSession: jest.fn(),
 }));
 
-describe('Unique Flows KPI', () => {
-  const mockUseNetworkKpiUniqueFlows = useNetworkKpiUniqueFlows as jest.Mock;
+describe('KPI Unique IPs', () => {
+  const mockUseHostsKpiUniqueIps = useHostsKpiUniqueIps as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const MockKpiBaseComponentManage = KpiBaseComponentManage as jest.Mock;
   const mockRefetchByRestartingSession = jest.fn();
@@ -45,7 +45,7 @@ describe('Unique Flows KPI', () => {
   };
   beforeEach(() => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
-    mockUseNetworkKpiUniqueFlows.mockReturnValue([
+    mockUseHostsKpiUniqueIps.mockReturnValue([
       false,
       {
         id: '123',
@@ -68,25 +68,25 @@ describe('Unique Flows KPI', () => {
   it('toggleStatus=true, do not skip', () => {
     render(
       <TestProviders>
-        <NetworkKpiUniqueFlows {...defaultProps} />
+        <HostsKpiUniqueIps {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseNetworkKpiUniqueFlows.mock.calls[0][0].skip).toEqual(false);
+    expect(mockUseHostsKpiUniqueIps.mock.calls[0][0].skip).toEqual(false);
   });
   it('toggleStatus=false, skip', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
     render(
       <TestProviders>
-        <NetworkKpiUniqueFlows {...defaultProps} />
+        <HostsKpiUniqueIps {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseNetworkKpiUniqueFlows.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseHostsKpiUniqueIps.mock.calls[0][0].skip).toEqual(true);
   });
   it('Refetches data', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
     render(
       <TestProviders>
-        <NetworkKpiUniqueFlows {...defaultProps} />
+        <HostsKpiUniqueIps {...defaultProps} />
       </TestProviders>
     );
     expect(MockKpiBaseComponentManage.mock.calls[0][0].refetch).toEqual(mockRefetch);
@@ -97,7 +97,7 @@ describe('Unique Flows KPI', () => {
 
     render(
       <TestProviders>
-        <NetworkKpiUniqueFlows {...defaultProps} />
+        <HostsKpiUniqueIps {...defaultProps} />
       </TestProviders>
     );
 

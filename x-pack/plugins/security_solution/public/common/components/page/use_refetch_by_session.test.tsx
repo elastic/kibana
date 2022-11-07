@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { tGridReducer } from '@kbn/timelines-plugin/public';
+import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import {
   createSecuritySolutionStorageMock,
@@ -19,6 +20,8 @@ import { createStore } from '../../store';
 import { useKibana } from '../../lib/kibana';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useRefetchByRestartingSession } from './use_refetch_by_session';
+import { inputsActions } from '../../store/actions';
+import type { Refetch } from '../../store/inputs/model';
 
 const state: State = mockGlobalState;
 
@@ -35,17 +38,43 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders store={store}>{children}</TestProviders>
 );
 
+jest.mock('react-redux', () => {
+  const actual = jest.requireActual('react-redux');
+  const mockDispatch = jest.fn();
+  return {
+    ...actual,
+    useDispatch: jest.fn().mockReturnValue(mockDispatch),
+  };
+});
+
 jest.mock('../../lib/kibana', () => {
   return {
     useKibana: jest.fn(),
   };
 });
 
+jest.mock('../../store/actions', () => {
+  return {
+    inputsActions: {
+      setInspectionParameter: jest.fn(),
+    },
+  };
+});
+
 describe(`useRefetchByRestartingSession`, () => {
+  let res: RenderHookResult<
+    {
+      children: React.ReactNode;
+    },
+    {
+      searchSessionId: string;
+      refetchByRestartingSession: Refetch;
+    }
+  >;
   const mockSessionStart = jest
     .fn()
     .mockReturnValueOnce('mockSessionId')
-    .mockReturnValue('mockSessionIdDefault');
+    .mockReturnValue('mockSessionId1');
   const mockSession = {
     start: mockSessionStart,
   };
@@ -63,10 +92,7 @@ describe(`useRefetchByRestartingSession`, () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('should start a session', () => {
-    const { result } = renderHook(
+    res = renderHook(
       () =>
         useRefetchByRestartingSession({
           inputId: InputsModelId.global,
@@ -76,8 +102,22 @@ describe(`useRefetchByRestartingSession`, () => {
         wrapper,
       }
     );
+  });
 
+  it('should start a session', () => {
     expect(mockSessionStart).toHaveBeenCalledTimes(1);
-    expect(result.current.searchSessionId).toBe('mockSessionId');
+    expect(res.result.current.searchSessionId).toBe('mockSessionId');
+  });
+
+  it('should start a session when clicking refetchByRestartingSession', () => {
+    res.result.current.refetchByRestartingSession();
+    expect(mockSessionStart).toHaveBeenCalledTimes(2);
+    expect(inputsActions.setInspectionParameter).toHaveBeenCalledWith({
+      id: 'test',
+      selectedInspectIndex: 0,
+      isInspected: false,
+      inputId: InputsModelId.global,
+      searchSessionId: 'mockSessionId1',
+    });
   });
 });

@@ -6,14 +6,12 @@
  */
 
 import type { Position } from '@elastic/charts';
-import { noop, omit } from 'lodash/fp';
+import { omit } from 'lodash/fp';
 import React, { useEffect } from 'react';
 
 import type { inputsModel } from '../../store';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
-import { useRefetchByRestartingSession } from './use_refetch_by_session';
-import { InputsModelId } from '../../store/inputs/constants';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import type { InputsModelId } from '../../store/inputs/constants';
 
 export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
   headerChildren?: React.ReactNode;
@@ -22,35 +20,22 @@ export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery
   inspect?: inputsModel.InspectQuery;
   legendPosition?: Position;
   loading: boolean;
-  refetch?: inputsModel.Refetch;
+  refetch: inputsModel.Refetch;
+  searchSessionId?: string;
 }
 
 export function manageQuery<T>(
   WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>
 ): React.FC<OwnProps & T> {
   const ManageQuery = (props: OwnProps & T) => {
-    const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
-
-    const {
-      deleteQuery,
-      id,
-      inputId = InputsModelId.global,
-      inspect = null,
-      loading,
-      refetch,
-      setQuery,
-    } = props;
-    const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
-      inputId,
-      queryId: id,
-    });
+    const { deleteQuery, id, inspect = null, loading, refetch, setQuery, searchSessionId } = props;
 
     useQueryInspector({
       deleteQuery,
       inspect,
       loading,
       queryId: id,
-      refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch ?? noop, // refetchByRestartingSession is for refetching Lens Embeddables
+      refetch,
       searchSessionId,
       setQuery,
     });
