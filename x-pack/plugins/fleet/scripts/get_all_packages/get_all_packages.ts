@@ -20,7 +20,7 @@ const KIBANA_USERNAME = 'elastic';
 const KIBANA_PASSWORD = 'changeme';
 const KIBANA_VERSION = kibanaPackageJson.version;
 
-const { base = '', help, prerelease = false, batchSize = 1 } = yargs(process.argv).argv;
+const { base = '', prerelease = false, batchSize = 1 } = yargs(process.argv).argv;
 
 const logger = new ToolingLog({
   level: 'info',
@@ -100,7 +100,7 @@ async function performTest({ name, version }: { name: string; version: string })
 export async function run() {
   const allPackages = await getAllPackages();
 
-  const batches = chunk(allPackages, batchSize);
+  const batches = chunk(allPackages, batchSize as number);
   let allResults: Result[] = [];
 
   const start = Date.now();
