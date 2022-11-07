@@ -23,6 +23,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { getSettingsRouteConfig } from './components/settings/route_config';
 import { ErrorDetailsPage } from './components/error_details/error_details_page';
 import { StepTitle } from './components/step_details_page/step_title';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
@@ -63,7 +64,7 @@ import { MonitorHistory } from './components/monitor_details/monitor_history/mon
 import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
 import { StepDetailPage } from './components/step_details_page/step_detail_page';
 
-type RouteProps = LazyObservabilityPageTemplateProps & {
+export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
   component: React.FC;
   dataTestSubj: string;
@@ -87,6 +88,7 @@ const getRoutes = (
   syntheticsPath: string
 ): RouteProps[] => {
   return [
+    ...getSettingsRouteConfig(history, syntheticsPath, baseTitle),
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
         defaultMessage: 'Synthetics Getting Started | {baseTitle}',
