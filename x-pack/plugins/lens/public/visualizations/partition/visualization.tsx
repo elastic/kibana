@@ -295,14 +295,18 @@ export const getPieVisualization = ({
       const accessors = layer.metrics.map((columnId) => ({ columnId }));
       applyPaletteToAccessorConfigs(accessors, layer, state.palette, paletteService);
 
+      const groupLabel = layer.allowMultipleMetrics
+        ? i18n.translate('xpack.lens.pie.groupMetricLabel', {
+            defaultMessage: 'Metrics',
+          })
+        : i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
+            defaultMessage: 'Metric',
+          });
+
       return {
         groupId: 'metric',
-        groupLabel: i18n.translate('xpack.lens.pie.groupMetricLabel', {
-          defaultMessage: 'Metrics',
-        }),
-        dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.groupMetricLabel', {
-          defaultMessage: 'Metrics',
-        }),
+        groupLabel,
+        dimensionEditorGroupLabel: groupLabel,
         paramEditorCustomProps: {
           headingLabel: i18n.translate('xpack.lens.pie.headingLabel', {
             defaultMessage: 'Value',
