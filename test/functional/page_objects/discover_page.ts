@@ -433,6 +433,16 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
+  public async toggleFieldListSection(
+    sectionName: 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected'
+  ) {
+    return await this.find.clickByCssSelector(
+      `[data-test-subj="fieldListGrouped${sectionName[0].toUpperCase()}${sectionName.substring(
+        1
+      )}Fields"] .euiAccordion__iconButton`
+    );
+  }
+
   public async clickFieldListItem(field: string) {
     return await this.testSubjects.click(`field-${field}`);
   }
@@ -456,8 +466,8 @@ export class DiscoverPageObject extends FtrService {
     if (await this.isFieldSelected(field)) {
       return;
     }
-    if (['_score', '_id', '_index'].includes(field)) {
-      await this.testSubjects.click('fieldListGroupedMetaFields'); // expand Meta section
+    if (['_score', '_id', '_index', '_type'].includes(field)) {
+      await this.toggleFieldListSection('meta'); // expand Meta section
     }
     await this.clickFieldListItemToggle(field);
     const isLegacyDefault = await this.useLegacyTable();

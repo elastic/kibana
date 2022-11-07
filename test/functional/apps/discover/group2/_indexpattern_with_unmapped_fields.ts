@@ -48,11 +48,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });
-      const allFields = await PageObjects.discover.getAllFieldNames();
+      let allFields = await PageObjects.discover.getAllFieldNames();
       // message is a mapped field
       expect(allFields.includes('message')).to.be(true);
       // sender is not a mapped field
-      expect(allFields.includes('sender')).to.be(true);
+      expect(allFields.includes('sender')).to.be(false);
+
+      await PageObjects.discover.toggleFieldListSection('unmapped');
+
+      allFields = await PageObjects.discover.getAllFieldNames();
+      expect(allFields.includes('sender')).to.be(true); // now visible under Unmapped section
+
+      await PageObjects.discover.toggleFieldListSection('unmapped');
     });
 
     it('unmapped fields exist on an existing saved search', async () => {
@@ -61,10 +68,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });
-      const allFields = await PageObjects.discover.getAllFieldNames();
+      let allFields = await PageObjects.discover.getAllFieldNames();
       expect(allFields.includes('message')).to.be(true);
+      expect(allFields.includes('sender')).to.be(false);
+      expect(allFields.includes('receiver')).to.be(false);
+
+      await PageObjects.discover.toggleFieldListSection('unmapped');
+
+      allFields = await PageObjects.discover.getAllFieldNames();
+
+      // now visible under Unmapped section
       expect(allFields.includes('sender')).to.be(true);
       expect(allFields.includes('receiver')).to.be(true);
+
+      await PageObjects.discover.toggleFieldListSection('unmapped');
     });
   });
 }
