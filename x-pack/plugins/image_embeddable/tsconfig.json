@@ -6,7 +6,7 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["public/**/*"],
+  "include": ["public/**/*", "common/**/*", "server/**/*"],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },

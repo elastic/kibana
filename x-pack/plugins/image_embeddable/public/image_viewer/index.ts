@@ -5,17 +5,4 @@
  * 2.0.
  */
 
-export interface ImageConfig {
-  src: ImageFileSrc | ImageUrlSrc;
-  alt?: string;
-}
-
-export interface ImageFileSrc {
-  type: 'file';
-  fileId: string;
-}
-
-export interface ImageUrlSrc {
-  type: 'url';
-  url: string;
-}
+export * from './image_viewer';

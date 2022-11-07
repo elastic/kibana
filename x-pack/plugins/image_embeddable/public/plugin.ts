@@ -8,14 +8,18 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
+import { imageEmbeddableFileKind } from '../common';
 import { IMAGE_EMBEDDABLE_TYPE, ImageEmbeddableFactoryDefinition } from './image_embeddable';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
+  files: FilesSetup;
 }
 
 export interface StartDependencies {
   embeddable: EmbeddableStart;
+  files: FilesStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -31,9 +35,16 @@ export class ImageEmbeddablePlugin
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     const start = createStartServicesGetter(core.getStartServices);
+    plugins.files.registerFileKind(imageEmbeddableFileKind);
     plugins.embeddable.registerEmbeddableFactory(
       IMAGE_EMBEDDABLE_TYPE,
-      new ImageEmbeddableFactoryDefinition({ start })
+      new ImageEmbeddableFactoryDefinition({
+        start: () => ({
+          application: start().core.application,
+          overlays: start().core.overlays,
+          files: start().plugins.files.filesClientFactory.asScoped(imageEmbeddableFileKind.id),
+        }),
+      })
     );
     return {};
   }

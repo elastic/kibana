@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-export interface ImageConfig {
-  src: ImageFileSrc | ImageUrlSrc;
-  alt?: string;
-}
+import { PluginInitializerContext } from '@kbn/core/server';
+import { ImageEmbeddablePlugin } from './plugin';
 
-export interface ImageFileSrc {
-  type: 'file';
-  fileId: string;
-}
-
-export interface ImageUrlSrc {
-  type: 'url';
-  url: string;
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new ImageEmbeddablePlugin(initializerContext);
 }

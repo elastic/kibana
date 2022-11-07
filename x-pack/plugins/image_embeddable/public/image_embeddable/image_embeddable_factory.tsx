@@ -10,16 +10,25 @@ import {
   IContainer,
   EmbeddableInput,
   EmbeddableFactoryDefinition,
-} from '@kbn/embeddable-plugin/public';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+  ApplicationStart,
+  OverlayStart,
+  ScopedFilesClient,
+  FileImageMetadata,
+} from '../imports';
 import { ImageEmbeddable, IMAGE_EMBEDDABLE_TYPE } from './image_embeddable';
+import { ImageConfig } from '../types';
+import { imageEmbeddableFileKind } from '../../common';
 
 export interface ImageEmbeddableFactoryDeps {
-  start: StartServicesGetter;
+  start: () => {
+    application: ApplicationStart;
+    overlays: OverlayStart;
+    files: ScopedFilesClient<FileImageMetadata>;
+  };
 }
 
 export interface ImageEmbeddableInput extends EmbeddableInput {
-  imageSrc: string;
+  imageConfig: ImageConfig;
 }
 
 export class ImageEmbeddableFactoryDefinition
@@ -30,11 +39,20 @@ export class ImageEmbeddableFactoryDefinition
   constructor(private deps: ImageEmbeddableFactoryDeps) {}
 
   public async isEditable() {
-    return Boolean(this.deps.start().core.application.capabilities.dashboard?.showWriteControls);
+    return Boolean(this.deps.start().application.capabilities.dashboard?.showWriteControls);
   }
 
   public async create(initialInput: ImageEmbeddableInput, parent?: IContainer) {
-    return new ImageEmbeddable(initialInput, parent);
+    return new ImageEmbeddable(
+      {
+        getImageDownloadHref: (fileId) =>
+          this.deps
+            .start()
+            .files.getDownloadHref({ id: fileId, fileKind: imageEmbeddableFileKind.id }),
+      },
+      initialInput,
+      parent
+    );
   }
 
   public getDisplayName() {
@@ -50,14 +68,15 @@ export class ImageEmbeddableFactoryDefinition
   public async getExplicitInput(initialInput: ImageEmbeddableInput) {
     const { configureImage } = await import('../image_editor');
 
-    const image = await configureImage(
+    const imageConfig = await configureImage(
       {
-        overlays: this.deps.start().core.overlays,
-        currentAppId$: this.deps.start().core.application.currentAppId$,
+        files: this.deps.start().files,
+        overlays: this.deps.start().overlays,
+        currentAppId$: this.deps.start().application.currentAppId$,
       },
-      initialInput ? { src: initialInput.imageSrc } : undefined
+      initialInput ? initialInput.imageConfig : undefined
     );
 
-    return { imageSrc: image.imageConfig.src };
+    return { imageConfig };
   }
 }

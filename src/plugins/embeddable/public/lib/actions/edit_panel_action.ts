@@ -92,9 +92,9 @@ export class EditPanelAction implements Action<ActionContext> {
         throw new EmbeddableFactoryNotFoundError(embeddable.type);
       }
 
-      const oldInput = embeddable.getInput();
-      const newInput = await factory.getExplicitInput(oldInput);
-      embeddable.parent?.replaceEmbeddable(embeddable.id, newInput);
+      const oldExplicitInput = embeddable.getExplicitInput();
+      const newExplicitInput = await factory.getExplicitInput(oldExplicitInput);
+      embeddable.parent?.replaceEmbeddable(embeddable.id, newExplicitInput);
       return;
     }
 

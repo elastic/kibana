@@ -1,7 +1,7 @@
 {
   "id": "imageEmbeddable",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
   "owner": {
     "name": "App Services",

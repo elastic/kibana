@@ -6,18 +6,21 @@
  */
 
 import React from 'react';
-import { OverlayStart, ApplicationStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { FilesContext } from '@kbn/files-plugin/public';
 import { skip, take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { ImageConfig } from '../types';
 import { ImageEditorFlyout } from './image_editor_flyout';
+import { ImageViewerContext } from '../image_viewer';
+import { OverlayStart, ApplicationStart, ScopedFilesClient, FileImageMetadata } from '../imports';
 
 /**
  * @throws in case user cancels
  */
 export async function configureImage(
   deps: {
+    files: ScopedFilesClient<FileImageMetadata>;
     overlays: OverlayStart;
     currentAppId$: ApplicationStart['currentAppId$'];
   },
@@ -43,11 +46,21 @@ export async function configureImage(
 
     const handle = deps.overlays.openFlyout(
       toMountPoint(
-        <ImageEditorFlyout
-          onCancel={onCancel}
-          onSave={onSave}
-          initialImageConfig={initialImageConfig}
-        />
+        // @ts-ignore - TODO: check this
+        <FilesContext client={deps.files}>
+          <ImageViewerContext.Provider
+            value={{
+              // @ts-ignore - TODO: check this
+              filesClient: deps.files,
+            }}
+          >
+            <ImageEditorFlyout
+              onCancel={onCancel}
+              onSave={onSave}
+              initialImageConfig={initialImageConfig}
+            />
+          </ImageViewerContext.Provider>
+        </FilesContext>
       ),
       {
         ownFocus: true,

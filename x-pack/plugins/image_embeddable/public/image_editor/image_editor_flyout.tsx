@@ -6,18 +6,20 @@
  */
 
 import {
-  EuiFlyoutHeader,
-  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiFieldText,
+  EuiFlyoutHeader,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { FilePicker } from '@kbn/files-plugin/public';
 import { ImageConfig } from '../types';
+import { imageEmbeddableFileKind } from '../../common';
+import { ImageViewer } from '../image_viewer';
 
 export interface ImageEditorFlyoutProps {
   onCancel: () => void;
@@ -26,12 +28,15 @@ export interface ImageEditorFlyoutProps {
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
-  const [src, setSrc] = useState(props.initialImageConfig?.src ?? '');
+  const [fileId, setFileId] = useState('');
 
   const onSave = () => {
     props.onSave({
       ...props.initialImageConfig,
-      src,
+      src: {
+        type: 'file',
+        fileId,
+      },
     });
   };
 
@@ -43,12 +48,19 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFieldText
-          placeholder="Image src"
-          value={src}
-          onChange={(e) => setSrc(e.target.value)}
-          aria-label="Image src"
+        <ImageViewer
+          src={{
+            type: 'file',
+            fileId,
+          }}
         />
+        <FilePickerButton onFilePicked={(file) => setFileId(file.fileId)} />
+        {/* <EuiFieldText*/}
+        {/*  placeholder="Image src"*/}
+        {/*  value={src}*/}
+        {/*  onChange={(e) => setSrc(e.target.value)}*/}
+        {/*  aria-label="Image src"*/}
+        {/* />*/}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -64,6 +76,35 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
+    </>
+  );
+}
+
+function FilePickerButton(props: { onFilePicked: (file: { fileId: string }) => void }) {
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+
+  return (
+    <>
+      {isDialogOpen && (
+        <FilePicker
+          kind={imageEmbeddableFileKind.id}
+          onClose={() => {
+            setIsDialogOpen(false);
+          }}
+          onDone={(fileIds) => {
+            props.onFilePicked({ fileId: fileIds[0] });
+            setIsDialogOpen(false);
+          }}
+        />
+      )}
+
+      <EuiButton
+        onClick={() => {
+          setIsDialogOpen(true);
+        }}
+      >
+        Select a file
+      </EuiButton>
     </>
   );
 }
