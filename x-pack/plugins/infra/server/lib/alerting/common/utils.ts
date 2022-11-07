@@ -15,20 +15,20 @@ import { ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-uti
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { PublicContract } from '@kbn/utility-types';
+import {
+  ALERT_CONTEXT_CLOUD,
+  ALERT_CONTEXT_CONTAINER,
+  ALERT_CONTEXT_HOST,
+  ALERT_CONTEXT_LABELS,
+  ALERT_CONTEXT_ORCHESTRATOR,
+  ALERT_CONTEXT_TAGS,
+} from '@kbn/rule-data-utils';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
-import {
-  ALERT_CONTEXT_CLOUD,
-  ALERT_CONTEXT_CONTAINER,
-  ALERT_CONTEXT_HOST,
-  ALERT_CONTEXT_LABELS, 
-  ALERT_CONTEXT_ORCHESTRATOR, 
-  ALERT_CONTEXT_TAGS
-} from '@kbn/rule-data-utils';
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
@@ -175,13 +175,9 @@ export const getContextForRecoveredAlerts = async (
   ruleDataClient: PublicContract<IRuleDataClient>,
   alertUuid: string | null
 ): Promise<{ [x: string]: any }> => {
-  const alertHits = alertUuid
-    ? await fetchAlertbyAlertUUID(ruleDataClient, alertUuid)
-    : undefined;
+  const alertHits = alertUuid ? await fetchAlertbyAlertUUID(ruleDataClient, alertUuid) : undefined;
 
-  const alertHitsSource = alertHits && alertHits.length > 0
-    ? alertHits[0]._source
-    : undefined;
+  const alertHitsSource = alertHits && alertHits.length > 0 ? alertHits[0]._source : undefined;
 
   const additionalContext = {
     cloud: alertHitsSource?.[ALERT_CONTEXT_CLOUD],
@@ -189,7 +185,7 @@ export const getContextForRecoveredAlerts = async (
     orchestrator: alertHitsSource?.[ALERT_CONTEXT_ORCHESTRATOR],
     container: alertHitsSource?.[ALERT_CONTEXT_CONTAINER],
     labels: alertHitsSource?.[ALERT_CONTEXT_LABELS],
-    tags: alertHitsSource?.[ALERT_CONTEXT_TAGS]
+    tags: alertHitsSource?.[ALERT_CONTEXT_TAGS],
   };
 
   return additionalContext;

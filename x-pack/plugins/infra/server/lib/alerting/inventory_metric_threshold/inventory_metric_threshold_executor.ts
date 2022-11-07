@@ -6,16 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_CONTEXT_CLOUD,
-  ALERT_CONTEXT_CONTAINER,
-  ALERT_CONTEXT_HOST,
-  ALERT_CONTEXT_LABELS,
-  ALERT_CONTEXT_ORCHESTRATOR,
-  ALERT_CONTEXT_TAGS,
-  ALERT_REASON,
-  ALERT_RULE_PARAMETERS,
-} from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import {
   ActionGroup,
