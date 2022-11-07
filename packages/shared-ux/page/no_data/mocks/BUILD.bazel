@@ -47,6 +47,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//react",
+   "@npm//@storybook/addon-actions",
   "//packages/shared-ux/card/no_data/mocks",
   "//packages/shared-ux/storybook/mock",
 ]
@@ -64,7 +65,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",
-  "//packages/shared-ux/page/no_data/types",
+  "//packages/shared-ux/page/no_data/types:npm_module_types",
   "//packages/shared-ux/card/no_data/mocks:npm_module_types",
   "//packages/shared-ux/storybook/mock:npm_module_types",
 ]
