@@ -44,9 +44,6 @@ export const useActions = ({
     if (withActions === false) {
       setDefaultActions([]);
     }
-    if (Array.isArray(withActions)) {
-      setDefaultActions(withActions);
-    }
   }, [withActions]);
 
   const onOpenInLens = useCallback(() => {

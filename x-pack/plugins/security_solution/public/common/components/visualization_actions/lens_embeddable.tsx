@@ -34,7 +34,7 @@ const LensComponentWrapper = styled.div<{ height?: string }>`
   }
 `;
 
-const initialVisData: {
+const initVisualizationData: {
   requests: string[] | undefined;
   responses: string[] | undefined;
   isLoading: boolean;
@@ -59,7 +59,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
   const [isShowingModal, setIsShowingModal] = useState(false);
-  const [visData, setVisData] = useState(initialVisData);
+  const [visualizationData, setVisualizationData] = useState(initVisualizationData);
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
   const attributes = useLensAttributes({
@@ -75,9 +75,9 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       onInspectActionClicked: () => {
         setIsShowingModal(true);
       },
-      isDisabled: visData.isLoading,
+      isDisabled: visualizationData.isLoading,
     }),
-    [visData.isLoading]
+    [visualizationData.isLoading]
   );
 
   const actions = useActions({
@@ -106,21 +106,21 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   );
 
   const requests = useMemo(() => {
-    const [request, ...additionalRequests] = visData.requests ?? [];
+    const [request, ...additionalRequests] = visualizationData.requests ?? [];
     return { request, additionalRequests };
-  }, [visData.requests]);
+  }, [visualizationData.requests]);
 
   const responses = useMemo(() => {
-    const [response, ...additionalResponses] = visData.responses ?? [];
+    const [response, ...additionalResponses] = visualizationData.responses ?? [];
     return { response, additionalResponses };
-  }, [visData.responses]);
+  }, [visualizationData.responses]);
 
   const onLoad = useCallback((isLoading, adapters) => {
     if (!adapters) {
       return;
     }
     const data = getRequestsAndResponses(adapters?.requests?.getRequests());
-    setVisData({
+    setVisualizationData({
       requests: data.requests,
       responses: data.responses,
       isLoading,
