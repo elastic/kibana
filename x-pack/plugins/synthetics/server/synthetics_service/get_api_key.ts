@@ -11,12 +11,12 @@ import type {
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { getFakeKibanaRequest } from './utils/fake_kibana_request';
 import { syntheticsServiceAPIKeySavedObject } from '../legacy_uptime/lib/saved_objects/service_api_key';
 import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
+import { checkHasPrivileges } from './authentication/check_has_privilege';
 
-const syntheticsIndex = 'synthetics-*';
+export const syntheticsIndex = 'synthetics-*';
 
 export const serviceApiKeyPrivileges = {
   cluster: ['monitor', 'read_ilm', 'read_pipeline'] as SecurityClusterPrivilege[],
@@ -49,14 +49,7 @@ export const getAPIKeyForSyntheticsService = async ({
       });
 
       if (isValid) {
-        const { index } = await server.coreStart.elasticsearch.client
-          .asScoped(getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey }))
-          .asCurrentUser.security.hasPrivileges({
-            body: {
-              index: serviceApiKeyPrivileges.indices,
-              cluster: serviceApiKeyPrivileges.cluster,
-            },
-          });
+        const { index } = await checkHasPrivileges(server, apiKey);
 
         const indexPermissions = index[syntheticsIndex];
 
@@ -66,7 +59,7 @@ export const getAPIKeyForSyntheticsService = async ({
           indexPermissions.view_index_metadata;
 
         if (!hasPermissions) {
-          return { isValid };
+          return { isValid: false, apiKey };
         }
       } else {
         server.logger.info(

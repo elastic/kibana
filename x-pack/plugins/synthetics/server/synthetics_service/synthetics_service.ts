@@ -7,13 +7,12 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { SavedObject } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObject } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
+  TaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  TaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { Subject } from 'rxjs';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
@@ -24,17 +23,17 @@ import { syntheticsMonitorType } from '../legacy_uptime/lib/saved_objects/synthe
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../common/config';
 import { ServiceAPIClient } from './service_api_client';
-import { formatMonitorConfig, formatHeartbeatRequest } from './formatters/format_configs';
+import { formatHeartbeatRequest, formatMonitorConfig } from './formatters/format_configs';
 import {
   ConfigKey,
+  HeartbeatConfig,
   MonitorFields,
+  ServiceLocationErrors,
   ServiceLocations,
   SyntheticsMonitor,
-  ThrottlingOptions,
   SyntheticsMonitorWithId,
-  ServiceLocationErrors,
   SyntheticsMonitorWithSecrets,
-  HeartbeatConfig,
+  ThrottlingOptions,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 
@@ -350,11 +349,7 @@ export class SyntheticsService {
       output,
       monitors: this.formatConfigs(configs),
     };
-    const result = await this.apiClient.delete(data);
-    if (this.syncErrors && this.syncErrors?.length > 0) {
-      await this.pushConfigs();
-    }
-    return result;
+    return await this.apiClient.delete(data);
   }
 
   async deleteAllConfigs() {
