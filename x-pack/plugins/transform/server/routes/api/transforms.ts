@@ -149,10 +149,13 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       async (ctx, req, res) => {
         try {
           const { body } =
-            await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
-              size: 1000,
-              transform_id: '_all',
-            });
+            await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats(
+              {
+                size: 1000,
+                transform_id: '_all',
+              },
+              { maxRetries: 0 }
+            );
           return res.ok({ body });
         } catch (e) {
           return res.customError(wrapError(wrapEsError(e)));
@@ -179,9 +182,12 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       const { transformId } = req.params;
       try {
         const { body } =
-          await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
-            transform_id: transformId,
-          });
+          await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats(
+            {
+              transform_id: transformId,
+            },
+            { maxRetries: 0 }
+          );
         return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
@@ -395,7 +401,9 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     },
     license.guardApiRoute(async (ctx, req, res) => {
       try {
-        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.search(req.body);
+        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.search(req.body, {
+          maxRetries: 0,
+        });
         return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
@@ -554,16 +562,22 @@ const previewTransformHandler: RequestHandler<
 > = async (ctx, req, res) => {
   try {
     const reqBody = req.body;
-    const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
-      body: reqBody,
-    });
+    const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform(
+      {
+        body: reqBody,
+      },
+      { maxRetries: 0 }
+    );
     if (isLatestTransform(reqBody)) {
       // for the latest transform mappings properties have to be retrieved from the source
-      const fieldCapsResponse = await ctx.core.elasticsearch.client.asCurrentUser.fieldCaps({
-        index: reqBody.source.index,
-        fields: '*',
-        include_unmapped: false,
-      });
+      const fieldCapsResponse = await ctx.core.elasticsearch.client.asCurrentUser.fieldCaps(
+        {
+          index: reqBody.source.index,
+          fields: '*',
+          include_unmapped: false,
+        },
+        { maxRetries: 0 }
+      );
 
       const fieldNamesSet = new Set(Object.keys(fieldCapsResponse.body.fields));
 
