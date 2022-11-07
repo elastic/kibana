@@ -46,7 +46,8 @@ export enum INPUT_TYPE {
 export abstract class InferenceBase<TInferResponse> {
   protected abstract readonly inferenceType: InferenceType;
   protected abstract readonly inferenceTypeLabel: string;
-  protected readonly inputField: string;
+  protected inputField: string;
+  protected readonly modelInputField: string;
   public inputText$ = new BehaviorSubject<string[]>([]);
   public inferenceResult$ = new BehaviorSubject<TInferResponse[] | null>(null);
   public inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
@@ -58,7 +59,8 @@ export abstract class InferenceBase<TInferResponse> {
     protected readonly model: estypes.MlTrainedModelConfig,
     protected readonly inputType: INPUT_TYPE
   ) {
-    this.inputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
+    this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
+    this.inputField = this.modelInputField;
   }
 
   public setStopped() {
@@ -94,6 +96,10 @@ export abstract class InferenceBase<TInferResponse> {
     this.runningState$.next(RUNNING_STATE.STOPPED);
   }
 
+  public setInputField(field: string | undefined) {
+    this.inputField = field === undefined ? this.modelInputField : field;
+  }
+
   protected getInputText() {
     return this.inputText$.getValue()[0];
   }
@@ -122,7 +128,7 @@ export abstract class InferenceBase<TInferResponse> {
         model_id: this.model.model_id,
         target_field: this.inferenceType,
         field_map: {
-          [this.inputField]: this.inputField,
+          [this.inputField]: this.modelInputField,
         },
         ...(inferenceConfigOverrides?.length
           ? { ...this.getInferenceConfig(inferenceConfigOverrides) }

@@ -86,10 +86,11 @@ export const InferenceInputFormIndex: FC<Props> = ({ inferrer }) => {
   useEffect(() => {
     setFieldNames([]);
     setSelectedField(undefined);
+    inferrer.setInputField(undefined);
     if (selectedDataViewId !== undefined) {
       dataViews.get(selectedDataViewId).then((dv) => setSelectedDataView(dv));
     }
-  }, [selectedDataViewId, dataViews]);
+  }, [selectedDataViewId, dataViews, inferrer]);
 
   useEffect(() => {
     if (selectedDataView !== null) {
@@ -104,10 +105,12 @@ export const InferenceInputFormIndex: FC<Props> = ({ inferrer }) => {
         }));
       setFieldNames(fieldNames2);
       if (fieldNames2.length === 1) {
-        setSelectedField(fieldNames2[0].value);
+        const fieldName = fieldNames2[0].value;
+        setSelectedField(fieldName);
+        inferrer.setInputField(fieldName);
       }
     }
-  }, [selectedDataView, selectedDataViewId]);
+  }, [selectedDataView, selectedDataViewId, inferrer]);
 
   const loadExamples = useCallback(() => {
     setExamples([]);
@@ -148,11 +151,11 @@ export const InferenceInputFormIndex: FC<Props> = ({ inferrer }) => {
   useEffect(() => {
     inferrer.reset();
     setExamples([]);
-  }, [selectedDataViewId, setSelectedField, inferrer]);
+  }, [selectedDataViewId, inferrer]);
 
   useEffect(() => {
     loadExamples();
-  }, [selectedField, selectedDataView, search, loadExamples]);
+  }, [selectedField, selectedDataView, loadExamples]);
 
   async function run() {
     setErrorText(null);
