@@ -79,7 +79,7 @@ export function getColorBands(euiTheme: EuiThemeComputed, colorMode: EuiThemeCol
 }
 
 export function getSkippedVizColor(euiTheme: EuiThemeComputed) {
-  return euiTheme.colors.body;
+  return euiTheme.colors.lightestShade;
 }
 
 export function getErrorVizColor(euiTheme: EuiThemeComputed) {
