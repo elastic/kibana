@@ -72,7 +72,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/he",
   "@npm//@types/jest",
-  "@npm//@types/strip-ansi",
+  "@npm//strip-ansi",
   "@npm//@types/normalize-path",
   "@npm//@types/xml2js",
   "@npm//axios",

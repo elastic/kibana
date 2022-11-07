@@ -154,6 +154,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_categories_response'
       operationId: get-package-categories
+    parameters:
+      - in: query
+        name: prerelease
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Whether to include prerelease packages in categories count (e.g. beta,
+          rc, preview) 
+      - in: query
+        name: experimental
+        deprecated: true
+        schema:
+          type: boolean
+          default: false
+      - in: query
+        name: include_policy_templates
+        schema:
+          type: boolean
+          default: false
   /epm/packages/limited:
     get:
       summary: Packages - Get limited list
@@ -196,6 +216,24 @@ paths:
           headers. If you don't need up-to-date installation info for a package,
           and are querying for a list of available packages, providing this flag
           can improve performance substantially.
+      - in: query
+        name: prerelease
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Whether to return prerelease versions of packages (e.g. beta, rc,
+          preview) 
+      - in: query
+        name: experimental
+        deprecated: true
+        schema:
+          type: boolean
+          default: false
+      - in: query
+        name: category
+        schema:
+          type: string
   /epm/packages/_bulk:
     post:
       summary: Packages - Bulk install
@@ -2617,6 +2655,8 @@ components:
           type: array
           items:
             type: string
+        prerelease_integrations_enabled:
+          type: boolean
       required:
         - fleet_server_hosts
         - id
@@ -2751,6 +2791,10 @@ components:
           type: string
         release:
           type: string
+          deprecated: true
+          description: >-
+            release label is deprecated, derive from the version instead
+            (packages follow semver)
           enum:
             - experimental
             - beta
@@ -3180,6 +3224,12 @@ components:
         monitoring_output_id:
           type: string
           nullable: true
+        fleet_server_host_id:
+          type: string
+          nullable: true
+        download_source_id:
+          type: string
+          nullable: true
       required:
         - name
         - namespace
@@ -3282,8 +3332,16 @@ components:
               type: string
             data_output_id:
               type: string
+              nullable: true
             monitoring_output_id:
               type: string
+              nullable: true
+            fleet_server_host_id:
+              type: string
+              nullable: true
+            download_source_id:
+              type: string
+              nullable: true
             revision:
               type: number
             agents:

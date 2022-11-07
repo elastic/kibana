@@ -81,7 +81,7 @@ export class Plugin implements PluginType {
       config,
       router: core.http.createRouter(),
       cloud: plugins.cloud,
-      kibanaVersion: this.initContext.env.packageInfo.version,
+      stackVersion: this.initContext.env.packageInfo.version,
       basePath: core.http.basePath,
       logger: this.logger,
       telemetry: this.telemetryEventsSender,

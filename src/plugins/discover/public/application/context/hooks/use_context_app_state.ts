@@ -67,6 +67,6 @@ export function useContextAppState({
   return {
     appState,
     globalState,
-    setAppState: stateContainer.setAppState,
+    stateContainer,
   };
 }
