@@ -9,8 +9,7 @@ import objectHash from 'object-hash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import {
   ALERT_UUID,
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_VALUES,
+  ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
@@ -26,40 +25,38 @@ import type { SignalSource } from '../../../signals/types';
 import { buildBulkBody } from './build_bulk_body';
 import type { BuildReasonMessage } from '../../../signals/reason_formatters';
 
-export interface ThrottleBuckets {
+export interface SuppressionBuckets {
   event: estypes.SearchHit<SignalSource>;
   count: number;
   start: Date;
   end: Date;
-  values: Array<string | number | null>;
+  terms: Array<{ field: string; value: string | number | null }>;
 }
 
-export const wrapThrottledAlerts = ({
-  throttleBuckets,
+export const wrapSuppressedAlerts = ({
+  suppressionBuckets,
   spaceId,
   completeRule,
   mergeStrategy,
   indicesToQuery,
   buildReasonMessage,
-  groupByFields,
   alertTimestampOverride,
 }: {
-  throttleBuckets: ThrottleBuckets[];
+  suppressionBuckets: SuppressionBuckets[];
   spaceId: string | null | undefined;
   completeRule: CompleteRule<RuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
   indicesToQuery: string[];
   buildReasonMessage: BuildReasonMessage;
-  groupByFields: string[];
   alertTimestampOverride: Date | undefined;
 }): Array<WrappedFieldsLatest<SuppressionFieldsLatest>> => {
-  return throttleBuckets.map((bucket) => {
+  return suppressionBuckets.map((bucket) => {
     const id = objectHash([
       bucket.event._index,
       bucket.event._id,
       String(bucket.event._version),
       `${spaceId}:${completeRule.alertId}`,
-      bucket.values,
+      bucket.terms,
       bucket.start,
       bucket.end,
     ]);
@@ -79,8 +76,7 @@ export const wrapThrottledAlerts = ({
       _index: '',
       _source: {
         ...baseAlert,
-        [ALERT_SUPPRESSION_FIELDS]: groupByFields,
-        [ALERT_SUPPRESSION_VALUES]: bucket.values,
+        [ALERT_SUPPRESSION_TERMS]: bucket.terms,
         [ALERT_SUPPRESSION_START]: bucket.start,
         [ALERT_SUPPRESSION_END]: bucket.end,
         [ALERT_SUPPRESSION_COUNT]: bucket.count,

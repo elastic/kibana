@@ -24,8 +24,8 @@ import {
   ALERT_RULE_PARAMETERS,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
-  ALERT_SUPPRESSION_VALUES,
   ALERT_SUPPRESSION_COUNT,
+  ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 
 import type { TGridModel } from '@kbn/timelines-plugin/public';
@@ -673,22 +673,21 @@ const getSuppressedAlertData = (ecsData: Ecs | Ecs[]) => {
   const normalizedEcsData: Ecs = Array.isArray(ecsData) ? ecsData[0] : ecsData;
   const from = getField(normalizedEcsData, ALERT_SUPPRESSION_START);
   const to = getField(normalizedEcsData, ALERT_SUPPRESSION_END);
-  const params = getField(normalizedEcsData, ALERT_RULE_PARAMETERS);
-  // TODO: fix snake and camel case mixing in HTTP schema
-  const groupByFields: string[] = params.alert_suppression.groupBy;
-  const entities = getField(normalizedEcsData, ALERT_SUPPRESSION_VALUES);
-  const dataProviderPartials = groupByFields.map((field, i) => {
-    const fieldId = field.replace('.', '-');
-    const value = entities[i];
+  const terms: Array<{ field: string; value: string | number }> = getField(
+    normalizedEcsData,
+    ALERT_SUPPRESSION_TERMS
+  );
+  const dataProviderPartials = terms.map((term) => {
+    const fieldId = term.field.replace('.', '-');
     return {
-      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${value}`,
+      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`,
       name: fieldId,
       enabled: true,
       excluded: false,
       kqlQuery: '',
       queryMatch: {
-        field,
-        value,
+        field: term.field,
+        value: term.value,
         operator: ':' as const,
       },
     };

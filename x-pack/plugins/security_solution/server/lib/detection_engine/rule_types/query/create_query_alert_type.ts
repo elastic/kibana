@@ -16,7 +16,7 @@ import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 
 export interface QueryRuleState {
-  throttleGroupHistory?: BucketHistory[];
+  suppressionGroupHistory?: BucketHistory[];
   [key: string]: unknown;
 }
 
@@ -82,7 +82,7 @@ export const createQueryAlertType = (
         services,
         version,
         spaceId,
-        bucketHistory: state.throttleGroupHistory,
+        bucketHistory: state.suppressionGroupHistory,
         osqueryCreateAction,
         licensing,
       });

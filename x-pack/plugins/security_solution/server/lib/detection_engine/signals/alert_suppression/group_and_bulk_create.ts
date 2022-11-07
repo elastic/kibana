@@ -17,8 +17,8 @@ import type {
   GroupAndBulkCreateReturnType,
 } from '../types';
 import { addToSearchAfterReturn, getUnprocessedExceptionsWarnings } from '../utils';
-import type { ThrottleBuckets } from '../../rule_types/factories/utils/wrap_throttled_alerts';
-import { wrapThrottledAlerts } from '../../rule_types/factories/utils/wrap_throttled_alerts';
+import type { SuppressionBuckets } from '../../rule_types/factories/utils/wrap_suppressed_alerts';
+import { wrapSuppressedAlerts } from '../../rule_types/factories/utils/wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
 import { singleSearchAfter } from '../single_search_after';
 
@@ -108,7 +108,7 @@ export const groupAndBulkCreate = async ({
       errors: [],
       warningMessages: [],
       state: {
-        throttleGroupHistory: filteredBucketHistory,
+        suppressionGroupHistory: filteredBucketHistory,
       },
     };
 
@@ -165,7 +165,7 @@ export const groupAndBulkCreate = async ({
         return toReturn;
       }
 
-      const throttleBuckets: ThrottleBuckets[] = buckets.map((bucket) => ({
+      const suppressionBuckets: SuppressionBuckets[] = buckets.map((bucket) => ({
         event: bucket.topHits.hits.hits[0],
         count: bucket.doc_count,
         start: bucket.min_timestamp.value_as_string
@@ -174,17 +174,16 @@ export const groupAndBulkCreate = async ({
         end: bucket.max_timestamp.value_as_string
           ? new Date(bucket.max_timestamp.value_as_string)
           : tuple.to.toDate(),
-        values: Object.values(bucket.key),
+        terms: Object.entries(bucket.key).map(([key, value]) => ({ field: key, value })),
       }));
 
-      const wrappedAlerts = wrapThrottledAlerts({
-        throttleBuckets,
+      const wrappedAlerts = wrapSuppressedAlerts({
+        suppressionBuckets,
         spaceId,
         completeRule: runOpts.completeRule,
         mergeStrategy: runOpts.mergeStrategy,
         indicesToQuery: runOpts.inputIndex,
         buildReasonMessage,
-        groupByFields,
         alertTimestampOverride: runOpts.alertTimestampOverride,
       });
 
@@ -208,7 +207,7 @@ export const groupAndBulkCreate = async ({
           };
         });
 
-      toReturn.state.throttleGroupHistory.push(...newBucketHistory);
+      toReturn.state.suppressionGroupHistory.push(...newBucketHistory);
     } catch (exc) {
       toReturn.success = false;
       toReturn.errors.push(exc.message);

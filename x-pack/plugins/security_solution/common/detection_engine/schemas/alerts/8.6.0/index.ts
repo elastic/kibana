@@ -7,8 +7,7 @@
 
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_VALUES,
+  ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_COUNT,
@@ -25,8 +24,7 @@ new schemas to the union of all alert schemas, and re-export the new schemas as 
 */
 
 export interface SuppressionFields860 extends BaseFields840 {
-  [ALERT_SUPPRESSION_FIELDS]: string[];
-  [ALERT_SUPPRESSION_VALUES]: Array<string | number | null>;
+  [ALERT_SUPPRESSION_TERMS]: Array<{ field: string; value: string | number | null }>;
   [ALERT_SUPPRESSION_START]: Date;
   [ALERT_SUPPRESSION_END]: Date;
   [ALERT_SUPPRESSION_COUNT]: number;

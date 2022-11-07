@@ -311,7 +311,7 @@ export interface SearchAfterAndBulkCreateReturnType {
 
 export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateReturnType {
   state: {
-    throttleGroupHistory: BucketHistory[];
+    suppressionGroupHistory: BucketHistory[];
   };
 }
 

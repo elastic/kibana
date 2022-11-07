@@ -188,12 +188,12 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
-  [Fields.ALERT_SUPPRESSION_FIELDS]: {
+  [Fields.ALERT_SUPPRESSION_FIELD]: {
     type: 'keyword',
     array: true,
     required: false,
   },
-  [Fields.ALERT_SUPPRESSION_VALUES]: {
+  [Fields.ALERT_SUPPRESSION_VALUE]: {
     type: 'keyword',
     array: true,
     required: false,

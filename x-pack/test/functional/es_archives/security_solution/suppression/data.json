@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:00.000Z",
       "host": {
@@ -9,7 +9,8 @@
         "ip": "127.0.0.1"
       },
       "user.name": "user-0",
-      "source.ip": "192.168.1.1"
+      "source.ip": "192.168.1.1",
+      "destination.ip": ["127.0.0.1", "127.0.0.2"]
     },
     "type": "_doc"
   }
@@ -18,7 +19,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:01.000Z",
       "host": {
@@ -35,7 +36,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:02.000Z",
       "host": {
@@ -52,7 +53,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:00.000Z",
       "host": {
@@ -69,7 +70,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:01.000Z",
       "host": {
@@ -86,7 +87,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:02.000Z",
       "host": {
@@ -103,7 +104,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:00.000Z",
       "host": {
@@ -120,7 +121,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:01.000Z",
       "host": {
@@ -137,7 +138,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:02.000Z",
       "host": {
@@ -154,7 +155,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:00.000Z",
       "host": {
@@ -171,7 +172,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:01.000Z",
       "host": {
@@ -188,7 +189,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:02.000Z",
       "host": {
@@ -205,7 +206,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:00.000Z",
       "host": {
@@ -222,7 +223,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:01.000Z",
       "host": {
@@ -239,7 +240,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:02.000Z",
       "host": {
@@ -256,7 +257,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:00.000Z",
       "host": {
@@ -273,7 +274,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:01.000Z",
       "host": {
@@ -290,7 +291,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T05:00:02.000Z",
       "host": {
@@ -307,7 +308,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:00.000Z",
       "host": {
@@ -324,7 +325,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:01.000Z",
       "host": {
@@ -341,7 +342,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:02.000Z",
       "host": {
@@ -358,7 +359,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:00.000Z",
       "host": {
@@ -375,7 +376,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:01.000Z",
       "host": {
@@ -392,7 +393,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:02.000Z",
       "host": {
@@ -409,7 +410,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:00.000Z",
       "host": {
@@ -426,7 +427,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:01.000Z",
       "host": {
@@ -443,7 +444,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:02.000Z",
       "host": {
@@ -460,7 +461,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:00.000Z",
       "host": {
@@ -477,7 +478,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:01.000Z",
       "host": {
@@ -494,7 +495,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:02.000Z",
       "host": {
@@ -511,7 +512,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:00.000Z",
       "host": {
@@ -528,7 +529,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:01.000Z",
       "host": {
@@ -545,7 +546,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:02.000Z",
       "host": {
@@ -562,7 +563,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:00.000Z",
       "host": {
@@ -579,7 +580,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:01.000Z",
       "host": {
@@ -596,7 +597,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "throttling-data",
+    "index": "suppression-data",
     "source": {
       "@timestamp": "2020-10-28T06:00:02.000Z",
       "host": {

@@ -12,11 +12,10 @@ import {
   ALERT_RULE_RULE_ID,
   ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_VALUES,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_COUNT,
+  ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
@@ -428,18 +427,18 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).to.eql(1);
     });
 
-    describe('with throttling enabled', async () => {
+    describe('with suppression enabled', async () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/throttling');
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/suppression');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/throttling');
+        await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/suppression');
       });
 
       it('should generate only 1 alert per host name when grouping by host name', async () => {
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['throttling-data']),
+          ...getRuleForSignalTesting(['suppression-data']),
           query: `host.name: "host-0"`,
           alert_suppression: {
             group_by: ['host.name'],
@@ -457,8 +456,12 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).to.eql(1);
         expect(previewAlerts[0]._source).to.eql({
           ...previewAlerts[0]._source,
-          [ALERT_SUPPRESSION_FIELDS]: ['host.name'],
-          [ALERT_SUPPRESSION_VALUES]: ['host-0'],
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-0',
+            },
+          ],
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
@@ -468,7 +471,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should generate multiple alerts when multiple host names are found', async () => {
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['throttling-data']),
+          ...getRuleForSignalTesting(['suppression-data']),
           query: `host.name: *`,
           alert_suppression: {
             group_by: ['host.name'],
@@ -493,8 +496,12 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hostNames).to.eql(['host-0', 'host-1', 'host-2']);
         expect(previewAlerts[0]._source).to.eql({
           ...previewAlerts[0]._source,
-          [ALERT_SUPPRESSION_FIELDS]: ['host.name'],
-          [ALERT_SUPPRESSION_VALUES]: ['host-0'],
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-0',
+            },
+          ],
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
@@ -504,7 +511,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should generate alerts when using multiple group by fields', async () => {
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['throttling-data']),
+          ...getRuleForSignalTesting(['suppression-data']),
           query: `host.name: *`,
           alert_suppression: {
             group_by: ['host.name', 'source.ip'],
@@ -528,8 +535,16 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]._source).to.eql({
           ...previewAlerts[0]._source,
-          [ALERT_SUPPRESSION_FIELDS]: ['host.name', 'source.ip'],
-          [ALERT_SUPPRESSION_VALUES]: ['host-0', '192.168.1.1'],
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-0',
+            },
+            {
+              field: 'source.ip',
+              value: '192.168.1.1',
+            },
+          ],
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
@@ -539,7 +554,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not count documents that were covered by previous alerts', async () => {
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['throttling-data']),
+          ...getRuleForSignalTesting(['suppression-data']),
           query: `host.name: *`,
           alert_suppression: {
             group_by: ['host.name', 'source.ip'],
@@ -567,8 +582,16 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]._source).to.eql({
           ...previewAlerts[0]._source,
-          [ALERT_SUPPRESSION_FIELDS]: ['host.name', 'source.ip'],
-          [ALERT_SUPPRESSION_VALUES]: ['host-0', '192.168.1.1'],
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-0',
+            },
+            {
+              field: 'source.ip',
+              value: '192.168.1.1',
+            },
+          ],
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
@@ -577,13 +600,62 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[1]._source).to.eql({
           ...previewAlerts[1]._source,
-          [ALERT_SUPPRESSION_FIELDS]: ['host.name', 'source.ip'],
-          [ALERT_SUPPRESSION_VALUES]: ['host-0', '192.168.1.1'],
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-0',
+            },
+            {
+              field: 'source.ip',
+              value: '192.168.1.1',
+            },
+          ],
           // Note: the timestamps here are 1 hour after the timestamps for previewAlerts[0]
           [ALERT_ORIGINAL_TIME]: '2020-10-28T06:00:00.000Z',
           [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
           [ALERT_SUPPRESSION_COUNT]: 3,
+        });
+      });
+
+      // Only one source document populates destination.ip, but it populates the field with an array
+      // so we expect 2 groups to be created from the single document
+      it('should generate multiple alerts for a single doc in multiple groups', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['suppression-data']),
+          query: `destination.ip: *`,
+          alert_suppression: {
+            group_by: ['destination.ip'],
+          },
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T05:30:00.000Z'),
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 1000,
+          sort: ['destination.ip'],
+        });
+        expect(previewAlerts.length).to.eql(2);
+
+        expect(previewAlerts[0]._source).to.eql({
+          ...previewAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'destination.ip',
+              value: '127.0.0.1',
+            },
+          ],
+          [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+          [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:00.000Z',
+          [ALERT_SUPPRESSION_COUNT]: 1,
         });
       });
     });
