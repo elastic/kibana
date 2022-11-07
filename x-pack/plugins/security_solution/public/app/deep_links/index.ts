@@ -238,7 +238,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           {
             id: SecurityPageName.sharedExceptionListDetails,
             title: 'List Details',
-            path: '/exceptions/shared',
+            path: '/exceptions/shared/:exceptionListId',
             navLinkStatus: AppNavLinkStatus.hidden,
             searchable: false,
           },

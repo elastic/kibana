@@ -80,7 +80,8 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                       <EuiFlexItem grow={false} component={'span'}>
                         <EuiLink
                           data-test-subj="exception-list-name"
-                          href={href}
+                          // href={href}
+                          onClick={goToExceptionDetail}
                           // onClick={navigateToApp(APP_UI_ID, {
                           //   deepLinkId: SecurityPageName.sharedExceptionListDetails,
                           //   path: `/exceptions/shared/${exceptionsList.list_id}`,

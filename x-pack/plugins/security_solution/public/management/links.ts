@@ -139,6 +139,15 @@ export const links: LinkItem = {
           defaultMessage: 'Exception lists',
         }),
       ],
+      // links: [
+      //   {
+      //     id: SecurityPageName.sharedExceptionListDetails,
+      //     path: '/exceptions/shared',
+      //     title: 'Exception List',
+      //     skipUrlState: true,
+      //     hideTimeline: true,
+      //   },
+      // ],
     },
     {
       id: SecurityPageName.endpoints,

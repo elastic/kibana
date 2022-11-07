@@ -27,21 +27,6 @@ const ExceptionsRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const ExceptionsContainerComponent: React.FC = () => {
-  useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
-
-  return (
-    <Switch>
-      <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />
-      <Route component={NotFoundPage} />
-    </Switch>
-  );
-};
-
-const Exceptions = React.memo(ExceptionsContainerComponent);
-
-const renderExceptionsRoutes = () => <Exceptions />;
-
 const ExceptionsListDetailRoute = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.sharedExceptionListDetails}>
@@ -51,26 +36,42 @@ const ExceptionsListDetailRoute = () => (
   </PluginTemplateWrapper>
 );
 
-const ExceptionListDetailContainerComponent: React.FC = () => {
+const ExceptionsContainerComponent: React.FC = () => {
+  useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
+
   return (
     <Switch>
+      <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />
       <Route path={'/exceptions/shared/:exceptionListId'} component={ExceptionsListDetailRoute} />
       <Route component={NotFoundPage} />
     </Switch>
   );
 };
 
-const ExceptionListDetails = React.memo(ExceptionListDetailContainerComponent);
+const Exceptions = React.memo(ExceptionsContainerComponent);
 
-const renderExceptionListDetailsRoute = () => <ExceptionListDetails />;
+const renderExceptionsRoutes = () => <Exceptions />;
+
+// const ExceptionListDetailContainerComponent: React.FC = () => {
+//   return (
+//     <Switch>
+//       <Route path={'/exceptions/shared/:exceptionListId'} component={ExceptionsListDetailRoute} />
+//       <Route component={NotFoundPage} />
+//     </Switch>
+//   );
+// };
+
+// const ExceptionListDetails = React.memo(ExceptionListDetailContainerComponent);
+
+// const renderExceptionListDetailsRoute = () => <ExceptionListDetails />;
 
 export const routes = [
   {
     path: EXCEPTIONS_PATH,
     render: renderExceptionsRoutes,
   },
-  {
-    path: '/exceptions/shared/:exceptionListId',
-    component: ExceptionListDetails,
-  },
+  // {
+  //   path: '/exceptions/shared/:exceptionListId',
+  //   component: ExceptionListDetails,
+  // },
 ];
