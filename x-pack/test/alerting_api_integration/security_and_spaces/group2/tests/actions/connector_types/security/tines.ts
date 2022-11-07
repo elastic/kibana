@@ -240,7 +240,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             service_message:
-              'Request validation failed (Error: [webhook.id]: expected value of type [number] but got [undefined])',
+              'Invalid subActionsParams: [webhook] or [webhookUrl] expected but got none',
           });
         });
 
@@ -365,14 +365,17 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               })
               .expect(200);
 
-            expect(simulator.requestUrl).to.eql(getTinesStoriesUrl(url, { per_page: '20' }));
+            expect(simulator.requestUrl).to.eql(getTinesStoriesUrl(url, { per_page: '500' }));
             expect(body).to.eql({
               status: 'ok',
               connector_id: tinesActionId,
-              data: [
-                { id: tinesStory1.id, name: tinesStory1.name },
-                { id: tinesStory2.id, name: tinesStory2.name },
-              ],
+              data: {
+                stories: [
+                  { id: tinesStory1.id, name: tinesStory1.name, published: true },
+                  { id: tinesStory2.id, name: tinesStory2.name, published: true },
+                ],
+                incompleteResponse: false,
+              },
             });
           });
 
@@ -386,20 +389,23 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               .expect(200);
 
             expect(simulator.requestUrl).to.eql(
-              getTinesAgentsUrl(url, { story_id: '1', per_page: '20' })
+              getTinesAgentsUrl(url, { story_id: '1', per_page: '500' })
             );
             expect(body).to.eql({
               status: 'ok',
               connector_id: tinesActionId,
-              data: [
-                {
-                  id: tinesAgentWebhook.id,
-                  name: tinesAgentWebhook.name,
-                  storyId: tinesAgentWebhook.story_id,
-                  path: tinesAgentWebhook.options.path,
-                  secret: tinesAgentWebhook.options.secret,
-                },
-              ],
+              data: {
+                webhooks: [
+                  {
+                    id: tinesAgentWebhook.id,
+                    name: tinesAgentWebhook.name,
+                    storyId: tinesAgentWebhook.story_id,
+                    path: tinesAgentWebhook.options.path,
+                    secret: tinesAgentWebhook.options.secret,
+                  },
+                ],
+                incompleteResponse: false,
+              },
             });
           });
 
@@ -409,6 +415,30 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'foo')
               .send({
                 params: { subAction: 'run', subActionParams: { body: '["test"]', webhook } },
+              })
+              .expect(200);
+
+            expect(simulator.requestData).to.eql(['test']);
+            expect(simulator.requestUrl).to.eql(getTinesWebhookPostUrl(url, webhook));
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: tinesActionId,
+              data: tinesWebhookSuccessResponse,
+            });
+          });
+
+          it('should run the webhook url', async () => {
+            const { body } = await supertest
+              .post(`/api/actions/connector/${tinesActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'run',
+                  subActionParams: {
+                    body: '["test"]',
+                    webhookUrl: getTinesWebhookPostUrl(url, webhook),
+                  },
+                },
               })
               .expect(200);
 
@@ -458,8 +488,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
-              service_message:
-                'Status code: undefined. Message: API Error: (422) Unprocessable Entity',
+              service_message: 'Status code: 422. Message: API Error: (422) Unprocessable Entity',
             });
           });
 
@@ -480,8 +509,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
-              service_message:
-                'Status code: undefined. Message: API Error: (422) Unprocessable Entity',
+              service_message: 'Status code: 422. Message: API Error: (422) Unprocessable Entity',
             });
           });
 
@@ -500,8 +528,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
-              service_message:
-                'Status code: undefined. Message: API Error: (422) Unprocessable Entity',
+              service_message: 'Status code: 422. Message: API Error: (422) Unprocessable Entity',
             });
           });
         });

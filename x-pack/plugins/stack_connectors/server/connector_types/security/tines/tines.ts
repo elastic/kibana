@@ -161,6 +161,9 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     webhookUrl,
     body,
   }: TinesRunActionParams): Promise<TinesRunActionResponse> {
+    if (!webhook && !webhookUrl) {
+      throw Error('Invalid subActionsParams: [webhook] or [webhookUrl] expected but got none');
+    }
     const response = await this.request({
       url: webhookUrl ? webhookUrl : this.urls.getRunWebhookURL(webhook!),
       method: 'post',

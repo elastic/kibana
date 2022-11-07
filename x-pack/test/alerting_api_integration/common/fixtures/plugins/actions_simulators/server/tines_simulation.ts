@@ -50,8 +50,8 @@ export class TinesSimulator extends Simulator {
   }
 }
 
-export const tinesStory1 = { name: 'story 1', id: 1, team: 'team' };
-export const tinesStory2 = { name: 'story 2', id: 2, team: 'team' };
+export const tinesStory1 = { name: 'story 1', id: 1, team: 'team', published: true };
+export const tinesStory2 = { name: 'story 2', id: 2, team: 'team', published: true };
 
 export const tinesAgentWebhook = {
   name: 'agent 1',
@@ -61,8 +61,8 @@ export const tinesAgentWebhook = {
   type: 'Agents::WebhookAgent',
 };
 export const tinesAgentNotWebhook = {
-  name: 'agent 1',
-  id: 1,
+  name: 'agent 2',
+  id: 2,
   story_id: 1,
   options: { url: 'url' },
   type: 'Agents::HttpRequest',
@@ -71,14 +71,14 @@ export const tinesAgentNotWebhook = {
 export const tinesStoriesResponse = {
   stories: [tinesStory1, tinesStory2],
   meta: {
-    next_page: null,
+    pages: 1,
   },
 };
 
 export const tinesAgentsResponse = {
   agents: [tinesAgentWebhook, tinesAgentNotWebhook],
   meta: {
-    next_page: null,
+    pages: 1,
   },
 };
 
