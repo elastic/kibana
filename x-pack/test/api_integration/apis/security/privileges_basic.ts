@@ -123,6 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
             dev_tools: ['all', 'read', 'minimal_all', 'minimal_read'],
             advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             osquery: [
               'all',
