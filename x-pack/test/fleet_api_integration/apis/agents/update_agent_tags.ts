@@ -49,7 +49,7 @@ export default function (providerContext: FtrProviderContext) {
           supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx'),
           supertest.get(`/api/fleet/agents/agent4`).set('kbn-xsrf', 'xxx'),
         ]);
-        expect(agent1data.body.item.tags).to.eql(['tag1', 'newTag']);
+        expect(agent1data.body.item.tags).to.eql(['newTag', 'tag1']);
         expect(agent4data.body.item.tags).to.eql(['newTag']);
       });
 

@@ -18,15 +18,13 @@ import { appContextService } from '../app_context';
 
 import { agentPolicyService } from '../agent_policy';
 
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
+
 import { ActionRunner } from './action_runner';
 
 import { BulkActionTaskType } from './bulk_actions_resolver';
 import { filterHostedPolicies } from './filter_hosted_agents';
-import {
-  createErrorActionResults,
-  bulkCreateAgentActionResults,
-  createAgentAction,
-} from './actions';
+import { bulkCreateAgentActionResults, createAgentAction } from './actions';
 import { getElasticsearchQuery } from './crud';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
@@ -101,6 +99,7 @@ export async function updateTagsBatch(
   if (options.kuery !== undefined) {
     const hostedPolicies = await agentPolicyService.list(soClient, {
       kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+      perPage: SO_SEARCH_LIMIT,
     });
     const hostedIds = hostedPolicies.items.map((item) => item.id);
 
@@ -122,13 +121,15 @@ export async function updateTagsBatch(
       wait_for_completion: true,
       script: {
         source: `   
-      ctx._source.tags = ctx._source.tags == null ? [] : ctx._source.tags;
+      if (ctx._source.tags == null) {
+        ctx._source.tags = [];
+      }
       if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) { 
         ctx._source.tags.replaceAll(tag -> params.tagsToRemove[0] == tag ? params.tagsToAdd[0] : tag);
       } else {
-        ctx._source.tags.removeAll(params.tagsToRemove); 
-        ctx._source.tags.addAll(params.tagsToAdd);
+        ctx._source.tags.removeAll(params.tagsToRemove);
       } 
+      ctx._source.tags.addAll(params.tagsToAdd);
 
       LinkedHashSet uniqueSet = new LinkedHashSet();
       uniqueSet.addAll(ctx._source.tags);
@@ -163,15 +164,15 @@ export async function updateTagsBatch(
     type: 'UPDATE_TAGS',
     total,
   });
-  // writing action errors from errors map (applicable if agentIds were checked for hosted agent)
-  await createErrorActionResults(esClient, actionId, errors, hostedAgentError);
 
   // writing successful action results
   if (res.updated ?? 0 > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-      (options.kuery !== undefined ? Array(res.updated).fill('') : agentIds).map((agentId) => ({
-        agentId,
+      // we don't have all agent ids in case of kuery
+      // it would be better to be able to write 1 action doc for multiple agents at once
+      (options.kuery !== undefined ? [...Array(res.updated).keys()] : agentIds).map((id) => ({
+        agentId: id + '',
         actionId,
       }))
     );
@@ -182,7 +183,7 @@ export async function updateTagsBatch(
     await bulkCreateAgentActionResults(
       esClient,
       res.failures.map((failure) => ({
-        agentId: '',
+        agentId: failure.id,
         actionId,
         error: failure.cause.reason,
       }))
@@ -193,13 +194,11 @@ export async function updateTagsBatch(
   if ((res.total ?? total) < total) {
     await bulkCreateAgentActionResults(
       esClient,
-      Array(total - (res.total ?? total))
-        .fill('')
-        .map(() => ({
-          agentId: '',
-          actionId,
-          error: hostedAgentError,
-        }))
+      [...Array(total - (res.total ?? total)).keys()].map((id) => ({
+        agentId: id + '',
+        actionId,
+        error: hostedAgentError,
+      }))
     );
   }
 
