@@ -14,7 +14,7 @@ import type { Agent } from '../../types';
 
 import { AGENTS_INDEX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
-import { appContextService } from '..';
+import { appContextService } from '../app_context';
 
 import { agentPolicyService } from '../agent_policy';
 
@@ -190,7 +190,7 @@ export async function updateTagsBatch(
   }
 
   // writing hosted agent errors - hosted agents filtered out when kuery is passed
-  if (res.total ?? total < total) {
+  if ((res.total ?? total) < total) {
     await bulkCreateAgentActionResults(
       esClient,
       Array(total - (res.total ?? total))

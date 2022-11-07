@@ -8,21 +8,29 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { appContextService } from '..';
-
 import { createClientMock } from './action.mock';
 import { updateAgentTags } from './update_agent_tags';
 
-jest.mock('..');
+jest.mock('../app_context', () => {
+  return {
+    appContextService: {
+      getLogger: jest.fn().mockReturnValue({
+        debug: jest.fn(),
+        warn: jest.fn(),
+        info: jest.fn(),
+        error: jest.fn(),
+      } as any),
+    },
+  };
+});
 
-jest.mock('./filter_hosted_agents', () => ({
-  filterHostedPolicies: jest
-    .fn()
-    .mockImplementation((soClient, givenAgents) => Promise.resolve(givenAgents)),
-}));
-
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
-mockedAppContextService.getLogger.mockReturnValue({ debug: jest.fn(), warn: jest.fn() } as any);
+jest.mock('../agent_policy', () => {
+  return {
+    agentPolicyService: {
+      getByIDs: jest.fn().mockResolvedValue([{ id: 'hosted-agent-policy', is_managed: true }]),
+    },
+  };
+});
 
 const mockRunAsync = jest.fn().mockResolvedValue({});
 jest.mock('./update_agent_tags_action_runner', () => ({
@@ -55,7 +63,7 @@ describe('update_agent_tags', () => {
     } as any);
 
     esClient.updateByQuery.mockReset();
-    esClient.updateByQuery.mockResolvedValue({ failures: [] } as any);
+    esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 1 } as any);
 
     mockRunAsync.mockClear();
   });
@@ -65,7 +73,7 @@ describe('update_agent_tags', () => {
 
     expect(esClient.updateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        conflicts: 'proceed',
+        conflicts: 'abort',
         index: '.fleet-agents',
         query: { terms: { _id: ['agent1'] } },
         script: expect.objectContaining({
@@ -81,7 +89,28 @@ describe('update_agent_tags', () => {
     );
   });
 
-  it('should write error action results for hosted agent', async () => {
+  it('should update action results on success', async () => {
+    await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], []);
+
+    const agentAction = esClient.create.mock.calls[0][0] as any;
+    expect(agentAction?.body).toEqual(
+      expect.objectContaining({
+        action_id: expect.anything(),
+        agents: ['agent1'],
+        type: 'UPDATE_TAGS',
+        total: 1,
+      })
+    );
+
+    const actionResults = esClient.bulk.mock.calls[0][0] as any;
+    const agentIds = actionResults?.body
+      ?.filter((i: any) => i.agent_id)
+      .map((i: any) => i.agent_id);
+    expect(agentIds).toEqual(['agent1']);
+    expect(actionResults.body[1].error).not.toBeDefined();
+  });
+
+  it('should write error action results for hosted agent when agentIds are passed', async () => {
     const { esClient: esClientMock, agentInHostedDoc } = createClientMock();
 
     await updateAgentTags(
@@ -92,9 +121,53 @@ describe('update_agent_tags', () => {
       []
     );
 
+    const agentAction = esClientMock.create.mock.calls[0][0] as any;
+    expect(agentAction?.body).toEqual(
+      expect.objectContaining({
+        action_id: expect.anything(),
+        agents: [],
+        type: 'UPDATE_TAGS',
+        total: 1,
+      })
+    );
+
     const errorResults = esClientMock.bulk.mock.calls[0][0] as any;
     const errorIds = errorResults?.body?.filter((i: any) => i.agent_id).map((i: any) => i.agent_id);
     expect(errorIds).toEqual([agentInHostedDoc._id]);
+    expect(errorResults.body[1].error).toEqual(
+      'Cannot modify tags on a hosted agent in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.'
+    );
+  });
+
+  it('should write error action results when failures are returned', async () => {
+    esClient.updateByQuery.mockReset();
+    esClient.updateByQuery.mockResolvedValue({
+      failures: [{ cause: { reason: 'error reason' } }],
+      updated: 0,
+    } as any);
+
+    await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], []);
+
+    const errorResults = esClient.bulk.mock.calls[0][0] as any;
+    expect(errorResults.body[1].error).toEqual('error reason');
+  });
+
+  it('should write error action results when less agents updated than total', async () => {
+    const { esClient: esClientMock, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
+
+    esClientMock.updateByQuery.mockReset();
+    esClientMock.updateByQuery.mockResolvedValue({ failures: [], updated: 0, total: '1' } as any);
+
+    await updateAgentTags(
+      soClient,
+      esClientMock,
+      { agentIds: [agentInRegularDoc._id, agentInRegularDoc2._id] },
+      ['one'],
+      []
+    );
+
+    const errorResults = esClientMock.bulk.mock.calls[0][0] as any;
+    expect(errorResults.body[1].error).toEqual('Cannot modify tags on a hosted agent');
   });
 
   it('should run add tags async when actioning more agents than batch size', async () => {
