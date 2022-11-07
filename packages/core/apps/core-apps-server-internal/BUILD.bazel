@@ -8,13 +8,6 @@ PKG_REQUIRE_NAME = "@kbn/core-apps-server-internal"
 SOURCE_FILES = glob(
   [
     "**/*.ts",
-    "src/**/*.css",
-    "src/**/*.ttf",
-    "src/**/*.woff",
-    "src/**/*.woff2",
-    "src/**/*.ico",
-    "src/**/*.png",
-    "src/**/*.svg",
   ],
   exclude = [
     "**/*.config.js",
@@ -38,8 +31,16 @@ filegroup(
   srcs = SRCS,
 )
 
+ASSETS = glob(["assets/**/*"])
+
+filegroup(
+  name = "assets",
+  srcs = ASSETS,
+)
+
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
+  ":assets"
 ]
 
 RUNTIME_DEPS = [

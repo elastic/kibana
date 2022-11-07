@@ -8,7 +8,7 @@
   "extraPublicDirs": ["common/index"],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Contains the new xy-axis chart using the elastic-charts library, which will eventually replace the vislib xy-axis charts including bar, area, and line."
 }
