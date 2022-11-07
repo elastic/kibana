@@ -240,17 +240,17 @@ it('matches snapshot', () => {
         "required": false,
         "type": "object",
       },
-      "orchestrator": Object {
-        "array": false,
-        "required": false,
-        "type": "object",
-      },
       "cloud": Object {
         "array": false,
         "required": false,
         "type": "object",
       },
       "host": Object {
+        "array": false,
+        "required": false,
+        "type": "object",
+      },
+      "orchestrator": Object {
         "array": false,
         "required": false,
         "type": "object",
