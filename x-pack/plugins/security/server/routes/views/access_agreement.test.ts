@@ -130,8 +130,6 @@ describe('Access agreement view routes', () => {
     it('returns empty `accessAgreement` if session info is not available.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      session.get.mockResolvedValue(null);
-
       await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
         options: { body: { accessAgreement: '' } },
         payload: { accessAgreement: '' },
@@ -164,7 +162,10 @@ describe('Access agreement view routes', () => {
       ];
 
       for (const [sessionProvider, expectedAccessAgreement] of cases) {
-        session.get.mockResolvedValue(sessionMock.createValue({ provider: sessionProvider }));
+        session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ provider: sessionProvider }),
+        });
 
         await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
           options: { body: { accessAgreement: expectedAccessAgreement } },
@@ -201,7 +202,10 @@ describe('Access agreement view routes', () => {
       ];
 
       for (const [sessionProvider, expectedAccessAgreement] of cases) {
-        session.get.mockResolvedValue(sessionMock.createValue({ provider: sessionProvider }));
+        session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ provider: sessionProvider }),
+        });
 
         await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
           options: { body: { accessAgreement: expectedAccessAgreement } },
