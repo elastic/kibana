@@ -30,7 +30,7 @@ export class AnalyticsService {
   constructor(core: CoreContext) {
     this.analyticsClient = createAnalytics({
       isDev: core.env.mode.dev,
-      logger: createLogger(core.env.mode.dev),
+      logger: createLogger(true),
       // TODO: We need to be able to edit sendTo once we resolve the telemetry config.
       //  For now, we are relying on whether it's a distributable or running from source.
       sendTo: core.env.packageInfo.dist ? 'production' : 'staging',
