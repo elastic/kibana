@@ -21,6 +21,7 @@ export const useEnableDataFeed = () => {
     async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
       submitTelemetry(job, enable);
 
+      let success = true;
       if (!job.isInstalled) {
         setIsLoading(true);
         try {
@@ -34,7 +35,7 @@ export const useEnableDataFeed = () => {
         } catch (error) {
           addError(error, { title: i18n.CREATE_JOB_FAILURE });
           setIsLoading(false);
-          return;
+          success = false;
         }
       }
 
@@ -50,6 +51,7 @@ export const useEnableDataFeed = () => {
         } catch (error) {
           track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
           addError(error, { title: i18n.START_JOB_FAILURE });
+          success = false;
         }
       } else {
         try {
@@ -57,9 +59,11 @@ export const useEnableDataFeed = () => {
         } catch (error) {
           track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
           addError(error, { title: i18n.STOP_JOB_FAILURE });
+          success = false;
         }
       }
       setIsLoading(false);
+      return success;
     },
     [addError]
   );

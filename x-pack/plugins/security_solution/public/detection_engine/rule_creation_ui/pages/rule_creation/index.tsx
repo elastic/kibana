@@ -232,8 +232,10 @@ const CreateRulePageComponent: React.FC = () => {
           }
 
           const latestTimestampMs = job.latestTimestampMs ?? 0;
-          await enableDatafeed(job, latestTimestampMs, true);
-          success = success && isJobStarted(job.jobState, job.datafeedState);
+          const enabled = await enableDatafeed(job, latestTimestampMs, true);
+          if (!enabled) {
+            success = false;
+          }
         })
       );
     } catch (error) {
