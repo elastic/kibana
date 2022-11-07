@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { SERVER_APP_ID } from '../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../schemas/rule_schemas';
 import { duplicateExceptions } from './duplicate_exceptions';
@@ -24,7 +25,8 @@ const DUPLICATE_TITLE = i18n.translate(
 
 export const duplicateRule = async (
   rule: SanitizedRule<RuleParams>,
-  shouldDuplicateExceptions: boolean
+  shouldDuplicateExceptions: boolean,
+  exceptionsClient: ExceptionListClient | undefined
 ): Promise<InternalRuleCreate> => {
   // Generate a new static ruleId
   const ruleId = uuid.v4();
@@ -36,8 +38,10 @@ export const duplicateRule = async (
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
   const setup = isPrebuilt ? '' : rule.params.setup;
   const exceptions = await duplicateExceptions(
+    rule.params.ruleId,
     rule.params.exceptionsList,
-    shouldDuplicateExceptions
+    shouldDuplicateExceptions,
+    exceptionsClient
   );
 
   return {

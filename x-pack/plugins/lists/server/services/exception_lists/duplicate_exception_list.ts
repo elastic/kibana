@@ -75,6 +75,7 @@ export const duplicateExceptionListAndItems = async ({
   // fetch associated items
   let itemsToBeDuplicated: CreateExceptionListItemSchema[] = [];
   const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
+    console.log({ RESPONSE: response.data });
     const transformedItems = response.data.map((item) => {
       // Generate a new static listId
       const newItemId = uuid.v4();

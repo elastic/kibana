@@ -23,7 +23,7 @@ import {
 import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 
-export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
+export const useRulesTableActions = ({showExceptionsDuplicateConfirmation}): Array<DefaultItemAction<Rule>> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { startTransaction } = useStartTransaction();
@@ -63,9 +63,11 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       // TODO extract those handlers to hooks, like useDuplicateRule
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
+        const duplicateExceptions = await showExceptionsDuplicateConfirmation();
         const result = await executeBulkAction({
           type: BulkActionType.duplicate,
           ids: [rule.id],
+          payload: { duplicate: { include_exceptions: duplicateExceptions } },
         });
         const createdRules = result?.attributes.results.created;
         if (createdRules?.length) {
