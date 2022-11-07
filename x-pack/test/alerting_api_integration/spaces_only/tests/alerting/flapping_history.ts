@@ -220,7 +220,7 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
     actionId: string,
     reference: string
   ) {
-    const { body: createdAlert } = await supertestWithoutAuth
+    const { body: createdAlert } = await supertest
       .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(
@@ -258,7 +258,7 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
   }
 
   async function createAction() {
-    const { body: createdAction } = await supertestWithoutAuth
+    const { body: createdAction } = await supertest
       .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
       .set('kbn-xsrf', 'foo')
       .send({

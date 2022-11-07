@@ -154,48 +154,24 @@ describe('logAlerts', () => {
     expect(alertingEventLogger.logAlert).toHaveBeenCalledTimes(4);
 
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {
-      action: 'recovered-instance',
-      id: '7',
-      message: "test-rule-type-id:123: 'test rule' alert '7' has recovered",
-      state: {},
-    });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
-      action: 'recovered-instance',
-      id: '8',
-      message: "test-rule-type-id:123: 'test rule' alert '8' has recovered",
-      state: {},
-    });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
-      action: 'recovered-instance',
-      id: '9',
-      message: "test-rule-type-id:123: 'test rule' alert '9' has recovered",
-      state: {},
-    });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
-      action: 'recovered-instance',
-      id: '10',
-      message: "test-rule-type-id:123: 'test rule' alert '10' has recovered",
-      state: {},
-    });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(5, {
       action: 'new-instance',
       id: '4',
       message: "test-rule-type-id:123: 'test rule' created new alert: '4'",
       state: {},
     });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(6, {
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
       action: 'active-instance',
       id: '1',
       message: "test-rule-type-id:123: 'test rule' active alert: '1' in actionGroup: 'undefined'",
       state: {},
     });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(7, {
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
       action: 'active-instance',
       id: '2',
       message: "test-rule-type-id:123: 'test rule' active alert: '2' in actionGroup: 'undefined'",
       state: {},
     });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(8, {
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
       action: 'active-instance',
       id: '4',
       message: "test-rule-type-id:123: 'test rule' active alert: '4' in actionGroup: 'undefined'",
