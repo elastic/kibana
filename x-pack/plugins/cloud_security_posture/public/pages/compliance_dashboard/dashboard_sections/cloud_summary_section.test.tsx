@@ -65,7 +65,7 @@ describe('<CloudSummarySection />', () => {
     expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS)).toHaveTextContent('17');
   });
 
-  it('counters number abbreviation above one million', () => {
+  it('renders counters value in compact abbreviation if its above one million', () => {
     renderCloudSummarySection({ stats: { resourcesEvaluated: 999999, totalFailed: 1000000 } });
 
     expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED)).toHaveTextContent(

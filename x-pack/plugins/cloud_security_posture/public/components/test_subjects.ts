@@ -17,8 +17,3 @@ export const NO_FINDINGS_STATUS_TEST_SUBJ = {
   INDEXING: 'status-api-indexing',
   INDEX_TIMEOUT: 'status-api-index-timeout',
 };
-
-export const CSP_COUNTER_CARD_TEST_SUBJ = {
-  CARD: 'csp-counter-card-card',
-  STAT: 'csp-counter-card-stat',
-};
