@@ -84,11 +84,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 
   const unfilteredFieldGroups: FieldListGroups<T> = useMemo(() => {
     const containsData = (field: T) => {
-      if (!dataViewId || !dataView) {
-        return true;
-      }
-      const isDataViewField = Boolean(dataView.getFieldByName?.(field.name));
-      return hasFieldDataHandler(dataViewId, field.name) || !isDataViewField; // treat unmapped fields as Available rather than Empty
+      return dataViewId ? hasFieldDataHandler(dataViewId, field.name) : true;
     };
 
     const selectedFields = sortedSelectedFields || [];
@@ -108,6 +104,9 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         if (dataView?.metaFields?.includes(field.name)) {
           return 'metaFields';
         }
+        if (dataView?.getFieldByName && !dataView.getFieldByName(field.name)) {
+          return 'unmappedFields';
+        }
         if (containsData(field) || fieldsExistenceInfoUnavailable) {
           return 'availableFields';
         }
@@ -117,10 +116,9 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 
     const popularFields = popularFieldsLimit
       ? sortedFields
-          .filter((field) => field.count && field.type !== '_source' && containsData(field))
+          .filter((field) => field.count && field.type !== '_source')
           .sort((a: T, b: T) => (b.count || 0) - (a.count || 0)) // sort by popularity score
           .slice(0, popularFieldsLimit)
-          .sort(sortFields) // sort alphabetically
       : [];
 
     let fieldGroupDefinitions: FieldListGroups<T> = {
@@ -182,6 +180,25 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           'unifiedFieldList.useGroupedFields.noAvailableDataLabel',
           {
             defaultMessage: `There are no available fields that contain data.`,
+          }
+        ),
+      },
+      UnmappedFields: {
+        fields: groupedFields.unmappedFields,
+        fieldCount: groupedFields.unmappedFields.length,
+        isAffectedByGlobalFilter,
+        isAffectedByTimeFilter,
+        isInitiallyOpen: false,
+        showInAccordion: true,
+        hideDetails: false,
+        hideIfEmpty: true,
+        title: i18n.translate('unifiedFieldList.useGroupedFields.unmappedFieldsLabel', {
+          defaultMessage: 'Unmapped fields',
+        }),
+        defaultNoFieldsMessage: i18n.translate(
+          'unifiedFieldList.useGroupedFields.noUnmappedFieldsLabel',
+          {
+            defaultMessage: `There are no unmapped fields.`,
           }
         ),
       },
@@ -307,6 +324,7 @@ function getDefaultFieldGroups() {
     availableFields: [],
     emptyFields: [],
     metaFields: [],
+    unmappedFields: [],
     skippedFields: [],
   };
 }

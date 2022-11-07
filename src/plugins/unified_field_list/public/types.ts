@@ -40,6 +40,7 @@ export enum FieldsGroupNames {
   AvailableFields = 'AvailableFields',
   EmptyFields = 'EmptyFields',
   MetaFields = 'MetaFields',
+  UnmappedFields = 'UnmappedFields',
 }
 
 export interface FieldsGroupDetails {

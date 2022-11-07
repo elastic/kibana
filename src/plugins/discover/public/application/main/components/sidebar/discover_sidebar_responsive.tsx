@@ -143,6 +143,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
       setAllFields(getDataViewFieldList(selectedDataView, nextFieldCounts, isPlainRecord));
       setFieldCounts(nextFieldCounts);
+    } else if (documentState?.fetchStatus === FetchStatus.LOADING) {
+      setAllFields(null);
+      setFieldCounts(null);
     }
   }, [selectedDataView, documentState, setAllFields, setFieldCounts, isPlainRecord]);
 
