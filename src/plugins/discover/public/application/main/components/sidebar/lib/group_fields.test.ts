@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { type DataViewField } from '@kbn/data-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { getSelectedFields } from './group_fields';
+import { getSelectedFields, shouldShowField } from './group_fields';
 
 describe('group_fields', function () {
   it('should pick fields as unknown_selected if they are unknown', function () {
@@ -41,46 +42,39 @@ describe('group_fields', function () {
     expect(actual2.map((field) => field.name)).toEqual(['extension', 'bytes', 'unknown']);
   });
 
-  // it('excludes unmapped fields if useNewFieldsApi set to true', function () {
-  //   const fieldsWithUnmappedField = [...fields];
-  //   fieldsWithUnmappedField.push({
-  //     name: 'unknown_field',
-  //     type: 'unknown',
-  //     esTypes: ['unknown'],
-  //     count: 1,
-  //     scripted: false,
-  //     searchable: true,
-  //     aggregatable: true,
-  //     readFromDocValues: true,
-  //   });
-  //
-  //   expect(
-  //     (fieldsWithUnmappedField as DataViewField[]).filter((field) => shouldShowField(field, true))
-  //       .length
-  //   ).toBe(fieldsWithUnmappedField.length - 1);
-  // });
+  it('should show any fields if for text-based searches', function () {
+    expect(shouldShowField(dataView.getFieldByName('bytes'), true, true)).toBe(true);
+    expect(shouldShowField(dataView.getFieldByName('bytes'), false, true)).toBe(true);
+    expect(shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, true, true)).toBe(
+      true
+    );
+    expect(
+      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, false, true)
+    ).toBe(true);
+    expect(shouldShowField({ type: '_source', name: 'source' } as DataViewField, false, true)).toBe(
+      false
+    );
+  });
 
-  // it('includes unmapped fields when reading from source', function () {
-  //   const fieldFilterState = getDefaultFieldFilter();
-  //   const fieldsWithUnmappedField = [...fields];
-  //   fieldsWithUnmappedField.push({
-  //     name: 'unknown_field',
-  //     type: 'unknown',
-  //     esTypes: ['unknown'],
-  //     count: 0,
-  //     scripted: false,
-  //     searchable: false,
-  //     aggregatable: false,
-  //     readFromDocValues: false,
-  //   });
-  //
-  //   const actual = groupFields(
-  //     fieldsWithUnmappedField as DataViewField[],
-  //     ['customer_birth_date', 'currency'],
-  //     5,
-  //     fieldFilterState,
-  //     false
-  //   );
-  //   expect(actual.unpopular.map((field) => field.name)).toEqual(['unknown_field']);
-  // });
+  it('should show any fields when searched from source', function () {
+    expect(shouldShowField(dataView.getFieldByName('extension'), false, false)).toBe(true);
+    expect(shouldShowField(dataView.getFieldByName('extension.keyword'), false, false)).toBe(true);
+    expect(
+      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, false, false)
+    ).toBe(true);
+    expect(
+      shouldShowField({ type: '_source', name: 'source' } as DataViewField, false, false)
+    ).toBe(false);
+  });
+
+  it('should exclude multifields when fields api is used', function () {
+    expect(shouldShowField(dataView.getFieldByName('extension'), true, false)).toBe(true);
+    expect(shouldShowField(dataView.getFieldByName('extension.keyword'), true, false)).toBe(false);
+    expect(
+      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, true, false)
+    ).toBe(true);
+    expect(
+      shouldShowField({ type: '_source', name: 'source' } as DataViewField, false, false)
+    ).toBe(false);
+  });
 });

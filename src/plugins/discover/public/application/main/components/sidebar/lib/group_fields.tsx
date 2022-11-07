@@ -14,11 +14,11 @@ import {
 } from '@kbn/data-views-plugin/public';
 
 export function shouldShowField(
-  field: DataViewField,
+  field: DataViewField | undefined,
   useNewFieldsApi: boolean,
   isPlainRecord: boolean
 ): boolean {
-  if (field.type === '_source') {
+  if (!field?.type || field.type === '_source') {
     return false;
   }
   if (isPlainRecord) {
