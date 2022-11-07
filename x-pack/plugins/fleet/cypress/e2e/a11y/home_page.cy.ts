@@ -24,17 +24,24 @@ import {
   DATA_STREAMS_TAB,
   SETTINGS_TAB,
   SETTINGS_FLEET_SERVER_HOST_HEADING,
-  FLEET_SERVER_HOST_INPUT,
+  FLEET_SERVER_SETUP,
+  LANDING_PAGE_ADD_FLEET_SERVER_BUTTON,
 } from '../../screens/fleet';
 import { AGENT_POLICY_NAME_LINK } from '../../screens/integrations';
 import { cleanupAgentPolicies, unenrollAgent } from '../../tasks/cleanup';
+import { setFleetServerHost } from '../../tasks/fleet_server';
 describe('Home page', () => {
   before(() => {
+    setFleetServerHost('https://fleetserver:8220');
     navigateTo(FLEET);
-    cy.getBySel(AGENT_FLYOUT.QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
+    cy.getBySel(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).click();
   });
 
   describe('Agents', () => {
+    before(() => {
+      cy.getBySel(AGENT_FLYOUT.QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
+      setFleetServerHost('https://fleetserver:8220');
+    });
     const fleetServerHost = 'https://localhost:8220';
 
     describe('Quick Start', () => {
@@ -42,10 +49,14 @@ describe('Home page', () => {
         checkA11y({ skipFailures: false });
       });
       it('Install Fleet Server', () => {
-        cy.getBySel(FLEET_SERVER_HOST_INPUT, { timeout: 15000 }).should('be.visible');
-        cy.getBySel(FLEET_SERVER_HOST_INPUT).getBySel('comboBoxSearchInput').type(fleetServerHost);
+        cy.getBySel(FLEET_SERVER_SETUP.ADD_HOST_BTN).click();
+        cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('Host edited');
+        cy.get('[placeholder="Specify host URL"', { timeout: 15000 }).should('be.visible');
+        cy.get('[placeholder="Specify host URL"').type(fleetServerHost);
         cy.getBySel(GENERATE_FLEET_SERVER_POLICY_BUTTON).click();
-        cy.getBySel(PLATFORM_TYPE_LINUX_BUTTON, { timeout: 15000 }).should('be.visible');
+        cy.getBySel(PLATFORM_TYPE_LINUX_BUTTON, { timeout: 15000 })
+          .scrollIntoView()
+          .should('be.visible');
         checkA11y({ skipFailures: false });
       });
     });
@@ -58,13 +69,17 @@ describe('Home page', () => {
         checkA11y({ skipFailures: false });
       });
       it('Add your fleet sever host', () => {
+        cy.getBySel(FLEET_SERVER_SETUP.ADD_HOST_BTN).click();
+        cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('New host');
+        cy.get('[placeholder="Specify host URL"').type('https://localhost:8220');
         cy.getBySel(ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON).click();
         checkA11y({ skipFailures: false });
       });
       it('Generate service token', () => {
-        cy.getBySel(ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON, { timeout: 15000 }).should('be.visible');
         cy.getBySel(ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON).click();
-        cy.getBySel(PLATFORM_TYPE_LINUX_BUTTON, { timeout: 15000 }).should('be.visible');
+        cy.getBySel(PLATFORM_TYPE_LINUX_BUTTON, { timeout: 15000 })
+          .scrollIntoView()
+          .should('be.visible');
         checkA11y({ skipFailures: false });
       });
     });
@@ -72,6 +87,7 @@ describe('Home page', () => {
 
   describe('Agent Policies', () => {
     before(() => {
+      navigateTo(FLEET);
       cy.getBySel(AGENT_POLICIES_TAB).click();
       cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.CREATE_BUTTON, {
         timeout: 15000,
@@ -101,6 +117,7 @@ describe('Home page', () => {
 
   describe('Enrollment Tokens', () => {
     before(() => {
+      navigateTo(FLEET);
       cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
     });
     it('Enrollment Tokens Table', () => {

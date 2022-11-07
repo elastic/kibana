@@ -18,6 +18,14 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.control.placeholder', {
         defaultMessage: 'Any',
       }),
+    getNegate: () =>
+      i18n.translate('controls.optionsList.control.negate', {
+        defaultMessage: 'NOT',
+      }),
+    getExcludeExists: () =>
+      i18n.translate('controls.optionsList.control.excludeExists', {
+        defaultMessage: 'DOES NOT',
+      }),
   },
   editor: {
     getAllowMultiselectTitle: () =>
@@ -26,10 +34,32 @@ export const OptionsListStrings = {
       }),
     getRunPastTimeoutTitle: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout', {
-        defaultMessage: 'Run past timeout',
+        defaultMessage: 'Ignore timeout for results',
+      }),
+    getRunPastTimeoutTooltip: () =>
+      i18n.translate('controls.optionsList.editor.runPastTimeout.tooltip', {
+        defaultMessage:
+          'Wait to display results until the list is complete. This setting is useful for large data sets, but the results might take longer to populate.',
+      }),
+    getHideExcludeTitle: () =>
+      i18n.translate('controls.optionsList.editor.hideExclude', {
+        defaultMessage: 'Allow selections to be excluded',
+      }),
+    getHideExistsQueryTitle: () =>
+      i18n.translate('controls.optionsList.editor.hideExistsQuery', {
+        defaultMessage: 'Allow exists query',
+      }),
+    getHideExistsQueryTooltip: () =>
+      i18n.translate('controls.optionsList.editor.hideExistsQueryTooltip', {
+        defaultMessage: 'Returns the documents that contain an indexed value for the field.',
       }),
   },
   popover: {
+    getAriaLabel: (fieldName: string) =>
+      i18n.translate('controls.optionsList.popover.ariaLabel', {
+        defaultMessage: 'Popover for {fieldName} control',
+        values: { fieldName },
+      }),
     getLoadingMessage: () =>
       i18n.translate('controls.optionsList.popover.loading', {
         defaultMessage: 'Loading options',
@@ -85,6 +115,25 @@ export const OptionsListStrings = {
         defaultMessage:
           '{selectedOptions} selected {selectedOptions, plural, one {option} other {options}} {selectedOptions, plural, one {is} other {are}} ignored because {selectedOptions, plural, one {it is} other {they are}} no longer in the data.',
         values: { selectedOptions },
+      }),
+    getIncludeLabel: () =>
+      i18n.translate('controls.optionsList.popover.includeLabel', {
+        defaultMessage: 'Include',
+      }),
+    getExcludeLabel: () =>
+      i18n.translate('controls.optionsList.popover.excludeLabel', {
+        defaultMessage: 'Exclude',
+      }),
+    getIncludeExcludeLegend: () =>
+      i18n.translate('controls.optionsList.popover.excludeOptionsLegend', {
+        defaultMessage: 'Include or exclude selections',
+      }),
+  },
+  controlAndPopover: {
+    getExists: (negate: number = +false) =>
+      i18n.translate('controls.optionsList.controlAndPopover.exists', {
+        defaultMessage: '{negate, plural, one {Exist} other {Exists}}',
+        values: { negate },
       }),
   },
 };

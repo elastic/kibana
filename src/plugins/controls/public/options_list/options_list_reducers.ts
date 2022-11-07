@@ -51,8 +51,17 @@ export const optionsListReducers = {
       state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
     }
   },
+  selectExists: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
+    if (action.payload) {
+      state.explicitInput.existsSelected = true;
+      state.explicitInput.selectedOptions = [];
+    } else {
+      state.explicitInput.existsSelected = false;
+    }
+  },
   selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
+    if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
     state.explicitInput.selectedOptions?.push(action.payload);
   },
   replaceSelection: (
@@ -62,7 +71,11 @@ export const optionsListReducers = {
     state.explicitInput.selectedOptions = [action.payload];
   },
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {
+    if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
     if (state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
+  },
+  setExclude: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
+    state.explicitInput.exclude = action.payload;
   },
   clearValidAndInvalidSelections: (state: WritableDraft<OptionsListReduxState>) => {
     state.componentState.invalidSelections = [];

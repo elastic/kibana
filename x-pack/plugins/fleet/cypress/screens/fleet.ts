@@ -7,6 +7,7 @@
 
 export const ADD_AGENT_BUTTON = 'addAgentButton';
 export const ADD_AGENT_BUTTON_TOP = 'addAgentBtnTop';
+export const LANDING_PAGE_ADD_FLEET_SERVER_BUTTON = 'fleetServerLanding.addFleetServerButton';
 
 export const AGENTS_TAB = 'fleet-agents-tab';
 export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
@@ -48,7 +49,7 @@ export const SETTINGS_SAVE_BTN = 'saveApplySettingsBtn';
 export const AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX = 'agentPolicyFormSystemMonitoringCheckbox';
 export const INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN = 'AgentPolicyAdvancedOptions.AccordionBtn';
 export const AGENT_POLICY_CREATE_STATUS_CALLOUT = 'agentPolicyCreateStatusCallOut';
-export const FLEET_SERVER_HOST_INPUT = 'fleetServerHostInput';
+
 export const EXISTING_HOSTS_TAB = 'existingHostsTab';
 export const NEW_HOSTS_TAB = 'newHostsTab';
 
@@ -96,9 +97,13 @@ export const AGENT_BINARY_SOURCES_FLYOUT = {
 export const SETTINGS_OUTPUTS = {
   EDIT_BTN: 'editOutputBtn',
   ADD_BTN: 'addOutputBtn',
-  EDIT_HOSTS_BTN: 'editHostsBtn',
   NAME_INPUT: 'settingsOutputsFlyout.nameInput',
   TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
+};
+
+export const SETTINGS_FLEET_SERVER_HOSTS = {
+  ADD_BUTTON: 'settings.fleetServerHosts.addFleetServerHostBtn',
+  EDIT_BUTTON: 'fleetServerHostsTable.edit.btn',
 };
 
 export const AGENT_POLICY_FORM = {
@@ -113,4 +118,16 @@ export const FLEET_AGENT_LIST_PAGE = {
   SHOW_UPGRADEABLE: 'agentList.showUpgradeable',
   CHECKBOX_SELECT_ALL: 'checkboxSelectAll',
   BULK_ACTIONS_BUTTON: 'agentBulkActionsButton',
+};
+
+export const FLEET_SERVER_HOST_FLYOUT = {
+  NAME_INPUT: 'fleetServerHostsFlyout.nameInput',
+  DEFAULT_SWITCH: 'fleetServerHostsFlyout.isDefaultSwitch',
+};
+
+export const FLEET_SERVER_SETUP = {
+  NAME_INPUT: 'fleetServerSetup.nameInput',
+  HOST_INPUT: 'fleetServerSetup.multiRowInput',
+  DEFAULT_SWITCH: 'fleetServerHostsFlyout.isDefaultSwitch',
+  ADD_HOST_BTN: 'fleetServerSetup.addNewHostBtn',
 };

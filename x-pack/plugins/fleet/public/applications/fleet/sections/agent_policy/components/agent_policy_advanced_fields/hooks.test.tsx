@@ -113,7 +113,7 @@ describe('useOutputOptions', () => {
         Object {
           "disabled": false,
           "inputDisplay": "Default (currently Output 1)",
-          "value": "@@##DEFAULT_OUTPUT_VALUE##@@",
+          "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": false,
@@ -137,7 +137,7 @@ describe('useOutputOptions', () => {
         Object {
           "disabled": undefined,
           "inputDisplay": "Default (currently Output 1)",
-          "value": "@@##DEFAULT_OUTPUT_VALUE##@@",
+          "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": false,
@@ -175,7 +175,7 @@ describe('useOutputOptions', () => {
         Object {
           "disabled": false,
           "inputDisplay": "Default (currently Output 1)",
-          "value": "@@##DEFAULT_OUTPUT_VALUE##@@",
+          "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": true,
@@ -199,7 +199,7 @@ describe('useOutputOptions', () => {
         Object {
           "disabled": undefined,
           "inputDisplay": "Default (currently Output 1)",
-          "value": "@@##DEFAULT_OUTPUT_VALUE##@@",
+          "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": true,
@@ -237,7 +237,7 @@ describe('useOutputOptions', () => {
         Object {
           "disabled": false,
           "inputDisplay": "Default (currently Logstash 1)",
-          "value": "@@##DEFAULT_OUTPUT_VALUE##@@",
+          "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": false,
@@ -256,7 +256,7 @@ describe('useOutputOptions', () => {
         Object {
           "disabled": undefined,
           "inputDisplay": "Default (currently Logstash 1)",
-          "value": "@@##DEFAULT_OUTPUT_VALUE##@@",
+          "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": false,
@@ -315,7 +315,7 @@ describe('useOutputOptions', () => {
               />
             </EuiText>
           </React.Fragment>,
-          "value": "@@##DEFAULT_OUTPUT_VALUE##@@",
+          "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": false,
@@ -352,7 +352,7 @@ describe('useOutputOptions', () => {
         Object {
           "disabled": undefined,
           "inputDisplay": "Default (currently Logstash 1)",
-          "value": "@@##DEFAULT_OUTPUT_VALUE##@@",
+          "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": false,

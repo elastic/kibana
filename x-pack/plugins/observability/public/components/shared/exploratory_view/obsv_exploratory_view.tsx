@@ -8,6 +8,7 @@
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { getSyntheticsHeatmapConfig } from './configurations/synthetics/heatmap_config';
 import { getSyntheticsSingleMetricConfig } from './configurations/synthetics/single_metric_config';
 import { ExploratoryViewPage } from '.';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
@@ -16,6 +17,7 @@ import { AppDataType, ReportViewType } from './types';
 import {
   CORE_WEB_VITALS_LABEL,
   DEVICE_DISTRIBUTION_LABEL,
+  HEATMAP_LABEL,
   KPI_OVER_TIME_LABEL,
   PERF_DIST_LABEL,
   SINGLE_METRIC_LABEL,
@@ -89,6 +91,7 @@ export const reportTypesList: Array<{
   { reportType: 'core-web-vitals', label: CORE_WEB_VITALS_LABEL },
   { reportType: 'device-data-distribution', label: DEVICE_DISTRIBUTION_LABEL },
   { reportType: 'single-metric', label: SINGLE_METRIC_LABEL },
+  { reportType: 'heatmap', label: HEATMAP_LABEL },
 ];
 
 export const obsvReportConfigMap = {
@@ -102,6 +105,7 @@ export const obsvReportConfigMap = {
     getSyntheticsKPIConfig,
     getSyntheticsDistributionConfig,
     getSyntheticsSingleMetricConfig,
+    getSyntheticsHeatmapConfig,
   ],
   [DataTypes.MOBILE]: [
     getMobileKPIConfig,
@@ -118,7 +122,6 @@ export function ObservabilityExploratoryView() {
       <ExploratoryViewContextProvider
         reportTypes={reportTypesList}
         dataTypes={dataTypes}
-        dataViews={{}}
         reportConfigMap={obsvReportConfigMap}
         setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
         theme$={appMountParameters.theme$}

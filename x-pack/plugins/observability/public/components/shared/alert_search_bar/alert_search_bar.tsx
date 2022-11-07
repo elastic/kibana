@@ -15,7 +15,6 @@ import { observabilityAlertFeatureIds } from '../../../config';
 import { ObservabilityAppServices } from '../../../application/types';
 import {
   ALERT_STATUS_QUERY,
-  AlertsSearchBar,
   AlertsStatusFilter,
   useAlertsPageStateContainer,
 } from '../../../pages/alerts';
@@ -29,10 +28,12 @@ const getAlertStatusQuery = (status: string): Query[] => {
 const DEFAULT_QUERIES: Query[] = [];
 
 export function ObservabilityAlertSearchBar({
+  appName,
   setEsQuery,
   queries = DEFAULT_QUERIES,
   urlStateStorage,
 }: {
+  appName: string;
   setEsQuery: (query: { bool: BoolQuery }) => void;
   queries?: Query[];
   urlStateStorage?: IKbnUrlStateStorage;
@@ -43,6 +44,7 @@ export function ObservabilityAlertSearchBar({
         timefilter: { timefilter: timeFilterService },
       },
     },
+    triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
   } = useKibana<ObservabilityAppServices>().services;
 
   const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, status, setStatus } =
@@ -102,7 +104,7 @@ export function ObservabilityAlertSearchBar({
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <AlertsSearchBar
-          appName={'observability-alerts'}
+          appName={appName}
           featureIds={observabilityAlertFeatureIds}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}

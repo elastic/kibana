@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { NotificationsStart } from '@kbn/securitysolution-io-ts-list-types';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { createTransform, deleteTransforms, getTransformState, stopTransforms } from './transforms';
 
 const mockRequest = jest.fn();
@@ -24,7 +24,7 @@ const mockNotification = {
     addDanger: mockAddDanger,
     addError: mockAddError,
   },
-} as NotificationsStart;
+} as unknown as NotificationsStart;
 
 const mockRenderDocLink = jest.fn();
 

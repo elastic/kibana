@@ -20,7 +20,7 @@ jest.mock('rxjs', () => {
 });
 
 describe('MetadataService', () => {
-  jest.useFakeTimers();
+  jest.useFakeTimers('legacy');
 
   let metadataService: MetadataService;
 
@@ -43,12 +43,12 @@ describe('MetadataService', () => {
     });
 
     test(
-      'emits in_trial when trial_end_date is provided',
+      'emits inTrial when trialEndDate is provided',
       fakeSchedulers(async (advance) => {
         const initialMetadata = {
           userId: 'fake-user-id',
           kibanaVersion: 'version',
-          trial_end_date: new Date(0).toISOString(),
+          trialEndDate: new Date(0).toISOString(),
         };
         metadataService.setup(initialMetadata);
 
@@ -62,7 +62,7 @@ describe('MetadataService', () => {
         await new Promise((resolve) => process.nextTick(resolve)); // The timer triggers a promise, so we need to skip to the next tick
         await expect(firstValueFrom(metadataService.userMetadata$)).resolves.toStrictEqual({
           ...initialMetadata,
-          in_trial: false,
+          inTrial: false,
         });
       })
     );
@@ -75,9 +75,9 @@ describe('MetadataService', () => {
     });
 
     test(
-      'emits has_data after resolving the `hasUserDataView`',
+      'emits hasData after resolving the `hasUserDataView`',
       fakeSchedulers(async (advance) => {
-        metadataService.start({ hasDataFetcher: async () => ({ has_data: true }) });
+        metadataService.start({ hasDataFetcher: async () => ({ hasData: true }) });
 
         // Still equals initialMetadata
         await expect(firstValueFrom(metadataService.userMetadata$)).resolves.toStrictEqual(
@@ -89,7 +89,7 @@ describe('MetadataService', () => {
         await new Promise((resolve) => process.nextTick(resolve)); // The timer triggers a promise, so we need to skip to the next tick
         await expect(firstValueFrom(metadataService.userMetadata$)).resolves.toStrictEqual({
           ...initialMetadata,
-          has_data: true,
+          hasData: true,
         });
       })
     );

@@ -346,10 +346,11 @@ export class DashboardPageControls extends FtrService {
     return +(await availableOptions.getAttribute('data-option-count'));
   }
 
-  public async optionsListPopoverGetAvailableOptions() {
-    this.log.debug(`getting available options count from options list`);
+  public async optionsListPopoverGetAvailableOptions(filterOutExists: boolean = true) {
+    this.log.debug(`getting available options from options list`);
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
-    return (await availableOptions.getVisibleText()).split('\n');
+    const availableOptionsArray = (await availableOptions.getVisibleText()).split('\n');
+    return filterOutExists ? availableOptionsArray.slice(1) : availableOptionsArray;
   }
 
   public async optionsListPopoverSearchForOption(search: string) {
@@ -374,6 +375,19 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`clearing all selections from options list`);
     await this.optionsListPopoverAssertOpen();
     await this.testSubjects.click(`optionsList-control-clear-all-selections`);
+  }
+
+  public async optionsListPopoverSetIncludeSelections(include: boolean) {
+    this.log.debug(`exclude selections`);
+    await this.optionsListPopoverAssertOpen();
+
+    const buttonGroup = await this.testSubjects.find('optionsList__includeExcludeButtonGroup');
+    await (
+      await this.find.descendantDisplayedByCssSelector(
+        include ? '[data-text="Include"]' : '[data-text="Exclude"]',
+        buttonGroup
+      )
+    ).click();
   }
 
   /* -----------------------------------------------------------

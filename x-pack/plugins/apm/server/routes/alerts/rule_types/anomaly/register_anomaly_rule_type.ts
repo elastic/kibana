@@ -46,6 +46,7 @@ import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -66,6 +67,7 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 export function registerAnomalyRuleType({
   logger,
   ruleDataClient,
+  config$,
   alerting,
   ml,
   basePath,
@@ -102,6 +104,7 @@ export function registerAnomalyRuleType({
         if (!ml) {
           return {};
         }
+
         const ruleParams = params;
         const request = {} as KibanaRequest;
         const { mlAnomalySearch } = ml.mlSystemProvider(
@@ -145,6 +148,7 @@ export function registerAnomalyRuleType({
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
           body: {
+            track_total_hits: false,
             size: 0,
             query: {
               bool: {
@@ -160,8 +164,14 @@ export function registerAnomalyRuleType({
                       },
                     },
                   },
-                  ...termQuery('partition_field_value', ruleParams.serviceName),
-                  ...termQuery('by_field_value', ruleParams.transactionType),
+                  ...termQuery(
+                    'partition_field_value',
+                    ruleParams.serviceName,
+                    { queryEmptyString: false }
+                  ),
+                  ...termQuery('by_field_value', ruleParams.transactionType, {
+                    queryEmptyString: false,
+                  }),
                   ...termQuery(
                     'detector_index',
                     getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
@@ -177,7 +187,8 @@ export function registerAnomalyRuleType({
                     { field: 'by_field_value' },
                     { field: 'job_id' },
                   ],
-                  size: 10000,
+                  size: 1000,
+                  order: { 'latest_score.record_score': 'desc' as const },
                 },
                 aggs: {
                   latest_score: {
@@ -187,6 +198,8 @@ export function registerAnomalyRuleType({
                         { field: 'partition_field_value' },
                         { field: 'by_field_value' },
                         { field: 'job_id' },
+                        { field: 'timestamp' },
+                        { field: 'bucket_span' },
                       ] as const),
                       sort: {
                         timestamp: 'desc' as const,
@@ -221,14 +234,35 @@ export function registerAnomalyRuleType({
                 transactionType: latest.by_field_value as string,
                 environment: job.environment,
                 score: latest.record_score as number,
+                timestamp: Date.parse(latest.timestamp as string),
+                bucketSpan: latest.bucket_span as number,
               };
             })
             .filter((anomaly) =>
               anomaly ? anomaly.score >= threshold : false
             ) ?? [];
 
-        compact(anomalies).forEach((anomaly) => {
-          const { serviceName, environment, transactionType, score } = anomaly;
+        for (const anomaly of compact(anomalies)) {
+          const {
+            serviceName,
+            environment,
+            transactionType,
+            score,
+            timestamp,
+            bucketSpan,
+          } = anomaly;
+
+          const eventSourceFields = await getServiceGroupFieldsForAnomaly({
+            config$,
+            scopedClusterClient: services.scopedClusterClient,
+            savedObjectsClient: services.savedObjectsClient,
+            serviceName,
+            environment,
+            transactionType,
+            timestamp,
+            bucketSpan,
+          });
+
           const severityLevel = getSeverity(score);
           const reasonMessage = formatAnomalyReason({
             measured: score,
@@ -269,6 +303,7 @@ export function registerAnomalyRuleType({
                 [ALERT_EVALUATION_VALUE]: score,
                 [ALERT_EVALUATION_THRESHOLD]: threshold,
                 [ALERT_REASON]: reasonMessage,
+                ...eventSourceFields,
               },
             })
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
@@ -280,7 +315,7 @@ export function registerAnomalyRuleType({
               reason: reasonMessage,
               viewInAppUrl,
             });
-        });
+        }
 
         return {};
       },

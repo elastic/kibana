@@ -1,0 +1,14 @@
+{
+  "id": "filesExample",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "kibana-app-services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Example plugin integrating with files plugin",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["files", "developerExamples"],
+  "optionalPlugins": []
+}

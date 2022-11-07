@@ -208,6 +208,7 @@ function InternalRuleDetailsPage() {
         <>
           <EuiSpacer size="m" />
           <ObservabilityAlertSearchBar
+            appName={'observability-rule-details'}
             setEsQuery={setEsQuery}
             queries={ruleQuery.current}
             urlStateStorage={kbnUrlStateStorage}

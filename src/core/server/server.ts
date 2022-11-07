@@ -69,10 +69,18 @@ import type {
 import { RenderingService } from '@kbn/core-rendering-server-internal';
 
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
-import { CoreApp } from './core_app';
-import { PluginsService, config as pluginsConfig } from './plugins';
-import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
-import { DiscoveredPlugins } from './plugins';
+import {
+  InternalCorePreboot,
+  InternalCoreSetup,
+  InternalCoreStart,
+} from '@kbn/core-lifecycle-server-internal';
+import {
+  DiscoveredPlugins,
+  PluginsService,
+  config as pluginsConfig,
+} from '@kbn/core-plugins-server-internal';
+import { CoreAppsService } from '@kbn/core-apps-server-internal';
+import { elasticApmConfig } from './root/elastic_config';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -110,7 +118,7 @@ export class Server {
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
   private readonly logging: LoggingService;
-  private readonly coreApp: CoreApp;
+  private readonly coreApp: CoreAppsService;
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
   private readonly deprecations: DeprecationsService;
@@ -153,7 +161,7 @@ export class Server {
     this.node = new NodeService(core);
     this.metrics = new MetricsService(core);
     this.status = new StatusService(core);
-    this.coreApp = new CoreApp(core);
+    this.coreApp = new CoreAppsService(core);
     this.httpResources = new HttpResourcesService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
@@ -376,6 +384,7 @@ export class Server {
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
       docLinks: docLinkStart,
+      node: await this.node.start(),
     });
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
@@ -450,6 +459,7 @@ export class Server {
       cspConfig,
       deprecationConfig,
       elasticsearchConfig,
+      elasticApmConfig,
       executionContextConfig,
       externalUrlConfig,
       httpConfig,

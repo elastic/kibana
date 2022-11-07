@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { buildEsQuery as kbnBuildEsQuery, TimeRange, AnyQuery } from '@kbn/es-query';
+import { buildEsQuery as kbnBuildEsQuery, TimeRange, Query } from '@kbn/es-query';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { getTime } from '@kbn/data-plugin/common';
 
-export function buildEsQuery(timeRange: TimeRange, kuery?: string, queries: AnyQuery[] = []) {
+export function buildEsQuery(timeRange: TimeRange, kuery?: string, queries: Query[] = []) {
   const timeFilter =
     timeRange &&
     getTime(undefined, timeRange, {

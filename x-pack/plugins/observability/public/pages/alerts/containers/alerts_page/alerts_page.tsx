@@ -38,6 +38,7 @@ function AlertsPage() {
     notifications: { toasts },
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = useKibana<ObservabilityAppServices>().services;
+
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
     total: 0,
@@ -129,7 +130,7 @@ function AlertsPage() {
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <ObservabilityAlertSearchBar setEsQuery={setEsQuery} />
+          <ObservabilityAlertSearchBar appName={'observability-alerts'} setEsQuery={setEsQuery} />
         </EuiFlexItem>
 
         <EuiFlexItem>
