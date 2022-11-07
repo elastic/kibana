@@ -8,9 +8,9 @@
 import React, { useMemo } from 'react';
 
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EuiStepProps } from '@elastic/eui';
 import {
   EuiIcon,
-  EuiStepProps,
   EuiSuperSelect,
   EuiButton,
   EuiCallOut,
