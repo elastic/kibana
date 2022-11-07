@@ -14,6 +14,7 @@ import {
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertTypeWithExecutor } from '../types';
 import { LifecycleAlertService, createLifecycleExecutor } from './create_lifecycle_executor';
+import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
 
 export const createLifecycleRuleTypeFactory =
   ({ logger, ruleDataClient }: { logger: Logger; ruleDataClient: IRuleDataClient }) =>
@@ -27,6 +28,11 @@ export const createLifecycleRuleTypeFactory =
     type: AlertTypeWithExecutor<Record<string, any>, TParams, TAlertInstanceContext, TServices>
   ): AlertTypeWithExecutor<Record<string, any>, TParams, TAlertInstanceContext, any> => {
     const createBoundLifecycleExecutor = createLifecycleExecutor(logger, ruleDataClient);
+    const createGetSummarizedAlerts = createGetSummarizedAlertsFn({
+      ruleDataClient,
+      useNamespace: false,
+      isLifecycleAlert: true,
+    });
     const executor = createBoundLifecycleExecutor<
       TParams,
       RuleTypeState,
@@ -37,5 +43,6 @@ export const createLifecycleRuleTypeFactory =
     return {
       ...type,
       executor: executor as any,
+      getSummarizedAlerts: createGetSummarizedAlerts(),
     };
   };
