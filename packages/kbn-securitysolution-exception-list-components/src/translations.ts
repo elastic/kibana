@@ -140,3 +140,10 @@ export const EXCEPTION_LIST_HEADER_DESCRIPTION_TEXTBOX = i18n.translate(
     defaultMessage: 'Description',
   }
 );
+
+export const LIST_NAME_REQUIRED_ERROR = i18n.translate(
+  'exceptionList-components.exception_list_header_description_textboxexceptionList-components.exception_list_header_name_required_eror',
+  {
+    defaultMessage: 'List name cannot be empty',
+  }
+);
