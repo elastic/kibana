@@ -19,6 +19,9 @@ export const DEFAULT_VALUES = {
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
   THRESHOLD: [1000],
+  AGGREGATION_TYPE: 'count',
+  TERM_SIZE: 5,
+  GROUP_BY: 'all',
   EXCLUDE_PREVIOUS_HITS: true,
 };
 
@@ -33,6 +36,11 @@ export const EXPRESSION_ERRORS = {
   timeWindowSize: new Array<string>(),
   searchConfiguration: new Array<string>(),
   searchType: new Array<string>(),
+  aggField: new Array<string>(),
+  aggType: new Array<string>(),
+  groupBy: new Array<string>(),
+  termSize: new Array<string>(),
+  termField: new Array<string>(),
 };
 
 export const EXPRESSION_ERROR_KEYS = Object.keys(EXPRESSION_ERRORS) as ErrorKey[];

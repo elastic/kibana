@@ -34,6 +34,9 @@ export const SearchSourceExpression = ({
     size,
     savedQueryId,
     searchConfiguration,
+    aggType,
+    groupBy,
+    termSize,
     excludeHitsFromPreviousRun,
   } = ruleParams;
   const { data } = useTriggersAndActionsUiDeps();
@@ -70,6 +73,9 @@ export const SearchSourceExpression = ({
         threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
         thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
         size: size ?? DEFAULT_VALUES.SIZE,
+        aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
+        groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
+        termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
         excludeHitsFromPreviousRun:
           excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
       });

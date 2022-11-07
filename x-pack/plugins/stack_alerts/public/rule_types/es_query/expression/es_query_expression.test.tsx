@@ -114,6 +114,8 @@ const defaultEsQueryExpressionParams: EsQueryRuleParams<SearchType.esQuery> = {
   timeWindowUnit: 's',
   index: ['test-index'],
   timeField: '@timestamp',
+  aggType: 'count',
+  groupBy: 'all',
   esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
   excludeHitsFromPreviousRun: true,
 };

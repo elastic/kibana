@@ -77,6 +77,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
     return (
       <EuiPopover
         id="thresholdHelpPopover"
+        data-test-subj="thresholdHelpPopover"
         anchorPosition="upLeft"
         button={
           <EuiButtonIcon

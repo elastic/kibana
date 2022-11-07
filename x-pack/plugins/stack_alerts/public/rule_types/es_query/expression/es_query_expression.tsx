@@ -44,6 +44,11 @@ export const EsQueryExpression: React.FC<
     threshold,
     timeWindowSize,
     timeWindowUnit,
+    aggType,
+    aggField,
+    groupBy,
+    termSize,
+    termField,
     excludeHitsFromPreviousRun,
   } = ruleParams;
 
@@ -56,6 +61,9 @@ export const EsQueryExpression: React.FC<
       thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
       size: size ?? DEFAULT_VALUES.SIZE,
       esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
+      aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
+      groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
+      termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
       searchType: SearchType.esQuery,
       excludeHitsFromPreviousRun:
         excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
@@ -91,7 +99,7 @@ export const EsQueryExpression: React.FC<
     setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
 
     if (index && index.length > 0) {
-      await refreshEsFields();
+      await refreshEsFields(index);
     }
   };
 
@@ -100,11 +108,9 @@ export const EsQueryExpression: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const refreshEsFields = async () => {
-    if (index) {
-      const currentEsFields = await getFields(http, index);
-      setEsFields(currentEsFields);
-    }
+  const refreshEsFields = async (indices: string[]) => {
+    const currentEsFields = await getFields(http, indices);
+    setEsFields(currentEsFields);
   };
 
   const hasValidationErrors = useCallback(() => {
@@ -172,9 +178,14 @@ export const EsQueryExpression: React.FC<
               timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
               threshold: DEFAULT_VALUES.THRESHOLD,
               timeField: '',
+              aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
+              aggField: '',
+              groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
+              termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
+              termField: '',
             });
           } else {
-            await refreshEsFields();
+            await refreshEsFields(indices);
           }
         }}
         onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
@@ -237,6 +248,21 @@ export const EsQueryExpression: React.FC<
         timeWindowSize={timeWindowSize}
         timeWindowUnit={timeWindowUnit}
         size={size}
+        esFields={esFields}
+        aggType={aggType}
+        aggField={aggField}
+        groupBy={groupBy}
+        termSize={termSize}
+        termField={termField}
+        onChangeSelectedAggField={(selectedAggField?: string) =>
+          setParam('aggField', selectedAggField)
+        }
+        onChangeSelectedAggType={(selectedAggType: string) => setParam('aggType', selectedAggType)}
+        onChangeSelectedGroupBy={(selectedGroupBy) => setParam('groupBy', selectedGroupBy)}
+        onChangeSelectedTermField={(selectedTermField) => setParam('termField', selectedTermField)}
+        onChangeSelectedTermSize={(selectedTermSize?: number) =>
+          setParam('termSize', selectedTermSize)
+        }
         onChangeThreshold={(selectedThresholds) => setParam('threshold', selectedThresholds)}
         onChangeThresholdComparator={(selectedThresholdComparator) =>
           setParam('thresholdComparator', selectedThresholdComparator)

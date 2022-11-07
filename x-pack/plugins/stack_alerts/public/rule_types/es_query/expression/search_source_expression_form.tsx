@@ -38,6 +38,11 @@ interface LocalState {
   timeWindowSize: CommonRuleParams['timeWindowSize'];
   timeWindowUnit: CommonRuleParams['timeWindowUnit'];
   size: CommonRuleParams['size'];
+  aggType: CommonRuleParams['aggType'];
+  aggField: CommonRuleParams['aggField'];
+  groupBy: CommonRuleParams['groupBy'];
+  termSize: CommonRuleParams['termSize'];
+  termField: CommonRuleParams['termField'];
   excludeHitsFromPreviousRun: CommonRuleParams['excludeHitsFromPreviousRun'];
 }
 
@@ -50,6 +55,11 @@ interface LocalStateAction {
         | 'timeWindowSize'
         | 'timeWindowUnit'
         | 'size'
+        | 'aggType'
+        | 'aggField'
+        | 'groupBy'
+        | 'termSize'
+        | 'termField'
         | 'excludeHitsFromPreviousRun'
       );
   payload: SearchSourceParamsAction['payload'] | (number[] | number | string | boolean);
@@ -101,6 +111,11 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       thresholdComparator: ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
       timeWindowSize: ruleParams.timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
       timeWindowUnit: ruleParams.timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+      aggType: ruleParams.aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
+      aggField: ruleParams.aggField,
+      groupBy: ruleParams.groupBy ?? DEFAULT_VALUES.GROUP_BY,
+      termSize: ruleParams.termSize ?? DEFAULT_VALUES.TERM_SIZE,
+      termField: ruleParams.termField,
       size: ruleParams.size ?? DEFAULT_VALUES.SIZE,
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
@@ -111,9 +126,11 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onSelectDataView = useCallback(
     (newDataViewId) =>
-      data.dataViews
-        .get(newDataViewId)
-        .then((newDataView) => dispatch({ type: 'index', payload: newDataView })),
+      data.dataViews.get(newDataViewId).then((newDataView) => {
+        const dataviewFields = newDataView.fields.map((field) => field.toSpec());
+        console.log(dataviewFields);
+        dispatch({ type: 'index', payload: newDataView });
+      }),
     [data.dataViews]
   );
 
@@ -169,6 +186,35 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     (selectedThresholdComparator?: string) =>
       selectedThresholdComparator &&
       dispatch({ type: 'thresholdComparator', payload: selectedThresholdComparator }),
+    []
+  );
+
+  const onChangeSelectedAggField = useCallback(
+    (selectedAggField?: string) =>
+      selectedAggField && dispatch({ type: 'aggField', payload: selectedAggField }),
+    []
+  );
+
+  const onChangeSelectedAggType = useCallback(
+    (selectedAggType: string) => dispatch({ type: 'aggType', payload: selectedAggType }),
+    []
+  );
+
+  const onChangeSelectedGroupBy = useCallback(
+    (selectedGroupBy?: string) =>
+      selectedGroupBy && dispatch({ type: 'groupBy', payload: selectedGroupBy }),
+    []
+  );
+
+  const onChangeSelectedTermField = useCallback(
+    (selectedTermField?: string) =>
+      selectedTermField && dispatch({ type: 'termField', payload: selectedTermField }),
+    []
+  );
+
+  const onChangeSelectedTermSize = useCallback(
+    (selectedTermSize?: number) =>
+      selectedTermSize && dispatch({ type: 'termSize', payload: selectedTermSize }),
     []
   );
 
@@ -280,6 +326,17 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         timeWindowSize={ruleConfiguration.timeWindowSize}
         timeWindowUnit={ruleConfiguration.timeWindowUnit}
         size={ruleConfiguration.size}
+        esFields={[]}
+        aggType={ruleConfiguration.aggType}
+        aggField={ruleConfiguration.aggField}
+        groupBy={ruleConfiguration.groupBy}
+        termSize={ruleConfiguration.termSize}
+        termField={ruleConfiguration.termField}
+        onChangeSelectedAggField={onChangeSelectedAggField}
+        onChangeSelectedAggType={onChangeSelectedAggType}
+        onChangeSelectedGroupBy={onChangeSelectedGroupBy}
+        onChangeSelectedTermField={onChangeSelectedTermField}
+        onChangeSelectedTermSize={onChangeSelectedTermSize}
         onChangeThreshold={onChangeSelectedThreshold}
         onChangeThresholdComparator={onChangeSelectedThresholdComparator}
         onChangeWindowSize={onChangeWindowSize}

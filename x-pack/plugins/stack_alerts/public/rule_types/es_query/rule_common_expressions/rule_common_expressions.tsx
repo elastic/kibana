@@ -18,10 +18,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  builtInAggregationTypes,
   ForLastExpression,
+  GroupByExpression,
   IErrorObject,
+  OfExpression,
   ThresholdExpression,
   ValueExpression,
+  WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { CommonRuleParams } from '../types';
 import { DEFAULT_VALUES } from '../constants';
@@ -34,9 +38,26 @@ export interface RuleCommonExpressionsProps {
   timeWindowSize: CommonRuleParams['timeWindowSize'];
   timeWindowUnit: CommonRuleParams['timeWindowUnit'];
   size: CommonRuleParams['size'];
+  esFields: Array<{
+    name: string;
+    type: string;
+    normalizedType: string;
+    searchable: boolean;
+    aggregatable: boolean;
+  }>;
+  aggType: CommonRuleParams['aggType'];
+  aggField: CommonRuleParams['aggField'];
+  groupBy: CommonRuleParams['groupBy'];
+  termSize: CommonRuleParams['termSize'];
+  termField: CommonRuleParams['termField'];
   excludeHitsFromPreviousRun: CommonRuleParams['excludeHitsFromPreviousRun'];
   errors: IErrorObject;
   hasValidationErrors: boolean;
+  onChangeSelectedAggField: Parameters<typeof OfExpression>[0]['onChangeSelectedAggField'];
+  onChangeSelectedAggType: Parameters<typeof WhenExpression>[0]['onChangeSelectedAggType'];
+  onChangeSelectedGroupBy: Parameters<typeof GroupByExpression>[0]['onChangeSelectedGroupBy'];
+  onChangeSelectedTermField: Parameters<typeof GroupByExpression>[0]['onChangeSelectedTermField'];
+  onChangeSelectedTermSize: Parameters<typeof GroupByExpression>[0]['onChangeSelectedTermSize'];
   onChangeThreshold: Parameters<typeof ThresholdExpression>[0]['onChangeSelectedThreshold'];
   onChangeThresholdComparator: Parameters<
     typeof ThresholdExpression
@@ -50,13 +71,24 @@ export interface RuleCommonExpressionsProps {
 }
 
 export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
+  esFields,
   thresholdComparator,
   threshold,
   timeWindowSize,
   timeWindowUnit,
+  aggType,
+  aggField,
+  groupBy,
+  termField,
+  termSize,
   size,
   errors,
   hasValidationErrors,
+  onChangeSelectedAggField,
+  onChangeSelectedAggType,
+  onChangeSelectedGroupBy,
+  onChangeSelectedTermField,
+  onChangeSelectedTermSize,
   onChangeThreshold,
   onChangeThresholdComparator,
   onChangeWindowSize,
@@ -73,12 +105,41 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
         <h4>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.conditionsPrompt"
-            defaultMessage="Set the threshold and time window"
+            defaultMessage="Set the group, threshold and time window"
           />{' '}
           <QueryThresholdHelpPopover />
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
+      <WhenExpression
+        display="fullWidth"
+        data-test-subj="whenExpression"
+        aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
+        onChangeSelectedAggType={onChangeSelectedAggType}
+      />
+      {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
+        <OfExpression
+          aggField={aggField}
+          data-test-subj="aggTypeExpression"
+          fields={esFields}
+          aggType={aggType}
+          errors={errors}
+          display="fullWidth"
+          onChangeSelectedAggField={onChangeSelectedAggField}
+        />
+      ) : null}
+      <GroupByExpression
+        groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
+        data-test-subj="groupByExpression"
+        termField={termField}
+        termSize={termSize}
+        errors={errors}
+        fields={esFields}
+        display="fullWidth"
+        onChangeSelectedGroupBy={onChangeSelectedGroupBy}
+        onChangeSelectedTermField={onChangeSelectedTermField}
+        onChangeSelectedTermSize={onChangeSelectedTermSize}
+      />
       <ThresholdExpression
         data-test-subj="thresholdExpression"
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
@@ -92,8 +153,8 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
       <ForLastExpression
         data-test-subj="forLastExpression"
         popupPosition="upLeft"
-        timeWindowSize={timeWindowSize}
-        timeWindowUnit={timeWindowUnit}
+        timeWindowSize={timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE}
+        timeWindowUnit={timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT}
         display="fullWidth"
         errors={errors}
         onChangeWindowSize={onChangeWindowSize}

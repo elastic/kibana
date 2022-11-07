@@ -29,6 +29,11 @@ export interface CommonRuleParams extends RuleTypeParams {
   threshold: number[];
   timeWindowSize: number;
   timeWindowUnit: string;
+  aggType: string;
+  aggField?: string;
+  groupBy?: string;
+  termSize?: number;
+  termField?: string;
   excludeHitsFromPreviousRun: boolean;
 }
 
