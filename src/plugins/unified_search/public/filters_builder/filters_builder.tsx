@@ -11,6 +11,7 @@ import { EuiDragDropContext, DragDropContextProps, useEuiPaddingSize } from '@el
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { type Filter, BooleanRelation } from '@kbn/es-query';
 import { css } from '@emotion/css';
+import { isEqual } from 'lodash';
 import { FiltersBuilderContextType } from './filters_builder_context';
 import { FilterGroup } from './filters_builder_filter_group';
 import { FiltersBuilderReducer } from './filters_builder_reducer';
@@ -57,7 +58,7 @@ function FiltersBuilder({
   );
 
   useEffect(() => {
-    if (state.filters !== filters) {
+    if (!isEqual(state.filters, filters)) {
       onChange(state.filters);
     }
   }, [filters, onChange, state.filters]);

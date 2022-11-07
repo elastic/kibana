@@ -102,8 +102,10 @@ export function FilterItem({
 
   if (!conditionalOperationType) {
     field = getFieldFromFilter(filter as FieldFilter, dataView!);
-    operator = getOperatorFromFilter(filter);
-    params = getFilterParams(filter);
+    if (field) {
+      operator = getOperatorFromFilter(filter);
+      params = getFilterParams(filter);
+    }
   }
 
   const onHandleField = useCallback(
@@ -172,10 +174,6 @@ export function FilterItem({
 
   const onAddButtonClick = useCallback(() => onAddFilter(BooleanRelation.AND), [onAddFilter]);
   const onOrButtonClick = useCallback(() => onAddFilter(BooleanRelation.OR), [onAddFilter]);
-
-  if (!dataView) {
-    return null;
-  }
 
   return (
     <div

@@ -81,6 +81,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
           key={JSON.stringify(newFilter)}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           mode="add"
+          uiSettings={uiSettings}
         />
       )}
     </div>

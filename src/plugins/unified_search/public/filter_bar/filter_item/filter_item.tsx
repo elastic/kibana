@@ -27,7 +27,6 @@ import {
 import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect, HTMLAttributes, useMemo } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
-
 import { DataView } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
@@ -71,7 +70,7 @@ export const FILTER_EDITOR_WIDTH = 850;
 export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [renderedComponent, setRenderedComponent] = useState('menu');
-  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
+  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, uiSettings } = props;
 
   const euiTheme = useEuiTheme();
 
@@ -375,6 +374,7 @@ export function FilterItem(props: FilterItemProps) {
                   setIsPopoverOpen(false);
                 }}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                uiSettings={uiSettings}
               />
             </div>,
           ]}

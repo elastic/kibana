@@ -15,7 +15,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: DataView) {
-  return indexPattern.fields.find((field) => field.name === filter.meta.key);
+  return indexPattern?.fields.find((field) => field.name === filter.meta.key);
 }
 
 export function getOperatorFromFilter(filter: Filter) {
