@@ -18,7 +18,11 @@ const mockClusterBuckets: ClusterBucket[] = [
             _id: '123',
             _index: '123',
             _source: {
-              cluster: { name: 'cluster_name' },
+              orchestrator: {
+                cluster: {
+                  name: 'cluster_name',
+                },
+              },
               rule: { benchmark: { name: 'CIS Kubernetes', id: 'cis_k8s' } },
               '@timestamp': '123',
             },
