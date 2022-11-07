@@ -59,8 +59,13 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
 
   it('should NOT show artifact cards if no endpoint management authz', async () => {
     useEndpointPrivilegesMock.mockReturnValue({
-      ...getEndpointPrivilegesInitialStateMock(),
-      canAccessEndpointManagement: false,
+      ...getEndpointPrivilegesInitialStateMock({
+        canReadBlocklist: false,
+        canReadEventFilters: false,
+        canReadHostIsolationExceptions: false,
+        canReadTrustedApplications: false,
+        canIsolateHost: false,
+      }),
     });
     render();
 
