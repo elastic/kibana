@@ -404,7 +404,7 @@ describe('Execution', () => {
       jest.useRealTimers();
     });
 
-    test('handles functions returning observables', () => {
+    test('handles partial results when functions return observables', () => {
       testScheduler.run(({ cold, expectObservable }) => {
         const arg = cold('     -a-b-c|', { a: 1, b: 2, c: 3 });
         const expected = '     -a-b-c|';
@@ -417,12 +417,74 @@ describe('Execution', () => {
         const executor = createUnitTestExecutor();
         executor.registerFunction(observable);
 
-        const result = executor.run('observable', null, {});
+        const result = executor.run('observable', null, { partial: true });
 
         expectObservable(result).toBe(expected, {
           a: { result: 1, partial: true },
           b: { result: 2, partial: true },
           c: { result: 3, partial: false },
+        });
+      });
+    });
+
+    test('ignores partial results by default', () => {
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const arg = cold('     -a-b-c|', { a, b, c });
+        const expected = '     ------(c|)';
+        const spyFn = jest.fn((value) => value);
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => arg,
+        });
+        executor.registerFunction({
+          name: 'spy',
+          args: {},
+          help: '',
+          fn: (input) => spyFn(input),
+        });
+
+        const result = executor.run('observable | spy', null);
+
+        expectObservable(result).toBe(expected, {
+          c: { result: c, partial: false },
+        });
+
+        flush();
+
+        expect(spyFn).toHaveBeenCalledTimes(1);
+        expect(spyFn).toHaveBeenCalledWith(c);
+      });
+    });
+
+    it('throttles partial results', async () => {
+      testScheduler.run(({ cold, expectObservable }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const d = 4;
+        const observable = cold('a 5ms b 5ms c 10ms (d|)', { a, b, c, d });
+        const expected = '       a 19ms c 2ms (d|)';
+
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => observable,
+        });
+
+        const result = executor.run('observable', null, { partial: true, throttle: 20 });
+
+        expectObservable(result).toBe(expected, {
+          a: expect.objectContaining({ result: a }),
+          c: expect.objectContaining({ result: c }),
+          d: expect.objectContaining({ result: d }),
         });
       });
     });
@@ -525,7 +587,7 @@ describe('Execution', () => {
           fn: (value) => spyFn(value),
         });
 
-        const result = executor.run('observable | flaky | spy', null, {});
+        const result = executor.run('observable | flaky | spy', null, { partial: true });
 
         expectObservable(result).toBe('abc|', {
           a: { partial: true, result: a },
@@ -659,7 +721,7 @@ describe('Execution', () => {
         const executor = createUnitTestExecutor();
         executor.registerFunction(observable);
 
-        const result = executor.run('add val={observable}', 1, {});
+        const result = executor.run('add val={observable}', 1, { partial: true });
 
         expectObservable(result).toBe(expected, {
           a: { partial: true, result: { type: 'num', value: 2 } },
@@ -705,7 +767,11 @@ describe('Execution', () => {
         executor.registerFunction(observable2);
         executor.registerFunction(max);
 
-        const result = executor.run('max val1={observable1} val2={observable2}', {});
+        const result = executor.run(
+          'max val1={observable1} val2={observable2}',
+          {},
+          { partial: true }
+        );
 
         expectObservable(result).toBe(expected, {
           a: { partial: true, result: { type: 'num', value: 1 } },
@@ -730,7 +796,7 @@ describe('Execution', () => {
         const executor = createUnitTestExecutor();
         executor.registerFunction(observable);
 
-        const result = executor.run('add val={observable}', 1, {});
+        const result = executor.run('add val={observable}', 1, { partial: true });
 
         expectObservable(result).toBe(expected, {
           a: expect.objectContaining({ result: { type: 'num', value: 2 } }),
@@ -788,7 +854,7 @@ describe('Execution', () => {
           fn: (input, args) => spyFn(input, args),
         });
 
-        const result = executor.run('spy arg={observable | flaky}', null, {});
+        const result = executor.run('spy arg={observable | flaky}', null, { partial: true });
 
         expectObservable(result).toBe('abcd|', {
           a: { partial: true, result: a },
@@ -816,6 +882,47 @@ describe('Execution', () => {
         expect(spyFn).toHaveBeenCalledTimes(2);
         expect(spyFn).toHaveBeenNthCalledWith(1, null, { arg: a });
         expect(spyFn).toHaveBeenNthCalledWith(2, null, { arg: d });
+      });
+    });
+
+    test('supports opting out of partial results in sub-expression', async () => {
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const observable$ = cold('abc|', { a, b, c });
+        const expected = '        ---(c|)';
+        const spyFn = jest.fn((input, { arg }) => arg);
+
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => observable$,
+        });
+        executor.registerFunction({
+          name: 'spy',
+          args: {
+            arg: {
+              help: '',
+              types: ['number'],
+            },
+          },
+          help: '',
+          fn: (input, args) => spyFn(input, args),
+        });
+
+        const result = executor.run('spy arg={observable}', null);
+
+        expectObservable(result).toBe(expected, {
+          c: { partial: false, result: c },
+        });
+
+        flush();
+
+        expect(spyFn).toHaveBeenCalledTimes(1);
+        expect(spyFn).toHaveBeenCalledWith(null, { arg: c });
       });
     });
   });

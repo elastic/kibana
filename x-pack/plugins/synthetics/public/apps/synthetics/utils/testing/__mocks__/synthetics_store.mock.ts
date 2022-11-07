@@ -87,11 +87,13 @@ export const mockState: SyntheticsAppState = {
   overview: {
     pageState: {
       perPage: 10,
+      sortOrder: 'asc',
+      sortField: 'name.keyword',
     },
     data: {
       total: 0,
       allMonitorIds: [],
-      pages: {},
+      monitors: [],
     },
     error: null,
     loaded: false,
@@ -103,6 +105,7 @@ export const mockState: SyntheticsAppState = {
   monitorDetails: getMonitorDetailsMockSlice(),
   browserJourney: getBrowserJourneyMockSlice(),
   networkEvents: {},
+  pingStatus: getPingStatusesMockSlice(),
 };
 
 function getBrowserJourneyMockSlice() {
@@ -360,6 +363,7 @@ function getMonitorDetailsMockSlice() {
     },
     syntheticsMonitor: {
       id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
+      config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
       type: DataStream.BROWSER,
       enabled: true,
       schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
@@ -412,4 +416,33 @@ function getMonitorDetailsMockSlice() {
     error: null,
     selectedLocationId: 'us_central',
   };
+}
+
+function getPingStatusesMockSlice() {
+  const monitorDetails = getMonitorDetailsMockSlice();
+
+  return {
+    pingStatuses: monitorDetails.pings.data.reduce((acc, cur) => {
+      if (!acc[cur.monitor.id]) {
+        acc[cur.monitor.id] = {};
+      }
+
+      if (!acc[cur.monitor.id][cur.observer.geo.name]) {
+        acc[cur.monitor.id][cur.observer.geo.name] = {};
+      }
+
+      acc[cur.monitor.id][cur.observer.geo.name][cur.timestamp] = {
+        timestamp: cur.timestamp,
+        error: undefined,
+        locationId: cur.observer.geo.name,
+        config_id: cur.config_id,
+        docId: cur.docId,
+        summary: cur.summary,
+      };
+
+      return acc;
+    }, {} as SyntheticsAppState['pingStatus']['pingStatuses']),
+    loading: false,
+    error: null,
+  } as SyntheticsAppState['pingStatus'];
 }

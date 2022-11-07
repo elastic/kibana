@@ -49,7 +49,16 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
-      expect(apiResponse.body.attributes).eql(omit(newMonitor, secretKeys));
+      expect(apiResponse.body.attributes).eql(
+        omit(
+          {
+            ...newMonitor,
+            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+          },
+          secretKeys
+        )
+      );
     });
 
     it('returns bad request if payload is invalid for HTTP monitor', async () => {
@@ -107,6 +116,8 @@ export default function ({ getService }: FtrProviderContext) {
           {
             ...DEFAULT_FIELDS[DataStream.HTTP],
             ...newMonitor,
+            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
             revision: 1,
           },
           secretKeys
