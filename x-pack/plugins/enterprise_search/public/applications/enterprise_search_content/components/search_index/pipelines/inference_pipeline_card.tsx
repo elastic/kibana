@@ -36,6 +36,7 @@ import { IndexNameLogic } from '../index_name_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
 
+import { DeleteInferencePipelineButton } from './delete_inference_pipeline_button';
 import { TrainedModelHealth } from './ml_model_health';
 import { PipelinesLogic } from './pipelines_logic';
 
@@ -129,19 +130,11 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <div>
-                      <EuiButtonEmpty
+                      <DeleteInferencePipelineButton
                         data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-deletePipeline`}
-                        size="s"
-                        flush="both"
-                        iconType="trash"
-                        color="text"
                         onClick={showConfirmDeleteModal}
-                      >
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.inferencePipelineCard.action.delete',
-                          { defaultMessage: 'Delete pipeline' }
-                        )}
-                      </EuiButtonEmpty>
+                        pipeline={pipeline}
+                      />
                     </div>
                   </EuiFlexItem>
                 </EuiFlexGroup>

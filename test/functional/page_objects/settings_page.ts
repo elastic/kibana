@@ -306,9 +306,11 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clearFieldTypeFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
+      await this.find.byCssSelector(
+        '.euiPopover-isOpen[data-test-subj="indexedFieldTypeFilterDropdown-popover"]'
+      );
     });
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
@@ -319,8 +321,12 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setFieldTypeFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
-    await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
+      await this.find.byCssSelector(
+        '.euiPopover-isOpen[data-test-subj="indexedFieldTypeFilterDropdown-popover"]'
+      );
+    });
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);

@@ -7,6 +7,7 @@
 
 export const ADD_AGENT_BUTTON = 'addAgentButton';
 export const ADD_AGENT_BUTTON_TOP = 'addAgentBtnTop';
+export const LANDING_PAGE_ADD_FLEET_SERVER_BUTTON = 'fleetServerLanding.addFleetServerButton';
 
 export const AGENTS_TAB = 'fleet-agents-tab';
 export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
@@ -102,6 +103,7 @@ export const SETTINGS_OUTPUTS = {
 
 export const SETTINGS_FLEET_SERVER_HOSTS = {
   ADD_BUTTON: 'settings.fleetServerHosts.addFleetServerHostBtn',
+  EDIT_BUTTON: 'fleetServerHostsTable.edit.btn',
 };
 
 export const AGENT_POLICY_FORM = {
@@ -126,4 +128,6 @@ export const FLEET_SERVER_HOST_FLYOUT = {
 export const FLEET_SERVER_SETUP = {
   NAME_INPUT: 'fleetServerSetup.nameInput',
   HOST_INPUT: 'fleetServerSetup.multiRowInput',
+  DEFAULT_SWITCH: 'fleetServerHostsFlyout.isDefaultSwitch',
+  ADD_HOST_BTN: 'fleetServerSetup.addNewHostBtn',
 };
