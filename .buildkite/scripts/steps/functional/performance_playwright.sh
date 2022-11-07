@@ -79,41 +79,21 @@ node scripts/functional_tests \
   --debug \
   --bail
 
-while read -r journey; do
-  if [ "$journey" == "" ] || [ "$journey" == "x-pack/performance/journeys/warmup.ts" ] ; then
-    continue;
-  fi
+journey="x-pack/performance/journeys/ecommerce_dashboard.ts"
+for ((i=1;i<=20;i++)); do
+    echo "--- $journey - $i"
+    echo "Wait 30 sec"
+    sleep 30
+    export TEST_PERFORMANCE_PHASE="TEST"
 
-  echo "Wait 30 sec for ES"
-  sleep 30
-
-  phases=("WARMUP" "TEST")
-  status=0
-  for phase in "${phases[@]}"; do
-    echo "--- $journey - $phase"
-
-    export TEST_PERFORMANCE_PHASE="$phase"
-
-    set +e
     node scripts/functional_tests \
       --config "$journey" \
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
       --debug \
       --bail
-    status=$?
-    set -e
 
-    if [ $status -ne 0 ]; then
-      failedJourneys+=("$journey")
-      echo "^^^ +++"
-      echo "❌ FTR failed with status code: $status"
-      break
-    fi
-  done
-
-  # remove trap, we're manually shutting down
-  trap - EXIT;
-done <<< "$journeys"
+    killall -SIGKILL node
+done
 
 echo "--- 🔎 Shutdown ES"
 killall node
