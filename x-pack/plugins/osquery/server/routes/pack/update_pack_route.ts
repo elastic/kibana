@@ -60,7 +60,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             description: schema.maybe(schema.string()),
             enabled: schema.maybe(schema.boolean()),
             policy_ids: schema.maybe(schema.arrayOf(schema.string())),
-            shards: schema.recordOf(schema.string(), schema.number()),
+            shards: schema.maybe(schema.recordOf(schema.string(), schema.number())),
             queries: schema.maybe(
               schema.recordOf(
                 schema.string(),
@@ -103,7 +103,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { name, description, queries, enabled, policy_ids, shards } = request.body;
+      const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
 
       const currentPackSO = await savedObjectsClient.get<{ name: string; enabled: boolean }>(
         packSavedObjectType,
@@ -206,7 +206,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
         if (enabled) {
-          const policyIds = policy_ids || shards ? policiesList : currentAgentPolicyIds;
+          const policyIds = policy_ids || !isEmpty(shards) ? policiesList : currentAgentPolicyIds;
 
           await Promise.all(
             policyIds.map((agentPolicyId) => {
