@@ -81,7 +81,7 @@ export const useBulkDeleteResponse = (props: { onSearchPopulate?: (filter: strin
       // All failure
       if (numberOfErrors === total) {
         toasts.addDanger({
-          title: getFailedNotificationText(numberOfSuccess, singleRuleTitle, multipleRuleTitle),
+          title: getFailedNotificationText(numberOfErrors, singleRuleTitle, multipleRuleTitle),
           text: toMountPoint(renderToastErrorBody(response)),
         });
         return;

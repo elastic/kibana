@@ -101,7 +101,7 @@ export const getPartialSuccessNotificationText = (
     'xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText',
     {
       defaultMessage:
-        'Deleted {numberofSuccess, number} {numberofSuccess, plural, one {{singleTitle}} other {{multipleTitle}}}, {numberOfErrors, plural, one {{singleTitle}} other {{multipleTitle}}} encountered errors',
+        'Deleted {numberOfSuccess, number} {numberOfSuccess, plural, one {{singleTitle}} other {{multipleTitle}}}, {numberOfErrors, number} {numberOfErrors, plural, one {{singleTitle}} other {{multipleTitle}}} encountered errors',
       values: {
         numberOfSuccess,
         numberOfErrors,
