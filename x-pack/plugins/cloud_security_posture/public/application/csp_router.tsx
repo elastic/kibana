@@ -8,6 +8,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Redirect, Route, RouteComponentProps, type RouteProps, Switch } from 'react-router-dom';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH, type CspSecuritySolutionContext } from '..';
 import { cloudPosturePages } from '../common/navigation/constants';
 import type { CloudSecurityPosturePageId, CspPageNavigationItem } from '../common/navigation/types';
@@ -50,7 +51,9 @@ export const addSpyRouteComponentToRoute = (
     render: (props: RouteComponentProps) => (
       <>
         <SpyRoute pageName={route.id} />
-        <Component {...props} />
+        <TrackApplicationView viewId={route.id}>
+          <Component {...props} />
+        </TrackApplicationView>
       </>
     ),
   };
