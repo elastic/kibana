@@ -131,6 +131,22 @@ export const getDocumentationSections = async (language: string) => {
       initialSection,
     };
   }
+
+  if (language === 'esql') {
+    const { commands, operators, mathematicalFunctions, initialSection, aggregateFunctions } =
+      await import('./esql_documentation_sections');
+    groups.push({
+      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.howItWorks', {
+        defaultMessage: 'How it works',
+      }),
+      items: [],
+    });
+    groups.push(commands, operators, mathematicalFunctions, aggregateFunctions);
+    return {
+      groups,
+      initialSection,
+    };
+  }
 };
 
 export const getInlineEditorText = (queryString: string, isMultiLine: boolean) => {
