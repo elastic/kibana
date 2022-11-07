@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
@@ -17,7 +18,10 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import type { Services } from '../services';
 import type { Item } from '../types';
@@ -43,7 +47,7 @@ export interface Props {
   item: Item;
   entityName: string;
   isReadonly?: boolean;
-  services: Pick<Services, 'TagSelector' | 'TagList'>;
+  services: Pick<Services, 'TagSelector' | 'TagList' | 'notifyError'>;
   onSave?: (args: {
     id: string;
     title: string;
@@ -57,10 +61,11 @@ export const InspectorFlyoutContent: FC<Props> = ({
   item,
   entityName,
   isReadonly = true,
-  services: { TagSelector, TagList },
+  services: { TagSelector, TagList, notifyError },
   onSave,
   onCancel,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const i18nTexts = getI18nTexts({ entityName });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -68,27 +73,48 @@ export const InspectorFlyoutContent: FC<Props> = ({
 
   const onClickSave = useCallback(async () => {
     if (form.isValid) {
-      setIsSubmitting(true);
-      await onSave?.({
-        id: item.id,
-        title: form.title.value,
-        description: form.description.value,
-        tags: form.tags.value,
-      });
-      setIsSubmitting(false);
-    }
-    setIsSubmitted(true);
-  }, [form, onSave, item.id]);
+      if (onSave) {
+        setIsSubmitting(true);
 
-  const onClickCancel = useCallback(() => {
+        try {
+          await onSave({
+            id: item.id,
+            title: form.title.value,
+            description: form.description.value,
+            tags: form.tags.value,
+          });
+        } catch (error) {
+          notifyError(
+            <FormattedMessage
+              id="contentManagement.tableList.listing.unableToDeleteDangerMessage"
+              defaultMessage="Unable to save {entityName}"
+              values={{ entityName }}
+            />,
+            error.message
+          );
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+    }
+
+    setIsSubmitted(true);
+  }, [form, onSave, item.id, notifyError, entityName]);
+
+  const onClickCancel = () => {
     onCancel();
-  }, [onCancel]);
+  };
+
+  const iconCSS = css`
+    margin-right: ${euiTheme.size.m};
+  `;
 
   return (
     <>
       <EuiFlyoutHeader>
         <EuiTitle data-test-subj="flyoutTitle">
           <h2>
+            <EuiIcon type="inspect" css={iconCSS} size="l" />
             <span>{i18nTexts.title}</span>
           </h2>
         </EuiTitle>

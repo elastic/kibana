@@ -13,6 +13,8 @@ import type { EuiComboBoxProps } from '@elastic/eui';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 
+type NotifyFn = (title: JSX.Element, text?: string) => void;
+
 export type TagSelectorProps = EuiComboBoxProps<unknown> & {
   initialSelection: string[];
   onTagsSelected: (ids: string[]) => void;
@@ -29,6 +31,7 @@ export interface SavedObjectsReference {
  */
 export interface Services {
   openFlyout(node: ReactNode, options?: OverlayFlyoutOpenOptions): OverlayRef;
+  notifyError: NotifyFn;
   TagList?: FC<{ references: SavedObjectsReference[] }>;
   TagSelector?: React.FC<TagSelectorProps>;
 }
@@ -45,11 +48,16 @@ export const InspectorProvider: FC<Services> = ({ children, ...services }) => {
 /**
  * Kibana-specific service types.
  */
-export interface TableListViewKibanaDependencies {
+export interface InspectorKibanaDependencies {
   /** CoreStart contract */
   core: {
     overlays: {
       openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+    };
+    notifications: {
+      toasts: {
+        addDanger: (notifyArgs: { title: MountPoint; text?: string }) => void;
+      };
     };
   };
   /**
@@ -89,7 +97,7 @@ export interface TableListViewKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const InspectorKibanaProvider: FC<TableListViewKibanaDependencies> = ({
+export const InspectorKibanaProvider: FC<InspectorKibanaDependencies> = ({
   children,
   ...services
 }) => {
@@ -118,6 +126,9 @@ export const InspectorKibanaProvider: FC<TableListViewKibanaDependencies> = ({
   return (
     <InspectorProvider
       openFlyout={openFlyout}
+      notifyError={(title, text) => {
+        core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
+      }}
       TagList={TagList}
       TagSelector={savedObjectsTagging?.ui.components.SavedObjectSaveModalTagSelector}
     >
