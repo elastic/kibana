@@ -8,10 +8,10 @@
   },
   "include": ["public/**/*", "common/**/*", "server/**/*"],
   "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../core/tsconfig.json"},
+    { "path": "../embeddable/tsconfig.json"},
+    { "path": "../kibana_utils/tsconfig.json"},
+    { "path": "../kibana_react/tsconfig.json"},
     { "path": "../files/tsconfig.json" }
   ]
 }
