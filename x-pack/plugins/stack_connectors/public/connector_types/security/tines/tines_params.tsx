@@ -257,7 +257,11 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
         <EuiFlexItem>
           {showFallbackFrom !== 'any' && (
             <>
-              <EuiCallOut title={i18n.WEBHOOK_URL_FALLBACK_TITLE} color="primary">
+              <EuiCallOut
+                title={i18n.WEBHOOK_URL_FALLBACK_TITLE}
+                color="primary"
+                data-test-subj="tines-fallbackCallout"
+              >
                 {i18n.WEBHOOK_URL_FALLBACK_TEXT(showFallbackFrom)}
               </EuiCallOut>
               <EuiSpacer size="s" />

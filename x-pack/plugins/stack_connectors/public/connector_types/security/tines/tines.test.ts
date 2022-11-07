@@ -29,6 +29,13 @@ const actionParams: TinesExecuteActionParams = {
   subAction: SUB_ACTION.RUN,
   subActionParams: { webhook },
 };
+const defaultValidationErrors = {
+  subAction: [],
+  story: [],
+  webhook: [],
+  webhookUrl: [],
+  body: [],
+};
 
 beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
@@ -53,10 +60,8 @@ describe('tines action params validation', () => {
       subActionParams: { webhook: { ...webhook, storyId: undefined } },
     });
     expect(validation.errors).toEqual({
-      subAction: [],
+      ...defaultValidationErrors,
       story: ['Story is required.'],
-      webhook: [],
-      body: [],
     });
   });
 
@@ -66,10 +71,8 @@ describe('tines action params validation', () => {
       subActionParams: { webhook: { ...webhook, id: undefined } },
     });
     expect(validation.errors).toEqual({
-      subAction: [],
-      story: [],
+      ...defaultValidationErrors,
       webhook: ['Webhook is required.'],
-      body: [],
     });
   });
 
@@ -79,10 +82,8 @@ describe('tines action params validation', () => {
       subActionParams: { webhook: { ...webhook, path: '' } },
     });
     expect(validation.errors).toEqual({
-      subAction: [],
-      story: [],
+      ...defaultValidationErrors,
       webhook: ['Webhook action path is missing.'],
-      body: [],
     });
   });
 
@@ -92,20 +93,62 @@ describe('tines action params validation', () => {
       subActionParams: { webhook: { ...webhook, secret: '' } },
     });
     expect(validation.errors).toEqual({
-      subAction: [],
-      story: [],
+      ...defaultValidationErrors,
       webhook: ['Webhook action secret is missing.'],
-      body: [],
     });
   });
 
-  it('should succeed when subAction is run and params are correct', async () => {
+  it('should succeed when webhook params are correct', async () => {
     const validation = await actionTypeModel.validateParams(actionParams);
+    expect(validation.errors).toEqual(defaultValidationErrors);
+  });
+
+  it('should fail when webhookUrl is not a URL', async () => {
+    const validation = await actionTypeModel.validateParams({
+      ...actionParams,
+      subActionParams: { ...actionParams.subActionParams, webhookUrl: 'foo' },
+    });
     expect(validation.errors).toEqual({
-      subAction: [],
-      story: [],
-      webhook: [],
-      body: [],
+      ...defaultValidationErrors,
+      webhookUrl: ['Webhook URL is invalid.'],
+    });
+  });
+
+  it('should fail when webhookUrl is not using https', async () => {
+    const validation = await actionTypeModel.validateParams({
+      ...actionParams,
+      subActionParams: { ...actionParams.subActionParams, webhookUrl: 'http://example.tines.com' },
+    });
+    expect(validation.errors).toEqual({
+      ...defaultValidationErrors,
+      webhookUrl: ['Webhook URL does not have a valid "https" protocol.'],
+    });
+  });
+
+  it('should fail when webhookUrl is not a Tines URL', async () => {
+    const validation = await actionTypeModel.validateParams({
+      ...actionParams,
+      subActionParams: {
+        ...actionParams.subActionParams,
+        webhookUrl: 'https://example.wrong.com',
+      },
+    });
+    expect(validation.errors).toEqual({
+      ...defaultValidationErrors,
+      webhookUrl: ['Webhook URL does not have a valid ".tines.com" domain.'],
+    });
+  });
+
+  it('should succeed when webhookUrl is a proper Tines URL', async () => {
+    const validation = await actionTypeModel.validateParams({
+      ...actionParams,
+      subActionParams: {
+        ...actionParams.subActionParams,
+        webhookUrl: 'https://example.tines.com/abc/1234',
+      },
+    });
+    expect(validation.errors).toEqual({
+      ...defaultValidationErrors,
     });
   });
 
@@ -115,22 +158,19 @@ describe('tines action params validation', () => {
       subAction: '',
     });
     expect(validation.errors).toEqual({
+      ...defaultValidationErrors,
       subAction: ['Action is required.'],
-      story: [],
-      webhook: [],
-      body: [],
     });
   });
+
   it('should fail when subAction is wrong', async () => {
     const validation = await actionTypeModel.validateParams({
       ...actionParams,
       subAction: 'stories',
     });
     expect(validation.errors).toEqual({
+      ...defaultValidationErrors,
       subAction: ['Invalid action name.'],
-      story: [],
-      webhook: [],
-      body: [],
     });
   });
 
@@ -140,9 +180,7 @@ describe('tines action params validation', () => {
       subAction: SUB_ACTION.TEST,
     });
     expect(validation.errors).toEqual({
-      subAction: [],
-      story: [],
-      webhook: [],
+      ...defaultValidationErrors,
       body: ['Body is required.'],
     });
   });
@@ -153,9 +191,7 @@ describe('tines action params validation', () => {
       subActionParams: { webhook, body: 'not json' },
     });
     expect(validation.errors).toEqual({
-      subAction: [],
-      story: [],
-      webhook: [],
+      ...defaultValidationErrors,
       body: ['Body does not have a valid JSON format.'],
     });
   });
@@ -165,11 +201,6 @@ describe('tines action params validation', () => {
       subAction: SUB_ACTION.TEST,
       subActionParams: { webhook, body: '[]' },
     });
-    expect(validation.errors).toEqual({
-      subAction: [],
-      story: [],
-      webhook: [],
-      body: [],
-    });
+    expect(validation.errors).toEqual(defaultValidationErrors);
   });
 });

@@ -69,14 +69,14 @@ export function getConnectorType(): ConnectorTypeModel<
       } else {
         if (!subActionParams?.webhook?.storyId) {
           errors.story.push(translations.STORY_REQUIRED);
-        }
-
-        if (!subActionParams?.webhook?.id) {
-          errors.webhook.push(translations.WEBHOOK_REQUIRED);
-        } else if (!subActionParams?.webhook?.path) {
-          errors.webhook.push(translations.WEBHOOK_PATH_REQUIRED);
-        } else if (!subActionParams?.webhook?.secret) {
-          errors.webhook.push(translations.WEBHOOK_SECRET_REQUIRED);
+        } else {
+          if (!subActionParams?.webhook?.id) {
+            errors.webhook.push(translations.WEBHOOK_REQUIRED);
+          } else if (!subActionParams?.webhook?.path) {
+            errors.webhook.push(translations.WEBHOOK_PATH_REQUIRED);
+          } else if (!subActionParams?.webhook?.secret) {
+            errors.webhook.push(translations.WEBHOOK_SECRET_REQUIRED);
+          }
         }
       }
 

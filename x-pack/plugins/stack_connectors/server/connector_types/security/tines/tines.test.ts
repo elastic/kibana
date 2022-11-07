@@ -28,7 +28,15 @@ const token = '123';
 const story = {
   id: 97469,
   name: 'Test story',
+  published: true,
+  team_id: 1234, // just to make sure it is cleaned
 };
+const storyResult = {
+  id: story.id,
+  name: story.name,
+  published: story.published,
+};
+
 const otherAgent = {
   id: 941613,
   name: 'HTTP Req. Action',
@@ -45,6 +53,14 @@ const webhookAgent = {
     secret: 'eb80106acb3ee1521985f5cec3dd224c',
   },
 };
+const webhookResult = {
+  id: webhookAgent.id,
+  name: webhookAgent.name,
+  storyId: webhookAgent.story_id,
+  path: webhookAgent.options.path,
+  secret: webhookAgent.options.secret,
+};
+const webhookUrl = `${url}/webhook/${webhookAgent.options.path}/${webhookAgent.options.secret}`;
 
 const ignoredRequestFields = {
   axios: expect.anything(),
@@ -61,7 +77,7 @@ const storiesGetRequestExpected = {
     'x-user-token': token,
     'Content-Type': 'application/json',
   },
-  params: { per_page: 20 },
+  params: { per_page: 500 },
 };
 
 const agentsGetRequestExpected = {
@@ -74,7 +90,7 @@ const agentsGetRequestExpected = {
     'x-user-token': token,
     'Content-Type': 'application/json',
   },
-  params: { story_id: story.id, per_page: 20 },
+  params: { story_id: story.id, per_page: 500 },
 };
 
 describe('TinesConnector', () => {
@@ -92,8 +108,8 @@ describe('TinesConnector', () => {
   });
 
   describe('getStories', () => {
-    beforeEach(() => {
-      mockRequest.mockReturnValue({ data: { stories: [story], meta: {} } });
+    beforeAll(() => {
+      mockRequest.mockReturnValue({ data: { stories: [story], meta: { pages: 1 } } });
     });
 
     it('should request Tines stories', async () => {
@@ -104,53 +120,31 @@ describe('TinesConnector', () => {
       expect(requestArgs).toEqual(storiesGetRequestExpected);
     });
 
-    it('should request the Tines stories with pagination', async () => {
-      const secondPageUrl = `${url}/api/v1/stories?page=2&per_page=20`;
+    it('should return the Tines stories reduced array', async () => {
+      const { stories } = await connector.getStories();
+      expect(stories).toEqual([storyResult]);
+    });
+
+    it('should request the Tines stories complete response', async () => {
       mockRequest.mockReturnValueOnce({
-        data: { stories: [story], meta: { next_page: secondPageUrl } },
+        data: { stories: [story], meta: { pages: 1 } },
       });
-      await connector.getStories();
-
-      expect(mockRequest).toBeCalledTimes(2);
-
-      const [[request1Args], [request2Args]] = mockRequest.mock.calls;
-
-      expect(request1Args).toEqual(storiesGetRequestExpected);
-
-      expect(request2Args).toEqual({
-        ...storiesGetRequestExpected,
-        url: secondPageUrl,
-        params: {},
-      });
+      const response = await connector.getStories();
+      expect(response.incompleteResponse).toEqual(false);
     });
 
-    it('should request the Tines stories with pagination hard limit', async () => {
-      mockRequest.mockReturnValue({
-        data: { stories: [story], meta: { next_page: url } },
+    it('should request the Tines stories incomplete response', async () => {
+      mockRequest.mockReturnValueOnce({
+        data: { stories: [story], meta: { pages: 2 } },
       });
-      await connector.getStories();
-      expect(mockRequest).toBeCalledTimes(100); // hard limit is 100 pages
-    });
-
-    it('should accumulate the Tines stories paged in a cleaned objects array', async () => {
-      const story1 = { id: '1', name: 'story1' };
-      const story2 = { id: '2', name: 'story2' };
-      mockRequest
-        .mockReturnValueOnce({
-          data: { stories: [{ ...story1, description: 'desc1' }], meta: { next_page: url } },
-        })
-        .mockReturnValueOnce({
-          data: { stories: [{ ...story2, description: 'desc2' }], meta: { next_page: null } },
-        });
-      const stories = await connector.getStories();
-
-      expect(stories).toEqual([story1, story2]);
+      const response = await connector.getStories();
+      expect(response.incompleteResponse).toEqual(true);
     });
   });
 
   describe('getWebhooks', () => {
-    beforeEach(() => {
-      mockRequest.mockReturnValue({ data: { agents: [webhookAgent], meta: {} } });
+    beforeAll(() => {
+      mockRequest.mockReturnValue({ data: { agents: [webhookAgent], meta: { pages: 1 } } });
     });
 
     it('should request Tines webhook actions', async () => {
@@ -162,101 +156,36 @@ describe('TinesConnector', () => {
       expect(requestArgs).toEqual(agentsGetRequestExpected);
     });
 
-    it('should request the Tines webhook actions with pagination', async () => {
-      const secondPageUrl = `${url}/api/v1/agents?page=2&per_page=20`;
+    it('should return the Tines webhooks reduced array', async () => {
+      const { webhooks } = await connector.getWebhooks({ storyId: story.id });
+      expect(webhooks).toEqual([webhookResult]);
+    });
+
+    it('should request the Tines webhook complete response', async () => {
       mockRequest.mockReturnValueOnce({
-        data: { agents: [webhookAgent], meta: { next_page: secondPageUrl } },
+        data: { agents: [webhookAgent], meta: { pages: 1 } },
       });
-      await connector.getWebhooks({ storyId: story.id });
-
-      expect(mockRequest).toBeCalledTimes(2);
-
-      const [[request1Args], [request2Args]] = mockRequest.mock.calls;
-
-      expect(request1Args).toEqual(agentsGetRequestExpected);
-
-      expect(request2Args).toEqual({
-        ...agentsGetRequestExpected,
-        url: secondPageUrl,
-        params: {},
-      });
+      const response = await connector.getWebhooks({ storyId: story.id });
+      expect(response.incompleteResponse).toEqual(false);
     });
 
-    it('should request the Tines webhook actions with pagination hard limit', async () => {
-      mockRequest.mockReturnValue({
-        data: { agents: [webhookAgent], meta: { next_page: url } },
+    it('should request the Tines webhook incomplete response', async () => {
+      mockRequest.mockReturnValueOnce({
+        data: { agents: [webhookAgent], meta: { pages: 2 } },
       });
-      await connector.getWebhooks({ storyId: story.id });
-      expect(mockRequest).toBeCalledTimes(100); // hard limit is 100 pages
-    });
-
-    it('should request Tines webhook actions and take only webhook actions', async () => {
-      mockRequest.mockReturnValue({ data: { agents: [otherAgent, webhookAgent], meta: {} } });
-      const webhooks = await connector.getWebhooks({ storyId: story.id });
-
-      expect(webhooks).toEqual([
-        {
-          id: webhookAgent.id,
-          name: webhookAgent.name,
-          path: webhookAgent.options.path,
-          secret: webhookAgent.options.secret,
-          storyId: webhookAgent.story_id,
-        },
-      ]);
-    });
-
-    it('should accumulate the Tines webhook actions paged in a filtered and cleaned objects array', async () => {
-      const webhookAgent2 = { ...webhookAgent, id: 2, name: 'Elastic webhook 2' };
-      mockRequest
-        .mockReturnValueOnce({
-          data: {
-            agents: [{ ...webhookAgent, description: 'desc1' }, otherAgent],
-            meta: { next_page: url },
-          },
-        })
-        .mockReturnValueOnce({
-          data: {
-            agents: [{ ...webhookAgent2, description: 'desc2' }, otherAgent],
-            meta: { next_page: null },
-          },
-        });
-
-      const webhooks = await connector.getWebhooks({ storyId: story.id });
-
-      expect(webhooks).toEqual([
-        {
-          id: webhookAgent.id,
-          name: webhookAgent.name,
-          path: webhookAgent.options.path,
-          secret: webhookAgent.options.secret,
-          storyId: webhookAgent.story_id,
-        },
-        {
-          id: webhookAgent2.id,
-          name: webhookAgent2.name,
-          path: webhookAgent2.options.path,
-          secret: webhookAgent2.options.secret,
-          storyId: webhookAgent2.story_id,
-        },
-      ]);
+      const response = await connector.getWebhooks({ storyId: story.id });
+      expect(response.incompleteResponse).toEqual(true);
     });
   });
 
   describe('runWebhook', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
+    beforeAll(() => {
       mockRequest.mockReturnValue({ data: { took: 5, requestId: '123', status: 'ok' } });
     });
 
-    it('should send data to Tines webhook', async () => {
+    it('should send data to Tines webhook using selected webhook parameter', async () => {
       await connector.runWebhook({
-        webhook: {
-          id: webhookAgent.id,
-          name: webhookAgent.name,
-          path: webhookAgent.options.path,
-          secret: webhookAgent.options.secret,
-          storyId: webhookAgent.story_id,
-        },
+        webhook: webhookResult,
         body: '[]',
       });
 
@@ -267,7 +196,27 @@ describe('TinesConnector', () => {
         ...ignoredRequestFields,
         method: 'post',
         data: '[]',
-        url: `${url}/webhook/${webhookAgent.options.path}/${webhookAgent.options.secret}`,
+        url: webhookUrl,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+
+    it('should send data to Tines webhook using webhook url parameter', async () => {
+      await connector.runWebhook({
+        webhookUrl,
+        body: '[]',
+      });
+
+      expect(mockRequest).toBeCalledTimes(1);
+      const [[requestArgs]] = mockRequest.mock.calls;
+
+      expect(requestArgs).toEqual({
+        ...ignoredRequestFields,
+        method: 'post',
+        data: '[]',
+        url: webhookUrl,
         headers: {
           'Content-Type': 'application/json',
         },

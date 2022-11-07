@@ -15,17 +15,17 @@ const kibanaReactPath = '@kbn/kibana-react-plugin/public';
 const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
 interface Result {
   isLoading: boolean;
-  response: unknown[];
+  response: Record<string, unknown>;
   error: null | Error;
 }
 const mockUseSubActionStories = jest.fn<Result, [UseSubActionParams<unknown>]>(() => ({
   isLoading: false,
-  response: [story],
+  response: { stories: [story], incompleteResponse: false },
   error: null,
 }));
 const mockUseSubActionWebhooks = jest.fn<Result, [UseSubActionParams<unknown>]>(() => ({
   isLoading: false,
-  response: [webhook],
+  response: { webhooks: [webhook], incompleteResponse: false },
   error: null,
 }));
 const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>((params) =>
@@ -66,7 +66,7 @@ const webhook = {
   path: 'somePath',
   secret: 'someSecret',
 };
-const story = { id: webhook.storyId, name: 'test story' };
+const story = { id: webhook.storyId, name: 'test story', published: true };
 const actionParams = { subActionParams: { webhook } };
 const emptyErrors = { subAction: [], subActionParams: [] };
 const messageVariables = [
@@ -104,6 +104,8 @@ describe('TinesParamsFields renders', () => {
       expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').first().text()).toBe(
         'Select a story first'
       );
+      expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(false);
 
       expect(mockEditAction).toHaveBeenCalledWith('subAction', 'run', index);
     });
@@ -176,6 +178,32 @@ describe('TinesParamsFields renders', () => {
       expect(
         wrapper.find('[data-test-subj="tines-webhookSelector"]').first().prop('disabled')
       ).toBe(true);
+    });
+
+    it('should render with a draft story in the selectable', () => {
+      mockUseSubActionStories.mockReturnValueOnce({
+        isLoading: false,
+        response: { stories: [{ ...story, published: false }], incompleteResponse: false },
+        error: null,
+      });
+
+      const wrapper = mountWithIntl(
+        <TinesParamsFields
+          actionParams={{}}
+          errors={emptyErrors}
+          editAction={mockEditAction}
+          index={index}
+          messageVariables={messageVariables}
+        />
+      );
+      wrapper
+        .find('[data-test-subj="tines-storySelector"] [data-test-subj="comboBoxToggleListButton"]')
+        .first()
+        .simulate('click');
+
+      expect(wrapper.find('[data-test-subj="tines-storySelector-optionsList"]').text()).toBe(
+        `${story.name} (draft)`
+      );
     });
 
     it('should enable with webhook selector when story selected', () => {
@@ -253,6 +281,26 @@ describe('TinesParamsFields renders', () => {
 
       expect(mockEditAction).toHaveBeenCalledWith('subActionParams', { webhook }, index);
     });
+
+    it('should render webhook url fallback when response incomplete', () => {
+      mockUseSubActionStories.mockReturnValueOnce({
+        isLoading: false,
+        response: { stories: [story], incompleteResponse: true },
+        error: null,
+      });
+
+      const wrapper = mountWithIntl(
+        <TinesParamsFields
+          actionParams={{}}
+          errors={emptyErrors}
+          editAction={mockEditAction}
+          index={index}
+          messageVariables={messageVariables}
+        />
+      );
+      expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(true);
+    });
   });
 
   describe('Edit connector', () => {
@@ -276,6 +324,9 @@ describe('TinesParamsFields renders', () => {
       expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').first().text()).toBe(
         webhook.name
       );
+
+      expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(false);
     });
 
     it('should call useSubAction with form values', () => {
@@ -331,12 +382,114 @@ describe('TinesParamsFields renders', () => {
       });
     });
 
+    describe('WebhookUrl fallback', () => {
+      beforeEach(() => {
+        mockUseSubActionStories.mockReturnValue({
+          isLoading: false,
+          response: { stories: [story], incompleteResponse: true },
+          error: null,
+        });
+
+        mockUseSubActionWebhooks.mockReturnValue({
+          isLoading: false,
+          response: { webhooks: [webhook], incompleteResponse: true },
+          error: null,
+        });
+      });
+
+      it('should not render webhook url fallback when stories response incomplete but selected story found', () => {
+        const wrapper = mountWithIntl(
+          <TinesParamsFields
+            actionParams={actionParams}
+            errors={emptyErrors}
+            editAction={mockEditAction}
+            index={index}
+            messageVariables={messageVariables}
+          />
+        );
+        expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(false);
+      });
+
+      it('should render webhook url fallback when stories response incomplete and selected story not found', () => {
+        mockUseSubActionStories.mockReturnValue({
+          isLoading: false,
+          response: { stories: [], incompleteResponse: true },
+          error: null,
+        });
+
+        const wrapper = mountWithIntl(
+          <TinesParamsFields
+            actionParams={actionParams}
+            errors={emptyErrors}
+            editAction={mockEditAction}
+            index={index}
+            messageVariables={messageVariables}
+          />
+        );
+        expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(true);
+      });
+
+      it('should not render webhook url fallback when webhook response incomplete but webhook selected found', () => {
+        const wrapper = mountWithIntl(
+          <TinesParamsFields
+            actionParams={actionParams}
+            errors={emptyErrors}
+            editAction={mockEditAction}
+            index={index}
+            messageVariables={messageVariables}
+          />
+        );
+        expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(false);
+      });
+
+      it('should render webhook url fallback when webhook response incomplete and webhook selected not found', () => {
+        mockUseSubActionWebhooks.mockReturnValue({
+          isLoading: false,
+          response: { webhooks: [], incompleteResponse: true },
+          error: null,
+        });
+
+        const wrapper = mountWithIntl(
+          <TinesParamsFields
+            actionParams={actionParams}
+            errors={emptyErrors}
+            editAction={mockEditAction}
+            index={index}
+            messageVariables={messageVariables}
+          />
+        );
+        expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(true);
+      });
+
+      it('should render webhook url fallback without callout when responses are complete but webhookUrl is stored', () => {
+        const webhookUrl = 'https://example.tines.com/1234';
+        const wrapper = mountWithIntl(
+          <TinesParamsFields
+            actionParams={{ subActionParams: { ...actionParams.subActionParams, webhookUrl } }}
+            errors={emptyErrors}
+            editAction={mockEditAction}
+            index={index}
+            messageVariables={messageVariables}
+          />
+        );
+        expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(false);
+        expect(wrapper.find('input[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(true);
+        expect(wrapper.find('input[data-test-subj="tines-webhookUrlInput"]').prop('value')).toBe(
+          webhookUrl
+        );
+      });
+    });
+
     describe('subActions error', () => {
       it('should show error when stories subAction has error', () => {
         const errorMessage = 'something broke';
         mockUseSubActionStories.mockReturnValueOnce({
           isLoading: false,
-          response: [story],
+          response: { stories: [story] },
           error: new Error(errorMessage),
         });
 
@@ -360,7 +513,7 @@ describe('TinesParamsFields renders', () => {
         const errorMessage = 'something broke';
         mockUseSubActionWebhooks.mockReturnValueOnce({
           isLoading: false,
-          response: [webhook],
+          response: { webhooks: [webhook] },
           error: new Error(errorMessage),
         });
 
