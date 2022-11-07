@@ -17,9 +17,9 @@ const configSchema = schema.object({
      * Ml Snapshot should only be enabled for major version upgrades. Currently this
      * is manually set to `true` on every `x.last` version.
      * ML Upgrade mode can be toggled from outside Kibana, the purpose
-     * of this feature guard is to hide all ML related deprecations from the end user 
+     * of this feature guard is to hide all ML related deprecations from the end user
      * until the next major upgrade.
-     * 
+     *
      * When we want to enable ML model snapshot deprecation warnings again we need
      * to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
      * to something higher than 7.0.0 in the Elasticsearch code.
@@ -33,11 +33,11 @@ const configSchema = schema.object({
     /**
      * Deprecations with reindexing corrective actions are only enabled for major version upgrades.
      * Currently this is manually set to `true` on every `x.last` version.
-     * 
+     *
      * The reindex action includes some logic that is specific to the 8.0 upgrade
      * End users could get into a bad situation if this is enabled before this logic is fixed.
      */
-     reindexCorrectiveActions: schema.boolean({ defaultValue: false }),
+    reindexCorrectiveActions: schema.boolean({ defaultValue: false }),
   }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

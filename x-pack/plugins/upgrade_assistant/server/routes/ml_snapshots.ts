@@ -338,7 +338,7 @@ export function registerMlSnapshotRoutes({
          * This disables possibly showing a needless warning about ML
          * upgrade mode when there's never a need to upgrade ML job
          * snapshots in minor version upgrades.
-         * 
+         *
          * This config should be set to false only on the `x.last` versions, or when
          * the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
          * is incremented to something higher than 7.0.0 in the Elasticsearch code.
