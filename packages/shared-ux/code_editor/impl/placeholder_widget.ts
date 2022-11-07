@@ -20,8 +20,6 @@ interface Props {
 export const PlaceholderWidget = (props: Props) => {
   const [placeholderText, setPlaceholderText] = useState('');
   const [editor, setEditor] = useState();
-
-
 };
 
 export const getDomNode = (domNode: undefined | HTMLElement): HTMLElement => {
