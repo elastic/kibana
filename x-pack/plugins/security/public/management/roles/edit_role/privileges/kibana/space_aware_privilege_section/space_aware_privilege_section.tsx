@@ -82,12 +82,10 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
       return (
         <EuiCallOut
           title={
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
-                defaultMessage="Insufficient Privileges"
-              />
-            </p>
+            <FormattedMessage
+              id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
+              defaultMessage="Insufficient Privileges"
+            />
           }
           iconType="alert"
           color="danger"
