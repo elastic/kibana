@@ -67,14 +67,17 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertState,
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params, alertId, executionId, spaceId, startedAt }) => {
+  >(async ({ services, params, executionId, spaceId, startedAt, rule: { id: ruleId } }) => {
     const startTime = Date.now();
 
     const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
 
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
-    const logger = createScopedLogger(libs.logger, 'inventoryRule', { alertId, executionId });
+    const logger = createScopedLogger(libs.logger, 'inventoryRule', {
+      alertId: ruleId,
+      executionId,
+    });
 
     const esClient = services.scopedClusterClient.asCurrentUser;
 

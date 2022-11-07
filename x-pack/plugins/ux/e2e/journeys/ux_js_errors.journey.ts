@@ -45,7 +45,8 @@ journey('UX JsErrors', async ({ page, params }) => {
 
   step('Confirm error count', async () => {
     // Wait until chart data is loaded
-    page.waitForLoadState('networkidle');
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForLoadState('networkidle');
     await page.waitForSelector(`text=${jsErrorCount}`);
 
     const jsErrors = await (
