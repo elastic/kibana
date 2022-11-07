@@ -130,4 +130,5 @@ export const FLEET_SERVER_SETUP = {
   HOST_INPUT: 'fleetServerSetup.multiRowInput',
   DEFAULT_SWITCH: 'fleetServerHostsFlyout.isDefaultSwitch',
   ADD_HOST_BTN: 'fleetServerSetup.addNewHostBtn',
+  SELECT_HOSTS: 'fleetServerSetup.fleetServerHostsSelect',
 };
