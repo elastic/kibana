@@ -17,6 +17,15 @@ it('matches snapshot', () => {
         "required": true,
         "type": "date",
       },
+      "cloud": Object {
+        "array": false,
+        "required": false,
+        "type": "object",
+      },
+      "container": Object {
+        "required": false,
+        "type": "object",
+      },
       "ecs.version": Object {
         "array": false,
         "required": false,
@@ -31,6 +40,11 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "host": Object {
+        "array": false,
+        "required": false,
+        "type": "object",
       },
       "kibana.alert.action_group": Object {
         "array": false,
@@ -231,21 +245,7 @@ it('matches snapshot', () => {
         "required": false,
         "type": "version",
       },
-      "tags": Object {
-        "array": true,
-        "required": false,
-        "type": "keyword",
-      },
-      "container": Object {
-        "required": false,
-        "type": "object",
-      },
-      "cloud": Object {
-        "array": false,
-        "required": false,
-        "type": "object",
-      },
-      "host": Object {
+      "labels": Object {
         "array": false,
         "required": false,
         "type": "object",
@@ -255,10 +255,10 @@ it('matches snapshot', () => {
         "required": false,
         "type": "object",
       },
-      "labels": Object {
-        "array": false,
+      "tags": Object {
+        "array": true,
         "required": false,
-        "type": "object",
+        "type": "keyword",
       },
     }
   `);
