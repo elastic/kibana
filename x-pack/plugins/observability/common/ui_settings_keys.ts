@@ -11,7 +11,6 @@ export const maxSuggestions = 'observability:maxSuggestions';
 export const enableComparisonByDefault = 'observability:enableComparisonByDefault';
 export const defaultApmServiceEnvironment = 'observability:apmDefaultServiceEnvironment';
 export const apmProgressiveLoading = 'observability:apmProgressiveLoading';
-export const enableServiceGroups = 'observability:enableServiceGroups';
 export const apmServiceInventoryOptimizedSorting =
   'observability:apmServiceInventoryOptimizedSorting';
 export const apmServiceGroupMaxNumberOfServices =
@@ -22,3 +21,6 @@ export const apmLabsButton = 'observability:apmLabsButton';
 export const enableInfrastructureHostsView = 'observability:enableInfrastructureHostsView';
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const enableServiceMetrics = 'observability:apmEnableServiceMetrics';
+export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
+export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequestCostPerMillion';
+export const enableCriticalPath = 'observability:apmEnableCriticalPath';

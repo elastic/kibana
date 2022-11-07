@@ -120,7 +120,7 @@ export function StorageExplorer() {
           <p>
             <FormattedMessage
               id="xpack.apm.storageExplorer.longLoadingTimeCalloutText"
-              defaultMessage="Enable progressive loading of data or optimized sorting for services list in {kibanaAdvancedSettingsLink}."
+              defaultMessage="Enable progressive loading of data and optimized sorting for services list in {kibanaAdvancedSettingsLink}."
               values={{
                 kibanaAdvancedSettingsLink: (
                   <EuiLink href={getKibanaAdvancedSettingsHref(core)}>

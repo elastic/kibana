@@ -125,6 +125,16 @@ Cypress.Commands.add(
   }
 );
 
+Cypress.Commands.add('dismissServiceGroupsTour', () => {
+  window.localStorage.setItem(
+    'apm.serviceGroupsTour',
+    JSON.stringify({
+      createGroup: false,
+      editGroup: false,
+    })
+  );
+});
+
 // A11y configuration
 
 const axeConfig = {

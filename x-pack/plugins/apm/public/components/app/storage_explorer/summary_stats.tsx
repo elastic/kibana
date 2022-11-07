@@ -104,7 +104,8 @@ export function SummaryStats() {
               tooltipContent={i18n.translate(
                 'xpack.apm.storageExplorer.summary.totalSize.tooltip',
                 {
-                  defaultMessage: 'The storage size used by the APM indices.',
+                  defaultMessage:
+                    'Total storage size of all the APM indices currently, ignoring all filters.',
                 }
               )}
               value={asDynamicBytes(data?.totalSize)}
@@ -122,7 +123,7 @@ export function SummaryStats() {
                 'xpack.apm.storageExplorer.summary.diskSpaceUsedPct.tooltip',
                 {
                   defaultMessage:
-                    'The percentage of storage size used by the APM indices compared to the overall storage configured for Elasticsearch.',
+                    'The percentage of the storage capacity that is currently used by all the APM indices compared to the max. storage capacity currently configured for Elasticsearch.',
                 }
               )}
               value={asPercent(data?.diskSpaceUsedPct, 1)}

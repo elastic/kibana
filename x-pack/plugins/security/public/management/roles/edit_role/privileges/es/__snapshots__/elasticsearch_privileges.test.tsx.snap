@@ -52,6 +52,7 @@ exports[`it renders without crashing 1`] = `
             "monitor",
           ]
         }
+        editable={true}
         onChange={[Function]}
         role={
           Object {
@@ -170,6 +171,7 @@ exports[`it renders without crashing 1`] = `
         "index",
       ]
     }
+    editable={true}
     indexPatterns={Array []}
     indicesAPIClient={
       Object {

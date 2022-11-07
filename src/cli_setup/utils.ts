@@ -29,6 +29,7 @@ const logger: Logger = {
   fatal: noop,
   log: noop,
   get: () => logger,
+  isLevelEnabled: () => true,
 };
 
 export const kibanaConfigWriter = new KibanaConfigWriter(getConfigPath(), getDataPath(), logger);

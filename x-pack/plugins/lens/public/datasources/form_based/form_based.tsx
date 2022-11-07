@@ -65,7 +65,7 @@ import {
 
 import {
   getFiltersInLayer,
-  getTSDBRollupWarningMessages,
+  getShardFailuresWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
@@ -89,10 +89,10 @@ import {
 } from './operations/layer_helpers';
 import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
-import { Datasource, VisualizeEditorContext } from '../../types';
+import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
-import { DraggingIdentifier } from '../../drag_drop';
+import type { DraggingIdentifier } from '../../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
@@ -897,8 +897,8 @@ export function getFormBasedDatasource({
         ),
       ];
     },
-    getSearchWarningMessages: (state, warning) => {
-      return [...getTSDBRollupWarningMessages(state, warning)];
+    getSearchWarningMessages: (state, warning, request, response) => {
+      return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
     },
     getDeprecationMessages: () => {
       const deprecatedMessages: React.ReactNode[] = [];

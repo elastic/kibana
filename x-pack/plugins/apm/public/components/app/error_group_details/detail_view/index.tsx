@@ -96,9 +96,10 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
   const method = error.http?.request?.method;
   const status = error.http?.response?.status_code;
 
-  const traceExplorerLink = router.link('/traces/explorer', {
+  const traceExplorerLink = router.link('/traces/explorer/waterfall', {
     query: {
       ...query,
+      showCriticalPath: false,
       query: `${ERROR_GROUP_ID}:${groupId}`,
       type: TraceSearchType.kql,
       traceId: '',

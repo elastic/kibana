@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiTourStep,
 } from '@elastic/eui';
+import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -66,7 +67,6 @@ export function OverviewPage() {
     },
   ]);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [refreshNow, setRefreshNow] = useState<number>();
 
   const {
     cases,
@@ -77,6 +77,12 @@ export function OverviewPage() {
 
   const { ObservabilityPageTemplate } = usePluginContext();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
+  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>(
+    buildEsQuery({
+      from: relativeStart,
+      to: relativeEnd,
+    })
+  );
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
 
@@ -105,9 +111,14 @@ export function OverviewPage() {
   }, [trackMetric, isGuidedSetupProgressDismissed, hideGuidedSetupTour]);
 
   const onTimeRangeRefresh = useCallback(() => {
-    setRefreshNow(new Date().getTime());
+    setEsQuery(
+      buildEsQuery({
+        from: relativeStart,
+        to: relativeEnd,
+      })
+    );
     return refetch.current && refetch.current();
-  }, []);
+  }, [relativeEnd, relativeStart]);
 
   const CasesContext = cases.ui.getCasesContext();
   const userCasesPermissions = useGetUserCasesPermissions();
@@ -183,13 +194,9 @@ export function OverviewPage() {
                     AlertConsumers.LOGS,
                     AlertConsumers.UPTIME,
                   ]}
-                  query={buildEsQuery({
-                    from: relativeStart,
-                    to: relativeEnd,
-                  })}
+                  query={esQuery}
                   showExpandToDetails={false}
                   pageSize={ALERTS_PER_PAGE}
-                  refreshNow={refreshNow}
                 />
               </CasesContext>
             </SectionContainer>

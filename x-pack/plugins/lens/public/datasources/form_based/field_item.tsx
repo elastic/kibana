@@ -190,6 +190,9 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         initialFocus=".lnsFieldItem__fieldPanel"
         className="lnsFieldItem__popoverAnchor"
         data-test-subj="lnsFieldListPanelField"
+        panelProps={{
+          'data-test-subj': 'lnsFieldListPanelFieldContent',
+        }}
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
           <DragDrop
@@ -331,26 +334,30 @@ function FieldItemPopoverContents(
         field={dataViewField}
         data-test-subj="lnsFieldListPanel"
         overrideMissingContent={(params) => {
-          if (params?.noDataFound) {
+          if (params.reason === 'no-data') {
             // TODO: should we replace this with a default message "Analysis is not available for this field?"
             const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
             return (
-              <>
-                <EuiText size="s">
-                  {isUsingSampling
-                    ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
-                        defaultMessage:
-                          'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
-                      })
-                    : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-                        defaultMessage:
-                          'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
-                      })}
-                </EuiText>
-              </>
+              <EuiText size="s" data-test-subj="lnsFieldListPanel-missingFieldStats">
+                {isUsingSampling
+                  ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
+                      defaultMessage:
+                        'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
+                    })
+                  : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+                      defaultMessage:
+                        'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
+                    })}
+              </EuiText>
             );
           }
-
+          if (params.reason === 'unsupported') {
+            return (
+              <EuiText data-test-subj="lnsFieldListPanel-missingFieldStats">
+                {params.element}
+              </EuiText>
+            );
+          }
           return params.element;
         }}
       />

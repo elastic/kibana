@@ -137,7 +137,13 @@
         "description": [],
         "signature": [
           "<P extends ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">(locator: ",
           {
             "pluginId": "share",
@@ -908,7 +914,13 @@
             "description": [],
             "signature": [
               "((anonymousUserCapabilities: ",
-              "Capabilities",
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              },
               ") => boolean) | undefined"
             ],
             "path": "src/plugins/share/public/types.ts",
@@ -923,7 +935,13 @@
                 "label": "anonymousUserCapabilities",
                 "description": [],
                 "signature": [
-                  "Capabilities"
+                  {
+                    "pluginId": "@kbn/core-capabilities-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                    "section": "def-common.Capabilities",
+                    "text": "Capabilities"
+                  }
                 ],
                 "path": "src/plugins/share/public/types.ts",
                 "deprecated": false,
@@ -1322,7 +1340,13 @@
         "; navigate(options: ",
         "RedirectOptions",
         "<",
-        "SerializableRecord",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.SerializableRecord",
+          "text": "SerializableRecord"
+        },
         ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
         {
           "pluginId": "share",
@@ -1366,7 +1390,13 @@
         "; navigate(options: ",
         "RedirectOptions",
         "<",
-        "SerializableRecord",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.SerializableRecord",
+          "text": "SerializableRecord"
+        },
         ">): void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
@@ -1495,7 +1525,13 @@
         "description": [],
         "signature": [
           "<P extends ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">(locator: ",
           {
             "pluginId": "share",
@@ -1636,7 +1672,13 @@
             ],
             "signature": [
               "() => Promise<",
-              "Capabilities",
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              },
               ">"
             ],
             "path": "src/plugins/share/common/anonymous_access/types.ts",

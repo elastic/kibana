@@ -79,7 +79,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   getDisplayName() {
     return i18n.translate('xpack.lens.embeddableDisplayName', {
-      defaultMessage: 'lens',
+      defaultMessage: 'Lens',
     });
   }
 

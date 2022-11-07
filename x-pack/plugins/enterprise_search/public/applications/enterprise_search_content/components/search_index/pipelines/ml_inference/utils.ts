@@ -31,6 +31,12 @@ export const validateInferencePipelineConfiguration = (
   config: InferencePipelineConfiguration
 ): AddInferencePipelineFormErrors => {
   const errors: AddInferencePipelineFormErrors = {};
+  if (config.existingPipeline === true) {
+    if (config.pipelineName.length === 0) {
+      errors.pipelineName = FIELD_REQUIRED_ERROR;
+    }
+    return errors;
+  }
   if (config.pipelineName.trim().length === 0) {
     errors.pipelineName = FIELD_REQUIRED_ERROR;
   } else if (!isValidPipelineName(config.pipelineName)) {
@@ -45,3 +51,27 @@ export const validateInferencePipelineConfiguration = (
 
   return errors;
 };
+
+export const EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledSourceFieldDescription',
+  {
+    defaultMessage:
+      'This pipeline cannot be selected because the source field does not exist on this index.',
+  }
+);
+
+export const EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledPipelineExistsDescription',
+  {
+    defaultMessage: 'This pipeline cannot be selected because it is already attached.',
+  }
+);
+
+// TODO: removed when we support attaching pipelines with unavailable models
+export const EXISTING_PIPELINE_DISABLED_MODEL_REDACTED = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledModelRedactedDescription',
+  {
+    defaultMessage:
+      'This pipeline cannot be selected because it uses a trained model not available in this Kibana space.',
+  }
+);

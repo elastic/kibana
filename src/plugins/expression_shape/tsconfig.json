@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
     "isolatedModules": true
   },
   "include": [
@@ -13,7 +12,7 @@
     "server/**/*",
     "__fixtures__/**/*",
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../presentation_util/tsconfig.json" },
     { "path": "../expressions/tsconfig.json" },

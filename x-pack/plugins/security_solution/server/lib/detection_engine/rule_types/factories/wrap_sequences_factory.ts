@@ -24,6 +24,7 @@ export const wrapSequencesFactory =
     mergeStrategy,
     spaceId,
     indicesToQuery,
+    alertTimestampOverride,
   }: {
     logger: Logger;
     completeRule: CompleteRule<RuleParams>;
@@ -31,6 +32,7 @@ export const wrapSequencesFactory =
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
     indicesToQuery: string[];
+    alertTimestampOverride: Date | undefined;
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(
@@ -43,7 +45,8 @@ export const wrapSequencesFactory =
           mergeStrategy,
           spaceId,
           buildReasonMessage,
-          indicesToQuery
+          indicesToQuery,
+          alertTimestampOverride
         ),
       ],
       []

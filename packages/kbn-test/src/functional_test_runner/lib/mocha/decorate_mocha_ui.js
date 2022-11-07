@@ -38,7 +38,12 @@ function allTestsAreSkipped(suite) {
   return childrenSkipped;
 }
 
-export function decorateMochaUi(log, lifecycle, context, { rootTags }) {
+/**
+ * @param {import('../lifecycle').Lifecycle} lifecycle
+ * @param {any} context
+ * @param {{ rootTags?: string[] }} options
+ */
+export function decorateMochaUi(lifecycle, context, { rootTags }) {
   // incremented at the start of each suite, decremented after
   // so that in each non-suite call we can know if we are within
   // a suite, or that when a suite is defined it is within a suite
