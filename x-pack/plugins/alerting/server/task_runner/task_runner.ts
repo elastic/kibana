@@ -355,7 +355,6 @@ export class TaskRunner<
 
           updatedState = await this.context.executionContext.withContext(ctx, () =>
             this.ruleType.executor({
-              alertId: ruleId,
               executionId: this.executionId,
               services: {
                 savedObjectsClient,
@@ -373,11 +372,8 @@ export class TaskRunner<
               previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
               spaceId,
               namespace,
-              name,
-              tags,
-              createdBy,
-              updatedBy,
               rule: {
+                id: ruleId,
                 name,
                 tags,
                 consumer,

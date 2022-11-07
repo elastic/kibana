@@ -142,6 +142,7 @@ export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = Sanit
 
 export type SanitizedRuleConfig = Pick<
   SanitizedRule,
+  | 'id'
   | 'name'
   | 'tags'
   | 'consumer'

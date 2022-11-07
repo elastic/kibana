@@ -8,33 +8,28 @@
 import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
 import { canEditRuleWithActions } from '../../../../common/utils/privileges';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../rule_management/logic';
-import {
-  downloadExportedRules,
-  useBulkExport,
-} from '../../../rule_management/logic/bulk_actions/use_bulk_export';
+import { useBulkExport } from '../../../rule_management/logic/bulk_actions/use_bulk_export';
 import {
   goToRuleEditPage,
   useExecuteBulkAction,
 } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
-import { useRulesTableContext } from './rules_table/rules_table_context';
+import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 
 export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
-  const toasts = useAppToasts();
-  const { setLoadingRules } = useRulesTableContext().actions;
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
+  const downloadExportedRules = useDownloadExportedRules();
 
   return [
     {
@@ -69,10 +64,8 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
         const result = await executeBulkAction({
-          action: BulkAction.duplicate,
-          setLoadingRules,
-          visibleRuleIds: [rule.id],
-          search: { ids: [rule.id] },
+          type: BulkActionType.duplicate,
+          ids: [rule.id],
         });
         const createdRules = result?.attributes.results.created;
         if (createdRules?.length) {
@@ -88,16 +81,9 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       name: i18n.EXPORT_RULE,
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
-        const response = await bulkExport({
-          setLoadingRules,
-          visibleRuleIds: [rule.id],
-          search: { ids: [rule.id] },
-        });
+        const response = await bulkExport({ ids: [rule.id] });
         if (response) {
-          await downloadExportedRules({
-            response,
-            toasts,
-          });
+          await downloadExportedRules(response);
         }
       },
       enabled: (rule: Rule) => !rule.immutable,
@@ -111,10 +97,8 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
         await executeBulkAction({
-          action: BulkAction.delete,
-          setLoadingRules,
-          visibleRuleIds: [rule.id],
-          search: { ids: [rule.id] },
+          type: BulkActionType.delete,
+          ids: [rule.id],
         });
       },
     },

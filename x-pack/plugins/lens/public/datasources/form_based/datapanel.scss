@@ -14,15 +14,6 @@
   margin-bottom: $euiSizeS;
 }
 
-.lnsInnerIndexPatternDataPanel__titleTooltip {
-  margin-right: $euiSizeXS;
-}
-
-.lnsInnerIndexPatternDataPanel__fieldItems {
-  // Quick fix for making sure the shadow and focus rings are visible outside the accordion bounds
-  padding: $euiSizeXS;
-}
-
 .lnsInnerIndexPatternDataPanel__textField {
   @include euiFormControlLayoutPadding(1, 'right');
   @include euiFormControlLayoutPadding(1, 'left');

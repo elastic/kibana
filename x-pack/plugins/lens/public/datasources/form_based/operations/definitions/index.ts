@@ -198,7 +198,6 @@ export interface ParamEditorProps<
   activeData?: FormBasedDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   paramEditorCustomProps?: ParamEditorCustomProps;
-  existingFields: Record<string, Record<string, boolean>>;
   isReferenced?: boolean;
 }
 
@@ -215,10 +214,6 @@ export interface FieldInputProps<C> {
   incompleteParams: Omit<IncompleteColumn, 'sourceField' | 'operationType'>;
   dimensionGroups: FormBasedDimensionEditorProps['dimensionGroups'];
   groupId: FormBasedDimensionEditorProps['groupId'];
-  /**
-   * indexPatternId -> fieldName -> boolean
-   */
-  existingFields: Record<string, Record<string, boolean>>;
   operationSupportMatrix: OperationSupportMatrix;
   helpMessage?: React.ReactNode;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;

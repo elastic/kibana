@@ -92,11 +92,8 @@ export interface RuleExecutorOptions<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
 > {
-  alertId: string; // Is actually the Rule ID. Will be updated as part of https://github.com/elastic/kibana/issues/100115
-  createdBy: string | null;
   executionId: string;
   logger: Logger;
-  name: string;
   params: Params;
   previousStartedAt: Date | null;
   rule: SanitizedRuleConfig;
@@ -104,8 +101,6 @@ export interface RuleExecutorOptions<
   spaceId: string;
   startedAt: Date;
   state: State;
-  tags: string[];
-  updatedBy: string | null;
   namespace?: string;
 }
 
