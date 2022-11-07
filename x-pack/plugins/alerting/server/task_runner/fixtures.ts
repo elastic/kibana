@@ -225,6 +225,7 @@ export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams 
     message,
     state,
     ...(group ? { group } : {}),
+    flapping: false,
   };
 };
 
