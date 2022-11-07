@@ -61,7 +61,7 @@ const cursorOrStyles = css`
 `;
 
 const fieldAndParamStyle = css`
-  min-width: 216px;
+  min-width: 162px;
 `;
 
 const operationStyle = css`
