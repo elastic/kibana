@@ -18,6 +18,7 @@ import {
 } from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { verifyPolicy, verifyAgentPackage, navigateToTab } from '../tasks/fleet';
+import { deleteFleetServer } from '../tasks/fleet_server';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
 describe('Fleet startup', () => {
@@ -37,6 +38,12 @@ describe('Fleet startup', () => {
   });
 
   describe('Create policies', () => {
+    before(() => {
+      unenrollAgent();
+      cleanupAgentPolicies();
+      deleteFleetServer();
+    });
+
     after(() => {
       cleanupAgentPolicies();
     });
@@ -104,6 +111,7 @@ describe('Fleet startup', () => {
       cy.getBySel(AGENT_FLYOUT.POLICY_DROPDOWN);
 
       // verify fleet server enroll command contains created policy id
+      cy.getBySel(FLEET_SERVER_SETUP.ADD_HOST_BTN).click();
       cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('New host');
       cy.get('[placeholder="Specify host URL"').type('https://localhost:8220');
 

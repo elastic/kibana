@@ -91,11 +91,8 @@ export interface RuleExecutorOptions<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
 > {
-  alertId: string; // Is actually the Rule ID. Will be updated as part of https://github.com/elastic/kibana/issues/100115
-  createdBy: string | null;
   executionId: string;
   logger: Logger;
-  name: string;
   params: Params;
   previousStartedAt: Date | null;
   rule: SanitizedRuleConfig;
@@ -103,8 +100,6 @@ export interface RuleExecutorOptions<
   spaceId: string;
   startedAt: Date;
   state: State;
-  tags: string[];
-  updatedBy: string | null;
   namespace?: string;
 }
 
@@ -127,6 +122,32 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
+
+export interface GetSummarizedAlertsFnOpts {
+  start?: Date;
+  end?: Date;
+  executionUuid?: string;
+  ruleId: string;
+  spaceId: string;
+}
+
+// TODO - add type for these alerts when we determine which alerts-as-data
+// fields will be made available in https://github.com/elastic/kibana/issues/143741
+export interface SummarizedAlerts {
+  new: {
+    count: number;
+    alerts: unknown[];
+  };
+  ongoing: {
+    count: number;
+    alerts: unknown[];
+  };
+  recovered: {
+    count: number;
+    alerts: unknown[];
+  };
+}
+export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 
 export interface RuleType<
   Params extends RuleTypeParams = never,
@@ -172,6 +193,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  getSummarizedAlerts?: GetSummarizedAlertsFn;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
