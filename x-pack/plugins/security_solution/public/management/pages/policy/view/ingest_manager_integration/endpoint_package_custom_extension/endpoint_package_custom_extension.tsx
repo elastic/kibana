@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
@@ -30,89 +31,149 @@ import {
 import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint';
 import { NoPermissions } from '../../../../../components/no_permissons';
 
+const TrustedAppsArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
+  const http = useHttp();
+  const trustedAppsApiClientInstance = useMemo(
+    () => TrustedAppsApiClient.getInstance(http),
+    [http]
+  );
+
+  return (
+    <FleetArtifactsCard
+      {...props}
+      artifactApiClientInstance={trustedAppsApiClientInstance}
+      getArtifactsPath={getTrustedAppsListPath}
+      labels={TRUSTED_APPS_LABELS}
+      data-test-subj="trustedApps"
+    />
+  );
+});
+TrustedAppsArtifactCard.displayName = 'TrustedAppsArtifactCard';
+
+const EventFiltersArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
+  const http = useHttp();
+  const eventFiltersApiClientInstance = useMemo(
+    () => EventFiltersApiClient.getInstance(http),
+    [http]
+  );
+
+  return (
+    <FleetArtifactsCard
+      {...props}
+      artifactApiClientInstance={eventFiltersApiClientInstance}
+      getArtifactsPath={getEventFiltersListPath}
+      labels={EVENT_FILTERS_LABELS}
+      data-test-subj="eventFilters"
+    />
+  );
+});
+EventFiltersArtifactCard.displayName = 'EventFiltersArtifactCard';
+
+const HostIsolationExceptionsArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
+  const http = useHttp();
+  const hostIsolationExceptionsApiClientInstance = useMemo(
+    () => HostIsolationExceptionsApiClient.getInstance(http),
+    [http]
+  );
+
+  return (
+    <FleetArtifactsCard
+      {...props}
+      artifactApiClientInstance={hostIsolationExceptionsApiClientInstance}
+      getArtifactsPath={getHostIsolationExceptionsListPath}
+      labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
+      data-test-subj="hostIsolationExceptions"
+    />
+  );
+});
+HostIsolationExceptionsArtifactCard.displayName = 'HostIsolationExceptionsArtifactCard';
+
+const BlockListArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
+  const http = useHttp();
+  const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
+
+  return (
+    <FleetArtifactsCard
+      {...props}
+      artifactApiClientInstance={blocklistsApiClientInstance}
+      getArtifactsPath={getBlocklistsListPath}
+      labels={BLOCKLISTS_LABELS}
+      data-test-subj="blocklists"
+    />
+  );
+});
+BlockListArtifactCard.displayName = 'BlockListArtifactCard';
+
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   (props) => {
-    const http = useHttp();
     const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
-    const { loading, canAccessEndpointManagement } = useEndpointPrivileges();
+    const { loading, canReadBlocklist, canReadEventFilters, canReadTrustedApplications } =
+      useEndpointPrivileges();
 
-    const trustedAppsApiClientInstance = useMemo(
-      () => TrustedAppsApiClient.getInstance(http),
-      [http]
-    );
+    const userCanAccessContent = useMemo(() => {
+      return (
+        canReadBlocklist ||
+        canReadEventFilters ||
+        canReadTrustedApplications ||
+        canSeeHostIsolationExceptions
+      );
+    }, [
+      canReadBlocklist,
+      canReadEventFilters,
+      canReadTrustedApplications,
+      canSeeHostIsolationExceptions,
+    ]);
 
-    const eventFiltersApiClientInstance = useMemo(
-      () => EventFiltersApiClient.getInstance(http),
-      [http]
-    );
+    const artifactCards: ReactElement = useMemo(() => {
+      if (loading) {
+        return <></>;
+      }
 
-    const hostIsolationExceptionsApiClientInstance = useMemo(
-      () => HostIsolationExceptionsApiClient.getInstance(http),
-      [http]
-    );
+      if (!userCanAccessContent) {
+        return <NoPermissions />;
+      }
 
-    const blocklistsApiClientInstance = useMemo(
-      () => BlocklistsApiClient.getInstance(http),
-      [http]
-    );
-
-    const artifactCards = useMemo(
-      () => (
+      return (
         <div data-test-subj="fleetEndpointPackageCustomContent">
-          <FleetArtifactsCard
-            {...props}
-            artifactApiClientInstance={trustedAppsApiClientInstance}
-            getArtifactsPath={getTrustedAppsListPath}
-            labels={TRUSTED_APPS_LABELS}
-            data-test-subj="trustedApps"
-          />
-          <EuiSpacer />
-          <FleetArtifactsCard
-            {...props}
-            artifactApiClientInstance={eventFiltersApiClientInstance}
-            getArtifactsPath={getEventFiltersListPath}
-            labels={EVENT_FILTERS_LABELS}
-            data-test-subj="eventFilters"
-          />
-          {canSeeHostIsolationExceptions && (
+          {canReadTrustedApplications && (
             <>
+              <TrustedAppsArtifactCard {...props} />
               <EuiSpacer />
-              <FleetArtifactsCard
-                {...props}
-                artifactApiClientInstance={hostIsolationExceptionsApiClientInstance}
-                getArtifactsPath={getHostIsolationExceptionsListPath}
-                labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
-                data-test-subj="hostIsolationExceptions"
-              />
             </>
           )}
-          <EuiSpacer />
-          <FleetArtifactsCard
-            {...props}
-            artifactApiClientInstance={blocklistsApiClientInstance}
-            getArtifactsPath={getBlocklistsListPath}
-            labels={BLOCKLISTS_LABELS}
-            data-test-subj="blocklists"
-          />
-        </div>
-      ),
-      [
-        blocklistsApiClientInstance,
-        canSeeHostIsolationExceptions,
-        eventFiltersApiClientInstance,
-        hostIsolationExceptionsApiClientInstance,
-        trustedAppsApiClientInstance,
-        props,
-      ]
-    );
 
-    return loading ? (
-      <EuiLoadingSpinner data-test-subj="endpointExtensionLoadingSpinner" />
-    ) : canAccessEndpointManagement ? (
-      artifactCards
-    ) : (
-      <NoPermissions />
-    );
+          {canReadEventFilters && (
+            <>
+              <EventFiltersArtifactCard {...props} />
+              <EuiSpacer />
+            </>
+          )}
+
+          {canSeeHostIsolationExceptions && (
+            <>
+              <HostIsolationExceptionsArtifactCard {...props} />
+              <EuiSpacer />
+            </>
+          )}
+
+          {canReadBlocklist && <BlockListArtifactCard {...props} />}
+        </div>
+      );
+    }, [
+      canReadBlocklist,
+      canReadEventFilters,
+      canReadTrustedApplications,
+      canSeeHostIsolationExceptions,
+      loading,
+      props,
+      userCanAccessContent,
+    ]);
+
+    if (loading) {
+      return <EuiLoadingSpinner data-test-subj="endpointExtensionLoadingSpinner" />;
+    }
+
+    return artifactCards;
   }
 );
 
