@@ -217,6 +217,7 @@ export const previewRulesRoute = async (
 
           const rule = {
             ...internalRule,
+            id: previewId,
             createdAt: new Date(),
             createdBy: username ?? 'preview-created-by',
             producer: 'preview-producer',
@@ -232,10 +233,7 @@ export const previewRulesRoute = async (
             invocationStartTime = moment();
 
             statePreview = (await executor({
-              alertId: previewId,
-              createdBy: rule.createdBy,
               executionId: uuid.v4(),
-              name: rule.name,
               params,
               previousStartedAt,
               rule,
@@ -257,8 +255,6 @@ export const previewRulesRoute = async (
               spaceId,
               startedAt: startedAt.toDate(),
               state: statePreview,
-              tags: [],
-              updatedBy: rule.updatedBy,
               logger,
             })) as TState;
 
