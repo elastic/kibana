@@ -10,16 +10,21 @@ import { Switch, Route } from 'react-router-dom';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
+import { getPackageReleaseLabel } from '../../../../../../services/package_prerelease';
+
 import { installationStatuses } from '../../../../../../../common/constants';
 
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
-import { isPackagePrerelease, isPackageUnverified } from '../../../../services';
+import { isPackageUnverified } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
 
-import type { IntegrationCardItem } from '../../../../../../../common/types/models';
+import type {
+  IntegrationCardItem,
+  IntegrationCardReleaseLabel,
+} from '../../../../../../../common/types/models';
 
 import { useGetPackages } from '../../../../hooks';
 
@@ -89,15 +94,7 @@ export const mapToCard = ({
     uiInternalPathUrl = url;
   }
 
-  let release: 'ga' | 'beta' | 'experimental' | undefined;
-  if ('release' in item) {
-    release = item.release;
-  } else if ((item as CustomIntegration).isBeta === true) {
-    release = 'beta';
-  }
-  if (!isPackagePrerelease(version)) {
-    release = 'ga';
-  }
+  const release: IntegrationCardReleaseLabel = getPackageReleaseLabel(version);
 
   return {
     id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}:${item.id}`,

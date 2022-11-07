@@ -83,7 +83,7 @@ ruleParamsExpression should be a lazy loaded React component extending an expres
 
 ```
 interface IndexThresholdProps {
-  ruleParams: IndexThresholdAlertParams;
+  ruleParams: IndexThresholdRuleParams;
   setRuleParams: (property: string, value: any) => void;
   setRuleProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
@@ -175,7 +175,7 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
 The Expression component should be lazy loaded which means it'll have to be the default export in `index_threshold_expression.ts`:
 
 ```
-export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
+export const IndexThresholdRuleTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
   ruleParams,
   setRuleParams,
   setRuleProperty,
@@ -227,7 +227,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
 };
 
 // Export as default in order to support lazy loading
-export {IndexThresholdAlertTypeExpression as default};
+export {IndexThresholdRuleTypeExpression as default};
 ```
 
 Index Threshold Alert form with validation:

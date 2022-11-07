@@ -545,7 +545,7 @@
           },
           ">) => void]>; } & Omit<",
           "InternalHttpServiceSetup",
-          ", \"createRouter\" | \"basePath\" | \"auth\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; createRouter: jest.MockedFunction<(path: string) => ",
+          ", \"createRouter\" | \"auth\" | \"basePath\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; createRouter: jest.MockedFunction<(path: string) => ",
           {
             "pluginId": "@kbn/core-http-router-server-mocks",
             "scope": "server",
