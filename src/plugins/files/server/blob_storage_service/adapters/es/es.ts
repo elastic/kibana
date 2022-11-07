@@ -15,10 +15,8 @@ import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
 import { lastValueFrom, defer } from 'rxjs';
-import {
-  FILE_UPLOAD_PERFORMANCE_EVENT_NAME,
-  withReportPerformanceMetric,
-} from '../../../performance';
+import { PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { FILE_UPLOAD_PERFORMANCE_EVENT_NAME } from '../../../performance';
 import type { BlobStorageClient } from '../../types';
 import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
@@ -41,6 +39,7 @@ interface UploadOptions {
 
 export class ElasticsearchBlobStorageClient implements BlobStorageClient {
   private static defaultSemaphore: Semaphore;
+
   /**
    * Call this function once to globally set a concurrent upload limit for
    * all {@link ElasticsearchBlobStorageClient} instances.
@@ -116,26 +115,29 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
           },
         });
 
+        const start = performance.now();
+        await pipeline([src, ...(transforms ?? []), dest]);
+        const end = performance.now();
+
         const _id = dest.getContentReferenceId()!;
         const size = dest.getBytesWritten();
-        const perfArgs = {
-          analytics,
-          eventData: {
-            eventName: FILE_UPLOAD_PERFORMANCE_EVENT_NAME,
-            key1: 'size',
-            value1: size,
-            meta: {
-              datasource: 'es',
-              id: _id,
-              index: this.index,
-              chunkSize: this.chunkSize,
-            },
+
+        const perfArgs: PerformanceMetricEvent = {
+          eventName: FILE_UPLOAD_PERFORMANCE_EVENT_NAME,
+          duration: end - start,
+          key1: 'size',
+          value1: size,
+          meta: {
+            datasource: 'es',
+            id: _id,
+            index: this.index,
+            chunkSize: this.chunkSize,
           },
         };
 
-        await withReportPerformanceMetric(perfArgs, () =>
-          pipeline([src, ...(transforms ?? []), dest])
-        );
+        if (analytics) {
+          reportPerformanceMetricEvent(analytics, perfArgs);
+        }
 
         return { id: _id, size };
       } catch (e) {
