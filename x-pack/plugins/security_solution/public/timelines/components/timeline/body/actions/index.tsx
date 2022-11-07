@@ -218,9 +218,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   const onExpandEvent = useCallback(() => {
-    const isStep2Active =
-      activeStep === AlertsCasesTourSteps.expandEvent && isTourShown(SecurityStepId.alertsCases);
-    if (isTourAnchor && isStep2Active) {
+    if (
+      isTourAnchor &&
+      activeStep === AlertsCasesTourSteps.expandEvent &&
+      isTourShown(SecurityStepId.alertsCases)
+    ) {
       incrementStep(SecurityStepId.alertsCases);
     }
     onEventDetailsPanelOpened();

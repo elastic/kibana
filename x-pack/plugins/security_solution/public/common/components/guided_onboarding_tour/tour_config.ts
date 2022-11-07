@@ -21,6 +21,7 @@ export const enum AlertsCasesTourSteps {
   reviewAlertDetailsFlyout = 3,
   addAlertToCase = 4,
   createCase = 5,
+  viewCase = 6,
 }
 
 export type StepConfig = Pick<
@@ -139,10 +140,22 @@ const alertsCasesConfig: StepConfig[] = [
       }
     ),
     anchor: `[data-test-subj="create-case-flyout"] [data-test-subj="caseTitle"] label`,
-    anchorPosition: 'leftUp',
+    anchorPosition: 'leftDown',
     dataTestSubj: getTourAnchor(AlertsCasesTourSteps.createCase, SecurityStepId.alertsCases),
     offset: 20,
     repositionOnScroll: false,
+  },
+  {
+    ...defaultConfig,
+    step: AlertsCasesTourSteps.viewCase,
+    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.viewCase.tourTitle', {
+      defaultMessage: 'View the case',
+    }),
+    content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.viewCase.tourContent', {
+      defaultMessage: 'From the Insights, click through to view the new case',
+    }),
+    anchorPosition: 'leftUp',
+    dataTestSubj: getTourAnchor(AlertsCasesTourSteps.viewCase, SecurityStepId.alertsCases),
   },
 ];
 

@@ -12,7 +12,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
 import { useLocation } from 'react-router-dom';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { isDetectionsPath } from '../../../helpers';
+import { isTourPath } from '../../../helpers';
 import { useKibana } from '../../lib/kibana';
 import { securityTourConfig, SecurityStepId } from './tour_config';
 
@@ -115,8 +115,7 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   const isTourEnabled = useIsExperimentalFeatureEnabled('guidedOnboarding');
 
   const ContextProvider = useMemo(
-    () =>
-      isDetectionsPath(pathname) && isTourEnabled ? RealTourContextProvider : TourContext.Provider,
+    () => (isTourPath(pathname) && isTourEnabled ? RealTourContextProvider : TourContext.Provider),
     [isTourEnabled, pathname]
   );
 

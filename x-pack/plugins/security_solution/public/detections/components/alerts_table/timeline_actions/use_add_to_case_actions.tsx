@@ -60,13 +60,13 @@ export const useAddToCaseActions = ({
       : [];
   }, [casesUi.helpers, ecsData, nonEcsData]);
 
-  const { activeStep, endTourStep, incrementStep, isTourShown } = useTourContext();
+  const { activeStep, incrementStep, isTourShown } = useTourContext();
 
   const afterCaseCreated = useCallback(async () => {
     if (isTourShown(SecurityStepId.alertsCases)) {
-      endTourStep(SecurityStepId.alertsCases);
+      incrementStep(SecurityStepId.alertsCases);
     }
-  }, [endTourStep, isTourShown]);
+  }, [incrementStep, isTourShown]);
 
   const prefillCasesValue = useMemo(
     () =>

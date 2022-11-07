@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
+import { useTourContext } from '../../guided_onboarding_tour';
 import { useKibana, useToasts } from '../../../lib/kibana';
 import { CaseDetailsLink } from '../../links';
 import { APP_ID } from '../../../../../common/constants';
@@ -33,6 +35,11 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
   const [relatedCases, setRelatedCases] = useState<RelatedCaseList | undefined>(undefined);
   const [hasError, setHasError] = useState<boolean>(false);
 
+  const { activeStep, isTourShown } = useTourContext();
+  const isTourActive = useMemo(
+    () => activeStep === AlertsCasesTourSteps.viewCase && isTourShown(SecurityStepId.alertsCases),
+    [activeStep, isTourShown]
+  );
   const renderContent = useCallback(() => renderCaseContent(relatedCases), [relatedCases]);
 
   const getRelatedCases = useCallback(async () => {
@@ -68,6 +75,7 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
       state={state}
       text={getTextFromState(state, relatedCases?.length)}
       renderContent={renderContent}
+      forceState={isTourActive ? 'open' : undefined}
     />
   );
 });
