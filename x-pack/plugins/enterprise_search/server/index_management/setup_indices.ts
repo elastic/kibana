@@ -32,6 +32,7 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   configuration: { type: 'object' },
   description: { type: 'text' },
   error: { type: 'keyword' },
+  features: { type: 'keyword' },
   filtering: {
     properties: {
       active: {
