@@ -204,9 +204,7 @@
               "Observable",
               "<Readonly<{} & { indices: Readonly<{} & { metric: string; error: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
-              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; }>>; getApmIndices: () => Promise<",
-              "ApmIndicesConfig",
-              ">; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
+              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; }>>; getApmIndices: () => Promise<Readonly<{ sourcemap: string; error: string; onboarding: string; span: string; transaction: string; metric: string; apmAgentConfigurationIndex: string; apmCustomLinkIndex: string; }>>; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -7216,9 +7214,7 @@
           "label": "getApmIndices",
           "description": [],
           "signature": [
-            "() => Promise<",
-            "ApmIndicesConfig",
-            ">"
+            "() => Promise<Readonly<{ sourcemap: string; error: string; onboarding: string; span: string; transaction: string; metric: string; apmAgentConfigurationIndex: string; apmCustomLinkIndex: string; }>>"
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,
