@@ -85,7 +85,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "event_loop_delays_daily": "d2ed39cf669577d90921c176499908b4943fb7bd",
         "exception-list": "fe8cc004fd2742177cdb9300f4a67689463faf9c",
         "exception-list-agnostic": "49fae8fcd1967cc4be45ba2a2c66c4afbc1e341b",
-        "file": "70c2a768473057157f6ee5d29a436e5288d22ff4",
+        "file": "05c14a75e5e20b12ca514a1d7de231f420facf2c",
         "file-upload-usage-collection-telemetry": "8478924cf0057bd90df737155b364f98d05420a5",
         "fileShare": "3f88784b041bb8728a7f40763a08981828799a75",
         "fleet-fleet-server-host": "f00ca963f1bee868806319789cdc33f1f53a97e2",

@@ -8,47 +8,33 @@ import { parseDefaultIngestPipeline, parseDataStreamElasticsearchEntry } from '.
 describe('parseDefaultIngestPipeline', () => {
   it('Should return undefined for stream without any elasticsearch dir', () => {
     expect(
-      parseDefaultIngestPipeline({
-        pkgKey: 'pkg-1.0.0',
-        paths: ['pkg-1.0.0/data_stream/stream1/manifest.yml'],
-        dataStreamPath: 'stream1',
-      })
+      parseDefaultIngestPipeline('pkg-1.0.0/data_stream/stream1/', [
+        'pkg-1.0.0/data_stream/stream1/manifest.yml',
+      ])
     ).toEqual(undefined);
   });
   it('Should return undefined for stream with non default ingest pipeline', () => {
     expect(
-      parseDefaultIngestPipeline({
-        pkgKey: 'pkg-1.0.0',
-        paths: [
-          'pkg-1.0.0/data_stream/stream1/manifest.yml',
-          'pkg-1.0.0/data_stream/stream1/elasticsearch/ingest_pipeline/someotherpipeline.yml',
-        ],
-        dataStreamPath: 'stream1',
-      })
+      parseDefaultIngestPipeline('pkg-1.0.0/data_stream/stream1/', [
+        'pkg-1.0.0/data_stream/stream1/manifest.yml',
+        'pkg-1.0.0/data_stream/stream1/elasticsearch/ingest_pipeline/someotherpipeline.yml',
+      ])
     ).toEqual(undefined);
   });
   it('Should return default for yml ingest pipeline', () => {
     expect(
-      parseDefaultIngestPipeline({
-        pkgKey: 'pkg-1.0.0',
-        paths: [
-          'pkg-1.0.0/data_stream/stream1/manifest.yml',
-          'pkg-1.0.0/data_stream/stream1/elasticsearch/ingest_pipeline/default.yml',
-        ],
-        dataStreamPath: 'stream1',
-      })
+      parseDefaultIngestPipeline('pkg-1.0.0/data_stream/stream1/', [
+        'pkg-1.0.0/data_stream/stream1/manifest.yml',
+        'pkg-1.0.0/data_stream/stream1/elasticsearch/ingest_pipeline/default.yml',
+      ])
     ).toEqual('default');
   });
   it('Should return default for json ingest pipeline', () => {
     expect(
-      parseDefaultIngestPipeline({
-        pkgKey: 'pkg-1.0.0',
-        paths: [
-          'pkg-1.0.0/data_stream/stream1/manifest.yml',
-          'pkg-1.0.0/data_stream/stream1/elasticsearch/ingest_pipeline/default.json',
-        ],
-        dataStreamPath: 'stream1',
-      })
+      parseDefaultIngestPipeline('pkg-1.0.0/data_stream/stream1/', [
+        'pkg-1.0.0/data_stream/stream1/manifest.yml',
+        'pkg-1.0.0/data_stream/stream1/elasticsearch/ingest_pipeline/default.json',
+      ])
     ).toEqual('default');
   });
 });
@@ -120,6 +106,34 @@ describe('parseDataStreamElasticsearchEntry', () => {
     ).toEqual({
       'index_template.mappings': { dynamic: false },
       'index_template.settings': { 'index.lifecycle.name': 'reference' },
+    });
+  });
+  it('Should handle non-dotted values for privileges', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        privileges: {
+          indices: ['read'],
+          cluster: ['test'],
+        },
+      })
+    ).toEqual({
+      privileges: {
+        indices: ['read'],
+        cluster: ['test'],
+      },
+    });
+  });
+  it('Should handle dotted values for privileges', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        'privileges.indices': ['read'],
+        'privileges.cluster': ['test'],
+      })
+    ).toEqual({
+      privileges: {
+        indices: ['read'],
+        cluster: ['test'],
+      },
     });
   });
 });

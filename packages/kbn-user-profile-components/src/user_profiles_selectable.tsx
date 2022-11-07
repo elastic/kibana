@@ -16,6 +16,7 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiText,
+  EuiCallOut,
   EuiHighlight,
   EuiTextColor,
 } from '@elastic/eui';
@@ -60,6 +61,13 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
   options?: Option[];
 
   /**
+   * Maximum number of users allowed to be selected.
+   *
+   * This limit is not enforced and only used to show a warning message.
+   */
+  limit?: number;
+
+  /**
    * Passes back the current selection.
    * @param options Either the list of selected users or `null` (no users).
    */
@@ -87,10 +95,16 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
   searchInputId?: string;
 
   /**
-   * Returns text for selected status.
+   * Returns message for number of selected users.
    * @param selectedCount Number of selected users
    */
   selectedStatusMessage?(selectedCount: number): ReactNode;
+
+  /**
+   * Returns message when maximum number of selected users are reached.
+   * @param limit Maximum number of users allowed to be selected
+   */
+  limitReachedMessage?(limit: number): ReactNode;
 
   /**
    * Label for clear button.
@@ -119,6 +133,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   onSearchChange,
   isLoading = false,
   singleSelection = false,
+  limit,
   height,
   loadingMessage,
   noMatchesMessage,
@@ -127,12 +142,16 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   searchPlaceholder,
   searchInputId,
   selectedStatusMessage,
+  limitReachedMessage,
   nullOptionLabel,
   defaultOptionsLabel,
   clearButtonLabel,
 }: UserProfilesSelectableProps<Option>) => {
   const [displayedOptions, setDisplayedOptions] = useState<SelectableOption[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const selectedCount = selectedOptions ? selectedOptions.length : 0;
+  const limitReached = limit ? selectedCount >= limit : false;
 
   // Resets all displayed options
   const resetDisplayedOptions = () => {
@@ -208,18 +227,30 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
       values.map((option) => {
         if (selectedOptions) {
           const match = selectedOptions.find((profile) => isMatchingOption(option, profile));
-          return { ...option, checked: match === undefined ? undefined : 'on' };
+          const checked = match === undefined ? undefined : 'on';
+          const disabled = checked ? false : limitReached;
+          return {
+            ...option,
+            checked,
+            disabled,
+            prepend: option.data ? (
+              <UserAvatar
+                user={option.data.user}
+                avatar={option.data.data?.avatar}
+                size="s"
+                isDisabled={disabled}
+              />
+            ) : undefined,
+          };
         }
-        return { ...option, checked: undefined };
+        return { ...option, checked: undefined, disabled: undefined };
       })
     );
   };
 
   useEffect(resetDisplayedOptions, [options]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(updateDisplayedOptions, [defaultOptions, selectedOptions]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(updateCheckedStatus, [options, defaultOptions, selectedOptions]);
-
-  const selectedCount = selectedOptions ? selectedOptions.length : 0;
+  useEffect(updateCheckedStatus, [options, defaultOptions, selectedOptions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <EuiSelectable
@@ -298,12 +329,12 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
               gutterSize="s"
               responsive={false}
             >
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
               </EuiFlexItem>
               {option.user.email && option.user.email !== option.label ? (
                 <EuiFlexItem grow={false}>
-                  <EuiTextColor color="subdued">
+                  <EuiTextColor color={option.disabled ? 'disabled' : 'subdued'}>
                     {searchValue ? (
                       <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
                     ) : (
@@ -365,6 +396,26 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
               </>
             ) : undefined}
           </EuiPanel>
+          {limit && selectedCount >= limit ? (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EuiCallOut
+                title={
+                  limitReachedMessage ? (
+                    limitReachedMessage(limit)
+                  ) : (
+                    <FormattedMessage
+                      id="userProfileComponents.userProfilesSelectable.limitReachedMessage"
+                      defaultMessage="You've selected the maximum of {count, plural, one {# user} other {# users}}"
+                      values={{ count: limit }}
+                    />
+                  )
+                }
+                color="warning"
+                size="s"
+              />
+            </>
+          ) : undefined}
           <EuiHorizontalRule margin="none" />
           {list}
         </>
@@ -382,7 +433,6 @@ function toSelectableOption(
   if (userProfile) {
     return {
       key: userProfile.uid,
-      prepend: <UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} size="s" />,
       label: getUserDisplayName(userProfile.user),
       data: userProfile,
     };
