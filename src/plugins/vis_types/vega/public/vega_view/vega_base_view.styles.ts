@@ -32,10 +32,6 @@ export const vegaBaseViewStyles = (euiThemeContext: UseEuiTheme) => {
       ${logicalCSS('max-width', '100%')}
       ${logicalCSS('max-height', '100%')}
       overflow: auto;
-
-      .vgaVis__view {
-        overflow: hidden;
-      }
     }
 
     .vgaVis__view {
