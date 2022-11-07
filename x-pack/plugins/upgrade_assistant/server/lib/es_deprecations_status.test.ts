@@ -16,7 +16,7 @@ const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
 
 describe('getESUpgradeStatus', () => {
   const featureSet: FeatureSet = {
-    migrateIndices: true,
+    migrateSystemIndices: true,
     mlSnapshots: true,
   };
 

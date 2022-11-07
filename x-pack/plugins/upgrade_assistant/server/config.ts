@@ -25,7 +25,7 @@ const configSchema = schema.object({
      * to something higher than 7.0.0 in the Elasticsearch code.
      */
     mlSnapshots: schema.boolean({ defaultValue: false }),
-    migrateIndices: schema.boolean({ defaultValue: false }),
+    migrateSystemIndices: schema.boolean({ defaultValue: false }),
   }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

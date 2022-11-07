@@ -36,7 +36,7 @@ type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 
 export const Overview = withRouter(({ history }: RouteComponentProps) => {
   const {
-    featureSet: { migrateIndices },
+    featureSet: { migrateSystemIndices },
     services: {
       breadcrumbs,
       core: { docLinks },
@@ -116,7 +116,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
                 isComplete: isStepComplete('backup'),
                 setIsComplete: setCompletedStep.bind(null, 'backup'),
               }),
-              migrateIndices &&
+              migrateSystemIndices &&
                 getMigrateSystemIndicesStep({
                   docLinks,
                   isComplete: isStepComplete('migrate_system_indices'),

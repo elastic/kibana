@@ -37,7 +37,7 @@ describe('ES deprecations API', () => {
       config: {
         featureSet: {
           mlSnapshots: true,
-          migrateIndices: true,
+          migrateSystemIndices: true,
         },
       },
       router: mockRouter,
