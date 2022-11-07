@@ -7,6 +7,9 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { Rule, RuleSummary, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
+import { ALERTS_TAB, EXECUTION_TAB } from './constants';
+
+export type TabId = typeof ALERTS_TAB | typeof EXECUTION_TAB;
 
 export interface RuleDetailsPathParams {
   ruleId: string;
@@ -51,8 +54,3 @@ export interface AlertListItem {
   isMuted: boolean;
   sortPriority: number;
 }
-
-export const EXECUTION_TAB = 'execution';
-export const ALERTS_TAB = 'alerts';
-export const EVENT_ERROR_LOG_TAB = 'rule_error_log_list';
-export const RULE_DETAILS_PAGE_ID = 'rule-details-alerts-o11y';

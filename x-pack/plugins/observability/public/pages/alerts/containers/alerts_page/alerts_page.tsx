@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { ObservabilityAlertSearchBar } from '../../../../components/shared/alert_search_bar/alert_search_bar';
+import { ObservabilityAlertSearchbarWithUrlSync } from '../../../../components/shared/alert_search_bar';
 import { observabilityAlertFeatureIds } from '../../../../config';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
@@ -22,14 +22,13 @@ import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
 import { LoadingObservability } from '../../../overview';
-import { Provider, alertsPageStateContainer } from '../state_container';
 import './styles.scss';
 import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
-import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
+import { ALERTS_PER_PAGE, ALERTS_SEARCH_BAR_ID, ALERTS_TABLE_ID } from './constants';
 import { RuleStatsState } from './types';
 
-function AlertsPage() {
+export function AlertsPage() {
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const {
     cases,
@@ -130,7 +129,10 @@ function AlertsPage() {
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <ObservabilityAlertSearchBar appName={'observability-alerts'} setEsQuery={setEsQuery} />
+          <ObservabilityAlertSearchbarWithUrlSync
+            appName={ALERTS_SEARCH_BAR_ID}
+            setEsQuery={setEsQuery}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -155,13 +157,5 @@ function AlertsPage() {
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
-  );
-}
-
-export function WrappedAlertsPage() {
-  return (
-    <Provider value={alertsPageStateContainer}>
-      <AlertsPage />
-    </Provider>
   );
 }

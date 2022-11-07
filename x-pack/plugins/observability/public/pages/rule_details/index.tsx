@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -38,17 +37,17 @@ import { Query, BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  RulesDetailsPageProvider,
-  ruleDetailsPageStateContainer,
-  useRuleDetailsPageStateContainer,
-} from './containers/state_container';
-import { TabId } from './containers/state_container/state_container';
-import { alertsPageStateContainer, Provider } from '../alerts';
-import { ObservabilityAlertSearchBar } from '../../components/shared/alert_search_bar/alert_search_bar';
+import { fromQuery, toQuery } from '../../utils/url';
+import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { RuleDetailsPathParams, EXECUTION_TAB, ALERTS_TAB, RULE_DETAILS_PAGE_ID } from './types';
+import {
+  EXECUTION_TAB,
+  ALERTS_TAB,
+  RULE_DETAILS_PAGE_ID,
+  RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
+} from './constants';
+import { RuleDetailsPathParams, TabId } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -61,9 +60,7 @@ import { observabilityFeatureId } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 import { ObservabilityAppServices } from '../../application/types';
 
-let kbnUrlStateStorage;
-
-function InternalRuleDetailsPage() {
+export function RuleDetailsPage() {
   const {
     http,
     triggersActionsUi: {
@@ -83,16 +80,7 @@ function InternalRuleDetailsPage() {
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const history = useHistory();
-  kbnUrlStateStorage = useMemo(
-    () =>
-      createKbnUrlStateStorage({
-        history,
-        useHash: false,
-        useHashQuery: false,
-      }),
-    [history]
-  );
-  const { setTab, tabId } = useRuleDetailsPageStateContainer(kbnUrlStateStorage);
+  const location = useLocation();
 
   const filteredRuleTypes = useMemo(
     () => observabilityRuleTypeRegistry.list(),
@@ -103,6 +91,9 @@ function InternalRuleDetailsPage() {
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
   });
+  const [tabId, setTabId] = useState<TabId>(
+    (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB
+  );
   const [features, setFeatures] = useState<string>('');
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
@@ -113,6 +104,21 @@ function InternalRuleDetailsPage() {
   const ruleQuery = useRef([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
   ] as Query[]);
+
+  function updateUrl(nextQuery: { tabId: TabId }) {
+    history.push({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        ...nextQuery,
+      }),
+    });
+  }
+
+  function onTabIdChange(newTabId: TabId) {
+    setTabId(newTabId);
+    updateUrl({ tabId: newTabId });
+  }
 
   const NOTIFY_WHEN_OPTIONS = useRef<Array<EuiSuperSelectOption<unknown>>>([]);
   useEffect(() => {
@@ -207,11 +213,10 @@ function InternalRuleDetailsPage() {
       content: (
         <>
           <EuiSpacer size="m" />
-          <ObservabilityAlertSearchBar
-            appName={'observability-rule-details'}
+          <ObservabilityAlertSearchbarWithUrlSync
+            appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
             setEsQuery={setEsQuery}
             queries={ruleQuery.current}
-            urlStateStorage={kbnUrlStateStorage}
           />
           <EuiSpacer size="s" />
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
@@ -361,7 +366,7 @@ function InternalRuleDetailsPage() {
         tabs={tabs}
         selectedTab={selectedTab}
         onTabClick={(tab) => {
-          setTab(tab.id as TabId);
+          onTabIdChange(tab.id as TabId);
         }}
       />
       {editFlyoutVisible &&
@@ -393,12 +398,10 @@ function InternalRuleDetailsPage() {
   );
 }
 
-export function RuleDetailsPage() {
-  return (
-    <Provider value={alertsPageStateContainer}>
-      <RulesDetailsPageProvider value={ruleDetailsPageStateContainer}>
-        <InternalRuleDetailsPage />
-      </RulesDetailsPageProvider>
-    </Provider>
-  );
-}
+// export function RuleDetailsPage() {
+//   return (
+//     <Provider value={alertsPageStateContainer}>
+//       <InternalRuleDetailsPage />
+//     </Provider>
+//   );
+// }

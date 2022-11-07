@@ -10,7 +10,7 @@ import {
   createStateContainerReactHelpers,
 } from '@kbn/kibana-utils-plugin/public';
 import { AlertStatus } from '../../../../../common/typings';
-import { ALL_ALERTS } from '../..';
+import { ALL_ALERTS } from '../constants';
 
 interface AlertsPageContainerState {
   rangeFrom: string;

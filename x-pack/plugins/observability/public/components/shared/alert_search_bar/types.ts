@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export {
-  Provider as RulesDetailsPageProvider,
-  ruleDetailsPageStateContainer,
-} from './state_container';
-export { useRuleDetailsPageStateContainer } from './use_rule_details_page_state_container';
+import { AlertStatus } from '../../../../common/typings';
+
+export interface AlertStatusFilterProps {
+  status: AlertStatus;
+  onChange: (id: string, value: string) => void;
+}

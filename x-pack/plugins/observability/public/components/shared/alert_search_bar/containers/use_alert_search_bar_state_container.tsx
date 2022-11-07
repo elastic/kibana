@@ -24,10 +24,10 @@ import {
   AlertsPageContainerState,
 } from './state_container';
 
-export function useAlertsPageStateContainer(urlStateStorage?: IKbnUrlStateStorage) {
+export function useAlertSearchBarStateContainer() {
   const stateContainer = useContainer();
 
-  useUrlStateSyncEffect(stateContainer, urlStateStorage);
+  useUrlStateSyncEffect(stateContainer);
 
   const { setRangeFrom, setRangeTo, setKuery, setStatus } = stateContainer.transitions;
   const { rangeFrom, rangeTo, kuery, status } = useContainerSelector(
@@ -47,21 +47,16 @@ export function useAlertsPageStateContainer(urlStateStorage?: IKbnUrlStateStorag
   };
 }
 
-function useUrlStateSyncEffect(
-  stateContainer: AlertsPageStateContainer,
-  kbnUrlStateStorage?: IKbnUrlStateStorage
-) {
+function useUrlStateSyncEffect(stateContainer: AlertsPageStateContainer) {
   const history = useHistory();
   const timefilterService = useTimefilterService();
 
   useEffect(() => {
-    const urlStateStorage = kbnUrlStateStorage
-      ? kbnUrlStateStorage
-      : createKbnUrlStateStorage({
-          history,
-          useHash: false,
-          useHashQuery: false,
-        });
+    const urlStateStorage = createKbnUrlStateStorage({
+      history,
+      useHash: false,
+      useHashQuery: false,
+    });
     const { start, stop } = setupUrlStateSync(stateContainer, urlStateStorage);
 
     start();

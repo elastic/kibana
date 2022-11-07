@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { Provider, alertsPageStateContainer } from './state_container';
-export { useAlertsPageStateContainer } from './use_alerts_page_state_container';
+export { AlertsStatusFilter } from './alerts_status_filter';
