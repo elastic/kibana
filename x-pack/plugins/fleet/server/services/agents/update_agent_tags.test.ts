@@ -113,6 +113,9 @@ describe('update_agent_tags', () => {
   it('should write error action results for hosted agent when agentIds are passed', async () => {
     const { esClient: esClientMock, agentInHostedDoc } = createClientMock();
 
+    esClientMock.updateByQuery.mockReset();
+    esClientMock.updateByQuery.mockResolvedValue({ failures: [], updated: 0, total: '0' } as any);
+
     await updateAgentTags(
       soClient,
       esClientMock,
@@ -132,11 +135,7 @@ describe('update_agent_tags', () => {
     );
 
     const errorResults = esClientMock.bulk.mock.calls[0][0] as any;
-    const errorIds = errorResults?.body?.filter((i: any) => i.agent_id).map((i: any) => i.agent_id);
-    expect(errorIds).toEqual([agentInHostedDoc._id]);
-    expect(errorResults.body[1].error).toEqual(
-      'Cannot modify tags on a hosted agent in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.'
-    );
+    expect(errorResults.body[1].error).toEqual('Cannot modify tags on a hosted agent');
   });
 
   it('should write error action results when failures are returned', async () => {
