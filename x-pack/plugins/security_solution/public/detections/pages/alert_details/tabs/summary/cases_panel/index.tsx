@@ -45,6 +45,10 @@ const StyledCasesFlexGroup = styled(EuiFlexGroup)`
   overflow-y: scroll;
 `;
 
+/**
+ * There is currently no api limit for the number of cases that can be returned
+ * To prevent the UI from growing too large, we limit to 25 most recent cases
+ */
 export const CASES_PANEL_CASES_COUNT_MAX = 25;
 
 const CasesPanelLoading = () => (
