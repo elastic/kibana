@@ -35,11 +35,13 @@ import type { TelemetryEventsSender } from '../../telemetry/sender';
 import type { UptimeRouter } from '../../../../types';
 import { UptimeConfig } from '../../../../../common/config';
 
+export type UMElasticsearchQueryFnParams<P> = {
+  uptimeEsClient: UptimeEsClient;
+  esClient?: IScopedClusterClient;
+} & P;
+
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: {
-    uptimeEsClient: UptimeEsClient;
-    esClient?: IScopedClusterClient;
-  } & P
+  params: UMElasticsearchQueryFnParams<P>
 ) => Promise<R>;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
