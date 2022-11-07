@@ -289,4 +289,5 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   // TODO: add a test for popular fields
+  // TODO: add a test for unmapped fields
 });

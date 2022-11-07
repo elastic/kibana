@@ -6,149 +6,39 @@
  * Side Public License, v 1.
  */
 
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { getSelectedFields } from './group_fields';
-import { DataViewField } from '@kbn/data-views-plugin/public';
-
-const fields = [
-  {
-    name: 'category',
-    type: 'string',
-    esTypes: ['text'],
-    count: 1,
-    scripted: false,
-    searchable: true,
-    aggregatable: true,
-    readFromDocValues: true,
-  },
-  {
-    name: 'currency',
-    type: 'string',
-    esTypes: ['keyword'],
-    count: 0,
-    scripted: false,
-    searchable: true,
-    aggregatable: true,
-    readFromDocValues: true,
-  },
-  {
-    name: 'customer_birth_date',
-    type: 'date',
-    esTypes: ['date'],
-    count: 0,
-    scripted: false,
-    searchable: true,
-    aggregatable: true,
-    readFromDocValues: true,
-  },
-];
 
 describe('group_fields', function () {
-  it('should pick fields into selected group', function () {
-    const actual = getSelectedFields(fields as DataViewField[], ['currency']);
+  it('should pick fields as unknown_selected if they are unknown', function () {
+    const actual = getSelectedFields(dataView, ['currency']);
     expect(actual).toMatchInlineSnapshot(`
       Array [
         Object {
-          "aggregatable": true,
-          "count": 0,
-          "esTypes": Array [
-            "keyword",
-          ],
+          "displayName": "currency",
           "name": "currency",
-          "readFromDocValues": true,
-          "scripted": false,
-          "searchable": true,
-          "type": "string",
+          "type": "unknown_selected",
         },
       ]
     `);
   });
-  it('should pick fields into selected group if they contain multifields', function () {
-    const category = {
-      name: 'category',
-      type: 'string',
-      esTypes: ['text'],
-      count: 1,
-      scripted: false,
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: true,
-    };
-    const currency = {
-      name: 'currency',
-      displayName: 'currency',
-      kbnFieldType: {
-        esTypes: ['string', 'text', 'keyword', '_type', '_id'],
-        filterable: true,
-        name: 'string',
-        sortable: true,
-      },
-      spec: {
-        esTypes: ['text'],
-        name: 'category',
-      },
-      scripted: false,
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: true,
-    };
-    const currencyKeyword = {
-      name: 'currency.keyword',
-      displayName: 'currency.keyword',
-      type: 'string',
-      esTypes: ['keyword'],
-      kbnFieldType: {
-        esTypes: ['string', 'text', 'keyword', '_type', '_id'],
-        filterable: true,
-        name: 'string',
-        sortable: true,
-      },
-      spec: {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'category.keyword',
-        readFromDocValues: true,
-        searchable: true,
-        shortDotsEnable: false,
-        subType: {
-          multi: {
-            parent: 'currency',
-          },
-        },
-      },
-      scripted: false,
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: false,
-    };
-    const fieldsToGroup = [category, currency, currencyKeyword] as DataViewField[];
 
-    const actual = getSelectedFields(fieldsToGroup, ['currency', 'currency.keyword']);
-
-    expect(actual).toEqual([currency, currencyKeyword]);
+  it('should pick fields into selected group', function () {
+    const actual = getSelectedFields(dataView, ['bytes', '@timestamp']);
+    expect(actual.map((field) => field.name)).toEqual(['bytes', '@timestamp']);
   });
 
-  it('should sort selected fields by columns order ', function () {
-    const actual1 = getSelectedFields(fields as DataViewField[], [
-      'customer_birth_date',
-      'currency',
-      'unknown',
-    ]);
-    expect(actual1.map((field) => field.name)).toEqual([
-      'customer_birth_date',
-      'currency',
-      'unknown',
-    ]);
+  it('should pick fields into selected group if they contain multifields', function () {
+    const actual = getSelectedFields(dataView, ['machine.os', 'machine.os.raw']);
+    expect(actual.map((field) => field.name)).toEqual(['machine.os', 'machine.os.raw']);
+  });
 
-    const actual2 = getSelectedFields(fields as DataViewField[], [
-      'currency',
-      'customer_birth_date',
-      'unknown',
-    ]);
-    expect(actual2.map((field) => field.name)).toEqual([
-      'currency',
-      'customer_birth_date',
-      'unknown',
-    ]);
+  it('should sort selected fields by columns order', function () {
+    const actual1 = getSelectedFields(dataView, ['bytes', 'extension.keyword', 'unknown']);
+    expect(actual1.map((field) => field.name)).toEqual(['bytes', 'extension.keyword', 'unknown']);
+
+    const actual2 = getSelectedFields(dataView, ['extension', 'bytes', 'unknown']);
+    expect(actual2.map((field) => field.name)).toEqual(['extension', 'bytes', 'unknown']);
   });
 
   // it('excludes unmapped fields if useNewFieldsApi set to true', function () {

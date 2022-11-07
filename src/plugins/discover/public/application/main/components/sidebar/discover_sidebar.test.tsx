@@ -57,7 +57,7 @@ function getCompProps(): DiscoverSidebarProps {
     }
   }
 
-  const allFields = getDataViewFieldList(dataView, fieldCounts);
+  const allFields = getDataViewFieldList(dataView, fieldCounts, false); // TODO: add tests for text-based queries too
 
   (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockClear();
   (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockImplementation(() => ({

@@ -151,6 +151,19 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                           },
                         }
                       ),
+                    fieldGroups.UnmappedFields &&
+                      (!fieldGroups.UnmappedFields?.hideIfEmpty ||
+                        fieldGroups.UnmappedFields?.fields?.length > 0) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForUnmappedFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{unmappedFields} unmapped {unmappedFields, plural, one {field} other {fields}}.',
+                          values: {
+                            unmappedFields: fieldGroups.UnmappedFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
                     fieldGroups.EmptyFields &&
                       (!fieldGroups.EmptyFields?.hideIfEmpty ||
                         fieldGroups.EmptyFields?.fields?.length > 0) &&
