@@ -272,7 +272,6 @@ const CaseDetailsLinkComponent: React.FC<{
     [activeStep, isTourShown]
   );
   const endTour = useCallback(() => {
-    console.log('endTour', isTourActive);
     if (isTourActive) endTourStep(SecurityStepId.alertsCases);
   }, [endTourStep, isTourActive]);
 
