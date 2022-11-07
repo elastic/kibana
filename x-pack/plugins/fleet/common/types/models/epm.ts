@@ -419,9 +419,11 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
 };
 
+export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
+
 export interface IntegrationCardItem {
   url: string;
-  release?: 'beta' | 'experimental' | 'ga';
+  release?: IntegrationCardReleaseLabel;
   description: string;
   name: string;
   title: string;
