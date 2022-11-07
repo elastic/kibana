@@ -3822,6 +3822,20 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.existsSelected",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "existsSelected",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.OptionsListEmbeddableInput.runPastTimeout",
             "type": "CompoundType",
             "tags": [],
@@ -3854,6 +3868,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hideExclude",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.hideExists",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideExists",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -4985,6 +5013,20 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.existsSelected",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "existsSelected",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-common.OptionsListEmbeddableInput.runPastTimeout",
             "type": "CompoundType",
             "tags": [],
@@ -5017,6 +5059,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hideExclude",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.hideExists",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideExists",
             "description": [],
             "signature": [
               "boolean | undefined"

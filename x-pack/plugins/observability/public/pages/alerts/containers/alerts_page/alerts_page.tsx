@@ -29,7 +29,7 @@ import {
   useAlertsPageStateContainer,
 } from '../state_container';
 import './styles.scss';
-import { AlertsStatusFilter, AlertsSearchBar, ALERT_STATUS_QUERY } from '../../components';
+import { AlertsStatusFilter, ALERT_STATUS_QUERY } from '../../components';
 import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
@@ -46,7 +46,11 @@ function AlertsPage() {
     docLinks,
     http,
     notifications: { toasts },
-    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
+    triggersActionsUi: {
+      alertsTableConfigurationRegistry,
+      getAlertsStateTable: AlertsStateTable,
+      getAlertsSearchBar: AlertsSearchBar,
+    },
     data: {
       query: {
         timefilter: { timefilter: timeFilterService },
