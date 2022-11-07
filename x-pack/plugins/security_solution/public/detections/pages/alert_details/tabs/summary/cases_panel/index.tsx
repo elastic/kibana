@@ -45,7 +45,7 @@ const StyledCasesFlexGroup = styled(EuiFlexGroup)`
   overflow-y: scroll;
 `;
 
-const CASES_PANEL_CASES_COUNT_MAX = 25;
+export const CASES_PANEL_CASES_COUNT_MAX = 25;
 
 const CasesPanelLoading = () => (
   <EuiEmptyPrompt

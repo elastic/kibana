@@ -7,10 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiIcon, EuiText } from '@elastic/eui';
 import { Status } from '@kbn/cases-components';
+import type { RelatedCaseInfo } from '@kbn/cases-plugin/common/api';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { CaseDetailsLink } from '../../../../../../common/components/links';
-import type { RelatedCases } from '../../../../../../common/containers/cases/use_get_related_cases_by_event';
 import { CASES_PANEL_CASE_STATUS } from '../translation';
 
 const DescriptionText = styled(EuiText)`
@@ -38,7 +38,7 @@ export const RelatedCasesList = ({
   relatedCases,
   maximumVisible,
 }: {
-  relatedCases: RelatedCases;
+  relatedCases: RelatedCaseInfo[];
   maximumVisible?: number;
 }) => {
   // Sort related cases, showing the most recently created first.
