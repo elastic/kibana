@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPackagePrerelease } from './package_prerelease';
+import { getPackageReleaseLabel, isPackagePrerelease } from './package_prerelease';
 
 describe('isPackagePrerelease', () => {
   it('should return prerelease true for 0.1.0', () => {
@@ -30,5 +30,31 @@ describe('isPackagePrerelease', () => {
 
   it('should return prerelease true for 1.0.0-dev.0', () => {
     expect(isPackagePrerelease('1.0.0-dev.0')).toBe(true);
+  });
+});
+
+describe('getPackageReleaseLabel', () => {
+  it('should return preview for 0.1.0', () => {
+    expect(getPackageReleaseLabel('0.1.0')).toEqual('preview');
+  });
+
+  it('should return ga for 1.1.0', () => {
+    expect(getPackageReleaseLabel('1.1.0')).toEqual('ga');
+  });
+
+  it('should return preview for 1.0.0-preview1', () => {
+    expect(getPackageReleaseLabel('1.0.0-preview1')).toEqual('preview');
+  });
+
+  it('should return beta for 1.0.0-beta', () => {
+    expect(getPackageReleaseLabel('1.0.0-beta')).toEqual('beta');
+  });
+
+  it('should return rc for 1.0.0-rc', () => {
+    expect(getPackageReleaseLabel('1.0.0-rc')).toEqual('rc');
+  });
+
+  it('should return beta for 1.0.0-dev.0', () => {
+    expect(getPackageReleaseLabel('1.0.0-dev.0')).toBe('beta');
   });
 });
