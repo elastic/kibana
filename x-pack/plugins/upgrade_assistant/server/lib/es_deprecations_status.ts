@@ -21,7 +21,6 @@ export async function getESUpgradeStatus(
   const deprecations = await dataClient.asCurrentUser.migration.deprecations();
 
   const getCombinedDeprecations = async () => {
-
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
     const systemIndices = await getESSystemIndicesMigrationStatus(dataClient.asCurrentUser);
     const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
