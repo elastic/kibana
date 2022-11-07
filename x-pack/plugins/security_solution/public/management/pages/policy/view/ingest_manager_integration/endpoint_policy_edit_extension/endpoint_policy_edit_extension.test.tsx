@@ -9,20 +9,20 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 
-import { useEndpointPrivileges } from '../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
-import { composeHttpHandlerMocks } from '../../../../../common/mock/endpoint/http_handler_mock_factory';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import { composeHttpHandlerMocks } from '../../../../../../common/mock/endpoint/http_handler_mock_factory';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import {
   fleetGetAgentStatusHttpMock,
   fleetGetEndpointPackagePolicyHttpMock,
-} from '../../../../mocks';
+} from '../../../../../mocks';
 import { EndpointPolicyEditExtension } from './endpoint_policy_edit_extension';
-import { createFleetContextRendererMock } from './mocks';
+import { createFleetContextRendererMock } from '../mocks';
 
-jest.mock('../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
-jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+jest.mock('../../../../../../common/components/user_privileges');
 const useEndpointPrivilegesMock = useEndpointPrivileges as jest.Mock;
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 

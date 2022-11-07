@@ -14,34 +14,34 @@ import type {
   PackagePolicyEditExtensionComponentProps,
   NewPackagePolicy,
 } from '@kbn/fleet-plugin/public';
-import { useHttp } from '../../../../../common/lib/kibana/hooks';
+import { useHttp } from '../../../../../../common/lib/kibana/hooks';
 import {
   getPolicyDetailPath,
   getPolicyTrustedAppsPath,
   getPolicyBlocklistsPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyEventFiltersPath,
-} from '../../../../common/routing';
-import { PolicyDetailsForm } from '../policy_details_form';
-import type { AppAction } from '../../../../../common/store/actions';
-import { usePolicyDetailsSelector } from '../policy_hooks';
+} from '../../../../../common/routing';
+import { PolicyDetailsForm } from '../../policy_details_form';
+import type { AppAction } from '../../../../../../common/store/actions';
+import { usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   apiError,
   policyDetails,
   policyDetailsForUpdate,
-} from '../../store/policy_details/selectors';
+} from '../../../store/policy_details/selectors';
 
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { FleetIntegrationArtifactsCard } from './endpoint_package_custom_extension/components/fleet_integration_artifacts_card';
-import { BlocklistsApiClient } from '../../../blocklist/services';
-import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { EventFiltersApiClient } from '../../../event_filters/service/api_client';
-import { TrustedAppsApiClient } from '../../../trusted_apps/service/api_client';
-import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
-import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
-import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
-import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
-import { useEndpointPrivileges } from '../../../../../common/components/user_privileges/endpoint';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { FleetIntegrationArtifactsCard } from '../endpoint_package_custom_extension/components/fleet_integration_artifacts_card';
+import { BlocklistsApiClient } from '../../../../blocklist/services';
+import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
+import { TrustedAppsApiClient } from '../../../../trusted_apps/service/api_client';
+import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../../blocklist/constants';
+import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../host_isolation_exceptions/constants';
+import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
+import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../../trusted_apps/constants';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint';
 
 export const BLOCKLISTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
