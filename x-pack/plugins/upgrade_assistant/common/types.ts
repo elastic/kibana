@@ -281,4 +281,5 @@ export interface SystemIndicesMigrationStarted {
 export interface FeatureSet {
   migrateSystemIndices: boolean;
   mlSnapshots: boolean;
+  reindexCorrectiveActions: boolean;
 }

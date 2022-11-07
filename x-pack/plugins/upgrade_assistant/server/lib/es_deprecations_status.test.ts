@@ -16,6 +16,7 @@ const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
 
 describe('getESUpgradeStatus', () => {
   const featureSet: FeatureSet = {
+    reindexCorrectiveActions: true,
     migrateSystemIndices: true,
     mlSnapshots: true,
   };
@@ -150,6 +151,38 @@ describe('getESUpgradeStatus', () => {
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet, mlSnapshots: false });
+
+    expect(upgradeStatus.deprecations).toHaveLength(0);
+    expect(upgradeStatus.totalCriticalDeprecations).toBe(0);
+  });
+
+  it('filters out reindex corrective actions if featureSet.reindexCorrectiveActions is set to false', async () => {
+    esClient.asCurrentUser.migration.deprecations.mockResponse({
+      cluster_settings: [],
+      node_settings: [
+        {
+          "level": "critical",
+          "message": "Index created before 7.0",
+          "url": "https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html",
+          "details": "This index was created using version: 6.8.13",
+          // @ts-ignore
+          "resolve_during_rolling_upgrade": false
+        },
+        {
+          "level": "critical",
+          "message": "Index created before 7.0",
+          "url":
+            "https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html",
+          "details": "This index was created using version: 6.8.13",
+          // @ts-ignore
+          "resolve_during_rolling_upgrade": false
+        }
+      ],
+      ml_settings: [],
+      index_settings: {},
+    });
+
+    const upgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet, reindexCorrectiveActions: false });
 
     expect(upgradeStatus.deprecations).toHaveLength(0);
     expect(upgradeStatus.totalCriticalDeprecations).toBe(0);

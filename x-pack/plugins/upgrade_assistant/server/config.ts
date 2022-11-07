@@ -14,7 +14,7 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 const configSchema = schema.object({
   featureSet: schema.object({
     /**
-     * Ml Snapshot should only be enabled before major version upgrades. Currently this
+     * Ml Snapshot should only be enabled for major version upgrades. Currently this
      * is manually set to `true` on every `x.last` version.
      * ML Upgrade mode can be toggled from outside Kibana, the purpose
      * of this feature guard is to hide all ML related deprecations from the end user 
@@ -25,7 +25,19 @@ const configSchema = schema.object({
      * to something higher than 7.0.0 in the Elasticsearch code.
      */
     mlSnapshots: schema.boolean({ defaultValue: false }),
+    /**
+     * Migrating system indices should only be enabled for major version upgrades.
+     * Currently this is manually set to `true` on every `x.last` version.
+     */
     migrateSystemIndices: schema.boolean({ defaultValue: false }),
+    /**
+     * Deprecations with reindexing corrective actions are only enabled for major version upgrades.
+     * Currently this is manually set to `true` on every `x.last` version.
+     * 
+     * The reindex action includes some logic that is specific to the 8.0 upgrade
+     * End users could get into a bad situation if this is enabled before this logic is fixed.
+     */
+     reindexCorrectiveActions: schema.boolean({ defaultValue: false }),
   }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

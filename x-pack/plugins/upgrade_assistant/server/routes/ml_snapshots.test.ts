@@ -29,7 +29,7 @@ describe('ML snapshots APIs', () => {
     mockRouter = createMockRouter();
     routeDependencies = {
       config: {
-        featureSet: { mlSnapshots, migrateSystemIndices: true },
+        featureSet: { mlSnapshots, migrateSystemIndices: true, reindexCorrectiveActions: true },
       },
       router: mockRouter,
       lib: { handleEsError },

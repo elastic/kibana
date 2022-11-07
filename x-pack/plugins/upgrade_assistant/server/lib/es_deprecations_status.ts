@@ -63,7 +63,7 @@ export async function getESUpgradeStatus(
           }
         ).filter(({ correctiveAction, type }) => {
           /**
-           * This disables showing the ML deprecations in the UA if featureSet.mlSnapshots
+           * This disables showing the ML deprecations in the UA if `featureSet.mlSnapshots`
            * is set to `false`.
            * 
            * This config should be set to true only on the `x.last` versions, or when
@@ -74,6 +74,14 @@ export async function getESUpgradeStatus(
             if (type === 'ml_settings' || correctiveAction?.type === 'mlSnapshot') {
               return false;
             }
+          }
+
+          /**
+           * This disables showing the reindexing deprecations in the UA if
+           * `featureSet.reindexCorrectiveActions` is set to `false`.
+           */
+          if (!featureSet.reindexCorrectiveActions && correctiveAction?.type === 'reindex') {
+            return false;
           }
 
           return true;
