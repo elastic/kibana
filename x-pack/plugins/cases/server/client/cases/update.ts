@@ -15,6 +15,7 @@ import type {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 
 import { nodeBuilder } from '@kbn/es-query';
@@ -439,13 +440,7 @@ export const update = async (
       return [
         ...flattenCases,
         flattenCaseSavedObject({
-          savedObject: {
-            ...originalCase,
-            ...updatedCase,
-            attributes: { ...originalCase.attributes, ...updatedCase?.attributes },
-            references: originalCase.references,
-            version: updatedCase?.version ?? originalCase.version,
-          },
+          savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
         }),
       ];
     }, [] as CaseResponse[]);
@@ -547,13 +542,7 @@ const getCasesAndAssigneesToNotifyForAssignment = (
     );
 
     if (comparedAssignees && comparedAssignees.addedItems.length > 0) {
-      const theCase = {
-        ...originalCaseSO,
-        ...updatedCase,
-        attributes: { ...originalCaseSO.attributes, ...updatedCase?.attributes },
-        references: originalCaseSO.references,
-        version: updatedCase?.version ?? originalCaseSO.version,
-      };
+      const theCase = mergeOriginalSOWithUpdatedSO(originalCaseSO, updatedCase);
 
       const assigneesWithoutCurrentUser = comparedAssignees.addedItems.filter(
         (assignee) => assignee.uid !== user.profile_uid
@@ -564,4 +553,17 @@ const getCasesAndAssigneesToNotifyForAssignment = (
 
     return acc;
   }, [] as Array<{ assignees: CaseAssignees; theCase: CaseSavedObject }>);
+};
+
+const mergeOriginalSOWithUpdatedSO = (
+  originalSO: CaseSavedObject,
+  updatedSO: SavedObjectsUpdateResponse<CaseAttributes>
+): CaseSavedObject => {
+  return {
+    ...originalSO,
+    ...updatedSO,
+    attributes: { ...originalSO.attributes, ...updatedSO?.attributes },
+    references: updatedSO.references ?? originalSO.references,
+    version: updatedSO?.version ?? updatedSO.version,
+  };
 };

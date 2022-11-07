@@ -56,8 +56,8 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You got assigned to case "Super Bad Security Issue". [View case](https://example.com/app/security/cases/mock-id-1).',
-      subject: 'You got assigned to case "Super Bad Security Issue"',
+        'You got assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View case](https://example.com/app/security/cases/mock-id-1)',
+      subject: '[Elastic] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
   });
@@ -79,8 +79,8 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You got assigned to case "Super Bad Security Issue". [View case](https://example.com/app/security/cases/mock-id-1).',
-      subject: 'You got assigned to case "Super Bad Security Issue"',
+        'You got assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View case](https://example.com/app/security/cases/mock-id-1)',
+      subject: '[Elastic] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
   });
@@ -107,8 +107,8 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You got assigned to case "Super Bad Security Issue". [View case](https://example.com/app/security/cases/mock-id-1).',
-      subject: 'You got assigned to case "Super Bad Security Issue"',
+        'You got assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View case](https://example.com/app/security/cases/mock-id-1)',
+      subject: '[Elastic] Super Bad Security Issue',
       to: ['physical_dinosaur@elastic.co'],
     });
   });
@@ -130,8 +130,37 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You got assigned to case "Super Bad Security Issue". [View case](https://example.com/app/security/cases/mock-id-1).',
-      subject: 'You got assigned to case "Super Bad Security Issue"',
+        'You got assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View case](https://example.com/app/security/cases/mock-id-1)',
+      subject: '[Elastic] Super Bad Security Issue',
+      to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
+    });
+  });
+
+  it('does not include the backlink of the publicBaseUrl is not defined', async () => {
+    emailNotificationService = new EmailNotificationService({
+      logger: clientArgs.logger,
+      security: clientArgs.securityStartPlugin,
+      notifications,
+    });
+
+    await emailNotificationService.notifyAssignees({
+      assignees,
+      theCase: caseSO,
+    });
+
+    expect(sendPlainTextEmail).toHaveBeenCalledWith({
+      context: {
+        relatedObjects: [
+          {
+            id: 'mock-id-1',
+            namespace: undefined,
+            type: 'cases',
+          },
+        ],
+      },
+      message:
+        'You got assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n',
+      subject: '[Elastic] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
   });

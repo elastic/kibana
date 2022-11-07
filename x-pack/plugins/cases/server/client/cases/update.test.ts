@@ -134,7 +134,7 @@ describe('update', () => {
       ]);
     });
 
-    it('does not notify when deleting users', async () => {
+    it('does not notify when removing assignees', async () => {
       clientArgs.services.caseService.getCases.mockResolvedValue({
         saved_objects: [
           {

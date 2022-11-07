@@ -42,12 +42,16 @@ export class EmailNotificationService implements NotificationService {
   }
 
   private getTitle(theCase: CaseSavedObject) {
-    // TODO: Better title
-    return `You got assigned to case "${theCase.attributes.title}"`;
+    return `[Elastic] ${theCase.attributes.title}`;
   }
 
   private getMessage(theCase: CaseSavedObject) {
-    let message = `You got assigned to case "${theCase.attributes.title}"`;
+    const lineBreak = '\r\n\r\n';
+    let message = `You got assigned to an Elastic Case.${lineBreak}`;
+    message = `${message}Title: ${theCase.attributes.title}${lineBreak}`;
+    message = `${message}Status: ${theCase.attributes.status}${lineBreak}`;
+    message = `${message}Severity: ${theCase.attributes.severity}${lineBreak}`;
+    message = `${message}Tags: ${theCase.attributes.tags.join(',')}${lineBreak}`;
 
     if (this.publicBaseUrl) {
       const caseUrl = getCaseViewPath({
@@ -56,7 +60,7 @@ export class EmailNotificationService implements NotificationService {
         owner: theCase.attributes.owner,
       });
 
-      message = `${message}. [View case](${caseUrl}).`;
+      message = `${message}${lineBreak}[View case](${caseUrl})`;
     }
 
     return message;
