@@ -13,7 +13,6 @@ import { IVectorStyle } from '../vector_style';
 import {
   getIconPalette,
   getMakiSymbolAnchor,
-  // @ts-expect-error
 } from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import { OTHER_CATEGORY_LABEL, assignCategoriesToPalette } from '../style_util';

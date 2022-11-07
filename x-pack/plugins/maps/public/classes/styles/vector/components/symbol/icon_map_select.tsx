@@ -11,7 +11,6 @@ import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { IconStops } from './icon_stops';
-// @ts-expect-error
 import { getIconPaletteOptions, PREFERRED_ICONS } from '../../symbol_utils';
 import {
   CustomIcon,

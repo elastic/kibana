@@ -28,7 +28,6 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { IconPreview } from './icon_preview';
-// @ts-expect-error
 import { getCustomIconId } from '../../symbol_utils';
 // @ts-expect-error
 import { ValidatedRange } from '../../../../../components/validated_range';
