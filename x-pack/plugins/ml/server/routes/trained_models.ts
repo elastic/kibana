@@ -16,6 +16,7 @@ import {
   inferTrainedModelQuery,
   inferTrainedModelBody,
   threadingParamsSchema,
+  updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -314,6 +315,40 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const body = await mlClient.startTrainedModelDeployment({
           model_id: modelId,
           ...(request.query ? request.query : {}),
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/:modelId/deployment/_update Start trained model deployment
+   * @apiName UpdateTrainedModelDeployment
+   * @apiDescription Updates trained model deployment.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/{modelId}/deployment/_update',
+      validate: {
+        params: modelIdSchema,
+        body: updateDeploymentParamsSchema,
+      },
+      options: {
+        tags: ['access:ml:canStartStopTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const body = await mlClient.updateTrainedModelDeployment({
+          model_id: modelId,
+          ...request.body,
         });
         return response.ok({
           body,

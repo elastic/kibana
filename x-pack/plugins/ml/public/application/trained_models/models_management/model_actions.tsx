@@ -166,7 +166,7 @@ export function useModelActions({
             onLoading(true);
             await trainedModelsApiService.startModelAllocation(item.model_id, {
               number_of_allocations: threadingParams.numOfAllocations,
-              threads_per_allocation: threadingParams.threadsPerAllocations,
+              threads_per_allocation: threadingParams.threadsPerAllocations!,
             });
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
@@ -212,14 +212,16 @@ export function useModelActions({
           item.stats?.deployment_stats?.state === DEPLOYMENT_STATE.STARTED,
         onClick: async (item) => {
           const threadingParams = await getUserInputThreadingParams(item.model_id, {
-            numOfAllocations: item.stats?.deployment_stats?.number_of_allocations,
+            numOfAllocations: item.stats?.deployment_stats?.number_of_allocations!,
           });
 
           if (!threadingParams) return;
 
           try {
             onLoading(true);
-            await trainedModelsApiService.updateModelDeployment(item.model_id);
+            await trainedModelsApiService.updateModelDeployment(item.model_id, {
+              number_of_allocations: threadingParams.numOfAllocations,
+            });
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
                 defaultMessage: 'Deployment for "{modelId}" has been updated successfully.',

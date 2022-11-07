@@ -309,7 +309,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
  */
 export const getUserInputThreadingParamsProvider =
   (overlays: OverlayStart, theme$: Observable<CoreTheme>, startModelDeploymentDocUrl: string) =>
-  (modelId: string, initialParams: ThreadingParams): Promise<ThreadingParams | void> => {
+  (modelId: string, initialParams?: ThreadingParams): Promise<ThreadingParams | void> => {
     return new Promise(async (resolve) => {
       try {
         const modalSession = overlays.openModal(

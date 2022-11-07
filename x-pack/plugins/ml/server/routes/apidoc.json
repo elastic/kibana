@@ -173,6 +173,7 @@
     "GetTrainedModelsNodesOverview",
     "GetTrainedModelPipelines",
     "StartTrainedModelDeployment",
+    "UpdateTrainedModelDeployment",
     "StopTrainedModelDeployment",
     "PutTrainedModel",
     "DeleteTrainedModel",
