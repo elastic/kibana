@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
-import { dispose, PlaceholderWidget } from './placeholder_widget';
+import { dispose, getDomNode, PlaceholderWidget } from './placeholder_widget';
 
 export interface Props {
   /** Width of editor. Defaults to 100%. */
@@ -405,7 +405,7 @@ export const CodeEditor: React.FC<Props> = ({
   useEffect(() => {
     if (placeholder && !value && _editor.current) {
       // Mounts editor inside constructor
-      _placeholderWidget.current = new PlaceholderWidget(placeholder, _editor.current);
+      _placeholderWidget.current = getDomNode(placeholder, _editor.current);
     }
     return () => {
       dispose(_editor, _placeholderWidget);
@@ -564,7 +564,3 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
 
   return { showCopyButton, CopyButton };
 };
-
-// React.lazy requires default export
-// eslint-disable-next-line import/no-default-export
-export default CodeEditor;

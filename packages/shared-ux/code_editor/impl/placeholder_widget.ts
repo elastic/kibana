@@ -21,16 +21,18 @@ export const PlaceholderWidget = (props: Props) => {
   const [placeholderText, setPlaceholderText] = useState('');
   const [editor, setEditor] = useState();
 
-  const getDomNode = (domNode: undefined | HTMLElement): HTMLElement => {
-    if (!domNode) {
-      let domNode = document.createElement('div');
-      setPlaceholderText(domNode.innerText);
-      domNode.className = 'kibanaCodeEditor__placeholderContainer';
-      setEditor.applyFontInfo(domNode);
-      domNode = domNode;
-    }
-    return domNode;
-  };
+
+};
+
+export const getDomNode = (domNode: undefined | HTMLElement): HTMLElement => {
+  if (!domNode) {
+    let domNode = document.createElement('div');
+    setPlaceholderText(domNode.innerText);
+    domNode.className = 'kibanaCodeEditor__placeholderContainer';
+    setEditor.applyFontInfo(domNode);
+    domNode = domNode;
+  }
+  return domNode;
 };
 
 export const getId = (): string => {
