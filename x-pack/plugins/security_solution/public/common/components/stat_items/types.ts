@@ -49,7 +49,6 @@ export interface StatItemsProps extends StatItems {
   id: string;
   updateDateRange: UpdateDateRange;
   to: string;
-  showInspectButton?: boolean;
   loading: boolean;
   setQuerySkip: (skip: boolean) => void;
 }

@@ -41,7 +41,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     grow,
     id,
     loading = false,
-    showInspectButton = true,
     index,
     updateDateRange,
     statKey = 'item',
