@@ -8,13 +8,18 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type {
+import {
   ISavedObjectTypeRegistry,
-  SavedObjectsClientWrapperFactory,
   SavedObjectsClientFactory,
   SavedObjectsClientProviderOptions,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensions,
+  ENCRYPTION_EXTENSION_ID,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
 } from '@kbn/core-saved-objects-server';
-import { PriorityCollection } from './priority_collection';
 
 /**
  * @internal
@@ -30,35 +35,31 @@ export type ISavedObjectsClientProvider = Pick<
  * @internal
  */
 export class SavedObjectsClientProvider {
-  private readonly _wrapperFactories = new PriorityCollection<{
-    id: string;
-    factory: SavedObjectsClientWrapperFactory;
-  }>();
   private _clientFactory: SavedObjectsClientFactory;
   private readonly _originalClientFactory: SavedObjectsClientFactory;
+  private readonly encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory | undefined;
+  private readonly securityExtensionFactory: SavedObjectsSecurityExtensionFactory | undefined;
+  private readonly spacesExtensionFactory: SavedObjectsSpacesExtensionFactory | undefined;
   private readonly _typeRegistry: ISavedObjectTypeRegistry;
 
   constructor({
     defaultClientFactory,
     typeRegistry,
+    encryptionExtensionFactory,
+    securityExtensionFactory,
+    spacesExtensionFactory,
   }: {
     defaultClientFactory: SavedObjectsClientFactory;
     typeRegistry: ISavedObjectTypeRegistry;
+    encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory | undefined;
+    securityExtensionFactory: SavedObjectsSecurityExtensionFactory | undefined;
+    spacesExtensionFactory: SavedObjectsSpacesExtensionFactory | undefined;
   }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
     this._typeRegistry = typeRegistry;
-  }
-
-  addClientWrapperFactory(
-    priority: number,
-    id: string,
-    factory: SavedObjectsClientWrapperFactory
-  ): void {
-    if (this._wrapperFactories.has((entry) => entry.id === id)) {
-      throw new Error(`wrapper factory with id ${id} is already defined`);
-    }
-
-    this._wrapperFactories.add(priority, { id, factory });
+    this.encryptionExtensionFactory = encryptionExtensionFactory;
+    this.securityExtensionFactory = securityExtensionFactory;
+    this.spacesExtensionFactory = spacesExtensionFactory;
   }
 
   setClientFactory(customClientFactory: SavedObjectsClientFactory) {
@@ -71,25 +72,36 @@ export class SavedObjectsClientProvider {
 
   getClient(
     request: KibanaRequest,
-    { includedHiddenTypes, excludedWrappers = [] }: SavedObjectsClientProviderOptions = {}
+    { includedHiddenTypes, excludedExtensions = [] }: SavedObjectsClientProviderOptions = {}
   ): SavedObjectsClientContract {
-    const client = this._clientFactory({
+    return this._clientFactory({
       request,
       includedHiddenTypes,
+      extensions: this.getExtensions(request, excludedExtensions),
     });
+  }
 
-    return this._wrapperFactories
-      .toPrioritizedArray()
-      .reduceRight((clientToWrap, { id, factory }) => {
-        if (excludedWrappers.includes(id)) {
-          return clientToWrap;
-        }
+  getExtensions(request: KibanaRequest, excludedExtensions: string[]): SavedObjectsExtensions {
+    const isEncryptionExtensionIncluded =
+      !excludedExtensions.includes(ENCRYPTION_EXTENSION_ID) && !!this.encryptionExtensionFactory;
+    const encryptionExtension = isEncryptionExtensionIncluded
+      ? this.encryptionExtensionFactory?.({ typeRegistry: this._typeRegistry, request })
+      : undefined;
+    const isSecurityExtensionIncluded =
+      !excludedExtensions.includes(SECURITY_EXTENSION_ID) && !!this.securityExtensionFactory;
+    const securityExtension = isSecurityExtensionIncluded
+      ? this.securityExtensionFactory?.({ typeRegistry: this._typeRegistry, request })
+      : undefined;
+    const isSpacesExtensionIncluded =
+      !excludedExtensions.includes(SPACES_EXTENSION_ID) && !!this.spacesExtensionFactory;
+    const spacesExtension = isSpacesExtensionIncluded
+      ? this.spacesExtensionFactory?.({ typeRegistry: this._typeRegistry, request })
+      : undefined;
 
-        return factory({
-          request,
-          client: clientToWrap,
-          typeRegistry: this._typeRegistry,
-        });
-      }, client);
+    return {
+      encryptionExtension,
+      securityExtension,
+      spacesExtension,
+    };
   }
 }

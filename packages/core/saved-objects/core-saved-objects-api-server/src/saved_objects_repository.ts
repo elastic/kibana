@@ -50,6 +50,19 @@ import type {
 } from './apis';
 
 /**
+ * @internal
+ */
+export interface SavedObjectsFindInternalOptions {
+  /** This is used for calls internal to the SO domain that need to use a PIT finder but want to prevent extensions from functioning.
+   * We use the SOR's PointInTimeFinder internally when searching for aliases and shared origins for saved objects, but we
+   * need to disable the extensions for that to function correctly.
+   * Before, when we had SOC wrappers, the SOR's PointInTimeFinder did not have any of the wrapper functionality applied.
+   * This disableExtensions internal option preserves that behavior.
+   */
+  disableExtensions?: boolean;
+}
+
+/**
  * The savedObjects repository contract.
  *
  * @public
@@ -150,7 +163,8 @@ export interface ISavedObjectsRepository {
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   find<T = unknown, A = unknown>(
-    options: SavedObjectsFindOptions
+    options: SavedObjectsFindOptions,
+    internalOptions?: SavedObjectsFindInternalOptions
   ): Promise<SavedObjectsFindResponse<T, A>>;
 
   /**
@@ -389,7 +403,8 @@ export interface ISavedObjectsRepository {
    */
   openPointInTimeForType(
     type: string | string[],
-    options?: SavedObjectsOpenPointInTimeOptions
+    options?: SavedObjectsOpenPointInTimeOptions,
+    internalOptions?: SavedObjectsFindInternalOptions
   ): Promise<SavedObjectsOpenPointInTimeResponse>;
 
   /**
@@ -435,7 +450,8 @@ export interface ISavedObjectsRepository {
    */
   closePointInTime(
     id: string,
-    options?: SavedObjectsClosePointInTimeOptions
+    options?: SavedObjectsClosePointInTimeOptions,
+    internalOptions?: SavedObjectsFindInternalOptions
   ): Promise<SavedObjectsClosePointInTimeResponse>;
 
   /**

@@ -66,10 +66,12 @@ export type BaseFileMetadata = {
    * ISO string representing the file creation date
    */
   created?: string;
+
   /**
    * Size of the file
    */
   size?: number;
+
   /**
    * Hash of the file's contents
    */
@@ -103,25 +105,6 @@ export type BaseFileMetadata = {
      */
     tlsh?: string;
     [hashName: string]: string | undefined;
-  };
-
-  /**
-   * Data about the user that created the file
-   */
-  user?: {
-    /**
-     * The human-friendly user name of the owner of the file
-     *
-     * @note this field cannot be used to uniquely ID a user. See {@link BaseFileMetadata['user']['id']}.
-     */
-    name?: string;
-    /**
-     * The unique ID of the user who created the file, taken from the user profile
-     * ID.
-     *
-     * See https://www.elastic.co/guide/en/elasticsearch/reference/master/user-profile.html.
-     */
-    id?: string;
   };
 
   /**
@@ -170,7 +153,7 @@ export type FileMetadata<Meta = unknown> = Required<
     FileKind: string;
 
     /**
-     * User-defined metadata.
+     * User-defined metadata
      */
     Meta?: Meta;
   };
@@ -239,10 +222,6 @@ export interface FileJSON<Meta = unknown> {
    * See {@link FileStatus} for more details.
    */
   status: FileMetadata['Status'];
-  /**
-   * User data associated with this file
-   */
-  user?: FileMetadata['user'];
 }
 
 /**

@@ -12,8 +12,6 @@ import type {
 } from '@kbn/core/server';
 import {
   coreMock,
-  httpServerMock,
-  savedObjectsClientMock,
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
@@ -23,7 +21,6 @@ import type { ClientInstanciator } from '.';
 import { setupSavedObjects } from '.';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
-import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 describe('#setupSavedObjects', () => {
   let setupContract: ClientInstanciator;
@@ -53,42 +50,6 @@ describe('#setupSavedObjects', () => {
       security: securityMock.createSetup(),
       getStartServices: coreSetupMock.getStartServices,
     });
-  });
-
-  it('properly registers client wrapper factory', () => {
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledWith(
-      Number.MAX_SAFE_INTEGER,
-      'encryptedSavedObjects',
-      expect.any(Function)
-    );
-
-    const [[, , clientFactory]] = coreSetupMock.savedObjects.addClientWrapper.mock.calls;
-    expect(
-      clientFactory({
-        client: savedObjectsClientMock.create(),
-        typeRegistry: savedObjectsTypeRegistryMock.create(),
-        request: httpServerMock.createKibanaRequest(),
-      })
-    ).toBeInstanceOf(EncryptedSavedObjectsClientWrapper);
-  });
-
-  it('properly registers client wrapper factory with', () => {
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledWith(
-      Number.MAX_SAFE_INTEGER,
-      'encryptedSavedObjects',
-      expect.any(Function)
-    );
-
-    const [[, , clientFactory]] = coreSetupMock.savedObjects.addClientWrapper.mock.calls;
-    expect(
-      clientFactory({
-        client: savedObjectsClientMock.create(),
-        typeRegistry: savedObjectsTypeRegistryMock.create(),
-        request: httpServerMock.createKibanaRequest(),
-      })
-    ).toBeInstanceOf(EncryptedSavedObjectsClientWrapper);
   });
 
   describe('#setupContract', () => {

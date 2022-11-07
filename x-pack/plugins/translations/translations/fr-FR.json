@@ -23290,6 +23290,7 @@
     "xpack.observability.alerts.ruleStats.loadError": "Impossible de charger les statistiques de règles",
     "xpack.observability.alerts.ruleStats.muted": "Répété",
     "xpack.observability.alerts.ruleStats.ruleCount": "Nombre de règles",
+    "xpack.observability.alerts.searchBarPlaceholder": "Alertes de recherche (par exemple, kibana.alert.evaluation.threshold > 75)",
     "xpack.observability.alerts.workflowStatusFilter.acknowledgedButtonLabel": "Reconnue(s)",
     "xpack.observability.alerts.workflowStatusFilter.closedButtonLabel": "Fermé",
     "xpack.observability.alerts.workflowStatusFilter.openButtonLabel": "Ouvrir",

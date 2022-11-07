@@ -25,9 +25,6 @@ const properties: Properties = {
   name: {
     type: 'text',
   },
-  user: {
-    type: 'flattened',
-  },
   Status: {
     type: 'keyword',
   },

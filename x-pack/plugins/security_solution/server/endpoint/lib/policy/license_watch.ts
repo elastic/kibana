@@ -61,7 +61,7 @@ export class PolicyWatcher {
       url: { href: {} },
       raw: { req: { url: '/' } },
     } as unknown as KibanaRequest;
-    return soStart.getScopedClient(fakeRequest, { excludedWrappers: ['security'] });
+    return soStart.getScopedClient(fakeRequest, { excludedExtensions: ['security'] });
   }
 
   public start(licenseService: LicenseService) {

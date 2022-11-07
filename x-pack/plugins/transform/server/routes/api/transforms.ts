@@ -155,13 +155,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       async (ctx, req, res) => {
         try {
           const esClient = (await ctx.core).elasticsearch.client;
-          const body = await esClient.asCurrentUser.transform.getTransformStats(
-            {
-              size: 1000,
-              transform_id: '_all',
-            },
-            { maxRetries: 0 }
-          );
+          const body = await esClient.asCurrentUser.transform.getTransformStats({
+            size: 1000,
+            transform_id: '_all',
+          });
           return res.ok({ body });
         } catch (e) {
           return res.customError(wrapError(wrapEsError(e)));
@@ -188,12 +185,9 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       const { transformId } = req.params;
       try {
         const esClient = (await ctx.core).elasticsearch.client;
-        const body = await esClient.asCurrentUser.transform.getTransformStats(
-          {
-            transform_id: transformId,
-          },
-          { maxRetries: 0 }
-        );
+        const body = await esClient.asCurrentUser.transform.getTransformStats({
+          transform_id: transformId,
+        });
         return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
@@ -458,7 +452,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute(async (ctx, req, res) => {
       try {
         const esClient = (await ctx.core).elasticsearch.client;
-        const body = await esClient.asCurrentUser.search(req.body, { maxRetries: 0 });
+        const body = await esClient.asCurrentUser.search(req.body);
         return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
@@ -649,22 +643,16 @@ const previewTransformHandler: RequestHandler<
   try {
     const reqBody = req.body;
     const esClient = (await ctx.core).elasticsearch.client;
-    const body = await esClient.asCurrentUser.transform.previewTransform(
-      {
-        body: reqBody,
-      },
-      { maxRetries: 0 }
-    );
+    const body = await esClient.asCurrentUser.transform.previewTransform({
+      body: reqBody,
+    });
     if (isLatestTransform(reqBody)) {
       // for the latest transform mappings properties have to be retrieved from the source
-      const fieldCapsResponse = await esClient.asCurrentUser.fieldCaps(
-        {
-          index: reqBody.source.index,
-          fields: '*',
-          include_unmapped: false,
-        },
-        { maxRetries: 0 }
-      );
+      const fieldCapsResponse = await esClient.asCurrentUser.fieldCaps({
+        index: reqBody.source.index,
+        fields: '*',
+        include_unmapped: false,
+      });
 
       const fieldNamesSet = new Set(Object.keys(fieldCapsResponse.fields));
 

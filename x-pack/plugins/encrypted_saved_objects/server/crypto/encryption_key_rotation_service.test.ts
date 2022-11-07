@@ -70,7 +70,7 @@ beforeEach(() => {
   mockRetrieveClient.find.mockResolvedValue({ total: 0, saved_objects: [], per_page: 0, page: 0 });
   mockUpdateClient = savedObjectsClientMock.create();
   mockSavedObjects.getScopedClient.mockImplementation((request, params) =>
-    params?.excludedWrappers?.[0] === 'encryptedSavedObjects'
+    params?.excludedExtensions?.[0] === 'encryptedSavedObjects'
       ? mockRetrieveClient
       : mockUpdateClient
   );
@@ -89,7 +89,7 @@ it('correctly setups Saved Objects clients', async () => {
   expect(mockSavedObjects.getScopedClient).toHaveBeenCalledTimes(2);
   expect(mockSavedObjects.getScopedClient).toHaveBeenCalledWith(mockRequest, {
     includedHiddenTypes: ['type-id-2', 'type-id-4'],
-    excludedWrappers: ['encryptedSavedObjects'],
+    excludedExtensions: ['encryptedSavedObjects'],
   });
   expect(mockSavedObjects.getScopedClient).toHaveBeenCalledWith(mockRequest, {
     includedHiddenTypes: ['type-id-2', 'type-id-4'],

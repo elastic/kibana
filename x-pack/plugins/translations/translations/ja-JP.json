@@ -23269,6 +23269,7 @@
     "xpack.observability.alerts.ruleStats.loadError": "ルール統計情報を読み込めません",
     "xpack.observability.alerts.ruleStats.muted": "スヌーズ済み",
     "xpack.observability.alerts.ruleStats.ruleCount": "ルール数",
+    "xpack.observability.alerts.searchBarPlaceholder": "検索アラート（例：kibana.alert.evaluation.threshold > 75）",
     "xpack.observability.alerts.workflowStatusFilter.acknowledgedButtonLabel": "認識",
     "xpack.observability.alerts.workflowStatusFilter.closedButtonLabel": "終了",
     "xpack.observability.alerts.workflowStatusFilter.openButtonLabel": "開く",

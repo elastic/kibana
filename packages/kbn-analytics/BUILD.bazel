@@ -43,7 +43,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "@npm//moment",
-  "@npm//moment-timezone",
+  "@npm//@types/moment-timezone",
   "@npm//@types/node",
 ]
 

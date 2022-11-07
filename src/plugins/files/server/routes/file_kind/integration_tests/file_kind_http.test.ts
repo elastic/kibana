@@ -40,9 +40,6 @@ describe('File kind HTTP API', () => {
       mimeType: 'image/png',
       extension: 'png',
       meta: {},
-      user: {
-        name: expect.any(String),
-      },
       alt: 'a picture of my dog',
     });
   });
@@ -84,7 +81,7 @@ describe('File kind HTTP API', () => {
     } = await request.get(root, `/api/files/files/${fileKind}/${id}`).expect(200);
     expect(file.name).toBe('acoolfilename');
 
-    const updatedFileAttrs: UpdatableFileMetadata<{ something: string }> = {
+    const updatedFileAttrs: UpdatableFileMetadata = {
       name: 'anothercoolfilename',
       alt: 'a picture of my cat',
       meta: {
@@ -92,24 +89,20 @@ describe('File kind HTTP API', () => {
       },
     };
 
-    {
-      const {
-        body: { file: updatedFile },
-      } = await request
-        .patch(root, `/api/files/files/${fileKind}/${id}`)
-        .send(updatedFileAttrs)
-        .expect(200);
+    const {
+      body: { file: updatedFile },
+    } = await request
+      .patch(root, `/api/files/files/${fileKind}/${id}`)
+      .send(updatedFileAttrs)
+      .expect(200);
 
-      expect(updatedFile).toMatchObject(updatedFileAttrs);
-    }
+    expect(updatedFile).toEqual(expect.objectContaining(updatedFileAttrs));
 
-    {
-      const {
-        body: { file: updatedFile },
-      } = await request.get(root, `/api/files/files/${fileKind}/${id}`).expect(200);
+    const {
+      body: { file: file2 },
+    } = await request.get(root, `/api/files/files/${fileKind}/${id}`).expect(200);
 
-      expect(updatedFile).toMatchObject(updatedFileAttrs);
-    }
+    expect(file2).toEqual(expect.objectContaining(updatedFileAttrs));
   });
 
   test('list current files', async () => {

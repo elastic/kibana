@@ -46,7 +46,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//moment-timezone",
+  "@npm//@types/moment-timezone",
   "@npm//rxjs",
   "//packages/core/base/core-base-browser-internal:npm_module_types",
   "//packages/core/ui-settings/core-ui-settings-browser:npm_module_types",

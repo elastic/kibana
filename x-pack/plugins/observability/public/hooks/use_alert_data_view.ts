@@ -11,10 +11,11 @@ import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import useAsync from 'react-use/lib/useAsync';
 import type { AsyncState } from 'react-use/lib/useAsync';
-import { TriggersAndActionsUiServices } from '../..';
+
+import { ObservabilityAppServices } from '../application/types';
 
 export function useAlertDataView(featureIds: ValidFeatureId[]): AsyncState<DataView> {
-  const { http, data: dataService } = useKibana<TriggersAndActionsUiServices>().services;
+  const { http, data: dataService } = useKibana<ObservabilityAppServices>().services;
   const features = featureIds.sort().join(',');
 
   const dataView = useAsync(async () => {
