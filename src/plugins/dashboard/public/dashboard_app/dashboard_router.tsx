@@ -66,8 +66,8 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   const {
     application,
     chrome: { setBadge, docTitle, setHelpExtension },
-    documentationLinks: { kibanaGuideDocLink },
     dashboardCapabilities: { showWriteControls },
+    documentationLinks: { dashboardDocLink },
     data: dataStart,
     embeddable,
     notifications,
@@ -206,7 +206,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     links: [
       {
         linkType: 'documentation',
-        href: `${kibanaGuideDocLink}`,
+        href: `${dashboardDocLink}`,
       },
     ],
   });
