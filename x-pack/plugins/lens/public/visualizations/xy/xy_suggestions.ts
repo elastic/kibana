@@ -61,24 +61,6 @@ export function getSuggestions({
     table.columns.length <= 1 ||
     table.columns.every((col) => col.operation.dataType !== 'number') ||
     table.columns.some((col) => !columnSortOrder.hasOwnProperty(col.operation.dataType));
-  if (incompleteTable && table.changeType === 'unchanged' && state) {
-    // this isn't a table we would switch to, but we have a state already. In this case, just use the current state for all series types
-    return visualizationTypes.map((visType) => {
-      const seriesType = visType.id as SeriesType;
-      return {
-        seriesType,
-        score: 0,
-        state: {
-          ...state,
-          preferredSeriesType: seriesType,
-          layers: state.layers.map((layer) => ({ ...layer, seriesType })),
-        },
-        previewIcon: getIconForSeries(seriesType),
-        title: visType.label,
-        hide: true,
-      };
-    });
-  }
 
   if (
     (incompleteTable && state && !subVisualizationId) ||
