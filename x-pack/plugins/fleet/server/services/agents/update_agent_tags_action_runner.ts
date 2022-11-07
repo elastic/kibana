@@ -110,13 +110,15 @@ export async function updateTagsBatch(
     };
   }
 
-  const res = await esClient.updateByQuery({
-    query,
-    index: AGENTS_INDEX,
-    refresh: true,
-    wait_for_completion: true,
-    script: {
-      source: `   
+  let res;
+  try {
+    res = await esClient.updateByQuery({
+      query,
+      index: AGENTS_INDEX,
+      refresh: true,
+      wait_for_completion: true,
+      script: {
+        source: `   
       ctx._source.tags = ctx._source.tags == null ? [] : ctx._source.tags;
       if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) { 
         ctx._source.tags.replaceAll(tag -> params.tagsToRemove[0] == tag ? params.tagsToAdd[0] : tag);
@@ -132,23 +134,20 @@ export async function updateTagsBatch(
 
       ctx._source.updated_at = params.updatedAt;
       `,
-      lang: 'painless',
-      params: {
-        tagsToAdd: uniq(options.tagsToAdd),
-        tagsToRemove: uniq(options.tagsToRemove),
-        updatedAt: new Date().toISOString(),
+        lang: 'painless',
+        params: {
+          tagsToAdd: uniq(options.tagsToAdd),
+          tagsToRemove: uniq(options.tagsToRemove),
+          updatedAt: new Date().toISOString(),
+        },
       },
-    },
-    conflicts: 'proceed',
-  });
-
-  appContextService.getLogger().debug(JSON.stringify(res));
-
-  if (res.failures && res.failures.length > 0) {
-    appContextService
-      .getLogger()
-      .warn('Failures while updating agent tags: ' + JSON.stringify(res.failures));
+      conflicts: 'abort', // relying on the task to retry in case of conflicts
+    });
+  } catch (error) {
+    throw new Error('Caught error: ' + JSON.stringify(error).slice(0, 1000));
   }
+
+  appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
 
   const actionId = options.actionId ?? uuid();
   const total = options.total ?? givenAgents.length;
@@ -161,13 +160,28 @@ export async function updateTagsBatch(
     type: 'UPDATE_TAGS',
     total,
   });
-  await bulkCreateAgentActionResults(
-    esClient,
-    filteredAgents.map((agent) => ({
-      agentId: agent.id,
-      actionId,
-    }))
-  );
+  if (res.updated ?? 0 > 0) {
+    await bulkCreateAgentActionResults(
+      esClient,
+      Array(res.updated)
+        .fill('')
+        .map(() => ({
+          agentId: '',
+          actionId,
+        }))
+    );
+  }
+
+  if (res.failures && res.failures.length > 0) {
+    await bulkCreateAgentActionResults(
+      esClient,
+      res.failures.map((failure) => ({
+        agentId: '',
+        actionId,
+        error: failure.cause.reason,
+      }))
+    );
+  }
 
   await createErrorActionResults(
     esClient,
