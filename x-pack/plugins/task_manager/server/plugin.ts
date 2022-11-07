@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -27,7 +27,6 @@ import { bulkRemoveIfExist } from './lib/bulk_remove_if_exist';
 import { setupSavedObjects } from './saved_objects';
 import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
-import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
@@ -204,6 +203,8 @@ export class TaskManagerPlugin
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
     const serializer = savedObjects.createSerializer();
+    const maxWorkers$ = new BehaviorSubject<number>(this.config!.max_workers);
+    const pollInterval$ = new BehaviorSubject<number>(this.config!.poll_interval);
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
@@ -212,13 +213,6 @@ export class TaskManagerPlugin
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
       adHocTaskCounter: this.adHocTaskCounter,
-    });
-
-    const managedConfiguration = createManagedConfiguration({
-      logger: this.logger,
-      errors$: taskStore.errors$,
-      startingMaxWorkers: this.config!.max_workers,
-      startingPollInterval: this.config!.poll_interval,
     });
 
     // Only poll for tasks if configured to run tasks
@@ -233,7 +227,8 @@ export class TaskManagerPlugin
         usageCounter: this.usageCounter,
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-        ...managedConfiguration,
+        maxWorkers$,
+        pollInterval$,
       });
 
       this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
@@ -252,7 +247,8 @@ export class TaskManagerPlugin
       taskStore,
       this.elasticsearchAndSOAvailability$!,
       this.config!,
-      managedConfiguration,
+      maxWorkers$,
+      pollInterval$,
       this.logger,
       this.adHocTaskCounter,
       this.taskPollingLifecycle,

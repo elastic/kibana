@@ -7,7 +7,6 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
-import { first } from 'rxjs/operators';
 
 import {
   TaskInstance,
@@ -183,20 +182,6 @@ describe('TaskStore', () => {
       );
     });
 
-    test('pushes error from saved objects client to errors$', async () => {
-      const task: TaskInstance = {
-        id: 'id',
-        params: { hello: 'world' },
-        state: { foo: 'bar' },
-        taskType: 'report',
-      };
-
-      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      savedObjectsClient.create.mockRejectedValue(new Error('Failure'));
-      await expect(store.schedule(task)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
-      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
-    });
-
     test('increments adHocTaskCounter', async () => {
       const task: TaskInstance = {
         id: 'id',
@@ -282,13 +267,6 @@ describe('TaskStore', () => {
           },
         },
       });
-    });
-
-    test('pushes error from call cluster to errors$', async () => {
-      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      esClient.search.mockRejectedValue(new Error('Failure'));
-      await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
-      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
 
@@ -470,70 +448,6 @@ describe('TaskStore', () => {
         version: '123',
       });
     });
-
-    test('pushes error from saved objects client to errors$', async () => {
-      const task = {
-        runAt: mockedDate,
-        scheduledAt: mockedDate,
-        startedAt: null,
-        retryAt: null,
-        id: 'task:324242',
-        params: { hello: 'world' },
-        state: { foo: 'bar' },
-        taskType: 'report',
-        attempts: 3,
-        status: 'idle' as TaskStatus,
-        version: '123',
-        ownerId: null,
-        traceparent: '',
-      };
-
-      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      savedObjectsClient.update.mockRejectedValue(new Error('Failure'));
-      await expect(store.update(task)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
-      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
-    });
-  });
-
-  describe('bulkUpdate', () => {
-    let store: TaskStore;
-
-    beforeAll(() => {
-      store = new TaskStore({
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-      });
-    });
-
-    test('pushes error from saved objects client to errors$', async () => {
-      const task = {
-        runAt: mockedDate,
-        scheduledAt: mockedDate,
-        startedAt: null,
-        retryAt: null,
-        id: 'task:324242',
-        params: { hello: 'world' },
-        state: { foo: 'bar' },
-        taskType: 'report',
-        attempts: 3,
-        status: 'idle' as TaskStatus,
-        version: '123',
-        ownerId: null,
-        traceparent: '',
-      };
-
-      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('Failure'));
-      await expect(store.bulkUpdate([task])).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
-      );
-      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
-    });
   });
 
   describe('remove', () => {
@@ -556,15 +470,6 @@ describe('TaskStore', () => {
       const result = await store.remove(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id);
-    });
-
-    test('pushes error from saved objects client to errors$', async () => {
-      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      savedObjectsClient.delete.mockRejectedValue(new Error('Failure'));
-      await expect(store.remove(randomId())).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
-      );
-      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
 
@@ -592,15 +497,6 @@ describe('TaskStore', () => {
         { type: 'task', id: tasksIdsToDelete[0] },
         { type: 'task', id: tasksIdsToDelete[1] },
       ]);
-    });
-
-    test('pushes error from saved objects client to errors$', async () => {
-      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      savedObjectsClient.bulkDelete.mockRejectedValue(new Error('Failure'));
-      await expect(store.bulkRemove(tasksIdsToDelete)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
-      );
-      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
 
@@ -651,13 +547,6 @@ describe('TaskStore', () => {
       expect(result).toEqual(task);
 
       expect(savedObjectsClient.get).toHaveBeenCalledWith('task', task.id);
-    });
-
-    test('pushes error from saved objects client to errors$', async () => {
-      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      savedObjectsClient.get.mockRejectedValue(new Error('Failure'));
-      await expect(store.get(randomId())).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
-      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
 
@@ -867,22 +756,6 @@ describe('TaskStore', () => {
       await expect(testBulkSchedule([{ taskType: 'nope', params: {}, state: {} }])).rejects.toThrow(
         /Unsupported task type "nope"/i
       );
-    });
-
-    test('pushes error from saved objects client to errors$', async () => {
-      const task: TaskInstance = {
-        id: 'id',
-        params: { hello: 'world' },
-        state: { foo: 'bar' },
-        taskType: 'report',
-      };
-
-      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      savedObjectsClient.bulkCreate.mockRejectedValue(new Error('Failure'));
-      await expect(store.bulkSchedule([task])).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
-      );
-      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
 
     test('increments adHocTaskCounter', async () => {

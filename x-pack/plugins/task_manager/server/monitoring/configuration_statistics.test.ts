@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { take, bufferCount } from 'rxjs/operators';
 import { createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
@@ -46,14 +46,12 @@ describe('Configuration Statistics Aggregator', () => {
       },
     };
 
-    const managedConfig = {
-      maxWorkersConfiguration$: new Subject<number>(),
-      pollIntervalConfiguration$: new Subject<number>(),
-    };
+    const maxWorkers$ = new BehaviorSubject<number>(8);
+    const pollInterval$ = new BehaviorSubject<number>(3000);
 
     return new Promise<void>(async (resolve, reject) => {
       try {
-        createConfigurationAggregator(configuration, managedConfig)
+        createConfigurationAggregator(configuration, maxWorkers$, pollInterval$)
           .pipe(take(3), bufferCount(3))
           .subscribe(([initial, updatedWorkers, updatedInterval]) => {
             expect(initial.value).toEqual({
@@ -103,8 +101,6 @@ describe('Configuration Statistics Aggregator', () => {
             });
             resolve();
           }, reject);
-        managedConfig.maxWorkersConfiguration$.next(8);
-        managedConfig.pollIntervalConfiguration$.next(3000);
       } catch (error) {
         reject(error);
       }

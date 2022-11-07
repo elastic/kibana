@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { combineLatest, of } from 'rxjs';
+import { combineLatest, of, BehaviorSubject } from 'rxjs';
 import { pick, merge } from 'lodash';
 import { map, startWith } from 'rxjs/operators';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { TaskManagerConfig } from '../config';
-import { ManagedConfiguration } from '../lib/create_managed_configuration';
 
 const CONFIG_FIELDS_TO_EXPOSE = [
   'request_capacity',
@@ -27,17 +26,18 @@ export type ConfigStat = Pick<
 
 export function createConfigurationAggregator(
   config: TaskManagerConfig,
-  managedConfig: ManagedConfiguration
+  maxWorkers$: BehaviorSubject<number>,
+  pollInterval$: BehaviorSubject<number>,
 ): AggregatedStatProvider<ConfigStat> {
   return combineLatest([
     of(pick(config, ...CONFIG_FIELDS_TO_EXPOSE)),
-    managedConfig.pollIntervalConfiguration$.pipe(
+    pollInterval$.pipe(
       startWith(config.poll_interval),
       map<number, Pick<TaskManagerConfig, 'poll_interval'>>((pollInterval) => ({
         poll_interval: pollInterval,
       }))
     ),
-    managedConfig.maxWorkersConfiguration$.pipe(
+    maxWorkers$.pipe(
       startWith(config.max_workers),
       map<number, Pick<TaskManagerConfig, 'max_workers'>>((maxWorkers) => ({
         max_workers: maxWorkers,

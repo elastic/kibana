@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 
 import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
 import { createInitialMiddleware } from './lib/middleware';
@@ -76,8 +76,8 @@ describe('TaskPollingLifecycle', () => {
     unusedTypes: [],
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
-    maxWorkersConfiguration$: of(100),
-    pollIntervalConfiguration$: of(100),
+    maxWorkers$: new BehaviorSubject(100),
+    pollInterval$: new BehaviorSubject(100),
     executionContext,
   };
 
@@ -108,7 +108,7 @@ describe('TaskPollingLifecycle', () => {
 
     test('provides TaskClaiming with the capacity available', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      const maxWorkers$ = new Subject<number>();
+      const maxWorkers$ = new BehaviorSubject<number>(10);
       taskManagerOpts.definitions.registerTaskDefinitions({
         report: {
           title: 'report',
@@ -125,7 +125,7 @@ describe('TaskPollingLifecycle', () => {
       new TaskPollingLifecycle({
         ...taskManagerOpts,
         elasticsearchAndSOAvailability$,
-        maxWorkersConfiguration$: maxWorkers$,
+        maxWorkers$,
       });
 
       const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock

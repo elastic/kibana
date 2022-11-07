@@ -11,11 +11,10 @@
 
 import stats from 'stats-lite';
 import { isNumber, random } from 'lodash';
-import { merge, of, Observable, combineLatest, ReplaySubject } from 'rxjs';
+import { merge, of, Observable, combineLatest, ReplaySubject, BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { Option, none, some, isSome, Some } from 'fp-ts/lib/Option';
 import { isOk } from '../lib/result_type';
-import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskPollingCycleEvent } from '../task_events';
 import { ClaimAndFillPoolResult } from '../lib/fill_pool';
@@ -25,8 +24,8 @@ import { createRunningAveragedStat } from '../monitoring/task_run_calcultors';
  * Emits a delay amount in ms to apply to polling whenever the task store exceeds a threshold of claim claimClashes
  */
 export function delayOnClaimConflicts(
-  maxWorkersConfiguration$: ManagedConfiguration['maxWorkersConfiguration$'],
-  pollIntervalConfiguration$: ManagedConfiguration['pollIntervalConfiguration$'],
+  maxWorkers$: BehaviorSubject<number>,
+  pollInterval$: BehaviorSubject<number>,
   taskLifecycleEvents$: Observable<TaskLifecycleEvent>,
   claimClashesPercentageThreshold: number,
   runningAverageWindowSize: number
@@ -37,8 +36,8 @@ export function delayOnClaimConflicts(
   merge(
     of(0),
     combineLatest([
-      maxWorkersConfiguration$,
-      pollIntervalConfiguration$,
+      maxWorkers$,
+      pollInterval$,
       taskLifecycleEvents$.pipe(
         map<TaskLifecycleEvent, Option<number>>((taskEvent: TaskLifecycleEvent) =>
           isTaskPollingCycleEvent(taskEvent) &&

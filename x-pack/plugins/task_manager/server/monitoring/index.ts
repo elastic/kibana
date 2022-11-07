@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { TaskManagerConfig } from '../config';
 import {
   MonitoringStats,
@@ -15,7 +15,6 @@ import {
 } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
-import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 
@@ -31,7 +30,8 @@ export function createMonitoringStats(
   taskStore: TaskStore,
   elasticsearchAndSOAvailability$: Observable<boolean>,
   config: TaskManagerConfig,
-  managedConfig: ManagedConfiguration,
+  maxWorkers$: BehaviorSubject<number>,
+  pollInterval$: BehaviorSubject<number>,
   logger: Logger,
   adHocTaskCounter: AdHocTaskCounter,
   taskPollingLifecycle?: TaskPollingLifecycle,
@@ -42,7 +42,8 @@ export function createMonitoringStats(
       taskStore,
       elasticsearchAndSOAvailability$,
       config,
-      managedConfig,
+      maxWorkers$,
+      pollInterval$,
       logger,
       adHocTaskCounter,
       taskPollingLifecycle,

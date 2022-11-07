@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject, of, firstValueFrom } from 'rxjs';
+import { Subject, firstValueFrom, BehaviorSubject } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { sleep } from '../test_utils';
 import { asOk } from '../lib/result_type';
@@ -25,8 +25,8 @@ describe('delayOnClaimConflicts', () => {
       const maxWorkers = 10;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
       const delays = delayOnClaimConflicts(
-        of(maxWorkers),
-        of(pollInterval),
+        new BehaviorSubject(maxWorkers),
+        new BehaviorSubject(pollInterval),
         taskLifecycleEvents$,
         80,
         2
@@ -46,10 +46,13 @@ describe('delayOnClaimConflicts', () => {
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
 
       const delays$ = firstValueFrom<number[]>(
-        delayOnClaimConflicts(of(maxWorkers), of(pollInterval), taskLifecycleEvents$, 80, 2).pipe(
-          take(2),
-          bufferCount(2)
-        )
+        delayOnClaimConflicts(
+          new BehaviorSubject(maxWorkers),
+          new BehaviorSubject(pollInterval),
+          taskLifecycleEvents$,
+          80,
+          2
+        ).pipe(take(2), bufferCount(2))
       );
 
       taskLifecycleEvents$.next(
@@ -81,7 +84,13 @@ describe('delayOnClaimConflicts', () => {
     fakeSchedulers(async () => {
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
 
-      const delays$ = delayOnClaimConflicts(of(10), of(100), taskLifecycleEvents$, 80, 2);
+      const delays$ = delayOnClaimConflicts(
+        new BehaviorSubject(10),
+        new BehaviorSubject(100),
+        taskLifecycleEvents$,
+        80,
+        2
+      );
 
       const firstSubscriber$ = firstValueFrom<number[]>(delays$.pipe(take(2), bufferCount(2)));
       const secondSubscriber$ = firstValueFrom<number[]>(delays$.pipe(take(2), bufferCount(2)));
@@ -143,8 +152,8 @@ describe('delayOnClaimConflicts', () => {
       const handler = jest.fn();
 
       delayOnClaimConflicts(
-        of(maxWorkers),
-        of(pollInterval),
+        new BehaviorSubject(maxWorkers),
+        new BehaviorSubject(pollInterval),
         taskLifecycleEvents$,
         80,
         2

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject, Observable, Subscription } from 'rxjs';
+import { Subject, Observable, Subscription, BehaviorSubject } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
@@ -13,7 +13,6 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
-import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 
 import {
@@ -47,7 +46,7 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
 
-export type TaskPollingLifecycleOpts = {
+export interface TaskPollingLifecycleOpts {
   logger: Logger;
   definitions: TaskTypeDictionary;
   unusedTypes: string[];
@@ -57,7 +56,9 @@ export type TaskPollingLifecycleOpts = {
   elasticsearchAndSOAvailability$: Observable<boolean>;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
-} & ManagedConfiguration;
+  maxWorkers$: BehaviorSubject<number>;
+  pollInterval$: BehaviorSubject<number>;
+}
 
 export type TaskLifecycleEvent =
   | TaskMarkRunning
@@ -101,8 +102,8 @@ export class TaskPollingLifecycle {
   constructor({
     logger,
     middleware,
-    maxWorkersConfiguration$,
-    pollIntervalConfiguration$,
+    maxWorkers$,
+    pollInterval$,
     // Elasticsearch and SavedObjects availability status
     elasticsearchAndSOAvailability$,
     config,
@@ -129,7 +130,7 @@ export class TaskPollingLifecycle {
 
     this.pool = new TaskPool({
       logger,
-      maxWorkers$: maxWorkersConfiguration$,
+      maxWorkers$,
     });
     this.pool.load.subscribe(emitEvent);
 
@@ -159,8 +160,8 @@ export class TaskPollingLifecycle {
       config;
 
     const pollIntervalDelay$ = delayOnClaimConflicts(
-      maxWorkersConfiguration$,
-      pollIntervalConfiguration$,
+      maxWorkers$,
+      pollInterval$,
       this.events$,
       config.version_conflict_threshold,
       config.monitored_stats_running_average_window
@@ -172,7 +173,7 @@ export class TaskPollingLifecycle {
         () =>
           createTaskPoller<string, TimedFillPoolResult>({
             logger,
-            pollInterval$: pollIntervalConfiguration$,
+            pollInterval$,
             pollIntervalDelay$,
             bufferCapacity: config.request_capacity,
             getCapacity: () => {
