@@ -528,7 +528,7 @@ export class RulesClient {
     this.eventLogger = eventLogger;
   }
 
-  public async clone(id: string, { newId}: {newId?: string}) {
+  public async clone(id: string, { newId }: { newId?: string }) {
     let ruleSavedObject: SavedObject<RawRule>;
 
     try {
@@ -548,9 +548,14 @@ export class RulesClient {
       ruleSavedObject = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     }
     if (isDetectionEngineAADRuleType(ruleSavedObject)) {
-      throw Boom.badRequest(`The clone functionality is not enable for rule who belongs to security solution`);
+      throw Boom.badRequest(
+        `The clone functionality is not enable for rule who belongs to security solution`
+      );
     }
-    const ruleName = ruleSavedObject.attributes.name.indexOf('[Duplicate]') > 0 ? ruleSavedObject.attributes.name : `${ruleSavedObject.attributes.name} [Duplicate]`;
+    const ruleName =
+      ruleSavedObject.attributes.name.indexOf('[Duplicate]') > 0
+        ? ruleSavedObject.attributes.name
+        : `${ruleSavedObject.attributes.name} [Duplicate]`;
     const ruleId = newId ?? SavedObjectsUtils.generateId();
     try {
       await this.authorization.ensureAuthorized({
@@ -598,7 +603,7 @@ export class RulesClient {
       mutedInstanceIds: [],
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
       monitoring: getDefaultRuleMonitoring(),
-    }
+    };
 
     this.auditLogger?.log(
       ruleAuditEvent({
@@ -614,7 +619,6 @@ export class RulesClient {
       references: ruleSavedObject.references,
       ruleId,
     });
-
   }
 
   public async create<Params extends RuleTypeParams = never>({
@@ -710,11 +714,21 @@ export class RulesClient {
       ruleId: id,
       options,
     });
-
   }
 
-  private async createRuleSavedObject<Params extends RuleTypeParams = never>({ intervalInMs,rawRule, references, ruleId, options
-  }: { intervalInMs: number; rawRule: RawRule; references: SavedObjectReference[]; ruleId: string; options?: SavedObjectOptions }) {
+  private async createRuleSavedObject<Params extends RuleTypeParams = never>({
+    intervalInMs,
+    rawRule,
+    references,
+    ruleId,
+    options,
+  }: {
+    intervalInMs: number;
+    rawRule: RawRule;
+    references: SavedObjectReference[];
+    ruleId: string;
+    options?: SavedObjectOptions;
+  }) {
     this.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.CREATE,

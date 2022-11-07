@@ -8,11 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import {
-  verifyAccessAndContext,
-  RewriteResponseCase,
-  handleDisabledApiKeysError,
-} from './lib';
+import { verifyAccessAndContext, RewriteResponseCase, handleDisabledApiKeysError } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
