@@ -46,6 +46,21 @@ export const useTotalHits = ({
   const abortController = useRef<AbortController>();
   const totalHitsDeps = useRef<ReturnType<typeof getTotalHitsDeps>>();
 
+  // When the unified histogram props change, we must compare the current subset
+  // that should trigger a total hits refetch against the previous subset. If they
+  // are different, we must refetch the total hits to ensure it's up to date with
+  // the chart. These are the props we care about:
+  //   - chartVisible:
+  //       We only need to fetch the total hits when the chart is hidden,
+  //       otherwise Lens will be responsible for updating the display.
+  //   - lastReloadRequestTime: A refetch has been manually triggered by the consumer.
+  //   - hits:
+  //       If the hits context is undefined, we don't need to fetch the
+  //       total hits because the display will be hidden.
+  //   - dataView: The current data view has changed.
+  //   - filters: The current filters have changed.
+  //   - query: The current query has been updated.
+  //   - timeRange: The selected time range has changed.
   useEffect(() => {
     const newTotalHitsDeps = getTotalHitsDeps({
       chartVisible,
@@ -178,6 +193,7 @@ const fetchTotalHits = async ({
 
   abortController.current = new AbortController();
 
+  // Let the consumer inspect the request if they want to track it
   const inspector = request?.adapter
     ? {
         adapter: request.adapter,
