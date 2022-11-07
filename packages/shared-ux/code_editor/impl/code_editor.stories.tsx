@@ -8,14 +8,14 @@
 
 import React from 'react';
 
-import { NoDataCardStorybookMock } from '@kbn/shared-ux-card-no-data-mocks';
-import type { NoDataCardStorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
+import { CodeEditorStorybookMock, CodeEditorStorybookParams } from '@kbn/shared-ux-code-editor-mocks';
 
+import { CodeEditor } from './code_editor'; 
 import mdx from './README.mdx';
 
 export default {
   title: 'Code Editor',
-  description: 'A cohesive code editor',
+  description: 'A code editor',
   parameters: {
     docs: {
       page: mdx,
@@ -23,11 +23,11 @@ export default {
   },
 };
 
-const mock = new NoDataCardStorybookMock();
+const mock = new CodeEditorStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
-export const CodeEditor = (params: NoDataCardStorybookParams) => {
-  return <></>;
+export const CodeEditorStorybookComponent = (params: CodeEditorStorybookParams) => {
+  return <CodeEditor {...params} />;
 };
 
-CodeEditor.argTypes = argTypes;
+CodeEditorStorybookComponent.argTypes = argTypes;

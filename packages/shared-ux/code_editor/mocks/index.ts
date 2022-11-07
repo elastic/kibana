@@ -5,7 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export function foo() {
-  return 'hello world';
-}
+export { CodeEditorStorybookMock } from './storybook';
+export type { Params as CodeEditorStorybookParams } from './storybook';

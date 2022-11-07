@@ -68,8 +68,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/node",
   "//packages/shared-ux/storybook/mock:npm_module_types",
-  # "//packages/shared-ux/code_editor/types:npm_module_types",
-
+  "//packages/shared-ux/code_editor/types:npm_module_types",
 ]
 
 jsts_transpiler(
