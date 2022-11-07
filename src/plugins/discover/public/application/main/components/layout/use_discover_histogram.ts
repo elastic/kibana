@@ -13,7 +13,7 @@ import {
   triggerVisualizeActions,
 } from '@kbn/unified-field-list-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
 import { getUiActions } from '../../../../kibana_services';
@@ -139,12 +139,12 @@ export const useDiscoverHistogram = ({
 
       // If we have a partial result already, we don't
       // want to update the total hits back to loading
-      if (fetchStatus === 'partial' && status === 'loading') {
+      if (fetchStatus === FetchStatus.PARTIAL && status === UnifiedHistogramFetchStatus.loading) {
         return;
       }
 
       savedSearchData$.totalHits$.next({
-        fetchStatus: status as FetchStatus,
+        fetchStatus: status.toString() as FetchStatus,
         result: totalHits,
         recordRawType,
       });
@@ -161,7 +161,7 @@ export const useDiscoverHistogram = ({
       isPlainRecord
         ? undefined
         : {
-            status: hitsFetchStatus,
+            status: hitsFetchStatus.toString() as UnifiedHistogramFetchStatus,
             total: hitsTotal,
           },
     [hitsFetchStatus, hitsTotal, isPlainRecord]

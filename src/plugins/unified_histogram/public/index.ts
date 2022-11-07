@@ -12,12 +12,12 @@ export type { UnifiedHistogramLayoutProps } from './layout';
 export { UnifiedHistogramLayout } from './layout';
 export type {
   UnifiedHistogramServices,
-  UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
 } from './types';
+export { UnifiedHistogramFetchStatus } from './types';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();

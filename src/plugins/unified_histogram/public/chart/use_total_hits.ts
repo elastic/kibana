@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, isEqual } from 'lodash';
 import { MutableRefObject, useEffect, useRef } from 'react';
 import { filter, lastValueFrom, map } from 'rxjs';
-import type {
+import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
   UnifiedHistogramRequestContext,
@@ -161,7 +161,7 @@ const fetchTotalHits = async ({
     return;
   }
 
-  onTotalHitsChange?.('loading', hits.total);
+  onTotalHitsChange?.(UnifiedHistogramFetchStatus.loading, hits.total);
 
   const searchSource = data.search.searchSource.createEmpty();
 
@@ -222,5 +222,5 @@ const fetchTotalHits = async ({
 
   const totalHits = await lastValueFrom(fetch$);
 
-  onTotalHitsChange?.('complete', totalHits);
+  onTotalHitsChange?.(UnifiedHistogramFetchStatus.complete, totalHits);
 };

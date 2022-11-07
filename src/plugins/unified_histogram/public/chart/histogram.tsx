@@ -15,7 +15,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateQuery, Query, Filter, TimeRange } from '@kbn/es-query';
-import type {
+import {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
@@ -74,7 +74,10 @@ export function Histogram({
     (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
       const totalHits = adapters?.tables?.tables?.unifiedHistogram?.meta?.statistics?.totalCount;
 
-      onTotalHitsChange?.(isLoading ? 'loading' : 'complete', totalHits ?? hits?.total);
+      onTotalHitsChange?.(
+        isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
+        totalHits ?? hits?.total
+      );
 
       const lensRequest = adapters?.requests?.getRequests()[0];
       const json = lensRequest?.response?.json as IKibanaSearchResponse<estypes.SearchResponse>;
