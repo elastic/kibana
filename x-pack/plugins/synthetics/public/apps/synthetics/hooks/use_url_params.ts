@@ -60,7 +60,7 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
 
       // only update the URL if the search has actually changed
       if (search !== updatedSearch) {
-        history.replace({ pathname, search: updatedSearch || undefined });
+        history.push({ pathname, search: updatedSearch || undefined });
       }
     },
     [history, pathname, search]
