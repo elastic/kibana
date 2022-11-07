@@ -10,7 +10,7 @@ import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { RulesClient, BulkEditError } from '@kbn/alerting-plugin/server';
+import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
@@ -66,7 +66,10 @@ interface NormalizedRuleError {
   rules: RuleDetailsInError[];
 }
 
-type BulkActionError = PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError;
+type BulkActionError =
+  | PromisePoolError<string>
+  | PromisePoolError<RuleAlertType>
+  | BulkOperationError;
 
 const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[] => {
   const errorsMap = new Map<string, NormalizedRuleError>();
@@ -76,7 +79,7 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
     let statusCode: number = 500;
     let errorCode: BulkActionsDryRunErrCode | undefined;
     let rule: RuleDetailsInError;
-    // transform different error types (PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError)
+    // transform different error types (PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkOperationError)
     // to one common used in NormalizedRuleError
     if ('rule' in errorObj) {
       rule = errorObj.rule;

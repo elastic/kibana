@@ -35,7 +35,7 @@ export type { PluginSetupContract, PluginStartContract } from './plugin';
 export type {
   FindResult,
   BulkEditOperation,
-  BulkEditError,
+  BulkOperationError,
   BulkEditOptions,
   BulkEditOptionsFilter,
   BulkEditOptionsIds,
