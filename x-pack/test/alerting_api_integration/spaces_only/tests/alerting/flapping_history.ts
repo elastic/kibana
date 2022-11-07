@@ -26,7 +26,7 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
   const retry = getService('retry');
   const supertest = getService('supertest');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
-  const space = Spaces.space1;
+  const space = Spaces.default;
 
   describe('Flapping History', () => {
     let alertUtils: AlertUtils;
