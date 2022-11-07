@@ -17,6 +17,7 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { EsQueryRuleParams, SearchType } from '../types';
@@ -83,15 +84,7 @@ export const EsQueryExpression: React.FC<
 
   const { http, docLinks } = useKibana<KibanaDeps>().services;
 
-  const [esFields, setEsFields] = useState<
-    Array<{
-      name: string;
-      type: string;
-      normalizedType: string;
-      searchable: boolean;
-      aggregatable: boolean;
-    }>
-  >([]);
+  const [esFields, setEsFields] = useState<FieldOption[]>([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
 
   const setDefaultExpressionValues = async () => {
@@ -178,10 +171,10 @@ export const EsQueryExpression: React.FC<
               timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
               threshold: DEFAULT_VALUES.THRESHOLD,
               timeField: '',
-              aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
+              aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
               aggField: '',
-              groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
-              termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
+              groupBy: DEFAULT_VALUES.GROUP_BY,
+              termSize: DEFAULT_VALUES.TERM_SIZE,
               termField: '',
             });
           } else {
@@ -254,35 +247,56 @@ export const EsQueryExpression: React.FC<
         groupBy={groupBy}
         termSize={termSize}
         termField={termField}
-        onChangeSelectedAggField={(selectedAggField?: string) =>
-          setParam('aggField', selectedAggField)
-        }
-        onChangeSelectedAggType={(selectedAggType: string) => setParam('aggType', selectedAggType)}
-        onChangeSelectedGroupBy={(selectedGroupBy) => setParam('groupBy', selectedGroupBy)}
-        onChangeSelectedTermField={(selectedTermField) => setParam('termField', selectedTermField)}
-        onChangeSelectedTermSize={(selectedTermSize?: number) =>
-          setParam('termSize', selectedTermSize)
-        }
-        onChangeThreshold={(selectedThresholds) => setParam('threshold', selectedThresholds)}
-        onChangeThresholdComparator={(selectedThresholdComparator) =>
-          setParam('thresholdComparator', selectedThresholdComparator)
-        }
-        onChangeWindowSize={(selectedWindowSize: number | undefined) =>
-          setParam('timeWindowSize', selectedWindowSize)
-        }
-        onChangeWindowUnit={(selectedWindowUnit: string) =>
-          setParam('timeWindowUnit', selectedWindowUnit)
-        }
-        onChangeSizeValue={(updatedValue) => {
-          setParam('size', updatedValue);
-        }}
+        onChangeSelectedAggField={useCallback(
+          (selectedAggField?: string) => setParam('aggField', selectedAggField),
+          [setParam]
+        )}
+        onChangeSelectedAggType={useCallback(
+          (selectedAggType: string) => setParam('aggType', selectedAggType),
+          [setParam]
+        )}
+        onChangeSelectedGroupBy={useCallback(
+          (selectedGroupBy) => setParam('groupBy', selectedGroupBy),
+          [setParam]
+        )}
+        onChangeSelectedTermField={useCallback(
+          (selectedTermField) => setParam('termField', selectedTermField),
+          [setParam]
+        )}
+        onChangeSelectedTermSize={useCallback(
+          (selectedTermSize?: number) => setParam('termSize', selectedTermSize),
+          [setParam]
+        )}
+        onChangeThreshold={useCallback(
+          (selectedThresholds) => setParam('threshold', selectedThresholds),
+          [setParam]
+        )}
+        onChangeThresholdComparator={useCallback(
+          (selectedThresholdComparator) =>
+            setParam('thresholdComparator', selectedThresholdComparator),
+          [setParam]
+        )}
+        onChangeWindowSize={useCallback(
+          (selectedWindowSize: number | undefined) =>
+            setParam('timeWindowSize', selectedWindowSize),
+          [setParam]
+        )}
+        onChangeWindowUnit={useCallback(
+          (selectedWindowUnit: string) => setParam('timeWindowUnit', selectedWindowUnit),
+          [setParam]
+        )}
+        onChangeSizeValue={useCallback(
+          (updatedValue) => setParam('size', updatedValue),
+          [setParam]
+        )}
         errors={errors}
         hasValidationErrors={hasValidationErrors()}
         onTestFetch={onTestQuery}
         excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
-        onChangeExcludeHitsFromPreviousRun={(exclude) => {
-          setParam('excludeHitsFromPreviousRun', exclude);
-        }}
+        onChangeExcludeHitsFromPreviousRun={useCallback(
+          (exclude) => setParam('excludeHitsFromPreviousRun', exclude),
+          [setParam]
+        )}
       />
 
       <EuiSpacer />

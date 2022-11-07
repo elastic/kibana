@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -18,17 +18,21 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { builtInGroupByTypes } from '../constants';
-import { GroupByType } from '../types';
+import { FieldOption, GroupByType } from '../types';
 import { ClosablePopoverTitle } from './components';
 import { IErrorObject } from '../../types';
 
+interface GroupByOverFieldOption {
+  text: string;
+  value: string;
+}
 export interface GroupByExpressionProps {
   groupBy: string;
   errors: IErrorObject;
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
   onChangeSelectedTermField: (selectedTermField?: string) => void;
   onChangeSelectedGroupBy: (selectedGroupBy?: string) => void;
-  fields: Record<string, any>;
+  fields: FieldOption[];
   termSize?: number;
   termField?: string;
   customGroupByTypes?: {
@@ -67,7 +71,7 @@ export const GroupByExpression = ({
   const [groupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
   const MIN_TERM_SIZE = 1;
   const MAX_TERM_SIZE = 1000;
-  const firstFieldOption = {
+  const firstFieldOption: GroupByOverFieldOption = {
     text: i18n.translate(
       'xpack.triggersActionsUI.common.expressionItems.groupByType.timeFieldOptionLabel',
       {
@@ -76,6 +80,30 @@ export const GroupByExpression = ({
     ),
     value: '',
   };
+
+  const availableFieldOptions: GroupByOverFieldOption[] = fields.reduce(
+    (options: GroupByOverFieldOption[], field: FieldOption) => {
+      if (groupByTypes[groupBy].validNormalizedTypes.includes(field.normalizedType)) {
+        options.push({
+          text: field.name,
+          value: field.name,
+        });
+      }
+      return options;
+    },
+    [firstFieldOption]
+  );
+
+  useEffect(() => {
+    // if current field set doesn't contain selected field, clear selection
+    if (
+      termField &&
+      termField.length > 0 &&
+      !fields.find((field: FieldOption) => field.name === termField)
+    ) {
+      onChangeSelectedTermField('');
+    }
+  }, [termField, fields, onChangeSelectedTermField]);
 
   return (
     <EuiPopover
@@ -152,7 +180,7 @@ export const GroupByExpression = ({
 
           {groupByTypes[groupBy].sizeRequired ? (
             <>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={true}>
                 <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
                   <EuiFieldNumber
                     isInvalid={errors.termSize.length > 0}
@@ -179,20 +207,7 @@ export const GroupByExpression = ({
                     onChange={(e) => {
                       onChangeSelectedTermField(e.target.value);
                     }}
-                    options={fields.reduce(
-                      (options: any, field: { name: string; normalizedType: string }) => {
-                        if (
-                          groupByTypes[groupBy].validNormalizedTypes.includes(field.normalizedType)
-                        ) {
-                          options.push({
-                            text: field.name,
-                            value: field.name,
-                          });
-                        }
-                        return options;
-                      },
-                      [firstFieldOption]
-                    )}
+                    options={availableFieldOptions}
                     onBlur={() => {
                       if (termField === undefined) {
                         onChangeSelectedTermField('');

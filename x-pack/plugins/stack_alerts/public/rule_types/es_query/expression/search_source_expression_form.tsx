@@ -16,10 +16,11 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { CommonRuleParams, EsQueryRuleParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
-import { useTriggersAndActionsUiDeps } from '../util';
+import { useTriggersAndActionsUiDeps, convertFieldSpecToFieldOption } from '../util';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { totalHitsToNumber } from '../test_query_row';
 import { hasExpressionValidationErrors } from '../validation';
@@ -62,7 +63,7 @@ interface LocalStateAction {
         | 'termField'
         | 'excludeHitsFromPreviousRun'
       );
-  payload: SearchSourceParamsAction['payload'] | (number[] | number | string | boolean);
+  payload: SearchSourceParamsAction['payload'] | (number[] | number | string | boolean | undefined);
 }
 
 type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => LocalState;
@@ -88,6 +89,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   const { data } = useTriggersAndActionsUiDeps();
   const { searchSource, errors, initialSavedQuery, setParam, ruleParams } = props;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
+  const [esFields, setEsFields] = useState<FieldOption[]>([]);
 
   const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
@@ -124,11 +126,16 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   const { index: dataView, query, filter: filters } = ruleConfiguration;
   const dataViews = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
+  useEffect(() => {
+    setEsFields(convertFieldSpecToFieldOption(dataView.fields.map((field) => field.toSpec())));
+  }, [dataView]);
+
   const onSelectDataView = useCallback(
     (newDataViewId) =>
       data.dataViews.get(newDataViewId).then((newDataView) => {
-        const dataviewFields = newDataView.fields.map((field) => field.toSpec());
-        console.log(dataviewFields);
+        setEsFields(
+          convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec()))
+        );
         dispatch({ type: 'index', payload: newDataView });
       }),
     [data.dataViews]
@@ -190,8 +197,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   const onChangeSelectedAggField = useCallback(
-    (selectedAggField?: string) =>
-      selectedAggField && dispatch({ type: 'aggField', payload: selectedAggField }),
+    (selectedAggField?: string) => dispatch({ type: 'aggField', payload: selectedAggField }),
     []
   );
 
@@ -207,8 +213,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   const onChangeSelectedTermField = useCallback(
-    (selectedTermField?: string) =>
-      selectedTermField && dispatch({ type: 'termField', payload: selectedTermField }),
+    (selectedTermField?: string) => dispatch({ type: 'termField', payload: selectedTermField }),
     []
   );
 
@@ -326,7 +331,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         timeWindowSize={ruleConfiguration.timeWindowSize}
         timeWindowUnit={ruleConfiguration.timeWindowUnit}
         size={ruleConfiguration.size}
-        esFields={[]}
+        esFields={esFields}
         aggType={ruleConfiguration.aggType}
         aggField={ruleConfiguration.aggField}
         groupBy={ruleConfiguration.groupBy}

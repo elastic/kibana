@@ -25,4 +25,4 @@ export { connectorDeprecatedMessage, deprecatedMessage } from './connectors_sele
 export type { IOption } from './index_controls';
 export { getFields, getIndexOptions, firstFieldOption } from './index_controls';
 export { getTimeFieldOptions, useKibana } from './lib';
-export type { Comparator, AggregationType, GroupByType, RuleStatus } from './types';
+export type { Comparator, AggregationType, GroupByType, RuleStatus, FieldOption } from './types';

@@ -27,6 +27,7 @@ import {
   ValueExpression,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { CommonRuleParams } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { TestQueryRow, TestQueryRowProps } from '../test_query_row';
@@ -38,13 +39,7 @@ export interface RuleCommonExpressionsProps {
   timeWindowSize: CommonRuleParams['timeWindowSize'];
   timeWindowUnit: CommonRuleParams['timeWindowUnit'];
   size: CommonRuleParams['size'];
-  esFields: Array<{
-    name: string;
-    type: string;
-    normalizedType: string;
-    searchable: boolean;
-    aggregatable: boolean;
-  }>;
+  esFields: FieldOption[];
   aggType: CommonRuleParams['aggType'];
   aggField: CommonRuleParams['aggField'];
   groupBy: CommonRuleParams['groupBy'];

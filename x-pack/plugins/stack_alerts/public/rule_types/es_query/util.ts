@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { EsQueryRuleParams, SearchType, TriggersAndActionsUiDeps } from './types';
 
 export const isSearchSourceRule = (
@@ -15,3 +17,12 @@ export const isSearchSourceRule = (
 };
 
 export const useTriggersAndActionsUiDeps = () => useKibana<TriggersAndActionsUiDeps>().services;
+
+export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOption[] =>
+  (fieldSpec ?? []).map((spec: FieldSpec) => ({
+    name: spec.name,
+    type: spec.type,
+    normalizedType: spec.type,
+    searchable: spec.searchable,
+    aggregatable: spec.aggregatable,
+  }));
