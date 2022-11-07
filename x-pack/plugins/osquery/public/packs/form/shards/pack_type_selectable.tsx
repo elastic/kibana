@@ -86,6 +86,7 @@ export const PackTypeSelectable = memo(
                 description={i18n.translate('xpack.osquery.pack.form.policyDescription', {
                   defaultMessage: 'Schedule pack for specific policy.',
                 })}
+                data-test-subj={'osqueryPackTypePolicy'}
                 selectable={policyCardSelectable}
                 {...(packType === 'policy' && { color: 'primary' })}
               />
@@ -110,6 +111,7 @@ export const PackTypeSelectable = memo(
                   defaultMessage: 'Use pack across all policies',
                 })}
                 selectable={globalCardSelectable}
+                data-test-subj={'osqueryPackTypeGlobal'}
                 {...(packType === 'global' && { color: 'primary' })}
               />
             </EuiFlexItem>

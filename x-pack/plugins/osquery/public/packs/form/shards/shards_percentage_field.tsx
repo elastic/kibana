@@ -59,6 +59,7 @@ const ShardsPercentageFieldComponent = ({
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={10}>
           <EuiRange
+            data-test-subj="shards-field-percentage"
             id={'shardsPercentage' + index}
             min={0}
             max={100}

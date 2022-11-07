@@ -409,4 +409,43 @@ describe('ALL - Packs', () => {
       cy.react('EuiTableRow').should('have.length.above', 5);
     });
   });
+
+  describe('Global packs', () => {
+    beforeEach(() => {
+      login();
+      navigateTo('/app/osquery/packs');
+    });
+
+    it('add global packs to polciies', () => {
+      const globalPack = 'globalPack';
+      cy.contains('Packs').click();
+      findAndClickButton('Add pack');
+      findFormFieldByRowsLabelAndType('Name', globalPack);
+      cy.getBySel('osqueryPackTypeGlobal').click();
+      findAndClickButton('Save pack');
+
+      cy.contains(globalPack);
+      cy.contains(`Successfully created "${globalPack}" pack`);
+
+      cy.visit(FLEET_AGENT_POLICIES);
+      cy.contains('Create agent policy').click();
+      cy.getBySel('createAgentPolicyNameField').type('testGlobal');
+      cy.getBySel('createAgentPolicyFlyoutBtn').click();
+      cy.contains(/^Agent policy 'testGlobal' created$/).click();
+      cy.contains('testGlobal').click();
+      cy.contains('Add integration').click();
+      cy.contains(integration).click();
+      addIntegration('testGlobal');
+      cy.contains('Add Elastic Agent later').click();
+      cy.contains('osquery_manager-');
+      cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
+        const item = response.body.items[0];
+
+        expect(item.inputs[0].config.osquery.value.packs.globalPack).to.deep.equal({
+          shard: 100,
+          queries: {},
+        });
+      });
+    });
+  });
 });
