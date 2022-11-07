@@ -135,6 +135,7 @@ describe('update_agent_tags', () => {
     );
 
     const errorResults = esClientMock.bulk.mock.calls[0][0] as any;
+    expect(errorResults.body[1].agent_id).toEqual(agentInHostedDoc._id);
     expect(errorResults.body[1].error).toEqual('Cannot modify tags on a hosted agent');
   });
 
@@ -149,24 +150,6 @@ describe('update_agent_tags', () => {
 
     const errorResults = esClient.bulk.mock.calls[0][0] as any;
     expect(errorResults.body[1].error).toEqual('error reason');
-  });
-
-  it('should write error action results when less agents updated than total', async () => {
-    const { esClient: esClientMock, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
-
-    esClientMock.updateByQuery.mockReset();
-    esClientMock.updateByQuery.mockResolvedValue({ failures: [], updated: 0, total: '1' } as any);
-
-    await updateAgentTags(
-      soClient,
-      esClientMock,
-      { agentIds: [agentInRegularDoc._id, agentInRegularDoc2._id] },
-      ['one'],
-      []
-    );
-
-    const errorResults = esClientMock.bulk.mock.calls[0][0] as any;
-    expect(errorResults.body[1].error).toEqual('Cannot modify tags on a hosted agent');
   });
 
   it('should run add tags async when actioning more agents than batch size', async () => {

@@ -94,6 +94,11 @@ export async function updateTagsBatch(
     hostedAgentError
   );
   const agentIds = filteredAgents.map((agent) => agent.id);
+  const hostedAgentIds = givenAgents
+    .filter(
+      (agent) => filteredAgents.find((filteredAgent) => filteredAgent.id === agent.id) === undefined
+    )
+    .map((agent) => agent.id);
 
   let query: estypes.QueryDslQueryContainer | undefined;
   if (options.kuery !== undefined) {
@@ -194,7 +199,10 @@ export async function updateTagsBatch(
   if ((res.total ?? total) < total) {
     await bulkCreateAgentActionResults(
       esClient,
-      [...Array(total - (res.total ?? total)).keys()].map((id) => ({
+      (options.kuery === undefined
+        ? hostedAgentIds
+        : [...Array(total - (res.total ?? total)).keys()]
+      ).map((id) => ({
         agentId: id + '',
         actionId,
         error: hostedAgentError,
