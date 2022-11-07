@@ -10,11 +10,11 @@ import {
   ALERT_CONTEXT_CLOUD,
   ALERT_CONTEXT_CONTAINER,
   ALERT_CONTEXT_HOST,
-  ALERT_CONTEXT_LABELS, 
-  ALERT_CONTEXT_ORCHESTRATOR, 
-  ALERT_CONTEXT_TAGS, 
-  ALERT_REASON, 
-  ALERT_RULE_PARAMETERS
+  ALERT_CONTEXT_LABELS,
+  ALERT_CONTEXT_ORCHESTRATOR,
+  ALERT_CONTEXT_TAGS,
+  ALERT_REASON,
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import {
@@ -87,7 +87,13 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
     const esClient = services.scopedClusterClient.asCurrentUser;
 
-    const { alertWithLifecycle, savedObjectsClient, getAlertStartedDate, getAlertUuid, ruleDataClient } = services;
+    const {
+      alertWithLifecycle,
+      savedObjectsClient,
+      getAlertStartedDate,
+      getAlertUuid,
+      ruleDataClient,
+    } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason, additionalContext) =>
       alertWithLifecycle({
         id,
@@ -254,7 +260,9 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       const alertUuid = getAlertUuid(recoveredAlertId);
 
       // fetch alert context from Alerts-As-Data
-      const alertHits = alertUuid ? await fetchAlertbyAlertUUID(ruleDataClient, alertUuid) : undefined;
+      const alertHits = alertUuid
+        ? await fetchAlertbyAlertUUID(ruleDataClient, alertUuid)
+        : undefined;
       const alertHitsSource = alertHits && alertHits.length > 0 ? alertHits[0]._source : undefined;
       const additionalContext = {
         cloud: alertHitsSource?.[ALERT_CONTEXT_CLOUD],
@@ -262,7 +270,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         orchestrator: alertHitsSource?.[ALERT_CONTEXT_ORCHESTRATOR],
         container: alertHitsSource?.[ALERT_CONTEXT_CONTAINER],
         labels: alertHitsSource?.[ALERT_CONTEXT_LABELS],
-        tags: alertHitsSource?.[ALERT_CONTEXT_TAGS]
+        tags: alertHitsSource?.[ALERT_CONTEXT_TAGS],
       };
 
       alert.setContext({
@@ -279,7 +287,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           timestamp: indexedStartedDate,
           spaceId,
         }),
-        ...additionalContext
+        ...additionalContext,
       });
     }
 
