@@ -66,6 +66,21 @@ export class SecurityPageObject extends FtrService {
       );
     },
 
+    getInfoMessage: async () => {
+      return await this.retry.try(async () => {
+        const infoMessageContainer = await this.retry.try(() =>
+          this.testSubjects.find('loginInfoMessage')
+        );
+        const infoMessageText = await infoMessageContainer.getVisibleText();
+
+        if (!infoMessageText) {
+          throw new Error('Login Info Message not present yet');
+        }
+
+        return infoMessageText;
+      });
+    },
+
     getErrorMessage: async () => {
       return await this.retry.try(async () => {
         const errorMessageContainer = await this.retry.try(() =>
