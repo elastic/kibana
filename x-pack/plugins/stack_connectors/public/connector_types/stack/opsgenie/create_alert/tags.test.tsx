@@ -105,7 +105,7 @@ describe('Tags', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('opsgenie-tags-rule-tags')).toBeInTheDocument();
-      expect(screen.getByText('The tags from the rule.')).toBeInTheDocument();
+      expect(screen.getByText('The tags of the rule.')).toBeInTheDocument();
     });
   });
 
@@ -122,11 +122,11 @@ describe('Tags', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('opsgenie-tags-rule-tags')).toBeInTheDocument();
-      expect(screen.getByText('The tags from the rule.')).toBeInTheDocument();
+      expect(screen.getByText('The tags of the rule.')).toBeInTheDocument();
     });
 
     act(() => {
-      userEvent.click(screen.getByText('The tags from the rule.'));
+      userEvent.click(screen.getByText('The tags of the rule.'));
     });
 
     await waitFor(() =>
