@@ -36,10 +36,10 @@ export const i18nTexts = {
     defaultMessage: 'Could not fetch diagnostics',
   }),
   diagnosticsSpaceUsed: i18n.translate('filesManagement.diagnostics.spaceUsedLabel', {
-    defaultMessage: 'Total space used',
+    defaultMessage: 'Disk space used',
   }),
   diagnosticsTotalCount: i18n.translate('filesManagement.diagnostics.totalCountLabel', {
-    defaultMessage: 'Total number of files',
+    defaultMessage: 'Number of files',
   }),
   diagnosticsBreakdownsStatus: i18n.translate('filesManagement.diagnostics.breakdownStatusTitle', {
     defaultMessage: 'Count by status',
