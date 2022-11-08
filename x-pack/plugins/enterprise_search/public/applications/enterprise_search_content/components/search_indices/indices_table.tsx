@@ -26,8 +26,7 @@ import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components'
 import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { SEARCH_INDEX_PATH } from '../../routes';
 import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
-import { crawlerStatusToColor, crawlerStatusToText } from '../../utils/crawler_status_helpers';
-import { ingestionMethodToText, isCrawlerIndex } from '../../utils/indices';
+import { ingestionMethodToText } from '../../utils/indices';
 import {
   ingestionStatusToColor,
   ingestionStatusToText,
@@ -121,26 +120,14 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
       ),
       render: (index: ElasticsearchViewIndex) => {
         const overviewPath = generateEncodedPath(SEARCH_INDEX_PATH, { indexName: index.name });
-        if (isCrawlerIndex(index)) {
-          const label = crawlerStatusToText(index.crawler?.most_recent_crawl_request_status);
-
-          return (
-            <EuiBadgeTo
-              to={overviewPath}
-              label={label}
-              color={crawlerStatusToColor(index.crawler?.most_recent_crawl_request_status)}
-            />
-          );
-        } else {
-          const label = ingestionStatusToText(index.ingestionStatus);
-          return (
-            <EuiBadgeTo
-              to={overviewPath}
-              label={label}
-              color={ingestionStatusToColor(index.ingestionStatus)}
-            />
-          );
-        }
+        const label = ingestionStatusToText(index.ingestionStatus);
+        return (
+          <EuiBadgeTo
+            to={overviewPath}
+            label={label}
+            color={ingestionStatusToColor(index.ingestionStatus)}
+          />
+        );
       },
       truncateText: true,
       width: '15%',

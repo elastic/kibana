@@ -48,7 +48,7 @@ const CONNECTOR_VALUES = {
   data: connectorIndex,
   index: indexToViewIndex(connectorIndex),
   ingestionMethod: IngestionMethod.CONNECTOR,
-  ingestionStatus: IngestionStatus.INCOMPLETE,
+  ingestionStatus: IngestionStatus.CONFIGURED,
   lastUpdated: 'never',
 };
 
