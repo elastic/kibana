@@ -8,8 +8,6 @@
 import { Journey } from '@kbn/journeys';
 import { waitForVisualizations } from '../utils';
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 export const journey = new Journey({
   kbnArchives: ['test/functional/fixtures/kbn_archiver/stress_test'],
   esArchives: ['test/functional/fixtures/es_archiver/stress_test'],
