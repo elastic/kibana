@@ -7,7 +7,7 @@
 
 import React, { useMemo, useEffect, useState, FC } from 'react';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+// import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiCallOut,
@@ -53,6 +53,7 @@ const SCATTERPLOT_MATRIX_DEFAULT_FIELDS = 4;
 const SCATTERPLOT_MATRIX_DEFAULT_FETCH_SIZE = 1000;
 const SCATTERPLOT_MATRIX_DEFAULT_FETCH_MIN_SIZE = 1;
 const SCATTERPLOT_MATRIX_DEFAULT_FETCH_MAX_SIZE = 10000;
+const DEFAULT_QUERY = { match_all: {} };
 
 const TOGGLE_ON = i18n.translate('xpack.ml.splom.toggleOn', {
   defaultMessage: 'On',
@@ -184,7 +185,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           ...(includeOutlierScoreField ? [outlierScoreField] : []),
         ];
 
-        const query = randomizeQuery
+        const foregroundQuery = randomizeQuery
           ? {
               function_score: {
                 query: searchQuery,
@@ -193,33 +194,60 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             }
           : searchQuery;
 
+        let backgroundQuery;
+        // @ts-ignore // match_all property doesn't exist
+        if (searchQuery && searchQuery.match_all && Object.keys(searchQuery.match_all).length > 0) {
+          backgroundQuery = randomizeQuery
+          ? {
+              function_score: {
+                query: DEFAULT_QUERY,
+                random_score: { seed: 10, field: '_seq_no' },
+              },
+            }
+          : DEFAULT_QUERY;
+        }
+
         const combinedRuntimeMappings =
           indexPattern && getCombinedRuntimeMappings(indexPattern, runtimeMappings);
-
-        const resp: estypes.SearchResponse = await esSearch({
-          index,
-          body: {
+        
+        const body = {
             fields: queryFields,
             _source: false,
-            query,
+            query: foregroundQuery,
             from: 0,
             size: fetchSize,
             ...(isRuntimeMappings(combinedRuntimeMappings)
               ? { runtime_mappings: combinedRuntimeMappings }
               : {}),
-          },
-        });
+          };
+
+        const promises = [
+          esSearch({
+            index,
+            body
+          })
+        ]
+
+        if (backgroundQuery) {
+          promises.push(esSearch({
+            index,
+            body: { ...body, query: backgroundQuery },
+          }))
+        }
+
+        // @ts-ignore estypes.SearchResponse 
+        const [foregroundResp, backGroundResp] = await Promise.all(promises);
 
         if (!options.didCancel) {
-          const items = resp.hits.hits
-            .map((d) =>
+          const items = foregroundResp.hits.hits
+            .map((d: any) =>
               getProcessedFields(d.fields ?? {}, (key: string) =>
                 key.startsWith(`${resultsField}.feature_importance`)
               )
             )
-            .filter((d) => !Object.keys(d).some((field) => Array.isArray(d[field])));
+            .filter((d: any) => !Object.keys(d).some((field) => Array.isArray(d[field])));
 
-          const originalDocsCount = resp.hits.hits.length;
+          const originalDocsCount = foregroundResp.hits.hits.length;
           const filteredDocsCount = originalDocsCount - items.length;
 
           if (originalDocsCount === filteredDocsCount) {
@@ -229,7 +257,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                   'All fetched documents included fields with arrays of values and cannot be visualized.',
               })
             );
-          } else if (resp.hits.hits.length !== items.length) {
+          } else if (foregroundResp.hits.hits.length !== items.length) {
             messages.push(
               i18n.translate('xpack.ml.splom.arrayFieldsWarningMessage', {
                 defaultMessage:
