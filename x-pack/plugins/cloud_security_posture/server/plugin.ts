@@ -44,10 +44,6 @@ import {
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
-  updatePackagePolicyRuntimeCfgVar,
-  getCspRulesSO,
-} from './routes/configuration/update_rules_configuration';
-import {
   removeFindingsStatsTask,
   scheduleFindingsStatsTask,
   setupFindingsStatsTask,
@@ -127,27 +123,15 @@ export class CspPlugin
         async (
           packagePolicy: PackagePolicy,
           context: RequestHandlerContext,
-          request: KibanaRequest
+          _: KibanaRequest
         ): Promise<PackagePolicy> => {
           if (isCspPackage(packagePolicy.package?.name)) {
             await this.initialize(core, plugins.taskManager);
 
             const soClient = (await context.core).savedObjects.client;
-            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const user = await plugins.security.authc.getCurrentUser(request);
-
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
 
-            const updatedPackagePolicy = await updatePackagePolicyRuntimeCfgVar({
-              rules: await getCspRulesSO(soClient, packagePolicy.id, packagePolicy.policy_id),
-              packagePolicy,
-              packagePolicyService: plugins.fleet.packagePolicyService,
-              esClient,
-              soClient,
-              user,
-            });
-
-            return updatedPackagePolicy;
+            return packagePolicy;
           }
 
           return packagePolicy;
