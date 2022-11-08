@@ -12,15 +12,15 @@ import {
   useAlertSearchBarStateContainer,
 } from './containers';
 import { AlertSearchBar } from './alert_search_bar';
-import { AlertSearchBarPropsWithUrlSync } from './types';
+import { AlertSearchBarWithUrlSyncProps } from './types';
 
-function InternalAlertSearchbarWithUrlSync(props: AlertSearchBarPropsWithUrlSync) {
+function InternalAlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
   const stateProps = useAlertSearchBarStateContainer();
 
   return <AlertSearchBar {...props} {...stateProps} />;
 }
 
-export function AlertSearchbarWithUrlSync(props: AlertSearchBarPropsWithUrlSync) {
+export function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
   return (
     <Provider value={alertSearchBarStateContainer}>
       <InternalAlertSearchbarWithUrlSync {...props} />
