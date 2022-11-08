@@ -155,7 +155,8 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
                   pageSize: urlQuery.pageSize,
-                  currentPageSize: pageSize,
+                  currentPageSize:
+                    pageSize !== undefined ? pageSize : findingsGroupByResource.data.page.length,
                 }),
               }}
             />

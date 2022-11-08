@@ -143,7 +143,8 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
                   pageSize: urlQuery.pageSize,
-                  currentPageSize: pageSize,
+                  currentPageSize:
+                    pageSize !== undefined ? pageSize : findingsGroupByNone.data.page.length,
                 }),
               }}
             />
