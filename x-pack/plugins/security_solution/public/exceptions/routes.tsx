@@ -52,26 +52,9 @@ const Exceptions = React.memo(ExceptionsContainerComponent);
 
 const renderExceptionsRoutes = () => <Exceptions />;
 
-// const ExceptionListDetailContainerComponent: React.FC = () => {
-//   return (
-//     <Switch>
-//       <Route path={'/exceptions/shared/:exceptionListId'} component={ExceptionsListDetailRoute} />
-//       <Route component={NotFoundPage} />
-//     </Switch>
-//   );
-// };
-
-// const ExceptionListDetails = React.memo(ExceptionListDetailContainerComponent);
-
-// const renderExceptionListDetailsRoute = () => <ExceptionListDetails />;
-
 export const routes = [
   {
     path: EXCEPTIONS_PATH,
     render: renderExceptionsRoutes,
   },
-  // {
-  //   path: '/exceptions/shared/:exceptionListId',
-  //   component: ExceptionListDetails,
-  // },
 ];
