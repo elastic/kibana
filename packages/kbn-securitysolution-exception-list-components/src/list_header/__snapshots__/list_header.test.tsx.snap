@@ -3,9 +3,7 @@
 exports[`ExceptionListHeader should render edit modal 1`] = `
 Object {
   "asFragment": [Function],
-  "baseElement": <body
-    class="euiBody-hasOverlayMask"
-  >
+  "baseElement": <body>
     <div>
       <div
         css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -74,7 +72,7 @@ Object {
                     >
                       <button
                         aria-label="Edit Text List Header"
-                        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                         data-test-subj="TitleEditIcon"
                         type="button"
                       >
@@ -116,7 +114,7 @@ Object {
                         >
                           <button
                             aria-label="Edit Text List Header"
-                            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                             data-test-subj="DescriptionEditIcon"
                             type="button"
                           >
@@ -176,15 +174,15 @@ Object {
                         class="euiFlexItem"
                       >
                         <button
-                          class="euiButton euiButton--primary euiButton--fill"
+                          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
                           data-test-subj="RightSideMenuItemsManageRulesButton"
                           type="button"
                         >
                           <span
-                            class="euiButtonContent euiButton__content"
+                            class="emotion-euiButtonDisplayContent"
                           >
                             <span
-                              class="euiButton__text"
+                              class="eui-textTruncate"
                             >
                               Manage rules
                             </span>
@@ -206,7 +204,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 type="button"
                               >
@@ -231,7 +229,9 @@ Object {
       </div>
     </div>
     <div
-      class="euiOverlayMask euiOverlayMask--aboveHeader"
+      class="euiOverlayMask"
+      data-euiportal="true"
+      data-relative-to-header="above"
     >
       <div
         data-eui="EuiFocusTrap"
@@ -243,7 +243,7 @@ Object {
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles"
             type="button"
           >
             <span
@@ -254,136 +254,132 @@ Object {
             />
           </button>
           <div
-            class="euiModal__flex"
+            class="euiModalHeader"
           >
             <div
-              class="euiModalHeader"
+              class="euiModalHeader__title"
+              data-test-subj="editModalTitle"
             >
-              <div
-                class="euiModalHeader__title"
-                data-test-subj="editModalTitle"
-              >
-                <h1>
-                  Edit List Name
-                </h1>
-              </div>
+              <h1>
+                Edit List Name
+              </h1>
             </div>
+          </div>
+          <div
+            class="euiModalBody"
+          >
             <div
-              class="euiModalBody"
+              class="euiModalBody__overflow"
             >
-              <div
-                class="euiModalBody__overflow"
+              <form
+                class="euiForm"
+                data-test-subj="editModalForm"
+                id="modalForm_generated-id"
               >
-                <form
-                  class="euiForm"
-                  data-test-subj="editModalForm"
-                  id="modalForm_generated-id"
+                <div
+                  class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+                  id="generated-id-row"
                 >
                   <div
-                    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
-                    id="generated-id-row"
+                    class="euiFormRow__labelWrapper"
+                  >
+                    <label
+                      aria-invalid="false"
+                      class="euiFormLabel euiFormRow__label"
+                      for="generated-id"
+                      id="generated-id-label"
+                    >
+                      Name
+                    </label>
+                  </div>
+                  <div
+                    class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormRow__labelWrapper"
-                    >
-                      <label
-                        aria-invalid="false"
-                        class="euiFormLabel euiFormRow__label"
-                        for="generated-id"
-                        id="generated-id-label"
-                      >
-                        Name
-                      </label>
-                    </div>
-                    <div
-                      class="euiFormRow__fieldWrapper"
+                      class="euiFormControlLayout euiFormControlLayout--fullWidth"
                     >
                       <div
-                        class="euiFormControlLayout euiFormControlLayout--fullWidth"
+                        class="euiFormControlLayout__childrenWrapper"
                       >
-                        <div
-                          class="euiFormControlLayout__childrenWrapper"
-                        >
-                          <input
-                            aria-invalid="false"
-                            class="euiFieldText euiFieldText--fullWidth"
-                            data-test-subj="editModalNameTextField"
-                            id="generated-id"
-                            name="name"
-                            type="text"
-                            value="List Name"
-                          />
-                        </div>
+                        <input
+                          aria-invalid="false"
+                          class="euiFieldText euiFieldText--fullWidth"
+                          data-test-subj="editModalNameTextField"
+                          id="generated-id"
+                          name="name"
+                          type="text"
+                          value="List Name"
+                        />
                       </div>
                     </div>
                   </div>
+                </div>
+                <div
+                  class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+                  id="generated-id-row"
+                >
                   <div
-                    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
-                    id="generated-id-row"
+                    class="euiFormRow__labelWrapper"
                   >
-                    <div
-                      class="euiFormRow__labelWrapper"
+                    <label
+                      class="euiFormLabel euiFormRow__label"
+                      for="generated-id"
+                      id="generated-id-label"
                     >
-                      <label
-                        class="euiFormLabel euiFormRow__label"
-                        for="generated-id"
-                        id="generated-id-label"
-                      >
-                        Description
-                      </label>
-                    </div>
-                    <div
-                      class="euiFormRow__fieldWrapper"
-                    >
-                      <textarea
-                        class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
-                        data-test-subj="editModalDescriptionTextField"
-                        id="generated-id"
-                        name="description"
-                        rows="6"
-                      >
-                        List description
-                      </textarea>
-                    </div>
+                      Description
+                    </label>
                   </div>
-                </form>
-              </div>
+                  <div
+                    class="euiFormRow__fieldWrapper"
+                  >
+                    <textarea
+                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
+                      data-test-subj="editModalDescriptionTextField"
+                      id="generated-id"
+                      name="description"
+                      rows="6"
+                    >
+                      List description
+                    </textarea>
+                  </div>
+                </div>
+              </form>
             </div>
-            <div
-              class="euiModalFooter"
+          </div>
+          <div
+            class="euiModalFooter"
+          >
+            <button
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              data-test-subj="editModalCancelBtn"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty euiButtonEmpty--primary"
-                data-test-subj="editModalCancelBtn"
-                type="button"
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
               >
                 <span
-                  class="euiButtonContent euiButtonEmpty__content"
+                  class="euiButtonEmpty__text"
                 >
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Cancel
-                  </span>
+                  Cancel
                 </span>
-              </button>
-              <button
-                class="euiButton euiButton--primary euiButton--fill"
-                data-test-subj="editModalSaveBtn"
-                form="modalForm_generated-id"
-                type="submit"
+              </span>
+            </button>
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+              data-test-subj="editModalSaveBtn"
+              form="modalForm_generated-id"
+              type="submit"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent euiButton__content"
+                  class="eui-textTruncate"
                 >
-                  <span
-                    class="euiButton__text"
-                  >
-                    Save
-                  </span>
+                  Save
                 </span>
-              </button>
-            </div>
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -457,7 +453,7 @@ Object {
                   >
                     <button
                       aria-label="Edit Text List Header"
-                      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                      class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                       data-test-subj="TitleEditIcon"
                       type="button"
                     >
@@ -499,7 +495,7 @@ Object {
                       >
                         <button
                           aria-label="Edit Text List Header"
-                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                           data-test-subj="DescriptionEditIcon"
                           type="button"
                         >
@@ -559,15 +555,15 @@ Object {
                       class="euiFlexItem"
                     >
                       <button
-                        class="euiButton euiButton--primary euiButton--fill"
+                        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
                         data-test-subj="RightSideMenuItemsManageRulesButton"
                         type="button"
                       >
                         <span
-                          class="euiButtonContent euiButton__content"
+                          class="emotion-euiButtonDisplayContent"
                         >
                           <span
-                            class="euiButton__text"
+                            class="eui-textTruncate"
                           >
                             Manage rules
                           </span>
@@ -589,7 +585,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               type="button"
                             >
@@ -739,7 +735,7 @@ Object {
                     >
                       <button
                         aria-label="Edit Text List Header"
-                        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                         data-test-subj="TitleEditIcon"
                         type="button"
                       >
@@ -781,7 +777,7 @@ Object {
                         >
                           <button
                             aria-label="Edit Text List Header"
-                            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                             data-test-subj="DescriptionEditIcon"
                             type="button"
                           >
@@ -841,15 +837,15 @@ Object {
                         class="euiFlexItem"
                       >
                         <button
-                          class="euiButton euiButton--primary euiButton--fill"
+                          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
                           data-test-subj="RightSideMenuItemsManageRulesButton"
                           type="button"
                         >
                           <span
-                            class="euiButtonContent euiButton__content"
+                            class="emotion-euiButtonDisplayContent"
                           >
                             <span
-                              class="euiButton__text"
+                              class="eui-textTruncate"
                             >
                               Manage rules
                             </span>
@@ -871,7 +867,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 type="button"
                               >
@@ -964,7 +960,7 @@ Object {
                   >
                     <button
                       aria-label="Edit Text List Header"
-                      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                      class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                       data-test-subj="TitleEditIcon"
                       type="button"
                     >
@@ -1006,7 +1002,7 @@ Object {
                       >
                         <button
                           aria-label="Edit Text List Header"
-                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                           data-test-subj="DescriptionEditIcon"
                           type="button"
                         >
@@ -1066,15 +1062,15 @@ Object {
                       class="euiFlexItem"
                     >
                       <button
-                        class="euiButton euiButton--primary euiButton--fill"
+                        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
                         data-test-subj="RightSideMenuItemsManageRulesButton"
                         type="button"
                       >
                         <span
-                          class="euiButtonContent euiButton__content"
+                          class="emotion-euiButtonDisplayContent"
                         >
                           <span
-                            class="euiButton__text"
+                            class="eui-textTruncate"
                           >
                             Manage rules
                           </span>
@@ -1096,7 +1092,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               type="button"
                             >
@@ -1320,15 +1316,15 @@ Object {
                         class="euiFlexItem"
                       >
                         <button
-                          class="euiButton euiButton--primary euiButton--fill"
+                          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
                           data-test-subj="RightSideMenuItemsManageRulesButton"
                           type="button"
                         >
                           <span
-                            class="euiButtonContent euiButton__content"
+                            class="emotion-euiButtonDisplayContent"
                           >
                             <span
-                              class="euiButton__text"
+                              class="eui-textTruncate"
                             >
                               Manage rules
                             </span>
@@ -1350,7 +1346,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-disabled-hoverStyles"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 disabled=""
                                 type="button"
@@ -1518,15 +1514,15 @@ Object {
                       class="euiFlexItem"
                     >
                       <button
-                        class="euiButton euiButton--primary euiButton--fill"
+                        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
                         data-test-subj="RightSideMenuItemsManageRulesButton"
                         type="button"
                       >
                         <span
-                          class="euiButtonContent euiButton__content"
+                          class="emotion-euiButtonDisplayContent"
                         >
                           <span
-                            class="euiButton__text"
+                            class="eui-textTruncate"
                           >
                             Manage rules
                           </span>
@@ -1548,7 +1544,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-disabled-hoverStyles"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               disabled=""
                               type="button"
@@ -1773,15 +1769,15 @@ Object {
                         class="euiFlexItem"
                       >
                         <button
-                          class="euiButton euiButton--primary euiButton--fill"
+                          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
                           data-test-subj="RightSideMenuItemsManageRulesButton"
                           type="button"
                         >
                           <span
-                            class="euiButtonContent euiButton__content"
+                            class="emotion-euiButtonDisplayContent"
                           >
                             <span
-                              class="euiButton__text"
+                              class="eui-textTruncate"
                             >
                               Manage rules
                             </span>
@@ -1803,7 +1799,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 type="button"
                               >
@@ -1844,7 +1840,7 @@ Object {
           tabindex="0"
         >
           <div
-            class="emotion-euiPopoverArrow-bottom"
+            class="euiPopover__arrow emotion-euiPopoverArrow-bottom"
             data-popover-arrow="bottom"
             style="left: 10px; top: 0px;"
           />
@@ -2051,15 +2047,15 @@ Object {
                       class="euiFlexItem"
                     >
                       <button
-                        class="euiButton euiButton--primary euiButton--fill"
+                        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
                         data-test-subj="RightSideMenuItemsManageRulesButton"
                         type="button"
                       >
                         <span
-                          class="euiButtonContent euiButton__content"
+                          class="emotion-euiButtonDisplayContent"
                         >
                           <span
-                            class="euiButton__text"
+                            class="eui-textTruncate"
                           >
                             Manage rules
                           </span>
@@ -2081,7 +2077,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               type="button"
                             >

@@ -5,7 +5,7 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
   className="canvasDataSource__section"
 >
   <button
-    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton"
+    className="euiButtonEmpty euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton css-9t7nyf-empty-primary"
     disabled={false}
     onClick={[Function]}
     type="button"
@@ -57,7 +57,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
   className="canvasDataSource__section"
 >
   <button
-    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton"
+    className="euiButtonEmpty euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton css-9t7nyf-empty-primary"
     disabled={false}
     onClick={[Function]}
     type="button"
@@ -102,7 +102,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+        className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -122,21 +122,16 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        className="euiButton euiButton--success euiButton--small euiButton--fill"
+        className="euiButton emotion-euiButtonDisplay-s-s-fill-success"
         disabled={false}
         onClick={[Function]}
-        style={
-          Object {
-            "minWidth": undefined,
-          }
-        }
         type="button"
       >
         <span
-          className="euiButtonContent euiButton__content"
+          className="emotion-euiButtonDisplayContent"
         >
           <span
-            className="euiButton__text"
+            className="eui-textTruncate"
           >
             Save
           </span>
