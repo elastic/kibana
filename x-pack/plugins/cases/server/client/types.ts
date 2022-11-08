@@ -50,6 +50,7 @@ export interface CasesClientArgs {
   readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   readonly securityStartPlugin: SecurityPluginStart;
+  readonly spaceId: string;
   readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
 

@@ -6246,6 +6246,21 @@
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.TimelineEventsAllRequestOptions.filterStatus",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filterStatus",
+            "description": [],
+            "signature": [
+              "AlertStatus",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
