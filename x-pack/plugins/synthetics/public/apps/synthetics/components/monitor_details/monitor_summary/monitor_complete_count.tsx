@@ -25,6 +25,7 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
 
   return (
     <ExploratoryViewEmbeddable
+      align="left"
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
         {

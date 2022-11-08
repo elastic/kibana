@@ -48,7 +48,7 @@ export const MonitorHistory = () => {
               <EuiFlexGrid columns={2} gutterSize="s">
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem>
+                    <EuiFlexItem grow={false}>
                       <MonitorCompleteCount from={dateRangeStart} to={dateRangeEnd} />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -68,7 +68,7 @@ export const MonitorHistory = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem>
+                    <EuiFlexItem grow={false}>
                       <MonitorErrorsCount from={dateRangeStart} to={dateRangeEnd} />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -86,7 +86,7 @@ export const MonitorHistory = () => {
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <MonitorTotalRunsCount from={dateRangeStart} to={dateRangeEnd} />
                 </EuiFlexItem>
               </EuiFlexGrid>

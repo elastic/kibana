@@ -25,6 +25,7 @@ export const MonitorTotalRunsCount = (props: MonitorTotalRunsCountProps) => {
 
   return (
     <ExploratoryViewEmbeddable
+      align="left"
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
         {
