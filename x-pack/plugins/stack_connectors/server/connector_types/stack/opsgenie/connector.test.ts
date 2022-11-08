@@ -147,4 +147,62 @@ describe('OpsgenieConnector', () => {
       data: { user: 'sam' },
     });
   });
+
+  describe('getResponseErrorMessage', () => {
+    it('returns an unknown error message', () => {
+      // @ts-expect-error expects an axios error as the parameter
+      expect(connector.getResponseErrorMessage({})).toMatchInlineSnapshot(`"unknown error"`);
+    });
+
+    it('returns the error.message', () => {
+      // @ts-expect-error expects an axios error as the parameter
+      expect(connector.getResponseErrorMessage({ message: 'a message' })).toMatchInlineSnapshot(
+        `"a message"`
+      );
+    });
+
+    it('returns the error.response.data.message', () => {
+      expect(
+        // @ts-expect-error expects an axios error as the parameter
+        connector.getResponseErrorMessage({ response: { data: { message: 'a message' } } })
+      ).toMatchInlineSnapshot(`"a message"`);
+    });
+
+    it('returns detailed message', () => {
+      // @ts-expect-error expects an axios error as the parameter
+      const error: AxiosError<FailureResponseType> = {
+        response: {
+          data: {
+            errors: {
+              message: 'message field had a problem',
+            },
+            message: 'toplevel message',
+          },
+        },
+      };
+
+      expect(connector.getResponseErrorMessage(error)).toMatchInlineSnapshot(
+        `"toplevel message: {\\"message\\":\\"message field had a problem\\"}"`
+      );
+    });
+
+    it('returns detailed message with multiple entires', () => {
+      // @ts-expect-error expects an axios error as the parameter
+      const error: AxiosError<FailureResponseType> = {
+        response: {
+          data: {
+            errors: {
+              message: 'message field had a problem',
+              visibleTo: 'visibleTo field had a problem',
+            },
+            message: 'toplevel message',
+          },
+        },
+      };
+
+      expect(connector.getResponseErrorMessage(error)).toMatchInlineSnapshot(
+        `"toplevel message: {\\"message\\":\\"message field had a problem\\",\\"visibleTo\\":\\"visibleTo field had a problem\\"}"`
+      );
+    });
+  });
 });
