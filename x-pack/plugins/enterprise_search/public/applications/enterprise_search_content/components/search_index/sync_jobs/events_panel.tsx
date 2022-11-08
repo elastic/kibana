@@ -76,9 +76,12 @@ export const SyncJobEventsPanel: React.FC<SyncJobsEventPanelProps> = ({
     },
     {
       date: dateToString(cancelationRequestedAt),
-      title: i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.events.completed', {
-        defaultMessage: 'Cancelation requested',
-      }),
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.index.syncJobs.events.cancelationRequested',
+        {
+          defaultMessage: 'Cancelation requested',
+        }
+      ),
     },
     {
       date: dateToString(canceledAt),

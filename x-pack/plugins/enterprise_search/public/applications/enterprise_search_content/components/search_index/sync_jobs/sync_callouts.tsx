@@ -73,7 +73,7 @@ export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => 
             {i18n.translate('xpack.enterpriseSearch.content.syncJobs.flyout.canceledDescription', {
               defaultMessage: 'Sync canceled at {date}.',
               values: {
-                error: dateToString(syncJob.canceled_at ?? ''),
+                date: dateToString(syncJob.canceled_at ?? ''),
               },
             })}
           </EuiCallOut>
@@ -124,7 +124,7 @@ export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => 
                   )
             }
           >
-            {i18n.translate('xpack.enterpriseSearch.content.syncJobs.flyout.completedDescription', {
+            {i18n.translate('xpack.enterpriseSearch.content.syncJobs.flyout.startedAtDescription', {
               defaultMessage: 'Started at {date}.',
               values: {
                 date: dateToString(syncJob.started_at),
