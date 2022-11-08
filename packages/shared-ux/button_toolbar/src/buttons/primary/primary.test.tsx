@@ -14,13 +14,13 @@ import { PrimaryButton } from './primary';
 describe('<ToolbarButton />', () => {
   test('is rendered', () => {
     const component = mountWithIntl(<PrimaryButton label="test" />);
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   test('it can be passed a functional onClick handler', () => {
     const mockHandler = jest.fn();
     const component = mountWithIntl(<PrimaryButton label="withOnClick" onClick={mockHandler} />);
-    component.simulate('click');
+    component.find('button').simulate('click');
     expect(mockHandler).toHaveBeenCalled();
   });
 });
