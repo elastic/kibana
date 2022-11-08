@@ -13,6 +13,7 @@ export type {
   CustomPaletteArguments,
   CustomPaletteState,
   SystemPaletteArguments,
+  SystemPaletteExpressionFunctionDefinition,
 } from './expressions/palette';
 export { palette, systemPalette } from './expressions/palette';
 
