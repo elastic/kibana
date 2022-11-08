@@ -139,8 +139,10 @@ describe('SyncJobsViewLogic', () => {
           ...DEFAULT_VALUES,
           syncJobs: [
             {
-              docsCount: 50,
-              duration: undefined,
+              ...syncJob,
+              completed_at: null,
+              deleted_document_count: 0,
+              duration: expect.anything(),
               lastSync: syncJob.created_at,
               status: SyncStatus.IN_PROGRESS,
             },
