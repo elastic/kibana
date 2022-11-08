@@ -5,19 +5,19 @@
  * 2.0.
  */
 import { useEffect, useMemo } from 'react';
-import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import { useHttp } from '../../../../common/lib/kibana/hooks';
 import { useSummaryArtifact } from '../../../hooks/artifacts';
 import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions_api_client';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 /**
  * Checks if the current user should be able to see the host isolation exceptions
- * menu item based on their current privileges
+ * menu item based on their current privileges, or, if they are no longer able to access it (due to authz),
+ * that they can still see the page because entries exist.
  */
 export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   const http = useHttp();
-  // TODO: why doesn't this use useUserPrivileges?
-  const privileges = useEndpointPrivileges();
+  const privileges = useUserPrivileges().endpointPrivileges;
   const apiQuery = useSummaryArtifact(
     HostIsolationExceptionsApiClient.getInstance(http),
     undefined,
