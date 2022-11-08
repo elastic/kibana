@@ -67,7 +67,7 @@ export const Actions = ({
           <EuiButtonIcon
             isDisabled={isDisabled || !canUpdatePrivateMonitor}
             iconType="pencil"
-            href={`${basePath}/app/uptime/edit-monitor/${id}`}
+            href={`${basePath}/app/uptime/edit-monitor/${configId}`}
             aria-label={EDIT_MONITOR_LABEL}
             data-test-subj="monitorManagementEditMonitor"
           />
@@ -87,7 +87,7 @@ export const Actions = ({
           <DeleteMonitor
             onUpdate={onUpdate}
             name={name}
-            id={id}
+            configId={configId}
             isDisabled={isDisabled || isProjectMonitor || !canUpdatePrivateMonitor}
           />
         </EuiToolTip>
