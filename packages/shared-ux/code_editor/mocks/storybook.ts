@@ -9,11 +9,7 @@ import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 
 import type { Props as CodeEditorProps } from '@kbn/shared-ux-code-editor-types';
 
-type PropArguments = Pick<
-  CodeEditorProps,
-  | 'languageId'
-  | 'value'
->;
+type PropArguments = Pick<CodeEditorProps, 'languageId' | 'value'>;
 
 export type Params = Record<keyof PropArguments, any>;
 
@@ -29,17 +25,17 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
 > {
   propArguments = {
     languageId: {
-        control: {
-            type: 'select',
-        },
-        defaultValue: 'json',
+      control: {
+        type: 'select',
+      },
+      defaultValue: 'json',
     },
     value: {
-        controle: {
-            type: 'text',
-        },
-        defaultValue: 'initial code editor value',
-    }
+      controle: {
+        type: 'text',
+      },
+      defaultValue: 'initial code editor value',
+    },
     // ariaLabel: {
     //     control: {
     //       type: 'text',
@@ -53,8 +49,8 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
 
   getProps(params?: Params): CodeEditorProps {
     return {
-        languageId: this.getArgumentValue('languageId', params),
-        value: this.getArgumentValue('value', params),
+      languageId: this.getArgumentValue('languageId', params),
+      value: this.getArgumentValue('value', params),
     };
   }
 
