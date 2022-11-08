@@ -75,6 +75,9 @@ export class ApiService implements GuidedOnboardingApi {
    */
   public fetchActiveGuideState$(): Observable<GuideState | undefined> {
     const currentState = this.guideState$.value;
+    // if currentState is undefined, it can be because there is no active guide or we haven't fetched the data from the backend
+    // check if there is no request in flight
+    // also check if we have fetched the data from the backend already once, if yes no request is sent
     if (!currentState && !this.isGuideStateLoading && !this.isGuideStateInitialized) {
       this.isGuideStateLoading = true;
       return concat(this.createGetStateObservable(), this.guideState$);
