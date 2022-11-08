@@ -40,7 +40,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+    <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
       <EuiFlexItem grow={false}>
         <EuiToolTip
           position="top"
@@ -90,7 +90,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
           />
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={true} style={{ justifyContent: 'flex-end' }}>
         <CISBenchmarkIcon
           type={cluster.meta.benchmarkId}
           name={cluster.meta.benchmarkName}

@@ -10,24 +10,20 @@ import {
   AreaSeries,
   Axis,
   Chart,
-  ElementClickListener,
   niceTimeFormatByDay,
-  Partition,
   PartitionElementEvent,
-  PartitionLayout,
   Settings,
   timeFormatter,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTextProps, EuiTitle } from '@elastic/eui';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
-import { statusColors } from '../../../common/constants';
 import type { PostureTrend, Stats } from '../../../../common/types';
-import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
 interface CloudPostureScoreChartProps {
+  compact?: boolean;
   trend: PostureTrend[];
   data: Stats;
   id: string;
@@ -36,76 +32,18 @@ interface CloudPostureScoreChartProps {
 
 const getPostureScorePercentage = (postureScore: number): string => `${Math.round(postureScore)}%`;
 
-const ScoreChart = ({
-  data: { totalPassed, totalFailed },
-  id,
-  partitionOnElementClick,
-}: Omit<CloudPostureScoreChartProps, 'trend'>) => {
-  const data = [
-    { label: RULE_PASSED, value: totalPassed },
-    { label: RULE_FAILED, value: totalFailed },
-  ];
-  const {
-    services: { charts },
-  } = useKibana();
-
-  return (
-    <Chart size={{ height: 90, width: 90 }}>
-      <Settings
-        theme={[
-          // theme overrides
-          {
-            partition: {
-              linkLabel: { maximumSection: Infinity, maxCount: 0 },
-              outerSizeRatio: 0.75,
-              emptySizeRatio: 0.7,
-            },
-          },
-          // theme
-          charts.theme.useChartsTheme(),
-        ]}
-        baseTheme={charts.theme.useChartsBaseTheme()}
-        onElementClick={partitionOnElementClick as ElementClickListener}
-      />
-      <Partition
-        id={id}
-        data={data}
-        valueGetter="percent"
-        valueAccessor={(d) => d.value}
-        layout={PartitionLayout.sunburst}
-        layers={[
-          {
-            groupByRollup: (d: { label: string }) => d.label,
-            shape: {
-              fillColor: (d, index) =>
-                d.dataName === RULE_PASSED ? statusColors.success : statusColors.danger,
-            },
-          },
-        ]}
-      />
-    </Chart>
-  );
-};
-
 const PercentageInfo = ({
+  compact,
   postureScore,
   totalPassed,
   totalFindings,
-}: CloudPostureScoreChartProps['data']) => {
+}: CloudPostureScoreChartProps['data'] & { compact: CloudPostureScoreChartProps['compact'] }) => {
   const percentage = getPostureScorePercentage(postureScore);
 
   return (
-    <EuiFlexGroup direction="column" justifyContent="center" gutterSize="none">
-      <EuiTitle css={{ fontSize: 42 }}>
-        <h3>{percentage}</h3>
-      </EuiTitle>
-      {/* <EuiText size="xs">*/}
-      {/*  <CompactFormattedNumber number={totalPassed} />*/}
-      {/*  {'/'}*/}
-      {/*  <CompactFormattedNumber number={totalFindings} />*/}
-      {/*  {' Findings passed'}*/}
-      {/* </EuiText>*/}
-    </EuiFlexGroup>
+    <EuiTitle css={{ fontSize: compact ? 22 : 42 }}>
+      <h3>{percentage}</h3>
+    </EuiTitle>
   );
 };
 
@@ -156,43 +94,56 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
   );
 };
 
+const CounterLink = ({
+  text,
+  count,
+  color,
+}: {
+  count: number;
+  text: string;
+  color: EuiTextProps['color'];
+}) => (
+  <EuiLink color="text" css={{ display: 'flex' }}>
+    <EuiText color={color} style={{ fontWeight: 500 }} size="s">
+      <CompactFormattedNumber number={count} abbreviateAbove={999} />
+      &nbsp;
+    </EuiText>
+    <EuiText size="s">{text}</EuiText>
+  </EuiLink>
+);
+
 export const CloudPostureScoreChart = ({
   data,
   trend,
   id,
   partitionOnElementClick,
+  compact,
 }: CloudPostureScoreChartProps) => (
-  <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-    <EuiFlexItem grow={1}>
-      <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="none">
-        {/* <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>*/}
-        {/*  <ScoreChart {...{ id, data, partitionOnElementClick }} />*/}
-        {/* </EuiFlexItem>*/}
+  <EuiFlexGroup
+    direction="column"
+    justifyContent="spaceBetween"
+    style={{ height: '100%' }}
+    gutterSize="none"
+  >
+    <EuiFlexItem grow={2}>
+      <EuiFlexGroup direction="row" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <PercentageInfo {...data} />
+          <PercentageInfo {...data} compact={compact} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexEnd" style={{ paddingRight: 42 }}>
-            <EuiLink color="text" css={{ display: 'flex' }}>
-              <EuiText color="success" style={{ fontWeight: 500 }} size="s">
-                <CompactFormattedNumber number={285} abbreviateAbove={999} />
-                &nbsp;
-              </EuiText>
-              <EuiText size="s">{`passed`}</EuiText>
-            </EuiLink>
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            alignItems={compact ? 'center' : 'flexStart'}
+            style={{ paddingRight: 42 }}
+          >
+            <CounterLink text="passed" count={data.totalPassed} color="success" />
             &nbsp;{`-`}&nbsp;
-            <EuiLink color="text" css={{ display: 'flex' }}>
-              <EuiText color="danger" style={{ fontWeight: 500 }} size="s">
-                <CompactFormattedNumber number={77} abbreviateAbove={999} />
-                &nbsp;
-              </EuiText>
-              <EuiText size="s">{`failed`}</EuiText>
-            </EuiLink>
+            <CounterLink text="failed" count={data.totalFailed} color="danger" />
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
-    <EuiFlexItem grow={6}>
+    <EuiFlexItem grow={compact ? 8 : 6}>
       <ComplianceTrendChart trend={trend} />
     </EuiFlexItem>
   </EuiFlexGroup>

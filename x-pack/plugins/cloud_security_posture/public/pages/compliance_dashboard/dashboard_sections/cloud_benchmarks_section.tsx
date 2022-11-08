@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { PartitionElementEvent } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ChartPanel } from '../../../components/chart_panel';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
@@ -105,8 +104,9 @@ export const CloudBenchmarksSection = ({
             <ClusterDetailsBox cluster={cluster} />
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.second}>
-            <ChartPanel hasBorder={false}>
+            <div style={{ padding: '0 16px', height: '100%' }}>
               <CloudPostureScoreChart
+                compact
                 id={`${cluster.meta.clusterId}_score_chart`}
                 data={cluster.stats}
                 trend={cluster.trend}
@@ -114,10 +114,10 @@ export const CloudBenchmarksSection = ({
                   handleElementClick(cluster.meta.clusterId, elements)
                 }
               />
-            </ChartPanel>
+            </div>
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.third}>
-            <ChartPanel hasBorder={false}>
+            <div style={{ padding: '0 16px' }}>
               <RisksTable
                 data={cluster.groupedFindingsEvaluation}
                 maxItems={3}
@@ -126,7 +126,7 @@ export const CloudBenchmarksSection = ({
                 }
                 onViewAllClick={() => handleViewAllClick(cluster.meta.clusterId)}
               />
-            </ChartPanel>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
