@@ -18,12 +18,12 @@ import {
   Settings,
   timeFormatter,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiText, EuiHorizontalRule, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
+import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import { statusColors } from '../../../common/constants';
 import type { PostureTrend, Stats } from '../../../../common/types';
-import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
@@ -95,14 +95,16 @@ const PercentageInfo = ({
   const percentage = getPostureScorePercentage(postureScore);
 
   return (
-    <EuiFlexGroup direction="column" justifyContent="center">
-      <EuiText style={{ fontSize: 40, fontWeight: 'bold', lineHeight: 1 }}>{percentage}</EuiText>
-      <EuiText size="xs">
-        <CompactFormattedNumber number={totalPassed} />
-        {'/'}
-        <CompactFormattedNumber number={totalFindings} />
-        {' Findings passed'}
-      </EuiText>
+    <EuiFlexGroup direction="column" justifyContent="center" gutterSize="none">
+      <EuiTitle css={{ fontSize: 42 }}>
+        <h3>{percentage}</h3>
+      </EuiTitle>
+      {/* <EuiText size="xs">*/}
+      {/*  <CompactFormattedNumber number={totalPassed} />*/}
+      {/*  {'/'}*/}
+      {/*  <CompactFormattedNumber number={totalFindings} />*/}
+      {/*  {' Findings passed'}*/}
+      {/* </EuiText>*/}
     </EuiFlexGroup>
   );
 };
@@ -149,14 +151,7 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         tickFormat={timeFormatter(niceTimeFormatByDay(2))}
         ticks={4}
       />
-      <Axis
-        ticks={3}
-        id="left-axis"
-        position="left"
-        showGridLines
-        domain={{ min: 0, max: 100 }}
-        tickFormat={(rawScore) => getPostureScorePercentage(rawScore)}
-      />
+      <Axis ticks={3} id="left-axis" position="left" showGridLines domain={{ min: 0, max: 100 }} />
     </Chart>
   );
 };
@@ -167,18 +162,36 @@ export const CloudPostureScoreChart = ({
   id,
   partitionOnElementClick,
 }: CloudPostureScoreChartProps) => (
-  <EuiFlexGroup direction="column" gutterSize="none">
-    <EuiFlexItem grow={4}>
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-          <ScoreChart {...{ id, data, partitionOnElementClick }} />
-        </EuiFlexItem>
+  <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+    <EuiFlexItem grow={1}>
+      <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="none">
+        {/* <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>*/}
+        {/*  <ScoreChart {...{ id, data, partitionOnElementClick }} />*/}
+        {/* </EuiFlexItem>*/}
         <EuiFlexItem>
           <PercentageInfo {...data} />
         </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd" style={{ paddingRight: 16 }}>
+            <EuiLink color="text" css={{ display: 'flex' }}>
+              <EuiText color="success" style={{ fontWeight: 500 }} size="s">
+                <CompactFormattedNumber number={285} abbreviateAbove={999} />
+                &nbsp;
+              </EuiText>
+              <EuiText size="s">{`passed`}</EuiText>
+            </EuiLink>
+            &nbsp;{`-`}&nbsp;
+            <EuiLink color="text" css={{ display: 'flex' }}>
+              <EuiText color="danger" style={{ fontWeight: 500 }} size="s">
+                <CompactFormattedNumber number={77} abbreviateAbove={999} />
+                &nbsp;
+              </EuiText>
+              <EuiText size="s">{`failed`}</EuiText>
+            </EuiLink>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
-    <EuiHorizontalRule margin="xs" />
     <EuiFlexItem grow={6}>
       <ComplianceTrendChart trend={trend} />
     </EuiFlexItem>
