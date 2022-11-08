@@ -25,6 +25,8 @@ import {
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
+import { ExperimentalFeaturesService } from '../../../services';
+
 import { AgentRefreshContext } from './hooks';
 import {
   AgentLogs,
@@ -66,6 +68,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       navigateToApp(routeState.onDoneNavigateTo[0], routeState.onDoneNavigateTo[1]);
     }
   }, [routeState, navigateToApp]);
+  const { showRequestDiagnostics } = ExperimentalFeaturesService.get();
 
   const host = agentData?.item?.local_metadata?.host;
 
@@ -135,7 +138,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   );
 
   const headerTabs = useMemo(() => {
-    return [
+    const tabs = [
       {
         id: 'details',
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
@@ -152,16 +155,19 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         href: getHref('agent_details_logs', { agentId, tabId: 'logs' }),
         isSelected: tabId === 'logs',
       },
-      {
+    ];
+    if (showRequestDiagnostics) {
+      tabs.push({
         id: 'diagnostics',
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.diagnosticsTab', {
           defaultMessage: 'Diagnostics',
         }),
         href: getHref('agent_details_diagnostics', { agentId, tabId: 'diagnostics' }),
         isSelected: tabId === 'diagnostics',
-      },
-    ];
-  }, [getHref, agentId, tabId]);
+      });
+    }
+    return tabs;
+  }, [getHref, agentId, tabId, showRequestDiagnostics]);
 
   return (
     <AgentRefreshContext.Provider

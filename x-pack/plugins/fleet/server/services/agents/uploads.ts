@@ -15,7 +15,11 @@ import type { ResponseHeaders } from '@kbn/core-http-server';
 
 import type { AgentDiagnostics } from '../../../common/types/models';
 import { appContextService } from '../app_context';
-import { AGENT_ACTIONS_INDEX, agentRouteService } from '../../../common';
+import {
+  AGENT_ACTIONS_INDEX,
+  agentRouteService,
+  AGENT_ACTIONS_RESULTS_INDEX,
+} from '../../../common';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -23,27 +27,26 @@ export async function getAgentUploads(
   esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentDiagnostics[]> {
-  // TODO filter agentId
-  const filesMetadata = await esClient.search({
-    index: '.fleet-agent-files',
-    size: 20,
-  });
-  const files = filesMetadata.hits.hits.map((hit) => ({
-    ...(hit._source as any).file,
-    id: hit._id,
-  }));
+  const getFile = async (fileId: string) => {
+    if (!fileId) return;
+    const file = await esClient.get({
+      index: '.fleet-agent-files',
+      id: fileId,
+    });
+    return {
+      id: file._id,
+      ...(file._source as any)?.file,
+    };
+  };
 
   const actions = await _getRequestDiagnosticsActions(esClient, agentId);
 
-  const result = actions.map((action, index) => {
-    let file = files.find((item) => item.action_id === action.actionId);
-    // TODO mock, remove when files contain actionId
-    if (index === actions.length - 1) {
-      file = files[0];
-    }
+  const results = [];
+  for (const action of actions) {
+    const file = await getFile(action.fileId);
     const fileName = file?.name ?? `${moment(action.timestamp!).format('YYYY-MM-DD HH:mm:ss')}.zip`;
     const filePath = file ? agentRouteService.getAgentFileDownloadLink(file.id, file.name) : '';
-    return {
+    const result = {
       actionId: action.actionId,
       id: file?.id ?? action.actionId,
       status: file?.Status ?? 'IN_PROGRESS',
@@ -51,31 +54,17 @@ export async function getAgentUploads(
       createTime: action.timestamp!,
       filePath,
     };
-  });
-
-  // TODO mock failed value
-  if (result.length > 0) {
-    result.push({
-      ...result[0],
-      id: 'failed1',
-      status: 'FAILED',
-    });
-
-    // TODO mock simulating last in progress action turning ready if taken in last 10s
-    const diag = result.find((item) => item.status === 'IN_PROGRESS');
-    if (diag && new Date(diag.createTime).getTime() > Date.now() - 10000) {
-      diag.status = 'READY';
-    }
+    results.push(result);
   }
 
-  return result;
+  return results;
 }
 
 async function _getRequestDiagnosticsActions(
   esClient: ElasticsearchClient,
   agentId: string
-): Promise<Array<{ actionId: string; timestamp?: string }>> {
-  const res = await esClient.search<any>({
+): Promise<Array<{ actionId: string; timestamp?: string; fileId: string }>> {
+  const agentActionRes = await esClient.search<any>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
     size: SO_SEARCH_LIMIT,
@@ -97,10 +86,48 @@ async function _getRequestDiagnosticsActions(
     },
   });
 
-  return res.hits.hits.map((hit) => ({
-    actionId: hit._source?.action_id as string,
-    timestamp: hit._source?.['@timestamp'],
-  }));
+  const agentActionIds = agentActionRes.hits.hits.map((hit) => hit._source?.action_id as string);
+
+  if (agentActionIds.length === 0) {
+    return [];
+  }
+
+  try {
+    const actionResults = await esClient.search<any>({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      ignore_unavailable: true,
+      size: SO_SEARCH_LIMIT,
+      query: {
+        bool: {
+          must: [
+            {
+              terms: {
+                action_id: agentActionIds,
+              },
+            },
+            {
+              term: {
+                agent_id: agentId,
+              },
+            },
+          ],
+        },
+      },
+    });
+    return actionResults.hits.hits.map((hit) => ({
+      actionId: hit._source?.action_id as string,
+      timestamp: hit._source?.['@timestamp'],
+      fileId: hit._source?.data?.file_id as string,
+    }));
+  } catch (err) {
+    if (err.statusCode === 404) {
+      // .fleet-actions-results does not yet exist
+      appContextService.getLogger().debug(err);
+      return [];
+    } else {
+      throw err;
+    }
+  }
 }
 
 export async function getAgentUploadFile(
