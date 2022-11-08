@@ -70,7 +70,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease: true });
+  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease: true, full: true });
 
   const {
     agentPolicy,
