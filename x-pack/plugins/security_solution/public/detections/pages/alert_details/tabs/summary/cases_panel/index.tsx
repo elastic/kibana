@@ -42,7 +42,7 @@ export interface CasesPanelProps {
 
 const StyledCasesFlexGroup = styled(EuiFlexGroup)`
   max-height: 300px;
-  overflow-y: scroll;
+  overflow-y: auto;
 `;
 
 /**
