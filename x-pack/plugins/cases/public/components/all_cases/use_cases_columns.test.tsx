@@ -63,7 +63,7 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "10%",
           },
           Object {
             "align": "right",
@@ -142,7 +142,7 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "10%",
           },
           Object {
             "align": "right",
@@ -212,7 +212,7 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "10%",
           },
           Object {
             "align": "right",
@@ -271,7 +271,7 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "10%",
           },
           Object {
             "align": "right",
@@ -341,7 +341,7 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "10%",
           },
           Object {
             "align": "right",
@@ -409,7 +409,7 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "10%",
           },
           Object {
             "align": "right",
@@ -476,7 +476,7 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "10%",
           },
           Object {
             "align": "right",
@@ -542,7 +542,7 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "10%",
           },
           Object {
             "align": "right",
