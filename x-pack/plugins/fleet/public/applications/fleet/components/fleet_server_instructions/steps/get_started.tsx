@@ -7,8 +7,8 @@
 
 import React from 'react';
 
+import type { EuiStepProps } from '@elastic/eui';
 import {
-  EuiStepProps,
   EuiButton,
   EuiCallOut,
   EuiCode,
