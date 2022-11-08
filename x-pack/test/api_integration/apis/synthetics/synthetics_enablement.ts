@@ -263,6 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
             canManageApiKeys: true,
             canEnable: true,
             isEnabled: false,
+            isValidApiKey: false,
           });
         } finally {
           await security.user.delete(username);
@@ -312,6 +313,7 @@ export default function ({ getService }: FtrProviderContext) {
             canManageApiKeys: false,
             canEnable: false,
             isEnabled: true,
+            isValidApiKey: false,
           });
         } finally {
           await supertestWithAuth
