@@ -49,7 +49,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
           ConfigKey.PROJECT_ID
         }: "${decodedProjectName}" AND ${getKqlFilter({
           field: 'journey_id',
-          values: monitorsToDelete.map((id: string) => `"${id}"`),
+          values: monitorsToDelete.map((id: string) => `${id}`),
         })}`,
         fields: [],
         perPage: 500,
