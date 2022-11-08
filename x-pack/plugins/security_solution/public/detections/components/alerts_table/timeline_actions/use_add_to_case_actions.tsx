@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding_tour/tour_step';
+import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
 import {
   AlertsCasesTourSteps,
   sampleCase,
@@ -30,44 +30,6 @@ export interface UseAddToCaseActions {
   isActiveTimelines: boolean;
   isInDetections: boolean;
 }
-
-const getSubmitButton = (): HTMLElement | null =>
-  document.querySelector(`[data-test-subj="create-case-submit"]`);
-
-const CasesTourSteps = () => {
-  const [activeStep, setActiveStep] = useState(AlertsCasesTourSteps.createCase);
-
-  const scrollToSubmitButton = useCallback(() => {
-    getSubmitButton()?.scrollIntoView();
-  }, []);
-
-  const onClick = useCallback(() => {
-    setActiveStep(AlertsCasesTourSteps.submitCase);
-    scrollToSubmitButton();
-    setTimeout(() => {
-      // something is resetting focus to close flyout button
-      getSubmitButton()?.focus();
-    }, 500);
-  }, [scrollToSubmitButton]);
-
-  return (
-    <>
-      {activeStep === AlertsCasesTourSteps.createCase && (
-        <GuidedOnboardingTourStep
-          onClick={onClick}
-          step={AlertsCasesTourSteps.createCase}
-          stepId={SecurityStepId.alertsCases}
-        />
-      )}
-      {activeStep === AlertsCasesTourSteps.submitCase && (
-        <GuidedOnboardingTourStep
-          step={AlertsCasesTourSteps.submitCase}
-          stepId={SecurityStepId.alertsCases}
-        />
-      )}
-    </>
-  );
-};
 
 export const useAddToCaseActions = ({
   onMenuItemClick,

@@ -11,12 +11,11 @@ import { useAddToCaseActions } from './use_add_to_case_actions';
 import { TestProviders } from '../../../../common/mock';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
-import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding_tour/tour_step';
 import {
   AlertsCasesTourSteps,
   sampleCase,
-  SecurityStepId,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
+import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
 
 jest.mock('../../../../common/components/guided_onboarding_tour');
 jest.mock('../../../../common/lib/kibana');
@@ -129,14 +128,7 @@ describe('useAddToCaseActions', () => {
     });
     expect(open).toHaveBeenCalledWith({
       attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
-      headerContent: (
-        <GuidedOnboardingTourStep
-          onClick={submit}
-          isTourAnchor
-          step={AlertsCasesTourSteps.createCase}
-          stepId={SecurityStepId.alertsCases}
-        />
-      ),
+      headerContent: <CasesTourSteps />,
     });
     expect(incrementStep).toHaveBeenCalled();
   });
