@@ -250,7 +250,7 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
           class="euiFlexItem"
@@ -266,7 +266,7 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <div
         class="euiFlexItem"
@@ -339,7 +339,7 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
           class="euiFlexItem"
@@ -355,7 +355,7 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <div
         class="euiFlexItem"
