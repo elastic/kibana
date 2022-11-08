@@ -107,8 +107,8 @@ for ((i=1;i<=20;i++)); do
       --debug \
       --bail
 
-    kill_all_by_name "chrome"
-    check_running_processes
+    # kill_all_by_name "chrome"
+    # check_running_processes
 done
 
 echo "--- Upload journey step screenshots"
