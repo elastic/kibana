@@ -77,7 +77,6 @@ export const MonitorManagementList = ({
     () =>
       list.monitors.map((monitor) => ({
         ...monitor.attributes,
-        id: monitor.id,
       })),
     [list.monitors]
   );
@@ -192,7 +191,7 @@ export const MonitorManagementList = ({
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsMonitorWithId) => (
         <MonitorEnabled
-          id={monitor.id}
+          id={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
           isDisabled={!canEdit}
           onUpdate={onUpdate}

@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from './use_selected_monitor';
 
 export const useMonitorQueryId = () => {
-  const { monitorId } = useParams<{ monitorId: string }>();
-
   const { monitor } = useSelectedMonitor();
 
-  return monitor[ConfigKey.MONITOR_QUERY_ID] || monitorId;
+  return monitor?.[ConfigKey.MONITOR_QUERY_ID];
 };

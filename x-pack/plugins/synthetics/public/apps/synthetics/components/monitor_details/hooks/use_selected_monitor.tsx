@@ -27,9 +27,10 @@ export const useSelectedMonitor = () => {
   const { syntheticsMonitor, syntheticsMonitorLoading } = useSelector(selectorMonitorDetailsState);
   const dispatch = useDispatch();
 
-  const isMonitorFromListValid = monitorId && monitorFromList && monitorFromList?.id === monitorId;
+  const isMonitorFromListValid =
+    monitorId && monitorFromList && monitorFromList[ConfigKey.CONFIG_ID] === monitorId;
   const isLoadedSyntheticsMonitorValid =
-    monitorId && syntheticsMonitor && syntheticsMonitor?.id === monitorId;
+    monitorId && syntheticsMonitor && syntheticsMonitor[ConfigKey.CONFIG_ID] === monitorId;
   const availableMonitor = isLoadedSyntheticsMonitorValid
     ? syntheticsMonitor
     : isMonitorFromListValid
