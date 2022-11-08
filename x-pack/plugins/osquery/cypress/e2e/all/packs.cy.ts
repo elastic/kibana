@@ -447,5 +447,33 @@ describe('ALL - Packs', () => {
         });
       });
     });
+    it('add propershard to policies packs config', () => {
+      const shardPack = 'shardPack';
+      cy.contains('Packs').click();
+      findAndClickButton('Add pack');
+      findFormFieldByRowsLabelAndType('Name', shardPack);
+
+      cy.contains('Partial deployment (shards)').click();
+      cy.getBySel('shards-field-policy').type('Default{downArrow}{enter}');
+      cy.get('#shardsPercentage0').type('{backspace}{backspace}5');
+      findAndClickButton('Save pack');
+
+      cy.contains(shardPack);
+      cy.contains(`Successfully created "${shardPack}" pack`);
+
+      cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
+        const shardPolicy = response.body.items.find(
+          (policy: { policy_id: string }) => policy.policy_id === 'fleet-server-policy'
+        );
+
+        expect(shardPolicy.inputs[0].config.osquery.value.packs[shardPack]).to.deep.equal({
+          shard: 15,
+          queries: {},
+        });
+      });
+      cy.contains(shardPack).click();
+      cy.contains('Edit').click();
+      cy.get('#shardsPercentage0').should('have.value', '15');
+    });
   });
 });
