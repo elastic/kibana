@@ -53,7 +53,6 @@ import {
   SelfStyledEmbeddable,
   FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -556,7 +555,7 @@ export class Embeddable
     if (requestWarnings.length && this.warningDomNode) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <Warnings warnings={requestWarnings} />
+          <Warnings warnings={requestWarnings} compressed />
         </KibanaThemeProvider>,
         this.warningDomNode
       );
@@ -726,8 +725,8 @@ export class Embeddable
           css={css({
             position: 'absolute',
             zIndex: 2,
-            right: euiThemeVars.euiSizeM,
-            bottom: euiThemeVars.euiSizeM,
+            left: 0,
+            bottom: 0,
           })}
           ref={(el) => {
             if (el) {
