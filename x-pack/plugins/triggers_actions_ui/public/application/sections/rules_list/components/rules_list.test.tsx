@@ -488,7 +488,7 @@ describe.skip('rules_list component empty', () => {
   });
 });
 
-describe.skip('rules_list component with props', () => {
+describe('rules_list component with props', () => {
   describe('Status filter', () => {
     let wrapper: ReactWrapper<any>;
     async function setup(editable: boolean = true) {
@@ -1048,7 +1048,7 @@ describe.skip('rules_list component with props', () => {
   });
 });
 
-describe.skip('rules_list component with items', () => {
+describe('rules_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(editable: boolean = true) {
@@ -1121,131 +1121,6 @@ describe.skip('rules_list component with items', () => {
       jest.clearAllMocks();
     });
 
-    // Tags column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-tagsPopover"]').length
-    ).toEqual(mockedRulesData.length);
-    // only show tags popover if tags exist on rule
-    const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagBadge"]');
-    expect(tagsBadges.length).toEqual(
-      mockedRulesData.filter((data) => data.tags.length > 0).length
-    );
-
-    // Last run column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastExecutionDate"]').length
-    ).toEqual(mockedRulesData.length);
-
-    // Last run tooltip
-    wrapper
-      .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
-      .first()
-      .simulate('mouseOver');
-
-    // Run the timers so the EuiTooltip will be visible
-    jest.runOnlyPendingTimers();
-
-    wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
-      'Start time of the last run.'
-    );
-
-    wrapper
-      .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"] EuiToolTipAnchor')
-      .first()
-      .simulate('mouseOut');
-
-    // Schedule interval column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-interval"]').length
-    ).toEqual(mockedRulesData.length);
-
-    // Schedule interval tooltip
-    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOver');
-
-    // Run the timers so the EuiTooltip will be visible
-    jest.runOnlyPendingTimers();
-
-    wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
-      'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
-    );
-
-    wrapper
-      .find('[data-test-subj="ruleInterval-config-tooltip-0"] EuiToolTipAnchor')
-      .first()
-      .simulate('mouseOut');
-
-    // Duration column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-duration"]').length
-    ).toEqual(mockedRulesData.length);
-    // show warning if duration is long
-    const durationWarningIcon = wrapper.find('EuiIconTip[data-test-subj="ruleDurationWarning"]');
-    expect(durationWarningIcon.length).toEqual(
-      mockedRulesData.filter(
-        (data) => data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout)
-      ).length
-    );
-
-    // Duration tooltip
-    wrapper.find('[data-test-subj="rulesTableCell-durationTooltip"]').first().simulate('mouseOver');
-
-    // Run the timers so the EuiTooltip will be visible
-    jest.runOnlyPendingTimers();
-
-    wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
-      'The length of time it took for the rule to run (mm:ss).'
-    );
-
-    // Last response column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastResponse"]').length
-    ).toEqual(mockedRulesData.length);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-active"]').length).toEqual(1);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').length).toEqual(1);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-unknown"]').length).toEqual(0);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').length).toEqual(2);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-warning"]').length).toEqual(1);
-    expect(wrapper.find('[data-test-subj="ruleStatus-error-tooltip"]').length).toEqual(2);
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="ruleStatus-error-license-fix"]').length
-    ).toEqual(1);
-
-    expect(wrapper.find('[data-test-subj="rulesListAutoRefresh"]').exists()).toBeTruthy();
-
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').first().text()).toEqual(
-      'Error'
-    );
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').last().text()).toEqual(
-      'License Error'
-    );
-
-    // Status control column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
-      mockedRulesData.length
-    );
-
-    // Monitoring column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-successRatio"]').length
-    ).toEqual(mockedRulesData.length);
-    const ratios = wrapper.find(
-      'EuiTableRowCell[data-test-subj="rulesTableCell-successRatio"] span[data-test-subj="successRatio"]'
-    );
-
-    mockedRulesData.forEach((rule, index) => {
-      if (rule.monitoring) {
-        expect(ratios.at(index).text()).toEqual(
-          `${rule.monitoring.execution.calculated_metrics.success_ratio * 100}%`
-        );
-      } else {
-        expect(ratios.at(index).text()).toEqual(`N/A`);
-      }
-    });
-
     it('should render basic table and its row', async () => {
       expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
       expect(wrapper.find('EuiTableRow')).toHaveLength(mockedRulesData.length);
@@ -1286,7 +1161,10 @@ describe.skip('rules_list component with items', () => {
       jest.runOnlyPendingTimers();
 
       wrapper.update();
-      expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last run.');
+
+      expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
+        'Start time of the last run.'
+      );
 
       wrapper
         .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
@@ -1310,7 +1188,7 @@ describe.skip('rules_list component with items', () => {
       jest.runOnlyPendingTimers();
 
       wrapper.update();
-      expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+      expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
         'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
       );
 
@@ -1339,6 +1217,7 @@ describe.skip('rules_list component with items', () => {
       jest.runOnlyPendingTimers();
 
       wrapper.update();
+
       expect(wrapper.find('.euiToolTipPopover').text()).toBe(
         'The length of time it took for the rule to run (mm:ss).'
       );
@@ -1750,7 +1629,7 @@ describe.skip('rules_list component with items', () => {
   });
 });
 
-describe.skip('rules_list component empty with show only capability', () => {
+describe('rules_list component empty with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
@@ -1793,7 +1672,7 @@ describe.skip('rules_list component empty with show only capability', () => {
   });
 });
 
-describe.skip('rules_list with show only capability', () => {
+describe('rules_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(editable: boolean = true) {
@@ -1914,7 +1793,7 @@ describe.skip('rules_list with show only capability', () => {
   });
 });
 
-describe.skip('rules_list with disabled items', () => {
+describe('rules_list with disabled items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
