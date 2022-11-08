@@ -52,6 +52,15 @@ export const getSyntheticsMonitorSavedObjectType = (
             },
           },
         },
+        hosts: {
+          type: 'text',
+          fields: {
+            keyword: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+          },
+        },
         journey_id: {
           type: 'keyword',
         },
@@ -87,6 +96,11 @@ export const getSyntheticsMonitorSavedObjectType = (
         },
         tags: {
           type: 'keyword',
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
         },
         schedule: {
           properties: {

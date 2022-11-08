@@ -12,3 +12,4 @@ export * from './monitor_selector.journey';
 export * from './overview_sorting.journey';
 // TODO: Fix this test
 export * from './overview_scrolling.journey';
+export * from './overview_search.journey';

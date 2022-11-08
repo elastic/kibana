@@ -29,7 +29,14 @@ export const QuerySchema = schema.object({
 
 export type MonitorsQuery = TypeOf<typeof QuerySchema>;
 
-export const SEARCH_FIELDS = ['name', 'tags.text', 'locations.id.text', 'urls', 'project_id.text'];
+export const SEARCH_FIELDS = [
+  'name',
+  'tags.text',
+  'locations.id.text',
+  'urls',
+  'hosts',
+  'project_id.text',
+];
 
 export const getMonitors = (
   request: MonitorsQuery,
@@ -93,10 +100,10 @@ export const getKqlFilter = ({
   }
 
   if (Array.isArray(values)) {
-    return `${fieldKey}:${values.join(` ${operator} ${fieldKey}:`)}`;
+    return `${fieldKey}:"${values.join(`" ${operator} ${fieldKey}:"`)}"`;
   }
 
-  return `${fieldKey}:${values}`;
+  return `${fieldKey}:"${values}"`;
 };
 
 const parseLocationFilter = (serviceLocations: ServiceLocations, locations?: string | string[]) => {
