@@ -267,7 +267,7 @@ const CaseDetailsLinkComponent: React.FC<{
 }> = ({ index, children, detailName, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
-  const { activeStep, endTourStep, isTourShown } = useTourContext();
+  const { activeStep, isTourShown } = useTourContext();
   const isTourActive = useMemo(
     () =>
       activeStep === AlertsCasesTourSteps.viewCase &&
@@ -275,9 +275,6 @@ const CaseDetailsLinkComponent: React.FC<{
       index === 0,
     [activeStep, index, isTourShown]
   );
-  const endTour = useCallback(() => {
-    if (isTourActive) endTourStep(SecurityStepId.alertsCases);
-  }, [endTourStep, isTourActive]);
 
   const goToCaseDetails = useCallback(
     async (ev?) => {
@@ -286,9 +283,8 @@ const CaseDetailsLinkComponent: React.FC<{
         deepLinkId: SecurityPageName.case,
         path: getCaseDetailsUrl({ id: detailName, search }),
       });
-      endTour();
     },
-    [detailName, navigateToApp, endTour, search]
+    [detailName, navigateToApp, search]
   );
 
   useEffect(() => {
