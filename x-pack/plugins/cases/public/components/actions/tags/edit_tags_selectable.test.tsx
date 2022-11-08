@@ -171,7 +171,6 @@ describe('EditTagsSelectable', () => {
 
     await waitForComponentToUpdate();
 
-    // expect(result.getByPlaceholderText('Search')).toHaveValue('');
     expect(props.onChangeTags).toBeCalledTimes(1);
     expect(props.onChangeTags).nthCalledWith(1, {
       selectedTags: ['not-exist', 'coke', 'pepsi'],

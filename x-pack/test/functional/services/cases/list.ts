@@ -191,13 +191,6 @@ export function CasesTableServiceProvider(
       await this.openBulkActions();
     },
 
-    // async selectCase(index: number) {
-    //   const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
-
-    //   assertCaseExists(index, rows.length);
-    //   rows[index].click();
-    // },
-
     async changeStatus(status: CaseStatuses, index: number) {
       await this.openRowActions(index);
 

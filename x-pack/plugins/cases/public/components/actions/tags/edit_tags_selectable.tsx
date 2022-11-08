@@ -483,7 +483,6 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="m" />
-          {/* <AddNewTagItem searchValue={searchValue} onNewItem={onNewItem} /> */}
           {list}
         </>
       )}
