@@ -419,6 +419,13 @@ paths:
         name: ignoreUnverified
         description: Ignore if the package is fails signature verification
         in: query
+      - schema:
+          type: boolean
+        name: full
+        description: >-
+          Return all fields from the package manifest, not just those supported
+          by the Elastic Package Registry
+        in: query
     post:
       summary: Packages - Install
       tags: []
@@ -2791,6 +2798,10 @@ components:
           type: string
         release:
           type: string
+          deprecated: true
+          description: >-
+            release label is deprecated, derive from the version instead
+            (packages follow semver)
           enum:
             - experimental
             - beta
@@ -3220,6 +3231,12 @@ components:
         monitoring_output_id:
           type: string
           nullable: true
+        fleet_server_host_id:
+          type: string
+          nullable: true
+        download_source_id:
+          type: string
+          nullable: true
       required:
         - name
         - namespace
@@ -3322,8 +3339,16 @@ components:
               type: string
             data_output_id:
               type: string
+              nullable: true
             monitoring_output_id:
               type: string
+              nullable: true
+            fleet_server_host_id:
+              type: string
+              nullable: true
+            download_source_id:
+              type: string
+              nullable: true
             revision:
               type: number
             agents:
