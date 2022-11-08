@@ -90,6 +90,7 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   public reset() {
+    this.setInputField(undefined);
     this.inputText$.next([]);
     this.inferenceResult$.next(null);
     this.inferenceError$.next(null);
@@ -180,5 +181,17 @@ export abstract class InferenceBase<TInferResponse> {
     return {
       num_top_classes: defaultOverride,
     };
+  }
+
+  // @ts-expect-error error does not exist in type
+  protected getDocFromResponse({ doc, error }: estypes.IngestSimulatePipelineSimulation) {
+    if (doc === undefined) {
+      if (error) {
+        this.setFinishedWithErrors(error);
+        throw Error(error.reason);
+      }
+      throw Error('No doc aaaggghhhhhhh'); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    }
+    return doc;
   }
 }

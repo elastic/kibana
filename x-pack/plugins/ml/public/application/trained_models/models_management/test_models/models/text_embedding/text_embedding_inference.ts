@@ -70,16 +70,7 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
       );
 
       const processedResponse: TextEmbeddingResponse[] = docs.map((d) => {
-        // @ts-expect-error error does not exist in type
-        const { doc, error } = d;
-        if (doc === undefined) {
-          if (error) {
-            this.setFinishedWithErrors(error);
-            throw Error(error.reason);
-          }
-          throw Error('No doc aaaggghhhhhhh'); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        }
-
+        const doc = this.getDocFromResponse(d);
         const inputText = doc._source[this.inputField];
 
         return processIndexResponse(doc._source[this.inferenceType], inputText);

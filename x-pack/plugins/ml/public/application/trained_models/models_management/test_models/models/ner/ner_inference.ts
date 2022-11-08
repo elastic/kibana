@@ -65,10 +65,8 @@ export class NerInference extends InferenceBase<NerResponse> {
         this.getPipelineDocs()
       );
 
-      const processedResponse: NerResponse[] = docs.map(({ doc }) => {
-        if (doc === undefined) {
-          throw Error('No doc aaaggghhhhhhh'); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        }
+      const processedResponse: NerResponse[] = docs.map((d) => {
+        const doc = this.getDocFromResponse(d);
 
         return {
           response: parseResponse({ inference_results: [doc._source[this.inferenceType]] }),

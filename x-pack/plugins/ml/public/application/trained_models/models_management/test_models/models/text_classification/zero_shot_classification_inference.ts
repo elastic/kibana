@@ -70,15 +70,7 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
       );
 
       const processedResponse: TextClassificationResponse[] = docs.map((d) => {
-        // @ts-expect-error error does not exist in type
-        const { doc, error } = d;
-        if (doc === undefined) {
-          if (error) {
-            this.setFinishedWithErrors(error);
-            throw Error(error.reason);
-          }
-          throw Error('No doc aaaggghhhhhhh'); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        }
+        const doc = this.getDocFromResponse(d);
 
         return {
           response: processInferenceResult(doc._source[this.inferenceType], this.model),

@@ -61,10 +61,8 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
         this.getPipelineDocs()
       );
 
-      const processedResponse: TextClassificationResponse[] = docs.map(({ doc }) => {
-        if (doc === undefined) {
-          throw Error('No doc aaaggghhhhhhh'); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        }
+      const processedResponse: TextClassificationResponse[] = docs.map((d) => {
+        const doc = this.getDocFromResponse(d);
 
         return {
           response: processInferenceResult(doc._source[this.inferenceType], this.model),
