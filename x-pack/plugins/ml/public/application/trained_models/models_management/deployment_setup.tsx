@@ -70,6 +70,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
     []
   );
 
+  const disableThreadingControls = config.priority === 'low';
+
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
       {config.priority !== undefined ? (
@@ -165,13 +167,15 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
             />
           }
           hasChildLabel={false}
+          isDisabled={disableThreadingControls}
         >
           <EuiFieldNumber
+            disabled={disableThreadingControls}
             fullWidth
             min={1}
             step={1}
             name={'numOfAllocations'}
-            value={numOfAllocation}
+            value={disableThreadingControls ? 1 : numOfAllocation}
             onChange={(event) => {
               onConfigChange({ ...config, numOfAllocations: Number(event.target.value) });
             }}
@@ -206,8 +210,10 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
               />
             }
             hasChildLabel={false}
+            isDisabled={disableThreadingControls}
           >
             <EuiButtonGroup
+              isDisabled={disableThreadingControls}
               legend={i18n.translate(
                 'xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLegend',
                 {
@@ -217,7 +223,9 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
               name={'threadsPerAllocation'}
               isFullWidth
               idSelected={
-                threadsPerAllocationsOptions.find((v) => v.value === threadsPerAllocations)!.id
+                disableThreadingControls
+                  ? '1'
+                  : threadsPerAllocationsOptions.find((v) => v.value === threadsPerAllocations)!.id
               }
               onChange={(optionId) => {
                 const value = threadsPerAllocationsOptions.find((v) => v.id === optionId)!.value;
@@ -391,7 +399,14 @@ export const getUserInputThreadingParamsProvider =
                 modelId={modelId}
                 onConfigChange={(config) => {
                   modalSession.close();
-                  resolve(config);
+
+                  const resultConfig = { ...config };
+                  if (resultConfig.priority === 'low') {
+                    resultConfig.numOfAllocations = 1;
+                    resultConfig.threadsPerAllocations = 1;
+                  }
+
+                  resolve(resultConfig);
                 }}
                 onClose={() => {
                   modalSession.close();
