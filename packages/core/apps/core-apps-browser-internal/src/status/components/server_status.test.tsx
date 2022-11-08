@@ -24,7 +24,7 @@ describe('ServerStatus', () => {
     const status = getStatus();
     const component = mount(<ServerStatus serverState={status} name="My Computer" />);
     expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Green"`);
-    expect(component.find('EuiBadge')).toMatchSnapshot();
+    expect(component.find('EuiBadge').render()).toMatchSnapshot();
   });
 
   it('renders correctly for yellow state', () => {
@@ -34,7 +34,7 @@ describe('ServerStatus', () => {
     });
     const component = mount(<ServerStatus serverState={status} name="My Computer" />);
     expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Yellow"`);
-    expect(component.find('EuiBadge')).toMatchSnapshot();
+    expect(component.find('EuiBadge').render()).toMatchSnapshot();
   });
 
   it('renders correctly for red state', () => {
@@ -44,7 +44,7 @@ describe('ServerStatus', () => {
     });
     const component = mount(<ServerStatus serverState={status} name="My Computer" />);
     expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Red"`);
-    expect(component.find('EuiBadge')).toMatchSnapshot();
+    expect(component.find('EuiBadge').render()).toMatchSnapshot();
   });
 
   it('displays the correct `name`', () => {

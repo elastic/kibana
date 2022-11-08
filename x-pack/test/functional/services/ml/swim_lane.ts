@@ -198,7 +198,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
     async assertActivePage(testSubj: string, expectedPage: number) {
       const pagination = await testSubjects.find(`${testSubj} > mlSwimLanePagination`);
       const activePage = await pagination.findByCssSelector(
-        '.euiPaginationButton-isActive .euiButtonEmpty__text'
+        '.euiPaginationButton[aria-current] .euiButtonEmpty__text'
       );
       const text = await activePage.getVisibleText();
       expect(text).to.eql(expectedPage);
