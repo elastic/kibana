@@ -191,7 +191,7 @@ export const technicalRuleFieldMap = {
   },
   [Fields.SERVICE_NAME]: {
     type: 'keyword',
-    array: true,
+    array: false,
     required: false,
   },
   [Fields.TRANSACTION_TYPE]: {
