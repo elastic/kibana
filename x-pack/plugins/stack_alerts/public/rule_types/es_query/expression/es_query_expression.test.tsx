@@ -215,7 +215,7 @@ describe('EsQueryRuleTypeExpression', () => {
     });
     dataMock.search.search.mockImplementation(() => searchResponseMock$);
     const wrapper = await setup(defaultEsQueryExpressionParams);
-    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('button[data-test-subj="testQuery"]');
 
     testQueryButton.simulate('click');
     expect(dataMock.search.search).toHaveBeenCalled();
@@ -248,7 +248,7 @@ describe('EsQueryRuleTypeExpression', () => {
     const searchResponseMock$ = new Subject();
     dataMock.search.search.mockImplementation(() => searchResponseMock$);
     const wrapper = await setup(defaultEsQueryExpressionParams);
-    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('button[data-test-subj="testQuery"]');
 
     testQueryButton.simulate('click');
     expect(dataMock.search.search).toHaveBeenCalled();
@@ -272,7 +272,7 @@ describe('EsQueryRuleTypeExpression', () => {
       throw new Error('What is this query');
     });
     const wrapper = await setup(defaultEsQueryExpressionParams);
-    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('button[data-test-subj="testQuery"]');
 
     testQueryButton.simulate('click');
     expect(dataMock.search.search).toHaveBeenCalled();
