@@ -1055,7 +1055,7 @@ export class LensAttributes {
         isVisible: true,
         showSingleSeries: true,
         position: 'right',
-        legendSize: LegendSize.LARGE,
+        legendSize: LegendSize.AUTO,
         shouldTruncate: false,
       },
       valueLabels: 'hide',
