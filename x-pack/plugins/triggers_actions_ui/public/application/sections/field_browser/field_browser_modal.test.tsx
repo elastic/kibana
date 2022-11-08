@@ -49,7 +49,7 @@ describe('FieldBrowserModal', () => {
   test('it invokes the Close button', () => {
     const wrapper = mountComponent();
 
-    wrapper.find('[data-test-subj="close"]').first().simulate('click');
+    wrapper.find('[data-test-subj="close"]').last().simulate('click');
     expect(mockOnHide).toBeCalled();
   });
 
