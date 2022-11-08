@@ -1108,6 +1108,72 @@ describe('processAlerts', () => {
         expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
       });
 
+      test('if alert is active and previously recovered, set flapping state to true', () => {
+        const activeAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1', {
+          meta: { flappingHistory: [false] },
+        });
+        activeAlert1.scheduleActions('default', { foo: '1' });
+        const activeAlert2 = new Alert<{}, {}, DefaultActionGroupId>('1');
+        activeAlert2.scheduleActions('default', { foo: '1' });
+
+        const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
+
+        const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
+          // @ts-expect-error
+          alerts,
+          existingAlerts: {},
+          // @ts-expect-error
+          previouslyRecoveredAlerts: { '1': activeAlert1 },
+          hasReachedAlertLimit: true,
+          alertLimit: 10,
+          setFlapping: true,
+        });
+
+        expect(activeAlerts).toMatchInlineSnapshot(`
+          Object {
+            "1": Object {
+              "meta": Object {
+                "flappingHistory": Array [
+                  false,
+                  true,
+                ],
+              },
+              "state": Object {
+                "duration": "0",
+                "start": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "2": Object {
+              "meta": Object {
+                "flappingHistory": Array [
+                  false,
+                ],
+              },
+              "state": Object {
+                "duration": "0",
+                "start": "1970-01-01T00:00:00.000Z",
+              },
+            },
+          }
+        `);
+        expect(newAlerts).toMatchInlineSnapshot(`
+          Object {
+            "2": Object {
+              "meta": Object {
+                "flappingHistory": Array [
+                  false,
+                ],
+              },
+              "state": Object {
+                "duration": "0",
+                "start": "1970-01-01T00:00:00.000Z",
+              },
+            },
+          }
+        `);
+        expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+      });
+
       test('if setFlapping is false should not update flappingHistory', () => {
         const activeAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1', {
           meta: { flappingHistory: [false] },
