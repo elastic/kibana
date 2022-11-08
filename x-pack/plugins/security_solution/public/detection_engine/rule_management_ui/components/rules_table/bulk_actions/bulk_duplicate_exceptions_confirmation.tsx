@@ -66,7 +66,7 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiButton onClick={handleConfirm} fill>
+            <EuiButton onClick={handleConfirm} data-test-subj="confirmDuplicate" fill>
               {i18n.CONTINUE_BUTTON}
             </EuiButton>
           </EuiFlexItem>
