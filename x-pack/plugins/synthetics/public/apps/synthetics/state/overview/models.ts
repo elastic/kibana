@@ -10,3 +10,8 @@ export interface MonitorOverviewPageState {
   sortOrder: 'asc' | 'desc';
   sortField: string;
 }
+
+export type MonitorOverviewFlyoutConfig = {
+  monitorId: string;
+  location: string;
+} | null;

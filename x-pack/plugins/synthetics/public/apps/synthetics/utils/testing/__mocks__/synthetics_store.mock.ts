@@ -98,6 +98,7 @@ export const mockState: SyntheticsAppState = {
     error: null,
     loaded: false,
     loading: false,
+    flyoutConfig: null,
     status: null,
     statusError: null,
   },

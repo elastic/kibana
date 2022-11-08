@@ -33,6 +33,7 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_DURATION]: { type: 'long' },
   [Fields.ALERT_SEVERITY]: { type: 'keyword' },
   [Fields.ALERT_STATUS]: { type: 'keyword', required: true },
+  [Fields.ALERT_FLAPPING]: { type: 'boolean' },
   [Fields.VERSION]: {
     type: 'version',
     array: false,
