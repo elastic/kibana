@@ -46,7 +46,7 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     await Promise.all([convertToLensModule, import('./configurations')]);
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.metric);
-  const result = getColumnsFromVis(
+  const layers = getColumnsFromVis(
     vis,
     timefilter,
     dataView,
@@ -56,17 +56,19 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     { dropEmptyRowsInDateHistogram: true, ...percentageModeConfig }
   );
 
-  if (result === null) {
+  if (layers === null) {
     return null;
   }
+
+  const [layerConfig] = layers;
 
   // for now, multiple metrics are not supported
-  if (result.metrics.length > 1 || result.buckets.length > 1) {
+  if (layerConfig.metrics.length > 1 || layerConfig.buckets.all.length > 1) {
     return null;
   }
 
-  if (result.metrics[0]) {
-    const metric = result.columns.find(({ columnId }) => columnId === result.metrics[0]);
+  if (layerConfig.metrics[0]) {
+    const metric = layerConfig.columns.find(({ columnId }) => columnId === layerConfig.metrics[0]);
     if (metric?.dataType !== 'number') {
       return null;
     }
@@ -81,7 +83,7 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
       {
         indexPatternId,
         layerId,
-        columns: result.columns.map(excludeMetaFromColumn),
+        columns: layerConfig.columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],
@@ -89,7 +91,7 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
       layerId,
       vis.params,
       getPalette(vis.params.metric, percentageModeConfig),
-      result
+      layerConfig
     ),
     indexPatternIds: [indexPatternId],
   };

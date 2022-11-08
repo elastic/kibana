@@ -9,7 +9,7 @@ import React, { VFC } from 'react';
 import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useInvestigateInTimeline } from '../../hooks/use_investigate_in_timeline';
+import { useInvestigateInTimeline } from '../../hooks';
 import { Indicator } from '../../../../../common/types/indicator';
 
 const BUTTON_ICON_LABEL: string = i18n.translate(

@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { HttpSetup } from '@kbn/core/public';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { getExecuteConnectorUrl } from '../../../../common/utils';
-import {
-  ConnectorExecutorResult,
-  rewriteResponseToCamelCase,
-} from '../rewrite_response_to_camel_case';
-import { IssueTypes, Fields, Issues, Issue } from './types';
+import type { ConnectorExecutorResult } from '../rewrite_response_to_camel_case';
+import { rewriteResponseToCamelCase } from '../rewrite_response_to_camel_case';
+import type { IssueTypes, Fields, Issues, Issue } from './types';
 
 export interface GetIssueTypesProps {
   http: HttpSetup;

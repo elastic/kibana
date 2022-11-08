@@ -14,6 +14,7 @@ import {
   ElasticsearchClient,
   CustomRequestHandlerContext,
   SavedObjectReference,
+  Logger,
 } from '@kbn/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -60,6 +61,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
+  logger: Logger;
   isEphemeral?: boolean;
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;

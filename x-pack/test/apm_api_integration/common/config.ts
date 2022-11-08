@@ -107,9 +107,9 @@ export function createTestConfig(config: ApmFtrConfig) {
               kibanaServer,
               username: ApmUsername.apmManageOwnAndCreateAgentKeys,
             }),
-            monitorIndicesUser: await getApmApiClient({
+            monitorClusterAndIndicesUser: await getApmApiClient({
               kibanaServer,
-              username: ApmUsername.apmMonitorIndices,
+              username: ApmUsername.apmMonitorClusterAndIndices,
             }),
           };
         },

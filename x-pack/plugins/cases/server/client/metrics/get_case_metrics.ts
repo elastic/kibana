@@ -6,15 +6,12 @@
  */
 import { merge } from 'lodash';
 
-import {
-  SingleCaseMetricsRequest,
-  SingleCaseMetricsResponse,
-  SingleCaseMetricsResponseRt,
-} from '../../../common/api';
+import type { SingleCaseMetricsRequest, SingleCaseMetricsResponse } from '../../../common/api';
+import { SingleCaseMetricsResponseRt } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { CasesClient } from '../client';
-import { CasesClientArgs } from '../types';
+import type { CasesClient } from '../client';
+import type { CasesClientArgs } from '../types';
 import { buildHandlers } from './utils';
 
 export const getCaseMetrics = async (

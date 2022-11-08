@@ -17,7 +17,6 @@ import {
   INDEX,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup } from '../../lib/helpers/setup_request';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   IndexLifecyclePhaseSelectOption,
@@ -29,11 +28,12 @@ import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
 } from './indices_stats_helpers';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getSizeTimeseries({
   environment,
   kuery,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
@@ -43,7 +43,7 @@ export async function getSizeTimeseries({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
@@ -51,8 +51,6 @@ export async function getSizeTimeseries({
   randomSampler: RandomSampler;
   context: ApmPluginRequestHandlerContext;
 }) {
-  const { apmEventClient } = setup;
-
   const { intervalString } = getBucketSizeForAggregatedTransactions({
     start,
     end,
@@ -60,7 +58,7 @@ export async function getSizeTimeseries({
   });
 
   const [{ indices: allIndicesStats }, res] = await Promise.all([
-    getTotalIndicesStats({ setup, context }),
+    getTotalIndicesStats({ apmEventClient, context }),
     apmEventClient.search('get_storage_timeseries', {
       apm: {
         events: [

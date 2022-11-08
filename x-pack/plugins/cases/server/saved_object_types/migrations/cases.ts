@@ -8,10 +8,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { cloneDeep, unset } from 'lodash';
-import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
-import { addOwnerToSO, SanitizedCaseOwner } from '.';
-import { ESConnectorFields } from '../../services';
-import { CaseAttributes, CaseSeverity, ConnectorTypes } from '../../../common/api';
+import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
+import type { SanitizedCaseOwner } from '.';
+import { addOwnerToSO } from '.';
+import type { ESConnectorFields } from '../../services';
+import type { CaseAttributes } from '../../../common/api';
+import { CaseSeverity, ConnectorTypes } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,

@@ -61,7 +61,7 @@ function inLocation(cursorPosition: number, location: TinymathLocation) {
   return cursorPosition >= location.min && cursorPosition < location.max;
 }
 
-const MARKER = 'LENS_MATH_MARKER';
+export const MARKER = 'LENS_MATH_MARKER';
 
 export function getInfoAtZeroIndexedPosition(
   ast: TinymathAST,
@@ -91,6 +91,23 @@ export function getInfoAtZeroIndexedPosition(
   return {
     ast,
     parent,
+  };
+}
+
+export function createEditOperation(
+  textToInject: string,
+  currentPosition: monaco.IRange,
+  startOffset: number = 0,
+  endOffset: number = 1
+) {
+  return {
+    range: {
+      ...currentPosition,
+      // Insert after the current char
+      startColumn: currentPosition.startColumn + startOffset,
+      endColumn: currentPosition.startColumn + endOffset,
+    },
+    text: textToInject,
   };
 }
 
@@ -289,12 +306,14 @@ function getArgumentSuggestions(
       operationDefinitionMap
     );
     // TODO: This only allow numeric functions, will reject last_value(string) for example.
-    const validOperation = available.find(
+    const validOperation = available.filter(
       ({ operationMetaData }) =>
-        operationMetaData.dataType === 'number' && !operationMetaData.isBucketed
+        (operationMetaData.dataType === 'number' || operationMetaData.dataType === 'date') &&
+        !operationMetaData.isBucketed
     );
-    if (validOperation) {
-      const fields = validOperation.operations
+    if (validOperation.length) {
+      const fields = validOperation
+        .flatMap((op) => op.operations)
         .filter((op) => op.operationType === operation.type)
         .map((op) => ('field' in op ? op.field : undefined))
         .filter(nonNullable);

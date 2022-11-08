@@ -11,37 +11,41 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObject, SavedObjectsFindResponse, SavedObjectsUtils } from '@kbn/core/server';
-import { FindActionResult } from '@kbn/actions-plugin/server/types';
-import { ActionType, CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import {
-  CaseConfigurationsResponseRt,
-  CaseConfigureResponseRt,
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
+import type { FindActionResult } from '@kbn/actions-plugin/server/types';
+import type { ActionType } from '@kbn/actions-plugin/common';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type {
   CasesConfigurationsResponse,
   CasesConfigureAttributes,
   CasesConfigurePatch,
-  CasesConfigurePatchRt,
   CasesConfigureRequest,
   CasesConfigureResponse,
   ConnectorMappings,
   ConnectorMappingsAttributes,
-  excess,
   GetConfigureFindRequest,
+} from '../../../common/api';
+import {
+  CaseConfigurationsResponseRt,
+  CaseConfigureResponseRt,
+  CasesConfigurePatchRt,
+  excess,
   GetConfigureFindRequestRt,
   throwErrors,
 } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
-import { CasesClientInternal } from '../client_internal';
-import { CasesClientArgs } from '../types';
+import type { CasesClientInternal } from '../client_internal';
+import type { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
-import { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
+import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
-import {
+import type {
   ICasesConfigurePatch,
   ICasesConfigureRequest,
   ICasesConfigureResponse,

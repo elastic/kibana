@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { FileJSON } from '@kbn/files-plugin/common';
 import type {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
@@ -50,6 +51,13 @@ export interface KillProcessActionOutputContent {
   entity_id?: string;
 }
 
+export interface ResponseActionGetFileOutputContent {
+  code: string;
+  path: string;
+  size: number;
+  zip_size: number;
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -66,7 +74,7 @@ interface EcsError {
 }
 
 interface EndpointActionFields<
-  TParameters extends EndpointActionDataParameterTypes = never,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends object = object
 > {
   action_id: string;
@@ -104,15 +112,16 @@ export interface LogsEndpointAction {
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
  */
-export interface LogsEndpointActionResponse<
-  TParameters extends EndpointActionDataParameterTypes = never,
-  TOutputContent extends object = object
-> {
+export interface LogsEndpointActionResponse<TOutputContent extends object = object> {
   '@timestamp': string;
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields<TParameters, TOutputContent> & ActionResponseFields;
+  EndpointActions: ActionResponseFields & {
+    action_id: string;
+    // Endpoint Response documents do not have `parameters` in the `data`
+    data: Pick<EndpointActionData<never, TOutputContent>, 'comment' | 'command' | 'output'>;
+  };
   error?: EcsError;
 }
 
@@ -131,7 +140,7 @@ export type ResponseActionParametersWithPidOrEntityId =
   | ResponseActionParametersWithEntityId;
 
 export interface ResponseActionGetFileParameters {
-  file: string;
+  path: string;
 }
 
 export type EndpointActionDataParameterTypes =
@@ -140,12 +149,12 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionGetFileParameters;
 
 export interface EndpointActionData<
-  T extends EndpointActionDataParameterTypes = never,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends object = object
 > {
   command: ResponseActionsApiCommandNames;
   comment?: string;
-  parameters?: T;
+  parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
 }
 
@@ -268,7 +277,10 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
-export interface ActionDetails<TOutputContent extends object = object> {
+export interface ActionDetails<
+  TOutputContent extends object = object,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+> {
   /** The action id */
   id: string;
   /**
@@ -323,11 +335,14 @@ export interface ActionDetails<TOutputContent extends object = object> {
   /** comment submitted with action */
   comment?: string;
   /** parameters submitted with action */
-  parameters?: EndpointActionDataParameterTypes;
+  parameters?: TParameters;
 }
 
-export interface ActionDetailsApiResponse<TOutputType extends object = object> {
-  data: ActionDetails<TOutputType>;
+export interface ActionDetailsApiResponse<
+  TOutputType extends object = object,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+> {
+  data: ActionDetails<TOutputType, TParameters>;
 }
 export interface ActionListApiResponse {
   page: number | undefined;
@@ -345,4 +360,13 @@ export interface ActionListApiResponse {
   data: Array<Omit<ActionDetails, 'outputs'>>;
   statuses: ResponseActionStatus[] | undefined;
   total: number;
+}
+
+export type UploadedFileInfo = Pick<
+  FileJSON,
+  'name' | 'id' | 'mimeType' | 'size' | 'status' | 'created'
+>;
+
+export interface ActionFileInfoApiResponse {
+  data: UploadedFileInfo;
 }

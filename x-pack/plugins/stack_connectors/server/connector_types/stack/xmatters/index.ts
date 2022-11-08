@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { curry, isString } from 'lodash';
+import { isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -60,7 +59,7 @@ const ParamsSchema = schema.object({
 
 export const ConnectorTypeId = '.xmatters';
 // connector type definition
-export function getConnectorType({ logger }: { logger: Logger }): XmattersConnectorType {
+export function getConnectorType(): XmattersConnectorType {
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
@@ -82,7 +81,7 @@ export function getConnectorType({ logger }: { logger: Logger }): XmattersConnec
       },
       connector: validateConnector,
     },
-    executor: curry(executor)({ logger }),
+    executor,
   };
 }
 
@@ -243,13 +242,11 @@ function validateConnectorTypeSecrets(
 
 // action executor
 export async function executor(
-  { logger }: { logger: Logger },
   execOptions: XmattersConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const actionId = execOptions.actionId;
-  const configurationUtilities = execOptions.configurationUtilities;
-  const { configUrl, usesBasic } = execOptions.config;
-  const data = getPayloadForRequest(execOptions.params);
+  const { actionId, configurationUtilities, config, params, logger } = execOptions;
+  const { configUrl, usesBasic } = config;
+  const data = getPayloadForRequest(params);
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
   const basicAuth =
@@ -274,6 +271,20 @@ export async function executor(
       actionId,
       message,
       serviceMessage: err.message,
+    };
+  }
+
+  if (result == null) {
+    const message = i18n.translate(
+      'xpack.stackConnectors.xmatters.unexpectedNullResponseErrorMessage',
+      {
+        defaultMessage: 'unexpected null response from xmatters',
+      }
+    );
+    return {
+      status: 'error',
+      actionId,
+      message,
     };
   }
 

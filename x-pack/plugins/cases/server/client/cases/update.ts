@@ -10,24 +10,30 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 
 import { nodeBuilder } from '@kbn/es-query';
 
 import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
-import {
+import type {
   CasePatchRequest,
   CasesPatchRequest,
-  CasesPatchRequestRt,
   CasesResponse,
+  CommentAttributes,
+  CaseAttributes,
+  User,
+} from '../../../common/api';
+import {
+  CasesPatchRequestRt,
   CasesResponseRt,
   CaseStatuses,
-  CommentAttributes,
   CommentType,
   excess,
   throwErrors,
-  CaseAttributes,
-  User,
 } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -38,19 +44,20 @@ import {
 
 import { getCaseToUpdate } from '../utils';
 
-import { AlertService, CasesService } from '../../services';
+import type { AlertService, CasesService } from '../../services';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
   flattenCaseSavedObject,
   isCommentRequestTypeAlert,
 } from '../../common/utils';
-import { UpdateAlertRequest } from '../alerts/types';
-import { CasesClientArgs } from '..';
-import { Operations, OwnerEntity } from '../../authorization';
+import type { UpdateAlertRequest } from '../alerts/types';
+import type { CasesClientArgs } from '..';
+import type { OwnerEntity } from '../../authorization';
+import { Operations } from '../../authorization';
 import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
-import { LicensingService } from '../../services/licensing';
+import type { LicensingService } from '../../services/licensing';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.

@@ -15,8 +15,7 @@
     "triggersActionsUi",
     "observability",
     "ruleRegistry",
-    "unifiedSearch",
-    "lens"
+    "unifiedSearch"
   ],
   "optionalPlugins": ["ml", "home", "embeddable", "osquery"],
   "server": true,

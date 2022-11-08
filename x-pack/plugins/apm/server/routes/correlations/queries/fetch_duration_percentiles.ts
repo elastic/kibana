@@ -6,15 +6,15 @@
  */
 
 import { SIGNIFICANT_VALUE_DIGITS } from '../../../../common/correlations/constants';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { getDurationField, getEventType } from '../utils';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchDurationPercentiles = async ({
   chartType,
-  setup,
+  apmEventClient,
   start,
   end,
   environment,
@@ -24,7 +24,7 @@ export const fetchDurationPercentiles = async ({
   searchMetrics,
 }: CommonCorrelationsQueryParams & {
   chartType: LatencyDistributionChartType;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   percents?: number[];
   searchMetrics: boolean;
 }): Promise<{
@@ -63,7 +63,7 @@ export const fetchDurationPercentiles = async ({
       },
     },
   };
-  const response = await setup.apmEventClient.search(
+  const response = await apmEventClient.search(
     'get_duration_percentiles',
     params
   );

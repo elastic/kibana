@@ -72,7 +72,11 @@ export function OpenTelemetryInstructions({
           defaultMessage: 'Configuration value',
         }
       ),
-      render: (_, { value }) => <EuiText color="accent">{value}</EuiText>,
+      render: (_, { value }) => (
+        <EuiText size="s" color="accent">
+          {value}
+        </EuiText>
+      ),
     },
     {
       field: 'notes',

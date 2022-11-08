@@ -11,6 +11,7 @@ import { timelineActions } from '../../../store/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineId, TimelineTabs } from '../../../../../common/types';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 const mockDispatch = jest.fn();
 jest.mock('../../../../common/lib/kibana');
@@ -39,7 +40,7 @@ jest.mock('../../../../common/containers/sourcerer', () => {
 describe('useDetailPanel', () => {
   const defaultProps: UseDetailPanelConfig = {
     sourcererScope: SourcererScopeName.detections,
-    timelineId: TimelineId.test,
+    scopeId: TimelineId.test,
   };
   const mockGetExpandedDetail = jest.fn().mockImplementation(() => ({}));
   beforeEach(() => {
@@ -51,71 +52,237 @@ describe('useDetailPanel', () => {
     (useDeepEqualSelector as jest.Mock).mockClear();
   });
 
-  test('should return openDetailsPanel fn, handleOnDetailsPanelClosed fn, shouldShowDetailsPanel, and the DetailsPanel component', async () => {
+  test('should return open fns (event, host, network, user), handleOnDetailsPanelClosed fn, shouldShowDetailsPanel, and the DetailsPanel component', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => {
         return useDetailPanel(defaultProps);
       });
       await waitForNextUpdate();
 
-      expect(result.current.openDetailsPanel).toBeDefined();
+      expect(result.current.openEventDetailsPanel).toBeDefined();
+      expect(result.current.openHostDetailsPanel).toBeDefined();
+      expect(result.current.openNetworkDetailsPanel).toBeDefined();
+      expect(result.current.openUserDetailsPanel).toBeDefined();
       expect(result.current.handleOnDetailsPanelClosed).toBeDefined();
       expect(result.current.shouldShowDetailsPanel).toBe(false);
       expect(result.current.DetailsPanel).toBeNull();
     });
   });
 
-  test('should fire redux action to open details panel', async () => {
+  describe('open event details', () => {
     const testEventId = '123';
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => {
-        return useDetailPanel(defaultProps);
+    test('should fire redux action to open event details panel', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
+
+        result.current?.openEventDetailsPanel(testEventId);
+
+        expect(mockDispatch).toHaveBeenCalled();
+        expect(timelineActions.toggleDetailPanel).toHaveBeenCalled();
       });
-      await waitForNextUpdate();
+    });
 
-      result.current?.openDetailsPanel(testEventId);
+    test('should call provided onClose callback provided to openEventDetailsPanel fn', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
 
-      expect(mockDispatch).toHaveBeenCalled();
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalled();
+        const mockOnClose = jest.fn();
+        result.current?.openEventDetailsPanel(testEventId, mockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
+
+        expect(mockOnClose).toHaveBeenCalled();
+      });
+    });
+
+    test('should call the last onClose callback provided to openEventDetailsPanel fn', async () => {
+      // Test that the onClose ref is properly updated
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
+
+        const mockOnClose = jest.fn();
+        const secondMockOnClose = jest.fn();
+        result.current?.openEventDetailsPanel(testEventId, mockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
+
+        expect(mockOnClose).toHaveBeenCalled();
+
+        result.current?.openEventDetailsPanel(testEventId, secondMockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
+
+        expect(secondMockOnClose).toHaveBeenCalled();
+      });
     });
   });
 
-  test('should call provided onClose callback provided to openDetailsPanel fn', async () => {
-    const testEventId = '123';
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => {
-        return useDetailPanel(defaultProps);
+  describe('open host details', () => {
+    const hostName = 'my-host';
+    test('should fire redux action to open host details panel', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
+
+        result.current?.openHostDetailsPanel(hostName);
+
+        expect(mockDispatch).toHaveBeenCalled();
+        expect(timelineActions.toggleDetailPanel).toHaveBeenCalled();
       });
-      await waitForNextUpdate();
+    });
 
-      const mockOnClose = jest.fn();
-      result.current?.openDetailsPanel(testEventId, mockOnClose);
-      result.current?.handleOnDetailsPanelClosed();
+    test('should call provided onClose callback provided to openEventDetailsPanel fn', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
 
-      expect(mockOnClose).toHaveBeenCalled();
+        const mockOnClose = jest.fn();
+        result.current?.openHostDetailsPanel(hostName, mockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
+
+        expect(mockOnClose).toHaveBeenCalled();
+      });
+    });
+
+    test('should call the last onClose callback provided to openEventDetailsPanel fn', async () => {
+      // Test that the onClose ref is properly updated
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
+
+        const mockOnClose = jest.fn();
+        const secondMockOnClose = jest.fn();
+        result.current?.openHostDetailsPanel(hostName, mockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
+
+        expect(mockOnClose).toHaveBeenCalled();
+
+        result.current?.openEventDetailsPanel(hostName, secondMockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
+
+        expect(secondMockOnClose).toHaveBeenCalled();
+      });
     });
   });
 
-  test('should call the last onClose callback provided to openDetailsPanel fn', async () => {
-    // Test that the onClose ref is properly updated
-    const testEventId = '123';
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => {
-        return useDetailPanel(defaultProps);
+  describe('open network details', () => {
+    const ip = '1.2.3.4';
+    const flowTarget = FlowTargetSourceDest.source;
+    test('should fire redux action to open host details panel', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
+
+        result.current?.openNetworkDetailsPanel(ip, flowTarget);
+
+        expect(mockDispatch).toHaveBeenCalled();
+        expect(timelineActions.toggleDetailPanel).toHaveBeenCalled();
       });
-      await waitForNextUpdate();
+    });
 
-      const mockOnClose = jest.fn();
-      const secondMockOnClose = jest.fn();
-      result.current?.openDetailsPanel(testEventId, mockOnClose);
-      result.current?.handleOnDetailsPanelClosed();
+    test('should call provided onClose callback provided to openEventDetailsPanel fn', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
 
-      expect(mockOnClose).toHaveBeenCalled();
+        const mockOnClose = jest.fn();
+        result.current?.openNetworkDetailsPanel(ip, flowTarget, mockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
 
-      result.current?.openDetailsPanel(testEventId, secondMockOnClose);
-      result.current?.handleOnDetailsPanelClosed();
+        expect(mockOnClose).toHaveBeenCalled();
+      });
+    });
 
-      expect(secondMockOnClose).toHaveBeenCalled();
+    test('should call the last onClose callback provided to openEventDetailsPanel fn', async () => {
+      // Test that the onClose ref is properly updated
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
+
+        const mockOnClose = jest.fn();
+        const secondMockOnClose = jest.fn();
+        result.current?.openNetworkDetailsPanel(ip, flowTarget, mockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
+
+        expect(mockOnClose).toHaveBeenCalled();
+
+        result.current?.openNetworkDetailsPanel(ip, flowTarget, secondMockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
+
+        expect(secondMockOnClose).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('open user details', () => {
+    const userName = 'IAmBatman';
+    test('should fire redux action to open host details panel', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
+
+        result.current?.openUserDetailsPanel(userName);
+
+        expect(mockDispatch).toHaveBeenCalled();
+        expect(timelineActions.toggleDetailPanel).toHaveBeenCalled();
+      });
+    });
+
+    test('should call provided onClose callback provided to openEventDetailsPanel fn', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
+
+        const mockOnClose = jest.fn();
+        result.current?.openUserDetailsPanel(userName, mockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
+
+        expect(mockOnClose).toHaveBeenCalled();
+      });
+    });
+
+    test('should call the last onClose callback provided to openEventDetailsPanel fn', async () => {
+      // Test that the onClose ref is properly updated
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => {
+          return useDetailPanel(defaultProps);
+        });
+        await waitForNextUpdate();
+
+        const mockOnClose = jest.fn();
+        const secondMockOnClose = jest.fn();
+        result.current?.openUserDetailsPanel(userName, mockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
+
+        expect(mockOnClose).toHaveBeenCalled();
+
+        result.current?.openUserDetailsPanel(userName, secondMockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
+
+        expect(secondMockOnClose).toHaveBeenCalled();
+      });
     });
   });
 
@@ -140,8 +307,8 @@ describe('useDetailPanel', () => {
         <Memo(DetailsPanel)
           browserFields={Object {}}
           handleOnPanelClosed={[Function]}
+          scopeId="timeline-test"
           tabType="session"
-          timelineId="test"
         />
       `);
     });

@@ -27,7 +27,6 @@ export type {
 export {
   enableInspectEsQueries,
   enableComparisonByDefault,
-  enableServiceGroups,
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   enableInfrastructureHostsView,
@@ -56,6 +55,7 @@ export {
   SelectableUrlList,
   ExploratoryView,
   DatePicker,
+  LoadWhenInView,
 } from './components/shared';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';

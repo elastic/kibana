@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import datemath, { Unit } from '@kbn/datemath';
 import { IKibanaResponse, SavedObjectsClientContract } from '@kbn/core/server';
@@ -14,7 +15,7 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { getMonitors } from '../common';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { ConfigKey, OverviewStatus } from '../../../common/runtime_types';
+import { ConfigKey, OverviewStatus, OverviewStatusMetaData } from '../../../common/runtime_types';
 
 /**
  * Helper function that converts a monitor's schedule to a value to use to generate
@@ -35,12 +36,12 @@ export async function queryMonitorStatus(
   maxLocations: number,
   maxPeriod: number,
   ids: Array<string | undefined>
-): Promise<Pick<OverviewStatus, 'up' | 'down'>> {
+): Promise<Omit<OverviewStatus, 'disabledCount'>> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
   const pageCount = Math.ceil(ids.length / idSize);
   const promises: Array<Promise<any>> = [];
   for (let i = 0; i < pageCount; i++) {
-    const params = {
+    const params: estypes.SearchRequest = {
       size: 0,
       query: {
         bool: {
@@ -49,13 +50,14 @@ export async function queryMonitorStatus(
               range: {
                 '@timestamp': {
                   gte: maxPeriod,
+                  // @ts-expect-error can't mix number and string in client definition
                   lte: 'now',
                 },
               },
             },
             {
               terms: {
-                'monitor.id': ids.slice(i * idSize, i * idSize + idSize),
+                'monitor.id': (ids as string[]).slice(i * idSize, i * idSize + idSize),
               },
             },
             {
@@ -90,7 +92,7 @@ export async function queryMonitorStatus(
                       },
                     ],
                     _source: {
-                      includes: ['@timestamp', 'summary'],
+                      includes: ['@timestamp', 'summary', 'monitor', 'observer', 'config_id'],
                     },
                   },
                 },
@@ -100,24 +102,40 @@ export async function queryMonitorStatus(
         },
       },
     };
+
     promises.push(esClient.baseESClient.search(params));
   }
   let up = 0;
   let down = 0;
+  const upConfigs: OverviewStatusMetaData[] = [];
+  const downConfigs: OverviewStatusMetaData[] = [];
   for await (const response of promises) {
     response.aggregations?.id.buckets.forEach(({ location }: { key: string; location: any }) => {
       location.buckets.forEach(({ status }: { key: string; status: any }) => {
         const downCount = status.hits.hits[0]._source.summary.down;
         const upCount = status.hits.hits[0]._source.summary.up;
+        const configId = status.hits.hits[0]._source.config_id;
+        const heartbeatId = status.hits.hits[0]._source.monitor.id;
+        const locationName = status.hits.hits[0]._source.observer?.geo?.name;
         if (upCount > 0) {
           up += 1;
+          upConfigs.push({
+            configId,
+            heartbeatId,
+            location: locationName,
+          });
         } else if (downCount > 0) {
           down += 1;
+          downConfigs.push({
+            configId,
+            heartbeatId,
+            location: locationName,
+          });
         }
       });
     });
   }
-  return { up, down };
+  return { up, down, upConfigs, downConfigs };
 }
 
 /**
@@ -166,7 +184,7 @@ export async function getStatus(
     });
   } while (monitors.saved_objects.length === monitors.per_page);
 
-  const { up, down } = await queryMonitorStatus(
+  const { up, down, upConfigs, downConfigs } = await queryMonitorStatus(
     uptimeEsClient,
     maxLocations,
     maxPeriod,
@@ -177,6 +195,8 @@ export async function getStatus(
     disabledCount,
     up,
     down,
+    upConfigs,
+    downConfigs,
   };
 }
 

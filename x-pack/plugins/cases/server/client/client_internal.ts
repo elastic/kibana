@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { CasesClientArgs } from './types';
-import {
-  InternalConfigureSubClient,
-  createInternalConfigurationSubClient,
-} from './configure/client';
+import type { CasesClientArgs } from './types';
+import type { InternalConfigureSubClient } from './configure/client';
+import { createInternalConfigurationSubClient } from './configure/client';
 
 export class CasesClientInternal {
   private readonly _configuration: InternalConfigureSubClient;

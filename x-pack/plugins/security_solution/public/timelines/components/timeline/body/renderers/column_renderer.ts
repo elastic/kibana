@@ -24,9 +24,10 @@ export interface ColumnRenderer {
     isDraggable,
     linkValues,
     rowRenderers,
-    timelineId,
+    scopeId,
     truncate,
     values,
+    key,
   }: {
     asPlainText?: boolean;
     className?: string;
@@ -39,8 +40,9 @@ export interface ColumnRenderer {
     isDraggable?: boolean;
     linkValues?: string[] | null | undefined;
     rowRenderers?: RowRenderer[];
-    timelineId: string;
+    scopeId: string;
     truncate?: boolean;
     values: string[] | null | undefined;
+    key?: string;
   }) => React.ReactNode;
 }

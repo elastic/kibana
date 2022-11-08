@@ -53,7 +53,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
 
-  const result = getColumnsFromVis(
+  const layers = getColumnsFromVis(
     vis,
     timefilter,
     dataView,
@@ -63,17 +63,19 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     { dropEmptyRowsInDateHistogram: true, ...percentageModeConfig }
   );
 
-  if (result === null) {
+  if (layers === null) {
     return null;
   }
+
+  const [layerConfig] = layers;
 
   // for now, multiple metrics are not supported
-  if (result.metrics.length > 1 || result.buckets.length) {
+  if (layerConfig.metrics.length > 1 || layerConfig.buckets.all.length) {
     return null;
   }
 
-  if (result.metrics[0]) {
-    const metric = result.columns.find(({ columnId }) => columnId === result.metrics[0]);
+  if (layerConfig.metrics[0]) {
+    const metric = layerConfig.columns.find(({ columnId }) => columnId === layerConfig.metrics[0]);
     if (metric?.dataType !== 'number') {
       return null;
     }
@@ -82,11 +84,11 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
   const layerId = uuid();
   const indexPatternId = dataView.id!;
 
-  const metricAccessor = result.metrics[0];
+  const metricAccessor = layerConfig.metrics[0];
   const { min, max, isPercentageMode } = percentageModeConfig as PercentageModeConfigWithMinMax;
   const minColumn = createStaticValueColumn(isPercentageMode ? 0 : min);
   const maxColumn = createStaticValueColumn(isPercentageMode ? 1 : max);
-  const columns = [...result.columns, minColumn, maxColumn];
+  const columns = [...layerConfig.columns, minColumn, maxColumn];
 
   return {
     type: 'lnsGauge',

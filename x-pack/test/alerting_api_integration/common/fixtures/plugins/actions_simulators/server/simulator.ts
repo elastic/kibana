@@ -9,7 +9,7 @@ import getPort from 'get-port';
 import http from 'http';
 import httpProxy from 'http-proxy';
 import { getProxyPort } from '../../../../lib/get_proxy_server';
-import { getDataFromPostRequest } from './data_handler';
+import { getDataFromRequest } from './data_handler';
 
 export interface ProxyArgs {
   config: string;
@@ -53,7 +53,7 @@ export abstract class Simulator {
   };
 
   private baseHandler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
-    const data = await getDataFromPostRequest(request);
+    const data = await getDataFromRequest(request);
     this._requestData = data;
     this._requestUrl = new URL(request.url ?? '', `http://${request.headers.host}`).toString();
 

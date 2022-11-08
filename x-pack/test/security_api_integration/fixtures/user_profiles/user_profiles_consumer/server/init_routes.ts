@@ -16,8 +16,13 @@ export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
       path: '/internal/user_profiles_consumer/_suggest',
       validate: {
         body: schema.object({
-          name: schema.string(),
+          name: schema.maybe(schema.string()),
           dataPath: schema.maybe(schema.string()),
+          hint: schema.maybe(
+            schema.object({
+              uids: schema.arrayOf(schema.string()),
+            })
+          ),
           size: schema.maybe(schema.number()),
           requiredAppPrivileges: schema.maybe(schema.arrayOf(schema.string())),
         }),
@@ -28,6 +33,7 @@ export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
       const profiles = await pluginDeps.security.userProfiles.suggest({
         name: request.body.name,
         dataPath: request.body.dataPath,
+        hint: request.body.hint,
         size: request.body.size,
         requiredPrivileges: request.body.requiredAppPrivileges
           ? {

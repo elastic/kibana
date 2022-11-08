@@ -8,7 +8,7 @@ import { getStatusConfiguration } from '@kbn/cases-components';
 import { StatusAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import * as i18n from './translations';
-import { AllCaseStatus, Statuses } from './types';
+import type { AllCaseStatus, Statuses } from './types';
 
 const statusConfiguration = getStatusConfiguration();
 

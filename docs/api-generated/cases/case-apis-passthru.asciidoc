@@ -19,8 +19,11 @@ Any modifications made to this file will be overwritten.
   <h4><a href="#Cases">Cases</a></h4>
   <ul>
   <li><a href="#addCaseComment"><code><span class="http-method">post</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
+  <li><a href="#createCase"><code><span class="http-method">post</span> /s/{spaceId}/api/cases</code></a></li>
+  <li><a href="#deleteCase"><code><span class="http-method">delete</span> /s/{spaceId}/api/cases</code></a></li>
   <li><a href="#deleteCaseComments"><code><span class="http-method">delete</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
   <li><a href="#getAllCaseComments"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
+  <li><a href="#updateCase"><code><span class="http-method">patch</span> /s/{spaceId}/api/cases</code></a></li>
   <li><a href="#updateCaseComment"><code><span class="http-method">patch</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
   </ul>
 
@@ -84,6 +87,11 @@ Any modifications made to this file will be overwritten.
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
   "comments" : [ null, null ],
+  "assignees" : [ {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  }, {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  } ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -102,28 +110,6 @@ Any modifications made to this file will be overwritten.
   },
   "tags" : [ "tag-1" ],
   "duration" : 120,
-  "connector" : {
-    "name" : "none",
-    "id" : "none",
-    "fields" : {
-      "destIp" : "destIp",
-      "severity" : "severity",
-      "parent" : "parent",
-      "impact" : "impact",
-      "malwareUrl" : "malwareUrl",
-      "priority" : "priority",
-      "issueTypes" : [ 0.8008281904610115, 0.8008281904610115 ],
-      "issueType" : "issueType",
-      "sourceIp" : "sourceIp",
-      "urgency" : "urgency",
-      "malwareHash" : "malwareHash",
-      "caseId" : "caseId",
-      "severityCode" : 6.027456183070403,
-      "category" : "category",
-      "subcategory" : "subcategory"
-    },
-    "type" : ".none"
-  },
   "updated_at" : "2000-01-23T04:56:07.000+00:00",
   "updated_by" : {
     "full_name" : "full_name",
@@ -159,6 +145,166 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createCase"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/cases</code></pre></div>
+    <div class="method-summary">Creates a case. (<span class="nickname">createCase</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana  feature privileges, depending on the owner of the case you're creating.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">create_case_request <a href="#create_case_request">create_case_request</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#case_response_properties">case_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "owner" : "cases",
+  "totalComment" : 0,
+  "settings" : {
+    "syncAlerts" : true
+  },
+  "totalAlerts" : 0,
+  "closed_at" : "2000-01-23T04:56:07.000+00:00",
+  "comments" : [ null, null ],
+  "assignees" : [ {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  }, {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  } ],
+  "created_at" : "2022-05-13T09:16:17.416Z",
+  "description" : "A case description.",
+  "title" : "Case title 1",
+  "created_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "version" : "WzUzMiwxXQ==",
+  "closed_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "tags" : [ "tag-1" ],
+  "duration" : 120,
+  "updated_at" : "2000-01-23T04:56:07.000+00:00",
+  "updated_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "id" : "66b9aa00-94fa-11ea-9f74-e7e108796192",
+  "external_service" : {
+    "external_title" : "external_title",
+    "pushed_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "external_url" : "external_url",
+    "pushed_at" : "2000-01-23T04:56:07.000+00:00",
+    "connector_id" : "connector_id",
+    "external_id" : "external_id",
+    "connector_name" : "connector_name"
+  }
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#case_response_properties">case_response_properties</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteCase"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /s/{spaceId}/api/cases</code></pre></div>
+    <div class="method-summary">Deletes one or more cases. (<span class="nickname">deleteCase</span>)</div>
+    <div class="method-notes">You must have <code>read</code> or <code>all</code> privileges and the <code>delete</code> sub-feature privilege for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases you're deleting.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">ids (required)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The cases that you want to removed. All non-ASCII characters must be URL encoded. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="deleteCaseComments"/>
@@ -240,6 +386,11 @@ Any modifications made to this file will be overwritten.
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
   "comments" : [ null, null ],
+  "assignees" : [ {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  }, {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  } ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -258,28 +409,6 @@ Any modifications made to this file will be overwritten.
   },
   "tags" : [ "tag-1" ],
   "duration" : 120,
-  "connector" : {
-    "name" : "none",
-    "id" : "none",
-    "fields" : {
-      "destIp" : "destIp",
-      "severity" : "severity",
-      "parent" : "parent",
-      "impact" : "impact",
-      "malwareUrl" : "malwareUrl",
-      "priority" : "priority",
-      "issueTypes" : [ 0.8008281904610115, 0.8008281904610115 ],
-      "issueType" : "issueType",
-      "sourceIp" : "sourceIp",
-      "urgency" : "urgency",
-      "malwareHash" : "malwareHash",
-      "caseId" : "caseId",
-      "severityCode" : 6.027456183070403,
-      "category" : "category",
-      "subcategory" : "subcategory"
-    },
-    "type" : ".none"
-  },
   "updated_at" : "2000-01-23T04:56:07.000+00:00",
   "updated_by" : {
     "full_name" : "full_name",
@@ -315,6 +444,123 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateCase"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="patch"><code class="huge"><span class="http-method">patch</span> /s/{spaceId}/api/cases</code></pre></div>
+    <div class="method-summary">Updates one or more cases. (<span class="nickname">updateCase</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the  <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana  feature privileges, depending on the owner of the case you're updating.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">update_case_request <a href="#update_case_request">update_case_request</a> (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#case_response_properties">case_response_properties</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "owner" : "cases",
+  "totalComment" : 0,
+  "settings" : {
+    "syncAlerts" : true
+  },
+  "totalAlerts" : 0,
+  "closed_at" : "2000-01-23T04:56:07.000+00:00",
+  "comments" : [ null, null ],
+  "assignees" : [ {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  }, {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  } ],
+  "created_at" : "2022-05-13T09:16:17.416Z",
+  "description" : "A case description.",
+  "title" : "Case title 1",
+  "created_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "version" : "WzUzMiwxXQ==",
+  "closed_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "tags" : [ "tag-1" ],
+  "duration" : 120,
+  "updated_at" : "2000-01-23T04:56:07.000+00:00",
+  "updated_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "id" : "66b9aa00-94fa-11ea-9f74-e7e108796192",
+  "external_service" : {
+    "external_title" : "external_title",
+    "pushed_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "external_url" : "external_url",
+    "pushed_at" : "2000-01-23T04:56:07.000+00:00",
+    "connector_id" : "connector_id",
+    "external_id" : "external_id",
+    "connector_name" : "connector_name"
+  }
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateCaseComment"/>
@@ -376,6 +622,11 @@ Any modifications made to this file will be overwritten.
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
   "comments" : [ null, null ],
+  "assignees" : [ {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  }, {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  } ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -394,28 +645,6 @@ Any modifications made to this file will be overwritten.
   },
   "tags" : [ "tag-1" ],
   "duration" : 120,
-  "connector" : {
-    "name" : "none",
-    "id" : "none",
-    "fields" : {
-      "destIp" : "destIp",
-      "severity" : "severity",
-      "parent" : "parent",
-      "impact" : "impact",
-      "malwareUrl" : "malwareUrl",
-      "priority" : "priority",
-      "issueTypes" : [ 0.8008281904610115, 0.8008281904610115 ],
-      "issueType" : "issueType",
-      "sourceIp" : "sourceIp",
-      "urgency" : "urgency",
-      "malwareHash" : "malwareHash",
-      "caseId" : "caseId",
-      "severityCode" : 6.027456183070403,
-      "category" : "category",
-      "subcategory" : "subcategory"
-    },
-    "type" : ".none"
-  },
   "updated_at" : "2000-01-23T04:56:07.000+00:00",
   "updated_by" : {
     "full_name" : "full_name",
@@ -471,12 +700,26 @@ Any modifications made to this file will be overwritten.
     <li><a href="#alert_identifiers"><code>alert_identifiers</code> - Alert identifiers</a></li>
     <li><a href="#alert_indices"><code>alert_indices</code> - Alert indices</a></li>
     <li><a href="#case_response_closed_by_properties"><code>case_response_closed_by_properties</code> - Case response properties for closed_by</a></li>
-    <li><a href="#case_response_connector_field_properties"><code>case_response_connector_field_properties</code> - Case response properties for connector fields</a></li>
     <li><a href="#case_response_created_by_properties"><code>case_response_created_by_properties</code> - Case response properties for created_by</a></li>
     <li><a href="#case_response_properties"><code>case_response_properties</code> - Case response properties</a></li>
+    <li><a href="#case_response_properties_assignees_inner"><code>case_response_properties_assignees_inner</code> - </a></li>
     <li><a href="#case_response_pushed_by_properties"><code>case_response_pushed_by_properties</code> - Case response properties for pushed_by</a></li>
     <li><a href="#case_response_updated_by_properties"><code>case_response_updated_by_properties</code> - Case response properties for updated_by</a></li>
-    <li><a href="#connector_types"><code>connector_types</code> - </a></li>
+    <li><a href="#connector_properties_cases_webhook"><code>connector_properties_cases_webhook</code> - Create or upate case request properties for Cases Webhook connector</a></li>
+    <li><a href="#connector_properties_jira"><code>connector_properties_jira</code> - Create or update case request properties for a Jira connector</a></li>
+    <li><a href="#connector_properties_jira_fields"><code>connector_properties_jira_fields</code> - </a></li>
+    <li><a href="#connector_properties_none"><code>connector_properties_none</code> - Create or update case request properties for no connector</a></li>
+    <li><a href="#connector_properties_resilient"><code>connector_properties_resilient</code> - Create case request properties for a IBM Resilient connector</a></li>
+    <li><a href="#connector_properties_resilient_fields"><code>connector_properties_resilient_fields</code> - </a></li>
+    <li><a href="#connector_properties_servicenow"><code>connector_properties_servicenow</code> - Create case request properties for a ServiceNow ITSM connector</a></li>
+    <li><a href="#connector_properties_servicenow_fields"><code>connector_properties_servicenow_fields</code> - </a></li>
+    <li><a href="#connector_properties_servicenow_sir"><code>connector_properties_servicenow_sir</code> - Create case request properties for a ServiceNow SecOps connector</a></li>
+    <li><a href="#connector_properties_servicenow_sir_fields"><code>connector_properties_servicenow_sir_fields</code> - </a></li>
+    <li><a href="#connector_properties_swimlane"><code>connector_properties_swimlane</code> - Create case request properties for a Swimlane connector</a></li>
+    <li><a href="#connector_properties_swimlane_fields"><code>connector_properties_swimlane_fields</code> - </a></li>
+    <li><a href="#create_case_request"><code>create_case_request</code> - Create case request</a></li>
+    <li><a href="#create_case_request_assignees_inner"><code>create_case_request_assignees_inner</code> - </a></li>
+    <li><a href="#create_case_request_connector"><code>create_case_request_connector</code> - </a></li>
     <li><a href="#external_service"><code>external_service</code> - </a></li>
     <li><a href="#owners"><code>owners</code> - </a></li>
     <li><a href="#rule"><code>rule</code> - Alerting rule</a></li>
@@ -485,6 +728,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#status"><code>status</code> - </a></li>
     <li><a href="#update_alert_comment_request_properties"><code>update_alert_comment_request_properties</code> - Update case comment request properties for alerts</a></li>
     <li><a href="#update_case_comment_request"><code>update_case_comment_request</code> - Update case comment request</a></li>
+    <li><a href="#update_case_request"><code>update_case_request</code> - Update case request</a></li>
+    <li><a href="#update_case_request_cases_inner"><code>update_case_request_cases_inner</code> - </a></li>
     <li><a href="#update_user_comment_request_properties"><code>update_user_comment_request_properties</code> - Update case comment request properties for user comments</a></li>
     <li><a href="#user_comment_response_properties"><code>user_comment_response_properties</code> - Case response properties for user comments</a></li>
   </ol>
@@ -515,10 +760,12 @@ Any modifications made to this file will be overwritten.
     <h3><a name="Case_response_properties_for_connectors"><code>Case_response_properties_for_connectors</code> - Case response properties for connectors</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">fields (optional)</div><div class="param-desc"><span class="param-type"><a href="#case_response_connector_field_properties">case_response_connector_field_properties</a></span>  </div>
-<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To create a case without a connector, use <code>none</code>. </div>
-<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. To create a case without a connector, use <code>none</code>. </div>
-<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
+      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_swimlane_fields">connector_properties_swimlane_fields</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To retrieve connector IDs, use the find connectors API. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.swimlane</div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -631,27 +878,6 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="case_response_connector_field_properties"><code>case_response_connector_field_properties</code> - Case response properties for connector fields</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.</div>
-    <div class="field-items">
-      <div class="param">caseId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The case identifier for Swimlane connectors. </div>
-<div class="param">category (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors. </div>
-<div class="param">destIp (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A comma-separated list of destination IPs for ServiceNow SecOps connectors. </div>
-<div class="param">impact (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The effect an incident had on business for ServiceNow ITSM connectors. </div>
-<div class="param">issueType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of issue for Jira connectors. </div>
-<div class="param">issueTypes (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">array[BigDecimal]</a></span> The type of incident for IBM Resilient connectors. </div>
-<div class="param">malwareHash (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A comma-separated list of malware hashes for ServiceNow SecOps connectors. </div>
-<div class="param">malwareUrl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A comma-separated list of malware URLs for ServiceNow SecOps connectors. </div>
-<div class="param">parent (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The key of the parent issue, when the issue type is sub-task for Jira connectors. </div>
-<div class="param">priority (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The priority of the issue for Jira and ServiceNow SecOps connectors. </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The severity of the incident for ServiceNow ITSM connectors. </div>
-<div class="param">severityCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span> The severity code of the incident for IBM Resilient connectors. </div>
-<div class="param">sourceIp (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A comma-separated list of source IPs for ServiceNow SecOps connectors. </div>
-<div class="param">subcategory (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The subcategory of the incident for ServiceNow ITSM connectors. </div>
-<div class="param">urgency (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
     <h3><a name="case_response_created_by_properties"><code>case_response_created_by_properties</code> - Case response properties for created_by</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
@@ -665,7 +891,8 @@ Any modifications made to this file will be overwritten.
     <h3><a name="case_response_properties"><code>case_response_properties</code> - Case response properties</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">closed_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#case_response_properties_assignees_inner">array[case_response_properties_assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+<div class="param">closed_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">closed_by </div><div class="param-desc"><span class="param-type"><a href="#case_response_closed_by_properties">case_response_closed_by_properties</a></span>  </div>
 <div class="param">comments </div><div class="param-desc"><span class="param-type"><a href="#Case_response_properties_for_comments_inner">array[Case_response_properties_for_comments_inner]</a></span> An array of comment objects for the case. </div>
 <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#Case_response_properties_for_connectors">Case_response_properties_for_connectors</a></span>  </div>
@@ -689,6 +916,13 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="case_response_properties_assignees_inner"><code>case_response_properties_assignees_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">uid </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A unique identifier for the user profile. You can use the get user profile API to retrieve more details. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="case_response_pushed_by_properties"><code>case_response_pushed_by_properties</code> - Case response properties for pushed_by</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
@@ -709,10 +943,169 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="connector_types"><code>connector_types</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The type of connector.</div>
+    <h3><a name="connector_properties_cases_webhook"><code>connector_properties_cases_webhook</code> - Create or upate case request properties for Cases Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.cases-webhook</code>.</div>
     <div class="field-items">
-          </div>  <!-- field-items -->
+      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To retrieve connector IDs, use the find connectors API. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.cases-webhook</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_properties_jira"><code>connector_properties_jira</code> - Create or update case request properties for a Jira connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.jira</code>.</div>
+    <div class="field-items">
+      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_jira_fields">connector_properties_jira_fields</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To retrieve connector IDs, use the find connectors API. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.jira</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_properties_jira_fields"><code>connector_properties_jira_fields</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An object containing the connector fields. If you want to omit any individual field, specify null as its value.</div>
+    <div class="field-items">
+      <div class="param">issueType </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of issue. </div>
+<div class="param">parent </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The key of the parent issue, when the issue type is sub-task. </div>
+<div class="param">priority </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The priority of the issue. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_properties_none"><code>connector_properties_none</code> - Create or update case request properties for no connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.none</code>.</div>
+    <div class="field-items">
+      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An object containing the connector fields. To create a case without a connector, specify null. To update a case to remove the connector, specify null. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To create a case without a connector, use <code>none</code>. To update a case to remove the connector, specify <code>none</code>. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. To create a case without a connector, use <code>none</code>. To update a case to remove the connector, specify <code>none</code>. </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. To create a case without a connector, use <code>.none</code>. To update a case to remove the connector, specify <code>.none</code>. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.none</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_properties_resilient"><code>connector_properties_resilient</code> - Create case request properties for a IBM Resilient connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.resilient</code>.</div>
+    <div class="field-items">
+      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_resilient_fields">connector_properties_resilient_fields</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.resilient</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_properties_resilient_fields"><code>connector_properties_resilient_fields</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An object containing the connector fields. If you want to omit any individual field, specify null as its value.</div>
+    <div class="field-items">
+      <div class="param">issueTypes </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The type of incident. </div>
+<div class="param">severityCode </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The severity code of the incident. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_properties_servicenow"><code>connector_properties_servicenow</code> - Create case request properties for a ServiceNow ITSM connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.servicenow</code>.</div>
+    <div class="field-items">
+      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_servicenow_fields">connector_properties_servicenow_fields</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To retrieve connector IDs, use the find connectors API. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.servicenow</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_properties_servicenow_fields"><code>connector_properties_servicenow_fields</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An object containing the connector fields. If you want to omit any individual field, specify null as its value.</div>
+    <div class="field-items">
+      <div class="param">category </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The category of the incident. </div>
+<div class="param">impact </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The effect an incident had on business. </div>
+<div class="param">severity </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The severity of the incident. </div>
+<div class="param">subcategory </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The subcategory of the incident. </div>
+<div class="param">urgency </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The extent to which the incident resolution can be delayed. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_properties_servicenow_sir"><code>connector_properties_servicenow_sir</code> - Create case request properties for a ServiceNow SecOps connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.servicenow-sir</code>.</div>
+    <div class="field-items">
+      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_servicenow_sir_fields">connector_properties_servicenow_sir_fields</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To retrieve connector IDs, use the find connectors API. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.servicenow-sir</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_properties_servicenow_sir_fields"><code>connector_properties_servicenow_sir_fields</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An object containing the connector fields. If you want to omit any individual field, specify null as its value.</div>
+    <div class="field-items">
+      <div class="param">category </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The category of the incident. </div>
+<div class="param">destIp </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of destination IPs. </div>
+<div class="param">malwareHash </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of malware hashes. </div>
+<div class="param">malwareUrl </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of malware URLs. </div>
+<div class="param">priority </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The priority of the issue. </div>
+<div class="param">sourceIp </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of source IPs. </div>
+<div class="param">subcategory </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The subcategory of the incident. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_properties_swimlane"><code>connector_properties_swimlane</code> - Create case request properties for a Swimlane connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.swimlane</code>.</div>
+    <div class="field-items">
+      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_swimlane_fields">connector_properties_swimlane_fields</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To retrieve connector IDs, use the find connectors API. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.swimlane</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_properties_swimlane_fields"><code>connector_properties_swimlane_fields</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An object containing the connector fields. If you want to omit any individual field, specify null as its value.</div>
+    <div class="field-items">
+      <div class="param">caseId </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The case identifier for Swimlane connectors. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_case_request"><code>create_case_request</code> - Create case request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The create case API request body varies depending on the type of connector.</div>
+    <div class="field-items">
+      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#create_case_request_assignees_inner">array[create_case_request_assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+<div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#create_case_request_connector">create_case_request_connector</a></span>  </div>
+<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
+<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_case_request_assignees_inner"><code>create_case_request_assignees_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">uid </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_case_request_connector"><code>create_case_request_connector</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_swimlane_fields">connector_properties_swimlane_fields</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To retrieve connector IDs, use the find connectors API. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.swimlane</div>
+    </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="external_service"><code>external_service</code> - </a> <a class="up" href="#__Models">Up</a></h3>
@@ -745,7 +1138,7 @@ Any modifications made to this file will be overwritten.
     <h3><a name="settings"><code>settings</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>An object that contains the case settings.</div>
     <div class="field-items">
-      <div class="param">syncAlerts (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Turns alert syncing on or off. </div>
+      <div class="param">syncAlerts </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Turns alert syncing on or off. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -789,6 +1182,29 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum">user</div>
 <div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current comment version. To retrieve version values, use the get comments API. </div>
 <div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_case_request"><code>update_case_request</code> - Update case request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The update case API request body varies depending on the type of connector.</div>
+    <div class="field-items">
+      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#update_case_request_cases_inner">array[update_case_request_cases_inner]</a></span> An array containing one or more case objects. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_case_request_cases_inner"><code>update_case_request_cases_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#create_case_request_assignees_inner">array[create_case_request_assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+<div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#create_case_request_connector">create_case_request_connector</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
+<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

@@ -63,7 +63,6 @@ export const AdminSearchBar = memo(() => {
             iconType="search"
             showFilterBar={false}
             showDatePicker={false}
-            showQueryBar={true}
             showQueryInput={true}
           />
         </div>

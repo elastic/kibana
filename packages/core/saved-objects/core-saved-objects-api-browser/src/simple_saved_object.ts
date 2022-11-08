@@ -27,6 +27,7 @@ export interface SimpleSavedObject<T = unknown> {
   error: SavedObjectType<T>['error'];
   references: SavedObjectType<T>['references'];
   updatedAt: SavedObjectType<T>['updated_at'];
+  createdAt: SavedObjectType<T>['created_at'];
   /**
    * Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with
    * `namespaceType: 'agnostic'`.

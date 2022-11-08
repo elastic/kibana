@@ -23,6 +23,7 @@ jest.mock('../../../vis_schemas', () => ({
 }));
 
 describe('convertToSiblingPipelineColumns', () => {
+  const visType = 'heatmap';
   const dataView = stubLogstashDataView;
   const aggId = 'agg-id-1';
   const agg: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
@@ -46,7 +47,12 @@ describe('convertToSiblingPipelineColumns', () => {
 
   test('should return null if aggParams are not defined', () => {
     expect(
-      convertToSiblingPipelineColumns({ agg: { ...agg, aggParams: undefined }, aggs: [], dataView })
+      convertToSiblingPipelineColumns({
+        agg: { ...agg, aggParams: undefined },
+        aggs: [],
+        dataView,
+        visType,
+      })
     ).toBeNull();
     expect(mockConvertMetricToColumns).toBeCalledTimes(0);
   });
@@ -57,6 +63,7 @@ describe('convertToSiblingPipelineColumns', () => {
         agg: { ...agg, aggParams: { customMetric: undefined } },
         aggs: [],
         dataView,
+        visType,
       })
     ).toBeNull();
     expect(mockConvertMetricToColumns).toBeCalledTimes(0);
@@ -64,7 +71,7 @@ describe('convertToSiblingPipelineColumns', () => {
 
   test('should return null if sibling agg is not supported', () => {
     mockConvertMetricToColumns.mockReturnValue(null);
-    expect(convertToSiblingPipelineColumns({ agg, aggs: [], dataView })).toBeNull();
+    expect(convertToSiblingPipelineColumns({ agg, aggs: [], dataView, visType })).toBeNull();
     expect(mockConvertToSchemaConfig).toBeCalledTimes(1);
     expect(mockConvertMetricToColumns).toBeCalledTimes(1);
   });
@@ -72,7 +79,7 @@ describe('convertToSiblingPipelineColumns', () => {
   test('should return column', () => {
     const column = { operationType: 'formula' };
     mockConvertMetricToColumns.mockReturnValue([column]);
-    expect(convertToSiblingPipelineColumns({ agg, aggs: [], dataView })).toEqual(column);
+    expect(convertToSiblingPipelineColumns({ agg, aggs: [], dataView, visType })).toEqual(column);
     expect(mockConvertToSchemaConfig).toBeCalledTimes(1);
     expect(mockConvertMetricToColumns).toBeCalledTimes(1);
   });

@@ -41,7 +41,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
     const watcherESApp = esSection.registerApp({
       id: 'watcher',
       title: pluginName,
-      order: 3,
+      order: 5,
       mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
         const [coreStart] = await getStartServices();
         const {

@@ -125,6 +125,7 @@ describe('HeatmapComponent', function () {
       formatFactory: formatService.deserialize,
       interactive: true,
       syncTooltips: false,
+      syncCursor: true,
       renderComplete: jest.fn(),
     };
   });

@@ -32,6 +32,7 @@ export interface UISession {
   created: string;
   expires: string | null;
   status: UISearchSessionState;
+  idMapping: SearchSessionSavedObjectAttributes['idMapping'];
   numSearches: number;
   actions?: ACTION[];
   reloadUrl: string;
@@ -39,4 +40,5 @@ export interface UISession {
   initialState: Record<string, unknown>;
   restoreState: Record<string, unknown>;
   version: string;
+  errors?: string[];
 }

@@ -126,7 +126,7 @@ const ThreatSummaryViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
   enrichments: CtiEnrichment[];
   eventId: string;
-  timelineId: string;
+  scopeId: string;
   hostRisk: HostRisk;
   userRisk: UserRisk;
   isDraggable?: boolean;
@@ -136,7 +136,7 @@ const ThreatSummaryViewComponent: React.FC<{
   data,
   enrichments,
   eventId,
-  timelineId,
+  scopeId,
   hostRisk,
   userRisk,
   isDraggable,
@@ -180,7 +180,7 @@ const ThreatSummaryViewComponent: React.FC<{
           browserFields={browserFields}
           data={data}
           enrichments={enrichments}
-          timelineId={timelineId}
+          scopeId={scopeId}
           eventId={eventId}
           isDraggable={isDraggable}
           isReadOnly={isReadOnly}

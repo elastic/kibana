@@ -13,7 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType, EuiFlyoutSize } from '@elastic/eui';
+import type { IconType, EuiFlyoutSize, RecursivePartial } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
@@ -41,7 +41,7 @@ import {
   ActionVariable,
   RuleType as CommonRuleType,
 } from '@kbn/alerting-plugin/common';
-import type { BulkEditError } from '@kbn/alerting-plugin/server';
+import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -158,8 +158,13 @@ export enum RuleFlyoutCloseReason {
 
 export interface BulkEditResponse {
   rules: Rule[];
-  errors: BulkEditError[];
+  errors: BulkOperationError[];
   total: number;
+}
+
+export enum ActionConnectorMode {
+  Test = 'test',
+  ActionForm = 'actionForm',
 }
 
 export interface ActionParamsProps<TParams> {
@@ -173,6 +178,7 @@ export interface ActionParamsProps<TParams> {
   isLoading?: boolean;
   isDisabled?: boolean;
   showEmailSubjectAndMessage?: boolean;
+  executionMode?: ActionConnectorMode;
 }
 
 export interface Pagination {
@@ -204,8 +210,8 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     ComponentType<ActionConnectorFieldsProps>
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
-  defaultActionParams?: Partial<ActionParams>;
-  defaultRecoveredActionParams?: Partial<ActionParams>;
+  defaultActionParams?: RecursivePartial<ActionParams>;
+  defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
 }

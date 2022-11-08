@@ -163,6 +163,7 @@ describe('math operation', () => {
           arguments: {
             id: ['myColumnId'],
             name: ['Math'],
+            castColumns: [],
             expression: [
               '(((((((((((((((("columnX0" + "columnX1") + "columnX2") + "columnX3") + "columnX4") + "columnX5") + "columnX6") + "columnX7") + "columnX8") + "columnX9") + "columnX10") + "columnX11") + "columnX12") + "columnX13") + "columnX14") + "columnX15") + "columnX16")',
             ],
@@ -243,6 +244,7 @@ describe('math operation', () => {
           arguments: {
             id: ['myColumnId'],
             name: ['Math'],
+            castColumns: [],
             expression: [
               `("columnX0" + (("columnX1" - "columnX2") / ("columnX3" - ("columnX4" * "columnX5"))))`,
             ],
@@ -298,6 +300,7 @@ describe('math operation', () => {
           arguments: {
             id: ['myColumnId'],
             name: ['Math'],
+            castColumns: [],
             expression: [`max(min("columnX0","columnX1"),abs("columnX2"))`],
             onError: ['null'],
           },
@@ -342,7 +345,94 @@ describe('math operation', () => {
           arguments: {
             id: ['myColumnId'],
             name: ['Math'],
+            castColumns: [],
             expression: [`(5 + (3 / 8))`],
+            onError: ['null'],
+          },
+        },
+      ]);
+    });
+
+    it('should work for comparison operations as well', () => {
+      const tinymathAst = {
+        type: 'function',
+        name: 'ifelse',
+        args: [
+          {
+            type: 'function',
+            name: 'eq',
+            args: ['columnX0', 0],
+          },
+          {
+            type: 'function',
+            name: 'ifelse',
+            args: [
+              {
+                type: 'function',
+                name: 'lt',
+                args: ['columnX1', 0],
+              },
+              {
+                type: 'function',
+                name: 'ifelse',
+                args: [
+                  {
+                    type: 'function',
+                    name: 'lte',
+                    args: ['columnX2', 0],
+                  },
+                  'columnX3',
+                  'columnX4',
+                ],
+              },
+              'columnX5',
+            ],
+          },
+          {
+            type: 'function',
+            name: 'ifelse',
+            args: [
+              {
+                type: 'function',
+                name: 'gt',
+                args: ['columnX6', 0],
+              },
+              {
+                type: 'function',
+                name: 'ifelse',
+                args: [
+                  {
+                    type: 'function',
+                    name: 'gte',
+                    args: ['columnX7', 0],
+                  },
+                  'columnX8',
+                  'columnX9',
+                ],
+              },
+              'columnX10',
+            ],
+          },
+        ],
+      } as unknown as TinymathAST;
+
+      const expression = mathOperation.toExpression(
+        createLayerWithMathColumn(tinymathAst),
+        'myColumnId',
+        {} as IndexPattern
+      );
+
+      expect(expression).toEqual([
+        {
+          type: 'function',
+          function: 'mathColumn',
+          arguments: {
+            id: ['myColumnId'],
+            name: ['Math'],
+            castColumns: [],
+            expression: [
+              'ifelse(("columnX0" == 0),ifelse(("columnX1" < 0),ifelse(("columnX2" <= 0),"columnX3","columnX4"),"columnX5"),ifelse(("columnX6" > 0),ifelse(("columnX7" >= 0),"columnX8","columnX9"),"columnX10"))',
+            ],
             onError: ['null'],
           },
         },

@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components';
-import { CaseStatuses, StatusUserAction } from '../../../common/api';
-import { UserActionBuilder, UserActionResponse } from './types';
+import type { CaseStatuses, StatusUserAction } from '../../../common/api';
+import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { statuses } from '../status';
 import * as i18n from './translations';

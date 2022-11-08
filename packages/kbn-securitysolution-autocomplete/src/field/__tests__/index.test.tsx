@@ -114,4 +114,30 @@ describe('FieldComponent', () => {
       expect(wrapper.getByTestId('fieldAutocompleteComboBox')).toHaveTextContent('_source')
     );
   });
+
+  it('it allows custom user input if "acceptsCustomOptions" is "true"', async () => {
+    const mockOnChange = jest.fn();
+    const wrapper = render(
+      <FieldComponent
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={mockOnChange}
+        placeholder="Placeholder text"
+        selectedField={undefined}
+        acceptsCustomOptions
+      />
+    );
+
+    const fieldAutocompleteComboBox = wrapper.getByTestId('comboBoxSearchInput');
+    fireEvent.change(fieldAutocompleteComboBox, { target: { value: 'custom' } });
+    await waitFor(() =>
+      expect(wrapper.getByTestId('fieldAutocompleteComboBox')).toHaveTextContent('custom')
+    );
+  });
 });

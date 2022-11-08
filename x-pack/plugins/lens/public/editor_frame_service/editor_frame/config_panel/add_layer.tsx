@@ -44,10 +44,12 @@ export function AddLayerButton({
     if (!visualization.appendLayer || !visualizationState) {
       return null;
     }
-    return visualization.getSupportedLayers?.(visualizationState, layersMeta);
+    return visualization
+      .getSupportedLayers?.(visualizationState, layersMeta)
+      ?.filter(({ canAddViaMenu: hideFromMenu }) => !hideFromMenu);
   }, [visualization, visualizationState, layersMeta]);
 
-  if (supportedLayers == null) {
+  if (supportedLayers == null || !supportedLayers.length) {
     return null;
   }
   if (supportedLayers.length === 1) {

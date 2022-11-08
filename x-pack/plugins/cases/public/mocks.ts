@@ -6,7 +6,7 @@
  */
 
 import { mockCasesContext } from './mocks/mock_cases_context';
-import { CasesUiStart } from './types';
+import type { CasesUiStart } from './types';
 
 const apiMock: jest.Mocked<CasesUiStart['api']> = {
   getRelatedCases: jest.fn(),

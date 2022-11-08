@@ -16,8 +16,6 @@ import {
   enrichNewExceptionItemsWithComments,
   enrichExistingExceptionItemWithComments,
   enrichExceptionItemsWithOS,
-  entryHasListType,
-  entryHasNonEcsType,
   prepareExceptionItemsForBulkClose,
   lowercaseHashValues,
   getPrepopulatedEndpointException,
@@ -34,7 +32,6 @@ import type {
   OsTypeArray,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { DataViewBase } from '@kbn/es-query';
 
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
@@ -317,32 +314,6 @@ describe('Exception helpers', () => {
     });
   });
 
-  describe('#entryHasListType', () => {
-    test('it should return false with an empty array', () => {
-      const payload: ExceptionListItemSchema[] = [];
-      const result = entryHasListType(payload);
-      expect(result).toEqual(false);
-    });
-
-    test("it should return false with exception items that don't contain a list type", () => {
-      const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
-      const result = entryHasListType(payload);
-      expect(result).toEqual(false);
-    });
-
-    test('it should return true with exception items that do contain a list type', () => {
-      const payload = [
-        {
-          ...getExceptionListItemSchemaMock(),
-          entries: [{ type: OperatorTypeEnum.LIST }] as EntriesArray,
-        },
-        getExceptionListItemSchemaMock(),
-      ];
-      const result = entryHasListType(payload);
-      expect(result).toEqual(true);
-    });
-  });
-
   describe('#getCodeSignatureValue', () => {
     test('it should return empty string if code_signature nested value are undefined', () => {
       // Using the unsafe casting because with our types this shouldn't be possible but there have been issues with old data having undefined values in these fields
@@ -351,47 +322,6 @@ describe('Exception helpers', () => {
       >;
       const result = getCodeSignatureValue(payload);
       expect(result).toEqual([{ trusted: '', subjectName: '' }]);
-    });
-  });
-
-  describe('#entryHasNonEcsType', () => {
-    const mockEcsIndexPattern = {
-      title: 'testIndex',
-      fields: [
-        {
-          name: 'some.parentField',
-        },
-        {
-          name: 'some.not.nested.field',
-        },
-        {
-          name: 'nested.field',
-        },
-      ],
-    } as DataViewBase;
-
-    test('it should return false with an empty array', () => {
-      const payload: ExceptionListItemSchema[] = [];
-      const result = entryHasNonEcsType(payload, mockEcsIndexPattern);
-      expect(result).toEqual(false);
-    });
-
-    test("it should return false with exception items that don't contain a non ecs type", () => {
-      const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
-      const result = entryHasNonEcsType(payload, mockEcsIndexPattern);
-      expect(result).toEqual(false);
-    });
-
-    test('it should return true with exception items that do contain a non ecs type', () => {
-      const payload = [
-        {
-          ...getExceptionListItemSchemaMock(),
-          entries: [{ field: 'some.nonEcsField' }] as EntriesArray,
-        },
-        getExceptionListItemSchemaMock(),
-      ];
-      const result = entryHasNonEcsType(payload, mockEcsIndexPattern);
-      expect(result).toEqual(true);
     });
   });
 
@@ -509,7 +439,7 @@ describe('Exception helpers', () => {
     test('it returns prepopulated fields with empty values', () => {
       const prepopulatedItem = getPrepopulatedEndpointException({
         listId: 'some_id',
-        ruleName: 'my rule',
+        name: 'my rule',
         codeSignature: { subjectName: '', trusted: '' },
         eventCode: '',
         alertEcsData: { ...alertDataMock, file: { path: '', hash: { sha256: '' } } },
@@ -534,7 +464,7 @@ describe('Exception helpers', () => {
     test('it returns prepopulated items with actual values', () => {
       const prepopulatedItem = getPrepopulatedEndpointException({
         listId: 'some_id',
-        ruleName: 'my rule',
+        name: 'my rule',
         codeSignature: { subjectName: 'someSubjectName', trusted: 'false' },
         eventCode: 'some-event-code',
         alertEcsData: alertDataMock,

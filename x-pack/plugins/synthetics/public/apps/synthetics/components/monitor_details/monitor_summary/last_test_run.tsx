@@ -19,7 +19,6 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -31,18 +30,18 @@ import {
 import { formatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { selectLatestPing, selectPingsLoading } from '../../../state';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import { SinglePingResult } from '../../common/monitor_test_result/single_ping_result';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 
+import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 
 export const LastTestRun = () => {
   const { euiTheme } = useEuiTheme();
-  const latestPing = useSelector(selectLatestPing);
-  const pingsLoading = useSelector(selectPingsLoading);
+  const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
   const { monitor } = useSelectedMonitor();
 
   const { data: stepsData, loading: stepsLoading } = useJourneySteps(
@@ -52,7 +51,7 @@ export const LastTestRun = () => {
   const loading = stepsLoading || pingsLoading;
 
   return (
-    <EuiPanel css={{ minHeight: 356 }}>
+    <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 356 }}>
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
       {!loading && latestPing?.error ? (
         <EuiCallOut
@@ -96,16 +95,18 @@ const PanelHeader = ({
   loading,
 }: {
   monitor: EncryptedSyntheticsSavedMonitor | null;
-  latestPing: Ping;
+  latestPing?: Ping;
   loading: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const { basePath } = useSyntheticsSettingsContext();
 
+  const format = useKibanaDateFormat();
+
   const lastRunTimestamp = useMemo(
-    () => (latestPing?.timestamp ? formatTestRunAt(latestPing?.timestamp) : ''),
-    [latestPing?.timestamp]
+    () => (latestPing?.timestamp ? formatTestRunAt(latestPing?.timestamp, format) : ''),
+    [latestPing?.timestamp, format]
   );
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;

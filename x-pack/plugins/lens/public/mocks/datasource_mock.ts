@@ -21,11 +21,12 @@ export function createMockDatasource(id: string): DatasourceMock {
     getFilters: jest.fn(),
     getMaxPossibleNumValues: jest.fn(),
     isTextBasedLanguage: jest.fn(() => false),
+    hasDefaultTimeField: jest.fn(() => true),
   };
 
   return {
     id: 'testDatasource',
-    clearLayer: jest.fn((state, _layerId) => state),
+    clearLayer: jest.fn((state, _layerId) => ({ newState: state, removedLayerIds: [] })),
     getDatasourceSuggestionsForField: jest.fn((_state, _item, filterFn, _indexPatterns) => []),
     getDatasourceSuggestionsForVisualizeField: jest.fn(
       (_state, _indexpatternId, _fieldName, _indexPatterns) => []
@@ -43,7 +44,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     renderLayerPanel: jest.fn(),
     toExpression: jest.fn((_frame, _state, _indexPatterns) => null),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
-    removeLayer: jest.fn((_state, _layerId) => {}),
+    removeLayer: jest.fn((state, layerId) => ({ newState: state, removedLayerIds: [layerId] })),
     cloneLayer: jest.fn((_state, _layerId, _newLayerId, getNewId) => {}),
     removeColumn: jest.fn((props) => {}),
     getLayers: jest.fn((_state) => []),
@@ -53,6 +54,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getDropProps: jest.fn(),
     onDrop: jest.fn(),
     createEmptyLayer: jest.fn(),
+    syncColumns: jest.fn(),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called

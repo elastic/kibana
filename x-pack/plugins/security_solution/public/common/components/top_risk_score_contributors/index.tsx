@@ -16,7 +16,7 @@ import * as i18n from './translations';
 
 import type { RuleRisk } from '../../../../common/search_strategy';
 
-import { RuleLink } from '../../../detections/pages/detection_engine/rules/all/use_columns';
+import { RuleLink } from '../../../detection_engine/rule_management_ui/components/rules_table/use_columns';
 
 export interface TopRiskScoreContributorsProps {
   loading: boolean;

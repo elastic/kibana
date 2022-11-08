@@ -444,11 +444,10 @@ describe('When using Actions service utilities', () => {
           outputs: {
             '456': {
               content: {
-                file: {
-                  name: 'bad_file.txt',
-                  path: '/some/path/bad_file.txt',
-                  size: 221,
-                },
+                code: 'ra_get-file_success_done',
+                path: '/some/path/bad_file.txt',
+                size: 1234,
+                zip_size: 123,
               },
               type: 'json',
             },

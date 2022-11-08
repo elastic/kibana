@@ -54,7 +54,7 @@ export function useDevToolsRequest({
           'xpack.fleet.createPackagePolicy.devtoolsRequestWithAgentPolicyDescription',
           {
             defaultMessage:
-              'These Kibana requests creates a new agent policy and a new package policy.',
+              'These Kibana requests create a new agent policy and a new package policy.',
           }
         ),
       ];

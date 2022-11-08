@@ -17,6 +17,7 @@ import {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
+  Logger,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
@@ -89,20 +90,16 @@ export interface RuleExecutorOptions<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
 > {
-  alertId: string;
   executionId: string;
-  startedAt: Date;
-  previousStartedAt: Date | null;
-  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
+  logger: Logger;
   params: Params;
-  state: State;
+  previousStartedAt: Date | null;
   rule: SanitizedRuleConfig;
+  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
   spaceId: string;
+  startedAt: Date;
+  state: State;
   namespace?: string;
-  name: string;
-  tags: string[];
-  createdBy: string | null;
-  updatedBy: string | null;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -124,6 +121,32 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
+
+export interface GetSummarizedAlertsFnOpts {
+  start?: Date;
+  end?: Date;
+  executionUuid?: string;
+  ruleId: string;
+  spaceId: string;
+}
+
+// TODO - add type for these alerts when we determine which alerts-as-data
+// fields will be made available in https://github.com/elastic/kibana/issues/143741
+export interface SummarizedAlerts {
+  new: {
+    count: number;
+    alerts: unknown[];
+  };
+  ongoing: {
+    count: number;
+    alerts: unknown[];
+  };
+  recovered: {
+    count: number;
+    alerts: unknown[];
+  };
+}
+export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 
 export interface RuleType<
   Params extends RuleTypeParams = never,
@@ -169,6 +192,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  getSummarizedAlerts?: GetSummarizedAlertsFn;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

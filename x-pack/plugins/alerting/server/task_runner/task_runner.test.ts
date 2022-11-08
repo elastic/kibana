@@ -202,6 +202,7 @@ describe('Task Runner', () => {
 
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
     (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
+    logger.get.mockImplementation(() => logger);
   });
 
   test('successfully executes the task', async () => {
@@ -230,11 +231,8 @@ describe('Task Runner', () => {
     expect(call.startedAt).toStrictEqual(new Date(DATE_1970));
     expect(call.previousStartedAt).toStrictEqual(new Date(DATE_1970_5_MIN));
     expect(call.state).toEqual({});
-    expect(call.name).toBe(RULE_NAME);
-    expect(call.tags).toEqual(['rule-', '-tags']);
-    expect(call.createdBy).toBe('rule-creator');
-    expect(call.updatedBy).toBe('rule-updater');
     expect(call.rule).not.toBe(null);
+    expect(call.rule.id).toBe('1');
     expect(call.rule.name).toBe(RULE_NAME);
     expect(call.rule.tags).toEqual(['rule-', '-tags']);
     expect(call.rule.consumer).toBe('bar');
@@ -2058,11 +2056,8 @@ describe('Task Runner', () => {
     expect(call.startedAt).toEqual(new Date(DATE_1970));
     expect(call.previousStartedAt).toEqual(new Date(DATE_1970_5_MIN));
     expect(call.state).toEqual({});
-    expect(call.name).toBe(RULE_NAME);
-    expect(call.tags).toEqual(['rule-', '-tags']);
-    expect(call.createdBy).toBe('rule-creator');
-    expect(call.updatedBy).toBe('rule-updater');
     expect(call.rule).not.toBe(null);
+    expect(call.rule.id).toBe('1');
     expect(call.rule.name).toBe(RULE_NAME);
     expect(call.rule.tags).toEqual(['rule-', '-tags']);
     expect(call.rule.consumer).toBe('bar');
@@ -2429,8 +2424,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    // 1x(.server-log) and 1x(any-action) per alert
-    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(2);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
@@ -2473,7 +2467,7 @@ describe('Task Runner', () => {
 
     expect(logger.debug).nthCalledWith(
       3,
-      'Rule "1" skipped scheduling action "2" because the maximum number of allowed actions for connector type .server-log has been reached.'
+      'Rule "1" skipped scheduling action "1" because the maximum number of allowed actions for connector type .server-log has been reached.'
     );
 
     testAlertingEventLogCalls({

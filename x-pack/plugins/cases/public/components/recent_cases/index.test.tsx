@@ -8,13 +8,10 @@
 import React from 'react';
 import { configure, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import RecentCases, { RecentCasesProps } from '.';
-import {
-  AppMockRenderer,
-  createAppMockRenderer,
-  noCasesCapabilities,
-  TestProviders,
-} from '../../common/mock';
+import type { RecentCasesProps } from '.';
+import RecentCases from '.';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, noCasesCapabilities, TestProviders } from '../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import { useGetCases } from '../../containers/use_get_cases';

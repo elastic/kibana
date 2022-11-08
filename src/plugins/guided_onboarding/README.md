@@ -10,11 +10,9 @@ The client-side code registers a button in the Kibana header that controls the g
 
 ## Development
 
-1. To enable the UI, add `guidedOnboarding.ui: true` to the file `KIBANA_FOLDER/config/kibana.dev.yml`. 
+1. Start Kibana with examples `yarn start --run-examples` to be able to see the guidedOnboardingExample plugin. 
 
-2. Start Kibana with examples `yarn start --run-examples` to be able to see the guidedOnboardingExample plugin. 
-
-3. Navigate to `/app/guidedOnboardingExample` to start a guide and check the button in the header.
+2. Navigate to `/app/guidedOnboardingExample` to start a guide and check the button in the header.
 
 ## API service
 *Also see `KIBANA_FOLDER/examples/guided_onboarding_example` for code examples.*

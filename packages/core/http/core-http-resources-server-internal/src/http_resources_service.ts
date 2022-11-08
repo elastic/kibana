@@ -155,6 +155,16 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           },
         });
       },
+      renderCss(options: HttpResourcesResponseOptions) {
+        return response.ok({
+          body: options.body,
+          headers: {
+            ...options.headers,
+            'content-type': 'text/css',
+            'content-security-policy': cspHeader,
+          },
+        });
+      },
     };
   }
 }

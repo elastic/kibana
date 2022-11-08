@@ -10,13 +10,14 @@ import type { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { EuiPopover, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
+import { isActiveTimeline } from '../../../../helpers';
 import { StatefulTopN } from '../../top_n';
-import { TimelineId } from '../../../../../common/types/timeline';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
 import { useSourcererDataView } from '../../../containers/sourcerer';
 import { TooltipWithKeyboardShortcut } from '../../accessibility';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from '../keyboard_shortcut_constants';
+import { isDetectionsAlertsTable } from '../../top_n/helpers';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.hoverActions.showTopTooltip', {
@@ -44,7 +45,7 @@ interface Props {
   showTooltip?: boolean;
   showTopN: boolean;
   showLegend?: boolean;
-  timelineId?: string | null;
+  scopeId?: string | null;
   title?: string;
   value?: string[] | string | null;
 }
@@ -66,20 +67,16 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     showLegend,
     showTooltip = true,
     showTopN,
-    timelineId,
+    scopeId,
     title,
     value,
     globalFilters,
   }) => {
-    const activeScope: SourcererScopeName =
-      timelineId === TimelineId.active
-        ? SourcererScopeName.timeline
-        : timelineId != null &&
-          [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(
-            timelineId as TimelineId
-          )
-        ? SourcererScopeName.detections
-        : SourcererScopeName.default;
+    const activeScope: SourcererScopeName = isActiveTimeline(scopeId ?? '')
+      ? SourcererScopeName.timeline
+      : scopeId != null && isDetectionsAlertsTable(scopeId)
+      ? SourcererScopeName.detections
+      : SourcererScopeName.default;
     const { browserFields, indexPattern } = useSourcererDataView(activeScope);
 
     const icon = iconType ?? 'visBarVertical';
@@ -147,7 +144,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           onFilterAdded={onFilterAdded}
           paddingSize={paddingSize}
           showLegend={showLegend}
-          timelineId={timelineId ?? undefined}
+          scopeId={scopeId ?? undefined}
           toggleTopN={onClick}
           value={value}
           globalFilters={globalFilters}
@@ -160,7 +157,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         onFilterAdded,
         paddingSize,
         showLegend,
-        timelineId,
+        scopeId,
         onClick,
         value,
         globalFilters,

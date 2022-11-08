@@ -113,6 +113,7 @@ export class SecurityPlugin
       analytics: core.analytics,
       authc: this.authc,
       cloudId: cloud?.cloudId,
+      http: core.http,
       securityLicense: license,
     });
 

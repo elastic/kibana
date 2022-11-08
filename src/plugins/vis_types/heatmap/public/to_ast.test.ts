@@ -7,7 +7,7 @@
  */
 
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { sampleAreaVis } from './sample_vis.test.mocks';
+import { sampleHeatmapVis } from './sample_vis.test.mocks';
 import { buildExpression } from '@kbn/expressions-plugin/public';
 
 import { toExpressionAst } from './to_ast';
@@ -33,7 +33,7 @@ describe('heatmap vis toExpressionAst function', () => {
   } as any;
 
   beforeEach(() => {
-    vis = sampleAreaVis as any;
+    vis = sampleHeatmapVis as any;
   });
 
   it('should match basic snapshot', () => {

@@ -58,7 +58,7 @@ export function TraceSearchBox({
   error,
   loading,
 }: Props) {
-  const { unifiedSearch, core, data } = useApmPluginContext();
+  const { unifiedSearch, core, data, dataViews } = useApmPluginContext();
   const { notifications, http, docLinks, uiSettings } = core;
   const {
     services: { storage },
@@ -153,6 +153,7 @@ export function TraceSearchBox({
                         docLinks,
                         uiSettings,
                         data,
+                        dataViews,
                         storage,
                       }}
                     />

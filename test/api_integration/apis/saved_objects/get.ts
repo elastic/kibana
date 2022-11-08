@@ -38,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
             type: 'visualization',
             updated_at: resp.body.updated_at,
+            created_at: resp.body.created_at,
             version: resp.body.version,
             migrationVersion: resp.body.migrationVersion,
             coreMigrationVersion: KIBANA_VERSION,

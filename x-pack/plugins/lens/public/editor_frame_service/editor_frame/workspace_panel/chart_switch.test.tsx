@@ -146,7 +146,7 @@ describe('chart_switch', () => {
   }
 
   function showFlyout(instance: ReactWrapper) {
-    instance.find('[data-test-subj="lnsChartSwitchPopover"]').first().simulate('click');
+    instance.find('button[data-test-subj="lnsChartSwitchPopover"]').first().simulate('click');
   }
 
   function switchTo(subType: string, instance: ReactWrapper) {
@@ -494,8 +494,8 @@ describe('chart_switch', () => {
 
     switchTo('visB', instance);
     expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a');
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'b');
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'c');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'b');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'c');
     expect(visualizationMap.visB.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
         keptLayerIds: ['a'],

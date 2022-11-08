@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { CaseUserAvatar } from './user_avatar';
-import { UserInfoWithAvatar } from './types';
+import type { UserInfoWithAvatar } from './types';
 
 describe('CaseUserAvatar', () => {
   let appMockRender: AppMockRenderer;

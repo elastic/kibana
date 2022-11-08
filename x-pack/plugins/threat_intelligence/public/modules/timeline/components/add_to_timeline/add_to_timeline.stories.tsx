@@ -12,7 +12,7 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { AddToTimelineButtonIcon, AddToTimelineContextMenu } from './add_to_timeline';
+import { AddToTimelineButtonIcon, AddToTimelineContextMenu } from '.';
 
 export default {
   title: 'AddToTimeline',

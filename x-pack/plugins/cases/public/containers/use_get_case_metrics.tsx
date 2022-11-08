@@ -6,10 +6,10 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { SingleCaseMetrics, SingleCaseMetricsFeature } from './types';
+import type { SingleCaseMetrics, SingleCaseMetricsFeature } from './types';
 import { useToasts } from '../common/lib/kibana';
 import { getSingleCaseMetrics } from './api';
-import { ServerError } from '../types';
+import type { ServerError } from '../types';
 import { ERROR_TITLE } from './translations';
 import { casesQueriesKeys } from './constants';
 

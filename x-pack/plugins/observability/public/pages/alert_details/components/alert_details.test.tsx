@@ -71,7 +71,12 @@ const params = {
 
 const config = {
   unsafe: {
-    alertDetails: { enabled: true },
+    alertDetails: {
+      apm: { enabled: true },
+      logs: { enabled: true },
+      metrics: { enabled: true },
+      uptime: { enabled: true },
+    },
   },
 } as ConfigSchema;
 

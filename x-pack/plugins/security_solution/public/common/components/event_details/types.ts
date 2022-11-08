@@ -21,7 +21,7 @@ export interface EnrichedFieldInfo {
   data: FieldsData | EventFieldsData;
   eventId: string;
   fieldFromBrowserField?: BrowserField;
-  timelineId: string;
+  scopeId: string;
   values: string[] | null | undefined;
   linkValue?: string;
 }

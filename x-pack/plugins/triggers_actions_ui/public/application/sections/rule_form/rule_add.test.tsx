@@ -206,16 +206,30 @@ describe('rule_add', () => {
     expect(wrapper.find('[data-test-subj="addRuleFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
 
-    wrapper.find('[data-test-subj="my-rule-type-SelectOption"]').first().simulate('click');
+    wrapper.find('[data-test-subj="cancelSaveRuleButton"]').last().simulate('click');
+    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.CANCELED);
+  });
 
+  it('renders a confirm close modal if the flyout is closed after inputs have changed', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
+    const onClose = jest.fn();
+    await setup({}, onClose);
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    wrapper.find('[data-test-subj="my-rule-type-SelectOption"]').last().simulate('click');
     expect(wrapper.find('input#ruleName').props().value).toBe('');
-
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('');
-
     expect(wrapper.find('.euiSelect').first().props().value).toBe('m');
 
-    wrapper.find('[data-test-subj="cancelSaveRuleButton"]').first().simulate('click');
-    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.CANCELED);
+    wrapper.find('[data-test-subj="cancelSaveRuleButton"]').last().simulate('click');
+    expect(onClose).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-test-subj="confirmRuleCloseModal"]').exists()).toBe(true);
   });
 
   it('renders rule add flyout with initial values', async () => {
@@ -279,7 +293,7 @@ describe('rule_add', () => {
       onClose
     );
 
-    wrapper.find('[data-test-subj="saveRuleButton"]').first().simulate('click');
+    wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
 
     // Wait for handlers to fire
     await act(async () => {

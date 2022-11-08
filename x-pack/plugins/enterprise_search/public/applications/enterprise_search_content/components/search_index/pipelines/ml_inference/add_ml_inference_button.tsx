@@ -84,7 +84,7 @@ const AddButton: React.FC<{
     onClick={onClick}
   >
     {i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButtonLabel', {
-      defaultMessage: 'Add inference pipeline',
+      defaultMessage: 'Add Inference Pipeline',
     })}
   </EuiButton>
 );

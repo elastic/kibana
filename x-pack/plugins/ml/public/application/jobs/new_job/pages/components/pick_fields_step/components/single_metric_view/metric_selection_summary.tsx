@@ -49,7 +49,7 @@ export const SingleMetricDetectorsSummary: FC = () => {
       subscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [resultsLoader]);
 
   async function loadChart() {
     if (jobCreator.aggFieldPair !== null) {

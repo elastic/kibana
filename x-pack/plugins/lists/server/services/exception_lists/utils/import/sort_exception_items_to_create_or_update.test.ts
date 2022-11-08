@@ -169,7 +169,7 @@ describe('sort_exception_lists_items_to_create_update', () => {
         });
       });
 
-      it('assigns error if matching item_id found but differing list_id', () => {
+      it('assigns no error if matching item_id found but differing list_id', () => {
         const result = sortExceptionItemsToUpdateOrCreate({
           existingItems: {
             'item-id-1': {
@@ -185,17 +185,7 @@ describe('sort_exception_lists_items_to_create_update', () => {
         });
 
         expect(result).toEqual({
-          errors: [
-            {
-              error: {
-                message:
-                  'Error trying to update item_id: "item-id-1" and list_id: "list-id-1". The item already exists under list_id: list-id-2',
-                status_code: 409,
-              },
-              item_id: 'item-id-1',
-              list_id: 'list-id-1',
-            },
-          ],
+          errors: [],
           itemsToCreate: [],
           itemsToUpdate: [],
         });

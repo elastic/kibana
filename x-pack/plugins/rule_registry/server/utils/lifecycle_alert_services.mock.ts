@@ -36,4 +36,5 @@ export const createLifecycleAlertServicesMock = <
 ): LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds> => ({
   alertWithLifecycle: ({ id }) => alertServices.alertFactory.create(id),
   getAlertStartedDate: jest.fn((id: string) => null),
+  getAlertUuid: jest.fn((id: string) => null),
 });
