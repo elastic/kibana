@@ -21,7 +21,11 @@ export const DEFAULT_LAYOUT_TITLE = `[data-test-subj="tiDefaultPageLayoutTitle"]
 
 export const INDICATORS_TABLE = `[data-test-subj="tiIndicatorsTable"]`;
 
-export const INDICATORS_TABLE_TIMESTAMP_COLUMN_HEADER = `[data-test-subj="dataGridHeaderCell-@timestamp"]`;
+export const INDICATORS_TABLE_ROW_CELL = `[data-test-subj="dataGridRowCell"]`;
+
+export const INDICATORS_TABLE_INDICATOR_NAME_CELL = `[data-gridcell-column-id="threat.indicator.name"]`;
+
+export const INDICATORS_TABLE_INDICATOR_TYPE_CELL = `[data-gridcell-column-id="threat.indicator.type"]`;
 
 export const INDICATORS_TABLE_INDICATOR_NAME_COLUMN_HEADER = `[data-test-subj="dataGridHeaderCell-threat.indicator.name"]`;
 

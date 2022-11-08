@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/packages/shared-ux/link/redirect_app/mocks'],
-};
+import { css } from '@emotion/react';
+
+export const redirectAppLinksStyles = css({
+  display: 'flex',
+  flex: '1',
+});
