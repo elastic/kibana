@@ -94,11 +94,14 @@ report.asciidoc
 
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
+tsconfig.base.type_check.json
+tsconfig.type_check.json
 
 # Yarn local mirror content
 .yarn-local-mirror
 
 # Bazel
+.ijwb
 /bazel
 /bazel-*
 .bazelrc.user

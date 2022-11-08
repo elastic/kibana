@@ -984,6 +984,7 @@ export class ExceptionListClient {
     exceptionsToImport,
     maxExceptionsImportSize,
     overwrite,
+    generateNewListId,
   }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
     const { savedObjectsClient, user } = this;
 
@@ -1004,6 +1005,7 @@ export class ExceptionListClient {
 
     return importExceptions({
       exceptions: parsedObjects,
+      generateNewListId,
       overwrite,
       savedObjectsClient,
       user,
@@ -1038,6 +1040,7 @@ export class ExceptionListClient {
 
     return importExceptions({
       exceptions: parsedObjects,
+      generateNewListId: false,
       overwrite,
       savedObjectsClient,
       user,

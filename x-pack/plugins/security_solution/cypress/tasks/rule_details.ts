@@ -40,7 +40,7 @@ import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_br
 
 export const enablesRule = () => {
   // Rules get enabled via _bulk_action endpoint
-  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
+  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_action').then(({ response }) => {

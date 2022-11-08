@@ -10,7 +10,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
 
-import { KpiWrapper } from './kpi_wrapper';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
 interface DurationPanelProps {
@@ -27,19 +26,18 @@ export const DurationPanel = (props: DurationPanelProps) => {
   const monitorId = useMonitorQueryId();
 
   return (
-    <KpiWrapper>
-      <ExploratoryViewEmbeddable
-        reportType={ReportTypes.SINGLE_METRIC}
-        attributes={[
-          {
-            time: props,
-            name: 'Monitor duration',
-            dataType: 'synthetics',
-            selectedMetricField: 'monitor_duration',
-            reportDefinitions: { 'monitor.id': [monitorId] },
-          },
-        ]}
-      />
-    </KpiWrapper>
+    <ExploratoryViewEmbeddable
+      customHeight="70px"
+      reportType={ReportTypes.SINGLE_METRIC}
+      attributes={[
+        {
+          time: props,
+          name: 'Monitor duration',
+          dataType: 'synthetics',
+          selectedMetricField: 'monitor_duration',
+          reportDefinitions: { 'monitor.id': [monitorId] },
+        },
+      ]}
+    />
   );
 };

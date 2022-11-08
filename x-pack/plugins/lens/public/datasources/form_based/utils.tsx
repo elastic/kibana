@@ -8,15 +8,23 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiTextColor, EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
-import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import { SearchRequest } from '@kbn/data-plugin/common';
+
+import {
+  SearchResponseWarning,
+  ShardFailureOpenModalButton,
+  ShardFailureRequest,
+} from '@kbn/data-plugin/public';
+
+import { estypes } from '@elastic/elasticsearch';
 import type { FramePublicAPI, IndexPattern, StateSetter } from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
@@ -162,43 +170,67 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
   />
 );
 
-export function getTSDBRollupWarningMessages(
+export function getShardFailuresWarningMessages(
   state: FormBasedPersistedState,
-  warning: SearchResponseWarning
-) {
+  warning: SearchResponseWarning,
+  request: SearchRequest,
+  response: estypes.SearchResponse,
+  theme: ThemeServiceStart
+): Array<string | React.ReactNode> {
   if (state) {
-    const hasTSDBRollupWarnings =
-      warning.type === 'shard_failure' &&
-      warning.reason.type === 'unsupported_aggregation_on_downsampled_index';
-    if (!hasTSDBRollupWarnings) {
-      return [];
+    if (warning.type === 'shard_failure') {
+      switch (warning.reason.type) {
+        case 'unsupported_aggregation_on_downsampled_index':
+          return Object.values(state.layers).flatMap((layer) =>
+            uniq(
+              Object.values(layer.columns)
+                .filter((col) =>
+                  [
+                    'median',
+                    'percentile',
+                    'percentile_rank',
+                    'last_value',
+                    'unique_count',
+                    'standard_deviation',
+                  ].includes(col.operationType)
+                )
+                .map((col) => col.label)
+            ).map((label) =>
+              i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+                defaultMessage:
+                  '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+                values: {
+                  label,
+                },
+              })
+            )
+          );
+        default:
+          return [
+            <>
+              <EuiText size="s">
+                <strong>{warning.message}</strong>
+                <p>{warning.text}</p>
+              </EuiText>
+              <EuiSpacer size="s" />
+              {warning.text ? (
+                <ShardFailureOpenModalButton
+                  theme={theme}
+                  title={warning.message}
+                  size="m"
+                  getRequestMeta={() => ({
+                    request: request as ShardFailureRequest,
+                    response,
+                  })}
+                  color="primary"
+                  isButtonEmpty={true}
+                />
+              ) : null}
+            </>,
+          ];
+      }
     }
-    return Object.values(state.layers).flatMap((layer) =>
-      uniq(
-        Object.values(layer.columns)
-          .filter((col) =>
-            [
-              'median',
-              'percentile',
-              'percentile_rank',
-              'last_value',
-              'unique_count',
-              'standard_deviation',
-            ].includes(col.operationType)
-          )
-          .map((col) => col.label)
-      ).map((label) =>
-        i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
-          defaultMessage:
-            '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-          values: {
-            label,
-          },
-        })
-      )
-    );
   }
-
   return [];
 }
 

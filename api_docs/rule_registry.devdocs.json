@@ -1091,7 +1091,13 @@
             "description": [],
             "signature": [
               "(featureId: ",
-              "AlertConsumers",
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.AlertConsumers",
+                "text": "AlertConsumers"
+              },
               ", dataset: ",
               {
                 "pluginId": "ruleRegistry",
@@ -1116,7 +1122,13 @@
                 "label": "featureId",
                 "description": [],
                 "signature": [
-                  "AlertConsumers"
+                  {
+                    "pluginId": "@kbn/rule-data-utils",
+                    "scope": "common",
+                    "docId": "kibKbnRuleDataUtilsPluginApi",
+                    "section": "def-common.AlertConsumers",
+                    "text": "AlertConsumers"
+                  }
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
@@ -1397,9 +1409,21 @@
         "description": [],
         "signature": [
           "(logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           ", ruleDataClient: ",
-          "PublicContract",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.PublicContract",
+            "text": "PublicContract"
+          },
           "<",
           {
             "pluginId": "ruleRegistry",
@@ -1458,7 +1482,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
             "deprecated": false,
@@ -1473,7 +1503,13 @@
             "label": "ruleDataClient",
             "description": [],
             "signature": [
-              "PublicContract",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.PublicContract",
+                "text": "PublicContract"
+              },
               "<",
               {
                 "pluginId": "ruleRegistry",
@@ -1502,7 +1538,13 @@
         "description": [],
         "signature": [
           "({ logger, ruleDataClient }: { logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; ruleDataClient: ",
           {
             "pluginId": "ruleRegistry",
@@ -1568,7 +1610,13 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  "Logger"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.Logger",
+                    "text": "Logger"
+                  }
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
                 "deprecated": false,
@@ -1617,7 +1665,13 @@
             "text": "IRuleDataClient"
           },
           "; logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; }) => <TParams extends ",
           {
             "pluginId": "alerting",
@@ -1709,7 +1763,13 @@
             "text": "RuleParamsAndRefs"
           },
           "<TParams>; injectReferences: (params: TParams, references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
@@ -1733,7 +1793,13 @@
                 "text": "IRuleDataClient"
               },
               "; logger: ",
-              "Logger",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              },
               "; }"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
@@ -1786,7 +1852,13 @@
             "label": "outcome",
             "description": [],
             "signature": [
-              "EcsEventOutcome",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.EcsEventOutcome",
+                "text": "EcsEventOutcome"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
@@ -2320,7 +2392,13 @@
               "<TSearchRequest extends ",
               "SearchRequest",
               ">(request: TSearchRequest) => Promise<",
-              "ESSearchResponse",
+              {
+                "pluginId": "@kbn/es-types",
+                "scope": "server",
+                "docId": "kibKbnEsTypesPluginApi",
+                "section": "def-server.ESSearchResponse",
+                "text": "ESSearchResponse"
+              },
               "<Partial<OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & OutputOf<SetOptional<{ readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; }>>>, TSearchRequest, { restTotalHitsAsInt: false; }>>"
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
@@ -2660,7 +2738,13 @@
             ],
             "signature": [
               "(featureId: ",
-              "AlertConsumers",
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.AlertConsumers",
+                "text": "AlertConsumers"
+              },
               ", dataset: ",
               {
                 "pluginId": "ruleRegistry",
@@ -2685,7 +2769,13 @@
                 "label": "featureId",
                 "description": [],
                 "signature": [
-                  "AlertConsumers"
+                  {
+                    "pluginId": "@kbn/rule-data-utils",
+                    "scope": "common",
+                    "docId": "kibKbnRuleDataUtilsPluginApi",
+                    "section": "def-common.AlertConsumers",
+                    "text": "AlertConsumers"
+                  }
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
@@ -3248,7 +3338,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
             "deprecated": false,
@@ -3329,7 +3425,13 @@
             "text": "IRuleDataClient"
           },
           "; logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; }) => <TParams extends ",
           {
             "pluginId": "alerting",
@@ -3386,7 +3488,13 @@
                 "text": "IRuleDataClient"
               },
               "; logger: ",
-              "Logger",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              },
               "; }"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
@@ -3776,7 +3884,13 @@
           "<Error> | ",
           "Right",
           "<",
-          "ElasticsearchClient",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
           ">"
         ],
         "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
@@ -3916,7 +4030,13 @@
           "description": [],
           "signature": [
             "(req: ",
-            "KibanaRequest",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
             "<unknown, unknown, unknown, any>) => Promise<",
             {
               "pluginId": "ruleRegistry",
@@ -3939,7 +4059,13 @@
               "label": "req",
               "description": [],
               "signature": [
-                "KibanaRequest",
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/plugins/rule_registry/server/plugin.ts",
@@ -4180,7 +4306,13 @@
             "label": "subType",
             "description": [],
             "signature": [
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/rule_registry/common/types.ts",
@@ -4330,7 +4462,13 @@
             "text": "IEsSearchRequest"
           },
           " & { featureIds: ",
-          "AlertConsumers",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.AlertConsumers",
+            "text": "AlertConsumers"
+          },
           "[]; fields?: ",
           "QueryDslFieldAndFormat",
           "[] | undefined; query?: Pick<",

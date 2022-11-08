@@ -34,11 +34,13 @@ import {
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
+import { MissingGroupsRecord } from './lib/check_missing_group';
+import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
   lastRunTimestamp?: number;
-  missingGroups?: string[];
+  missingGroups?: Array<string | MissingGroupsRecord>;
   groupBy?: string | string[];
   filterQuery?: string;
 };
@@ -72,12 +74,23 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   >(async function (options) {
     const startTime = Date.now();
 
-    const { services, params, state, startedAt, alertId, executionId, spaceId } = options;
+    const {
+      services,
+      params,
+      state,
+      startedAt,
+      executionId,
+      spaceId,
+      rule: { id: ruleId },
+    } = options;
 
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
-    const logger = createScopedLogger(libs.logger, 'metricThresholdRule', { alertId, executionId });
+    const logger = createScopedLogger(libs.logger, 'metricThresholdRule', {
+      alertId: ruleId,
+      executionId,
+    });
 
     const { alertWithLifecycle, savedObjectsClient, getAlertUuid } = services;
 
@@ -144,7 +157,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const filterQueryIsSame = isEqual(state.filterQuery, params.filterQuery);
     const groupByIsSame = isEqual(state.groupBy, params.groupBy);
     const previousMissingGroups =
-      alertOnGroupDisappear && filterQueryIsSame && groupByIsSame ? state.missingGroups : [];
+      alertOnGroupDisappear && filterQueryIsSame && groupByIsSame && state.missingGroups
+        ? state.missingGroups
+        : [];
 
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
@@ -155,7 +170,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       logger,
       state.lastRunTimestamp,
       { end: startedAt.valueOf() },
-      previousMissingGroups
+      convertStringsToMissingGroupsRecord(previousMissingGroups)
     );
 
     const resultGroupSet = new Set<string>();
@@ -166,7 +181,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     }
 
     const groups = [...resultGroupSet];
-    const nextMissingGroups = new Set<string>();
+    const nextMissingGroups = new Set<MissingGroupsRecord>();
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
     let scheduledActionsCount = 0;
 
@@ -180,7 +195,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       const isNoData = alertResults.some((result) => result[group]?.isNoData);
 
       if (isNoData && group !== UNGROUPED_FACTORY_KEY) {
-        nextMissingGroups.add(group);
+        nextMissingGroups.add({ key: group, bucketKey: alertResults[0][group].bucketKey });
       }
 
       const nextState = isNoData

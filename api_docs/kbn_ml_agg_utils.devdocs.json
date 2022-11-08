@@ -74,7 +74,13 @@
         ],
         "signature": [
           "(client: ",
-          "ElasticsearchClient",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
           ", indexPattern: string, query: ",
           "QueryDslQueryContainer",
           ", fields: ",
@@ -109,7 +115,13 @@
             "label": "client",
             "description": [],
             "signature": [
-              "ElasticsearchClient"
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
@@ -229,7 +241,13 @@
         ],
         "signature": [
           "(client: ",
-          "ElasticsearchClient",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
           ", indexPattern: string, query: any, fields: ",
           {
             "pluginId": "@kbn/ml-agg-utils",
@@ -241,7 +259,13 @@
           ", samplerShardSize: number, runtimeMappings?: ",
           "MappingRuntimeFields",
           " | undefined, abortSignal?: AbortSignal | undefined) => Promise<(",
-          "NumericChartData",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.NumericChartData",
+            "text": "NumericChartData"
+          },
           " | OrdinalChartData | UnsupportedChartData)[]>"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
@@ -258,7 +282,13 @@
               "Elasticsearch Client"
             ],
             "signature": [
-              "ElasticsearchClient"
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
@@ -544,7 +574,13 @@
             "text": "ChangePoint"
           },
           " extends ",
-          "FieldValuePair"
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.FieldValuePair",
+            "text": "FieldValuePair"
+          }
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -807,7 +843,13 @@
             "text": "ChangePointHistogram"
           },
           " extends ",
-          "FieldValuePair"
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.FieldValuePair",
+            "text": "FieldValuePair"
+          }
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -899,6 +941,47 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.FieldValuePair",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldValuePair",
+        "description": [
+          "\nField/value pair definition."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.FieldValuePair.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.FieldValuePair.fieldValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldValue",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-server.HistogramField",
         "type": "Interface",
         "tags": [],
@@ -929,7 +1012,13 @@
             "label": "type",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -987,6 +1076,86 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.NumericChartData",
+        "type": "Interface",
+        "tags": [],
+        "label": "NumericChartData",
+        "description": [
+          "\nInterface to describe the data structure returned for numeric based charts."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumericChartData.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "NumericDataItem[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumericChartData.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumericChartData.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumericChartData.stats",
+            "type": "Object",
+            "tags": [],
+            "label": "stats",
+            "description": [],
+            "signature": [
+              "[number, number]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumericChartData.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"numeric\""
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-server.NumericColumnStats",
         "type": "Interface",
         "tags": [],
@@ -1033,6 +1202,68 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.NumericHistogramField",
+        "type": "Interface",
+        "tags": [],
+        "label": "NumericHistogramField",
+        "description": [
+          "\nNumeric based histogram field interface, limited to `date` and `number`."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.NumericHistogramField",
+            "text": "NumericHistogramField"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.HistogramField",
+            "text": "HistogramField"
+          }
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumericHistogramField.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
+              ".DATE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
+              ".NUMBER"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -1048,7 +1279,13 @@
         ],
         "signature": [
           "(",
-          "NumericHistogramField",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.NumericHistogramField",
+            "text": "NumericHistogramField"
+          },
           " | NumericHistogramFieldWithColumnStats | OrdinalHistogramField | UnsupportedHistogramField)[]"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",

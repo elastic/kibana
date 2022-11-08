@@ -17,7 +17,7 @@
       "node",
     ],
   },
-  "references": [
+  "kbn_references": [
     { "path": "../tsconfig.json" }
   ]
 }

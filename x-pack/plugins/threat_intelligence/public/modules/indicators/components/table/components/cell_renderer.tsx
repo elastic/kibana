@@ -9,7 +9,7 @@ import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
 import { useKibana } from '../../../../../hooks';
-import { Indicator } from '../../../types';
+import { Indicator } from '../../../../../../common/types/indicator';
 import { IndicatorFieldValue } from '../../field_value';
 import { IndicatorsTableContext } from '../contexts';
 import { ActionsRowCell } from '.';

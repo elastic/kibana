@@ -89,7 +89,8 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
     await ml.jobTable.assertJobRowJobId(jobId);
   }
 
-  describe('create jobs from lens with wizard', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/144186
+  describe.skip('create jobs from lens with wizard', function () {
     this.tags(['ml']);
 
     before(async () => {

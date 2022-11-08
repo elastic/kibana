@@ -4,10 +4,9 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "./config.ts"],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../../../x-pack/plugins/licensing/tsconfig.json" }
   ]
