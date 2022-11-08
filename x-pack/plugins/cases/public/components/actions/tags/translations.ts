@@ -18,7 +18,7 @@ export const SAVE_SELECTION = i18n.translate('xpack.cases.actions.tags.saveSelec
 
 export const TOTAL_TAGS = (totalTags: number) =>
   i18n.translate('xpack.cases.actions.tags.totalTags', {
-    defaultMessage: '{totalTags} tags',
+    defaultMessage: 'Total tags: {totalTags}',
     values: { totalTags },
   });
 
@@ -44,4 +44,10 @@ export const SELECTED_CASES = (totalCases: number) =>
   i18n.translate('xpack.cases.actions.tags.headerSubtitle', {
     values: { totalCases },
     defaultMessage: 'Selected cases: {totalCases}',
+  });
+
+export const SELECTED_TAGS = (selectedTags: number) =>
+  i18n.translate('xpack.cases.actions.tags.selectedTags', {
+    defaultMessage: 'Selected: {selectedTags}',
+    values: { selectedTags },
   });

@@ -53,9 +53,23 @@ describe('EditTagsSelectable', () => {
 
     expect(result.getByTestId('cases-actions-tags-edit-selectable')).toBeInTheDocument();
     expect(result.getByPlaceholderText('Search')).toBeInTheDocument();
-    expect(result.getByText(`${props.tags.length} tags`)).toBeInTheDocument();
+    expect(result.getByText(`Total tags: ${props.tags.length}`)).toBeInTheDocument();
+    expect(result.getByText('Selected: 2')).toBeInTheDocument();
     expect(result.getByText('Select all')).toBeInTheDocument();
     expect(result.getByText('Select none')).toBeInTheDocument();
+
+    for (const tag of props.tags) {
+      expect(result.getByText(tag)).toBeInTheDocument();
+    }
+
+    await waitForComponentToUpdate();
+  });
+
+  it('renders the selected tags label correctly', async () => {
+    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+
+    expect(result.getByText('Total tags: 5')).toBeInTheDocument();
+    expect(result.getByText('Selected: 4')).toBeInTheDocument();
 
     for (const tag of props.tags) {
       expect(result.getByText(tag)).toBeInTheDocument();

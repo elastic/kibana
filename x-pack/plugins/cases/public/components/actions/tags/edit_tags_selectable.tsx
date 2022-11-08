@@ -18,6 +18,7 @@ import {
   EuiIcon,
   EuiHighlight,
   EuiSelectableListItem,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -274,6 +275,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
    */
   const [state, dispatch] = useReducer(tagsReducer, { tags, selectedCases }, getInitialTagsState);
   const [searchValue, setSearchValue] = useState<string>('');
+  const { euiTheme } = useEuiTheme();
 
   const options: TagSelectableOption[] = useMemo(() => stateToOptions(state.tags), [state.tags]);
 
@@ -284,7 +286,11 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
 
     return (
       <>
-        <EuiIcon type={option.tagIcon} data-test-subj={dataTestSubj} />
+        <EuiIcon
+          type={option.tagIcon}
+          data-test-subj={dataTestSubj}
+          className="euiSelectableListItem__icon euiSelectableListItem__prepend"
+        />
         <EuiHighlight search={search}>{option.label}</EuiHighlight>
       </>
     );
@@ -399,6 +405,10 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     return options;
   }, [options, searchValue]);
 
+  const selectedTags = Object.values(state.tags).filter(
+    (tag) => tag.tagState === TagState.CHECKED || tag.tagState === TagState.PARTIAL
+  ).length;
+
   return (
     <EuiSelectable
       options={optionsWithAddNewTagOption}
@@ -428,13 +438,30 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
             responsive={false}
             direction="row"
             css={{ flexGrow: 0 }}
+            gutterSize="none"
           >
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              css={{
+                borderRight: euiTheme.border.thin,
+                paddingRight: euiTheme.size.s,
+              }}
+            >
               <EuiText size="xs" color="subdued">
                 {i18n.TOTAL_TAGS(tags.length)}
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              grow={false}
+              css={{
+                paddingLeft: euiTheme.size.s,
+              }}
+            >
+              <EuiText size="xs" color="subdued">
+                {i18n.SELECTED_TAGS(selectedTags)}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
               <EuiFlexGroup
                 responsive={false}
                 direction="row"
