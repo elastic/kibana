@@ -2130,7 +2130,7 @@ describe('Rules list bulk actions', () => {
     wrapper.find('[data-test-subj="bulkDelete"]').first().simulate('click');
 
     expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
-    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
     await act(async () => {
       await nextTick();
