@@ -56,7 +56,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.diskLatencyColumnHeader', {
-      defaultMessage: 'Disk Latency',
+      defaultMessage: 'Disk Latency (avg.)',
     }),
     field: 'diskLatency.avg',
     sortable: true,
