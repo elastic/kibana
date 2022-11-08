@@ -47,6 +47,29 @@ describe('OpsgenieConnectorFields renders', () => {
     expect(screen.getByTestId('secrets.apiKey-input')).toBeInTheDocument();
   });
 
+  it('populates the url field with the default opsgenie url if none is set', async () => {
+    const connector = {
+      actionTypeId: '.opsgenie',
+      name: 'opsgenie',
+      config: {},
+      secrets: {},
+      isDeprecated: false,
+    };
+
+    render(
+      <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <OpsgenieConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    expect(screen.getByTestId('config.apiUrl-input')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('https://api.opsgenie.com')).toBeInTheDocument();
+  });
+
   describe('Validation', () => {
     beforeEach(() => {
       jest.clearAllMocks();
