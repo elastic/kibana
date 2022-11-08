@@ -36,10 +36,10 @@ const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
 describe('Indicators', () => {
   before(() => {
-    esArchiverLoad('threat_intelligence');
+    esArchiverLoad('threat_intelligence/indicators_data');
   });
   after(() => {
-    esArchiverUnload('threat_intelligence');
+    esArchiverUnload('threat_intelligence/indicators_data');
   });
 
   describe('Indicators query bar interaction', () => {

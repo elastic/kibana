@@ -34,10 +34,10 @@ before(() => {
 
 describe('Indicators', () => {
   before(() => {
-    esArchiverLoad('threat_intelligence');
+    esArchiverLoad('threat_intelligence/indicators_data');
   });
   after(() => {
-    esArchiverUnload('threat_intelligence');
+    esArchiverUnload('threat_intelligence/indicators_data');
   });
 
   describe('Indicators timeline interactions', () => {
