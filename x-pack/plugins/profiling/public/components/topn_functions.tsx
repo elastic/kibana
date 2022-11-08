@@ -32,9 +32,100 @@ interface Row {
   inclusiveCPU: number;
   diff?: {
     rank: number;
+    samples: number;
     exclusiveCPU: number;
     inclusiveCPU: number;
   };
+}
+
+/**
+ * Format number of samples as human-readable text.
+ *
+ * @param bytes Number of bytes.
+ * @param dp Number of decimal places to display.
+ *
+ * @return Formatted string.
+ */
+function humanSampleCount(samples, dp=2) {
+  const thresh = 1000;
+
+  if (Math.abs(samples) < thresh) {
+    return samples + ' ';
+  }
+
+  const units = ['k', 'M', 'B', 'T', 'Q'];
+  let u = -1;
+  const r = 10**dp;
+
+  do {
+    samples /= thresh;
+    ++u;
+  } while (Math.round(Math.abs(samples) * r) / r >= thresh && u < units.length - 1);
+
+  return samples.toFixed(dp) + ' ' + units[u];
+}
+
+function TotalSamplesStat({ totalSamples, newSamples } : { totalSamples : number, newSamples : number | undefined }) {
+  const samplesLabel = `${totalSamples.toLocaleString()}`;
+  const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel',
+    { defaultMessage: ' Total sample estimate: ',});
+
+  if (newSamples === undefined || newSamples === 0) {
+    return (
+      <EuiText size="xs">
+        <strong>{sampleHeader}
+        </strong>
+        { " " + totalSamples.toLocaleString()}
+      </EuiText>)
+  }
+
+  const diffSamples = totalSamples - newSamples;
+  const color = diffSamples < 0 ? 'success' : 'danger';
+  const prefix = diffSamples < 0 ? '-' : '+';
+  const percentDelta = (diffSamples / (totalSamples - diffSamples))*100;
+  const label = Math.abs(percentDelta) <= 0.01 ? '<0.01' : 
+    " " + prefix + Math.abs(percentDelta).toFixed(2) + "%";
+
+  return (
+    <EuiText size="xs">
+      <strong>{sampleHeader}</strong>{ " " + totalSamples.toLocaleString() + " " } 
+      <EuiTextColor color={color} size="xs">({label})</EuiTextColor>
+    </EuiText>
+  );
+}
+
+function SampleStat({ samples, diffSamples, totalSamples } :
+  { samples: number; diffSamples: number | undefined; totalSamples: number | undefined }){
+  const samplesLabel = `${samples.toLocaleString()}`;
+
+  if (diffSamples === undefined || diffSamples === 0) {
+    return <>{samplesLabel}</>;
+  }
+  const color = diffSamples < 0 ? 'success' : 'danger';
+  const prefix = diffSamples < 0 ? '-' : '+';
+  const percentDelta = (diffSamples / (samples - diffSamples))*100;
+  const label = Math.abs(percentDelta) <= 0.01 ? '<0.01' : 
+    prefix + Math.abs(percentDelta).toFixed(2) + "% rel";
+
+  const totalPercentDelta = (diffSamples / totalSamples)*100;
+  const totalLabel = Math.abs(totalPercentDelta) <= 0.01 ? '<0.01' : 
+    prefix + Math.abs(totalPercentDelta).toFixed(2) + "% abs";
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem>{samplesLabel}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText color={color} size="s">
+          {label}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText color={color} size="s">
+          {totalLabel}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }
 
 function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU: number | undefined }) {
@@ -44,7 +135,8 @@ function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU: number | undefined })
     return <>{cpuLabel}</>;
   }
   const color = diffCPU < 0 ? 'success' : 'danger';
-  const label = Math.abs(diffCPU) <= 0.01 ? '<0.01' : Math.abs(diffCPU).toFixed(2);
+  const prefix = diffCPU < 0 ? '-' : '+';
+  const label = Math.abs(diffCPU) <= 0.01 ? '<0.01' : prefix + Math.abs(diffCPU).toFixed(2);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
@@ -56,18 +148,6 @@ function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU: number | undefined })
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
-
-function TotalDiff({ samples1, samples2 }: { samples1: number; samples2: number }) {
-  if (samples1 === samples2 || samples1 === 0) {
-    return <></>;
-  }
-
-  const diff = Math.abs(1 - samples2 / samples1) * 100;
-  const text = (samples1 < samples2 ? '+' : '-') + `${diff.toFixed(2)}%`;
-  const color = samples1 < samples2 ? 'danger' : 'success';
-
-  return <EuiTextColor color={color}> ({text})</EuiTextColor>;
 }
 
 export const TopNFunctionsTable = ({
@@ -113,6 +193,7 @@ export const TopNFunctionsTable = ({
         comparisonTopNFunctions && comparisonRow
           ? {
               rank: topN.Rank - comparisonRow.Rank,
+              samples: topN.CountExclusive - comparisonRow.CountExclusive,
               exclusiveCPU:
                 exclusiveCPU -
                 (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
@@ -154,18 +235,27 @@ export const TopNFunctionsTable = ({
     {
       field: TopNFunctionSortField.Samples,
       name: i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
-        defaultMessage: 'Samples',
+        defaultMessage: 'Samples (estd.)',
       }),
       align: 'right',
-      render: (_, { samples }) => {
-        return <EuiText style={{ whiteSpace: 'nowrap', fontSize: 'inherit' }}>{samples}</EuiText>;
+      render: (_, { samples, diff }) => {
+        return <SampleStat samples={samples} diffSamples={diff?.samples} totalSamples={totalCount} />;
       },
     },
     {
       field: TopNFunctionSortField.ExclusiveCPU,
-      name: i18n.translate('xpack.profiling.functionsView.exclusiveCpuColumnLabel', {
-        defaultMessage: 'Exclusive CPU',
-      }),
+      name: (
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel1Exclusive', {
+                          defaultMessage: 'CPU excl.'})}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel2Exclusive', {
+                          defaultMessage: 'subfunctions'})}
+         </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
       render: (_, { exclusiveCPU, diff }) => {
         return <CPUStat cpu={exclusiveCPU} diffCPU={diff?.exclusiveCPU} />;
       },
@@ -173,9 +263,18 @@ export const TopNFunctionsTable = ({
     },
     {
       field: TopNFunctionSortField.InclusiveCPU,
-      name: i18n.translate('xpack.profiling.functionsView.inclusiveCpuColumnLabel', {
-        defaultMessage: 'Inclusive CPU',
-      }),
+      name: (
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel1Inclusive', {
+                          defaultMessage: 'CPU incl.'})}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel2Inclusive', {
+                          defaultMessage: 'subfunctions'})}
+         </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
       render: (_, { inclusiveCPU, diff }) => {
         return <CPUStat cpu={inclusiveCPU} diffCPU={diff?.inclusiveCPU} />;
       },
@@ -220,13 +319,6 @@ export const TopNFunctionsTable = ({
     });
   }
 
-  const totalSampleCountLabel = i18n.translate(
-    'xpack.profiling.functionsView.totalSampleCountLabel',
-    {
-      defaultMessage: 'Total sample count',
-    }
-  );
-
   const sortedRows = orderBy(
     rows,
     (row) => {
@@ -239,13 +331,7 @@ export const TopNFunctionsTable = ({
 
   return (
     <>
-      <EuiText size="xs">
-        <strong>{totalSampleCountLabel}:</strong> {totalCount}
-        {TotalDiff({
-          samples1: comparisonTopNFunctions?.TotalCount ?? 0,
-          samples2: totalCount,
-        })}
-      </EuiText>
+      <TotalSamplesStat totalSamples={totalCount} newSamples={comparisonTopNFunctions?.TotalCount} />
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable
