@@ -8,8 +8,6 @@
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats';
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
-export const UPDATE_RULES_CONFIG_ROUTE_PATH =
-  '/internal/cloud_security_posture/update_rules_config';
 export const ES_PIT_ROUTE_PATH = '/internal/cloud_security_posture/es_pit';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
