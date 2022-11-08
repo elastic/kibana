@@ -45,7 +45,7 @@ describe('cases page in security', () => {
   beforeEach(() => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: AlertsCasesTourSteps.viewCase,
-      incrementStep: jest.fn(),
+      incrementStep: () => null,
       endTourStep,
       isTourShown: () => true,
     });
@@ -63,7 +63,7 @@ describe('cases page in security', () => {
   it('does not call endTour on cases details page when SecurityStepId.alertsCases tour is not active', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: AlertsCasesTourSteps.viewCase,
-      incrementStep: jest.fn(),
+      incrementStep: () => null,
       endTourStep,
       isTourShown: () => false,
     });
@@ -78,7 +78,7 @@ describe('cases page in security', () => {
   it('does not call endTour on cases details page when SecurityStepId.alertsCases tour is active and step is not AlertsCasesTourSteps.viewCase', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: AlertsCasesTourSteps.expandEvent,
-      incrementStep: jest.fn(),
+      incrementStep: () => null,
       endTourStep,
       isTourShown: () => true,
     });

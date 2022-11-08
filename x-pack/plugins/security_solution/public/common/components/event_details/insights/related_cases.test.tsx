@@ -14,10 +14,12 @@ import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { RelatedCases } from './related_cases';
 import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 import { CASES_LOADING, CASES_COUNT } from './translations';
+import { useTourContext } from '../../guided_onboarding_tour';
+import { AlertsCasesTourSteps } from '../../guided_onboarding_tour/tour_config';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetRelatedCases = jest.fn();
-
+jest.mock('../../guided_onboarding_tour');
 jest.mock('../../../lib/kibana', () => {
   const original = jest.requireActual('../../../lib/kibana');
 
@@ -40,8 +42,20 @@ jest.mock('../../../lib/kibana', () => {
 });
 
 const eventId = '1c84d9bff4884dabe6aa1bb15f08433463b848d9269e587078dc56669550d27a';
+const scrollToMock = jest.fn();
+window.HTMLElement.prototype.scrollIntoView = scrollToMock;
 
 describe('Related Cases', () => {
+  beforeEach(() => {
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
+    (useTourContext as jest.Mock).mockReturnValue({
+      activeStep: AlertsCasesTourSteps.viewCase,
+      incrementStep: () => null,
+      endTourStep: () => null,
+      isTourShown: () => false,
+    });
+    jest.clearAllMocks();
+  });
   describe('When user does not have cases read permissions', () => {
     beforeEach(() => {
       (useGetUserCasesPermissions as jest.Mock).mockReturnValue(noCasesPermissions());
@@ -59,11 +73,7 @@ describe('Related Cases', () => {
     });
   });
   describe('When user does have case read permissions', () => {
-    beforeEach(() => {
-      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
-    });
-
-    test('When related cases are loading should show the loading message', async () => {
+    test('Should show the loading message', async () => {
       await act(async () => {
         mockGetRelatedCases.mockReturnValue([]);
         render(
@@ -76,7 +86,7 @@ describe('Related Cases', () => {
       });
     });
 
-    test('When related cases are unable to be retrieved should show 0 related cases when there are none', async () => {
+    test('Should show 0 related cases when there are none', async () => {
       await act(async () => {
         mockGetRelatedCases.mockReturnValue([]);
         render(
@@ -91,7 +101,7 @@ describe('Related Cases', () => {
       });
     });
 
-    test('When 1 related case is retrieved should show 1 related case', async () => {
+    test('Should show 1 related case', async () => {
       await act(async () => {
         mockGetRelatedCases.mockReturnValue([{ id: '789', title: 'Test Case' }]);
         render(
@@ -106,7 +116,7 @@ describe('Related Cases', () => {
       });
     });
 
-    test('When 2 related cases are retrieved should show 2 related cases', async () => {
+    test('Should show 2 related cases', async () => {
       await act(async () => {
         mockGetRelatedCases.mockReturnValue([
           { id: '789', title: 'Test Case 1' },
@@ -124,6 +134,46 @@ describe('Related Cases', () => {
           expect(cases).toHaveLength(2);
           expect(cases[0]).toHaveTextContent('Test Case 1');
           expect(cases[1]).toHaveTextContent('Test Case 2');
+        });
+      });
+    });
+
+    test('Should not open the related cases accordion when isTourActive=false', async () => {
+      mockGetRelatedCases.mockReturnValue([{ id: '789', title: 'Test Case' }]);
+      await act(async () => {
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
+        await waitFor(() => {
+          expect(scrollToMock).not.toHaveBeenCalled();
+          expect(
+            screen.getByTestId('RelatedCases-accordion').classList.contains('euiAccordion-isOpen')
+          ).toBe(false);
+        });
+      });
+    });
+
+    test('Should automatically open the related cases accordion when isTourActive=true', async () => {
+      (useTourContext as jest.Mock).mockReturnValue({
+        activeStep: AlertsCasesTourSteps.viewCase,
+        incrementStep: () => null,
+        endTourStep: () => null,
+        isTourShown: () => true,
+      });
+      mockGetRelatedCases.mockReturnValue([{ id: '789', title: 'Test Case' }]);
+      await act(async () => {
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
+        await waitFor(() => {
+          expect(scrollToMock).toHaveBeenCalled();
+          expect(
+            screen.getByTestId('RelatedCases-accordion').classList.contains('euiAccordion-isOpen')
+          ).toBe(true);
         });
       });
     });
