@@ -167,6 +167,7 @@ export function useModelActions({
             await trainedModelsApiService.startModelAllocation(item.model_id, {
               number_of_allocations: threadingParams.numOfAllocations,
               threads_per_allocation: threadingParams.threadsPerAllocations!,
+              priority: threadingParams.priority!,
             });
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {

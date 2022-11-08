@@ -126,7 +126,11 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     startModelAllocation(
       modelId: string,
-      queryParams?: { number_of_allocations: number; threads_per_allocation: number }
+      queryParams?: {
+        number_of_allocations: number;
+        threads_per_allocation: number;
+        priority: 'low' | 'normal';
+      }
     ) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}/deployment/_start`,
