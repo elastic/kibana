@@ -59,7 +59,7 @@ export const buildParseSearchQuery = ({
 
     if (parsed.ast.getFieldClauses(tagField)) {
       // The query can have clauses that either *must* match or *must_not* match
-      // We will retrive the list of name for both list and convert them to references
+      // We will retrieve the list of name for both list and convert them to references
       const { selectedTags, excludedTags } = parsed.ast.getFieldClauses(tagField).reduce(
         (acc, clause) => {
           if (clause.match === 'must') {
