@@ -27,6 +27,10 @@ a| <<teams-action-type,Microsoft Teams>>
 
 | Send a message to a Microsoft Teams channel.
 
+a| <<opsgenie-action-type,Opsgenie>>
+
+| Create or close an alert in Opsgenie.
+
 a| <<pagerduty-action-type,PagerDuty>>
 
 | Send an event in PagerDuty.
