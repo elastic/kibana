@@ -9,6 +9,7 @@ import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   sendCompleteMsg,
@@ -25,6 +26,7 @@ import { FetchStatus } from '../../types';
 import {
   DataDocuments$,
   DataMain$,
+  DataMsg,
   RecordRawType,
   SavedSearchData,
 } from '../hooks/use_saved_search';
@@ -123,7 +125,6 @@ export function fetchAll(
     };
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
-
     documents
       .then((docs) => {
         // If the total hits (or chart) query is still loading, emit a partial
@@ -151,7 +152,12 @@ export function fetchAll(
       .catch(sendErrorTo(data, dataSubjects.documents$, dataSubjects.main$));
 
     // Return a promise that will resolve once all the requests have finished or failed
-    return documents.then(() => {
+    return firstValueFrom(
+      merge(
+        fetchStatusByType(dataSubjects.documents$, 'documents'),
+        fetchStatusByType(dataSubjects.totalHits$, 'totalHits')
+      ).pipe(scan(toRequestFinishedMap, {}), filter(allRequestsFinished))
+    ).then(() => {
       // Send a complete message to main$ once all queries are done and if main$
       // is not already in an ERROR state, e.g. because the document query has failed.
       // This will only complete main$, if it hasn't already been completed previously
@@ -166,3 +172,17 @@ export function fetchAll(
     return Promise.resolve();
   }
 }
+
+const fetchStatusByType = <T extends DataMsg>(subject: BehaviorSubject<T>, type: string) =>
+  subject.pipe(map(({ fetchStatus }) => ({ type, fetchStatus })));
+
+const toRequestFinishedMap = (
+  currentMap: Record<string, boolean>,
+  { type, fetchStatus }: { type: string; fetchStatus: FetchStatus }
+) => ({
+  ...currentMap,
+  [type]: [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus),
+});
+
+const allRequestsFinished = (requests: Record<string, boolean>) =>
+  Object.values(requests).every((finished) => finished);
