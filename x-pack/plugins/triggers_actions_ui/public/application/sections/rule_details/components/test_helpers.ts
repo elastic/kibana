@@ -101,6 +101,7 @@ export function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSumma
         status: 'OK',
         muted: false,
         actionGroupId: 'testActionGroup',
+        flapping: false,
       },
     },
     executionDuration: {
