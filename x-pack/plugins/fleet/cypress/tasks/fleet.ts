@@ -41,7 +41,7 @@ export function navigateToAgentPolicy(name: string) {
 export function navigateToEnrollmentTokens() {
   cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
   cy.get('.euiBasicTable-loading').should('not.exist');
-  cy.get('.euiButtonIcon--danger'); // wait for trash icon
+  cy.getBySel('enrollmentTokenTable.revokeBtn'); // wait for revoke btn
 }
 
 export function verifyPolicy(name: string, integrations: string[]) {
