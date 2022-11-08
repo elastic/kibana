@@ -21,6 +21,16 @@ export const withReduxDevTools = <StateContainer extends ReduxLikeStateContainer
         ...(typeof config?.serialize === 'object' ? config.serialize : {}),
         replacer: (_key: string, value: unknown) => replaceReactSyntheticEvent(value),
       },
+      features: {
+        lock: false,
+        persist: false,
+        import: false,
+        jump: false,
+        skip: false,
+        reorder: false,
+        dispatch: false,
+        ...config?.features,
+      },
     });
 
     devToolsInstance.init(stateContainer.getState());
