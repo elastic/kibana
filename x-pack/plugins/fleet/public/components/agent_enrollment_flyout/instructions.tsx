@@ -66,19 +66,15 @@ export const Instructions = (props: InstructionProps) => {
 
   const fleetServers = agents?.items || [];
 
-  const displayFleetServerHosts = useMemo(() => {
-    return fleetServerHosts?.filter((f) => f.is_default)?.[0]?.host_urls || [];
-  }, [fleetServerHosts]);
-
   if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
 
-  const hasNoFleetServerHost = fleetStatus.isReady && displayFleetServerHosts.length === 0;
+  const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
   const showAgentEnrollment =
     fleetStatus.isReady &&
     !isFleetServerUnhealthy &&
     fleetServers.length > 0 &&
-    displayFleetServerHosts.length > 0;
+    (fleetServerHosts?.length ?? 0) > 0;
 
   const showFleetServerEnrollment =
     fleetServers.length === 0 ||

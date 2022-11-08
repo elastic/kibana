@@ -283,6 +283,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
           agentId={agentId}
           defaultValues={alertId ? { alertIds: [alertId] } : undefined}
           onClose={handleOnOsqueryClick}
+          ecsData={ecsRowData}
         />
       )}
     </>

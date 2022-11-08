@@ -15,13 +15,18 @@ import {
   type AppContextTestRender,
 } from '../../../common/mock/endpoint';
 import { ResponseActionsLog } from './response_actions_log';
-import type { ActionListApiResponse } from '../../../../common/endpoint/types';
+import type {
+  ActionFileInfoApiResponse,
+  ActionListApiResponse,
+} from '../../../../common/endpoint/types';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { getActionListMock } from './mocks';
 import { useGetEndpointsList } from '../../hooks/endpoint/use_get_endpoints_list';
 import uuid from 'uuid';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
+import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import { waitFor } from '@testing-library/react';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -116,6 +121,19 @@ jest.mock('../../hooks/endpoint/use_get_endpoints_list');
 
 jest.mock('../../../common/components/user_privileges');
 
+let mockUseGetFileInfo: {
+  isFetching?: boolean;
+  error?: Partial<IHttpFetchError> | null;
+  data?: ActionFileInfoApiResponse;
+};
+jest.mock('../../hooks/response_actions/use_get_file_info', () => {
+  const original = jest.requireActual('../../hooks/response_actions/use_get_file_info');
+  return {
+    ...original,
+    useGetFileInfo: () => mockUseGetFileInfo,
+  };
+});
+
 const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 
 describe('Response actions history', () => {
@@ -131,6 +149,7 @@ describe('Response actions history', () => {
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
+  let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
 
   const refetchFunction = jest.fn();
   const baseMockedActionList = {
@@ -219,6 +238,10 @@ describe('Response actions history', () => {
   });
 
   describe('With Data', () => {
+    beforeEach(() => {
+      apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+    });
+
     it('should show table when there is data', async () => {
       render();
 
@@ -422,16 +445,60 @@ describe('Response actions history', () => {
         data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
       };
 
-      render();
-      const { getByTestId } = renderResult;
+      mockUseGetFileInfo = {
+        isFetching: false,
+        error: null,
+        data: apiMocks.responseProvider.fileInfo(),
+      };
 
+      render();
+
+      const { getByTestId } = renderResult;
       const expandButton = getByTestId(`${testPrefix}-expand-button`);
       userEvent.click(expandButton);
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+      });
+
       const downloadLink = getByTestId(`${testPrefix}-getFileDownloadLink`);
       expect(downloadLink).toBeTruthy();
       expect(downloadLink.textContent).toEqual(
         'Click here to download(ZIP file passcode: elastic)'
       );
+    });
+
+    it('should show file unavailable for download for `get-file` action WITH file operation permission when file is deleted', async () => {
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
+      };
+
+      const fileInfo = apiMocks.responseProvider.fileInfo();
+      fileInfo.data.status = 'DELETED';
+
+      apiMocks.responseProvider.fileInfo.mockReturnValue(fileInfo);
+
+      mockUseGetFileInfo = {
+        isFetching: false,
+        error: null,
+        data: apiMocks.responseProvider.fileInfo(),
+      };
+
+      render();
+
+      const { getByTestId } = renderResult;
+      const expandButton = getByTestId(`${testPrefix}-expand-button`);
+      userEvent.click(expandButton);
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+      });
+
+      const unavailableText = getByTestId(
+        `${testPrefix}-getFileDownloadLink-fileNoLongerAvailable`
+      );
+      expect(unavailableText).toBeTruthy();
     });
 
     it('should not contain download link in expanded row for `get-file` action when NO file operation permission', async () => {

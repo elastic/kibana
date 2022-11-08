@@ -27,7 +27,7 @@ import {
   useStartServices,
   useFleetStatus,
   useAgentEnrollmentFlyoutData,
-  useGetFleetServerHosts,
+  useFleetServerHostsForPolicy,
 } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy, AgentPolicy } from '../../types';
@@ -57,12 +57,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
     return policies.find((p) => p.id === id);
   };
 
-  const fleetServerHostsRequest = useGetFleetServerHosts();
-
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();
-  const fleetServerHosts =
-    fleetServerHostsRequest.data?.items?.filter((f) => true)?.[0]?.host_urls ?? [];
 
   const [selectedPolicyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
@@ -78,6 +74,10 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   } = useAgentEnrollmentFlyoutData();
 
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
+
+  const { fleetServerHosts, isLoadingInitialRequest } = useFleetServerHostsForPolicy(
+    agentPolicyWithPackagePolicies
+  );
 
   const selectedPolicy = agentPolicyWithPackagePolicies
     ? agentPolicyWithPackagePolicies
@@ -100,9 +100,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   }, [selectedPolicy, isFleetServerPolicySelected]);
 
   const { isK8s } = useIsK8sPolicy(selectedPolicy ? selectedPolicy : undefined);
-
-  const isLoadingInitialRequest =
-    fleetServerHostsRequest.isLoading && fleetServerHostsRequest.isInitialRequest;
 
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
@@ -192,7 +189,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
           <Loading size="l" />
         ) : (
           <Instructions
-            fleetServerHosts={fleetServerHostsRequest.data?.items ?? []}
+            fleetServerHosts={fleetServerHosts}
             setSelectedPolicyId={setSelectedPolicyId}
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}
