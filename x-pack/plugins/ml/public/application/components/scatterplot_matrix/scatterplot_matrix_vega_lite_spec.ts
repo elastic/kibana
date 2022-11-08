@@ -20,9 +20,13 @@ import { LegendType, LEGEND_TYPES } from '../vega_chart/common';
 export const OUTLIER_SCORE_FIELD = 'outlier_score';
 
 const SCATTERPLOT_SIZE = 125;
+export const USER_SELECTION = 'user_selection';
+export const SINGLE_POINT_CLICK = 'single_point_click';
 
-export const DEFAULT_COLOR = euiPaletteColorBlind()[0];
+export const COLOR_BLUR = '#bbb';
 export const COLOR_OUTLIER = euiPaletteNegative(2)[1];
+export const COLOR_SELECTION = euiPaletteColorBlind()[2];
+export const COLOR_RANGE_OUTLIER = [euiPaletteColorBlind()[1], euiPaletteColorBlind()[2]];
 export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
 export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
 
@@ -37,10 +41,14 @@ export const getColorSpec = (
   if (typeof escapedOutlierScoreField === 'string') {
     return {
       condition: {
-        value: COLOR_OUTLIER,
-        test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
+        selection: USER_SELECTION,
+        field: getEscapedVegaFieldName('is_outlier' ?? '00FF00'),
+        type: LEGEND_TYPES.NOMINAL,
+        scale: {
+          range: COLOR_RANGE_OUTLIER,
+        },
       },
-      value: euiTheme.euiColorMediumShade,
+      value: COLOR_BLUR,
     };
   }
 
@@ -48,15 +56,23 @@ export const getColorSpec = (
   // this returns either a continuous or categorical color spec.
   if (color !== undefined && legendType !== undefined) {
     return {
-      field: getEscapedVegaFieldName(color),
-      type: legendType,
-      scale: {
-        range: legendType === LEGEND_TYPES.NOMINAL ? COLOR_RANGE_NOMINAL : COLOR_RANGE_QUANTITATIVE,
+      condition: {
+        selection: USER_SELECTION,
+        field: getEscapedVegaFieldName(color ?? '00FF00'),
+        type: legendType,
+        scale: {
+          range:
+            legendType === LEGEND_TYPES.NOMINAL ? COLOR_RANGE_NOMINAL : COLOR_RANGE_QUANTITATIVE,
+        },
       },
+      value: COLOR_BLUR,
     };
   }
 
-  return { value: DEFAULT_COLOR };
+  return {
+    condition: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
+    value: COLOR_BLUR,
+  };
 };
 
 // Escapes the characters .[] in field names with double backslashes
@@ -129,8 +145,26 @@ export const getScatterplotMatrixVegaLiteSpec = (
             }
           : { type: 'circle', opacity: 0.75, size: 8 }),
       },
+      // transformation to apply outlier threshold as category
+      ...(outliers
+        ? {
+            transform: [
+              {
+                calculate: `datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff`,
+                as: 'is_outlier',
+              },
+            ],
+          }
+        : {}),
       encoding: {
         color: colorSpec,
+        opacity: {
+          condition: {
+            selection: USER_SELECTION,
+            value: 0.8,
+          },
+          value: 0.5,
+        },
         ...(dynamicSize
           ? {
               stroke: colorSpec,
@@ -179,7 +213,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
         },
         tooltip: [
           ...(color !== undefined
-            ? [{ type: colorSpec.type, field: getEscapedVegaFieldName(color) }]
+            ? // @ts-ignore
+              [{ type: colorSpec.condition.type, field: getEscapedVegaFieldName(color) }]
             : []),
           ...vegaColumns.map((d) => ({
             type: LEGEND_TYPES.QUANTITATIVE,
@@ -193,6 +228,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
       ...(outliers
         ? {
             selection: {
+              [USER_SELECTION]: { type: 'interval' },
+              [SINGLE_POINT_CLICK]: { type: 'single' },
               mlOutlierScoreThreshold: {
                 type: 'single',
                 fields: ['cutoff'],
@@ -209,7 +246,15 @@ export const getScatterplotMatrixVegaLiteSpec = (
               },
             },
           }
-        : {}),
+        : {
+            selection: {
+              // Always allow user selection
+              [USER_SELECTION]: {
+                type: 'interval',
+              },
+              [SINGLE_POINT_CLICK]: { type: 'single', empty: 'none' },
+            },
+          }),
       width: SCATTERPLOT_SIZE,
       height: SCATTERPLOT_SIZE,
     },
