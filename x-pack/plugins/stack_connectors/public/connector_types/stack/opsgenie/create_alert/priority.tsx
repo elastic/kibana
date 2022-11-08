@@ -46,27 +46,27 @@ export const Priority = React.memo(PriorityComponent);
 
 const priorityOptions = [
   {
-    value: i18n.PRIORITY_1,
+    value: 'P1',
     text: i18n.PRIORITY_1,
     ['data-test-subj']: 'opsgenie-priority-p1',
   },
   {
-    value: i18n.PRIORITY_2,
+    value: 'P2',
     text: i18n.PRIORITY_2,
     ['data-test-subj']: 'opsgenie-priority-p2',
   },
   {
-    value: i18n.PRIORITY_3,
+    value: 'P3',
     text: i18n.PRIORITY_3,
     ['data-test-subj']: 'opsgenie-priority-p3',
   },
   {
-    value: i18n.PRIORITY_4,
+    value: 'P4',
     text: i18n.PRIORITY_4,
     ['data-test-subj']: 'opsgenie-priority-p4',
   },
   {
-    value: i18n.PRIORITY_5,
+    value: 'P5',
     text: i18n.PRIORITY_5,
     ['data-test-subj']: 'opsgenie-priority-p5',
   },

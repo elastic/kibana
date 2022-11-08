@@ -642,7 +642,7 @@ describe('rule_details', () => {
         wrapper.update();
       });
 
-      const refreshButton = wrapper.find('[data-test-subj="refreshRulesButton"]').first();
+      const refreshButton = wrapper.find('[data-test-subj="refreshRulesButton"]').last();
       expect(refreshButton.exists()).toBeTruthy();
 
       refreshButton.simulate('click');
@@ -668,10 +668,10 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const updateButton = wrapper.find('[data-test-subj="updateAPIKeyButton"]').first();
+      const updateButton = wrapper.find('[data-test-subj="updateAPIKeyButton"]').last();
       expect(updateButton.exists()).toBeTruthy();
 
       updateButton.simulate('click');
@@ -679,7 +679,7 @@ describe('rule_details', () => {
       const confirm = wrapper.find('[data-test-subj="updateApiKeyIdsConfirmation"]').first();
       expect(confirm.exists()).toBeTruthy();
 
-      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first();
+      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').last();
       expect(confirmButton.exists()).toBeTruthy();
 
       confirmButton.simulate('click');
@@ -708,10 +708,10 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const updateButton = wrapper.find('[data-test-subj="deleteRuleButton"]').first();
+      const updateButton = wrapper.find('[data-test-subj="deleteRuleButton"]').last();
       expect(updateButton.exists()).toBeTruthy();
 
       updateButton.simulate('click');
@@ -719,7 +719,7 @@ describe('rule_details', () => {
       const confirm = wrapper.find('[data-test-subj="deleteIdsConfirmation"]').first();
       expect(confirm.exists()).toBeTruthy();
 
-      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first();
+      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').last();
       expect(confirmButton.exists()).toBeTruthy();
 
       confirmButton.simulate('click');
@@ -747,10 +747,10 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const disableButton = wrapper.find('[data-test-subj="disableButton"]').first();
+      const disableButton = wrapper.find('[data-test-subj="disableButton"]').last();
       expect(disableButton.exists()).toBeTruthy();
 
       disableButton.simulate('click');
@@ -776,10 +776,10 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const enableButton = wrapper.find('[data-test-subj="disableButton"]').first();
+      const enableButton = wrapper.find('[data-test-subj="disableButton"]').last();
       expect(enableButton.exists()).toBeTruthy();
 
       enableButton.simulate('click');
