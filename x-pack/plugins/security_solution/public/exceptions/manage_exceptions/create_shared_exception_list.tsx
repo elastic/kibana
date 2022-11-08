@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ChangeEvent } from 'react';
 import React, { memo, useState, useCallback, useRef, useEffect } from 'react';
 import {
   EuiFlyout,
@@ -24,6 +25,7 @@ import {
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notifications-browser';
 import { i18n as translate } from '@kbn/i18n';
+import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
 
 import { useCreateSharedExceptionListWithOptionalSignal } from './use_create_shared_list';
 import {
@@ -34,6 +36,8 @@ import {
   CLOSE_FLYOUT,
   CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER,
   CREATE_SHARED_LIST_NAME_FIELD_PLACEHOLDER,
+  SUCCESS_TITLE,
+  getSuccessText,
 } from './translations';
 
 export const CreateSharedListFlyout = memo(
@@ -50,61 +54,61 @@ export const CreateSharedListFlyout = memo(
     addError: (error: unknown, options: ErrorToastOptions) => Toast;
     handleCloseFlyout: () => void;
   }) => {
-    const [listName, setListName] = useState('');
-    const [description, setDescription] = useState('');
+    // const [listName, setListName] = useState('');
+    // const [description, setDescription] = useState('');
 
     const { start: createSharedExceptionList, ...createSharedExceptionListState } =
       useCreateSharedExceptionListWithOptionalSignal();
     const ctrl = useRef(new AbortController());
 
-    const onListNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setListName(e.target.value);
-    };
-    const onDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setDescription(e.target.value);
+    // const onListNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //   setListName(e.target.value);
+    // };
+    // const onDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    //   setDescription(e.target.value);
+    // };
+
+    enum DetailProperty {
+      name = 'name',
+      description = 'description',
+    }
+
+    const [newListDetails, setNewListDetails] = useState<ListDetails>({
+      name: '',
+      description: '',
+    });
+    const onChange = (
+      { target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      detailProperty: DetailProperty.name | DetailProperty.description
+    ) => {
+      const { value } = target;
+      setNewListDetails({ ...newListDetails, [detailProperty]: value });
     };
 
     const handleCreateSharedExceptionList = useCallback(() => {
-      if (!createSharedExceptionListState.loading && listName !== '') {
+      if (!createSharedExceptionListState.loading && newListDetails.name !== '') {
         ctrl.current = new AbortController();
 
         createSharedExceptionList({
           http,
           signal: ctrl.current.signal,
-          name: listName,
-          description,
+          name: newListDetails.name,
+          description: newListDetails.description ?? '',
         });
       }
-    }, [
-      createSharedExceptionList,
-      createSharedExceptionListState.loading,
-      description,
-      http,
-      listName,
-    ]);
+    }, [createSharedExceptionList, createSharedExceptionListState.loading, newListDetails, http]);
 
     const handleCreateSuccess = useCallback(
       (response) => {
         addSuccess({
-          text: translate.translate(
-            'xpack.securitySolution.exceptions.createSharedExceptionListSuccessDescription',
-            {
-              defaultMessage: 'list with name ${listName} was created!',
-              values: { listName },
-            }
-          ),
-          title: translate.translate(
-            'xpack.securitySolution.exceptions.createSharedExceptionListSuccessTitle',
-            {
-              defaultMessage: 'created list',
-            }
-          ),
+          text: getSuccessText(newListDetails.name),
+          title: SUCCESS_TITLE,
         });
         handleRefresh();
 
         handleCloseFlyout();
       },
-      [addSuccess, handleCloseFlyout, handleRefresh, listName]
+      [addSuccess, handleCloseFlyout, handleRefresh, newListDetails]
     );
 
     const handleCreateError = useCallback(
@@ -155,16 +159,16 @@ export const CreateSharedListFlyout = memo(
           <EuiText>{CREATE_SHARED_LIST_NAME_FIELD}</EuiText>
           <EuiFieldText
             placeholder={CREATE_SHARED_LIST_NAME_FIELD_PLACEHOLDER}
-            value={listName}
-            onChange={(e) => onListNameChange(e)}
+            value={newListDetails.name}
+            onChange={(e) => onChange(e, DetailProperty.name)}
             aria-label="Use aria labels when no actual label is in use"
           />
           <EuiSpacer />
           <EuiText>{CREATE_SHARED_LIST_DESCRIPTION}</EuiText>
           <EuiTextArea
             placeholder={CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER}
-            value={description}
-            onChange={(e) => onDescriptionChange(e)}
+            value={newListDetails.description}
+            onChange={(e) => onChange(e, DetailProperty.description)}
             aria-label="Stop the hackers"
           />
         </EuiFlyoutBody>
@@ -179,7 +183,7 @@ export const CreateSharedListFlyout = memo(
               <EuiButton
                 data-test-subj="exception-lists-form-create-shared"
                 onClick={handleCreateSharedExceptionList}
-                disabled={listName === ''}
+                disabled={newListDetails.name === ''}
               >
                 {CREATE_BUTTON}
               </EuiButton>

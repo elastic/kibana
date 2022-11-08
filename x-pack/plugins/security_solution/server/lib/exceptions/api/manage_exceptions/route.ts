@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 import uuid from 'uuid';
 
+import { SHARED_EXCEPTION_LIST_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -29,7 +30,7 @@ export type CreateSharedExceptionListRequestParamsDecoded = CreateSharedExceptio
 export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
     {
-      path: '/api/exceptions/shared',
+      path: SHARED_EXCEPTION_LIST_URL,
       validate: {
         body: buildRouteValidation<
           typeof CreateSharedExceptionListRequestParams,
