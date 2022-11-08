@@ -68,7 +68,7 @@ describe('Alerts timeline', () => {
   });
 
   it('Add an empty property to default timeline', () => {
-    // add condition to make sure the fild is empty
+    // add condition to make sure the field is empty
     openAddFilterPopover();
     fillAddFilterForm({ key: 'file.name', operator: 'does not exist' });
     scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);

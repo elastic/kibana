@@ -10,9 +10,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { combineQueries } from '@kbn/timelines-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { MAX_LIMIT_TIMELINE } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
+import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { TimelineArgs } from '../../../../timelines/containers';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
@@ -75,8 +75,7 @@ export const useAddBulkToTimelineAction = ({
   const { filters, dataTable: { selectAll, totalCount, sort, selectedEventIds } = tableDefaults } =
     useSelector((state: State) => eventsViewerSelector(state, tableId));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings as any), [uiSettings]);
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
 
   const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
     field: columnId,
@@ -114,7 +113,7 @@ export const useAddBulkToTimelineAction = ({
     indexNames: selectedPatterns,
     filterQuery,
     runtimeMappings,
-    limit: Math.min(MAX_LIMIT_TIMELINE, totalCount),
+    limit: Math.min(BULK_ADD_TO_TIMELINE_LIMIT, totalCount),
     timerangeKind: 'absolute',
   });
 
@@ -123,7 +122,7 @@ export const useAddBulkToTimelineAction = ({
       setDisabledActionOnSelectAll(false);
       return;
     }
-    if (totalCount > 4000) {
+    if (totalCount > BULK_ADD_TO_TIMELINE_LIMIT) {
       setDisabledActionOnSelectAll(true);
     } else {
       setDisabledActionOnSelectAll(false);
@@ -216,7 +215,7 @@ export const useAddBulkToTimelineAction = ({
 
   const investigateInTimelineTitle = useMemo(() => {
     return disableActionOnSelectAll
-      ? `${INVESTIGATE_BULK_IN_TIMELINE} ( max ${MAX_LIMIT_TIMELINE} )`
+      ? `${INVESTIGATE_BULK_IN_TIMELINE} ( max ${BULK_ADD_TO_TIMELINE_LIMIT} )`
       : INVESTIGATE_BULK_IN_TIMELINE;
   }, [disableActionOnSelectAll]);
 
