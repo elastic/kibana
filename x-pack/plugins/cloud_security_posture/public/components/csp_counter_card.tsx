@@ -8,10 +8,11 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiCard, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
-import type { EuiStatProps, EuiCardProps } from '@elastic/eui';
+import type { EuiTextProps, EuiCardProps } from '@elastic/eui';
 
-export type CspCounterCardProps = Pick<EuiCardProps, 'onClick' | 'id'> &
-  Pick<EuiStatProps, 'title' | 'description' | 'titleColor' | 'isLoading'>;
+export type CspCounterCardProps = Pick<EuiCardProps, 'onClick' | 'id' | 'title' | 'description'> & {
+  descriptionColor?: EuiTextProps['color'];
+};
 
 export const CspCounterCard = (counter: CspCounterCardProps) => {
   const { euiTheme } = useEuiTheme();
@@ -37,7 +38,7 @@ export const CspCounterCard = (counter: CspCounterCardProps) => {
       `}
       data-test-subj={counter.id}
     >
-      <EuiText color={counter.titleColor}>
+      <EuiText color={counter.descriptionColor}>
         <EuiTitle size="xs">
           <h3>{counter.description}</h3>
         </EuiTitle>
