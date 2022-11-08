@@ -33,7 +33,7 @@ export default function upgradeAssistantFunctionalTests({
             persistent: {
               cluster: {
                 max_shards_per_node: '9',
-              }
+              },
             },
           },
         });
@@ -52,9 +52,9 @@ export default function upgradeAssistantFunctionalTests({
                     disk: {
                       threshold_enabled: true,
                       watermark: { low: '30%' },
-                    }
-                  }
-                }
+                    },
+                  },
+                },
               },
             },
           },
@@ -83,9 +83,9 @@ export default function upgradeAssistantFunctionalTests({
                     disk: {
                       threshold_enabled: false,
                       watermark: { low: null },
-                    }
-                  }
-                }
+                    },
+                  },
+                },
               },
             },
           },
@@ -111,7 +111,9 @@ export default function upgradeAssistantFunctionalTests({
       const deprecationMessages = await testSubjects.getVisibleTextAll('defaultTableCell-message');
 
       expect(deprecationMessages).to.contain('Disk usage exceeds low watermark');
-      expect(deprecationMessages).to.contain('The cluster has too many shards to be able to upgrade');
+      expect(deprecationMessages).to.contain(
+        'The cluster has too many shards to be able to upgrade'
+      );
     });
 
     it('renders the Kibana deprecations page', async () => {
