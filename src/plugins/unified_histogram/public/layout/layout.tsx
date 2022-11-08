@@ -126,7 +126,6 @@ export const UnifiedHistogramLayout = ({
   const showFixedPanels = isMobile || !chart || chart.hidden;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
-  const minTopPanelHeight = euiTheme.base * 11;
   const minMainPanelHeight = euiTheme.base * 10;
 
   const chartClassName =
@@ -180,7 +179,7 @@ export const UnifiedHistogramLayout = ({
         mode={panelsMode}
         resizeRef={resizeRef}
         topPanelHeight={currentTopPanelHeight}
-        minTopPanelHeight={minTopPanelHeight}
+        minTopPanelHeight={defaultTopPanelHeight}
         minMainPanelHeight={minMainPanelHeight}
         topPanel={<OutPortal node={topPanelNode} />}
         mainPanel={<OutPortal node={mainPanelNode} />}

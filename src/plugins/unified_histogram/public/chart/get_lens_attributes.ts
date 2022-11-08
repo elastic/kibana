@@ -91,7 +91,7 @@ export const getLensAttributes = ({
             columnId: 'count_column',
           },
           orderDirection: 'desc',
-          otherBucket: false,
+          otherBucket: true,
           missingBucket: false,
           parentFormat: {
             id: 'terms',
