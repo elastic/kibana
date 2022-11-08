@@ -9,6 +9,7 @@ import { Route, Switch } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
@@ -32,7 +33,6 @@ import { ResourceFindings } from './resource_findings/resource_findings_containe
 import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY } from '../../../../common/constants';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 const getDefaultQuery = ({
   query,

@@ -7,6 +7,7 @@
 import React from 'react';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
@@ -16,7 +17,6 @@ import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 export const Findings = () => {
   const location = useLocation();
