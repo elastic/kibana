@@ -57,6 +57,11 @@ import {
   FetchMlInferencePipelinesResponse,
 } from '../../../../api/pipelines/fetch_ml_inference_pipelines';
 import {
+  SimulateExistingMlInterfacePipelineApiLogic,
+  SimulateExistingMlInterfacePipelineArgs,
+  SimulateExistingMlInterfacePipelineResponse,
+} from '../../../../api/pipelines/simulate_existing_ml_inference_pipeline';
+import {
   SimulateMlInterfacePipelineApiLogic,
   SimulateMlInterfacePipelineArgs,
   SimulateMlInterfacePipelineResponse,
@@ -73,7 +78,6 @@ import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from '
 
 import {
   validateInferencePipelineConfiguration,
-  EXISTING_PIPELINE_DISABLED_MODEL_REDACTED,
   EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD,
   EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS,
 } from './utils';
@@ -137,6 +141,10 @@ interface MLInferenceProcessorsActions {
     FetchMlInferencePipelinesArgs,
     FetchMlInferencePipelinesResponse
   >['makeRequest'];
+  makeSimulateExistingPipelineRequest: Actions<
+    SimulateExistingMlInterfacePipelineArgs,
+    SimulateExistingMlInterfacePipelineResponse
+  >['makeRequest'];
   makeSimulatePipelineRequest: Actions<
     SimulateMlInterfacePipelineArgs,
     SimulateMlInterfacePipelineResponse
@@ -157,11 +165,27 @@ interface MLInferenceProcessorsActions {
     simulateBody: string;
   };
   setSimulatePipelineErrors(errors: string[]): { errors: string[] };
+  simulateExistingPipelineApiError: Actions<
+    SimulateExistingMlInterfacePipelineArgs,
+    SimulateExistingMlInterfacePipelineResponse
+  >['apiError'];
+  simulateExistingPipelineApiReset: Actions<
+    SimulateExistingMlInterfacePipelineArgs,
+    SimulateExistingMlInterfacePipelineResponse
+  >['apiReset'];
+  simulateExistingPipelineApiSuccess: Actions<
+    SimulateExistingMlInterfacePipelineArgs,
+    SimulateExistingMlInterfacePipelineResponse
+  >['apiSuccess'];
   simulatePipeline: () => void;
   simulatePipelineApiError: Actions<
     SimulateMlInterfacePipelineArgs,
     SimulateMlInterfacePipelineResponse
   >['apiError'];
+  simulatePipelineApiReset: Actions<
+    SimulateMlInterfacePipelineArgs,
+    SimulateMlInterfacePipelineResponse
+  >['apiReset'];
   simulatePipelineApiSuccess: Actions<
     SimulateMlInterfacePipelineArgs,
     SimulateMlInterfacePipelineResponse
@@ -190,6 +214,8 @@ export interface MLInferenceProcessorsValues {
   mlInferencePipelinesData: FetchMlInferencePipelinesResponse | undefined;
   mlModelsData: TrainedModelConfigResponse[] | undefined;
   mlModelsStatus: Status;
+  simulateExistingPipelineData: typeof SimulateExistingMlInterfacePipelineApiLogic.values.data;
+  simulateExistingPipelineStatus: Status;
   simulatePipelineData: typeof SimulateMlInterfacePipelineApiLogic.values.data;
   simulatePipelineErrors: string[];
   simulatePipelineResult: IngestSimulateResponse | undefined;
@@ -226,11 +252,19 @@ export const MLInferenceLogic = kea<
       ['makeRequest as makeMappingRequest', 'apiError as mappingsApiError'],
       MLModelsApiLogic,
       ['makeRequest as makeMLModelsRequest', 'apiError as mlModelsApiError'],
+      SimulateExistingMlInterfacePipelineApiLogic,
+      [
+        'makeRequest as makeSimulateExistingPipelineRequest',
+        'apiSuccess as simulateExistingPipelineApiSuccess',
+        'apiError as simulateExistingPipelineApiError',
+        'apiReset as simulateExistingPipelineApiReset',
+      ],
       SimulateMlInterfacePipelineApiLogic,
       [
         'makeRequest as makeSimulatePipelineRequest',
         'apiSuccess as simulatePipelineApiSuccess',
         'apiError as simulatePipelineApiError',
+        'apiReset as simulatePipelineApiReset',
       ],
       CreateMlInferencePipelineApiLogic,
       [
@@ -254,6 +288,8 @@ export const MLInferenceLogic = kea<
       ['data as mappingData', 'status as mappingStatus'],
       MLModelsApiLogic,
       ['data as mlModelsData', 'status as mlModelsStatus'],
+      SimulateExistingMlInterfacePipelineApiLogic,
+      ['data as simulateExistingPipelineData', 'status as simulateExistingPipelineStatus'],
       SimulateMlInterfacePipelineApiLogic,
       ['data as simulatePipelineData', 'status as simulatePipelineStatus'],
       FetchMlInferencePipelineProcessorsApiLogic,
@@ -312,11 +348,22 @@ export const MLInferenceLogic = kea<
     simulatePipeline: () => {
       if (values.mlInferencePipeline) {
         actions.setSimulatePipelineErrors([]);
-        actions.makeSimulatePipelineRequest({
-          docs: values.addInferencePipelineModal.simulateBody,
-          indexName: values.addInferencePipelineModal.indexName,
-          pipeline: values.mlInferencePipeline,
-        });
+        actions.simulateExistingPipelineApiReset();
+        actions.simulatePipelineApiReset();
+        const { configuration } = values.addInferencePipelineModal;
+        if (configuration.existingPipeline) {
+          actions.makeSimulateExistingPipelineRequest({
+            docs: values.addInferencePipelineModal.simulateBody,
+            indexName: values.addInferencePipelineModal.indexName,
+            pipelineName: configuration.pipelineName,
+          });
+        } else {
+          actions.makeSimulatePipelineRequest({
+            docs: values.addInferencePipelineModal.simulateBody,
+            indexName: values.addInferencePipelineModal.indexName,
+            pipeline: values.mlInferencePipeline,
+          });
+        }
       }
     },
   }),
@@ -374,6 +421,7 @@ export const MLInferenceLogic = kea<
       {
         setSimulatePipelineErrors: (_, { errors }) => errors,
         simulatePipelineApiError: (_, error) => getErrorsFromHttpResponse(error),
+        simulateExistingPipelineApiError: (_, error) => getErrorsFromHttpResponse(error),
       },
     ],
   },
@@ -430,10 +478,21 @@ export const MLInferenceLogic = kea<
       },
     ],
     simulatePipelineResult: [
-      () => [selectors.simulatePipelineStatus, selectors.simulatePipelineData],
-      (status: Status, simulateResult: IngestSimulateResponse | undefined) => {
-        if (status !== Status.SUCCESS) return undefined;
-        return simulateResult;
+      () => [
+        selectors.simulatePipelineStatus,
+        selectors.simulatePipelineData,
+        selectors.simulateExistingPipelineStatus,
+        selectors.simulateExistingPipelineData,
+      ],
+      (
+        status: Status,
+        simulateResult: IngestSimulateResponse | undefined,
+        exStatus: Status,
+        exSimulateResult: IngestSimulateResponse | undefined
+      ) => {
+        if (exStatus === Status.SUCCESS) return exSimulateResult;
+        if (status === Status.SUCCESS) return simulateResult;
+        return undefined;
       },
     ],
     sourceFields: [
@@ -506,9 +565,6 @@ export const MLInferenceLogic = kea<
             } else if (indexProcessorNames.includes(pipelineName)) {
               disabled = true;
               disabledReason = EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS;
-            } else if (pipelineParams.model_id.length === 0) {
-              disabled = true;
-              disabledReason = EXISTING_PIPELINE_DISABLED_MODEL_REDACTED;
             }
             const mlModel = supportedMLModels.find((model) => model.model_id === modelId);
             const modelType = mlModel ? getMLType(getMlModelTypesForModelConfig(mlModel)) : '';
