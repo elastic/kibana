@@ -23,10 +23,10 @@ import React, {
 import { EuiButton, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { chain } from 'lodash';
 import {
   AlertTypeCount,
   Process,
-  ProcessEvent,
   ProcessEventAlertCategory,
 } from '../../../common/types/process_tree';
 import { dataOrDash } from '../../utils/data_or_dash';
@@ -132,18 +132,14 @@ export function ProcessTreeNode({
   });
 
   const alertTypeCounts = useMemo(() => {
-    const alertCounts: AlertTypeCount[] = [];
-    alerts?.forEach((alert: ProcessEvent, i) => {
-      const category = alert.event?.category?.[0] as ProcessEventAlertCategory;
-      if (alertCounts.some((alertItem) => alertItem.category === category)) return;
-      alertCounts.push({
-        category,
-        count:
-          alerts?.filter(
-            (processEventAlert: ProcessEvent) => processEventAlert.event?.category?.[0] === category
-          )?.length ?? 0,
-      });
-    });
+    const alertCounts: AlertTypeCount[] = chain(alerts)
+      .groupBy((alert) => alert.event?.category?.[0])
+      .map((processAlerts, alertCategory) => ({
+        category: alertCategory as ProcessEventAlertCategory,
+        count: processAlerts.length,
+      }))
+      .value();
+
     return alertCounts;
   }, [alerts]);
 

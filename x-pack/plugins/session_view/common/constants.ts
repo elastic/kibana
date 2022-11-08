@@ -73,3 +73,4 @@ export const ALERT_ICONS: { [key: string]: string } = {
   network: 'globe',
 };
 export const DEFAULT_ALERT_FILTER_VALUE = 'all';
+export const ALERT = 'alert';

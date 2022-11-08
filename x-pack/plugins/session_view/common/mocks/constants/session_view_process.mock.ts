@@ -805,7 +805,7 @@ export const mockAlerts: ProcessEvent[] = [
           },
         },
       },
-      name: 'touch',
+      name: 'vi',
       args_count: 2,
       args: ['vi', 'cmd/config.ini'],
       working_directory: '/home/vagrant',

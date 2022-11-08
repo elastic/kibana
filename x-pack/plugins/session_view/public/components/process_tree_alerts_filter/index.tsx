@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import * as i18n from './translations';
 import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
 import {
   ProcessEventAlertCategory,
@@ -88,7 +89,9 @@ export const ProcessTreeAlertsFilter = ({
       iconSide="right"
       onClick={onButtonClick}
     >
-      <EuiText size="s">View: {selectedProcessEventAlertCategory} alerts </EuiText>
+      <EuiText size="s">
+        {i18n.SELECTED_ALERT_CATEGORY_TEXT(selectedProcessEventAlertCategory)}
+      </EuiText>
     </EuiButtonEmpty>
   );
 
@@ -107,7 +110,7 @@ export const ProcessTreeAlertsFilter = ({
             icon={getIconType(processEventAlertCategory)}
             onClick={onSelectedProcessEventAlertCategory}
           >
-            View {processEventAlertCategory} alerts
+            {i18n.FILTER_MENU_ITEM_TEXT(processEventAlertCategory)}
           </EuiContextMenuItem>
         );
       });
@@ -119,7 +122,7 @@ export const ProcessTreeAlertsFilter = ({
         icon={getIconType(DEFAULT_ALERT_FILTER_VALUE)}
         onClick={onSelectedProcessEventAlertCategory}
       >
-        View {DEFAULT_ALERT_FILTER_VALUE} alerts
+        {i18n.FILTER_MENU_ITEM_DEFAULT_TEXT(DEFAULT_ALERT_FILTER_VALUE)}
       </EuiContextMenuItem>,
       ...alertEventFilterMenuItems,
     ];

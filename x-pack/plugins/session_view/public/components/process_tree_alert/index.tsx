@@ -17,7 +17,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
-import { ALERT_ICONS } from '../../../common/constants';
+import { ALERT, ALERT_ICONS } from '../../../common/constants';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
@@ -98,7 +98,7 @@ export const ProcessTreeAlert = ({
           <EuiToolTip
             position="top"
             content={`${capitalize(processEventAlertCategory)} ${
-              capitalize(processEventAlertCategory) !== 'alert' ? 'alert' : ''
+              capitalize(processEventAlertCategory) !== ALERT ? ALERT : ''
             }`}
           >
             <EuiIcon type={alertIconType} color="danger" />

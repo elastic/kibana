@@ -19,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
-import { ALERT_ICONS } from '../../../common/constants';
+import { ALERT, ALERT_ICONS } from '../../../common/constants';
 import { ProcessEvent, ProcessEventAlertCategory } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
@@ -66,10 +66,10 @@ export const DetailPanelAlertListItem = ({
   const { event: processEvent } = event;
   const forceState = !isInvestigated ? 'open' : undefined;
   const category = processEvent?.category?.[0];
-  const processEventAlertCategory = category ?? 'alert';
+  const processEventAlertCategory = category ?? ALERT;
   const alertCategoryDetailDisplayText =
     category !== ProcessEventAlertCategory.process
-      ? `${processName} ${getAlertCategoryDisplayText(event, category)}`
+      ? `${dataOrDash(processName)} ${getAlertCategoryDisplayText(event, category)}`
       : dataOrDash(args?.join(' '));
 
   return minimal ? (
@@ -114,7 +114,7 @@ export const DetailPanelAlertListItem = ({
             <EuiToolTip
               position="top"
               content={`${capitalize(processEventAlertCategory)} ${
-                capitalize(processEventAlertCategory) !== 'alert' ? 'alert' : ''
+                capitalize(processEventAlertCategory) !== ALERT ? ALERT : ''
               }`}
             >
               <EuiIcon
