@@ -28,7 +28,7 @@ interface Props {
   error?: Error;
   loading: boolean;
   showStepNumber: boolean;
-  compressed: boolean;
+  compressed?: boolean;
 }
 
 export function isStepEnd(step: JourneyStep) {
