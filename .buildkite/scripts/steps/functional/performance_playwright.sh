@@ -52,6 +52,11 @@ fi
 # track failed journeys here which might get written to metadata
 failedJourneys=()
 
+echo "--- Stop bazel(kibana) process"
+bazelPid=(pgrep "bazel(kibana)")
+echo "bazelPid=$bazelPid"
+killall -SIGKILL "$bazelPid" || true
+
 echo "--- 🔎 Start es"
 
 node scripts/es snapshot&
@@ -79,7 +84,15 @@ node scripts/functional_tests \
   --debug \
   --bail
 
-killall -SIGKILL node || true
+echo "--- Check running processes: top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'"
+top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
+end=$((SECONDS+10))
+while [ $SECONDS -lt $end ]; do
+  killall -SIGKILL node || true
+  killall -SIGKILL chrome || true
+done
+echo "Re-check running processes: top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'"
+top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
 
 journey="x-pack/performance/journeys/data_stress_test_lens.ts"
 for ((i=1;i<=20;i++)); do
@@ -94,7 +107,15 @@ for ((i=1;i<=20;i++)); do
       --debug \
       --bail
 
-    killall -SIGKILL node || true
+    echo "--- Check running processes: top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'"
+    top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
+    end=$((SECONDS+10))
+    while [ $SECONDS -lt $end ]; do
+      killall -SIGKILL node || true
+      killall -SIGKILL chrome || true
+    done
+    echo "Re-check running processes: top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'"
+    top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
 done
 
 echo "--- 🔎 Shutdown ES"
