@@ -903,6 +903,13 @@ describe('SearchSource', () => {
       expect(Object.keys(JSON.parse(searchSourceJSON))).toEqual(['highlightAll', 'from', 'sort']);
     });
 
+    test('should add pit', () => {
+      const pit = { id: 'flimflam', keep_alive: '1m' };
+      searchSource.setField('pit', pit);
+      const { searchSourceJSON } = searchSource.serialize();
+      expect(searchSourceJSON).toBe(JSON.stringify({ pit }));
+    });
+
     test('should serialize filters', () => {
       const filter = [
         {
