@@ -53,7 +53,7 @@ describe('update', () => {
     });
 
     it('does not notify if the case does not exist', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       await expect(
         update(
@@ -71,9 +71,13 @@ describe('update', () => {
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"not-exists","version":"123"}]: Error: These cases not-exists do not exist. Please check you have the correct ids.'
       );
+
+      expect(clientArgs.services.notificationService.bulkNotifyAssignees).not.toHaveBeenCalled();
     });
 
     it('does not notify if the case is patched with the same assignee', async () => {
+      expect.assertions(2);
+
       clientArgs.services.caseService.getCases.mockResolvedValue({
         saved_objects: [
           {
@@ -86,6 +90,8 @@ describe('update', () => {
       await expect(update(cases, clientArgs)).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: All update fields are identical to current version.'
       );
+
+      expect(clientArgs.services.notificationService.bulkNotifyAssignees).not.toHaveBeenCalled();
     });
 
     it('notifies only new users', async () => {
@@ -161,7 +167,8 @@ describe('update', () => {
         clientArgs
       );
 
-      expect(clientArgs.services.notificationService.bulkNotifyAssignees).not.toHaveBeenCalled();
+      expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledWith([]);
+      expect(clientArgs.services.notificationService.notifyAssignees).not.toHaveBeenCalled();
     });
 
     it('does not notify the current user', async () => {
@@ -239,7 +246,8 @@ describe('update', () => {
        * Current user is filtered out. Assignee with uid=1 should not be
        * notified because it was already assigned to the case.
        */
-      expect(clientArgs.services.notificationService.bulkNotifyAssignees).not.toHaveBeenCalled();
+      expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledWith([]);
+      expect(clientArgs.services.notificationService.notifyAssignees).not.toHaveBeenCalled();
     });
   });
 });

@@ -458,9 +458,7 @@ export const update = async (
       user
     );
 
-    if (casesAndAssigneesToNotifyForAssignment.length > 0) {
-      await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
-    }
+    await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
     return CasesResponseRt.encode(returnUpdatedCase);
   } catch (error) {
@@ -528,7 +526,9 @@ const getCasesAndAssigneesToNotifyForAssignment = (
   casesMap: Map<string, CaseSavedObject>,
   user: CasesClientArgs['user']
 ) => {
-  return updatedCases.saved_objects.reduce((acc, updatedCase) => {
+  return updatedCases.saved_objects.reduce<
+    Array<{ assignees: CaseAssignees; theCase: CaseSavedObject }>
+  >((acc, updatedCase) => {
     const originalCaseSO = casesMap.get(updatedCase.id);
 
     if (!originalCaseSO) {
@@ -552,7 +552,7 @@ const getCasesAndAssigneesToNotifyForAssignment = (
     }
 
     return acc;
-  }, [] as Array<{ assignees: CaseAssignees; theCase: CaseSavedObject }>);
+  }, []);
 };
 
 const mergeOriginalSOWithUpdatedSO = (

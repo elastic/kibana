@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { createCasesClientMockArgs } from '../../client/mocks';
 import { userProfiles } from '../../client/user_profiles.mock';
 import { mockCases } from '../../mocks';
@@ -12,23 +13,16 @@ import { EmailNotificationService } from './email_notification_service';
 
 describe('EmailNotificationService', () => {
   const clientArgs = createCasesClientMockArgs();
-  const sendPlainTextEmail = jest.fn();
-  const isEmailServiceAvailable = jest.fn();
   const caseSO = mockCases[0];
   const assignees = userProfiles.map((userProfile) => ({ uid: userProfile.uid }));
 
-  const notifications = {
-    isEmailServiceAvailable,
-    getEmailService: () => ({
-      sendPlainTextEmail,
-    }),
-  };
+  const notifications = notificationsMock.createStart();
 
   let emailNotificationService: EmailNotificationService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    isEmailServiceAvailable.mockReturnValue(true);
+    notifications.isEmailServiceAvailable.mockReturnValue(true);
     clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue(userProfiles);
 
     emailNotificationService = new EmailNotificationService({
@@ -45,7 +39,7 @@ describe('EmailNotificationService', () => {
       theCase: caseSO,
     });
 
-    expect(sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -56,7 +50,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You got assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View case](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
       subject: '[Elastic] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -68,7 +62,7 @@ describe('EmailNotificationService', () => {
       theCase: caseSO,
     });
 
-    expect(sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -79,7 +73,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You got assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View case](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
       subject: '[Elastic] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -92,11 +86,11 @@ describe('EmailNotificationService', () => {
     ]);
 
     await emailNotificationService.notifyAssignees({
-      assignees: [...assignees, { uid: assignees[0].uid }],
+      assignees,
       theCase: caseSO,
     });
 
-    expect(sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -107,7 +101,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You got assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View case](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
       subject: '[Elastic] Super Bad Security Issue',
       to: ['physical_dinosaur@elastic.co'],
     });
@@ -119,7 +113,7 @@ describe('EmailNotificationService', () => {
       theCase: { ...caseSO, namespaces: ['space1'] },
     });
 
-    expect(sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -130,7 +124,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You got assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View case](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
       subject: '[Elastic] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -148,7 +142,7 @@ describe('EmailNotificationService', () => {
       theCase: caseSO,
     });
 
-    expect(sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -159,14 +153,14 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You got assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n',
+        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n',
       subject: '[Elastic] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
   });
 
   it('logs a warning and not notify assignees when the email service is not available', async () => {
-    isEmailServiceAvailable.mockReturnValue(false);
+    notifications.isEmailServiceAvailable.mockReturnValue(false);
 
     await emailNotificationService.notifyAssignees({
       assignees,
@@ -176,7 +170,7 @@ describe('EmailNotificationService', () => {
     expect(clientArgs.logger.warn).toHaveBeenCalledWith(
       'Could not notifying assignees. Email service is not available.'
     );
-    expect(sendPlainTextEmail).not.toHaveBeenCalled();
+    expect(notifications.getEmailService().sendPlainTextEmail).not.toHaveBeenCalled();
   });
 
   it('logs a warning and not notify assignees on error', async () => {
@@ -192,6 +186,6 @@ describe('EmailNotificationService', () => {
     expect(clientArgs.logger.warn).toHaveBeenCalledWith(
       'Error notifying assignees: Cannot get user profiles'
     );
-    expect(sendPlainTextEmail).not.toHaveBeenCalled();
+    expect(notifications.getEmailService().sendPlainTextEmail).not.toHaveBeenCalled();
   });
 });

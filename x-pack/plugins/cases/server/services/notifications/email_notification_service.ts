@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import type { IBasePath, Logger } from '@kbn/core/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileUserInfo } from '@kbn/user-profile-components';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CaseSavedObject } from '../../common/types';
 import { getCaseViewPath } from '../../common/utils';
 import type { NotificationService, NotifyArgs } from './types';
@@ -41,38 +42,38 @@ export class EmailNotificationService implements NotificationService {
     this.publicBaseUrl = publicBaseUrl;
   }
 
-  private getTitle(theCase: CaseSavedObject) {
+  private static getTitle(theCase: CaseSavedObject) {
     return `[Elastic] ${theCase.attributes.title}`;
   }
 
-  private getMessage(theCase: CaseSavedObject) {
+  private static getMessage(theCase: CaseSavedObject, publicBaseUrl?: IBasePath['publicBaseUrl']) {
     const lineBreak = '\r\n\r\n';
-    let message = `You got assigned to an Elastic Case.${lineBreak}`;
+    let message = `You are assigned to an Elastic Kibana Case.${lineBreak}`;
     message = `${message}Title: ${theCase.attributes.title}${lineBreak}`;
     message = `${message}Status: ${theCase.attributes.status}${lineBreak}`;
     message = `${message}Severity: ${theCase.attributes.severity}${lineBreak}`;
     message = `${message}Tags: ${theCase.attributes.tags.join(',')}${lineBreak}`;
 
-    if (this.publicBaseUrl) {
+    if (publicBaseUrl) {
       const caseUrl = getCaseViewPath({
-        publicBaseUrl: this.publicBaseUrl,
+        publicBaseUrl,
         caseId: theCase.id,
         owner: theCase.attributes.owner,
       });
 
-      message = `${message}${lineBreak}[View case](${caseUrl})`;
+      message = `${message}${lineBreak}[View the case details](${caseUrl})`;
     }
 
     return message;
   }
 
   public async notifyAssignees({ assignees, theCase }: NotifyArgs) {
-    if (!this.notifications.isEmailServiceAvailable()) {
-      this.logger.warn('Could not notifying assignees. Email service is not available.');
-      return;
-    }
-
     try {
+      if (!this.notifications.isEmailServiceAvailable()) {
+        this.logger.warn('Could not notifying assignees. Email service is not available.');
+        return;
+      }
+
       const uids = new Set(assignees.map((assignee) => assignee.uid));
       const userProfiles = await this.security.userProfiles.bulkGet({ uids });
       const users = userProfiles.map((profile) => profile.user);
@@ -81,8 +82,8 @@ export class EmailNotificationService implements NotificationService {
         .filter((user): user is UserProfileUserInfoWithEmail => user.email != null)
         .map((user) => user.email);
 
-      const subject = this.getTitle(theCase);
-      const message = this.getMessage(theCase);
+      const subject = EmailNotificationService.getTitle(theCase);
+      const message = EmailNotificationService.getMessage(theCase, this.publicBaseUrl);
 
       await this.notifications.getEmailService().sendPlainTextEmail({
         to,
@@ -111,8 +112,12 @@ export class EmailNotificationService implements NotificationService {
   }
 
   public async bulkNotifyAssignees(args: NotifyArgs[]) {
-    await Promise.all(
-      args.map(({ assignees, theCase }) => this.notifyAssignees({ assignees, theCase }))
-    );
+    if (args.length === 0) {
+      return;
+    }
+
+    await pMap(args, this.notifyAssignees, {
+      concurrency: MAX_CONCURRENT_SEARCHES,
+    });
   }
 }
