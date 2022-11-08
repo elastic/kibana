@@ -12,41 +12,51 @@ import {
 import { AlertStatus } from '../../../../../common/typings';
 import { ALL_ALERTS } from '../constants';
 
-interface AlertsPageContainerState {
+interface AlertSearchBarContainerState {
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
   status: AlertStatus;
 }
 
-interface AlertsPageStateTransitions {
+interface AlertSearchBarStateTransitions {
   setRangeFrom: (
-    state: AlertsPageContainerState
-  ) => (rangeFrom: string) => AlertsPageContainerState;
-  setRangeTo: (state: AlertsPageContainerState) => (rangeTo: string) => AlertsPageContainerState;
-  setKuery: (state: AlertsPageContainerState) => (kuery: string) => AlertsPageContainerState;
-  setStatus: (state: AlertsPageContainerState) => (status: AlertStatus) => AlertsPageContainerState;
+    state: AlertSearchBarContainerState
+  ) => (rangeFrom: string) => AlertSearchBarContainerState;
+  setRangeTo: (
+    state: AlertSearchBarContainerState
+  ) => (rangeTo: string) => AlertSearchBarContainerState;
+  setKuery: (
+    state: AlertSearchBarContainerState
+  ) => (kuery: string) => AlertSearchBarContainerState;
+  setStatus: (
+    state: AlertSearchBarContainerState
+  ) => (status: AlertStatus) => AlertSearchBarContainerState;
 }
 
-const defaultState: AlertsPageContainerState = {
+const defaultState: AlertSearchBarContainerState = {
   rangeFrom: 'now-15m',
   rangeTo: 'now',
   kuery: '',
   status: ALL_ALERTS.status as AlertStatus,
 };
 
-const transitions: AlertsPageStateTransitions = {
+const transitions: AlertSearchBarStateTransitions = {
   setRangeFrom: (state) => (rangeFrom) => ({ ...state, rangeFrom }),
   setRangeTo: (state) => (rangeTo) => ({ ...state, rangeTo }),
   setKuery: (state) => (kuery) => ({ ...state, kuery }),
   setStatus: (state) => (status) => ({ ...state, status }),
 };
 
-const alertsPageStateContainer = createStateContainer(defaultState, transitions);
+const alertSearchBarStateContainer = createStateContainer(defaultState, transitions);
 
-type AlertsPageStateContainer = typeof alertsPageStateContainer;
+type AlertSearchBarStateContainer = typeof alertSearchBarStateContainer;
 
-const { Provider, useContainer } = createStateContainerReactHelpers<AlertsPageStateContainer>();
+const { Provider, useContainer } = createStateContainerReactHelpers<AlertSearchBarStateContainer>();
 
-export { Provider, alertsPageStateContainer, useContainer, defaultState };
-export type { AlertsPageStateContainer, AlertsPageContainerState, AlertsPageStateTransitions };
+export { Provider, alertSearchBarStateContainer, useContainer, defaultState };
+export type {
+  AlertSearchBarStateContainer,
+  AlertSearchBarContainerState,
+  AlertSearchBarStateTransitions,
+};

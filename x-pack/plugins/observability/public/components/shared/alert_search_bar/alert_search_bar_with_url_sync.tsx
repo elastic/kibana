@@ -6,13 +6,24 @@
  */
 
 import React from 'react';
-import { alertsPageStateContainer, Provider } from './containers';
-import { AlertSearchBar, AlertSearchBarProps } from './alert_search_bar';
+import {
+  alertSearchBarStateContainer,
+  Provider,
+  useAlertSearchBarStateContainer,
+} from './containers';
+import { AlertSearchBar } from './alert_search_bar';
+import { AlertSearchBarProps } from './types';
+
+function InternalAlertSearchbarWithUrlSync(props: AlertSearchBarProps) {
+  const stateProps = useAlertSearchBarStateContainer();
+
+  return <AlertSearchBar {...props} {...stateProps} />;
+}
 
 export function AlertSearchbarWithUrlSync(props: AlertSearchBarProps) {
   return (
-    <Provider value={alertsPageStateContainer}>
-      <AlertSearchBar {...props} />
+    <Provider value={alertSearchBarStateContainer}>
+      <InternalAlertSearchbarWithUrlSync {...props} />
     </Provider>
   );
 }

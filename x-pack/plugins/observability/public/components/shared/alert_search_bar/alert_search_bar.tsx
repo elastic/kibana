@@ -8,13 +8,13 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import React, { useCallback, useEffect } from 'react';
-import { Query, BoolQuery } from '@kbn/es-query';
+import { Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { observabilityAlertFeatureIds } from '../../../config';
 import { ObservabilityAppServices } from '../../../application/types';
-import { useAlertSearchBarStateContainer } from './containers';
 import { AlertsStatusFilter } from './components';
-import { ALERT_STATUS_QUERY } from './constants';
+import { ALERT_STATUS_QUERY, DEFAULT_QUERIES } from './constants';
+import { AlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../../utils/build_es_query';
 import { AlertStatus } from '../../../../common/typings';
 
@@ -22,16 +22,16 @@ const getAlertStatusQuery = (status: string): Query[] => {
   return status ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }] : [];
 };
 
-const DEFAULT_QUERIES: Query[] = [];
-
-export interface AlertSearchBarProps {
-  appName: string;
-  setEsQuery: (query: { bool: BoolQuery }) => void;
-  queries?: Query[];
-}
-
 export function AlertSearchBar({
   appName,
+  rangeFrom,
+  setRangeFrom,
+  rangeTo,
+  setRangeTo,
+  kuery,
+  setKuery,
+  status,
+  setStatus,
   setEsQuery,
   queries = DEFAULT_QUERIES,
 }: AlertSearchBarProps) {
@@ -43,9 +43,6 @@ export function AlertSearchBar({
     },
     triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
   } = useKibana<ObservabilityAppServices>().services;
-
-  const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, status, setStatus } =
-    useAlertSearchBarStateContainer();
 
   const onStatusChange = useCallback(
     (alertStatus: AlertStatus) => {

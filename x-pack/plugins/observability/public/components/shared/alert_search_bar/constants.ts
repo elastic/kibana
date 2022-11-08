@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { AlertStatusFilter } from '../../../../common/typings';
+
+export const DEFAULT_QUERIES: Query[] = [];
 
 export const ALL_ALERTS: AlertStatusFilter = {
   status: '',
