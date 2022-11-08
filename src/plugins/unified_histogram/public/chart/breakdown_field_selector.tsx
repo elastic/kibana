@@ -52,6 +52,7 @@ export const BreakdownFieldSelector = ({
 
   return (
     <EuiComboBox
+      data-test-subj="unifiedHistogramBreakdownFieldSelector"
       prepend={i18n.translate('unifiedHistogram.breakdownFieldSelectorLabel', {
         defaultMessage: 'Break down by',
       })}

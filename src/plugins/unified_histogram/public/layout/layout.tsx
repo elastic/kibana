@@ -84,7 +84,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Callback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status
    * and {@link UnifiedHistogramHitsContext.total} to totalHits
    */
-  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, totalHits?: number) => void;
+  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   /**
    * Called when the histogram loading status changes
    */

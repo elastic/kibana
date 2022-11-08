@@ -40,7 +40,7 @@ export interface HistogramProps {
   filters: Filter[];
   query: Query | AggregateQuery;
   timeRange: TimeRange;
-  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, totalHits?: number) => void;
+  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
 }
 

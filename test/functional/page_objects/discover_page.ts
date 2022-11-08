@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
@@ -25,6 +26,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
+  private readonly comboBox = this.ctx.getService('comboBox');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -200,6 +202,22 @@ export class DiscoverPageObject extends FtrService {
       { location: el, offset: { x: -300, y: 20 } },
       { location: el, offset: { x: -100, y: 30 } }
     );
+  }
+
+  public async chooseBreakdownField(field: string) {
+    await this.comboBox.set('unifiedHistogramBreakdownFieldSelector', field);
+  }
+
+  public async getHistogramLegendList() {
+    const unifiedHistogram = await this.testSubjects.find('unifiedHistogramChart');
+    const list = await unifiedHistogram.findAllByClassName('echLegendItem__label');
+    return Promise.all(list.map((elem: WebElementWrapper) => elem.getVisibleText()));
+  }
+
+  public async clickLegendFilter(field: string, type: '+' | '-') {
+    const filterType = type === '+' ? 'filterIn' : 'filterOut';
+    await this.testSubjects.click(`legend-${field}`);
+    await this.testSubjects.click(`legend-${field}-${filterType}`);
   }
 
   public async getCurrentQueryName() {
