@@ -7,4 +7,11 @@
 
 export interface MonitorOverviewPageState {
   perPage: number;
+  sortOrder: 'asc' | 'desc';
+  sortField: string;
 }
+
+export type MonitorOverviewFlyoutConfig = {
+  monitorId: string;
+  location: string;
+} | null;
