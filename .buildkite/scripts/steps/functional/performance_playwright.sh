@@ -57,6 +57,13 @@ bazelPid=(pgrep -f bazel)
 echo "bazelPid=$bazelPid"
 killall -SIGKILL "$bazelPid" || true
 
+echo "--- Stopping all 'java' 'node' 'chrome' processes"
+killall -SIGKILL node || true
+killall -SIGKILL chrome || true
+killall -SIGKILL java || true
+sleep 5;
+top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
+
 echo "--- 🔎 Start es"
 
 node scripts/es snapshot&
@@ -84,16 +91,6 @@ node scripts/functional_tests \
   --debug \
   --bail
 
-echo "--- Check running processes: top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'"
-top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
-end=$((SECONDS+10))
-while [ $SECONDS -lt $end ]; do
-  killall -SIGKILL node || true
-  killall -SIGKILL chrome || true
-done
-echo "Re-check running processes: top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'"
-top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
-
 journey="x-pack/performance/journeys/data_stress_test_lens.ts"
 for ((i=1;i<=20;i++)); do
     echo "--- $journey - $i"
@@ -107,19 +104,13 @@ for ((i=1;i<=20;i++)); do
       --debug \
       --bail
 
+    killall -SIGKILL chrome || true
     echo "--- Check running processes: top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'"
-    top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
-    end=$((SECONDS+10))
-    while [ $SECONDS -lt $end ]; do
-      killall -SIGKILL node || true
-      killall -SIGKILL chrome || true
-    done
-    echo "Re-check running processes: top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'"
     top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
 done
 
 echo "--- 🔎 Shutdown ES"
-killall node
+top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
 echo "waiting for $esPid to exit gracefully";
 
 timeout=30 #seconds
