@@ -7,11 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-plugin/public';
-import { PolicyFromES } from '@kbn/index-lifecycle-management-plugin/common/types';
-import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { formatBytes } from '../../step_details_page/hooks/use_object_metrics';
-import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
-import { apiService } from '../../../../../utils/api_service';
+import { getIlmPolicies, getIndicesData } from './api';
 
 const policyLabels = [
   {
@@ -89,15 +86,7 @@ const formatAge = (age?: string) => {
   }
   const [value] = age.split('d');
   return i18n.translate('xpack.synthetics.settingsRoute.table.retentionPeriodValue', {
-    defaultMessage: '{value} days -> rollover',
+    defaultMessage: '{value} days + rollover',
     values: { value },
   });
-};
-
-export const getIlmPolicies = async (): Promise<PolicyFromES[]> => {
-  return await apiService.get('/api/index_lifecycle_management/policies');
-};
-
-export const getIndicesData = async (): Promise<{ data: CatIndicesResponse }> => {
-  return await apiService.get(SYNTHETICS_API_URLS.INDEX_SIZE);
 };
