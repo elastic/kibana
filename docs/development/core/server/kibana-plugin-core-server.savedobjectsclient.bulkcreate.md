@@ -16,10 +16,10 @@ bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>Array&lt;SavedObjectsBulkCreateObject&lt;T&gt;&gt;</code> |  |
-|  options | <code>SavedObjectsCreateOptions</code> |  |
+|  objects | Array&lt;SavedObjectsBulkCreateObject&lt;T&gt;&gt; |  |
+|  options | SavedObjectsCreateOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsBulkResponse<T>>`
+Promise&lt;SavedObjectsBulkResponse&lt;T&gt;&gt;
 

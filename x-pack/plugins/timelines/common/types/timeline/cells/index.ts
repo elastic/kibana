@@ -23,6 +23,7 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   globalFilters?: Filter[];
   header: ColumnHeaderOptions;
   isDraggable: boolean;
+  isTimeline?: boolean; // Default cell renderer is used for both the alert table and timeline. This allows us to cheaply separate concerns
   linkValues: string[] | undefined;
   rowRenderers?: RowRenderer[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

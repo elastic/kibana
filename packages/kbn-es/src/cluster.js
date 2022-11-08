@@ -18,7 +18,7 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
-const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD, extract } = require('@kbn/dev-utils');
+const { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } = require('@kbn/dev-utils');
 const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
@@ -181,6 +181,25 @@ exports.Cluster = class Cluster {
         throw createCliError('ES exited without starting');
       }),
     ]);
+
+    if (options.onEarlyExit) {
+      this._outcome
+        .then(
+          () => {
+            if (!this._stopCalled) {
+              options.onEarlyExit(`ES exitted unexpectedly`);
+            }
+          },
+          (error) => {
+            if (!this._stopCalled) {
+              options.onEarlyExit(`ES exitted unexpectedly: ${error.stack}`);
+            }
+          }
+        )
+        .catch((error) => {
+          throw new Error(`failure handling early exit: ${error.stack}`);
+        });
+    }
   }
 
   /**
@@ -252,14 +271,16 @@ exports.Cluster = class Cluster {
     const esArgs = [
       'action.destructive_requires_name=true',
       'ingest.geoip.downloader.enabled=false',
+      'cluster.routing.allocation.disk.threshold_enabled=false',
     ].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
-      esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+      esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_NOPASSWORD_P12_PATH}`);
       esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
-      esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
+      // We are explicitly using ES_NOPASSWORD_P12_PATH instead of ES_P12_PATH + ES_P12_PASSWORD. The reasoning for this is that setting
+      // the keystore password using environment variables causes Elasticsearch to emit deprecation warnings.
     }
 
     const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {

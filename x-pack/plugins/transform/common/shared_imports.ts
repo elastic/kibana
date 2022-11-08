@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+export type { ChartData } from '../../ml/common';
 export {
   composeValidators,
   isPopulatedObject,
   isRuntimeMappings,
   patternValidator,
-  ChartData,
+  isRuntimeField,
 } from '../../ml/common';
 
 export { RUNTIME_FIELD_TYPES } from '../../../../src/plugins/data/common';

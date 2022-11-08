@@ -9,18 +9,16 @@
 import { IRouter } from '../../../http';
 import { catchAndReturnBoomErrors } from '../utils';
 import { deleteUnknownTypeObjects } from '../../deprecations';
-import { SavedObjectConfig } from '../../saved_objects_config';
 import { KibanaConfigType } from '../../../kibana_config';
 
 interface RouteDependencies {
-  config: SavedObjectConfig;
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
 }
 
 export const registerDeleteUnknownTypesRoute = (
   router: IRouter,
-  { config, kibanaConfig, kibanaVersion }: RouteDependencies
+  { kibanaConfig, kibanaVersion }: RouteDependencies
 ) => {
   router.post(
     {
@@ -31,7 +29,6 @@ export const registerDeleteUnknownTypesRoute = (
       await deleteUnknownTypeObjects({
         esClient: context.core.elasticsearch.client,
         typeRegistry: context.core.savedObjects.typeRegistry,
-        savedObjectsConfig: config,
         kibanaConfig,
         kibanaVersion,
       });

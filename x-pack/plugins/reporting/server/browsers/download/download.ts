@@ -49,6 +49,8 @@ export async function download(
           resolve();
         });
     });
+  } catch (err) {
+    throw new Error(`Unable to download ${url}: ${err}`);
   } finally {
     closeSync(handle);
   }

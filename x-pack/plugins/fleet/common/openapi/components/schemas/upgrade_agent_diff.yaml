@@ -1,0 +1,6 @@
+title: Package policy Upgrade dryrun
+type: array
+items:
+  type: array
+  items:
+    $ref: ./full_agent_policy_input.yaml

@@ -66,6 +66,12 @@ export interface EndpointActionData {
   comment?: string;
 }
 
+export interface FleetActionResponseData {
+  endpoint?: {
+    ack?: boolean;
+  };
+}
+
 export interface EndpointAction {
   action_id: string;
   '@timestamp': string;
@@ -92,6 +98,8 @@ export interface EndpointActionResponse {
   completed_at: string;
   error?: string;
   action_data: EndpointActionData;
+  /* Response data from the Endpoint process -- only present in 7.16+ */
+  action_response?: FleetActionResponseData;
 }
 
 export interface EndpointActivityLogAction {

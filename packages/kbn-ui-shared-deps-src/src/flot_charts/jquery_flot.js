@@ -351,7 +351,7 @@ Licensed under the MIT license.
 
 		if (info == null) {
 
-			var element = $("<div></div>").html(text)
+			var element = $("<div></div>").text(text)
 				.css({
 					position: "absolute",
 					'max-width': width,

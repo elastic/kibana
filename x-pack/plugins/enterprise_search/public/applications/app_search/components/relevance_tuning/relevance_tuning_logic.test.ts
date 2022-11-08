@@ -228,10 +228,10 @@ describe('RelevanceTuningLogic', () => {
       });
     });
 
-    describe('updatePrecision', () => {
+    describe('setPrecision', () => {
       it('should set precision inside search settings and set unsavedChanges to true', () => {
         mount();
-        RelevanceTuningLogic.actions.updatePrecision(9);
+        RelevanceTuningLogic.actions.setPrecision(9);
 
         expect(RelevanceTuningLogic.values).toEqual({
           ...DEFAULT_VALUES,
@@ -1007,15 +1007,24 @@ describe('RelevanceTuningLogic', () => {
       });
     });
 
-    describe('updateSearchValue', () => {
-      it('should update the query then update search results', () => {
+    describe('setSearchQuery', () => {
+      it('shoulds update search results', () => {
         mount();
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchQuery');
         jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
-        RelevanceTuningLogic.actions.updateSearchValue('foo');
+        RelevanceTuningLogic.actions.setSearchQuery('foo');
 
-        expect(RelevanceTuningLogic.actions.setSearchQuery).toHaveBeenCalledWith('foo');
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+      });
+    });
+
+    describe('setPrecision', () => {
+      it('shoulds update search results', () => {
+        mount();
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.setPrecision(9);
+
         expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
     });

@@ -19,6 +19,9 @@ import { dataPluginMock } from '../../../data/public/mocks';
 class SavedObjectNotFound extends Error {
   constructor(options: Record<string, any>) {
     super();
+
+    options.isSavedObjectNotFoundError = true;
+
     for (const option in options) {
       if (options.hasOwnProperty(option)) {
         (this as any)[option] = options[option];

@@ -35,7 +35,7 @@ fi
 
 name=kibana
 program=/usr/share/kibana/bin/kibana
-args="--logging.dest=/var/log/kibana/kibana.log"
+args="--logging.dest=/var/log/kibana/kibana.log --deprecation.skip_deprecated_settings[0]=logging.dest"
 pidfile="/var/run/kibana/$name.pid"
 
 [ -r /etc/default/$name ] && . /etc/default/$name

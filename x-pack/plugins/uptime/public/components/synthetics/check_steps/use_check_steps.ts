@@ -5,25 +5,34 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
-import { fetchJourneySteps } from '../../../state/api/journey';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppState } from '../../../state';
+import { getJourneySteps } from '../../../state/actions/journey';
 import { JourneyState } from '../../../state/reducers/journey';
 
 export const useCheckSteps = (): JourneyState => {
   const { checkGroupId } = useParams<{ checkGroupId: string }>();
+  const dispatch = useDispatch();
 
-  const { data, status, error } = useFetcher(() => {
-    return fetchJourneySteps({
-      checkGroup: checkGroupId,
-    });
-  }, [checkGroupId]);
+  useEffect(() => {
+    dispatch(
+      getJourneySteps({
+        checkGroup: checkGroupId,
+      })
+    );
+  }, [checkGroupId, dispatch]);
+
+  const checkGroup = useSelector((state: AppState) => {
+    return state.journeys[checkGroupId];
+  });
 
   return {
-    error,
     checkGroup: checkGroupId,
-    steps: data?.steps ?? [],
-    details: data?.details,
-    loading: status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING,
+    steps: checkGroup?.steps ?? [],
+    details: checkGroup?.details,
+    loading: checkGroup?.loading ?? false,
+    error: checkGroup?.error,
   };
 };

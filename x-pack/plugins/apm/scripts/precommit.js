@@ -80,7 +80,11 @@ const tasks = new Listr(
         ),
     },
   ],
-  { exitOnError: true, concurrent: false }
+  {
+    exitOnError: true,
+    concurrent: false,
+    renderer: process.env.CI ? 'verbose' : 'default',
+  }
 );
 
 tasks.run().catch((error) => {

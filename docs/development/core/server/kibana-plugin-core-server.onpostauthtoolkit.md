@@ -16,5 +16,5 @@ export interface OnPostAuthToolkit
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [next](./kibana-plugin-core-server.onpostauthtoolkit.next.md) | <code>() =&gt; OnPostAuthResult</code> | To pass request to the next handler |
+|  [next](./kibana-plugin-core-server.onpostauthtoolkit.next.md) | () =&gt; OnPostAuthResult | To pass request to the next handler |
 

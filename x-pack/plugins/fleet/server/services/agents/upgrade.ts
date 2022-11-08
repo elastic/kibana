@@ -9,7 +9,6 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 
 import type { Agent, AgentAction, AgentActionSOAttributes, BulkActionResult } from '../../types';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
-import { agentPolicyService } from '../../services';
 import {
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -28,6 +27,7 @@ import {
   getAgentPolicyForAgent,
 } from './crud';
 import { searchHitToAgent } from './helpers';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
 export async function sendUpgradeAgentAction({
   soClient,
@@ -114,26 +114,13 @@ export async function sendUpgradeAgentsActions(
     givenAgents = await getAgents(esClient, options);
   }
 
-  // get any policy ids from upgradable agents
-  const policyIdsToGet = new Set(
-    givenAgents.filter((agent) => agent.policy_id).map((agent) => agent.policy_id!)
-  );
-
-  // get the agent policies for those ids
-  const agentPolicies = await agentPolicyService.getByIDs(soClient, Array.from(policyIdsToGet), {
-    fields: ['is_managed'],
-  });
-  const hostedPolicies = agentPolicies.reduce<Record<string, boolean>>((acc, policy) => {
-    acc[policy.id] = policy.is_managed;
-    return acc;
-  }, {});
-  const isHostedAgent = (agent: Agent) => agent.policy_id && hostedPolicies[agent.policy_id];
+  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
 
   // results from getAgents with options.kuery '' (or even 'active:false') may include hosted agents
   // filter them out unless options.force
   const agentsToCheckUpgradeable =
     'kuery' in options && !options.force
-      ? givenAgents.filter((agent: Agent) => !isHostedAgent(agent))
+      ? givenAgents.filter((agent: Agent) => !isHostedAgent(hostedPolicies, agent))
       : givenAgents;
 
   const kibanaVersion = appContextService.getKibanaVersion();
@@ -145,7 +132,7 @@ export async function sendUpgradeAgentsActions(
         throw new IngestManagerError(`${agent.id} is not upgradeable`);
       }
 
-      if (!options.force && isHostedAgent(agent)) {
+      if (!options.force && isHostedAgent(hostedPolicies, agent)) {
         throw new HostedAgentPolicyRestrictionRelatedError(
           `Cannot upgrade agent in hosted agent policy ${agent.policy_id}`
         );

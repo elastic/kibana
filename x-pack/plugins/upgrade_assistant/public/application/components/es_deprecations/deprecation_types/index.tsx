@@ -9,3 +9,4 @@ export { MlSnapshotsTableRow } from './ml_snapshots';
 export { IndexSettingsTableRow } from './index_settings';
 export { DefaultTableRow } from './default';
 export { ReindexTableRow } from './reindex';
+export { ClusterSettingsTableRow } from './cluster_settings';

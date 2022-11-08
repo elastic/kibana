@@ -49,7 +49,6 @@ export function toElasticsearchQuery(
   }
 
   return {
-    // @ts-expect-error @elastic/elasticsearch doesn't support ignore_unmapped in QueryDslGeoPolygonQuery
     geo_polygon: {
       [fieldName]: queryParams,
       ignore_unmapped: true,

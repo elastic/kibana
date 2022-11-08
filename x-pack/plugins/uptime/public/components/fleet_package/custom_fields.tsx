@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useMemo, memo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -30,25 +31,34 @@ import { BrowserSimpleFields } from './browser/simple_fields';
 import { BrowserAdvancedFields } from './browser/advanced_fields';
 
 interface Props {
-  typeEditable?: boolean;
   validate: Validation;
   dataStreams?: DataStream[];
 }
 
-export const CustomFields = memo<Props>(({ typeEditable = false, validate, dataStreams = [] }) => {
-  const { monitorType, setMonitorType, isTLSEnabled, setIsTLSEnabled } = usePolicyConfigContext();
+const dataStreamToString = [
+  { value: DataStream.HTTP, text: 'HTTP' },
+  { value: DataStream.TCP, text: 'TCP' },
+  { value: DataStream.ICMP, text: 'ICMP' },
+  {
+    value: DataStream.BROWSER,
+    text: i18n.translate(
+      'xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browserLabel',
+      {
+        defaultMessage: 'Browser (Beta)',
+      }
+    ),
+  },
+];
+
+export const CustomFields = memo<Props>(({ validate, dataStreams = [] }) => {
+  const { monitorType, setMonitorType, isTLSEnabled, setIsTLSEnabled, isEditable } =
+    usePolicyConfigContext();
 
   const isHTTP = monitorType === DataStream.HTTP;
   const isTCP = monitorType === DataStream.TCP;
   const isBrowser = monitorType === DataStream.BROWSER;
 
   const dataStreamOptions = useMemo(() => {
-    const dataStreamToString = [
-      { value: DataStream.HTTP, text: 'HTTP' },
-      { value: DataStream.TCP, text: 'TCP' },
-      { value: DataStream.ICMP, text: 'ICMP' },
-      { value: DataStream.BROWSER, text: 'Browser' },
-    ];
     return dataStreamToString.filter((dataStream) => dataStreams.includes(dataStream.value));
   }, [dataStreams]);
 
@@ -88,7 +98,7 @@ export const CustomFields = memo<Props>(({ typeEditable = false, validate, dataS
       >
         <EuiFlexGroup>
           <EuiFlexItem>
-            {typeEditable && (
+            {!isEditable && (
               <EuiFormRow
                 label={
                   <FormattedMessage

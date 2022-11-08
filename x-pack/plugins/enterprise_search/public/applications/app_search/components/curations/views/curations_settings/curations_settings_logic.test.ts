@@ -12,7 +12,19 @@ import {
 } from '../../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/engine_logic.mock';
 
+jest.mock('../../curations_logic', () => ({
+  CurationsLogic: {
+    values: {},
+    actions: {
+      loadCurations: jest.fn(),
+    },
+  },
+}));
+
 import { nextTick } from '@kbn/test/jest';
+
+import { CurationsLogic } from '../..';
+import { EngineLogic } from '../../../engine';
 
 import { CurationsSettingsLogic } from './curations_settings_logic';
 
@@ -85,7 +97,7 @@ describe('CurationsSettingsLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions/settings'
+          '/internal/app_search/engines/some-engine/adaptive_relevance/settings'
         );
         expect(CurationsSettingsLogic.actions.onCurationsSettingsLoad).toHaveBeenCalledWith({
           enabled: true,
@@ -192,7 +204,7 @@ describe('CurationsSettingsLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions/settings',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/settings',
           {
             body: JSON.stringify({
               curation: {
@@ -205,6 +217,10 @@ describe('CurationsSettingsLogic', () => {
           enabled: true,
           mode: 'automatic',
         });
+
+        // data should have been reloaded
+        expect(EngineLogic.actions.initializeEngine).toHaveBeenCalled();
+        expect(CurationsLogic.actions.loadCurations).toHaveBeenCalled();
       });
 
       it('presents any API errors to the user', async () => {

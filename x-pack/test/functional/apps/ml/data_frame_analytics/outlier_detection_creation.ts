@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
     });
 
     const jobId = `ihp_1_${Date.now()}`;
@@ -161,12 +162,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the source data preview');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
-
-          await ml.testExecution.logTestStep('enables the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts(true);
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramChartEnabled(true);
 
           await ml.testExecution.logTestStep('displays the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramCharts(
+          await ml.dataFrameAnalyticsCreation.enableAndAssertSourceDataPreviewHistogramCharts(
             testData.expected.histogramCharts
           );
 

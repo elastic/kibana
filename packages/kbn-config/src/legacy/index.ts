@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export {
-  LegacyObjectToConfigAdapter,
-  LegacyLoggingConfig,
-} from './legacy_object_to_config_adapter';
+export type { LegacyLoggingConfig } from './legacy_object_to_config_adapter';
+export { LegacyObjectToConfigAdapter } from './legacy_object_to_config_adapter';

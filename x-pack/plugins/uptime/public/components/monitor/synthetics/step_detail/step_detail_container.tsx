@@ -45,7 +45,11 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
         </EuiFlexGroup>
       )}
       {journey && activeStep && !journey.loading && (
-        <WaterfallChartContainer checkGroup={checkGroup} stepIndex={stepIndex} />
+        <WaterfallChartContainer
+          checkGroup={checkGroup}
+          stepIndex={stepIndex}
+          activeStep={activeStep}
+        />
       )}
     </>
   );

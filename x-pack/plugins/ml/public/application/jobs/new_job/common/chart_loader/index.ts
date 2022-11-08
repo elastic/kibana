@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { ChartLoader, LineChartData, LineChartPoint } from './chart_loader';
+export type { LineChartData, LineChartPoint } from './chart_loader';
+export { ChartLoader } from './chart_loader';

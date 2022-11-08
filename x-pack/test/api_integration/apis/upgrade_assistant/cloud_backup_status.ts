@@ -52,7 +52,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
-  describe('Cloud backup status', () => {
+  describe('Cloud backup status', function () {
+    // file system repositories are not supported in cloud
+    this.tags(['skipCloud']);
+    this.onlyEsVersion('<=7');
+
     describe('get', () => {
       describe('with backups present', () => {
         let mostRecentSnapshot: estypes.SnapshotSnapshotInfo;

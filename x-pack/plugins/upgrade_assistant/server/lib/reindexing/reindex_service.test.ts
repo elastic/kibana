@@ -19,7 +19,7 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { mockKibanaVersion } from '../../../common/constants';
+import { MAJOR_VERSION } from '../../../common/constants';
 import { licensingMock } from '../../../../licensing/server/mocks';
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
@@ -80,7 +80,7 @@ describe('reindexService', () => {
       licensingPluginSetup
     );
 
-    versionService.setup(mockKibanaVersion);
+    versionService.setup(MAJOR_VERSION);
   });
 
   describe('hasRequiredPrivileges', () => {
@@ -164,13 +164,17 @@ describe('reindexService', () => {
       });
 
       const reindexWarnings = await service.detectReindexWarnings(indexName);
-      expect(reindexWarnings).toEqual([]);
+      expect(reindexWarnings).toEqual([
+        {
+          warningType: 'replaceIndexWithAlias',
+        },
+      ]);
     });
 
     it('returns null if index does not exist', async () => {
       actions.getFlatSettings.mockResolvedValueOnce(null);
       const reindexWarnings = await service.detectReindexWarnings('myIndex');
-      expect(reindexWarnings).toBeNull();
+      expect(reindexWarnings).toBeUndefined();
     });
   });
 

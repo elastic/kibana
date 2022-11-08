@@ -9,7 +9,7 @@
 import Path from 'path';
 import { Observable } from 'rxjs';
 import { concatMap, filter, first, map, tap, toArray } from 'rxjs/operators';
-import { getFlattenedObject, pick } from '@kbn/std';
+import { getFlattenedObject } from '@kbn/std';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -26,6 +26,7 @@ import {
 } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
+import { createBrowserConfig } from './create_browser_config';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { IConfigService } from '../config';
 import { InternalEnvironmentServicePreboot } from '../environment';
@@ -89,10 +90,10 @@ export interface PluginsServiceDiscoverDeps {
 /** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
-  private readonly prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
+  private readonly prebootPluginsSystem: PluginsSystem<PluginType.preboot>;
   private arePrebootPluginsStopped = false;
   private readonly prebootUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
-  private readonly standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
+  private readonly standardPluginsSystem: PluginsSystem<PluginType.standard>;
   private readonly standardUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
   private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
@@ -105,6 +106,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
       .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
+    this.prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
+    this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
   }
 
   public async discover({ environment }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
@@ -226,16 +229,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           const configDescriptor = this.pluginConfigDescriptors.get(pluginId)!;
           return [
             pluginId,
-            this.configService.atPath(plugin.configPath).pipe(
-              map((config: any) =>
-                pick(
-                  config || {},
-                  Object.entries(configDescriptor.exposeToBrowser!)
-                    .filter(([_, exposed]) => exposed)
-                    .map(([key, _]) => key)
-                )
-              )
-            ),
+            this.configService
+              .atPath(plugin.configPath)
+              .pipe(map((config: any) => createBrowserConfig(config, configDescriptor))),
           ];
         })
     );

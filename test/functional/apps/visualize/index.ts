@@ -74,8 +74,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_metric_chart'));
     });
 
-    describe('visualize ciGroup4', function () {
-      this.tags('ciGroup4');
+    describe('visualize ciGroup1', function () {
+      this.tags('ciGroup1');
 
       loadTestFile(require.resolve('./_pie_chart'));
       loadTestFile(require.resolve('./_shared_item'));
@@ -87,11 +87,16 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_region_map'));
     });
 
+    describe('visualize ciGroup8', function () {
+      this.tags('ciGroup8');
+
+      loadTestFile(require.resolve('./_tsvb_chart'));
+    });
+
     describe('visualize ciGroup11', function () {
       this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./_tag_cloud'));
-      loadTestFile(require.resolve('./_tsvb_chart'));
       loadTestFile(require.resolve('./_tsvb_time_series'));
       loadTestFile(require.resolve('./_tsvb_markdown'));
       loadTestFile(require.resolve('./_tsvb_table'));

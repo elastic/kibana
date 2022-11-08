@@ -47,6 +47,10 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
           // remove any multiple spaces from the query
           return value.replaceAll(/\s(?=\s)/gm, '');
         }
+        if (key === 'interval') {
+          // convert interval int to string
+          return `${value}`;
+        }
         return value;
       });
 

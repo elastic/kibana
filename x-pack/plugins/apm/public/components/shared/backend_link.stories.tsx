@@ -30,7 +30,13 @@ export const Example: Story<Args> = (args) => {
   return <BackendLink {...args} />;
 };
 Example.args = {
-  backendName: 'postgres',
+  query: {
+    backendName: 'postgres',
+    environment: 'ENVIRONMENT_ALL',
+    kuery: '',
+    rangeFrom: 'now-15m',
+    rangeTo: 'now',
+  },
   type: 'db',
   subtype: 'postgresql',
 };

@@ -23,6 +23,7 @@ import {
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
+  buildInvalidQueryAlertReason,
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { createFormatter } from '../../../../common/formatters';
@@ -33,6 +34,7 @@ export type MetricThresholdAlertTypeParams = Record<string, any>;
 export type MetricThresholdAlertTypeState = AlertTypeState & {
   groups: string[];
   groupBy?: string | string[];
+  filterQuery?: string;
 };
 export type MetricThresholdAlertInstanceState = AlertInstanceState; // no specific instace state used
 export type MetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instace state used
@@ -84,6 +86,27 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       alertOnGroupDisappear: boolean | undefined;
     };
 
+    if (!params.filterQuery && params.filterQueryText) {
+      try {
+        const { fromKueryExpression } = await import('@kbn/es-query');
+        fromKueryExpression(params.filterQueryText);
+      } catch (e) {
+        const timestamp = moment().toISOString();
+        const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
+        const reason = buildInvalidQueryAlertReason(params.filterQueryText);
+        const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY, reason);
+        alertInstance.scheduleActions(actionGroupId, {
+          group: UNGROUPED_FACTORY_KEY,
+          alertState: stateToAlertMessage[AlertStates.ERROR],
+          reason,
+          timestamp,
+          value: null,
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
+        });
+        return { groups: [], groupBy: params.groupBy, filterQuery: params.filterQuery };
+      }
+    }
+
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
     const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
 
@@ -94,8 +117,11 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const config = source.configuration;
 
     const previousGroupBy = state.groupBy;
+    const previousFilterQuery = state.filterQuery;
     const prevGroups =
-      alertOnGroupDisappear && isEqual(previousGroupBy, params.groupBy)
+      alertOnGroupDisappear &&
+      isEqual(previousGroupBy, params.groupBy) &&
+      isEqual(previousFilterQuery, params.filterQuery)
         ? // Filter out the * key from the previous groups, only include it if it's one of
           // the current groups. In case of a groupBy alert that starts out with no data and no
           // groups, we don't want to persist the existence of the * alert instance
@@ -220,7 +246,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
     }
 
-    return { groups, groupBy: params.groupBy };
+    return { groups, groupBy: params.groupBy, filterQuery: params.filterQuery };
   });
 
 export const FIRED_ACTIONS = {

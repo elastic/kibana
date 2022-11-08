@@ -8,7 +8,7 @@
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/common';
+import { isSavedObjectNotFoundError } from '../../../../../../src/plugins/kibana_utils/common';
 import {
   FetchLogSourceConfigurationError,
   FetchLogSourceStatusError,
@@ -82,7 +82,7 @@ const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
           />
         }
       >
-        {error.cause instanceof SavedObjectNotFound ? (
+        {isSavedObjectNotFoundError(error.cause) ? (
           // the SavedObjectNotFound error message contains broken markup
           <FormattedMessage
             id="xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage"

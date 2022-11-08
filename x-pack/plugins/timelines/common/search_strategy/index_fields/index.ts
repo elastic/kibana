@@ -67,6 +67,7 @@ export interface BrowserField {
   name: string;
   searchable: boolean;
   type: string;
+  esTypes?: string[];
   subType?: IFieldSubType;
 }
 

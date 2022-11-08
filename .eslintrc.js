@@ -89,6 +89,15 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
+const VENN_DIAGRAM_HEADER = `
+/*
+  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),
+  * and may include modifications made by Elasticsearch B.V.
+  * Elasticsearch B.V. licenses this file to you under the MIT License.
+  * See \`x-pack/plugins/graph/public/components/venn_diagram/vennjs/LICENSE\` for more information.
+  */
+`;
+
 /** Packages which should not be included within production code. */
 const DEV_PACKAGES = [
   'kbn-babel-code-parser',
@@ -226,12 +235,16 @@ const RESTRICTED_IMPORTS = [
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
   },
+  {
+    name: '@kbn/io-ts-utils',
+    message: `Import directly from @kbn/io-ts-utils/{method} submodules`,
+  },
 ];
 
 module.exports = {
   root: true,
 
-  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
+  extends: ['plugin:@elastic/eui/recommended', '@kbn/eslint-config'],
 
   overrides: [
     /**
@@ -281,12 +294,7 @@ module.exports = {
      * Licence headers
      */
     {
-      files: [
-        '**/*.{js,mjs,ts,tsx}',
-        '!plugins/**/*',
-        '!packages/elastic-datemath/**/*',
-        '!packages/elastic-eslint-config-kibana/**/*',
-      ],
+      files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -305,6 +313,7 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -317,7 +326,7 @@ module.exports = {
     {
       files: [
         'packages/elastic-datemath/**/*.{js,mjs,ts,tsx}',
-        'packages/elastic-eslint-config-kibana/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@kbn/eslint/require-license-header': [
@@ -337,6 +346,7 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -376,6 +386,7 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -405,11 +416,13 @@ module.exports = {
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
       },
     },
+
     {
       files: ['packages/elastic-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
       rules: {
@@ -430,6 +443,7 @@ module.exports = {
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -455,6 +469,37 @@ module.exports = {
               OLD_DUAL_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
+              VENN_DIAGRAM_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
+     * venn.js fork requires special license headers
+     */
+    {
+      files: ['x-pack/plugins/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: VENN_DIAGRAM_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
           },
         ],
@@ -703,6 +748,7 @@ module.exports = {
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
+        '**/jest.config.js',
       ],
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
@@ -847,6 +893,10 @@ module.exports = {
               {
                 name: 'semver',
                 message: 'Please use "semver/*/{function}" instead',
+              },
+              {
+                name: '@kbn/rule-data-utils',
+                message: `Import directly from @kbn/rule-data-utils/* submodules in public/common code`,
               },
             ],
           },

@@ -96,12 +96,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     for (const testData of testDataList) {
       it(`${testData.testTitle}`, async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post('/api/ml/fields_service/time_field_range')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
-          .send(testData.requestBody)
-          .expect(testData.expected.responseCode);
+          .send(testData.requestBody);
+        ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 
         if (body.error === undefined) {
           expect(body).to.eql(testData.expected.responseBody);

@@ -12,20 +12,17 @@ import { AppTestBed, setupAppPage } from './app.helpers';
 
 describe('Cluster upgrade', () => {
   let testBed: AppTestBed;
-  let server: ReturnType<typeof setupEnvironment>['server'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
-
-  beforeEach(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterEach(() => {
-    server.restore();
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('when user is still preparing for upgrade', () => {
     beforeEach(async () => {
-      testBed = await setupAppPage();
+      testBed = await setupAppPage(httpSetup);
     });
 
     test('renders overview', () => {
@@ -36,9 +33,14 @@ describe('Cluster upgrade', () => {
     });
   });
 
+  // The way we detect if we are currently upgrading or if the upgrade has been completed is if
+  // we ever get back a 426 error in *any* API response that UA makes. For that reason we can
+  // just mock one of the APIs that are being called from the overview page to return an error
+  // in order to trigger these interstitial states. In this case we're going to mock the
+  // `es deprecations` response.
   describe('when cluster is in the process of a rolling upgrade', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, {
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, {
         statusCode: 426,
         message: '',
         attributes: {
@@ -47,7 +49,7 @@ describe('Cluster upgrade', () => {
       });
 
       await act(async () => {
-        testBed = await setupAppPage();
+        testBed = await setupAppPage(httpSetup);
       });
     });
 
@@ -62,7 +64,7 @@ describe('Cluster upgrade', () => {
 
   describe('when cluster has been upgraded', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, {
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, {
         statusCode: 426,
         message: '',
         attributes: {
@@ -71,7 +73,7 @@ describe('Cluster upgrade', () => {
       });
 
       await act(async () => {
-        testBed = await setupAppPage();
+        testBed = await setupAppPage(httpSetup);
       });
     });
 

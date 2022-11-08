@@ -11,7 +11,7 @@ import { filter, first, catchError, map } from 'rxjs/operators';
 import exitHook from 'exit-hook';
 
 import { ToolingLog } from '../tooling_log';
-import { createCliError } from './errors';
+import { createFailError } from '../run';
 import { Proc, ProcOptions, startProc } from './proc';
 
 const SECOND = 1000;
@@ -22,6 +22,7 @@ const noop = () => {};
 interface RunOptions extends ProcOptions {
   wait: true | RegExp;
   waitTimeout?: number | false;
+  onEarlyExit?: (msg: string) => void;
 }
 
 /**
@@ -48,27 +49,18 @@ export class ProcRunner {
 
   /**
    *  Start a process, tracking it by `name`
-   *  @param  {String}  name
-   *  @param  {Object}  options
-   *  @property {String} options.cmd executable to run
-   *  @property {Array<String>?} options.args arguments to provide the executable
-   *  @property {String?} options.cwd current working directory for the process
-   *  @property {RegExp|Boolean} options.wait Should start() wait for some time? Use
-   *                                          `true` will wait until the proc exits,
-   *                                          a `RegExp` will wait until that log line
-   *                                          is found
-   *  @return {Promise<undefined>}
    */
   async run(name: string, options: RunOptions) {
     const {
-      cmd,
       args = [],
       cwd = process.cwd(),
       stdin = undefined,
       wait = false,
       waitTimeout = 15 * MINUTE,
       env = process.env,
+      onEarlyExit,
     } = options;
+    const cmd = options.cmd === 'node' ? process.execPath : options.cmd;
 
     if (this.closing) {
       throw new Error('ProcRunner is closing');
@@ -90,6 +82,25 @@ export class ProcRunner {
       stdin,
     });
 
+    if (onEarlyExit) {
+      proc.outcomePromise
+        .then(
+          (code) => {
+            if (!proc.stopWasCalled()) {
+              onEarlyExit(`[${name}] exitted early with ${code}`);
+            }
+          },
+          (error) => {
+            if (!proc.stopWasCalled()) {
+              onEarlyExit(`[${name}] exitted early: ${error.message}`);
+            }
+          }
+        )
+        .catch((error) => {
+          throw new Error(`Error handling early exit: ${error.stack}`);
+        });
+    }
+
     try {
       if (wait instanceof RegExp) {
         // wait for process to log matching line
@@ -99,7 +110,7 @@ export class ProcRunner {
             first(),
             catchError((err) => {
               if (err.name !== 'EmptyError') {
-                throw createCliError(`[${name}] exited without matching pattern: ${wait}`);
+                throw createFailError(`[${name}] exited without matching pattern: ${wait}`);
               } else {
                 throw err;
               }
@@ -110,7 +121,7 @@ export class ProcRunner {
             : Rx.timer(waitTimeout).pipe(
                 map(() => {
                   const sec = waitTimeout / SECOND;
-                  throw createCliError(
+                  throw createFailError(
                     `[${name}] failed to match pattern within ${sec} seconds [pattern=${wait}]`
                   );
                 })

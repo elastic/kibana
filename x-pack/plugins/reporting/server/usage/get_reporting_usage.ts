@@ -147,7 +147,7 @@ export async function getReportingUsage(
   const reportingIndex = config.get('index');
   const params = {
     index: `${reportingIndex}-*`,
-    filterPath: 'aggregations.*.buckets',
+    filter_path: 'aggregations.*.buckets',
     body: {
       size: 0,
       aggs: {

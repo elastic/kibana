@@ -66,10 +66,10 @@ describe('Fleet event filters card', () => {
         <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
       </I18nProvider>
     );
-    // @ts-ignore
+    // @ts-expect-error TS2739
     const component = reactTestingLibrary.render(<FleetEventFiltersCard />, { wrapper: Wrapper });
     try {
-      // @ts-ignore
+      // @ts-expect-error TS2769
       await reactTestingLibrary.act(() => promise);
     } catch (err) {
       return component;
@@ -97,8 +97,8 @@ describe('Fleet event filters card', () => {
       };
     });
     const component = await renderComponent();
-    expect(component.getByText('Event Filters')).not.toBeNull();
-    expect(component.getByText('Manage event filters')).not.toBeNull();
+    expect(component.getByText('Event filters')).not.toBeNull();
+    expect(component.getByText('Manage')).not.toBeNull();
   });
   it('should render an error toast when api call fails', async () => {
     expect(addDanger).toBeCalledTimes(0);
@@ -109,8 +109,8 @@ describe('Fleet event filters card', () => {
       };
     });
     const component = await renderComponent();
-    expect(component.getByText('Event Filters')).not.toBeNull();
-    expect(component.getByText('Manage event filters')).not.toBeNull();
+    expect(component.getByText('Event filters')).not.toBeNull();
+    expect(component.getByText('Manage')).not.toBeNull();
     await reactTestingLibrary.waitFor(() => expect(addDanger).toBeCalledTimes(1));
   });
 });

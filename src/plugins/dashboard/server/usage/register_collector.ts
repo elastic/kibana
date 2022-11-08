@@ -22,32 +22,41 @@ export function registerDashboardUsageCollector(
       return await collectDashboardTelemetry(soClient, embeddableService);
     },
     schema: {
-      panels: { type: 'long' },
-      panelsByValue: { type: 'long' },
-      lensByValue: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description:
-              'Collection of telemetry metrics for Lens visualizations, which are added to dashboard by "value".',
-          },
-        },
-      },
-      visualizationByValue: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description:
-              'Collection of telemetry metrics for visualizations, which are added to dashboard by "value".',
-          },
-        },
-      },
-      embeddable: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description:
-              'Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable.',
+      panels: {
+        total: { type: 'long' },
+        by_reference: { type: 'long' },
+        by_value: { type: 'long' },
+        by_type: {
+          DYNAMIC_KEY: {
+            total: {
+              type: 'long',
+              _meta: {
+                description: 'The number of panels that have been added to all dashboards.',
+              },
+            },
+            by_reference: {
+              type: 'long',
+              _meta: {
+                description:
+                  'The number of "by reference" panels that have been added to all dashboards.',
+              },
+            },
+            by_value: {
+              type: 'long',
+              _meta: {
+                description:
+                  'The number of "by value" panels that have been added to all dashboards.',
+              },
+            },
+            details: {
+              DYNAMIC_KEY: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable.',
+                },
+              },
+            },
           },
         },
       },

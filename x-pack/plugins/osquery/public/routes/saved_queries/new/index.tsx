@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 import { NewSavedQueryForm } from './form';
 import { useCreateSavedQuery } from '../../../saved_queries/use_create_saved_query';
 
@@ -34,15 +33,14 @@ const NewSavedQueryPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.addSavedQuery.pageTitle"
                 defaultMessage="Add saved query"
               />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

@@ -58,6 +58,6 @@ export type {
 } from './indexpattern_datasource/types';
 export type { LensEmbeddableInput } from './embeddable';
 
-export { LensPublicStart } from './plugin';
+export type { LensPublicStart } from './plugin';
 
 export const plugin = () => new LensPlugin();

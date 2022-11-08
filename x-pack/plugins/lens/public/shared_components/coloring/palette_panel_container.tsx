@@ -56,6 +56,7 @@ export function PalettePanelContainer({
           <div
             role="dialog"
             aria-labelledby="lnsPalettePanelContainerTitle"
+            data-test-subj="lns-indexPattern-PalettePanelContainer"
             className="lnsPalettePanelContainer"
           >
             <EuiFlyoutHeader hasBorder className="lnsPalettePanelContainer__header">

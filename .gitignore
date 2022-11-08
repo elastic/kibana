@@ -19,6 +19,7 @@ target
 .idea
 *.iml
 *.log
+types.eslint.config.js
 
 # Ignore example plugin builds
 /examples/*/build
@@ -36,6 +37,7 @@ target
 /x-pack/test/*/screenshots/failure
 /x-pack/test/*/screenshots/session
 /x-pack/test/*/screenshots/visual_regression_gallery.html
+/x-pack/test/functional/apps/*/*/reporting/reports/failure
 
 /html_docs
 .eslintcache
@@ -54,6 +56,7 @@ selenium
 *.swo
 *.out
 package-lock.json
+!/.buildkite/package-lock.json
 .yo-rc.json
 .vscode
 *.sublime-*
@@ -86,9 +89,12 @@ report.asciidoc
 .yarn-local-mirror
 
 # Bazel
+.ijwb
 /bazel
 /bazel-*
 .bazelrc.user
+.bazelrc.cache
 
 # Exclude renovate config file (we only need it on master)
 renovate.json5
+/packages/kbn-synthetic-package-map/synthetic-packages.json

@@ -7,6 +7,8 @@
 
 export const PLUGIN_ID = 'reporting';
 
+export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
+
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
@@ -60,6 +62,7 @@ export const LAYOUT_TYPES = {
 export const DEFAULT_VIEWPORT = {
   width: 1950,
   height: 1200,
+  deviceScaleFactor: 1,
 };
 
 // Export Type Definitions
@@ -90,7 +93,7 @@ export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 // Licenses
 export const LICENSE_TYPE_TRIAL = 'trial';
 export const LICENSE_TYPE_BASIC = 'basic';
-export const LICENSE_TYPE_STANDARD = 'standard';
+export const LICENSE_TYPE_CLOUD_STANDARD = 'standard';
 export const LICENSE_TYPE_GOLD = 'gold';
 export const LICENSE_TYPE_PLATINUM = 'platinum';
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise';

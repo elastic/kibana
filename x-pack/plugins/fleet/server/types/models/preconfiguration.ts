@@ -97,6 +97,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
       monitoring_output_id: schema.maybe(schema.string()),
       package_policies: schema.arrayOf(
         schema.object({
+          id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
           name: schema.string(),
           package: schema.object({
             name: schema.string(),

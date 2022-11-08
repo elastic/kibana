@@ -31,13 +31,15 @@ export async function runDockerGenerator(
     context: boolean;
     image: boolean;
     ubi?: boolean;
+    ubuntu?: boolean;
     ironbank?: boolean;
     cloud?: boolean;
     dockerBuildDate?: string;
   }
 ) {
-  // UBI var config
-  const baseOSImage = flags.ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
+  let baseOSImage = '';
+  if (flags.ubuntu) baseOSImage = 'ubuntu:20.04';
+  if (flags.ubi) baseOSImage = 'docker.elastic.co/ubi8/ubi-minimal:latest';
   const ubiVersionTag = 'ubi8';
 
   let imageFlavor = '';
@@ -71,6 +73,8 @@ export async function runDockerGenerator(
       : []),
   ];
 
+  const dockerCrossCompile = config.getDockerCrossCompile();
+  const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
   const scope: TemplateContext = {
     artifactPrefix,
     artifactTarball,
@@ -82,15 +86,18 @@ export async function runDockerGenerator(
     imageTag,
     dockerBuildDir,
     dockerTargetFilename,
+    dockerCrossCompile,
     baseOSImage,
     dockerBuildDate,
     ubi: flags.ubi,
+    ubuntu: flags.ubuntu,
     cloud: flags.cloud,
     metricbeatTarball,
     filebeatTarball,
     ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
+    publicArtifactSubdomain,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
@@ -99,7 +106,7 @@ export async function runDockerGenerator(
     arm64: 'aarch64',
   };
   const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
-  if (flags.architecture && !buildArchitectureSupported) {
+  if (flags.architecture && !buildArchitectureSupported && !dockerCrossCompile) {
     return;
   }
 

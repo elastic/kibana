@@ -9,7 +9,7 @@ import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
 import type { IndexPatternField } from 'src/plugins/data/common';
-import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/common';
+import { isSavedObjectNotFoundError } from '../../../../../src/plugins/kibana_utils/common';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 import { PluginStartContract } from '../plugin';
@@ -123,7 +123,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           body: await getStringSamples(search, field, size),
         });
       } catch (e) {
-        if (e instanceof SavedObjectNotFound) {
+        if (isSavedObjectNotFoundError(e)) {
           return res.notFound();
         }
         if (e instanceof errors.ResponseError && e.statusCode === 404) {

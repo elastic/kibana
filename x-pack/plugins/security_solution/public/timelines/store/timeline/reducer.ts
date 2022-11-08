@@ -94,9 +94,14 @@ export const initialTimelineState: TimelineState = {
 
 /** The reducer for all timeline actions  */
 export const timelineReducer = reducerWithInitialState(initialTimelineState)
-  .case(addTimeline, (state, { id, timeline }) => ({
+  .case(addTimeline, (state, { id, timeline, resolveTimelineConfig }) => ({
     ...state,
-    timelineById: addTimelineToStore({ id, timeline, timelineById: state.timelineById }),
+    timelineById: addTimelineToStore({
+      id,
+      timeline,
+      resolveTimelineConfig,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(createTimeline, (state, { id, timelineType = TimelineType.default, ...timelineProps }) => {
     return {

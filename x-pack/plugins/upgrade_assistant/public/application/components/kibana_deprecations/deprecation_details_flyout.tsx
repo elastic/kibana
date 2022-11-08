@@ -68,22 +68,10 @@ const i18nTexts = {
       defaultMessage: 'Resolution in progress…',
     }
   ),
-  quickResolveCalloutTitle: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveCalloutTitle',
-    {
-      defaultMessage: 'Quick resolve action available',
-    }
-  ),
-  quickResolveErrorTitle: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveErrorTitle',
-    {
-      defaultMessage: 'Error resolving deprecation',
-    }
-  ),
-  quickResolveCalloutDescription: (
+  quickResolveCalloutTitle: (
     <FormattedMessage
-      id="xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveCalloutDescription"
-      defaultMessage="The steps to resolve this issue may be automated with {quickResolve} action below."
+      id="xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveCalloutTitle"
+      defaultMessage="Click {quickResolve} to fix this issue automatically."
       values={{
         quickResolve: (
           <strong>
@@ -95,10 +83,16 @@ const i18nTexts = {
       }}
     />
   ),
+  quickResolveErrorTitle: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveErrorTitle',
+    {
+      defaultMessage: 'Error resolving issue',
+    }
+  ),
   manualFixTitle: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.manualFixTitle',
     {
-      defaultMessage: 'Fix manually',
+      defaultMessage: 'How to fix',
     }
   ),
 };
@@ -181,9 +175,7 @@ export const DeprecationDetailsFlyout = ({
                   color="primary"
                   iconType="iInCircle"
                   data-test-subj="quickResolveCallout"
-                >
-                  <p>{i18nTexts.quickResolveCalloutDescription}</p>
-                </EuiCallOut>
+                />
 
                 <EuiSpacer />
               </>

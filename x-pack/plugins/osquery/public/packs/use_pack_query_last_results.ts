@@ -6,21 +6,22 @@
  */
 
 import { useQuery } from 'react-query';
-import { IndexPattern } from '../../../../../src/plugins/data/common';
+import moment from 'moment-timezone';
+import { DataView, SortDirection } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
 
 interface UsePackQueryLastResultsProps {
   actionId: string;
   agentIds?: string[];
   interval: number;
-  logsIndexPattern?: IndexPattern;
+  logsDataView?: DataView;
   skip?: boolean;
 }
 
 export const usePackQueryLastResults = ({
   actionId,
   interval,
-  logsIndexPattern,
+  logsDataView,
   skip = false,
 }: UsePackQueryLastResultsProps) => {
   const data = useKibana().services.data;
@@ -29,8 +30,9 @@ export const usePackQueryLastResults = ({
     ['scheduledQueryLastResults', { actionId }],
     async () => {
       const lastResultsSearchSource = await data.search.searchSource.create({
-        index: logsIndexPattern,
+        index: logsDataView,
         size: 1,
+        sort: { '@timestamp': SortDirection.desc },
         query: {
           // @ts-expect-error update types
           bool: {
@@ -46,13 +48,12 @@ export const usePackQueryLastResults = ({
       });
 
       const lastResultsResponse = await lastResultsSearchSource.fetch$().toPromise();
+      const timestamp = lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'][0];
 
-      const responseId = lastResultsResponse.rawResponse?.hits?.hits[0]?._source?.response_id;
-
-      if (responseId) {
+      if (timestamp) {
         const aggsSearchSource = await data.search.searchSource.create({
-          index: logsIndexPattern,
-          size: 0,
+          index: logsDataView,
+          size: 1,
           aggs: {
             unique_agents: { cardinality: { field: 'agent.id' } },
           },
@@ -61,13 +62,16 @@ export const usePackQueryLastResults = ({
             bool: {
               filter: [
                 {
-                  match_phrase: {
-                    action_id: actionId,
+                  range: {
+                    '@timestamp': {
+                      gte: moment(timestamp).subtract(interval, 'seconds').format(),
+                      lte: moment(timestamp).format(),
+                    },
                   },
                 },
                 {
                   match_phrase: {
-                    response_id: responseId,
+                    action_id: actionId,
                   },
                 },
               ],
@@ -81,7 +85,7 @@ export const usePackQueryLastResults = ({
           '@timestamp': lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'],
           // @ts-expect-error update types
           uniqueAgentsCount: aggsResponse.rawResponse.aggregations?.unique_agents?.value,
-          docCount: aggsResponse.rawResponse?.hits?.total,
+          docCount: aggsResponse?.rawResponse?.hits?.total,
         };
       }
 
@@ -89,7 +93,7 @@ export const usePackQueryLastResults = ({
     },
     {
       keepPreviousData: true,
-      enabled: !!(!skip && actionId && interval && logsIndexPattern),
+      enabled: !!(!skip && actionId && interval && logsDataView),
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     }

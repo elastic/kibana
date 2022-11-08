@@ -48,7 +48,6 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.startLayout();
 
     const layout = createLayout(captureConfig, layoutParams);
-    logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
     tracker.endLayout();
 
     tracker.startScreenshots();
@@ -60,6 +59,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
       getFullRedirectAppUrl(reporting.getConfig(), job.spaceId, job.forceNow)
     );
 
+    logger.debug(`Layout: id=${layout.id} width=${layout.width} height=${layout.height}`);
     const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
       urlsOrUrlLocatorTuples: zip(urls, locatorParams) as UrlOrUrlLocatorTuple[],

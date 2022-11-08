@@ -14,10 +14,10 @@ static decorateIndexAliasNotFoundError(error: Error, alias: string): DecoratedEr
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  error | <code>Error</code> |  |
-|  alias | <code>string</code> |  |
+|  error | Error |  |
+|  alias | string |  |
 
 <b>Returns:</b>
 
-`DecoratedError`
+DecoratedError
 

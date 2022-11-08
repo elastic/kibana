@@ -21,12 +21,14 @@ export const createMockTelemetryEventsSender = (
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
+    getClusterID: jest.fn(),
     fetchTelemetryUrl: jest.fn(),
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemetry ?? jest.fn()),
     sendIfDue: jest.fn(),
     sendEvents: jest.fn(),
+    sendOnDemand: jest.fn(),
   } as unknown as jest.Mocked<TelemetryEventsSender>;
 };
 
@@ -35,7 +37,6 @@ export const createMockTelemetryReceiver = (
 ): jest.Mocked<TelemetryReceiver> => {
   return {
     start: jest.fn(),
-    fetchClusterInfo: jest.fn(),
     fetchLicenseInfo: jest.fn(),
     copyLicenseFields: jest.fn(),
     fetchFleetAgents: jest.fn(),

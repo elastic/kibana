@@ -88,8 +88,7 @@ export function mockSearchResult(
 ): UptimeESClient {
   const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-  // @ts-expect-error incomplete search response
-  mockEsClient.search.mockResolvedValue({
+  mockEsClient.search = jest.fn().mockResolvedValue({
     body: {
       took: 18,
       timed_out: false,
@@ -110,5 +109,6 @@ export function mockSearchResult(
       aggregations,
     },
   });
+
   return uptimeEsClient;
 }

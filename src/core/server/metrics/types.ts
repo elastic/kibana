@@ -70,7 +70,7 @@ export interface OpsMetrics {
 
 /**
  * an IntervalHistogram object that samples and reports the event loop delay over time.
- * The delays will be reported in nanoseconds.
+ * The delays will be reported in milliseconds.
  *
  * @public
  */

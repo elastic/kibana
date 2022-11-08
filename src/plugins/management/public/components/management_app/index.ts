@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { ManagementApp, ManagementAppDependencies } from './management_app';
+export type { ManagementAppDependencies } from './management_app';
+export { ManagementApp } from './management_app';

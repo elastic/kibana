@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { UrlDrilldownCollectConfig, UrlDrilldownCollectConfigProps } from './lazy';
+export type { UrlDrilldownCollectConfigProps } from './lazy';
+export { UrlDrilldownCollectConfig } from './lazy';

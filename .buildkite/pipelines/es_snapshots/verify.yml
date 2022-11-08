@@ -13,6 +13,9 @@ steps:
 
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
 
   - wait
 
@@ -22,12 +25,13 @@ steps:
       queue: c2-16
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    timeout_in_minutes: 60
 
   - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Default CI Group'
-    parallelism: 13
+    parallelism: 27
     agents:
-      queue: ci-group-6
+      queue: n2-4
     depends_on: build
     timeout_in_minutes: 150
     key: default-cigroup
@@ -39,7 +43,7 @@ steps:
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Docker CI Group'
     agents:
-      queue: ci-group-6
+      queue: n2-4
     depends_on: build
     timeout_in_minutes: 120
     key: default-cigroup-docker
@@ -63,6 +67,7 @@ steps:
 
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
+    parallelism: 3
     agents:
       queue: n2-4
     timeout_in_minutes: 120
@@ -75,12 +80,15 @@ steps:
   - command: .buildkite/scripts/steps/test/api_integration.sh
     label: 'API Integration Tests'
     agents:
-      queue: jest
+      queue: n2-2
     timeout_in_minutes: 120
     key: api-integration
 
   - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
     label: Trigger promotion
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
     depends_on:
       - default-cigroup
       - default-cigroup-docker
@@ -93,3 +101,6 @@ steps:
 
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default

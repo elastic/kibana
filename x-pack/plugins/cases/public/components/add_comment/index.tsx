@@ -5,14 +5,22 @@
  * 2.0.
  */
 
+import React, {
+  useCallback,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+  useState,
+} from 'react';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 
 import { CommentType } from '../../../common';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
-import { MarkdownEditorForm } from '../markdown_editor';
+import { EuiMarkdownEditorRef, MarkdownEditorForm } from '../markdown_editor';
 import { Form, useForm, UseField, useFormData } from '../../common/shared_imports';
 
 import * as i18n from './translations';
@@ -33,6 +41,7 @@ const initialCommentValue: AddCommentFormSchema = {
 export interface AddCommentRefObject {
   addQuote: (quote: string) => void;
   setComment: (newComment: string) => void;
+  editor: EuiMarkdownEditorRef | null;
 }
 
 export interface AddCommentProps {
@@ -61,7 +70,8 @@ export const AddComment = React.memo(
       },
       ref
     ) => {
-      const editorRef = useRef();
+      const editorRef = useRef<EuiMarkdownEditorRef>(null);
+      const [focusOnContext, setFocusOnContext] = useState(false);
       const owner = useOwnerContext();
       const { isLoading, postComment } = usePostComment();
 
@@ -77,7 +87,10 @@ export const AddComment = React.memo(
 
       const addQuote = useCallback(
         (quote) => {
-          setFieldValue(fieldName, `${comment}${comment.length > 0 ? '\n\n' : ''}${quote}`);
+          const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '\n> ');
+          const val = `> ${addCarrots} \n\n`;
+          setFieldValue(fieldName, `${comment}${comment.length > 0 ? '\n\n' : ''}${val}`);
+          setFocusOnContext(true);
         },
         [comment, setFieldValue]
       );
@@ -110,6 +123,38 @@ export const AddComment = React.memo(
           reset();
         }
       }, [submit, onCommentSaving, postComment, caseId, owner, onCommentPosted, subCaseId, reset]);
+
+      /**
+       * Focus on the text area when a quote has been added.
+       *
+       * The useEffect will run only when focusOnContext
+       * changes.
+       *
+       * The useEffect is also called once one mount
+       * where the comment is empty. We do not want to focus
+       * in this scenario.
+       *
+       * Ideally we would like to put the
+       * editorRef.current?.textarea?.focus(); inside the if (focusOnContext).
+       * The reason this is not feasible is because when it sets the
+       * focusOnContext to false a render will occur again and the
+       * focus will be lost.
+       *
+       * We do not put the comment in the dependency list
+       * because we do not want to focus when the user
+       * is typing.
+       */
+
+      useEffect(() => {
+        if (!isEmpty(comment)) {
+          editorRef.current?.textarea?.focus();
+        }
+
+        if (focusOnContext) {
+          setFocusOnContext(false);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [focusOnContext]);
 
       return (
         <span id="add-comment-permLink">

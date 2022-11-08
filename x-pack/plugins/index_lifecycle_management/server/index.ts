@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
+import { PluginInitializerContext } from 'kibana/server';
 import { IndexLifecycleManagementServerPlugin } from './plugin';
-import { configSchema, IndexLifecycleManagementConfig } from './config';
+
+export { config } from './config';
 
 export const plugin = (ctx: PluginInitializerContext) =>
   new IndexLifecycleManagementServerPlugin(ctx);
-
-export const config: PluginConfigDescriptor<IndexLifecycleManagementConfig> = {
-  schema: configSchema,
-  exposeToBrowser: {
-    ui: true,
-  },
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
-};

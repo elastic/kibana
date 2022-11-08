@@ -84,6 +84,7 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
               iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
               iconSide="right"
               flush="left"
+              data-test-subj={`mlDFExpandableSection-${dataTestId}-toggle-button`}
             >
               {title}
             </EuiButtonEmpty>
@@ -126,7 +127,12 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
         )}
       </div>
       {isExpanded && (
-        <div className={contentPadding ? 'mlExpandableSection-contentPadding' : ''}>{content}</div>
+        <div
+          className={contentPadding ? 'mlExpandableSection-contentPadding' : ''}
+          data-test-subj={`mlDFExpandableSection-${dataTestId}-content`}
+        >
+          {content}
+        </div>
       )}
     </EuiPanel>
   );

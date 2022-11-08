@@ -45,7 +45,7 @@ const PURPOSE_PRIVILEGE_MAP: Record<
 export const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
 
 export class SecureSpacesClientWrapper implements ISpacesClient {
-  private readonly useRbac = this.authorization.mode.useRbacForRequest(this.request);
+  private readonly useRbac: boolean;
 
   constructor(
     private readonly spacesClient: ISpacesClient,
@@ -54,7 +54,9 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     private readonly auditLogger: AuditLogger,
     private readonly legacyAuditLogger: LegacySpacesAuditLogger,
     private readonly errors: SavedObjectsClientContract['errors']
-  ) {}
+  ) {
+    this.useRbac = this.authorization.mode.useRbacForRequest(this.request);
+  }
 
   public async getAll({
     purpose = 'any',

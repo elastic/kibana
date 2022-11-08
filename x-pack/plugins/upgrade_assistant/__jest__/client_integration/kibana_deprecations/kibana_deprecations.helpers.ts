@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig, findTestSubject } from '@kbn/test/jest';
+import { HttpSetup } from 'src/core/public';
 import { KibanaDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: ['/kibana_deprecations'],
     componentRoutePath: '/kibana_deprecations',
@@ -112,10 +113,11 @@ const createActions = (testBed: TestBed) => {
 };
 
 export const setupKibanaPage = async (
+  httpSetup: HttpSetup,
   overrides?: Record<string, unknown>
 ): Promise<KibanaTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(KibanaDeprecations, overrides),
+    WithAppDependencies(KibanaDeprecations, httpSetup, overrides),
     testBedConfig
   );
   const testBed = await initTestBed();

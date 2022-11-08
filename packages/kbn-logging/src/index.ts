@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { LogLevel, LogLevelId } from './log_level';
-export { LogRecord } from './log_record';
-export { Logger } from './logger';
-export { LogMeta } from './log_meta';
-export { LoggerFactory } from './logger_factory';
-export { Layout } from './layout';
-export { Appender, DisposableAppender } from './appenders';
-export { Ecs, EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from './ecs';
+export type { LogLevelId } from './log_level';
+export { LogLevel } from './log_level';
+export type { LogRecord } from './log_record';
+export type { Logger } from './logger';
+export type { LogMeta } from './log_meta';
+export type { LoggerFactory } from './logger_factory';
+export type { Layout } from './layout';
+export type { Appender, DisposableAppender } from './appenders';
+export type { Ecs, EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from './ecs';

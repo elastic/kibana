@@ -39,11 +39,10 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        `--elasticsearch.ignoreVersionMismatch=true`,
+        `--elasticsearch.ignoreVersionMismatch=${process.env.CI ? 'false' : 'true'}`,
         `--uiSettings.overrides.theme:darkMode=true`,
         `--elasticsearch.username=kibana_system`,
         `--elasticsearch.password=changeme`,
-        '--migrations.enableV2=false',
         '--xpack.reporting.enabled=false',
       ],
     },

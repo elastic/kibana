@@ -4,33 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useLicense } from '../../../../common/hooks/use_license';
 import { useCanSeeHostIsolationExceptionsMenu } from './hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
 import { getHostIsolationExceptionSummary } from '../service';
+import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../service');
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 const getHostIsolationExceptionSummaryMock = getHostIsolationExceptionSummary as jest.Mock;
 
 describe('host isolation exceptions hooks', () => {
-  const isPlatinumPlusMock = useLicense().isPlatinumPlus as jest.Mock;
+  const useEndpointPrivilegesMock = useEndpointPrivileges as jest.Mock;
   describe('useCanSeeHostIsolationExceptionsMenu', () => {
     beforeEach(() => {
-      isPlatinumPlusMock.mockReset();
+      useEndpointPrivilegesMock.mockReset();
     });
-    it('should return true if the license is platinum plus', () => {
-      isPlatinumPlusMock.mockReturnValue(true);
+
+    it('should return true if has the correct privileges', () => {
+      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: true });
       const { result } = renderHook(() => useCanSeeHostIsolationExceptionsMenu(), {
         wrapper: TestProviders,
       });
       expect(result.current).toBe(true);
     });
 
-    it('should return false if the license is lower platinum plus and there are not existing host isolation items', () => {
-      isPlatinumPlusMock.mockReturnValue(false);
+    it('should return false if does not have privileges and there are not existing host isolation items', () => {
+      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
       getHostIsolationExceptionSummaryMock.mockReturnValueOnce({ total: 0 });
       const { result } = renderHook(() => useCanSeeHostIsolationExceptionsMenu(), {
         wrapper: TestProviders,
@@ -38,8 +40,8 @@ describe('host isolation exceptions hooks', () => {
       expect(result.current).toBe(false);
     });
 
-    it('should return true if the license is lower platinum plus and there are existing host isolation items', async () => {
-      isPlatinumPlusMock.mockReturnValue(false);
+    it('should return true if does not have privileges and there are existing host isolation items', async () => {
+      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
       getHostIsolationExceptionSummaryMock.mockReturnValueOnce({ total: 11 });
       const { result, waitForNextUpdate } = renderHook(
         () => useCanSeeHostIsolationExceptionsMenu(),

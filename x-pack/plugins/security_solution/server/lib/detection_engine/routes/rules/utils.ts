@@ -13,6 +13,7 @@ import { RulesSchema } from '../../../../../common/detection_engine/schemas/resp
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
+import { ActionsClient, FindActionResult } from '../../../../../../actions/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -103,8 +104,11 @@ export const transformAlertToRule = (
   return internalRuleToAPIResponse(alert, ruleStatus?.attributes, legacyRuleActions);
 };
 
-export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<RulesSchema>> => {
-  return alerts.map((alert) => transformAlertToRule(alert));
+export const transformAlertsToRules = (
+  alerts: RuleAlertType[],
+  legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
+): Array<Partial<RulesSchema>> => {
+  return alerts.map((alert) => transformAlertToRule(alert, undefined, legacyRuleActions[alert.id]));
 };
 
 export const transformFindAlerts = (
@@ -187,6 +191,82 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
       errors: new Map<string, BulkError>(),
       rulesAcc: new Map<string, PromiseFromStreams>(),
     }
+  );
+
+  return [Array.from(errors.values()), Array.from(rulesAcc.values())];
+};
+
+/**
+ * Given a set of rules and an actions client this will return connectors that are invalid
+ * such as missing connectors and filter out the rules that have invalid connectors.
+ * @param rules The rules to check for invalid connectors
+ * @param actionsClient The actions client to get all the connectors.
+ * @returns An array of connector errors if it found any and then the promise stream of valid and invalid connectors.
+ */
+export const getInvalidConnectors = async (
+  rules: PromiseFromStreams[],
+  actionsClient: ActionsClient
+): Promise<[BulkError[], PromiseFromStreams[]]> => {
+  let actionsFind: FindActionResult[] = [];
+  const reducerAccumulator = {
+    errors: new Map<string, BulkError>(),
+    rulesAcc: new Map<string, PromiseFromStreams>(),
+  };
+  try {
+    actionsFind = await actionsClient.getAll();
+  } catch (exc) {
+    if (exc?.output?.statusCode === 403) {
+      reducerAccumulator.errors.set(
+        uuid.v4(),
+        createBulkErrorObject({
+          statusCode: exc.output.statusCode,
+          message: `You may not have actions privileges required to import rules with actions: ${exc.output.payload.message}`,
+        })
+      );
+    } else {
+      reducerAccumulator.errors.set(
+        uuid.v4(),
+        createBulkErrorObject({
+          statusCode: 404,
+          message: JSON.stringify(exc),
+        })
+      );
+    }
+  }
+  const actionIds = new Set(actionsFind.map((action) => action.id));
+  const { errors, rulesAcc } = rules.reduce(
+    (acc, parsedRule) => {
+      if (parsedRule instanceof Error) {
+        acc.rulesAcc.set(uuid.v4(), parsedRule);
+      } else {
+        const { rule_id: ruleId, actions } = parsedRule;
+        const missingActionIds = actions.flatMap((action) => {
+          if (!actionIds.has(action.id)) {
+            return [action.id];
+          } else {
+            return [];
+          }
+        });
+        if (missingActionIds.length === 0) {
+          acc.rulesAcc.set(ruleId, parsedRule);
+        } else {
+          const errorMessage =
+            missingActionIds.length > 1
+              ? 'connectors are missing. Connector ids missing are:'
+              : 'connector is missing. Connector id missing is:';
+          acc.errors.set(
+            uuid.v4(),
+            createBulkErrorObject({
+              ruleId,
+              statusCode: 404,
+              message: `${missingActionIds.length} ${errorMessage} ${missingActionIds.join(', ')}`,
+            })
+          );
+        }
+      }
+      return acc;
+    }, // using map (preserves ordering)
+    reducerAccumulator
   );
 
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];

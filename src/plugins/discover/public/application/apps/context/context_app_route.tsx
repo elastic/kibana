@@ -33,6 +33,8 @@ export function ContextAppRoute(props: ContextAppProps) {
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
+  const anchorId = decodeURIComponent(id);
+  const dataViewId = decodeURIComponent(indexPatternId);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -45,7 +47,7 @@ export function ContextAppRoute(props: ContextAppProps) {
     ]);
   }, [chrome]);
 
-  const { indexPattern, error } = useIndexPattern(services.indexPatterns, indexPatternId);
+  const { indexPattern, error } = useIndexPattern(services.indexPatterns, dataViewId);
 
   if (error) {
     return (
@@ -54,15 +56,15 @@ export function ContextAppRoute(props: ContextAppProps) {
         iconColor="danger"
         title={
           <FormattedMessage
-            id="discover.singleDocRoute.errorTitle"
-            defaultMessage="An error occured"
+            id="discover.contextViewRoute.errorTitle"
+            defaultMessage="An error occurred"
           />
         }
         body={
           <FormattedMessage
-            id="discover.singleDocRoute.errorMessage"
-            defaultMessage="No matching index pattern for id {indexPatternId}"
-            values={{ indexPatternId }}
+            id="discover.contextViewRoute.errorMessage"
+            defaultMessage="No matching data view for id {dataViewId}"
+            values={{ dataViewId }}
           />
         }
       />
@@ -73,5 +75,5 @@ export function ContextAppRoute(props: ContextAppProps) {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp anchorId={id} indexPattern={indexPattern} />;
+  return <ContextApp anchorId={anchorId} indexPattern={indexPattern} />;
 }

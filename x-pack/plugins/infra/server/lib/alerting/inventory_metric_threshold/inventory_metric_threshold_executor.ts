@@ -11,7 +11,7 @@ import { ALERT_REASON, ALERT_RULE_PARAMS } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { AlertStates, InventoryMetricConditions } from './types';
+import { AlertStates } from './types';
 import {
   ActionGroupIdsOf,
   ActionGroup,
@@ -20,32 +20,25 @@ import {
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
 import { AlertInstance, AlertTypeState } from '../../../../../alerting/server';
-import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
 import { createFormatter } from '../../../../common/formatters';
+import { InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
+  buildInvalidQueryAlertReason,
 } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
-
-interface InventoryMetricThresholdParams {
-  criteria: InventoryMetricConditions[];
-  filterQuery: string | undefined;
-  nodeType: InventoryItemType;
-  sourceId?: string;
-  alertOnNoData?: boolean;
-}
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
 
-export type InventoryMetricThresholdAlertTypeParams = Record<string, any>;
 export type InventoryMetricThresholdAlertTypeState = AlertTypeState; // no specific state used
 export type InventoryMetricThresholdAlertInstanceState = AlertInstanceState; // no specific state used
 export type InventoryMetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instance context used
@@ -64,14 +57,13 @@ type InventoryMetricThresholdAlertInstanceFactory = (
 
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
-    InventoryMetricThresholdAlertTypeParams,
+    InventoryMetricThresholdParams & Record<string, unknown>,
     InventoryMetricThresholdAlertTypeState,
     InventoryMetricThresholdAlertInstanceState,
     InventoryMetricThresholdAlertInstanceContext,
     InventoryMetricThresholdAllowedActionGroups
   >(async ({ services, params }) => {
-    const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } =
-      params as InventoryMetricThresholdParams;
+    const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
     const alertInstanceFactory: InventoryMetricThresholdAlertInstanceFactory = (id, reason) =>
@@ -83,6 +75,25 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         },
       });
 
+    if (!params.filterQuery && params.filterQueryText) {
+      try {
+        const { fromKueryExpression } = await import('@kbn/es-query');
+        fromKueryExpression(params.filterQueryText);
+      } catch (e) {
+        const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
+        const reason = buildInvalidQueryAlertReason(params.filterQueryText);
+        const alertInstance = alertInstanceFactory('*', reason);
+        alertInstance.scheduleActions(actionGroupId, {
+          group: '*',
+          alertState: stateToAlertMessage[AlertStates.ERROR],
+          reason,
+          timestamp: moment().toISOString(),
+          value: null,
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
+        });
+        return {};
+      }
+    }
     const source = await libs.sources.getSourceConfiguration(
       savedObjectsClient,
       sourceId || 'default'

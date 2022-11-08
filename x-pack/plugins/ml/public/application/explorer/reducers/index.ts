@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export {
-  explorerReducer,
-  getExplorerDefaultState,
-  getIndexPattern,
-  ExplorerState,
-} from './explorer_reducer';
+export type { ExplorerState } from './explorer_reducer';
+export { explorerReducer, getExplorerDefaultState, getIndexPattern } from './explorer_reducer';

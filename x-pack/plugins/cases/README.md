@@ -167,7 +167,7 @@ UI component:
 
 _***Feature in development, disabled by default**_
 
-See [Kibana Actions](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions) for more information.
+See [Kibana Actions](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions) for more information.
 
 
 ID: `.case`

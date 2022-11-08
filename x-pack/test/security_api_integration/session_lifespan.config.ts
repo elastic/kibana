@@ -27,7 +27,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.token.timeout=15s',
-        'xpack.security.authc.realms.saml.saml1.order=0',
+        'xpack.security.authc.realms.native.native1.order=0',
+        'xpack.security.authc.realms.saml.saml1.order=1',
         `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${idpPath}`,
         'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
@@ -41,13 +42,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.security.session.lifespan=5s',
-        '--xpack.security.session.cleanupInterval=10s',
+        '--xpack.security.session.lifespan=10s',
+        '--xpack.security.session.cleanupInterval=20s',
         `--xpack.security.authc.providers=${JSON.stringify({
           basic: { basic1: { order: 0 } },
           saml: {
             saml_fallback: { order: 1, realm: 'saml1' },
-            saml_override: { order: 2, realm: 'saml1', session: { lifespan: '1m' } },
+            saml_override: { order: 2, realm: 'saml1', session: { lifespan: '2m' } },
             saml_disable: { order: 3, realm: 'saml1', session: { lifespan: 0 } },
           },
         })}`,

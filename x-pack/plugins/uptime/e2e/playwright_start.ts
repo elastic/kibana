@@ -15,24 +15,25 @@ import './journeys';
 
 export function playwrightRunTests() {
   return async ({ getService }: any) => {
-    try {
-      const result = await playwrightStart(getService);
+    const results = await playwrightStart(getService);
 
-      if (result && result.uptime.status !== 'succeeded') {
-        process.exit(1);
+    Object.entries(results).forEach(([_journey, result]) => {
+      if (result.status !== 'succeeded') {
+        throw new Error('Tests failed');
       }
-    } catch (error) {
-      console.error('errors: ', error);
-      process.exit(1);
-    }
+    });
   };
 }
 
 async function playwrightStart(getService: any) {
   console.log('Loading esArchiver...');
-  await esArchiverLoad('full_heartbeat');
+  const esArchiver = getService('esArchiver');
+
+  esArchiverLoad('full_heartbeat');
 
   const config = getService('config');
+
+  await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
 
   const kibanaUrl = Url.format({
     protocol: config.get('servers.kibana.protocol'),
@@ -41,12 +42,12 @@ async function playwrightStart(getService: any) {
   });
 
   const res = await playwrightRun({
-    params: { kibanaUrl },
-    playwrightOptions: { chromiumSandbox: false, timeout: 60 * 1000 },
+    params: { kibanaUrl, getService },
+    playwrightOptions: { headless: true, chromiumSandbox: false, timeout: 60 * 1000 },
   });
 
   console.log('Removing esArchiver...');
-  await esArchiverUnload('full_heartbeat');
+  esArchiverUnload('full_heartbeat');
 
   return res;
 }

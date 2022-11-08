@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { TodoSavedObjectAttributes } from './todo_saved_object_attributes';
-export { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from './book_saved_object_attributes';
+export type { TodoSavedObjectAttributes } from './todo_saved_object_attributes';
+export type { BookSavedObjectAttributes } from './book_saved_object_attributes';
+export { BOOK_SAVED_OBJECT } from './book_saved_object_attributes';

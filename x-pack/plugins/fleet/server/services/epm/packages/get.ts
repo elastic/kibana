@@ -30,7 +30,8 @@ import { normalizeKuery } from '../../saved_object';
 
 import { createInstallableFrom, isUnremovablePackage } from './index';
 
-export { getFile, SearchParams } from '../registry';
+export type { SearchParams } from '../registry';
+export { getFile } from '../registry';
 
 function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();

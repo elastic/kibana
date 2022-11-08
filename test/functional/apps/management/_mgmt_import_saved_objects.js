@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }) {
   //in 6.4.0 bug the Saved Search conflict would be resolved and get imported but the visualization
   //that referenced the saved search was not imported.( https://github.com/elastic/kibana/issues/22238)
 
-  // https://github.com/elastic/kibana/issues/114053
-  describe.skip('mgmt saved objects', function describeIndexTests() {
+  describe('mgmt saved objects', function describeIndexTests() {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.settings.navigateTo();

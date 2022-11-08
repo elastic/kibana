@@ -18,10 +18,12 @@ import { connectorTypesRoute } from './connector_types';
 import { updateActionRoute } from './update';
 import { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
 import { defineLegacyRoutes } from './legacy';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 export function defineRoutes(
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState,
+  actionsConfigUtils: ActionsConfigurationUtilities,
   usageCounter?: UsageCounter
 ) {
   defineLegacyRoutes(router, licenseState, usageCounter);

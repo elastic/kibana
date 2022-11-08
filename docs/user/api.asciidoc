@@ -15,6 +15,8 @@ It is recommended that you use HTTPs on port 5601 because it is more secure.
 
 NOTE: The {kib} Console supports only Elasticsearch APIs. You are unable to interact with the {kib} APIs with the Console and must use `curl` or another HTTP tool instead. For more information, refer to <<console-kibana,Console>>.
 
+Note: this will automatically prefix `s/{space_id}/` on the API request if ran from a non-default Kibana Space.
+
 [float]
 [[api-authentication]]
 === Authentication
@@ -94,6 +96,7 @@ include::{kib-repo-dir}/api/saved-objects.asciidoc[]
 include::{kib-repo-dir}/api/index-patterns.asciidoc[]
 include::{kib-repo-dir}/api/alerting.asciidoc[]
 include::{kib-repo-dir}/api/actions-and-connectors.asciidoc[]
+include::{kib-repo-dir}/api/cases.asciidoc[]
 include::{kib-repo-dir}/api/dashboard-api.asciidoc[]
 include::{kib-repo-dir}/api/logstash-configuration-management.asciidoc[]
 include::{kib-repo-dir}/api/machine-learning.asciidoc[]

@@ -13,7 +13,6 @@ include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 :es-docker-image: {es-docker-repo}:{version}
 :blob:           {kib-repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
-
 :data-source:     index pattern
 :data-sources:    index patterns
 :a-data-source:   an index pattern

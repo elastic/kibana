@@ -27,7 +27,7 @@ async function removeLogFile() {
   await fs.unlink(logFilePath).catch(() => void 0);
 }
 
-describe('migration v2', () => {
+describe('migration v2', function () {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
@@ -118,7 +118,6 @@ function createRoot(options: { maxBatchSizeBytes?: number }) {
     {
       migrations: {
         skip: false,
-        enableV2: true,
         batchSize: 1000,
         maxBatchSizeBytes: options.maxBatchSizeBytes,
       },
@@ -135,6 +134,7 @@ function createRoot(options: { maxBatchSizeBytes?: number }) {
         loggers: [
           {
             name: 'root',
+            level: 'info',
             appenders: ['file'],
           },
         ],

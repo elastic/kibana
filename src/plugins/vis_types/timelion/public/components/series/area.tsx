@@ -9,7 +9,14 @@
 // @ts-ignore
 import chroma from 'chroma-js';
 import React from 'react';
-import { AreaSeries, ScaleType, CurveType, AreaSeriesStyle, PointShape } from '@elastic/charts';
+import {
+  AreaSeries,
+  ScaleType,
+  CurveType,
+  AreaSeriesStyle,
+  PointShape,
+  RecursivePartial,
+} from '@elastic/charts';
 import type { VisSeries } from '../../../common/vis_data';
 
 interface AreaSeriesComponentProps {
@@ -54,7 +61,7 @@ const getAreaSeriesStyle = ({ color, lines, points }: AreaSeriesComponentProps['
       shape: points?.symbol === 'cross' ? PointShape.X : points?.symbol,
     },
     curve: lines?.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
-  } as AreaSeriesStyle);
+  } as RecursivePartial<AreaSeriesStyle>);
 
 export const AreaSeriesComponent = ({ index, groupId, visData }: AreaSeriesComponentProps) => (
   <AreaSeries

@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`jestConfigs #expected throws if test file outside root 1`] = `[Error: Test file (bad.test.js) can not exist outside roots (packages/b/nested, packages). Move it to a root or configure additional root.]`;

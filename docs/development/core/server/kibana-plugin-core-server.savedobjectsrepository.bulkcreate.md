@@ -16,12 +16,12 @@ bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>Array&lt;SavedObjectsBulkCreateObject&lt;T&gt;&gt;</code> |  |
-|  options | <code>SavedObjectsCreateOptions</code> |  |
+|  objects | Array&lt;SavedObjectsBulkCreateObject&lt;T&gt;&gt; | \[{ type, id, attributes, references, migrationVersion }<!-- -->\] |
+|  options | SavedObjectsCreateOptions |  {<!-- -->boolean<!-- -->} \[options.overwrite=false\] - overwrites existing documents  {<!-- -->string<!-- -->} \[options.namespace\] |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsBulkResponse<T>>`
+Promise&lt;SavedObjectsBulkResponse&lt;T&gt;&gt;
 
 {<!-- -->promise<!-- -->} - {<!-- -->saved\_objects: \[\[{ id, type, version, references, attributes, error: { message } }<!-- -->\]<!-- -->}
 

@@ -21,5 +21,5 @@ const WrappedSearchBar = (props: SearchBarProps) => (
 );
 
 export const SearchBar = injectI18n(withKibana(WrappedSearchBar));
-export { StatefulSearchBarProps } from './create_search_bar';
+export type { StatefulSearchBarProps } from './create_search_bar';
 export type { SearchBarProps, SearchBarOwnProps } from './search_bar';

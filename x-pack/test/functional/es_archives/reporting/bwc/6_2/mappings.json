@@ -3,59 +3,57 @@
   "value": {
     "index": ".reporting-2018.03.11",
     "mappings": {
-      "esqueue": {
-        "properties": {
-          "attempts": {
-            "type": "short"
-          },
-          "completed_at": {
-            "type": "date"
-          },
-          "created_at": {
-            "type": "date"
-          },
-          "created_by": {
-            "type": "keyword"
-          },
-          "jobtype": {
-            "type": "keyword"
-          },
-          "max_attempts": {
-            "type": "short"
-          },
-          "output": {
-            "properties": {
-              "content": {
-                "enabled": false,
-                "type": "object"
-              },
-              "content_type": {
-                "type": "keyword"
-              },
-              "max_size_reached": {
-                "type": "boolean"
-              }
+      "properties": {
+        "attempts": {
+          "type": "short"
+        },
+        "completed_at": {
+          "type": "date"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "created_by": {
+          "type": "keyword"
+        },
+        "jobtype": {
+          "type": "keyword"
+        },
+        "max_attempts": {
+          "type": "short"
+        },
+        "output": {
+          "properties": {
+            "content": {
+              "enabled": false,
+              "type": "object"
+            },
+            "content_type": {
+              "type": "keyword"
+            },
+            "max_size_reached": {
+              "type": "boolean"
             }
-          },
-          "payload": {
-            "enabled": false,
-            "type": "object"
-          },
-          "priority": {
-            "type": "byte"
-          },
-          "process_expiration": {
-            "type": "date"
-          },
-          "started_at": {
-            "type": "date"
-          },
-          "status": {
-            "type": "keyword"
-          },
-          "timeout": {
-            "type": "long"
           }
+        },
+        "payload": {
+          "enabled": false,
+          "type": "object"
+        },
+        "priority": {
+          "type": "byte"
+        },
+        "process_expiration": {
+          "type": "date"
+        },
+        "started_at": {
+          "type": "date"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "timeout": {
+          "type": "long"
         }
       }
     },

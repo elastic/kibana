@@ -14,7 +14,7 @@ export const plugin = (ctx: PluginInitializerContext) => {
   return new IndexMgmtUIPlugin(ctx);
 };
 
-export { IndexManagementPluginSetup } from './types';
+export type { IndexManagementPluginSetup } from './types';
 
 export { getIndexListUri, getTemplateDetailsLink } from './application/services/routing';
 

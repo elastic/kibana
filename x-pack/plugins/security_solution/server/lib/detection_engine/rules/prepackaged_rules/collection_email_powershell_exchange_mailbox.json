@@ -15,7 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Exporting Exchange Mailbox via PowerShell",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name: (\"powershell.exe\", \"pwsh.exe\") and process.args : \"New-MailboxExportRequest*\"\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name: (\"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") and process.args : \"New-MailboxExportRequest*\"\n",
   "references": [
     "https://www.volexity.com/blog/2020/12/14/dark-halo-leverages-solarwinds-compromise-to-breach-organizations/",
     "https://docs.microsoft.com/en-us/powershell/module/exchange/new-mailboxexportrequest?view=exchange-ps"
@@ -61,5 +61,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 6
 }

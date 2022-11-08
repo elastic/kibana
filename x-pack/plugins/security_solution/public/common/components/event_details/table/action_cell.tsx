@@ -16,6 +16,7 @@ import { TimelineContext } from '../../../../../../timelines/public';
 interface Props {
   contextId: string;
   data: FieldsData | EventFieldsData;
+  applyWidthAndPadding?: boolean;
   disabled?: boolean;
   eventId: string;
   fieldFromBrowserField?: BrowserField;
@@ -29,6 +30,7 @@ interface Props {
 
 export const ActionCell: React.FC<Props> = React.memo(
   ({
+    applyWidthAndPadding = true,
     contextId,
     data,
     eventId,
@@ -68,6 +70,7 @@ export const ActionCell: React.FC<Props> = React.memo(
 
     return (
       <HoverActions
+        applyWidthAndPadding={applyWidthAndPadding}
         closeTopN={closeTopN}
         dataType={data.type}
         dataProvider={actionCellConfig?.dataProvider}

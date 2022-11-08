@@ -17,6 +17,7 @@ import { FormattedNumber } from '@kbn/i18n/react';
 
 import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../shared/constants';
 import { KibanaLogic } from '../../../../shared/kibana';
+import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import { ENGINE_CRAWLER_DOMAIN_PATH } from '../../../routes';
 import { generateEnginePath } from '../../engine';
@@ -45,6 +46,14 @@ export const DomainsTable: React.FC = () => {
         {
           defaultMessage: 'Domain URL',
         }
+      ),
+      render: (_, domain: CrawlerDomain) => (
+        <EuiLinkTo
+          data-test-subj="CrawlerDomainURL"
+          to={generateEnginePath(ENGINE_CRAWLER_DOMAIN_PATH, { domainId: domain.id })}
+        >
+          {domain.url}
+        </EuiLinkTo>
       ),
     },
     {

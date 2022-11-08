@@ -30,6 +30,8 @@ export const newSeriesFn = (obj = {}) => {
       point_size: 1,
       fill: 0.5,
       stacked: STACKED_OPTIONS.NONE,
+      override_index_pattern: 0,
+      series_drop_last_bucket: 0,
     },
     obj
   );

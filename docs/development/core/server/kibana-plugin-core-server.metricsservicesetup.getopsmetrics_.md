@@ -19,6 +19,5 @@ getOpsMetrics$: () => Observable<OpsMetrics>;
 core.metrics.getOpsMetrics$().subscribe(metrics => {
   // do something with the metrics
 })
-
 ```
 

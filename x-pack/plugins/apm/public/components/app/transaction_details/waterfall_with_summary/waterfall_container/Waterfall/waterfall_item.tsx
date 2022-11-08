@@ -17,6 +17,7 @@ import {
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/Timeline';
+import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { SyncBadge } from './sync_badge';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { FailureBadge } from './failure_badge';
@@ -67,6 +68,7 @@ const ItemText = euiStyled.span`
   display: flex;
   align-items: center;
   height: ${({ theme }) => theme.eui.euiSizeL};
+  max-width: 100%;
 
   /* add margin to all direct descendants */
   & > * {
@@ -160,7 +162,11 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
             : '';
         name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;
       }
-      return <EuiText size="s">{name}</EuiText>;
+      return (
+        <EuiText style={{ overflow: 'hidden' }} size="s">
+          <TruncateWithTooltip content={name} text={name} />
+        </EuiText>
+      );
     case 'transaction':
       return (
         <EuiTitle size="xxs">
@@ -232,11 +238,16 @@ function RelatedErrors({
   const theme = useTheme();
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
+  let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
+  if (item.doc.transaction?.id) {
+    kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
+  }
+
   const href = apmRouter.link(`/services/{serviceName}/errors`, {
     path: { serviceName: item.doc.service.name },
     query: {
       ...query,
-      kuery: `${TRACE_ID} : "${item.doc.trace.id}" and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`,
+      kuery,
     },
   });
 

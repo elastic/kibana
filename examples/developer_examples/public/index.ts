@@ -10,4 +10,4 @@ import { DeveloperExamplesPlugin } from './plugin';
 
 export const plugin = () => new DeveloperExamplesPlugin();
 
-export { DeveloperExamplesSetup } from './plugin';
+export type { DeveloperExamplesSetup } from './plugin';

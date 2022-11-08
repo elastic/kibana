@@ -10,6 +10,7 @@ import { take } from 'rxjs/operators';
 import { coreMock } from '../../../core/public/mocks';
 import { NewsfeedPublicPlugin } from './plugin';
 import { NewsfeedApiEndpoint } from './lib/api';
+import { screenshotModePluginMock } from '../../screenshot_mode/public/mocks';
 
 describe('Newsfeed plugin', () => {
   let plugin: NewsfeedPublicPlugin;
@@ -46,7 +47,7 @@ describe('Newsfeed plugin', () => {
     describe('base case', () => {
       it('makes fetch requests', () => {
         const startContract = plugin.start(coreMock.createStart(), {
-          screenshotMode: { isScreenshotMode: () => false },
+          screenshotMode: screenshotModePluginMock.createSetupContract(),
         });
         const sub = startContract
           .createNewsFeed$(NewsfeedApiEndpoint.KIBANA) // Any endpoint will do
@@ -60,8 +61,10 @@ describe('Newsfeed plugin', () => {
 
     describe('when in screenshot mode', () => {
       it('makes no fetch requests in screenshot mode', () => {
+        const screenshotMode = screenshotModePluginMock.createSetupContract();
+        screenshotMode.isScreenshotMode.mockReturnValue(true);
         const startContract = plugin.start(coreMock.createStart(), {
-          screenshotMode: { isScreenshotMode: () => true },
+          screenshotMode,
         });
         const sub = startContract
           .createNewsFeed$(NewsfeedApiEndpoint.KIBANA) // Any endpoint will do

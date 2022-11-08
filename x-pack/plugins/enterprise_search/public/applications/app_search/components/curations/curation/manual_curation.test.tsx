@@ -22,7 +22,7 @@ jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { CurationLogic } from './curation_logic';
 
 import { DeleteCurationButton } from './delete_curation_button';
-import { PromotedDocuments, HiddenDocuments } from './documents';
+import { PromotedDocuments, HiddenDocuments, OrganicDocuments } from './documents';
 import { ManualCuration } from './manual_curation';
 import { ActiveQuerySelect, ManageQueriesModal } from './queries';
 import { AddResultFlyout } from './results';
@@ -30,7 +30,6 @@ import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 describe('ManualCuration', () => {
   const values = {
-    dataLoading: false,
     queries: ['query A', 'query B'],
     isFlyoutOpen: false,
     selectedPageTab: 'promoted',
@@ -74,13 +73,13 @@ describe('ManualCuration', () => {
     expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(2, 'hidden');
   });
 
-  it('contains a suggested documents callout when the selectedPageTab is ', () => {
+  it('contains a suggested documents callout', () => {
     const wrapper = shallow(<ManualCuration />);
 
     expect(wrapper.find(SuggestedDocumentsCallout)).toHaveLength(1);
   });
 
-  it('renders promoted documents when that tab is selected', () => {
+  it('renders promoted and organic documents when the promoted tab is selected', () => {
     setMockValues({ ...values, selectedPageTab: 'promoted' });
     const wrapper = shallow(<ManualCuration />);
     const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
@@ -88,9 +87,10 @@ describe('ManualCuration', () => {
     expect(tabs.at(0).prop('isSelected')).toEqual(true);
 
     expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
+    expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
   });
 
-  it('renders hidden documents when that tab is selected', () => {
+  it('renders hidden documents when the hidden tab is selected', () => {
     setMockValues({ ...values, selectedPageTab: 'hidden' });
     const wrapper = shallow(<ManualCuration />);
     const tabs = getPageHeaderTabs(wrapper).find(EuiTab);

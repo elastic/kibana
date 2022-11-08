@@ -16,7 +16,7 @@ export interface SavedObjectsImportUnknownError
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [message](./kibana-plugin-core-public.savedobjectsimportunknownerror.message.md) | <code>string</code> |  |
-|  [statusCode](./kibana-plugin-core-public.savedobjectsimportunknownerror.statuscode.md) | <code>number</code> |  |
-|  [type](./kibana-plugin-core-public.savedobjectsimportunknownerror.type.md) | <code>'unknown'</code> |  |
+|  [message](./kibana-plugin-core-public.savedobjectsimportunknownerror.message.md) | string |  |
+|  [statusCode](./kibana-plugin-core-public.savedobjectsimportunknownerror.statuscode.md) | number |  |
+|  [type](./kibana-plugin-core-public.savedobjectsimportunknownerror.type.md) | 'unknown' |  |
 

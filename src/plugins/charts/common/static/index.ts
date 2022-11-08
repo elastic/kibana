@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
+export type { ColorSchema, RawColorSchema, ColorMap } from './color_maps';
 export {
   ColorSchemas,
-  ColorSchema,
-  RawColorSchema,
-  ColorMap,
   vislibColorMaps,
   colorSchemas,
   getHeatmapColors,

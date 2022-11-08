@@ -85,7 +85,6 @@ export default async function ({ readConfigFile }) {
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
-        '--usageCollection.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
@@ -452,9 +451,7 @@ export default async function ({ readConfigFile }) {
           },
           kibana: [
             {
-              feature: {
-                discover: ['read'],
-              },
+              base: ['all'],
               spaces: ['*'],
             },
           ],
@@ -528,11 +525,38 @@ export default async function ({ readConfigFile }) {
             cluster: ['monitor', 'manage_index_templates'],
             indices: [
               {
-                names: ['geo_shapes*'],
+                names: ['*'],
                 privileges: ['all'],
               },
             ],
           },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        // https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshots-register-repository.html#snapshot-repo-prereqs
+        snapshot_restore_user: {
+          elasticsearch: {
+            cluster: [
+              'monitor',
+              'manage_slm',
+              'cluster:admin/snapshot',
+              'cluster:admin/repository',
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         ingest_pipelines_user: {
@@ -564,6 +588,27 @@ export default async function ({ readConfigFile }) {
         remote_clusters_user: {
           elasticsearch: {
             cluster: ['manage'],
+          },
+        },
+
+        global_alerts_logs_all_else_read: {
+          kibana: [
+            {
+              feature: {
+                apm: ['read'],
+                logs: ['all'],
+                infrastructure: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
           },
         },
       },

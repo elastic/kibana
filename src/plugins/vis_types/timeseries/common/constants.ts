@@ -7,6 +7,7 @@
  */
 
 export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
+export const ALLOW_CHECKING_FOR_FAILED_SHARDS = 'metrics:allowCheckingForFailedShards';
 export const INDEXES_SEPARATOR = ',';
 export const AUTO_INTERVAL = 'auto';
 export const ROUTES = {

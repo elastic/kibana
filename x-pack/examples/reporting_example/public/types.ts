@@ -10,6 +10,7 @@ import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { SharePluginSetup } from 'src/plugins/share/public';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import { ReportingStart } from '../../../plugins/reporting/public';
+import type { MyForwardableState } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
@@ -26,4 +27,4 @@ export interface StartDeps {
   reporting: ReportingStart;
 }
 
-export type MyForwardableState = Record<string, unknown>;
+export type { MyForwardableState };

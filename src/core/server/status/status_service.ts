@@ -24,7 +24,7 @@ import { InternalEnvironmentServiceSetup } from '../environment';
 import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
-import { PluginsStatusService } from './plugins_status';
+import { PluginsStatusService } from './cached_plugins_status';
 import { getOverallStatusChanges } from './log_overall_status';
 
 interface StatusLogMeta extends LogMeta {
@@ -68,7 +68,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
     this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
-      debounceTime(500),
+      debounceTime(80),
       map(([coreStatus, pluginsStatus]) => {
         const summary = getSummaryStatus([
           ...Object.entries(coreStatus),
@@ -170,6 +170,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     this.subscriptions.forEach((subscription) => {
       subscription.unsubscribe();
     });
+
+    this.pluginsStatus?.stop();
     this.subscriptions = [];
   }
 

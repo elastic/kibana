@@ -14,9 +14,9 @@ has(key: string): boolean;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  key | <code>string</code> |  |
+|  key | string |  |
 
 <b>Returns:</b>
 
-`boolean`
+boolean
 

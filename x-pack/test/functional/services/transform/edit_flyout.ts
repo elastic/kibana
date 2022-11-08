@@ -37,7 +37,7 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       );
     },
 
-    async assertTransformEditFlyoutRetentionPolicySelectEnabled(expectedValue: boolean) {
+    async assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(expectedValue: boolean) {
       await testSubjects.existOrFail(`transformEditFlyoutRetentionPolicyFieldSelect`, {
         timeout: 1000,
       });
@@ -50,6 +50,28 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
+    },
+
+    async assertTransformEditFlyoutRetentionPolicyFieldSelectValue(expectedValue: string) {
+      await testSubjects.existOrFail(`transformEditFlyoutRetentionPolicyFieldSelect`, {
+        timeout: 1000,
+      });
+      const actualValue = await testSubjects.getAttribute(
+        'transformEditFlyoutRetentionPolicyFieldSelect',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Retention policy field option value should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async setTransformEditFlyoutRetentionPolicyFieldSelectValue(fieldOptionValue: string) {
+      await testSubjects.selectValue(
+        'transformEditFlyoutRetentionPolicyFieldSelect',
+        fieldOptionValue
+      );
+      await this.assertTransformEditFlyoutRetentionPolicyFieldSelectValue(fieldOptionValue);
     },
 
     async assertTransformEditFlyoutInputEnabled(input: string, expectedValue: boolean) {

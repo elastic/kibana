@@ -47,6 +47,7 @@ import {
   RESIZED_COLUMN_MIN_WITH,
 } from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
+import { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -124,6 +125,7 @@ export const addTimelineNoteToEvent = ({
 
 interface AddTimelineParams {
   id: string;
+  resolveTimelineConfig?: ResolveTimelineConfig;
   timeline: TimelineModel;
   timelineById: TimelineById;
 }
@@ -145,6 +147,7 @@ export const shouldResetActiveTimelineContext = (
  */
 export const addTimelineToStore = ({
   id,
+  resolveTimelineConfig,
   timeline,
   timelineById,
 }: AddTimelineParams): TimelineById => {
@@ -159,6 +162,7 @@ export const addTimelineToStore = ({
       filterManager: timelineById[id].filterManager,
       isLoading: timelineById[id].isLoading,
       initialized: timelineById[id].initialized,
+      resolveTimelineConfig,
       dateRange:
         timeline.status === TimelineStatus.immutable &&
         timeline.timelineType === TimelineType.template

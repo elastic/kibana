@@ -7,5 +7,6 @@
 
 export { KibanaDeprecations } from './kibana_deprecations';
 export { EsDeprecations } from './es_deprecations';
+export { EsDeprecationLogs } from './es_deprecation_logs';
 export { ComingSoonPrompt } from './coming_soon_prompt';
 export { Overview } from './overview';

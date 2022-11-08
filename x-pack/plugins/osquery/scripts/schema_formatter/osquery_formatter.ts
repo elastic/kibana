@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { map, partialRight, pick } from 'lodash';
+import { find, map, partialRight, pick } from 'lodash';
 import { promises as fs } from 'fs';
 import path from 'path';
 
 import { run } from '@kbn/dev-utils';
 
 const OSQUERY_COLUMN_SCHEMA_FIELDS = ['name', 'description', 'platforms', 'columns'];
+const ELASTIC_OSQUERY_HOSTFS_TABLES = ['users', 'groups', 'processes'];
 
 run(
   async ({ flags }) => {
@@ -20,9 +21,14 @@ run(
     const schemaData = await require(schemaFile);
 
     const formattedSchema = map(schemaData, partialRight(pick, OSQUERY_COLUMN_SCHEMA_FIELDS));
+    const elasticTables = map(ELASTIC_OSQUERY_HOSTFS_TABLES, (tableName) => ({
+      ...find(formattedSchema, { name: tableName }),
+      name: `host_${tableName}`,
+    }));
+    formattedSchema.push(...elasticTables);
 
     await fs.writeFile(
-      path.join(schemaPath, `v${flags.schema_version}-formatted.json`),
+      path.join(schemaPath, `${flags.schema_version}`),
       JSON.stringify(formattedSchema)
     );
   },

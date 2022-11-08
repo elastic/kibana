@@ -34,6 +34,12 @@ export const filterExportedCounts = (): Transform => {
   );
 };
 
+export const filterExceptions = (): Transform => {
+  return createFilterStream<ImportRulesSchemaDecoded | RulesObjectsExportResultDetails>(
+    (obj) => obj != null && !has('list_id', obj)
+  );
+};
+
 // Adaptation from: saved_objects/import/create_limit_stream.ts
 export const createLimitStream = (limit: number): Transform => {
   let counter = 0;

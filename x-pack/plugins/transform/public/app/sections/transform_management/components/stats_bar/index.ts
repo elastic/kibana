@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { StatsBar, TransformStatsBarStats } from './stats_bar';
+export type { TransformStatsBarStats } from './stats_bar';
+export { StatsBar } from './stats_bar';

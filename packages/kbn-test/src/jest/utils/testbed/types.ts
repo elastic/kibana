@@ -7,10 +7,13 @@
  */
 
 import { Store } from 'redux';
-import { ReactWrapper } from 'enzyme';
+import { ReactWrapper as GenericReactWrapper } from 'enzyme';
 import { LocationDescriptor } from 'history';
 
+export type AsyncSetupFunc<T> = (props?: any) => Promise<TestBed<T>>;
+export type SyncSetupFunc<T> = (props?: any) => TestBed<T>;
 export type SetupFunc<T> = (props?: any) => TestBed<T> | Promise<TestBed<T>>;
+export type ReactWrapper = GenericReactWrapper<any>;
 
 export interface EuiTableMetaData {
   /** Array of rows of the table. Each row exposes its reactWrapper and its columns */
@@ -51,38 +54,21 @@ export interface TestBed<T = string> {
     find('myForm.nameInput');
     ```
    */
-  find: (testSubject: T, reactWrapper?: ReactWrapper) => ReactWrapper<any>;
+  find: (testSubject: T, reactWrapper?: ReactWrapper) => ReactWrapper;
   /**
    * Update the props of the mounted component
    *
    * @param updatedProps The updated prop object
    */
   setProps: (updatedProps: any) => void;
-  /**
-   * Helper to wait until an element appears in the DOM as hooks updates cycles are tricky.
-   * Useful when loading a component that fetches a resource from the server
-   * and we need to wait for the data to be fetched (and bypass any "loading" state).
-   */
-  waitFor: (testSubject: T, count?: number) => Promise<void>;
-  waitForFn: (predicate: () => Promise<boolean>, errMessage: string) => Promise<void>;
   form: {
     /**
      * Set the value of a form text input.
      *
-     * In some cases, changing an input value triggers an HTTP request to validate
-     * the field. Even if we return immediately the response on the mock server we
-     * still need to wait until the next tick before the DOM updates.
-     * Setting isAsync to "true" takes care of that.
-     *
      * @param input The form input. Can either be a data-test-subj or a reactWrapper (can be a nested path. e.g. "myForm.myInput").
      * @param value The value to set
-     * @param isAsync If set to true will return a Promise that resolves on the next "tick"
      */
-    setInputValue: (
-      input: T | ReactWrapper,
-      value: string,
-      isAsync?: boolean
-    ) => Promise<void> | void;
+    setInputValue: (input: T | ReactWrapper, value: string) => void;
     /**
      * Set the value of a <EuiSelect /> or a mocked <EuiSuperSelect />
      * For the <EuiSuperSelect /> you need to mock it like this
@@ -147,15 +133,23 @@ export interface TestBed<T = string> {
   };
 }
 
-export interface TestBedConfig {
+export interface BaseTestBedConfig {
   /** The default props to pass to the mounted component. */
   defaultProps?: Record<string, any>;
   /** Configuration object for the react-router `MemoryRouter. */
   memoryRouter?: MemoryRouterConfig;
   /** An optional redux store. You can also provide a function that returns a store. */
   store?: (() => Store) | Store | null;
+}
+
+export interface AsyncTestBedConfig extends BaseTestBedConfig {
   /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
-  doMountAsync?: boolean;
+  doMountAsync: true;
+}
+
+export interface TestBedConfig extends BaseTestBedConfig {
+  /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
+  doMountAsync?: false;
 }
 
 export interface MemoryRouterConfig {

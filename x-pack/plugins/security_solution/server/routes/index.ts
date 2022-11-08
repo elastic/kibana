@@ -6,7 +6,6 @@
  */
 
 import { Logger } from 'src/core/server';
-import { RuleDataPluginService } from '../../../rule_registry/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -57,6 +56,7 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
+import { TelemetryEventsSender } from '../lib/telemetry/sender';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
@@ -66,8 +66,8 @@ export const initRoutes = (
   config: ConfigType,
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
+  telemetrySender: TelemetryEventsSender,
   ml: SetupPlugins['ml'],
-  ruleDataService: RuleDataPluginService,
   logger: Logger,
   isRuleRegistryEnabled: boolean
 ) => {
@@ -85,18 +85,18 @@ export const initRoutes = (
 
   // TODO: pass isRuleRegistryEnabled to all relevant routes
 
-  addPrepackedRulesRoute(router, config, security, isRuleRegistryEnabled);
+  addPrepackedRulesRoute(router);
   getPrepackagedRulesStatusRoute(router, config, security, isRuleRegistryEnabled);
   createRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   patchRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesBulkRoute(router, isRuleRegistryEnabled);
-  performBulkActionRoute(router, ml, isRuleRegistryEnabled);
+  performBulkActionRoute(router, ml, logger, isRuleRegistryEnabled);
 
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);
   importRulesRoute(router, config, ml, isRuleRegistryEnabled);
-  exportRulesRoute(router, config, isRuleRegistryEnabled);
+  exportRulesRoute(router, config, logger, isRuleRegistryEnabled);
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
@@ -118,7 +118,7 @@ export const initRoutes = (
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(router);
+  setSignalsStatusRoute(router, logger, security, telemetrySender);
   querySignalsRoute(router, config);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);
@@ -127,7 +127,7 @@ export const initRoutes = (
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
-  createIndexRoute(router, ruleDataService, config);
+  createIndexRoute(router);
   readIndexRoute(router, config);
   deleteIndexRoute(router);
 

@@ -16,17 +16,17 @@ export interface HttpRequestInit
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [body](./kibana-plugin-core-public.httprequestinit.body.md) | <code>BodyInit &#124; null</code> | A BodyInit object or null to set request's body. |
-|  [cache](./kibana-plugin-core-public.httprequestinit.cache.md) | <code>RequestCache</code> | The cache mode associated with request, which is a string indicating how the request will interact with the browser's cache when fetching. |
-|  [credentials](./kibana-plugin-core-public.httprequestinit.credentials.md) | <code>RequestCredentials</code> | The credentials mode associated with request, which is a string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. |
-|  [headers](./kibana-plugin-core-public.httprequestinit.headers.md) | <code>HttpHeadersInit</code> | [HttpHeadersInit](./kibana-plugin-core-public.httpheadersinit.md) |
-|  [integrity](./kibana-plugin-core-public.httprequestinit.integrity.md) | <code>string</code> | Subresource integrity metadata, which is a cryptographic hash of the resource being fetched. Its value consists of multiple hashes separated by whitespace. |
-|  [keepalive](./kibana-plugin-core-public.httprequestinit.keepalive.md) | <code>boolean</code> | Whether or not request can outlive the global in which it was created. |
-|  [method](./kibana-plugin-core-public.httprequestinit.method.md) | <code>string</code> | HTTP method, which is "GET" by default. |
-|  [mode](./kibana-plugin-core-public.httprequestinit.mode.md) | <code>RequestMode</code> | The mode associated with request, which is a string indicating whether the request will use CORS, or will be restricted to same-origin URLs. |
-|  [redirect](./kibana-plugin-core-public.httprequestinit.redirect.md) | <code>RequestRedirect</code> | The redirect mode associated with request, which is a string indicating how redirects for the request will be handled during fetching. A request will follow redirects by default. |
-|  [referrer](./kibana-plugin-core-public.httprequestinit.referrer.md) | <code>string</code> | The referrer of request. Its value can be a same-origin URL if explicitly set in init, the empty string to indicate no referrer, and "about:client" when defaulting to the global's default. This is used during fetching to determine the value of the <code>Referer</code> header of the request being made. |
-|  [referrerPolicy](./kibana-plugin-core-public.httprequestinit.referrerpolicy.md) | <code>ReferrerPolicy</code> | The referrer policy associated with request. This is used during fetching to compute the value of the request's referrer. |
-|  [signal](./kibana-plugin-core-public.httprequestinit.signal.md) | <code>AbortSignal &#124; null</code> | Returns the signal associated with request, which is an AbortSignal object indicating whether or not request has been aborted, and its abort event handler. |
-|  [window](./kibana-plugin-core-public.httprequestinit.window.md) | <code>null</code> | Can only be null. Used to disassociate request from any Window. |
+|  [body?](./kibana-plugin-core-public.httprequestinit.body.md) | BodyInit \| null | <i>(Optional)</i> A BodyInit object or null to set request's body. |
+|  [cache?](./kibana-plugin-core-public.httprequestinit.cache.md) | RequestCache | <i>(Optional)</i> The cache mode associated with request, which is a string indicating how the request will interact with the browser's cache when fetching. |
+|  [credentials?](./kibana-plugin-core-public.httprequestinit.credentials.md) | RequestCredentials | <i>(Optional)</i> The credentials mode associated with request, which is a string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. |
+|  [headers?](./kibana-plugin-core-public.httprequestinit.headers.md) | HttpHeadersInit | <i>(Optional)</i> [HttpHeadersInit](./kibana-plugin-core-public.httpheadersinit.md) |
+|  [integrity?](./kibana-plugin-core-public.httprequestinit.integrity.md) | string | <i>(Optional)</i> Subresource integrity metadata, which is a cryptographic hash of the resource being fetched. Its value consists of multiple hashes separated by whitespace. |
+|  [keepalive?](./kibana-plugin-core-public.httprequestinit.keepalive.md) | boolean | <i>(Optional)</i> Whether or not request can outlive the global in which it was created. |
+|  [method?](./kibana-plugin-core-public.httprequestinit.method.md) | string | <i>(Optional)</i> HTTP method, which is "GET" by default. |
+|  [mode?](./kibana-plugin-core-public.httprequestinit.mode.md) | RequestMode | <i>(Optional)</i> The mode associated with request, which is a string indicating whether the request will use CORS, or will be restricted to same-origin URLs. |
+|  [redirect?](./kibana-plugin-core-public.httprequestinit.redirect.md) | RequestRedirect | <i>(Optional)</i> The redirect mode associated with request, which is a string indicating how redirects for the request will be handled during fetching. A request will follow redirects by default. |
+|  [referrer?](./kibana-plugin-core-public.httprequestinit.referrer.md) | string | <i>(Optional)</i> The referrer of request. Its value can be a same-origin URL if explicitly set in init, the empty string to indicate no referrer, and "about:client" when defaulting to the global's default. This is used during fetching to determine the value of the <code>Referer</code> header of the request being made. |
+|  [referrerPolicy?](./kibana-plugin-core-public.httprequestinit.referrerpolicy.md) | ReferrerPolicy | <i>(Optional)</i> The referrer policy associated with request. This is used during fetching to compute the value of the request's referrer. |
+|  [signal?](./kibana-plugin-core-public.httprequestinit.signal.md) | AbortSignal \| null | <i>(Optional)</i> Returns the signal associated with request, which is an AbortSignal object indicating whether or not request has been aborted, and its abort event handler. |
+|  [window?](./kibana-plugin-core-public.httprequestinit.window.md) | null | <i>(Optional)</i> Can only be null. Used to disassociate request from any Window. |
 

@@ -32,12 +32,13 @@ interface ServiceDeps {
 
 export type TrackMetricOptions = TrackOptions & { metric: string };
 export type UiTracker = ReturnType<typeof useUiTracker>;
+export type TrackEvent = (options: TrackMetricOptions) => void;
 
 export { METRIC_TYPE };
 
 export function useUiTracker<Services extends ServiceDeps>({
   app: defaultApp,
-}: { app?: ObservabilityApp } = {}) {
+}: { app?: ObservabilityApp } = {}): TrackEvent {
   const reportUiCounter = useKibana<Services>().services?.usageCollection?.reportUiCounter;
   const trackEvent = useMemo(() => {
     return ({ app = defaultApp, metric, metricType = METRIC_TYPE.COUNT }: TrackMetricOptions) => {

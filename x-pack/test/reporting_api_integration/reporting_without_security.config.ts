@@ -24,7 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...apiConfig.get('kbnTestServer'),
-      serverArgs: [...apiConfig.get('kbnTestServer.serverArgs'), `--xpack.security.enabled=false`],
+      serverArgs: [...apiConfig.get('kbnTestServer.serverArgs')],
     },
   };
 }

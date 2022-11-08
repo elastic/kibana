@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-generator';
+import { service, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { mean, meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const traceData = getService('traceData');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -111,10 +111,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   }
 
-  let errorRateMetricValues: PromiseReturnType<typeof getErrorRateValues>;
   let errorTransactionValues: PromiseReturnType<typeof getErrorRateValues>;
 
-  registry.when('Services APIs', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
+  registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_LIST_RATE = 75;
       const GO_PROD_LIST_ERROR_RATE = 25;
@@ -128,7 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const transactionNameProductList = 'GET /api/product/list';
         const transactionNameProductId = 'GET /api/product/:id';
 
-        await traceData.index([
+        await synthtraceEsClient.index([
           ...timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_RATE)
@@ -176,35 +175,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => traceData.clean());
+      after(() => synthtraceEsClient.clean());
 
       describe('compare error rate value between service inventory, error rate chart, service inventory and transactions apis', () => {
         before(async () => {
-          [errorTransactionValues, errorRateMetricValues] = await Promise.all([
-            getErrorRateValues({ processorEvent: 'transaction' }),
-            getErrorRateValues({ processorEvent: 'metric' }),
-          ]);
+          errorTransactionValues = await getErrorRateValues({ processorEvent: 'transaction' });
         });
 
-        it('returns same avg error rate value for Transaction-based and Metric-based data', () => {
+        it('returns same error rate value for all APIs', () => {
           [
             errorTransactionValues.serviceInventoryErrorRate,
             errorTransactionValues.errorRateChartApiMean,
             errorTransactionValues.serviceInstancesErrorRateSum,
-            errorRateMetricValues.serviceInventoryErrorRate,
-            errorRateMetricValues.errorRateChartApiMean,
-            errorRateMetricValues.serviceInstancesErrorRateSum,
           ].forEach((value) =>
             expect(value).to.be.equal(mean([GO_PROD_LIST_ERROR_RATE, GO_PROD_ID_ERROR_RATE]) / 100)
           );
         });
 
-        it('returns same sum error rate value for Transaction-based and Metric-based data', () => {
-          [
-            errorTransactionValues.transactionsGroupErrorRateSum,
-            errorRateMetricValues.transactionsGroupErrorRateSum,
-          ].forEach((value) =>
-            expect(value).to.be.equal((GO_PROD_LIST_ERROR_RATE + GO_PROD_ID_ERROR_RATE) / 100)
+        it('returns the expected tranasction failure rate', () => {
+          expect(errorTransactionValues.transactionsGroupErrorRateSum).to.be.equal(
+            (GO_PROD_LIST_ERROR_RATE + GO_PROD_ID_ERROR_RATE) / 100
           );
         });
       });

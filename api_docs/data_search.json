@@ -9741,6 +9741,94 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.flattenHit",
+        "type": "Function",
+        "tags": [],
+        "label": "flattenHit",
+        "description": [
+          "\nFlattens an individual hit (from an ES response) into an object. This will\ncreate flattened field names, like `user.name`.\n"
+        ],
+        "signature": [
+          "(hit: ",
+          "SearchHit",
+          "<unknown>, indexPattern: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.IndexPattern",
+            "text": "IndexPattern"
+          },
+          " | undefined, params: ",
+          "TabifyDocsOptions",
+          " | undefined) => Record<string, any>"
+        ],
+        "path": "src/plugins/data/common/search/tabify/tabify_docs.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.flattenHit.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "hit",
+            "description": [
+              "The hit from an ES reponse's hits.hits[]"
+            ],
+            "signature": [
+              "SearchHit",
+              "<unknown>"
+            ],
+            "path": "src/plugins/data/common/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.flattenHit.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [
+              "The index pattern for the requested index if available."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.flattenHit.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [
+              "Parameters how to flatten the hit"
+            ],
+            "signature": [
+              "TabifyDocsOptions",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.functionWrapper",
         "type": "Function",
         "tags": [],

@@ -1,0 +1,17 @@
+[[plugin-api-changes]]
+== Plugin API changes in {minor-version}
+++++
+<titleabbrev>Plugin API changes</titleabbrev>
+++++
+
+There are no plugin API changes for {kib} {minor-version}.
+
+Other versions: {kibana-ref-all}/7.16/plugin-api-changes.html[7.16] |
+{kibana-ref-all}/7.15/plugin-api-changes.html[7.15] |
+{kibana-ref-all}/7.14/plugin-api-changes.html[7.14] |
+{kibana-ref-all}/7.13/plugin-api-changes.html[7.13] |
+{kibana-ref-all}/7.12/plugin-api-changes.html[7.12] |
+{kibana-ref-all}/7.11/plugin-api-changes-7-11.html[7.11] |
+{kibana-ref-all}/7.10/breaking-changes-7.10.html#general-plugin-API-changes-7-10[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html#general-plugin-API-changes-79[7.9] |
+{kibana-ref-all}/7.8/breaking-changes-7.8.html#general-plugin-API-changes-78[7.8]

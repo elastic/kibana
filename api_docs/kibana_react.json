@@ -1434,8 +1434,6 @@
         "description": [],
         "signature": [
           "(history: ",
-          "History",
-          "<any> | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1443,7 +1441,9 @@
             "section": "def-public.ScopedHistory",
             "text": "ScopedHistory"
           },
-          "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => { href: string; onClick: (event: React.MouseEvent<Element, MouseEvent>) => void; }"
+          "<unknown> | ",
+          "History",
+          "<any>, to: string | LocationObject, onClickCallback?: Function | undefined) => { href: string; onClick: (event: React.MouseEvent<Element, MouseEvent>) => void; }"
         ],
         "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
         "deprecated": false,
@@ -1456,8 +1456,6 @@
             "label": "history",
             "description": [],
             "signature": [
-              "History",
-              "<any> | ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -1465,7 +1463,9 @@
                 "section": "def-public.ScopedHistory",
                 "text": "ScopedHistory"
               },
-              "<unknown>"
+              "<unknown> | ",
+              "History",
+              "<any>"
             ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
@@ -1512,8 +1512,6 @@
         "description": [],
         "signature": [
           "(history: ",
-          "History",
-          "<any> | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1521,7 +1519,9 @@
             "section": "def-public.ScopedHistory",
             "text": "ScopedHistory"
           },
-          "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => (event: React.MouseEvent<Element, MouseEvent>) => void"
+          "<unknown> | ",
+          "History",
+          "<any>, to: string | LocationObject, onClickCallback?: Function | undefined) => (event: React.MouseEvent<Element, MouseEvent>) => void"
         ],
         "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
         "deprecated": false,
@@ -1534,8 +1534,6 @@
             "label": "history",
             "description": [],
             "signature": [
-              "History",
-              "<any> | ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -1543,7 +1541,9 @@
                 "section": "def-public.ScopedHistory",
                 "text": "ScopedHistory"
               },
-              "<unknown>"
+              "<unknown> | ",
+              "History",
+              "<any>"
             ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
@@ -4925,6 +4925,62 @@
       },
       {
         "parentPluginId": "kibanaReact",
+        "id": "def-public.LANG",
+        "type": "string",
+        "tags": [],
+        "label": "LANG",
+        "description": [],
+        "signature": [
+          "\"css\""
+        ],
+        "path": "src/plugins/kibana_react/public/code_editor/languages/css/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.LANG",
+        "type": "string",
+        "tags": [],
+        "label": "LANG",
+        "description": [],
+        "signature": [
+          "\"markdown\""
+        ],
+        "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.LANG",
+        "type": "string",
+        "tags": [],
+        "label": "LANG",
+        "description": [],
+        "signature": [
+          "\"yaml\""
+        ],
+        "path": "src/plugins/kibana_react/public/code_editor/languages/yaml/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.LANG",
+        "type": "string",
+        "tags": [],
+        "label": "LANG",
+        "description": [],
+        "signature": [
+          "\"handlebars\""
+        ],
+        "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
         "id": "def-public.NO_DATA_PAGE_MAX_WIDTH",
         "type": "number",
         "tags": [],
@@ -5664,204 +5720,6 @@
         ],
         "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.Lang",
-        "type": "Object",
-        "tags": [],
-        "label": "Lang",
-        "description": [],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/css/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.ID",
-            "type": "string",
-            "tags": [],
-            "label": "ID",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/css/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.lexerRules",
-            "type": "Any",
-            "tags": [],
-            "label": "lexerRules",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/css/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.languageConfiguration",
-            "type": "Any",
-            "tags": [],
-            "label": "languageConfiguration",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/css/index.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.Lang",
-        "type": "Object",
-        "tags": [],
-        "label": "Lang",
-        "description": [],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.ID",
-            "type": "string",
-            "tags": [],
-            "label": "ID",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.languageConfiguration",
-            "type": "Object",
-            "tags": [],
-            "label": "languageConfiguration",
-            "description": [],
-            "signature": [
-              "languages",
-              ".LanguageConfiguration"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.lexerRules",
-            "type": "Object",
-            "tags": [],
-            "label": "lexerRules",
-            "description": [],
-            "signature": [
-              "languages",
-              ".IMonarchLanguage"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/index.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.Lang",
-        "type": "Object",
-        "tags": [],
-        "label": "Lang",
-        "description": [],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.ID",
-            "type": "string",
-            "tags": [],
-            "label": "ID",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.languageConfiguration",
-            "type": "Any",
-            "tags": [],
-            "label": "languageConfiguration",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.lexerRules",
-            "type": "Any",
-            "tags": [],
-            "label": "lexerRules",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/index.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.Lang",
-        "type": "Object",
-        "tags": [],
-        "label": "Lang",
-        "description": [],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/yaml/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.ID",
-            "type": "string",
-            "tags": [],
-            "label": "ID",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/yaml/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.languageConfiguration",
-            "type": "Any",
-            "tags": [],
-            "label": "languageConfiguration",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/yaml/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Lang.lexerRules",
-            "type": "Any",
-            "tags": [],
-            "label": "lexerRules",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/languages/yaml/index.ts",
-            "deprecated": false
-          }
-        ],
         "initialIsOpen": false
       },
       {

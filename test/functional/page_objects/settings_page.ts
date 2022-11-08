@@ -343,11 +343,20 @@ export class SettingsPageObject extends FtrService {
     }
   }
 
+  async addCustomDataViewId(value: string) {
+    await this.testSubjects.click('toggleAdvancedSetting');
+    const customDataViewIdInput = await (
+      await this.testSubjects.find('savedObjectIdField')
+    ).findByTagName('input');
+    await customDataViewIdInput.type(value);
+  }
+
   async createIndexPattern(
     indexPatternName: string,
     // null to bypass default value
     timefield: string | null = '@timestamp',
-    isStandardIndexPattern = true
+    isStandardIndexPattern = true,
+    customDataViewId?: string
   ) {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
@@ -377,6 +386,9 @@ export class SettingsPageObject extends FtrService {
       await this.common.sleep(2000);
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
+      }
+      if (customDataViewId) {
+        await this.addCustomDataViewId(customDataViewId);
       }
       await (await this.getSaveIndexPatternButton()).click();
     });
@@ -556,6 +568,20 @@ export class SettingsPageObject extends FtrService {
     if (doSaveField) {
       await this.clickSaveField();
     }
+  }
+
+  async addFieldFilter(name: string) {
+    await this.testSubjects.click('tab-sourceFilters');
+    await this.find.setValue('.euiFieldText', name);
+    await this.find.clickByButtonText('Add');
+    const table = await this.find.byClassName('euiTable');
+    await this.retry.waitFor('field filter to be added', async () => {
+      const tableCells = await table.findAllByCssSelector('td');
+      const fieldNames = await mapAsync(tableCells, async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      });
+      return fieldNames.includes(name);
+    });
   }
 
   public async confirmSave() {

@@ -27,6 +27,7 @@ export function ObservabilityAlertsCommonProvider({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
   const pageObjects = getPageObjects(['common']);
@@ -53,6 +54,14 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.findAll('dataGridRowCell');
   };
 
+  const getAllDisabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:disabled');
+  };
+
+  const getAllEnabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:enabled');
+  };
+
   const getTableCellsInRows = async () => {
     const columnHeaders = await getTableColumnHeaders();
     if (columnHeaders.length <= 0) {
@@ -64,6 +73,10 @@ export function ObservabilityAlertsCommonProvider({
 
   const getTableOrFail = async () => {
     return await testSubjects.existOrFail(ALERTS_TABLE_CONTAINER_SELECTOR);
+  };
+
+  const getNoDataPageOrFail = async () => {
+    return await testSubjects.existOrFail('noDataPage');
   };
 
   const getNoDataStateOrFail = async () => {
@@ -191,8 +204,11 @@ export function ObservabilityAlertsCommonProvider({
     getAlertsFlyoutTitle,
     getAlertsFlyoutViewInAppButtonOrFail,
     getCopyToClipboardButton,
+    getAllDisabledCheckBoxInTable,
+    getAllEnabledCheckBoxInTable,
     getFilterForValueButton,
     copyToClipboardButtonExists,
+    getNoDataPageOrFail,
     getNoDataStateOrFail,
     getTableCells,
     getTableCellsInRows,

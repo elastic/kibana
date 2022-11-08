@@ -64,6 +64,11 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
       return item.getAttribute('href');
     }
 
+    async openHrefByText(text: string) {
+      log.debug(`openHref: "${text}"`);
+      (await this.getActionWebElementByText(text)).openHref();
+    }
+
     async getActionWebElementByText(text: string): Promise<WebElementWrapper> {
       log.debug(`getActionWebElement: "${text}"`);
       const menu = await testSubjects.find('multipleActionsContextMenu');

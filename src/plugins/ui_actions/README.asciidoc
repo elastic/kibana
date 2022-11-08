@@ -69,15 +69,5 @@ action to execute.
 
 === Examples
 
-https://github.com/elastic/kibana/blob/master/examples/ui_action_examples/README.md[ui_action examples]
-
-=== API Docs
-
-==== Server API
-https://github.com/elastic/kibana/blob/master/docs/development/plugins/ui_actions/server/kibana-plugin-plugins-ui_actions-server.uiactionssetup.md[Browser Setup contract]
-https://github.com/elastic/kibana/blob/master/docs/development/plugins/ui_actions/server/kibana-plugin-plugins-ui_actions-server.uiactionsstart.md[Browser Start contract]
-
-==== Browser API
-https://github.com/elastic/kibana/blob/master/docs/development/plugins/ui_actions/public/kibana-plugin-plugins-ui_actions-public.uiactionssetup.md[Browser Setup contract]
-https://github.com/elastic/kibana/blob/master/docs/development/plugins/ui_actions/public/kibana-plugin-plugins-ui_actions-public.uiactionsstart.md[Browser Start contract]
+https://github.com/elastic/kibana/blob/main/examples/ui_action_examples/README.md[ui_action examples]
 

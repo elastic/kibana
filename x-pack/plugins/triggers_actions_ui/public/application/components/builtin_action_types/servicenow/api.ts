@@ -6,11 +6,16 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
+
+import {
+  ActionTypeExecutorResult,
+  snExternalServiceConfig,
+} from '../../../../../../actions/common';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError } from './types';
+import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
+import { Choice } from './types';
 
 export async function getChoices({
   http,
@@ -22,8 +27,8 @@ export async function getChoices({
   signal: AbortSignal;
   connectorId: string;
   fields: string[];
-}): Promise<Record<string, any>> {
-  return await http.post(
+}): Promise<ActionTypeExecutorResult<Choice[]>> {
+  const res = await http.post<ConnectorExecutorResult<Choice[]>>(
     `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
     {
       body: JSON.stringify({
@@ -32,6 +37,7 @@ export async function getChoices({
       signal,
     }
   );
+  return rewriteResponseToCamelCase(res);
 }
 
 /**

@@ -16,7 +16,7 @@ export interface SavedObjectReference
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./kibana-plugin-core-public.savedobjectreference.id.md) | <code>string</code> |  |
-|  [name](./kibana-plugin-core-public.savedobjectreference.name.md) | <code>string</code> |  |
-|  [type](./kibana-plugin-core-public.savedobjectreference.type.md) | <code>string</code> |  |
+|  [id](./kibana-plugin-core-public.savedobjectreference.id.md) | string |  |
+|  [name](./kibana-plugin-core-public.savedobjectreference.name.md) | string |  |
+|  [type](./kibana-plugin-core-public.savedobjectreference.type.md) | string |  |
 

@@ -100,16 +100,18 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   /**
    * @deprecated
    */
-  public readonly functions = new FunctionsRegistry(this as Executor);
+  public readonly functions: FunctionsRegistry;
 
   /**
    * @deprecated
    */
-  public readonly types = new TypesRegistry(this as Executor);
+  public readonly types: TypesRegistry;
 
   protected parent?: Executor<Context>;
 
   constructor(state?: ExecutorState<Context>) {
+    this.functions = new FunctionsRegistry(this as Executor);
+    this.types = new TypesRegistry(this as Executor);
     this.container = createExecutorContainer<Context>(state);
   }
 

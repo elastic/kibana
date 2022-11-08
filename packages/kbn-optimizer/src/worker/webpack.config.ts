@@ -71,6 +71,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       new BundleRefsPlugin(bundle, bundleRefs),
       new PopulateBundleCachePlugin(worker, bundle),
       new BundleMetricsPlugin(bundle),
+      new webpack.DllReferencePlugin({
+        context: worker.repoRoot,
+        manifest: require(UiSharedDepsNpm.dllManifestPath),
+      }),
       ...(worker.profileWebpack ? [new EmitStatsPlugin(bundle)] : []),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
@@ -220,6 +224,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
+        vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
       },
       symlinks: false,
     },
@@ -257,10 +262,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         test: /\.(js|css)$/,
         cache: false,
       }),
-      new webpack.DllReferencePlugin({
-        context: worker.repoRoot,
-        manifest: require(UiSharedDepsNpm.dllManifestPath),
-      }),
     ],
 
     optimization: {
@@ -273,7 +274,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           terserOptions: {
             compress: true,
             keep_classnames: true,
-            mangle: !['kibanaLegacy', 'monitoring'].includes(bundle.id),
+            mangle: true,
           },
         }),
       ],

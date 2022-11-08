@@ -11,6 +11,7 @@ import { ColumnHeaderOptions } from '../../../../common';
 import { Ecs } from '../../../../common/ecs';
 import {
   allowSorting,
+  hasCellActions,
   mapSortDirectionToDirection,
   mapSortingColumns,
   stringifyEvent,
@@ -259,6 +260,7 @@ describe('helpers', () => {
         initialWidth: 176,
         category: 'kibana',
         type: 'date',
+        esTypes: ['date'],
         aggregatable: true,
         actions: {
           showSortAsc: {
@@ -290,12 +292,22 @@ describe('helpers', () => {
 
     test('it returns the expected results when each column has a corresponding entry in `columnHeaders`', () => {
       expect(mapSortingColumns({ columns, columnHeaders })).toEqual([
-        { columnId: 'kibana.rac.alert.status', columnType: 'string', sortDirection: 'asc' },
-        { columnId: 'kibana.rac.alert.start', columnType: 'date', sortDirection: 'desc' },
+        {
+          columnId: 'kibana.rac.alert.status',
+          columnType: 'string',
+          esTypes: [],
+          sortDirection: 'asc',
+        },
+        {
+          columnId: 'kibana.rac.alert.start',
+          columnType: 'date',
+          esTypes: ['date'],
+          sortDirection: 'desc',
+        },
       ]);
     });
 
-    test('it defaults to a `columnType` of `text` when a column does NOT has a corresponding entry in `columnHeaders`', () => {
+    test('it defaults to a `columnType` of empty string when a column does NOT have a corresponding entry in `columnHeaders`', () => {
       const withUnknownColumn: Array<{
         id: string;
         direction: 'asc' | 'desc';
@@ -315,11 +327,22 @@ describe('helpers', () => {
       ];
 
       expect(mapSortingColumns({ columns: withUnknownColumn, columnHeaders })).toEqual([
-        { columnId: 'kibana.rac.alert.status', columnType: 'string', sortDirection: 'asc' },
-        { columnId: 'kibana.rac.alert.start', columnType: 'date', sortDirection: 'desc' },
+        {
+          columnId: 'kibana.rac.alert.status',
+          columnType: 'string',
+          esTypes: [],
+          sortDirection: 'asc',
+        },
+        {
+          columnId: 'kibana.rac.alert.start',
+          columnType: 'date',
+          esTypes: ['date'],
+          sortDirection: 'desc',
+        },
         {
           columnId: 'unknown',
-          columnType: 'text', // <-- mapped to the default
+          columnType: '', // <-- mapped to the default
+          esTypes: [], // <-- mapped to the default
           sortDirection: 'asc',
         },
       ]);
@@ -418,6 +441,22 @@ describe('helpers', () => {
       addBuildingBlockStyle(mockDnsEvent, THEME, mockedSetCellProps);
 
       expect(mockedSetCellProps).toBeCalledWith({ style: { backgroundColor: 'inherit' } });
+    });
+  });
+
+  describe('hasCellActions', () => {
+    const columnId = '@timestamp';
+
+    test('it returns false when the columnId is included in `disabledCellActions` ', () => {
+      const disabledCellActions = ['foo', '@timestamp', 'bar', 'baz']; // includes @timestamp
+
+      expect(hasCellActions({ columnId, disabledCellActions })).toBe(false);
+    });
+
+    test('it returns true when the columnId is NOT included in `disabledCellActions` ', () => {
+      const disabledCellActions = ['foo', 'bar', 'baz'];
+
+      expect(hasCellActions({ columnId, disabledCellActions })).toBe(true);
     });
   });
 });

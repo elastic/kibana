@@ -113,9 +113,6 @@ export const XYSettings: FC<XYSettingsProps> = ({
     barSeriesStyle: {
       ...valueLabelsStyling,
     },
-    crosshair: {
-      ...theme.crosshair,
-    },
     legend: {
       labelOptions: { maxLines: truncateLegend ? maxLegendLines ?? 1 : 0 },
     },
@@ -171,7 +168,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
       baseTheme={baseTheme}
       showLegend={showLegend}
       legendPosition={legendPosition}
-      allowBrushingLastHistogramBucket={isTimeChart}
+      allowBrushingLastHistogramBin={isTimeChart}
       roundHistogramBrushValues={enableHistogramMode && !isTimeChart}
       legendColorPicker={legendColorPicker}
       onElementClick={onElementClick}

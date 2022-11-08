@@ -16,11 +16,11 @@ import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImpor
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { readStream, createNewCopies, namespace, overwrite, } | <code>SavedObjectsImportOptions</code> |  |
+|  { readStream, createNewCopies, namespace, overwrite, } | SavedObjectsImportOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsImportResponse>`
+Promise&lt;SavedObjectsImportResponse&gt;
 
 ## Exceptions
 

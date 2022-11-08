@@ -104,3 +104,20 @@ export const SUBJECT_REQUIRED = i18n.translate(
     defaultMessage: 'Subject is required.',
   }
 );
+
+export function getInvalidEmailAddress(email: string) {
+  return i18n.translate(
+    'xpack.triggersActionsUI.components.builtinActionTypes.error.invalidEmail',
+    {
+      defaultMessage: 'Email address {email} is not valid.',
+      values: { email },
+    }
+  );
+}
+
+export function getNotAllowedEmailAddress(email: string) {
+  return i18n.translate('xpack.triggersActionsUI.components.builtinActionTypes.error.notAllowed', {
+    defaultMessage: 'Email address {email} is not allowed.',
+    values: { email },
+  });
+}

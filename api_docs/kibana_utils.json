@@ -2259,7 +2259,7 @@
         "tags": [],
         "label": "createSessionStorageStateStorage",
         "description": [
-          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           "(storage?: Storage) => ",
@@ -2579,7 +2579,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",
@@ -3932,7 +3932,7 @@
         "tags": [],
         "label": "syncState",
         "description": [
-          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
+          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
         ],
         "signature": [
           "({\n  storageKey,\n  stateStorage,\n  stateContainer,\n}: ",
@@ -4704,7 +4704,7 @@
         "tags": [],
         "label": "IKbnUrlStateStorage",
         "description": [
-          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
+          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
         ],
         "signature": [
           {
@@ -4953,7 +4953,7 @@
         "tags": [],
         "label": "ISessionStorageStateStorage",
         "description": [
-          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           {
@@ -8982,7 +8982,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",

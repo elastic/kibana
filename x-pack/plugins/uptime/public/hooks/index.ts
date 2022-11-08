@@ -12,4 +12,5 @@ export * from './use_search_text';
 export * from './use_cert_status';
 export * from './use_telemetry';
 export * from './use_url_params';
+export * from './use_breakpoints';
 export { useIndexPattern } from '../contexts/uptime_index_pattern_context';

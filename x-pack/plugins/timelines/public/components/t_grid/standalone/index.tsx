@@ -50,7 +50,7 @@ import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const STANDALONE_ID = 'standalone-t-grid';
+export const STANDALONE_ID = 'standalone-t-grid';
 const EMPTY_DATA_PROVIDERS: DataProvider[] = [];
 
 const TitleText = styled.span`
@@ -87,6 +87,7 @@ export interface TGridStandaloneProps {
   columns: ColumnHeaderOptions[];
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
+  disabledCellActions: string[];
   end: string;
   entityType?: EntityType;
   loadingText: React.ReactNode;
@@ -125,6 +126,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   columns,
   defaultCellActions,
   deletedEventIds,
+  disabledCellActions,
   end,
   entityType = 'alerts',
   loadingText,
@@ -201,10 +203,11 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   const sortField = useMemo(
     () =>
-      sortStore.map(({ columnId, columnType, sortDirection }) => ({
+      sortStore.map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
       })),
     [sortStore]
   );
@@ -377,6 +380,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       browserFields={browserFields}
                       data={nonDeletedEvents}
                       defaultCellActions={defaultCellActions}
+                      disabledCellActions={disabledCellActions}
                       filterQuery={filterQuery}
                       hasAlertsCrud={hasAlertsCrud}
                       hasAlertsCrudPermissions={hasAlertsCrudPermissions}

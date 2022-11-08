@@ -5,123 +5,115 @@
  * 2.0.
  */
 
-import sinon, { SinonFakeServer } from 'sinon';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { ROUTES } from '../../../common/constants';
 
 const { API_ROOT } = ROUTES;
 
 type HttpResponse = Record<string, any> | any[];
-
-const mockResponse = (defaultResponse: HttpResponse, response: HttpResponse) => [
-  200,
-  { 'Content-Type': 'application/json' },
-  JSON.stringify({ ...defaultResponse, ...response }),
-];
+type HttpMethod = 'GET' | 'PUT' | 'POST';
+export interface ResponseError {
+  statusCode: number;
+  message: string | Error;
+}
 
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadWatchesResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { watches: [] };
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+) => {
+  const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
+    ['GET', 'PUT', 'POST'].map(
+      (method) => [method, new Map()] as [HttpMethod, Map<string, Promise<unknown>>]
+    )
+  );
 
-    server.respondWith('GET', `${API_ROOT}/watches`, mockResponse(defaultResponse, response));
+  const mockMethodImplementation = (method: HttpMethod, path: string) =>
+    mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+
+  httpSetup.get.mockImplementation((path) =>
+    mockMethodImplementation('GET', path as unknown as string)
+  );
+  httpSetup.post.mockImplementation((path) =>
+    mockMethodImplementation('POST', path as unknown as string)
+  );
+  httpSetup.put.mockImplementation((path) =>
+    mockMethodImplementation('PUT', path as unknown as string)
+  );
+
+  const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
+    const defuse = (promise: Promise<unknown>) => {
+      promise.catch(() => {});
+      return promise;
+    };
+
+    return mockResponses
+      .get(method)!
+      .set(path, error ? defuse(Promise.reject(error)) : Promise.resolve(response));
   };
 
-  const setLoadWatchResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { watch: {} };
-    server.respondWith('GET', `${API_ROOT}/watch/:id`, mockResponse(defaultResponse, response));
-  };
+  const setLoadWatchesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_ROOT}/watches`, response, error);
 
-  const setLoadWatchHistoryResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { watchHistoryItems: [] };
-    server.respondWith(
-      'GET',
-      `${API_ROOT}/watch/:id/history`,
-      mockResponse(defaultResponse, response)
-    );
-  };
+  const setLoadWatchResponse = (watchId: string, response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_ROOT}/watch/${watchId}`, response, error);
 
-  const setLoadWatchHistoryItemResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { watchHistoryItem: {} };
-    server.respondWith('GET', `${API_ROOT}/history/:id`, mockResponse(defaultResponse, response));
-  };
+  const setLoadWatchHistoryResponse = (
+    watchId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_ROOT}/watch/${watchId}/history`, response, error);
 
-  const setDeleteWatchResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+  const setLoadWatchHistoryItemResponse = (
+    watchId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_ROOT}/watch/history/${watchId}`, response, error);
 
-    server.respondWith('POST', `${API_ROOT}/watches/delete`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
-  };
+  const setDeleteWatchResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${API_ROOT}/watches/delete`, response, error);
 
-  const setSaveWatchResponse = (id: string, response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+  const setSaveWatchResponse = (watchId: string, response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('PUT', `${API_ROOT}/watch/${watchId}`, response, error);
 
-    server.respondWith('PUT', `${API_ROOT}/watch/${id}`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
-  };
+  const setLoadExecutionResultResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('PUT', `${API_ROOT}/watch/execute`, response, error);
 
-  const setLoadExecutionResultResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { watchHistoryItem: {} };
-    server.respondWith('PUT', `${API_ROOT}/watch/execute`, mockResponse(defaultResponse, response));
-  };
+  const setLoadMatchingIndicesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('PUT', `${API_ROOT}/indices`, response, error);
 
-  const setLoadMatchingIndicesResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { indices: [] };
-    server.respondWith('POST', `${API_ROOT}/indices`, mockResponse(defaultResponse, response));
-  };
+  const setLoadEsFieldsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${API_ROOT}/fields`, response, error);
 
-  const setLoadEsFieldsResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { fields: [] };
-    server.respondWith('POST', `${API_ROOT}/fields`, mockResponse(defaultResponse, response));
-  };
+  const setLoadSettingsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_ROOT}/settings`, response, error);
 
-  const setLoadSettingsResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { action_types: {} };
-    server.respondWith('GET', `${API_ROOT}/settings`, mockResponse(defaultResponse, response));
-  };
+  const setLoadWatchVisualizeResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${API_ROOT}/watch/visualize`, response, error);
 
-  const setLoadWatchVisualizeResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { visualizeData: {} };
-    server.respondWith(
-      'POST',
-      `${API_ROOT}/watch/visualize`,
-      mockResponse(defaultResponse, response)
-    );
-  };
+  const setDeactivateWatchResponse = (
+    watchId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('PUT', `${API_ROOT}/watch/${watchId}/deactivate`, response, error);
 
-  const setDeactivateWatchResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { watchStatus: {} };
-    server.respondWith(
+  const setActivateWatchResponse = (
+    watchId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('PUT', `${API_ROOT}/watch/${watchId}/activate`, response, error);
+
+  const setAcknowledgeWatchResponse = (
+    watchId: string,
+    actionId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse(
       'PUT',
-      `${API_ROOT}/watch/:id/deactivate`,
-      mockResponse(defaultResponse, response)
+      `${API_ROOT}/watch/${watchId}/action/${actionId}/acknowledge`,
+      response,
+      error
     );
-  };
-
-  const setActivateWatchResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { watchStatus: {} };
-    server.respondWith(
-      'PUT',
-      `${API_ROOT}/watch/:id/activate`,
-      mockResponse(defaultResponse, response)
-    );
-  };
-
-  const setAcknowledgeWatchResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { watchStatus: {} };
-    server.respondWith(
-      'PUT',
-      `${API_ROOT}/watch/:id/action/:actionId/acknowledge`,
-      mockResponse(defaultResponse, response)
-    );
-  };
 
   return {
     setLoadWatchesResponse,
@@ -142,18 +134,11 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 };
 
 export const init = () => {
-  const server = sinon.fakeServer.create();
-  server.respondImmediately = true;
-
-  // Define default response for unhandled requests.
-  // We make requests to APIs which don't impact the component under test, e.g. UI metric telemetry,
-  // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, 'DefaultResponse']);
-
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
+  const httpSetup = httpServiceMock.createSetupContract();
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
 
   return {
-    server,
+    httpSetup,
     httpRequestsMockHelpers,
   };
 };

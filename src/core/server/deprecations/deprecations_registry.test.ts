@@ -65,6 +65,25 @@ describe('DeprecationsRegistry', () => {
       ]);
     });
 
+    it('rejects deprecations when reaching the timeout', async () => {
+      const deprecationsRegistry = new DeprecationsRegistry({ timeout: 100 });
+      const mockContext = {} as unknown as GetDeprecationsContext;
+      const deprecationsConfigA = {
+        getDeprecations: jest.fn().mockReturnValue(new Promise(() => {})),
+      };
+      deprecationsRegistry.registerDeprecations(deprecationsConfigA);
+      const deprecations = await deprecationsRegistry.getDeprecations(mockContext);
+      expect(deprecations).toStrictEqual([
+        {
+          status: 'rejected',
+          reason: expect.any(Error),
+        },
+      ]);
+      expect((deprecations[0] as PromiseRejectedResult).reason.message).toEqual(
+        'Deprecations did not resolve in 10sec.'
+      );
+    });
+
     it('passes dependencies to registered getDeprecations function', async () => {
       const deprecationsRegistry = new DeprecationsRegistry();
       const mockContext = {} as unknown as GetDeprecationsContext;

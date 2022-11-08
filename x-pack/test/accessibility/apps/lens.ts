@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
 
-  describe('Lens', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/115614
+  describe.skip('Lens', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');

@@ -5,26 +5,56 @@
  * 2.0.
  */
 
-import sinon, { SinonFakeServer } from 'sinon';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { API_BASE_PATH } from '../../../common/constants';
 import { Cluster } from '../../../common/lib';
 
-// Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const mockResponse = (response: Cluster[] | { itemsDeleted: string[]; errors: string[] }) => [
-    200,
-    { 'Content-Type': 'application/json' },
-    JSON.stringify(response),
-  ];
+type HttpMethod = 'GET' | 'DELETE';
 
-  const setLoadRemoteClustersResponse = (response: Cluster[] = []) => {
-    server.respondWith('GET', '/api/remote_clusters', mockResponse(response));
+export interface ResponseError {
+  statusCode: number;
+  message: string | Error;
+}
+
+// Register helpers to mock HTTP Requests
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+) => {
+  const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
+    ['GET', 'DELETE'].map(
+      (method) => [method, new Map()] as [HttpMethod, Map<string, Promise<unknown>>]
+    )
+  );
+
+  const mockMethodImplementation = (method: HttpMethod, path: string) =>
+    mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+
+  httpSetup.get.mockImplementation((path) =>
+    mockMethodImplementation('GET', path as unknown as string)
+  );
+  httpSetup.delete.mockImplementation((path) =>
+    mockMethodImplementation('DELETE', path as unknown as string)
+  );
+
+  const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
+    const defuse = (promise: Promise<unknown>) => {
+      promise.catch(() => {});
+      return promise;
+    };
+
+    return mockResponses
+      .get(method)!
+      .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
   };
+
+  const setLoadRemoteClustersResponse = (response: Cluster[], error?: ResponseError) =>
+    mockResponse('GET', API_BASE_PATH, response, error);
 
   const setDeleteRemoteClusterResponse = (
-    response: { itemsDeleted: string[]; errors: string[] } = { itemsDeleted: [], errors: [] }
-  ) => {
-    server.respondWith('DELETE', /api\/remote_clusters/, mockResponse(response));
-  };
+    clusterName: string,
+    response: { itemsDeleted: string[]; errors: string[] } = { itemsDeleted: [], errors: [] },
+    error?: ResponseError
+  ) => mockResponse('DELETE', `${API_BASE_PATH}/${clusterName}`, response, error);
 
   return {
     setLoadRemoteClustersResponse,
@@ -33,15 +63,11 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 };
 
 export const init = () => {
-  const server = sinon.fakeServer.create();
-  server.respondImmediately = true;
-
-  // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
-  // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, '']);
+  const httpSetup = httpServiceMock.createSetupContract();
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
 
   return {
-    server,
-    httpRequestsMockHelpers: registerHttpRequestMockHelpers(server),
+    httpSetup,
+    httpRequestsMockHelpers,
   };
 };

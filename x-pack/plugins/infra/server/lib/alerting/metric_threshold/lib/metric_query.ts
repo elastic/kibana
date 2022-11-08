@@ -120,6 +120,7 @@ export const getElasticsearchMetricQuery = (
   const parsedFilterQuery = getParsedFilterQuery(filterQuery);
 
   return {
+    track_total_hits: true,
     query: {
       bool: {
         filter: [

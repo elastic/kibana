@@ -74,8 +74,8 @@ export const SuggestionsLogic = kea<MakeLogicType<SuggestionsValues, SuggestionA
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.post(
-          `/internal/app_search/engines/${engineName}/search_relevance_suggestions`,
+        const response = await http.post<SuggestionsAPIResponse>(
+          `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions`,
           {
             body: JSON.stringify({
               page: {

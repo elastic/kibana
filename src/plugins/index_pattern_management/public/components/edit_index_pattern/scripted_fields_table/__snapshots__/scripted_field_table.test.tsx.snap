@@ -27,11 +27,13 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
     items={
       Array [
         Object {
+          "isUserEditable": false,
           "lang": "painless",
           "name": "ScriptedField",
           "script": "x++",
         },
         Object {
+          "isUserEditable": false,
           "lang": "painless",
           "name": "JustATest",
           "script": "z++",
@@ -65,6 +67,7 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
     items={
       Array [
         Object {
+          "isUserEditable": false,
           "lang": "painless",
           "name": "JustATest",
           "script": "z++",
@@ -123,11 +126,13 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
     items={
       Array [
         Object {
+          "isUserEditable": false,
           "lang": "painless",
           "name": "ScriptedField",
           "script": "x++",
         },
         Object {
+          "isUserEditable": false,
           "lang": "painless",
           "name": "JustATest",
           "script": "z++",
@@ -161,11 +166,13 @@ exports[`ScriptedFieldsTable should show a delete modal 1`] = `
     items={
       Array [
         Object {
+          "isUserEditable": false,
           "lang": "painless",
           "name": "ScriptedField",
           "script": "x++",
         },
         Object {
+          "isUserEditable": false,
           "lang": "painless",
           "name": "JustATest",
           "script": "z++",

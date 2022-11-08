@@ -10,28 +10,39 @@ import { connectorValidator } from './validator';
 
 describe('ServiceNow validator', () => {
   describe('connectorValidator', () => {
-    test('it returns an error message if the connector is legacy', () => {
+    test('it returns an error message if the connector uses the table API', () => {
       const invalidConnector = {
         ...connector,
         config: {
           ...connector.config,
-          isLegacy: true,
+          usesTableApi: true,
         },
       };
 
       expect(connectorValidator(invalidConnector)).toEqual({ message: 'Deprecated connector' });
     });
 
-    test('it does not returns an error message if the connector is not legacy', () => {
+    test('it does not return an error message if the connector does not uses the table API', () => {
       const invalidConnector = {
         ...connector,
         config: {
           ...connector.config,
-          isLegacy: false,
+          usesTableApi: false,
         },
       };
 
       expect(connectorValidator(invalidConnector)).toBeFalsy();
+    });
+
+    test('it does not return an error message if the config of the connector is undefined', () => {
+      const { config, ...invalidConnector } = connector;
+
+      // @ts-expect-error
+      expect(connectorValidator(invalidConnector)).toBeFalsy();
+    });
+
+    test('it does not return an error message if the config of the connector is preconfigured', () => {
+      expect(connectorValidator({ ...connector, isPreconfigured: true })).toBeFalsy();
     });
   });
 });

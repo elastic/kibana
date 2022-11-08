@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { LegacyLoggingConfig, legacyLoggingConfigSchema } from './schema';
+export type { LegacyLoggingConfig } from './schema';
+export { legacyLoggingConfigSchema } from './schema';
 export { attachMetaData } from './metadata';
 export { setupLoggingRotate } from './rotate';
 export { setupLogging, reconfigureLogging } from './setup_logging';

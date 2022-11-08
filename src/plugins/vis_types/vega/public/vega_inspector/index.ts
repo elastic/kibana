@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export {
-  createInspectorAdapters,
-  getVegaInspectorView,
-  VegaInspectorAdapters,
-} from './vega_inspector';
+export type { VegaInspectorAdapters } from './vega_inspector';
+export { createInspectorAdapters, getVegaInspectorView } from './vega_inspector';

@@ -19,7 +19,7 @@
  */
 import { PluginInitializerContext } from 'src/core/public';
 import { IndexPatternManagementPlugin } from './plugin';
-export { IndexPatternManagementSetup, IndexPatternManagementStart } from './plugin';
+export type { IndexPatternManagementSetup, IndexPatternManagementStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new IndexPatternManagementPlugin(initializerContext);

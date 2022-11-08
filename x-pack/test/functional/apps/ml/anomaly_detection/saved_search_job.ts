@@ -282,6 +282,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteSavedSearches();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {
@@ -409,7 +411,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToJobManagement();
 
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobId, 1);
 
           await ml.testExecution.logTestStep(

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { createContext, useContext } from 'react';
 import { useFetcher } from '../../../observability/public';
 import { DataPublicPluginStart, IndexPattern } from '../../../../../src/plugins/data/public';
-import { indexStatusSelector, selectDynamicSettings } from '../state/selectors';
-import { getDynamicSettings } from '../state/actions/dynamic_settings';
+import { useHasData } from '../components/overview/empty_state/use_has_data';
 
 export const UptimeIndexPatternContext = createContext({} as IndexPattern);
 
@@ -18,16 +16,7 @@ export const UptimeIndexPatternContextProvider: React.FC<{ data: DataPublicPlugi
   children,
   data: { indexPatterns },
 }) => {
-  const { settings } = useSelector(selectDynamicSettings);
-  const { data: indexStatus } = useSelector(indexStatusSelector);
-
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (typeof settings === 'undefined') {
-      dispatch(getDynamicSettings());
-    }
-  }, [dispatch, settings]);
+  const { settings, data: indexStatus } = useHasData();
 
   const heartbeatIndices = settings?.heartbeatIndices || '';
 

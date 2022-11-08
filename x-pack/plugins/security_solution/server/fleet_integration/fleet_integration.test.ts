@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { createNewPackagePolicyMock, deletePackagePolicyMock } from '../../../fleet/common/mocks';
 import {
@@ -18,7 +20,8 @@ import {
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
 import { KibanaRequest } from 'kibana/server';
-import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
+import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
+import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContextServiceStartContract } from '../endpoint/mocks';
 import { licenseMock } from '../../../licensing/common/licensing.mock';
@@ -42,16 +45,12 @@ import {
   ExperimentalFeatures,
 } from '../../common/experimental_features';
 import { DeletePackagePoliciesResponse } from '../../../fleet/common';
-import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
   let req: KibanaRequest;
   let ctx: SecuritySolutionRequestHandlerContext;
   const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
-  const maxTimelineImportExportSize = createMockConfig().maxTimelineImportExportSize;
-  const prebuiltRulesFromFileSystem = createMockConfig().prebuiltRulesFromFileSystem;
-  const prebuiltRulesFromSavedObjects = createMockConfig().prebuiltRulesFromSavedObjects;
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -88,11 +87,7 @@ describe('ingest_integration tests ', () => {
       const callback = getPackagePolicyCreateCallback(
         logger,
         manifestManager,
-        endpointAppContextMock.appClientFactory,
-        maxTimelineImportExportSize,
-        prebuiltRulesFromFileSystem,
-        prebuiltRulesFromSavedObjects,
-        endpointAppContextMock.security,
+        requestContextFactoryMock.create(),
         endpointAppContextMock.alerting,
         licenseService,
         exceptionListClient

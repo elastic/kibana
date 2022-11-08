@@ -68,6 +68,7 @@ function ExplorerChartContainer({
   mlLocator,
   timeBuckets,
   timefilter,
+  timeRange,
   onSelectEntity,
   recentlyAccessed,
   tooManyBucketsCalloutMsg,
@@ -78,9 +79,24 @@ function ExplorerChartContainer({
   useEffect(() => {
     let isCancelled = false;
     const generateLink = async () => {
+      // Prioritize timeRange from embeddable panel or case
+      // Else use the time range from data plugins's timefilters service
+      let mergedTimeRange = timeRange;
+      const bounds = timefilter?.getActiveBounds();
+      if (!timeRange && bounds) {
+        mergedTimeRange = {
+          from: bounds.min.toISOString(),
+          to: bounds.max.toISOString(),
+        };
+      }
+
       if (!isCancelled && series.functionDescription !== ML_JOB_AGGREGATION.LAT_LONG) {
         try {
-          const singleMetricViewerLink = await getExploreSeriesLink(mlLocator, series, timefilter);
+          const singleMetricViewerLink = await getExploreSeriesLink(
+            mlLocator,
+            series,
+            mergedTimeRange
+          );
           setExplorerSeriesLink(singleMetricViewerLink);
         } catch (error) {
           setExplorerSeriesLink('');
@@ -91,7 +107,8 @@ function ExplorerChartContainer({
     return () => {
       isCancelled = true;
     };
-  }, [mlLocator, series]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mlLocator, series, timeRange]);
 
   const addToRecentlyAccessed = useCallback(() => {
     if (recentlyAccessed) {
@@ -237,6 +254,7 @@ export const ExplorerChartsContainerUI = ({
   mlLocator,
   timeBuckets,
   timefilter,
+  timeRange,
   onSelectEntity,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
@@ -294,6 +312,7 @@ export const ExplorerChartsContainerUI = ({
                 mlLocator={mlLocator}
                 timeBuckets={timeBuckets}
                 timefilter={timefilter}
+                timeRange={timeRange}
                 onSelectEntity={onSelectEntity}
                 recentlyAccessed={recentlyAccessed}
                 tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}

@@ -16,14 +16,14 @@ describe('buildEventEnrichmentQuery', () => {
       expect.arrayContaining([
         {
           match: {
-            'threat.indicator.file.hash.md5': {
+            'threatintel.indicator.file.hash.md5': {
               _name: 'file.hash.md5',
               query: '1eee2bf3f56d8abed72da2bc523e7431',
             },
           },
         },
-        { match: { 'threat.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
-        { match: { 'threat.indicator.url.full': { _name: 'url.full', query: 'elastic.co' } } },
+        { match: { 'threatintel.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
+        { match: { 'threatintel.indicator.url.full': { _name: 'url.full', query: 'elastic.co' } } },
       ])
     );
   });

@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 // Default parameter values automatically added to the registered domain processor when saved
 const defaultRegisteredDomainParameters = {
@@ -21,6 +21,7 @@ const REGISTERED_DOMAIN_TYPE = 'registered_domain';
 describe('Processor: Registered Domain', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
+  const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -34,7 +35,7 @@ describe('Processor: Registered Domain', () => {
     onUpdate = jest.fn();
 
     await act(async () => {
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         value: {
           processors: [],
         },

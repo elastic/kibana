@@ -14,7 +14,7 @@ export {
   KBN_SCREENSHOT_MODE_ENABLED_KEY,
 } from '../common';
 
-export {
+export type {
   ScreenshotModeRequestHandlerContext,
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,

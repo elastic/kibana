@@ -19,7 +19,7 @@ interface ExecutedStepProps {
   step: JourneyStep;
   index: number;
   loading: boolean;
-  browserConsole?: string;
+  browserConsoles?: string[];
 }
 
 const Label = euiStyled.div`
@@ -40,12 +40,7 @@ const ExpandedRow = euiStyled.div`
   width: 100%;
 `;
 
-export const ExecutedStep: FC<ExecutedStepProps> = ({
-  loading,
-  step,
-  index,
-  browserConsole = '',
-}) => {
+export const ExecutedStep: FC<ExecutedStepProps> = ({ loading, step, index, browserConsoles }) => {
   const isSucceeded = step.synthetics?.payload?.status === 'succeeded';
 
   return (
@@ -93,9 +88,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({
             language="javascript"
             initialIsOpen={!isSucceeded}
           >
-            <>
-              {browserConsole} <EuiSpacer />
-            </>
+            {browserConsoles?.join('\n')}
           </CodeBlockAccordion>
           <EuiSpacer />
           <StepScreenshots step={step} />

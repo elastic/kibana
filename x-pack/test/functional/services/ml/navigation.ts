@@ -212,6 +212,13 @@ export function MachineLearningNavigationProvider({
       await testSubjects.existOrFail('collapsibleNav');
     },
 
+    async closeKibanaNav() {
+      if (await testSubjects.exists('collapsibleNav')) {
+        await testSubjects.click('toggleNavButton');
+      }
+      await testSubjects.missingOrFail('collapsibleNav');
+    },
+
     async assertKibanaNavMLEntryExists() {
       const navArea = await testSubjects.find('collapsibleNav');
       const mlNavLink = await navArea.findAllByCssSelector('[title="Machine Learning"]');

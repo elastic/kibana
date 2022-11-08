@@ -41,7 +41,7 @@ export const cli = async () => {
 node ${basename(process.argv[1])} [options]
 
 Options:${Object.keys(cliDefaults.default).reduce((out, option) => {
-      // @ts-ignore
+      // @ts-expect-error TS7053
       return `${out}\n  --${option}=${cliDefaults.default[option]}`;
     }, '')}
 `);

@@ -99,7 +99,8 @@ export class AuthenticationService {
     // 2. Login selector is disabled, but the provider with the lowest `order` uses login form
     const isLoginPageAvailable =
       config.authc.selector.enabled ||
-      shouldProviderUseLoginForm(config.authc.sortedProviders[0].type);
+      (config.authc.sortedProviders.length > 0 &&
+        shouldProviderUseLoginForm(config.authc.sortedProviders[0].type));
 
     http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
@@ -114,7 +115,7 @@ export class AuthenticationService {
       // If security is disabled, then continue with no user credentials.
       if (!license.isEnabled()) {
         this.logger.debug(
-          'Current license does not support any security features, authentication is not needed.'
+          'Authentication is not required, as security features are disabled in Elasticsearch.'
         );
         return t.authenticated();
       }

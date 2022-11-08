@@ -66,7 +66,9 @@ export class RedirectManager {
     });
 
     locator
-      .navigate(migratedParams)
+      .navigate(migratedParams, {
+        replace: true, // We do not want the redirect app URL to appear in browser navigation history
+      })
       .then()
       .catch((error) => {
         // eslint-disable-next-line no-console

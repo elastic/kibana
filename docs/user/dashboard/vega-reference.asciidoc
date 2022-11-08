@@ -102,6 +102,8 @@ Tokens include the following:
 * `"%dashboard_context-filter_clause%"`: String replaced by an object containing filters
 * `"%dashboard_context-must_not_clause%"`: String replaced by an object containing filters
 
+NOTE: Vega supports the `interval` parameter, which is unsupported {es} 8.0.0 and later. To use intervals, use `fixed_interval` or `calendar_interval` instead.
+
 For example, the following query counts the number of documents in a specific index:
 
 [source,yaml]
@@ -240,12 +242,17 @@ experimental[] Access the Elastic Map Service files via the same mechanism:
 url: {
   // "type" defaults to "elasticsearch" otherwise
   %type%: emsfile
-  // Name of the file, exactly as in the Region map visualization
+  // Name of the file, exactly as in https://maps.elastic.co
   name: World Countries
 }
-// The result is a geojson file, get its features to use
-// this data source with the "shape" marks
+// The result is either a topojson file or a geojson file. 
+// Refer to the Default format for the file at https://maps.elastic.co
+// Get its features to use this data source with the "shape" marks
 // https://vega.github.io/vega/docs/marks/shape/
+// For a topojson file use
+format: {type: "topojson", feature: "data"}
+
+// For a geojson file use
 format: {property: "features"}
 ----
 
@@ -308,16 +315,28 @@ experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[dat
 
 [source,yaml]
 ----
-url: {
-  // "type" defaults to "elasticsearch" otherwise
-  %type%: emsfile
-  // Name of the file, exactly as in the Region map visualization
-  name: World Countries
-}
-// The result is a geojson file, get its features to use
-// this data source with the "shape" marks
-// https://vega.github.io/vega/docs/marks/shape/
-format: {property: "features"}
+  "data": [
+    {
+      "name": "countries",
+      "url": {
+        // "type" defaults to "elasticsearch" otherwise
+        %type%: emsfile
+        // Name of the file, exactly as in the Region map visualization
+        name: World Countries
+      },
+      // The result is a topojson file, get its features to use
+      // this data source with the "shape" marks
+      // https://vega.github.io/vega/docs/marks/shape/
+      "format": {"type": "topojson", "feature": "data"},
+    }
+  ],
+  "marks": [
+    {
+      "type": "shape",
+      "from": {"data": "countries"},
+      "transform": [{"type": "geoshape", "projection": "projection"}]
+    }
+  ]
 ----
 
 [float]

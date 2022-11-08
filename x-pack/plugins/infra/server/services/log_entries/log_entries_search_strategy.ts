@@ -113,7 +113,6 @@ export const logEntriesSearchStrategyProvider = ({
                   messageFormattingRules,
                 ]): IEsSearchRequest => {
                   return {
-                    // @ts-expect-error @elastic/elasticsearch declares indices_boost as Record<string, number>
                     params: createGetLogEntriesQuery(
                       indices,
                       params.startTimestamp,

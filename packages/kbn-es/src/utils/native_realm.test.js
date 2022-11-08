@@ -18,9 +18,14 @@ const mockClient = {
   xpack: {
     info: jest.fn(),
   },
+  cluster: {
+    health: jest.fn(),
+  },
   security: {
     changePassword: jest.fn(),
     getUser: jest.fn(),
+    putRole: jest.fn(),
+    putUser: jest.fn(),
   },
 };
 Client.mockImplementation(() => mockClient);
@@ -47,6 +52,12 @@ function mockXPackInfo(available, enabled) {
       },
     },
   }));
+}
+
+function mockClusterStatus(status) {
+  mockClient.cluster.health.mockImplementation(() => {
+    return { body: status };
+  });
 }
 
 describe('isSecurityEnabled', () => {
@@ -95,6 +106,7 @@ describe('isSecurityEnabled', () => {
 describe('setPasswords', () => {
   it('uses provided passwords', async () => {
     mockXPackInfo(true, true);
+    mockClusterStatus('green');
 
     mockClient.security.getUser.mockImplementation(() => ({
       body: {
@@ -127,49 +139,51 @@ describe('setPasswords', () => {
     }));
 
     await nativeRealm.setPasswords({
-      'password.kibana_system': 'bar',
+      body: {
+        'password.kibana_system': 'bar',
+      },
     });
 
     expect(mockClient.security.changePassword.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    Object {
-      "body": Object {
-        "password": "bar",
-      },
-      "refresh": "wait_for",
-      "username": "kibana_system",
-    },
-  ],
-  Array [
-    Object {
-      "body": Object {
-        "password": "changeme",
-      },
-      "refresh": "wait_for",
-      "username": "logstash_system",
-    },
-  ],
-  Array [
-    Object {
-      "body": Object {
-        "password": "changeme",
-      },
-      "refresh": "wait_for",
-      "username": "elastic",
-    },
-  ],
-  Array [
-    Object {
-      "body": Object {
-        "password": "changeme",
-      },
-      "refresh": "wait_for",
-      "username": "beats_system",
-    },
-  ],
-]
-`);
+      Array [
+        Array [
+          Object {
+            "body": Object {
+              "password": "changeme",
+            },
+            "refresh": "wait_for",
+            "username": "kibana_system",
+          },
+        ],
+        Array [
+          Object {
+            "body": Object {
+              "password": "changeme",
+            },
+            "refresh": "wait_for",
+            "username": "logstash_system",
+          },
+        ],
+        Array [
+          Object {
+            "body": Object {
+              "password": "changeme",
+            },
+            "refresh": "wait_for",
+            "username": "elastic",
+          },
+        ],
+        Array [
+          Object {
+            "body": Object {
+              "password": "changeme",
+            },
+            "refresh": "wait_for",
+            "username": "beats_system",
+          },
+        ],
+      ]
+    `);
   });
 });
 

@@ -35,7 +35,7 @@ export function defineInvalidateApiKeysRoutes({ router }: RouteDefinitionParams)
           await Promise.all(
             request.body.apiKeys.map(async (key) => {
               try {
-                const body: { id: string; owner?: boolean } = { id: key.id };
+                const body: { ids: string[]; owner?: boolean } = { ids: [key.id] };
                 if (!request.body.isAdmin) {
                   body.owner = true;
                 }

@@ -83,6 +83,21 @@ export class MapsPlugin implements Plugin {
       },
     ]);
 
+    home.sampleData.replacePanelInSampleDatasetDashboard({
+      sampleDataId: 'ecommerce',
+      dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
+      oldEmbeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+      embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+      // @ts-ignore
+      embeddableType: MAP_SAVED_OBJECT_TYPE,
+      embeddableConfig: {
+        isLayerTOCOpen: false,
+        hiddenLayers: [],
+        mapCenter: { lat: 45.88578, lon: -15.07605, zoom: 2.11 },
+        openTOCDetails: [],
+      },
+    });
+
     home.sampleData.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
 
     home.sampleData.addAppLinksToSampleDataset('flights', [
@@ -102,6 +117,9 @@ export class MapsPlugin implements Plugin {
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
         isLayerTOCOpen: true,
+        hiddenLayers: [],
+        mapCenter: { lat: 48.72307, lon: -115.18171, zoom: 4.28 },
+        openTOCDetails: [],
       },
     });
 
@@ -122,6 +140,9 @@ export class MapsPlugin implements Plugin {
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
         isLayerTOCOpen: false,
+        hiddenLayers: [],
+        mapCenter: { lat: 42.16337, lon: -88.92107, zoom: 3.64 },
+        openTOCDetails: [],
       },
     });
 

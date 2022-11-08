@@ -14,7 +14,7 @@ import { setupValidationTestBed, ValidationTestBed } from './validation.helpers'
 describe('<EditPolicy /> policy name validation', () => {
   let testBed: ValidationTestBed;
   let actions: ValidationTestBed['actions'];
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -22,14 +22,13 @@ describe('<EditPolicy /> policy name validation', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadPolicies(getGeneratedPolicies());
 
     await act(async () => {
-      testBed = await setupValidationTestBed();
+      testBed = await setupValidationTestBed(httpSetup);
     });
 
     const { component } = testBed;
@@ -56,7 +55,7 @@ describe('<EditPolicy /> policy name validation', () => {
 
   test(`doesn't allow to save as new policy but using the same name`, async () => {
     await act(async () => {
-      testBed = await setupValidationTestBed({
+      testBed = await setupValidationTestBed(httpSetup, {
         testBedConfig: {
           memoryRouter: {
             initialEntries: [`/policies/edit/testy0`],

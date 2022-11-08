@@ -20,7 +20,7 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
   const tooltipContent = disabled ? (
     <FormattedMessage
       id="discover.docViews.table.unindexedFieldsCanNotBeSearchedTooltip"
-      defaultMessage="Unindexed fields can not be searched"
+      defaultMessage="Unindexed fields or ignored values cannot be searched"
     />
   ) : (
     <FormattedMessage

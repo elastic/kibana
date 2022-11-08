@@ -87,22 +87,22 @@ describe('Package search provider', () => {
         ).toBe('--(a|)', {
           a: [
             {
-              id: 'test-test',
+              id: 'test',
               score: 80,
               title: 'test',
               type: 'integration',
               url: {
-                path: 'undefined/detail/test-test/overview',
+                path: 'undefined/detail/test/overview',
                 prependBasePath: false,
               },
             },
             {
-              id: 'test1-test1',
+              id: 'test1',
               score: 80,
               title: 'test1',
               type: 'integration',
               url: {
-                path: 'undefined/detail/test1-test1/overview',
+                path: 'undefined/detail/test1/overview',
                 prependBasePath: false,
               },
             },
@@ -170,12 +170,12 @@ describe('Package search provider', () => {
         ).toBe('--(a|)', {
           a: [
             {
-              id: 'test1-test1',
+              id: 'test1',
               score: 80,
               title: 'test1',
               type: 'integration',
               url: {
-                path: 'undefined/detail/test1-test1/overview',
+                path: 'undefined/detail/test1/overview',
                 prependBasePath: false,
               },
             },
@@ -226,22 +226,22 @@ describe('Package search provider', () => {
           ).toBe('--(a|)', {
             a: [
               {
-                id: 'test-test',
+                id: 'test',
                 score: 80,
                 title: 'test',
                 type: 'integration',
                 url: {
-                  path: 'undefined/detail/test-test/overview',
+                  path: 'undefined/detail/test/overview',
                   prependBasePath: false,
                 },
               },
               {
-                id: 'test1-test1',
+                id: 'test1',
                 score: 80,
                 title: 'test1',
                 type: 'integration',
                 url: {
-                  path: 'undefined/detail/test1-test1/overview',
+                  path: 'undefined/detail/test1/overview',
                   prependBasePath: false,
                 },
               },
@@ -269,12 +269,12 @@ describe('Package search provider', () => {
           ).toBe('--(a|)', {
             a: [
               {
-                id: 'test1-test1',
+                id: 'test1',
                 score: 80,
                 title: 'test1',
                 type: 'integration',
                 url: {
-                  path: 'undefined/detail/test1-test1/overview',
+                  path: 'undefined/detail/test1/overview',
                   prependBasePath: false,
                 },
               },

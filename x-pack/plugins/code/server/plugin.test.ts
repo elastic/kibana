@@ -5,19 +5,37 @@
  * 2.0.
  */
 
+import type { RegisterDeprecationsConfig, GetDeprecationsContext } from 'src/core/server';
 import { coreMock } from '../../../../src/core/server/mocks';
 
 import { CodePlugin } from './plugin';
 
 describe('Code Plugin', () => {
+  let deprecationConfigs: RegisterDeprecationsConfig[];
+
+  beforeEach(() => {
+    deprecationConfigs = [];
+  });
+
+  const getDeprecationContextMock = () => ({} as GetDeprecationsContext);
+
   describe('setup()', () => {
     it('does not log deprecation message if no xpack.code.* configurations are set', async () => {
       const context = coreMock.createPluginInitializerContext();
       const plugin = new CodePlugin(context);
 
-      await plugin.setup();
+      const coreSetup = coreMock.createSetup();
+      coreSetup.deprecations.registerDeprecations.mockImplementation((deprecationConfig) => {
+        deprecationConfigs.push(deprecationConfig);
+      });
 
-      expect(context.logger.get).not.toHaveBeenCalled();
+      await plugin.setup(coreSetup);
+
+      expect(coreSetup.deprecations.registerDeprecations).toHaveBeenCalledTimes(1);
+      expect(deprecationConfigs).toHaveLength(1);
+
+      const deprecations = await deprecationConfigs[0].getDeprecations(getDeprecationContextMock());
+      expect(deprecations).toHaveLength(0);
     });
 
     it('logs deprecation message if any xpack.code.* configurations are set', async () => {
@@ -28,12 +46,28 @@ describe('Code Plugin', () => {
       context.logger.get = jest.fn().mockReturnValue({ warn });
       const plugin = new CodePlugin(context);
 
-      await plugin.setup();
+      const coreSetup = coreMock.createSetup();
+      coreSetup.deprecations.registerDeprecations.mockImplementation((deprecationConfig) => {
+        deprecationConfigs.push(deprecationConfig);
+      });
 
-      expect(context.logger.get).toHaveBeenCalledWith('config', 'deprecation');
-      expect(warn.mock.calls[0][0]).toMatchInlineSnapshot(
-        `"The experimental app \\"Code\\" has been removed from Kibana. Remove all xpack.code.* configurations from kibana.yml so Kibana does not fail to start up in the next major version."`
-      );
+      await plugin.setup(coreSetup);
+
+      expect(coreSetup.deprecations.registerDeprecations).toHaveBeenCalledTimes(1);
+      expect(deprecationConfigs).toHaveLength(1);
+
+      const deprecations = await deprecationConfigs[0].getDeprecations(getDeprecationContextMock());
+      expect(deprecations).toHaveLength(1);
+      expect(deprecations[0]).toEqual({
+        level: 'critical',
+        deprecationType: 'feature',
+        title: expect.any(String),
+        message: expect.any(String),
+        requireRestart: true,
+        correctiveActions: expect.objectContaining({
+          manualSteps: expect.any(Array),
+        }),
+      });
     });
   });
 });

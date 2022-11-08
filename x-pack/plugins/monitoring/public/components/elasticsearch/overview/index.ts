@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { ElasticsearchOverview } from './overview';
 // @ts-ignore
-export { ElasticsearchOverviewReact } from './overview_react';
+export { ElasticsearchOverview } from './overview';

@@ -16,10 +16,10 @@ static objectTransformError(objects: SavedObject[], cause: Error): SavedObjectsE
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>SavedObject[]</code> |  |
-|  cause | <code>Error</code> |  |
+|  objects | SavedObject\[\] |  |
+|  cause | Error |  |
 
 <b>Returns:</b>
 
-`SavedObjectsExportError`
+SavedObjectsExportError
 

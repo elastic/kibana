@@ -25,7 +25,7 @@ import {
 import { TimeHistoryContract } from './time_history';
 import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
 
-export { AutoRefreshDoneFn };
+export type { AutoRefreshDoneFn };
 
 // TODO: remove!
 export class Timefilter {

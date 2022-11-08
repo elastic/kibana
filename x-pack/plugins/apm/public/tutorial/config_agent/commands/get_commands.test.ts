@@ -178,7 +178,7 @@ describe('getCommands', () => {
         # ...
         )
 
-        ELASTIC_APM = {curlyOpen}
+        ELASTIC_APM = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
         'SERVICE_NAME': '',
@@ -191,7 +191,7 @@ describe('getCommands', () => {
 
         # Set the service environment
         'ENVIRONMENT': 'production',
-        {curlyClose}
+        }
 
         # To send performance metrics, add our tracing middleware:
         MIDDLEWARE = (
@@ -216,7 +216,7 @@ describe('getCommands', () => {
         # ...
         )
 
-        ELASTIC_APM = {curlyOpen}
+        ELASTIC_APM = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
         'SERVICE_NAME': '',
@@ -229,7 +229,7 @@ describe('getCommands', () => {
 
         # Set the service environment
         'ENVIRONMENT': 'production',
-        {curlyClose}
+        }
 
         # To send performance metrics, add our tracing middleware:
         MIDDLEWARE = (
@@ -254,7 +254,7 @@ describe('getCommands', () => {
 
         # or configure to use ELASTIC_APM in your application's settings
         from elasticapm.contrib.flask import ElasticAPM
-        app.config['ELASTIC_APM'] = {curlyOpen}
+        app.config['ELASTIC_APM'] = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
         'SERVICE_NAME': '',
@@ -267,7 +267,7 @@ describe('getCommands', () => {
 
         # Set the service environment
         'ENVIRONMENT': 'production',
-        {curlyClose}
+        }
 
         apm = ElasticAPM(app)"
       `);
@@ -289,7 +289,7 @@ describe('getCommands', () => {
 
         # or configure to use ELASTIC_APM in your application's settings
         from elasticapm.contrib.flask import ElasticAPM
-        app.config['ELASTIC_APM'] = {curlyOpen}
+        app.config['ELASTIC_APM'] = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
         'SERVICE_NAME': '',
@@ -302,7 +302,7 @@ describe('getCommands', () => {
 
         # Set the service environment
         'ENVIRONMENT': 'production',
-        {curlyClose}
+        }
 
         apm = ElasticAPM(app)"
       `);
@@ -511,7 +511,7 @@ describe('getCommands', () => {
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "elastic_apm.server_url=\\"\\"
-        elastic.apm.secret_token=\\"\\"
+        elastic_apm.secret_token=\\"\\"
         elastic_apm.service_name=\\"My service\\"
         "
       `);
@@ -527,7 +527,7 @@ describe('getCommands', () => {
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "elastic_apm.server_url=\\"localhost:8220\\"
-        elastic.apm.secret_token=\\"foobar\\"
+        elastic_apm.secret_token=\\"foobar\\"
         elastic_apm.service_name=\\"My service\\"
         "
       `);

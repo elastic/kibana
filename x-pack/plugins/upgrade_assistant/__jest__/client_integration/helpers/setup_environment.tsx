@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import axios from 'axios';
+import SemVer from 'semver/classes/semver';
 import { merge } from 'lodash';
-// @ts-ignore
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import { HttpSetup } from 'src/core/public';
 
+import { MAJOR_VERSION } from '../../../common/constants';
 import { AuthorizationContext, Authorization, Privileges } from '../../../public/shared_imports';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
@@ -24,8 +23,6 @@ import { init as initHttpRequests } from './http_requests';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
 const createAuthorizationContextValue = (privileges: Privileges) => {
   return {
     isLoading: false,
@@ -33,13 +30,15 @@ const createAuthorizationContextValue = (privileges: Privileges) => {
   } as Authorization;
 };
 
+export const kibanaVersion = new SemVer(MAJOR_VERSION);
+
 export const WithAppDependencies =
-  (Comp: any, { privileges, ...overrides }: Record<string, unknown> = {}) =>
+  (Comp: any, httpSetup: HttpSetup, { privileges, ...overrides }: Record<string, unknown> = {}) =>
   (props: Record<string, unknown>) => {
-    apiService.setup(mockHttpClient as unknown as HttpSetup);
+    apiService.setup(httpSetup);
     breadcrumbService.setup(() => '');
 
-    const appContextMock = getAppContextMock() as unknown as AppDependencies;
+    const appContextMock = getAppContextMock(kibanaVersion) as unknown as AppDependencies;
 
     return (
       <AuthorizationContext.Provider
@@ -55,11 +54,5 @@ export const WithAppDependencies =
   };
 
 export const setupEnvironment = () => {
-  const { server, setServerAsync, httpRequestsMockHelpers } = initHttpRequests();
-
-  return {
-    server,
-    setServerAsync,
-    httpRequestsMockHelpers,
-  };
+  return initHttpRequests();
 };

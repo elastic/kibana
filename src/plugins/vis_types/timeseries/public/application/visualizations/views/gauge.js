@@ -75,6 +75,7 @@ export class Gauge extends Component {
             top: this.state.top || 0,
             left: this.state.left || 0,
             transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
+            zIndex: 1,
           },
           valueColor: {
             color: this.props.valueColor,

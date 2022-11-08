@@ -20,7 +20,7 @@ import {
 } from '../apps/context/services/context_state';
 import { getStateColumnActions } from '../apps/main/components/doc_table/actions/columns';
 
-interface UseDataGridColumnsProps {
+interface UseColumnsProps {
   capabilities: Capabilities;
   config: IUiSettingsClient;
   indexPattern: IndexPattern;
@@ -30,7 +30,7 @@ interface UseDataGridColumnsProps {
   state: DiscoverState | ContextState;
 }
 
-export const useDataGridColumns = ({
+export const useColumns = ({
   capabilities,
   config,
   indexPattern,
@@ -38,7 +38,7 @@ export const useDataGridColumns = ({
   setAppState,
   state,
   useNewFieldsApi,
-}: UseDataGridColumnsProps) => {
+}: UseColumnsProps) => {
   const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({

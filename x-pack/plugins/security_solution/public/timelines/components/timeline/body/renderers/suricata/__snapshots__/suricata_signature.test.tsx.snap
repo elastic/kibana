@@ -26,6 +26,7 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
       data-test-subj="draggable-signature-link"
       field="suricata.eve.alert.signature"
       id="suricata-signature-default-draggable-test-doc-id-123-suricata.eve.alert.signature"
+      tooltipPosition="bottom"
       value="ET SCAN ATTACK Hello"
     >
       <div>

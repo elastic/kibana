@@ -14,7 +14,7 @@ import { getAllStats } from './get_all_stats';
 import { getClusterUuids } from './get_cluster_uuids';
 import { getLicenses } from './get_licenses';
 
-interface MonitoringStats extends UsageStatsPayload {
+interface MonitoringStats extends Omit<UsageStatsPayload, 'cacheDetails'> {
   stack_stats: {
     logstash?: LogstashBaseStats;
     beats?: BeatsBaseStats;
@@ -146,9 +146,10 @@ export function registerMonitoringTelemetryCollection(
       const callCluster = kibanaRequest ? esClient : getClient().asInternalUser;
       const clusterDetails = await getClusterUuids(callCluster, timestamp, maxBucketSize);
       const [licenses, stats] = await Promise.all([
-        getLicenses(clusterDetails, callCluster, maxBucketSize),
+        getLicenses(clusterDetails, callCluster, timestamp, maxBucketSize),
         getAllStats(clusterDetails, callCluster, timestamp, maxBucketSize),
       ]);
+
       return {
         stats: stats.map((stat) => {
           const license = licenses[stat.cluster_uuid];

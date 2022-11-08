@@ -72,7 +72,7 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
     const getTitleMessage = () => (
       <FormattedMessage
         id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel"
-        defaultMessage="Trusted Applications"
+        defaultMessage="Trusted applications"
       />
     );
 

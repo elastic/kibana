@@ -15,10 +15,10 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
   const retry = getService('retry');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const es = getService('es');
 
   describe('Overview Page', function () {
     this.tags('skipFirefox');
+    this.onlyEsVersion('<=7');
 
     before(async () => {
       await security.testUser.setRoles(['superuser']);
@@ -39,30 +39,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
     it('Should render all steps', async () => {
       testSubjects.exists('backupStep-incomplete');
       testSubjects.exists('fixIssuesStep-incomplete');
-      testSubjects.exists('fixLogsStep-incomplete');
       testSubjects.exists('upgradeStep');
-    });
-
-    describe('fixLogsStep', () => {
-      before(async () => {
-        // Access to system indices will be deprecated and should generate a deprecation log
-        await es.indices.get({ index: '.kibana' });
-
-        await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
-
-        await retry.waitFor('UA external links title to be present', async () => {
-          return testSubjects.isDisplayed('externalLinksTitle');
-        });
-      });
-
-      it('Shows warnings callout if there are deprecations', async () => {
-        testSubjects.exists('hasWarningsCallout');
-      });
-
-      it('Shows no warnings callout if there are no deprecations', async () => {
-        await PageObjects.upgradeAssistant.clickResetLastCheckpointButton();
-        testSubjects.exists('noWarningsCallout');
-      });
     });
   });
 }

@@ -7,12 +7,12 @@
 import * as t from 'io-ts';
 import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
 
-export {
+export type {
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
 } from '../../../../../fleet/public';
 
-export {
+export type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyConfigRecordEntry,
@@ -46,7 +46,6 @@ export interface BasicSettingRow {
   settings?: SettingsRow[];
   validation?: SettingValidation;
   required?: boolean;
-  readOnly?: boolean;
 }
 
 export type SettingsRow = BasicSettingRow | AdvancedSettingRow;

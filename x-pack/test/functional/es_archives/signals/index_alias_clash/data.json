@@ -1,0 +1,11 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "signal_name_clash",
+    "source": {
+      "@timestamp": "2020-10-28T05:08:53.000Z"
+    },
+    "type": "_doc"
+  }
+}

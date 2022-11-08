@@ -62,10 +62,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./synthetics_integration'));
     });
 
-    describe('with generated data but no data reset', () => {
-      loadTestFile(require.resolve('./ping_redirects'));
-    });
-
     describe('with real-world data', () => {
       before(async () => {
         await esArchiver.unload(ARCHIVE);
@@ -76,7 +72,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       after(async () => await esArchiver.unload(ARCHIVE));
 
       loadTestFile(require.resolve('./overview'));
-      loadTestFile(require.resolve('./monitor'));
       loadTestFile(require.resolve('./ml_anomaly'));
       loadTestFile(require.resolve('./feature_controls'));
     });

@@ -14,9 +14,9 @@ static createUnsupportedTypeError(type: string): DecoratedError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
+|  type | string |  |
 
 <b>Returns:</b>
 
-`DecoratedError`
+DecoratedError
 

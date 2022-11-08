@@ -28,7 +28,7 @@ import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
 import { CaseDetailsHrefSchema, CasesNavigation } from '../links';
-import { Panel } from '../panel';
+
 import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { useCasesColumns } from './columns';
 import { getExpandedRowMap } from './expanded_row';
@@ -240,8 +240,6 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     const isCasesLoading = useMemo(() => loading.indexOf('cases') > -1, [loading]);
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
-    const TableWrap = useMemo(() => (isSelectorView ? 'span' : Panel), [isSelectorView]);
-
     const tableRowProps = useCallback(
       (theCase: Case) => {
         const onTableRowClick = memoize(async () => {
@@ -289,48 +287,43 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
           className="essentialAnimation"
           $isShow={(isCasesLoading || isLoading || isCommentUpdating) && !isDataEmpty}
         />
-        <TableWrap
-          data-test-subj="table-wrap"
-          loading={!isSelectorView ? isCasesLoading : undefined}
-        >
-          <CasesTableFilters
-            countClosedCases={data.countClosedCases}
-            countOpenCases={data.countOpenCases}
-            countInProgressCases={data.countInProgressCases}
-            onFilterChanged={onFilterChangedCallback}
-            initial={{
-              search: filterOptions.search,
-              reporters: filterOptions.reporters,
-              tags: filterOptions.tags,
-              status: filterOptions.status,
-            }}
-            setFilterRefetch={setFilterRefetch}
-            hiddenStatuses={hiddenStatuses}
-          />
-          <CasesTable
-            columns={columns}
-            createCaseNavigation={createCaseNavigation}
-            data={data}
-            filterOptions={filterOptions}
-            goToCreateCase={goToCreateCase}
-            handleIsLoading={handleIsLoading}
-            isCasesLoading={isCasesLoading}
-            isCommentUpdating={isCommentUpdating}
-            isDataEmpty={isDataEmpty}
-            isSelectorView={isSelectorView}
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            onChange={tableOnChangeCallback}
-            pagination={pagination}
-            refreshCases={refreshCases}
-            selectedCases={selectedCases}
-            selection={euiBasicTableSelectionProps}
-            showActions={showActions}
-            sorting={sorting}
-            tableRef={tableRef}
-            tableRowProps={tableRowProps}
-            userCanCrud={userCanCrud}
-          />
-        </TableWrap>
+        <CasesTableFilters
+          countClosedCases={data.countClosedCases}
+          countOpenCases={data.countOpenCases}
+          countInProgressCases={data.countInProgressCases}
+          onFilterChanged={onFilterChangedCallback}
+          initial={{
+            search: filterOptions.search,
+            reporters: filterOptions.reporters,
+            tags: filterOptions.tags,
+            status: filterOptions.status,
+          }}
+          setFilterRefetch={setFilterRefetch}
+          hiddenStatuses={hiddenStatuses}
+        />
+        <CasesTable
+          columns={columns}
+          createCaseNavigation={createCaseNavigation}
+          data={data}
+          filterOptions={filterOptions}
+          goToCreateCase={goToCreateCase}
+          handleIsLoading={handleIsLoading}
+          isCasesLoading={isCasesLoading}
+          isCommentUpdating={isCommentUpdating}
+          isDataEmpty={isDataEmpty}
+          isSelectorView={isSelectorView}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          onChange={tableOnChangeCallback}
+          pagination={pagination}
+          refreshCases={refreshCases}
+          selectedCases={selectedCases}
+          selection={euiBasicTableSelectionProps}
+          showActions={showActions}
+          sorting={sorting}
+          tableRef={tableRef}
+          tableRowProps={tableRowProps}
+          userCanCrud={userCanCrud}
+        />
       </>
     );
   }

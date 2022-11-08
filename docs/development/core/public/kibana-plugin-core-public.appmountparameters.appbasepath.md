@@ -35,7 +35,6 @@ export class MyPlugin implements Plugin {
    });
  }
 }
-
 ```
 
 ```ts
@@ -58,6 +57,5 @@ export renderApp = ({ appBasePath, element }: AppMountParameters) => {
 
   return () => ReactDOM.unmountComponentAtNode(element);
 }
-
 ```
 

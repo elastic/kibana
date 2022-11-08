@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord, Serializable } from '@kbn/utility-types';
 import { SavedObjectReference } from '../../../../core/types';
 
 /**
@@ -26,7 +26,7 @@ import { SavedObjectReference } from '../../../../core/types';
  * };
  * ```
  */
-export interface VersionedState<S extends SerializableRecord = SerializableRecord> {
+export interface VersionedState<S extends Serializable = Serializable> {
   version: string;
   state: S;
 }
@@ -116,7 +116,7 @@ export type PersistableStateDefinition<P extends SerializableRecord = Serializab
 /**
  * @todo Add description.
  */
-export interface PersistableStateService<P extends SerializableRecord = SerializableRecord> {
+export interface PersistableStateService<P extends Serializable = Serializable> {
   /**
    * Function which reports telemetry information. This function is essentially
    * a "reducer" - it receives the existing "stats" object and returns an

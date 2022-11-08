@@ -70,6 +70,9 @@ Array [
       />,
     },
   },
+  Object {
+    "toastLifeTimeMs": 86400000,
+  },
 ]
 `;
 
@@ -172,6 +175,9 @@ Array [
       />,
     },
   },
+  Object {
+    "toastLifeTimeMs": 86400000,
+  },
 ]
 `;
 
@@ -212,6 +218,9 @@ Array [
         }
       />,
     },
+  },
+  Object {
+    "toastLifeTimeMs": 86400000,
   },
 ]
 `;

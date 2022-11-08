@@ -8,12 +8,12 @@
 
 import { LocatorExamplesPlugin } from './plugin';
 
-export {
+export type {
   HelloLocator,
   HelloLocatorV1Params,
   HelloLocatorV2Params,
   HelloLocatorParams,
-  HELLO_LOCATOR,
 } from './locator';
+export { HELLO_LOCATOR } from './locator';
 
 export const plugin = () => new LocatorExamplesPlugin();

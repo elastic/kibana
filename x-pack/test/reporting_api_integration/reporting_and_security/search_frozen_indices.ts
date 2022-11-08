@@ -47,7 +47,9 @@ export default function ({ getService }: FtrProviderContext) {
       .send(job);
   }
 
-  describe('Frozen indices search', () => {
+  describe('Frozen indices search', function () {
+    this.onlyEsVersion('<=7');
+
     const reset = async () => {
       await kibanaServer.uiSettings.replace({ 'search:includeFrozen': false });
       try {

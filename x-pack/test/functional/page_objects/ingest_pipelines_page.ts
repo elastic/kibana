@@ -28,14 +28,21 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       version,
       processors,
       onFailureProcessors,
+      emptyState,
     }: {
       name: string;
       description: string;
       version?: number;
       processors?: string;
       onFailureProcessors?: string;
+      emptyState?: boolean;
     }) {
-      await testSubjects.click('createPipelineButton');
+      if (emptyState) {
+        await testSubjects.click('emptyStateCreatePipelineButton');
+      } else {
+        await testSubjects.click('createPipelineButton');
+      }
+
       await testSubjects.exists('pipelineForm');
 
       await testSubjects.setValue('nameField > input', name);

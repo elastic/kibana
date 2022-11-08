@@ -42,44 +42,44 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should delete calendar by id', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .delete(`/api/ml/calendars/${calendarId}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.acknowledged).to.eql(true);
       await ml.api.waitForCalendarNotToExist(calendarId);
     });
 
     it('should not delete calendar for user without required permission', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .delete(`/api/ml/calendars/${calendarId}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(403);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       await ml.api.waitForCalendarToExist(calendarId);
     });
 
     it('should not delete calendar for unauthorized user', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .delete(`/api/ml/calendars/${calendarId}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(403);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       await ml.api.waitForCalendarToExist(calendarId);
     });
 
     it('should return 404 if invalid calendarId', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .delete(`/api/ml/calendars/calendar_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(404);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(404, status, body);
 
       expect(body.error).to.eql('Not Found');
     });

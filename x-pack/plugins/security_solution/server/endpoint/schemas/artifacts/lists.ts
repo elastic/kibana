@@ -48,6 +48,24 @@ export const translatedEntryMatchWildcard = t.exact(
 );
 export type TranslatedEntryMatchWildcard = t.TypeOf<typeof translatedEntryMatchWildcard>;
 
+export const translatedEntryMatchWildcardNameMatcher = t.keyof({
+  exact_cased: null,
+  exact_caseless: null,
+});
+export type TranslatedEntryMatchWildcardNameMatcher = t.TypeOf<
+  typeof translatedEntryMatchWildcardNameMatcher
+>;
+
+export const translatedEntryMatchWildcardName = t.exact(
+  t.type({
+    field: t.string,
+    operator,
+    type: translatedEntryMatchWildcardNameMatcher,
+    value: t.string,
+  })
+);
+export type TranslatedEntryMatchWildcardName = t.TypeOf<typeof translatedEntryMatchWildcardName>;
+
 export const translatedEntryMatch = t.exact(
   t.type({
     field: t.string,
@@ -83,6 +101,12 @@ export const translatedEntry = t.union([
   translatedEntryMatchAny,
 ]);
 export type TranslatedEntry = t.TypeOf<typeof translatedEntry>;
+
+export const translatedPerformantEntries = t.array(
+  t.union([translatedEntryMatchWildcard, translatedEntryMatchWildcardName])
+);
+
+export type TranslatedPerformantEntries = t.TypeOf<typeof translatedPerformantEntries>;
 
 export const translatedExceptionListItem = t.exact(
   t.type({

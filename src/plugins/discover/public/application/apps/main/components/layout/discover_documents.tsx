@@ -23,7 +23,7 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../../common';
-import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
+import { useColumns } from '../../../../helpers/use_data_grid_columns';
 import { IndexPattern } from '../../../../../../../data/common';
 import { SavedSearch } from '../../../../../saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../services/use_saved_search';
@@ -69,7 +69,7 @@ function DiscoverDocumentsComponent({
 
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
-  const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useDataGridColumns({
+  const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities,
     config: uiSettings,
     indexPattern,
@@ -120,7 +120,7 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <EuiFlexItem className="dscTable" tabIndex={-1} aria-labelledby="documentsAriaLabel">
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel">
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />

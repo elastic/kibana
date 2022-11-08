@@ -309,7 +309,6 @@
         "gis-map": {
           "properties": {
             "bounds": {
-              "strategy": "recursive",
               "type": "geo_shape"
             },
             "description": {

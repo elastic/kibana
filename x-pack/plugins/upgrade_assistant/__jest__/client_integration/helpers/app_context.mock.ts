@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import SemVer from 'semver/classes/semver';
 import {
   deprecationsServiceMock,
   docLinksServiceMock,
@@ -16,16 +17,34 @@ import {
 } from 'src/core/public/mocks';
 import { sharePluginMock } from 'src/plugins/share/public/mocks';
 
-import { mockKibanaSemverVersion } from '../../../common/constants';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { cloudMock } from '../../../../../../x-pack/plugins/cloud/public/mocks';
 
+const data = dataPluginMock.createStartContract();
+const dataViews = { ...data.dataViews };
+const findDataView = (id: string) =>
+  Promise.resolve([
+    {
+      id,
+      title: id,
+      getFieldByName: jest.fn((name: string) => ({
+        name,
+      })),
+    },
+  ]);
+
 const servicesMock = {
   api: apiService,
   breadcrumbs: breadcrumbService,
-  data: dataPluginMock.createStartContract(),
+  data: {
+    ...data,
+    dataViews: {
+      ...dataViews,
+      find: findDataView,
+    },
+  },
 };
 
 // We'll mock these values to avoid testing the locators themselves.
@@ -53,12 +72,12 @@ shareMock.url.locators.get = (id: IdKey) => ({
     `${idToUrlMap[id]}?${stringifySearchParams(params)}`,
 });
 
-export const getAppContextMock = () => ({
+export const getAppContextMock = (kibanaVersion: SemVer) => ({
   isReadOnlyMode: false,
   kibanaVersionInfo: {
-    currentMajor: mockKibanaSemverVersion.major,
-    prevMajor: mockKibanaSemverVersion.major - 1,
-    nextMajor: mockKibanaSemverVersion.major + 1,
+    currentMajor: kibanaVersion.major,
+    prevMajor: kibanaVersion.major - 1,
+    nextMajor: kibanaVersion.major + 1,
   },
   services: {
     ...servicesMock,
@@ -69,7 +88,14 @@ export const getAppContextMock = () => ({
       notifications: notificationServiceMock.createStartContract(),
       docLinks: docLinksServiceMock.createStartContract(),
       history: scopedHistoryMock.create(),
-      application: applicationServiceMock.createStartContract(),
+      application: {
+        ...applicationServiceMock.createStartContract(),
+        capabilities: {
+          spaces: {
+            manage: true,
+          },
+        },
+      },
     },
   },
   plugins: {

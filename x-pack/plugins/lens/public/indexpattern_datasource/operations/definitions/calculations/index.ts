@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-export { counterRateOperation, CounterRateIndexPatternColumn } from './counter_rate';
-export { cumulativeSumOperation, CumulativeSumIndexPatternColumn } from './cumulative_sum';
-export { derivativeOperation, DerivativeIndexPatternColumn } from './differences';
-export { movingAverageOperation, MovingAverageIndexPatternColumn } from './moving_average';
+export type { CounterRateIndexPatternColumn } from './counter_rate';
+export { counterRateOperation } from './counter_rate';
+export type { CumulativeSumIndexPatternColumn } from './cumulative_sum';
+export { cumulativeSumOperation } from './cumulative_sum';
+export type { DerivativeIndexPatternColumn } from './differences';
+export { derivativeOperation } from './differences';
+export type { MovingAverageIndexPatternColumn } from './moving_average';
+export { movingAverageOperation } from './moving_average';
+export type {
+  OverallSumIndexPatternColumn,
+  OverallMinIndexPatternColumn,
+  OverallMaxIndexPatternColumn,
+  OverallAverageIndexPatternColumn,
+} from './overall_metric';
 export {
   overallSumOperation,
-  OverallSumIndexPatternColumn,
   overallMinOperation,
-  OverallMinIndexPatternColumn,
   overallMaxOperation,
-  OverallMaxIndexPatternColumn,
   overallAverageOperation,
-  OverallAverageIndexPatternColumn,
 } from './overall_metric';

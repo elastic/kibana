@@ -161,15 +161,34 @@ describe('ServiceNowSIR Fields', () => {
     ]);
   });
 
-  test('it shows the deprecated callout when the connector is legacy', async () => {
-    const legacyConnector = { ...connector, config: { isLegacy: true } };
-    render(<Fields fields={fields} onChange={onChange} connector={legacyConnector} />);
-    expect(screen.getByTestId('legacy-connector-warning-callout')).toBeInTheDocument();
+  test('it shows the deprecated callout when the connector uses the table API', async () => {
+    const tableApiConnector = { ...connector, config: { usesTableApi: true } };
+    render(<Fields fields={fields} onChange={onChange} connector={tableApiConnector} />);
+    expect(screen.getByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
-  test('it does not show the deprecated callout when the connector is not legacy', async () => {
+  test('it does not show the deprecated callout when the connector does not uses the table API', async () => {
     render(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    expect(screen.queryByTestId('legacy-connector-warning-callout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
+  });
+
+  it('does not show the deprecated callout when the connector is preconfigured', async () => {
+    render(
+      <Fields
+        fields={fields}
+        onChange={onChange}
+        connector={{ ...connector, isPreconfigured: true }}
+      />
+    );
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
+  });
+
+  it('does not show the deprecated callout when the config of the connector is undefined', async () => {
+    render(
+      // @ts-expect-error
+      <Fields fields={fields} onChange={onChange} connector={{ ...connector, config: undefined }} />
+    );
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });
 
   describe('onChange calls', () => {

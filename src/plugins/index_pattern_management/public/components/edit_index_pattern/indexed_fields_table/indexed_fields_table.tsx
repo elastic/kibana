@@ -8,9 +8,12 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
+import { OverlayStart } from 'src/core/public';
 import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
+import { IndexPatternManagmentContext } from '../../../types';
 
 interface IndexedFieldsTableProps {
   fields: IndexPatternField[];
@@ -23,16 +26,24 @@ interface IndexedFieldsTableProps {
     getFieldInfo: (indexPattern: IndexPattern, field: IndexPatternField) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
+  userEditPermission: boolean;
+  openModal: OverlayStart['openModal'];
 }
 
 interface IndexedFieldsTableState {
   fields: IndexedFieldItem[];
 }
 
-export class IndexedFieldsTable extends Component<
-  IndexedFieldsTableProps,
-  IndexedFieldsTableState
-> {
+const withHooks = (Comp: typeof Component) => {
+  return (props: any) => {
+    const { application } = useKibana<IndexPatternManagmentContext>().services;
+    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+
+    return <Comp userEditPermission={userEditPermission} {...props} />;
+  };
+};
+
+class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTableState> {
   constructor(props: IndexedFieldsTableProps) {
     super(props);
 
@@ -50,7 +61,7 @@ export class IndexedFieldsTable extends Component<
   }
 
   mapFields(fields: IndexPatternField[]): IndexedFieldItem[] {
-    const { indexPattern, fieldWildcardMatcher, helpers } = this.props;
+    const { indexPattern, fieldWildcardMatcher, helpers, userEditPermission } = this.props;
     const sourceFilters =
       indexPattern.sourceFilters &&
       indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
@@ -68,6 +79,7 @@ export class IndexedFieldsTable extends Component<
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
             info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
             isMapped: !!field.isMapped,
+            isUserEditable: userEditPermission,
             hasRuntime: !!field.runtimeField,
           };
         })) ||
@@ -91,7 +103,14 @@ export class IndexedFieldsTable extends Component<
       }
 
       if (indexedFieldTypeFilter) {
-        fields = fields.filter((field) => field.type === indexedFieldTypeFilter);
+        // match conflict fields
+        fields = fields.filter((field) => {
+          if (indexedFieldTypeFilter === 'conflict' && field.kbnType === 'conflict') {
+            return true;
+          }
+          // match one of multiple types on a field
+          return field.esTypes?.length && field.esTypes?.indexOf(indexedFieldTypeFilter) !== -1;
+        });
       }
 
       return fields;
@@ -109,8 +128,11 @@ export class IndexedFieldsTable extends Component<
           items={fields}
           editField={(field) => this.props.helpers.editField(field.name)}
           deleteField={(fieldName) => this.props.helpers.deleteField(fieldName)}
+          openModal={this.props.openModal}
         />
       </div>
     );
   }
 }
+
+export const IndexedFieldsTable = withHooks(IndexedFields);

@@ -84,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     it('job creation loads the multi metric wizard for the source data', async () => {
@@ -204,7 +205,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobId, 1);
 
       await ml.testExecution.logTestStep(
@@ -337,7 +337,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobIdClone, 1);
 
       await ml.testExecution.logTestStep(

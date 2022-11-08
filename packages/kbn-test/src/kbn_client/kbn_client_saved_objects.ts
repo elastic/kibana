@@ -70,6 +70,7 @@ interface FindApiResponse {
 interface CleanOptions {
   space?: string;
   types: string[];
+  force?: boolean;
 }
 
 interface DeleteObjectsOptions {
@@ -78,6 +79,7 @@ interface DeleteObjectsOptions {
     type: string;
     id: string;
   }>;
+  force?: boolean;
 }
 
 async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) => Promise<void>) {
@@ -203,6 +205,7 @@ export class KbnClientSavedObjects {
       const deletion = await this.bulkDelete({
         space: options.space,
         objects: resp.data.saved_objects,
+        force: options.force,
       });
       deleted += deletion.deleted;
 
@@ -212,6 +215,25 @@ export class KbnClientSavedObjects {
     }
 
     this.log.success('deleted', deleted, 'objects');
+  }
+
+  public async cleanStandardList(options?: { space?: string; force?: boolean }) {
+    // add types here
+    const types = [
+      'search',
+      'index-pattern',
+      'visualization',
+      'dashboard',
+      'lens',
+      'map',
+      'graph-workspace',
+      'query',
+      'tag',
+      'url',
+      'canvas-workpad',
+    ];
+    const newOptions = { types, space: options?.space, force: options?.force };
+    await this.clean(newOptions);
   }
 
   public async bulkDelete(options: DeleteObjectsOptions) {
@@ -225,6 +247,7 @@ export class KbnClientSavedObjects {
           path: options.space
             ? uriencode`/s/${options.space}/api/saved_objects/${obj.type}/${obj.id}`
             : uriencode`/api/saved_objects/${obj.type}/${obj.id}`,
+          query: options.force ? { force: true } : undefined,
         });
         deleted++;
       } catch (error) {

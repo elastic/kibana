@@ -13,3 +13,5 @@ export const PLUGIN = {
   }),
   id: 'license_management',
 };
+
+export const MAJOR_VERSION = '7.16.0';

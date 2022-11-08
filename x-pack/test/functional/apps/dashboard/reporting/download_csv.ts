@@ -21,7 +21,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const find = getService('find');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'reporting',
+    'common',
+    'dashboard',
+    'timePicker',
+    'discover',
+  ]);
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
   const ecommerceDataPath = 'x-pack/test/functional/es_archives/reporting/ecommerce';
@@ -71,7 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    describe('E-Commerce Data', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/120433
+    describe.skip('E-Commerce Data', () => {
       before(async () => {
         await esArchiver.load(ecommerceDataPath);
         await kibanaServer.importExport.load(ecommerceSOPath);
@@ -119,6 +127,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const csvFile = await getDownload(getCsvPath('Ecommerce Data')); // file exists with proper name
         expect(csvFile).to.not.be(null);
+      });
+
+      it('Downloads filtered Discover saved search report', async () => {
+        const setTimeRange = async () => {
+          const fromTime = 'Jun 20, 2019 @ 23:56:51.374';
+          const toTime = 'Jun 25, 2019 @ 16:18:51.821';
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        };
+
+        PageObjects.common.navigateToApp('discover');
+        await setTimeRange();
+        await PageObjects.discover.selectIndexPattern('ecommerce');
+        await PageObjects.discover.clickNewSearchButton();
+
+        await PageObjects.discover.clickFieldListItemAdd('customer_first_name');
+        await PageObjects.discover.clickFieldListItemAdd('customer_last_name');
+        await PageObjects.discover.clickFieldListItemAdd('customer_full_name');
+        await filterBar.addFilter('customer_first_name', 'is', 'Betty');
+        await PageObjects.discover.saveSearch('search-by-name');
+
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+        await setTimeRange();
+        await dashboardAddPanel.addSavedSearch('search-by-name');
+        await PageObjects.dashboard.saveDashboard('filtered-result');
+
+        await PageObjects.dashboard.clickCancelOutOfEditMode();
+        await clickActionsMenu('search-by-name');
+        await clickDownloadCsv();
+
+        const csvFile = await getDownload(getCsvPath('search-by-name'));
+        expectSnapshot(csvFile).toMatch();
       });
     });
 

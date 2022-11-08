@@ -22,7 +22,7 @@ interface Props {
     isLoading: boolean;
     hasPrivileges: boolean;
     privilegesMissing: MissingPrivileges;
-  }) => JSX.Element;
+  }) => JSX.Element | null;
 }
 
 type Privilege = [string, string];

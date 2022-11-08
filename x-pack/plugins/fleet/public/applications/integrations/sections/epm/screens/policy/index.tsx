@@ -10,11 +10,25 @@ import { useRouteMatch } from 'react-router-dom';
 
 // TODO: Needs to be moved
 import { EditPackagePolicyForm } from '../../../../../fleet/sections/agent_policy/edit_package_policy_page';
+import { useGetOnePackagePolicy, useUIExtension } from '../../../../hooks';
 
 export const Policy = memo(() => {
   const {
     params: { packagePolicyId },
   } = useRouteMatch<{ packagePolicyId: string }>();
 
-  return <EditPackagePolicyForm packagePolicyId={packagePolicyId} from="package-edit" />;
+  const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
+
+  const extensionView = useUIExtension(
+    packagePolicy.data?.item?.package?.name ?? '',
+    'package-policy-edit'
+  );
+
+  return (
+    <EditPackagePolicyForm
+      packagePolicyId={packagePolicyId}
+      from="package-edit"
+      forceUpgrade={extensionView?.useLatestPackageVersion}
+    />
+  );
 });

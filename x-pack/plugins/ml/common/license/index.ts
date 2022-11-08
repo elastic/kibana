@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+export type { LicenseStatus } from './ml_license';
 export {
   MlLicense,
-  LicenseStatus,
   MINIMUM_FULL_LICENSE,
   MINIMUM_LICENSE,
   isFullLicense,

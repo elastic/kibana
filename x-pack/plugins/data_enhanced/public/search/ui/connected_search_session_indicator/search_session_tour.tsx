@@ -23,6 +23,7 @@ export function useSearchSessionTour(
   searchSessionIndicatorRef: SearchSessionIndicatorRef | null,
   state: SearchSessionState,
   searchSessionsDisabled: boolean,
+  disableSearchSessionsTour: boolean,
   usageCollector?: SearchUsageCollector
 ) {
   const markOpenedDone = useCallback(() => {
@@ -55,6 +56,7 @@ export function useSearchSessionTour(
 
   useEffect(() => {
     if (searchSessionsDisabled) return;
+    if (disableSearchSessionsTour) return;
     if (!searchSessionIndicatorRef) return;
     let timeoutHandle: number;
 
@@ -82,6 +84,7 @@ export function useSearchSessionTour(
     searchSessionIndicatorRef,
     state,
     searchSessionsDisabled,
+    disableSearchSessionsTour,
     markOpenedDone,
     markRestoredDone,
     usageCollector,

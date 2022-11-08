@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 import { EuiToolTip, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,6 +17,7 @@ import { DEFAULT_TIME, ReportTypes } from '../configurations/constants';
 
 export function AddSeriesButton() {
   const [editorItems, setEditorItems] = useState<BuilderItem[]>([]);
+  const addSeriesButtonRef = useRef<HTMLButtonElement>(null);
   const { getSeries, allSeries, setSeries, reportType } = useSeriesStorage();
 
   const { loading, indexPatterns } = useAppIndexPatternContext();
@@ -29,6 +30,9 @@ export function AddSeriesButton() {
     const prevSeries = allSeries?.[0];
     const name = `${NEW_SERIES_KEY}-${editorItems.length + 1}`;
     const nextSeries = { name } as SeriesUrl;
+    if (addSeriesButtonRef?.current) {
+      addSeriesButtonRef.current.blur();
+    }
 
     const nextSeriesId = allSeries.length;
 
@@ -70,6 +74,7 @@ export function AddSeriesButton() {
         isDisabled={isAddDisabled}
         iconType="plusInCircle"
         size="s"
+        buttonRef={addSeriesButtonRef}
       >
         {i18n.translate('xpack.observability.expView.seriesBuilder.addSeries', {
           defaultMessage: 'Add series',

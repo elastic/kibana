@@ -8,8 +8,8 @@
 import type { AuthenticatedUser } from '../../common/model';
 
 export type AuthenticationInfo = Omit<AuthenticatedUser, 'authentication_provider'>;
-export {
-  ElasticsearchService,
+export type {
   ElasticsearchServiceStart,
   OnlineStatusRetryScheduler,
 } from './elasticsearch_service';
+export { ElasticsearchService } from './elasticsearch_service';

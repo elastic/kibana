@@ -29,7 +29,7 @@ export function kibanaLogsSpecProvider(context: TutorialContext): TutorialSchema
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.kibanaLogs.shortDescription', {
-      defaultMessage: 'Collect Kibana logs.',
+      defaultMessage: 'Collect and parse logs from Kibana with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kibanaLogs.longDescription', {
       defaultMessage: 'This is the Kibana module. \

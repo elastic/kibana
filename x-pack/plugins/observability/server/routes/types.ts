@@ -17,7 +17,7 @@ import { RuleDataPluginService } from '../../../rule_registry/server';
 import { ObservabilityServerRouteRepository } from './get_global_observability_server_route_repository';
 import { ObservabilityRequestHandlerContext } from '../types';
 
-export { ObservabilityServerRouteRepository };
+export type { ObservabilityServerRouteRepository };
 
 export interface ObservabilityRouteHandlerResources {
   core: {

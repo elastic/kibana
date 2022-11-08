@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-export {
+export type {
   UseRequestConfig,
   UseRequestResponse,
   SendRequestConfig,
   SendRequestResponse,
+  Error,
+} from '../../../../../../../src/plugins/es_ui_shared/public';
+export {
   sendRequest,
   useRequest,
   WithPrivileges,
@@ -18,7 +21,6 @@ export {
   SectionLoading,
   PageLoading,
   PageError,
-  Error,
   useAuthorizationContext,
   NotAuthorizedSection,
   Forms,
@@ -32,11 +34,13 @@ export {
   fieldFormatters,
 } from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
 
-export {
+export type {
   FormSchema,
+  FieldConfig,
+} from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+export {
   FIELD_TYPES,
   VALIDATION_TYPES,
-  FieldConfig,
   useForm,
   Form,
   getUseField,
@@ -50,17 +54,17 @@ export {
 
 export { isJSON } from '../../../../../../../src/plugins/es_ui_shared/static/validators/string';
 
+export type { CommonWizardSteps } from '../shared';
 export {
   TabMappings,
   TabSettings,
   TabAliases,
-  CommonWizardSteps,
   StepSettingsContainer,
   StepMappingsContainer,
   StepAliasesContainer,
 } from '../shared';
 
-export {
+export type {
   ComponentTemplateSerialized,
   ComponentTemplateDeserialized,
   ComponentTemplateListItem,

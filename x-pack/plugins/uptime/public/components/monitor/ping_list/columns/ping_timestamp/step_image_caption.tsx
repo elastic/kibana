@@ -6,10 +6,13 @@
  */
 
 import React, { MouseEvent, useEffect } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { nextAriaLabel, prevAriaLabel } from './translations';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
+import { useBreakpoints } from '../../../../../hooks';
+
+import { nextAriaLabel, prevAriaLabel } from './translations';
 
 export interface StepImageCaptionProps {
   captionContent: string;
@@ -23,13 +26,6 @@ export interface StepImageCaptionProps {
   isLoading: boolean;
 }
 
-const ImageCaption = euiStyled.div`
-  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
-  display: inline-block;
-  width: 100%;
-  text-decoration: none;
-`;
-
 export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   captionContent,
   imgRef,
@@ -41,6 +37,9 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   label,
   onVisible,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const breakpoints = useBreakpoints();
+
   useEffect(() => {
     onVisible(true);
     return () => {
@@ -49,8 +48,10 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const isSmall = breakpoints.down('m');
+
   return (
-    <ImageCaption
+    <CaptionWrapper
       onClick={(evt) => {
         // we don't want this to be captured by row click which leads to step list page
         evt.stopPropagation();
@@ -59,8 +60,9 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
       <div className="stepArrowsFullScreen">
         {(imgSrc || imgRef) && (
           <EuiFlexGroup alignItems="center" justifyContent="center">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={true}>
               <EuiButtonEmpty
+                css={{ marginLeft: isSmall ? 0 : 'auto' }}
                 disabled={stepNumber === 1}
                 onClick={(evt: MouseEvent<HTMLButtonElement>) => {
                   setStepNumber(stepNumber - 1);
@@ -74,10 +76,11 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText>{captionContent}</EuiText>
+              <SecondaryText>{captionContent}</SecondaryText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={true}>
               <EuiButtonEmpty
+                css={{ marginRight: isSmall ? 0 : 'auto' }}
                 disabled={stepNumber === maxSteps}
                 onClick={(evt: MouseEvent<HTMLButtonElement>) => {
                   setStepNumber(stepNumber + 1);
@@ -93,8 +96,21 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        <span className="eui-textNoWrap">{label}</span>
+        <SecondaryText css={{ padding: euiTheme.size.xs }} className="eui-textNoWrap" size="s">
+          {label}
+        </SecondaryText>
       </div>
-    </ImageCaption>
+    </CaptionWrapper>
   );
 };
+
+const CaptionWrapper = euiStyled.div`
+  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+  display: inline-block;
+  width: 100%;
+  text-decoration: none;
+`;
+
+const SecondaryText = euiStyled(EuiText)((props) => ({
+  color: props.theme.eui.euiTextColor,
+}));

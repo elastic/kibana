@@ -245,14 +245,26 @@
             "parentPluginId": "dataViews",
             "id": "def-public.DataView.flattenHit",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "flattenHit",
             "description": [],
             "signature": [
               "(hit: Record<string, any>, deep?: boolean | undefined) => Record<string, any>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              }
+            ],
             "returnComment": [],
             "children": [
               {
@@ -3803,27 +3815,27 @@
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_errors.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_errors.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_errors.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_errors.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_last_results.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_last_results.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_last_results.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_last_results.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
+            "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
+            "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4223,14 +4235,6 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/components/discover_grid/discover_grid.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/components/discover_grid/discover_grid.d.ts"
-          },
-          {
-            "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/components/doc_table/doc_table_wrapper.d.ts"
           },
           {
@@ -4347,14 +4351,6 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/apps/main/utils/calc_field_counts.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/apps/main/utils/calc_field_counts.d.ts"
-          },
-          {
-            "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/utils/get_switch_index_pattern_app_state.d.ts"
           },
           {
@@ -4428,6 +4424,14 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/components/doc_table/components/table_header/table_header.d.ts"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
           },
           {
             "plugin": "data",
@@ -11643,14 +11647,26 @@
             "parentPluginId": "dataViews",
             "id": "def-common.DataView.flattenHit",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "flattenHit",
             "description": [],
             "signature": [
               "(hit: Record<string, any>, deep?: boolean | undefined) => Record<string, any>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              }
+            ],
             "returnComment": [],
             "children": [
               {
@@ -15539,27 +15555,27 @@
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_errors.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_errors.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_errors.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_errors.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_last_results.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_last_results.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_last_results.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_last_results.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
+            "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
+            "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -15959,14 +15975,6 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/components/discover_grid/discover_grid.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/components/discover_grid/discover_grid.d.ts"
-          },
-          {
-            "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/components/doc_table/doc_table_wrapper.d.ts"
           },
           {
@@ -16083,14 +16091,6 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/apps/main/utils/calc_field_counts.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/apps/main/utils/calc_field_counts.d.ts"
-          },
-          {
-            "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/utils/get_switch_index_pattern_app_state.d.ts"
           },
           {
@@ -16164,6 +16164,14 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/components/doc_table/components/table_header/table_header.d.ts"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
           },
           {
             "plugin": "data",

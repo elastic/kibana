@@ -47,7 +47,7 @@ export const CreateCasePage = React.memo(() => {
   return (
     <>
       <SecuritySolutionPageWrapper>
-        <CaseHeaderPage backOptions={backOptions} title={i18n.CREATE_TITLE} />
+        <CaseHeaderPage backOptions={backOptions} title={i18n.CREATE_TITLE} border />
         <Create />
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.case} />

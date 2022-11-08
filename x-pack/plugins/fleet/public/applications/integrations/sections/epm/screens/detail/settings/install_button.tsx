@@ -15,7 +15,11 @@ import {
   useCapabilities,
   useGetPackageInstallStatus,
   useInstallPackage,
+  useStartServices,
 } from '../../../../../hooks';
+
+import { sendPostFleetSetup } from '../../../../../../../hooks/use_request/setup';
+import { toMountPoint } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 
 import { ConfirmPackageInstall } from './confirm_package_install';
 
@@ -35,17 +39,45 @@ export function InstallButton(props: InstallationButtonProps) {
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
 
-  const isInstalling = installationStatus === InstallStatus.installing;
+  const [isFleetSetupInProgress, setFleetSetupInProgress] = useState<boolean>(false);
+
+  const isInstalling = installationStatus === InstallStatus.installing || isFleetSetupInProgress;
   const [isInstallModalVisible, setIsInstallModalVisible] = useState<boolean>(false);
 
   const toggleInstallModal = useCallback(() => {
     setIsInstallModalVisible(!isInstallModalVisible);
   }, [isInstallModalVisible]);
 
-  const handleClickInstall = useCallback(() => {
-    installPackage({ name, version, title });
+  const { notifications } = useStartServices();
+
+  const handleClickInstall = useCallback(async () => {
+    setFleetSetupInProgress(true);
     toggleInstallModal();
-  }, [installPackage, name, title, toggleInstallModal, version]);
+    try {
+      const res = await sendPostFleetSetup({ forceRecreate: false });
+      if (res.error) {
+        throw res.error;
+      }
+    } catch (e) {
+      notifications.toasts.addWarning({
+        title: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.fleetSetupErrorTitle"
+            defaultMessage="Failed to setup Fleet"
+          />
+        ),
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.fleetSetupErrorDescription"
+            defaultMessage="Something went wrong while trying to setup Fleet. Please try again by navigating to Fleet tab."
+          />
+        ),
+        iconType: 'alert',
+      });
+    }
+    setFleetSetupInProgress(false);
+    installPackage({ name, version, title });
+  }, [installPackage, name, title, toggleInstallModal, version, notifications.toasts]);
 
   const installModal = (
     <ConfirmPackageInstall

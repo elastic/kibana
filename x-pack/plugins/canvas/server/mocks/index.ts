@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { workpadRouteContextMock, MockWorkpadRouteContext } from './workpad_route_context';
+export type { MockWorkpadRouteContext } from './workpad_route_context';
+export { workpadRouteContextMock } from './workpad_route_context';

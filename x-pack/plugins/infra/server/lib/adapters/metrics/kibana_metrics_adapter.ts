@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { flatten, get } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
+import { flatten, get } from 'lodash';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
@@ -62,7 +62,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       .then((results) => {
         return results.filter(isVisSeriesData).map((result) => {
           const metricIds = Object.keys(result).filter(
-            (k) => !['type', 'uiRestrictions'].includes(k)
+            (k) => !['type', 'uiRestrictions', 'trackedEsSearches'].includes(k)
           );
 
           return metricIds.map((id: string) => {

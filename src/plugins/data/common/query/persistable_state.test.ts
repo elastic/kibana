@@ -8,6 +8,7 @@
 
 import { extract, inject } from './persistable_state';
 import { Filter } from '@kbn/es-query';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 
 describe('filter manager persistable state tests', () => {
   const filters: Filter[] = [
@@ -15,13 +16,15 @@ describe('filter manager persistable state tests', () => {
   ];
   describe('reference injection', () => {
     test('correctly inserts reference to filter', () => {
-      const updatedFilters = inject(filters, [{ type: 'index_pattern', name: 'test', id: '123' }]);
+      const updatedFilters = inject(filters, [
+        { type: DATA_VIEW_SAVED_OBJECT_TYPE, name: 'test', id: '123' },
+      ]);
       expect(updatedFilters[0]).toHaveProperty('meta.index', '123');
     });
 
     test('drops index setting if reference is missing', () => {
       const updatedFilters = inject(filters, [
-        { type: 'index_pattern', name: 'test123', id: '123' },
+        { type: DATA_VIEW_SAVED_OBJECT_TYPE, name: 'test123', id: '123' },
       ]);
       expect(updatedFilters[0]).toHaveProperty('meta.index', undefined);
     });

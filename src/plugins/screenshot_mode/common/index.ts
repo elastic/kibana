@@ -11,6 +11,11 @@ export {
   setScreenshotModeEnabled,
   setScreenshotModeDisabled,
   KBN_SCREENSHOT_MODE_ENABLED_KEY,
+  KBN_SCREENSHOT_MODE_LAYOUT_KEY,
+  setScreenshotLayout,
+  getScreenshotLayout,
 } from './get_set_browser_screenshot_mode';
+
+export type { Layout } from './get_set_browser_screenshot_mode';
 
 export { KBN_SCREENSHOT_MODE_HEADER } from './constants';

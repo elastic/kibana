@@ -6,4 +6,4 @@
  */
 
 export { esAggFieldsFactory } from './es_agg_factory';
-export { IESAggField } from './agg_field_types';
+export type { IESAggField } from './agg_field_types';

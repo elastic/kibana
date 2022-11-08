@@ -11,7 +11,9 @@ import { setupSpacesAndUsers, tearDown } from '..';
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerts', () => {
-    describe('legacy alerts', () => {
+    describe('legacy alerts', function () {
+      this.tags('ciGroup17');
+
       before(async () => {
         await setupSpacesAndUsers(getService);
       });

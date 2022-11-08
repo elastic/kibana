@@ -14,6 +14,7 @@ import { useGetUrlParams } from '../../../hooks';
 import { useMonitorId } from '../../../hooks';
 import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../common/higher_order';
 import { UptimeRefreshContext } from '../../../contexts';
+import { useOverviewFilterCheck } from '../../../hooks/use_overview_filter_check';
 
 interface Props {
   height: string;
@@ -27,6 +28,7 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
     dateRangeStart: dateStart,
     dateRangeEnd: dateEnd,
   } = useGetUrlParams();
+  const filterCheck = useOverviewFilterCheck();
 
   const dispatch = useDispatch();
   const monitorId = useMonitorId();
@@ -38,8 +40,15 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
   const { loading, pingHistogram: data } = useSelector(selectPingHistogram);
 
   useEffect(() => {
-    dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }));
-  }, [dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch, query]);
+    if (monitorId) {
+      // we don't need filter check on monitor details page, where we have monitorId defined
+      dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }));
+    } else {
+      filterCheck(() =>
+        dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }))
+      );
+    }
+  }, [filterCheck, dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch, query]);
   return (
     <PingHistogramComponent
       data={data}

@@ -41,9 +41,13 @@ export const eqlSearchStrategyProvider = (
       const client = esClient.asCurrentUser.eql;
 
       const search = async () => {
-        const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(
-          uiSettingsClient
-        );
+        // track_total_hits/enable_fields_emulation are not supported by _eql/search
+        const {
+          track_total_hits: tth,
+          enable_fields_emulation: efe,
+          ...defaultParams
+        } = await getDefaultSearchParams(uiSettingsClient, request.params?.body);
+
         const params = id
           ? getDefaultAsyncGetParams(null, options)
           : {
@@ -52,6 +56,7 @@ export const eqlSearchStrategyProvider = (
               ...getDefaultAsyncGetParams(null, options),
               ...request.params,
             };
+
         const promise = id
           ? client.get({ ...params, id }, request.options)
           : // @ts-expect-error EqlRequestParams | undefined is not assignable to EqlRequestParams

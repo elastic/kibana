@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
 import { i18n } from '@kbn/i18n';
 import { METRIC_JAVA_GC_COUNT } from '../../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../helpers/setup_request';

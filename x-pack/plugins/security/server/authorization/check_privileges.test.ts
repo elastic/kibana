@@ -878,6 +878,42 @@ describe('#atSpace', () => {
       `);
     });
   });
+
+  test('omits login privilege when requireLoginAction: false', async () => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
+      has_all_requested: true,
+      username: 'foo-username',
+      index: {},
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.version]: true,
+          },
+        },
+      },
+    });
+    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+      mockActions,
+      () => Promise.resolve(mockClusterClient),
+      application
+    );
+    const request = httpServerMock.createKibanaRequest();
+    const checkPrivileges = checkPrivilegesWithRequest(request);
+    await checkPrivileges.atSpace('space_1', {}, { requireLoginAction: false });
+
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+      body: {
+        index: [],
+        application: [
+          {
+            application,
+            resources: [`space:space_1`],
+            privileges: [mockActions.version],
+          },
+        ],
+      },
+    });
+  });
 });
 
 describe('#atSpaces', () => {
@@ -1369,8 +1405,7 @@ describe('#atSpaces', () => {
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
-              // @ts-expect-error this is wrong on purpose
-              'space:space_1': {
+              'space:space_2': {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
@@ -1380,7 +1415,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
 
@@ -1397,8 +1432,7 @@ describe('#atSpaces', () => {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
               },
-              // @ts-expect-error this is wrong on purpose
-              'space:space_1': {
+              'space:space_2': {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
@@ -1408,7 +1442,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
 
@@ -2081,6 +2115,42 @@ describe('#atSpaces', () => {
           "username": "foo-username",
         }
       `);
+    });
+  });
+
+  test('omits login privilege when requireLoginAction: false', async () => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
+      has_all_requested: true,
+      username: 'foo-username',
+      index: {},
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.version]: true,
+          },
+        },
+      },
+    });
+    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+      mockActions,
+      () => Promise.resolve(mockClusterClient),
+      application
+    );
+    const request = httpServerMock.createKibanaRequest();
+    const checkPrivileges = checkPrivilegesWithRequest(request);
+    await checkPrivileges.atSpaces(['space_1'], {}, { requireLoginAction: false });
+
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+      body: {
+        index: [],
+        application: [
+          {
+            application,
+            resources: [`space:space_1`],
+            privileges: [mockActions.version],
+          },
+        ],
+      },
     });
   });
 });
@@ -2935,6 +3005,42 @@ describe('#globally', () => {
           "username": "foo-username",
         }
       `);
+    });
+  });
+
+  test('omits login privilege when requireLoginAction: false', async () => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
+      has_all_requested: true,
+      username: 'foo-username',
+      index: {},
+      application: {
+        [application]: {
+          [GLOBAL_RESOURCE]: {
+            [mockActions.version]: true,
+          },
+        },
+      },
+    });
+    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+      mockActions,
+      () => Promise.resolve(mockClusterClient),
+      application
+    );
+    const request = httpServerMock.createKibanaRequest();
+    const checkPrivileges = checkPrivilegesWithRequest(request);
+    await checkPrivileges.globally({}, { requireLoginAction: false });
+
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+      body: {
+        index: [],
+        application: [
+          {
+            application,
+            resources: [GLOBAL_RESOURCE],
+            privileges: [mockActions.version],
+          },
+        ],
+      },
     });
   });
 });

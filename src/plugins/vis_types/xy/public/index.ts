@@ -11,11 +11,11 @@
 
 import { VisTypeXyPlugin as Plugin } from './plugin';
 
-export { VisTypeXyPluginSetup } from './plugin';
+export type { VisTypeXyPluginSetup } from './plugin';
 
 // TODO: Remove when vis_type_vislib is removed
 // https://github.com/elastic/kibana/issues/56143
-export {
+export type {
   CategoryAxis,
   ThresholdLine,
   ValueAxis,
@@ -23,9 +23,8 @@ export {
   SeriesParam,
   Dimension,
   Dimensions,
-  ScaleType,
-  AxisType,
 } from './types';
+export { ScaleType, AxisType } from './types';
 export type { ValidationVisOptionsProps } from './editor/components/common/validation_wrapper';
 export { TruncateLabelsOption } from './editor/components/common/truncate_labels';
 export { getPositions } from './editor/positions';

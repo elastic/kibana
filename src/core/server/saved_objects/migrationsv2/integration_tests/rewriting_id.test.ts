@@ -62,7 +62,6 @@ function createRoot() {
     {
       migrations: {
         skip: false,
-        enableV2: true,
       },
       logging: {
         appenders: {
@@ -77,6 +76,7 @@ function createRoot() {
         loggers: [
           {
             name: 'root',
+            level: 'info',
             appenders: ['file'],
           },
         ],

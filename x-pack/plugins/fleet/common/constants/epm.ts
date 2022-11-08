@@ -15,6 +15,10 @@ export const FLEET_SERVER_PACKAGE = 'fleet_server';
 export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 export const FLEET_APM_PACKAGE = 'apm';
 export const FLEET_SYNTHETICS_PACKAGE = 'synthetics';
+export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
+export const KUBERNETES_RUN_INSTRUCTIONS =
+  'kubectl apply -f elastic-agent-standalone-kubernetes.yaml';
+export const STANDALONE_RUN_INSTRUCTIONS = './elastic-agent install';
 
 /*
  Package rules:

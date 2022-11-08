@@ -109,7 +109,7 @@ export const getVisConfig = (): VisConfig => {
           show: false,
         },
         scale: {
-          mode: AxisMode.Normal,
+          mode: AxisMode.Percentage,
           type: 'linear',
         },
         domain: {

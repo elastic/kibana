@@ -10,6 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 import { CapabilitiesResolver } from '../resolve_capabilities';
 
+const applicationIdRegexp = /^[a-zA-Z0-9_:-]+$/;
+
 export function registerCapabilitiesRoutes(router: IRouter, resolver: CapabilitiesResolver) {
   router.post(
     {
@@ -22,7 +24,15 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
           useDefaultCapabilities: schema.boolean({ defaultValue: false }),
         }),
         body: schema.object({
-          applications: schema.arrayOf(schema.string()),
+          applications: schema.arrayOf(
+            schema.string({
+              validate: (appName) => {
+                if (!applicationIdRegexp.test(appName)) {
+                  return 'Invalid application id';
+                }
+              },
+            })
+          ),
         }),
       },
     },

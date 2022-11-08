@@ -14,7 +14,8 @@ const imageBase64 = Buffer.from(
   'base64'
 );
 
-describe('PdfMaker', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/118484
+describe.skip('PdfMaker', () => {
   it('makes PDF using PrintLayout mode', async () => {
     const config = createMockConfig(createMockConfigSchema());
     const layout = new PrintLayout(config.get('capture'));

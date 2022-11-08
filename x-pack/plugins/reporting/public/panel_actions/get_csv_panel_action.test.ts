@@ -38,6 +38,8 @@ describe('GetCsvReportPanelAction', () => {
         value: () => {},
       });
     }
+
+    core.http.post.mockResolvedValue({});
   });
 
   beforeEach(() => {

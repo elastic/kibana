@@ -8,3 +8,4 @@
 export const ADD_POLICY_BTN = '[data-test-subj="addIntegrationPolicyButton"]';
 export const CREATE_PACKAGE_POLICY_SAVE_BTN = '[data-test-subj="createPackagePolicySaveButton"]';
 export const INTEGRATIONS_CARD = '.euiCard__titleAnchor';
+export const SAVE_PACKAGE_CONFIRM = '[data-test-subj=confirmModalConfirmButton]';

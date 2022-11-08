@@ -87,6 +87,18 @@ describe('DomainsTable', () => {
       expect(tableContent).toContain('elastic.co');
     });
 
+    it('renders a clickable domain url', () => {
+      const basicTable = wrapper.find(EuiInMemoryTable).dive().find(EuiBasicTable).dive();
+      const link = basicTable.find('[data-test-subj="CrawlerDomainURL"]').at(0);
+
+      expect(link.dive().text()).toContain('elastic.co');
+      expect(link.props()).toEqual(
+        expect.objectContaining({
+          to: '/engines/some-engine/crawler/domains/1234',
+        })
+      );
+    });
+
     it('renders a last crawled column', () => {
       expect(tableContent).toContain('Last activity');
       expect(tableContent).toContain('Jan 1, 2020');

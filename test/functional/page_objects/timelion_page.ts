@@ -7,13 +7,21 @@
  */
 
 import { FtrService } from '../ftr_provider_context';
+import type { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export class TimelionPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly retry = this.ctx.getService('retry');
 
   public async getSuggestionItemsText() {
-    const timelionCodeEditor = await this.testSubjects.find('timelionCodeEditor');
-    const lists = await timelionCodeEditor.findAllByClassName('monaco-list-row');
+    let lists: WebElementWrapper[] = [];
+    await this.retry.try(async () => {
+      const timelionCodeEditor = await this.testSubjects.find('timelionCodeEditor');
+      lists = await timelionCodeEditor.findAllByClassName('monaco-list-row');
+      if (lists.length === 0) {
+        throw new Error('suggestion list not populated');
+      }
+    });
     return await Promise.all(lists.map(async (element) => await element.getVisibleText()));
   }
 

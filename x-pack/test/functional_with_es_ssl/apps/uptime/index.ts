@@ -24,7 +24,6 @@ export default ({ getService, loadTestFile }: FtrProviderContext) => {
       after(async () => await esArchiver.unload(ARCHIVE));
 
       loadTestFile(require.resolve('./alert_flyout'));
-      loadTestFile(require.resolve('./anomaly_alert'));
       loadTestFile(require.resolve('./simple_down_alert'));
     });
   });

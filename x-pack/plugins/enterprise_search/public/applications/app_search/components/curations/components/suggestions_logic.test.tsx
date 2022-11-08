@@ -122,7 +122,7 @@ describe('SuggestionsLogic', () => {
         await nextTick();
 
         expect(http.post).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify({
               page: {

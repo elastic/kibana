@@ -265,7 +265,7 @@ export const ConfigSchema = schema.object({
     http: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       autoSchemesEnabled: schema.boolean({ defaultValue: true }),
-      schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
+      schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey', 'bearer'] }),
     }),
   }),
   audit: schema.object(

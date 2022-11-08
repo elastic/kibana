@@ -2,6 +2,7 @@
   "cluster.put_component_template": {
     "url_params": {
       "create": "__flag__",
+      "timeout": "",
       "master_timeout": ""
     },
     "methods": [

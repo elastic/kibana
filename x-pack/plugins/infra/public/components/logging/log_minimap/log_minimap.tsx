@@ -78,7 +78,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   };
 
   public getPositionOfTime = (time: number) => {
-    return this.getYScale()(time);
+    return this.getYScale()(time) ?? 0;
   };
 
   private updateTimeCursor: React.MouseEventHandler<SVGSVGElement> = (event) => {

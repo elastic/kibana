@@ -202,6 +202,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               isInvalid={form.touched.name && !!form.errors.name}
               inputRef={firstFieldRef}
               fullWidth
+              data-test-subj="apiKeyNameInput"
             />
           </EuiFormRow>
 
@@ -258,6 +259,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               )}
               checked={!!form.values.customExpiration}
               onChange={(e) => form.setValue('customExpiration', e.target.checked)}
+              data-test-subj="apiKeyCustomExpirationSwitch"
             />
             {form.values.customExpiration && (
               <>
@@ -284,6 +286,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
                     defaultValue={form.values.expiration}
                     isInvalid={form.touched.expiration && !!form.errors.expiration}
                     fullWidth
+                    data-test-subj="apiKeyCustomExpirationInput"
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />

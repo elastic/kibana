@@ -18,6 +18,7 @@ import { fleetSetupHandler } from './handlers';
 
 jest.mock('../../services/setup', () => {
   return {
+    ...jest.requireActual('../../services/setup'),
     setupFleet: jest.fn(),
   };
 });

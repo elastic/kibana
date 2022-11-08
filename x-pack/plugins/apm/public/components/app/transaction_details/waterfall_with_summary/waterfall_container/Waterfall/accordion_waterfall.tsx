@@ -7,7 +7,7 @@
 
 import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Margins } from '../../../../../shared/charts/Timeline';
 import { WaterfallItem } from './waterfall_item';
@@ -22,8 +22,8 @@ interface AccordionWaterfallProps {
   level: number;
   duration: IWaterfall['duration'];
   waterfallItemId?: string;
+  setMaxLevel: Dispatch<SetStateAction<number>>;
   waterfall: IWaterfall;
-  onToggleEntryTransaction?: () => void;
   timelineMargins: Margins;
   onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
 }
@@ -97,12 +97,13 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     duration,
     waterfall,
     waterfallItemId,
+    setMaxLevel,
     timelineMargins,
     onClickWaterfallItem,
-    onToggleEntryTransaction,
   } = props;
 
   const nextLevel = level + 1;
+  setMaxLevel(nextLevel);
 
   const children = waterfall.childrenByParentId[item.id] || [];
   const errorCount = waterfall.getErrorCount(item.id);
@@ -139,9 +140,6 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={() => {
         setIsOpen((isCurrentOpen) => !isCurrentOpen);
-        if (onToggleEntryTransaction) {
-          onToggleEntryTransaction();
-        }
       }}
     >
       {children.map((child) => (

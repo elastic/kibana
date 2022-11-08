@@ -26,6 +26,7 @@ import { useMlKibana } from '../../../../../contexts/kibana';
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../../../../../components/vega_chart';
 import { VegaChartLoading } from '../../../../../components/vega_chart/vega_chart_loading';
+import { useCurrentEuiTheme } from '../../../../../components/color_range_legend';
 
 import { ErrorCallout } from '../error_callout';
 import { getDependentVar, DataFrameAnalyticsConfig } from '../../../../common';
@@ -33,6 +34,7 @@ import { DataFrameTaskStateType } from '../../../analytics_management/components
 import { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
+
 import { EvaluateStat } from './evaluate_stat';
 import { EvaluationQualityMetricsTable } from './evaluation_quality_metrics_table';
 
@@ -107,6 +109,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   const {
     services: { docLinks },
   } = useMlKibana();
+  const { euiTheme } = useCurrentEuiTheme();
 
   const [columns, setColumns] = useState<ConfusionMatrixColumn[]>([]);
   const [columnsData, setColumnsData] = useState<ConfusionMatrixColumnData[]>([]);
@@ -469,7 +472,8 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                   vegaSpec={getRocCurveChartVegaLiteSpec(
                     classificationClasses,
                     rocCurveData,
-                    getDependentVar(jobConfig.analysis)
+                    getDependentVar(jobConfig.analysis),
+                    euiTheme
                   )}
                 />
               </div>

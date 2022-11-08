@@ -22,5 +22,5 @@ export function getDataViewsServiceFactory(
     throw Error('data views service has not been initialized');
   }
 
-  return () => dataViews.dataViewsServiceFactory(savedObjectClient, scopedClient.asInternalUser);
+  return () => dataViews.dataViewsServiceFactory(savedObjectClient, scopedClient.asCurrentUser);
 }

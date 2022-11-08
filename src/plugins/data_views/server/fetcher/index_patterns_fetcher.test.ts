@@ -32,8 +32,15 @@ describe('Index Pattern Fetcher - server', () => {
   });
 
   it('Removes pattern without matching indices', async () => {
+    // first field caps request returns empty
     const result = await indexPatterns.validatePatternListActive(patternList);
     expect(result).toEqual(['b', 'c']);
+  });
+
+  it('Keeps matching and negating patterns', async () => {
+    // first field caps request returns empty
+    const result = await indexPatterns.validatePatternListActive(['-a', 'b', 'c']);
+    expect(result).toEqual(['-a', 'c']);
   });
 
   it('Returns all patterns when all match indices', async () => {

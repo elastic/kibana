@@ -6,19 +6,9 @@
  */
 
 import { actionTypeRegistryMock } from '../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { isUuid, getActionTypeName, validateMustache, validateActionParams } from './utils';
+import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 describe('stepRuleActions utils', () => {
-  describe('isUuidv4', () => {
-    it('should validate proper uuid v4 value', () => {
-      expect(isUuid('817b8bca-91d1-4729-8ee1-3a83aaafd9d4')).toEqual(true);
-    });
-
-    it('should validate incorrect uuid v4 value', () => {
-      expect(isUuid('ad9d4')).toEqual(false);
-    });
-  });
-
   describe('getActionTypeName', () => {
     it('should return capitalized action type name', () => {
       expect(getActionTypeName('.slack')).toEqual('Slack');

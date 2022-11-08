@@ -1,25 +1,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "index-pattern:date_nanos_custom_timestamp",
-    "index": ".kibana",
-    "source": {
-      "index-pattern": {
-        "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"test\",\"type\":\"string\",\"esTypes\":[\"text\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"test.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"test\"}}},{\"name\":\"timestamp\",\"type\":\"date\",\"esTypes\":[\"date_nanos\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
-        "timeFieldName": "timestamp",
-        "title": "date_nanos_custom_timestamp"
-      },
-      "references": [
-      ],
-      "type": "index-pattern",
-      "updated_at": "2020-01-09T21:43:20.283Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "1",
     "index": "date_nanos_custom_timestamp",
     "source": {

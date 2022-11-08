@@ -40,14 +40,18 @@ export interface RenderTooltipContentParams {
   getFilterActions?: () => Promise<Action[]>;
   getLayerName: (layerId: string) => Promise<string | null>;
   isLocked: boolean;
+
+  /*
+   * Uses feature's layer to extend, filter, and format feature properties into tooltip properties.
+   * @param {string} layerId Use features[featureIndex].layerId
+   * @param {GeoJsonProperties} properties Use features[featureIndex].mbProperties or pass in a custom properties object
+   */
   loadFeatureProperties: ({
     layerId,
-    featureId,
-    mbProperties,
+    properties,
   }: {
     layerId: string;
-    featureId?: string | number;
-    mbProperties: GeoJsonProperties;
+    properties: GeoJsonProperties;
   }) => Promise<ITooltipProperty[]>;
   loadFeatureGeometry: ({
     layerId,

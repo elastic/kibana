@@ -40,28 +40,29 @@ const SESSION_INDEX_TEMPLATE_VERSION = 1;
 export function getSessionIndexTemplate(indexName: string) {
   return Object.freeze({
     index_patterns: [indexName],
-    order: 1000,
-    settings: {
-      index: {
-        number_of_shards: 1,
-        number_of_replicas: 0,
-        auto_expand_replicas: '0-1',
-        priority: 1000,
-        refresh_interval: '1s',
-        hidden: true,
+    template: {
+      settings: {
+        index: {
+          number_of_shards: 1,
+          number_of_replicas: 0,
+          auto_expand_replicas: '0-1',
+          priority: 1000,
+          refresh_interval: '1s',
+          hidden: true,
+        },
       },
+      mappings: {
+        dynamic: 'strict',
+        properties: {
+          usernameHash: { type: 'keyword' },
+          provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
+          idleTimeoutExpiration: { type: 'date' },
+          lifespanExpiration: { type: 'date' },
+          accessAgreementAcknowledged: { type: 'boolean' },
+          content: { type: 'binary' },
+        },
+      } as const,
     },
-    mappings: {
-      dynamic: 'strict',
-      properties: {
-        usernameHash: { type: 'keyword' },
-        provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
-        idleTimeoutExpiration: { type: 'date' },
-        lifespanExpiration: { type: 'date' },
-        accessAgreementAcknowledged: { type: 'boolean' },
-        content: { type: 'binary' },
-      },
-    } as const,
   });
 }
 
@@ -132,7 +133,7 @@ export class SessionIndex {
   /**
    * Name of the index to store session information in.
    */
-  private readonly indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
+  private readonly indexName: string;
 
   /**
    * Promise that tracks session index initialization process. We'll need to get rid of this as soon
@@ -142,7 +143,9 @@ export class SessionIndex {
    */
   private indexInitialization?: Promise<void>;
 
-  constructor(private readonly options: Readonly<SessionIndexOptions>) {}
+  constructor(private readonly options: Readonly<SessionIndexOptions>) {
+    this.indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
+  }
 
   /**
    * Retrieves session value with the specified ID from the index. If session value isn't found
@@ -316,11 +319,40 @@ export class SessionIndex {
     const sessionIndexTemplateName = `${this.options.kibanaIndexName}_security_session_index_template_${SESSION_INDEX_TEMPLATE_VERSION}`;
     return (this.indexInitialization = new Promise<void>(async (resolve, reject) => {
       try {
+        // Check if legacy index template exists, and remove it if it does.
+        let legacyIndexTemplateExists = false;
+        try {
+          legacyIndexTemplateExists = (
+            await this.options.elasticsearchClient.indices.existsTemplate({
+              name: sessionIndexTemplateName,
+            })
+          ).body;
+        } catch (err) {
+          this.options.logger.error(
+            `Failed to check if session legacy index template exists: ${err.message}`
+          );
+          return reject(err);
+        }
+
+        if (legacyIndexTemplateExists) {
+          try {
+            await this.options.elasticsearchClient.indices.deleteTemplate({
+              name: sessionIndexTemplateName,
+            });
+            this.options.logger.debug('Successfully deleted session legacy index template.');
+          } catch (err) {
+            this.options.logger.error(
+              `Failed to delete session legacy index template: ${err.message}`
+            );
+            return reject(err);
+          }
+        }
+
         // Check if required index template exists.
         let indexTemplateExists = false;
         try {
           indexTemplateExists = (
-            await this.options.elasticsearchClient.indices.existsTemplate({
+            await this.options.elasticsearchClient.indices.existsIndexTemplate({
               name: sessionIndexTemplateName,
             })
           ).body;
@@ -336,8 +368,9 @@ export class SessionIndex {
           this.options.logger.debug('Session index template already exists.');
         } else {
           try {
-            await this.options.elasticsearchClient.indices.putTemplate({
+            await this.options.elasticsearchClient.indices.putIndexTemplate({
               name: sessionIndexTemplateName,
+              // @ts-expect-error @elastic/elasticsearch IndicesIndexSettings.index: IndicesIndexSettings
               body: getSessionIndexTemplate(this.indexName),
             });
             this.options.logger.debug('Successfully created session index template.');

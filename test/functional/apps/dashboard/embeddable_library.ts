@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
-  const esArchiver = getService('esArchiver');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -21,7 +20,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('embeddable library', () => {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -61,45 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const updatedPanel = await testSubjects.find(
         'embeddablePanelHeading-RenderingTest:heatmap-copy'
-      );
-      const libraryActionExists = await testSubjects.descendantExists(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        updatedPanel
-      );
-      expect(libraryActionExists).to.be(true);
-    });
-
-    it('unlink map panel from embeddable library', async () => {
-      // add map panel from library
-      await dashboardAddPanel.clickOpenAddPanel();
-      await dashboardAddPanel.filterEmbeddableNames('Rendering Test: geo map');
-      await find.clickByButtonText('Rendering Test: geo map');
-      await dashboardAddPanel.closeAddPanel();
-
-      const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:geomap');
-      await panelActions.unlinkFromLibary(originalPanel);
-      await testSubjects.existOrFail('unlinkPanelSuccess');
-
-      const updatedPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:geomap');
-      const libraryActionExists = await testSubjects.descendantExists(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        updatedPanel
-      );
-      expect(libraryActionExists).to.be(false);
-
-      await dashboardAddPanel.clickOpenAddPanel();
-      await dashboardAddPanel.filterEmbeddableNames('Rendering Test: geo map');
-      await find.existsByLinkText('Rendering Test: geo map');
-      await dashboardAddPanel.closeAddPanel();
-    });
-
-    it('save map panel to embeddable library', async () => {
-      const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:geomap');
-      await panelActions.saveToLibrary('Rendering Test: geo map - copy', originalPanel);
-      await testSubjects.existOrFail('addPanelToLibrarySuccess');
-
-      const updatedPanel = await testSubjects.find(
-        'embeddablePanelHeading-RenderingTest:geomap-copy'
       );
       const libraryActionExists = await testSubjects.descendantExists(
         'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',

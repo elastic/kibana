@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { JobValidator, Validation, BasicValidations, ValidationSummary } from './job_validator';
+export type { Validation, BasicValidations, ValidationSummary } from './job_validator';
+export { JobValidator } from './job_validator';

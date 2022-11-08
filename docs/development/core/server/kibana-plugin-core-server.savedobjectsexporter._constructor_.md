@@ -21,5 +21,5 @@ constructor({ savedObjectsClient, typeRegistry, exportSizeLimit, logger, }: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { savedObjectsClient, typeRegistry, exportSizeLimit, logger, } | <code>{</code><br/><code>        savedObjectsClient: SavedObjectsClientContract;</code><br/><code>        typeRegistry: ISavedObjectTypeRegistry;</code><br/><code>        exportSizeLimit: number;</code><br/><code>        logger: Logger;</code><br/><code>    }</code> |  |
+|  { savedObjectsClient, typeRegistry, exportSizeLimit, logger, } | { savedObjectsClient: SavedObjectsClientContract; typeRegistry: ISavedObjectTypeRegistry; exportSizeLimit: number; logger: Logger; } |  |
 

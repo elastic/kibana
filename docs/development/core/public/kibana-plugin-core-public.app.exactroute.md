@@ -25,6 +25,5 @@ core.application.register({
 
 // '[basePath]/app/my_app' will be matched
 // '[basePath]/app/my_app/some/path' will not be matched
-
 ```
 

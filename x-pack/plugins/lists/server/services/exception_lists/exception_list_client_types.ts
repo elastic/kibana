@@ -15,6 +15,7 @@ import type {
   ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
+  ExportExceptionDetails,
   FilterOrUndefined,
   Id,
   IdOrUndefined,
@@ -219,4 +220,15 @@ export interface FindExceptionListOptions {
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
+}
+
+export interface ExportExceptionListAndItemsOptions {
+  listId: ListIdOrUndefined;
+  id: IdOrUndefined;
+  namespaceType: NamespaceType;
+}
+
+export interface ExportExceptionListAndItemsReturn {
+  exportData: string;
+  exportDetails: ExportExceptionDetails;
 }

@@ -8,7 +8,7 @@
 import { eventHit } from '@kbn/securitysolution-t-grid';
 import { EventHit } from '../../../../../../common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
-import { buildObjectForFieldPath, formatTimelineData } from './helpers';
+import { buildObjectForFieldPath, formatTimelineData, getPreferredEsType } from './helpers';
 
 describe('#formatTimelineData', () => {
   it('happy path', async () => {
@@ -567,5 +567,37 @@ describe('#formatTimelineData', () => {
         });
       });
     });
+  });
+});
+
+describe('getPreferredEsType', () => {
+  it('prefers `keyword` over other types when `esTypes` contains a `keyword` entry', () => {
+    const esTypes = ['long', 'keyword'];
+
+    expect(getPreferredEsType(esTypes)).toEqual('keyword');
+  });
+
+  it('returns the first entry when esTypes has multiple entries, but no `keyword` entry', () => {
+    const esTypes = ['long', 'date'];
+
+    expect(getPreferredEsType(esTypes)).toEqual('long');
+  });
+
+  it('returns the first entry when esTypes has only one (non-`keyword`) entry', () => {
+    const esTypes = ['date'];
+
+    expect(getPreferredEsType(esTypes)).toEqual('date');
+  });
+
+  it('returns `keyword` when esTypes only contains a `keyword` entry', () => {
+    const esTypes: string[] = ['keyword'];
+
+    expect(getPreferredEsType(esTypes)).toEqual('keyword');
+  });
+
+  it('returns `keyword` when esTypes is empty', () => {
+    const esTypes: string[] = [];
+
+    expect(getPreferredEsType(esTypes)).toEqual('keyword');
   });
 });

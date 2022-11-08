@@ -13,13 +13,12 @@ get(): ChromeRecentlyAccessedHistoryItem[];
 ```
 <b>Returns:</b>
 
-`ChromeRecentlyAccessedHistoryItem[]`
+ChromeRecentlyAccessedHistoryItem\[\]
 
 ## Example
 
 
 ```js
 chrome.recentlyAccessed.get().forEach(console.log);
-
 ```
 

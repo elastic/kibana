@@ -1,0 +1,45 @@
+title: Full agent policy input
+allOf:
+  - type: object
+    additionalProperties: true
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      revision:
+        type: number
+      type:
+        type: string
+      data_stream:
+        type: object
+        properties:
+          namespace:
+            type: string
+        required:
+          - namespace
+      use_output:
+        type: string
+      meta:
+        type: object
+        additionalProperties: true
+        properties:
+          package:
+            type: object
+            properties:
+              name:
+                type: string
+              version:
+                type: string
+            required:
+              - name
+              - version
+      streams:
+        $ref: ./full_agent_policy_input_stream.yaml
+    required:
+      - id
+      - name
+      - revision
+      - type
+      - data_stream
+      - use_output

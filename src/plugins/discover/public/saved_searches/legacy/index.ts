@@ -7,4 +7,4 @@
  */
 
 export { createSavedSearchesLoader } from './saved_searches';
-export { LegacySavedSearch, SavedSearchLoader } from './types';
+export type { LegacySavedSearch, SavedSearchLoader } from './types';

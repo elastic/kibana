@@ -6,13 +6,14 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import { parse, stringify } from 'query-string';
+import { stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 import { selectedFiltersSelector } from '../state/selectors';
 import { setSelectedFilters } from '../state/actions/selected_filters';
 import { getFiltersFromMap } from './use_selected_filters';
+import { getParsedParams } from '../lib/helper/parse_search';
 
 export type GetUrlParams = () => UptimeUrlParams;
 export type UpdateUrlParams = (updatedParams: {
@@ -20,10 +21,6 @@ export type UpdateUrlParams = (updatedParams: {
 }) => void;
 
 export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
-
-const getParsedParams = (search: string) => {
-  return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};
-};
 
 export const useGetUrlParams: GetUrlParams = () => {
   const { search } = useLocation();

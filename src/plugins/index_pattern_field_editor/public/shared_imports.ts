@@ -6,27 +6,31 @@
  * Side Public License, v 1.
  */
 
-export { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../data/public';
+export type { DataPublicPluginStart } from '../../data/public';
+export { IndexPattern, IndexPatternField } from '../../data/public';
 
-export { UsageCollectionStart } from '../../usage_collection/public';
+export type { UsageCollectionStart } from '../../usage_collection/public';
 
-export { RuntimeType, RuntimeField, KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../data/common';
+export type { RuntimeType, RuntimeField } from '../../data/common';
+export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../data/common';
 
 export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';
 
 export { FieldFormat } from '../../field_formats/common';
 
+export type {
+  FormSchema,
+  FormHook,
+  ValidationFunc,
+  FieldConfig,
+} from '../../es_ui_shared/static/forms/hook_form_lib';
 export {
   useForm,
   useFormData,
   useFormContext,
   useFormIsModified,
   Form,
-  FormSchema,
   UseField,
-  FormHook,
-  ValidationFunc,
-  FieldConfig,
 } from '../../es_ui_shared/static/forms/hook_form_lib';
 
 export { fieldValidators } from '../../es_ui_shared/static/forms/helpers';

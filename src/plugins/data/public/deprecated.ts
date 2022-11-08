@@ -137,7 +137,7 @@ export const esFilters = {
 /**
  * Deprecated type exports
  */
-export {
+export type {
   KueryNode,
   RangeFilter,
   RangeFilterMeta,
@@ -149,9 +149,8 @@ export {
   MatchAllFilter,
   IFieldSubType,
   EsQueryConfig,
-  isFilter,
-  isFilters,
 };
+export { isFilter, isFilters };
 
 /**
  * @deprecated Import helpers from the "@kbn/es-query" package directly instead.

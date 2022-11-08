@@ -11,20 +11,14 @@ import type {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { search } from '../../../../../../../data/public';
-import { AppState } from '../../services/discover_state';
-import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search';
-import { useDataState } from '../../utils/use_data_state';
 
 export function useChartPanels(
-  state: AppState,
-  savedSearchDataChart$: DataCharts$,
   toggleHideChart: () => void,
   onChangeInterval: (value: string) => void,
-  closePopover: () => void
+  closePopover: () => void,
+  hideChart?: boolean,
+  interval?: string
 ) {
-  const dataState: DataChartsMessage = useDataState(savedSearchDataChart$);
-  const { bucketInterval } = dataState;
-  const { interval, hideChart } = state;
   const selectedOptionIdx = search.aggs.intervalOptions.findIndex((opt) => opt.val === interval);
   const intervalDisplay =
     selectedOptionIdx > -1
@@ -56,29 +50,6 @@ export function useChartPanels(
           timeInterval: intervalDisplay,
         },
       }),
-      icon: bucketInterval?.scaled ? 'alert' : '',
-      toolTipTitle: bucketInterval?.scaled
-        ? i18n.translate('discover.timeIntervalWithValueWarning', {
-            defaultMessage: 'Warning',
-          })
-        : '',
-      toolTipContent: bucketInterval?.scaled
-        ? i18n.translate('discover.bucketIntervalTooltip', {
-            defaultMessage:
-              'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
-            values: {
-              bucketsDescription:
-                bucketInterval!.scale && bucketInterval!.scale > 1
-                  ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
-                      defaultMessage: 'buckets that are too large',
-                    })
-                  : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
-                      defaultMessage: 'too many buckets',
-                    }),
-              bucketIntervalDescription: bucketInterval?.description,
-            },
-          })
-        : '',
       panel: 1,
       'data-test-subj': 'discoverTimeIntervalPanel',
     });

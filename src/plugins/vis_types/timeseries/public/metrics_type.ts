@@ -22,6 +22,7 @@ import {
 } from '../../../visualizations/public';
 import { getDataStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
+import { RequestAdapter } from '../../../inspector/public';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -83,6 +84,8 @@ export const metricsVisDefinition: VisTypeDefinition<
           point_size: 1,
           fill: 0.5,
           stacked: 'none',
+          override_index_pattern: 0,
+          series_drop_last_bucket: 0,
         },
       ],
       time_field: '',
@@ -116,7 +119,9 @@ export const metricsVisDefinition: VisTypeDefinition<
     }
     return [];
   },
-  inspectorAdapters: {},
+  inspectorAdapters: () => ({
+    requests: new RequestAdapter(),
+  }),
   requiresSearch: true,
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();

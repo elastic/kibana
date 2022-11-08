@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies when a Route53 private hosted zone has been associated with VPC.",
+  "false_positives": [
+    "A private hosted zone may be asssociated with a VPC by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS Route53 private hosted zone associated with a VPC",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:route53.amazonaws.com and event.action:AssociateVPCWithHostedZone and \nevent.outcome:success\n",
+  "references": [
+    "https://docs.aws.amazon.com/Route53/latest/APIReference/API_AssociateVPCWithHostedZone.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "e3c27562-709a-42bd-82f2-3ed926cced19",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Asset Visibility"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

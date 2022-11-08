@@ -8,7 +8,7 @@
 
 import { ForwardedDashboardState } from '../../locator';
 import { DashboardState } from '../../types';
-import { convertSavedPanelsToPanelMap } from './convert_saved_panels_to_panel_map';
+import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 
 export const loadDashboardHistoryLocationState = (
   state?: ForwardedDashboardState

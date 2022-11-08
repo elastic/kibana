@@ -28,7 +28,7 @@ export interface ContextAppContentProps {
   columns: string[];
   onAddColumn: (columnsName: string) => void;
   onRemoveColumn: (columnsName: string) => void;
-  onSetColumns: (columnsNames: string[]) => void;
+  onSetColumns: (columnsNames: string[], hideTimeColumn: boolean) => void;
   services: DiscoverServices;
   indexPattern: IndexPattern;
   predecessorCount: number;
@@ -141,7 +141,7 @@ export function ContextAppContent({
           dataTestSubj="contextDocTable"
         />
       )}
-      {!isLegacy && rows && rows.length && (
+      {!isLegacy && (
         <div className="dscDocsGrid">
           <DiscoverGridMemoized
             ariaLabelledBy="surDocumentsAriaLabel"

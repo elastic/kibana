@@ -46,6 +46,7 @@ import {
   getPrivilegeDeprecationsService,
   registerKibanaDashboardOnlyRoleDeprecation,
   registerKibanaUserRoleDeprecation,
+  registerMLPrivilegesDeprecation,
 } from './deprecations';
 import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
@@ -158,9 +159,7 @@ export class SecurityPlugin
     return this.kibanaIndexName;
   };
 
-  private readonly authenticationService = new AuthenticationService(
-    this.initializerContext.logger.get('authentication')
-  );
+  private readonly authenticationService: AuthenticationService;
   private authenticationStart?: InternalAuthenticationServiceStart;
   private readonly getAuthentication = () => {
     if (!this.authenticationStart) {
@@ -178,19 +177,12 @@ export class SecurityPlugin
     return this.featureUsageServiceStart;
   };
 
-  private readonly auditService = new AuditService(this.initializerContext.logger.get('audit'));
+  private readonly auditService: AuditService;
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly authorizationService = new AuthorizationService();
-  private readonly elasticsearchService = new ElasticsearchService(
-    this.initializerContext.logger.get('elasticsearch')
-  );
-  private readonly sessionManagementService = new SessionManagementService(
-    this.initializerContext.logger.get('session')
-  );
-  private readonly anonymousAccessService = new AnonymousAccessService(
-    this.initializerContext.logger.get('anonymous-access'),
-    this.getConfig
-  );
+  private readonly elasticsearchService: ElasticsearchService;
+  private readonly sessionManagementService: SessionManagementService;
+  private readonly anonymousAccessService: AnonymousAccessService;
   private anonymousAccessStart?: AnonymousAccessServiceStart;
   private readonly getAnonymousAccess = () => {
     if (!this.anonymousAccessStart) {
@@ -201,6 +193,21 @@ export class SecurityPlugin
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
+
+    this.authenticationService = new AuthenticationService(
+      this.initializerContext.logger.get('authentication')
+    );
+    this.auditService = new AuditService(this.initializerContext.logger.get('audit'));
+    this.elasticsearchService = new ElasticsearchService(
+      this.initializerContext.logger.get('elasticsearch')
+    );
+    this.sessionManagementService = new SessionManagementService(
+      this.initializerContext.logger.get('session')
+    );
+    this.anonymousAccessService = new AnonymousAccessService(
+      this.initializerContext.logger.get('anonymous-access'),
+      this.getConfig
+    );
   }
 
   public setup(
@@ -433,6 +440,13 @@ export class SecurityPlugin
       license,
       logger,
       packageInfo: this.initializerContext.env.packageInfo,
+    });
+    registerMLPrivilegesDeprecation({
+      deprecationsService: core.deprecations,
+      license,
+      logger,
+      packageInfo: this.initializerContext.env.packageInfo,
+      applicationName: this.authorizationSetup?.applicationName!,
     });
   }
 }

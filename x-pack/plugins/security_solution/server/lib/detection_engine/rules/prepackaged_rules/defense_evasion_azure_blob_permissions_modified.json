@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies when the Azure role-based access control (Azure RBAC) permissions are modified for an Azure Blob. An adversary may modify the permissions on a blob to weaken their target's security controls or an administrator may inadvertently modify the permissions, which could lead to data exposure or loss.",
+  "false_positives": [
+    "Blob permissions may be modified by system administrators. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Blob Permissions Modification",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:(\n     \"MICROSOFT.STORAGE/STORAGEACCOUNTS/BLOBSERVICES/CONTAINERS/BLOBS/MANAGEOWNERSHIP/ACTION\" or\n     \"MICROSOFT.STORAGE/STORAGEACCOUNTS/BLOBSERVICES/CONTAINERS/BLOBS/MODIFYPERMISSIONS/ACTION\") and \n  event.outcome:(Success or success)\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles"
+  ],
+  "risk_score": 47,
+  "rule_id": "d79c4b2a-6134-4edd-86e6-564a92a933f9",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1222",
+          "name": "File and Directory Permissions Modification",
+          "reference": "https://attack.mitre.org/techniques/T1222/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

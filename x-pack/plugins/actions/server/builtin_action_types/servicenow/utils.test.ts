@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import { AxiosError } from 'axios';
-import { prepareIncident, createServiceError, getPushedDate } from './utils';
+import { Logger } from '../../../../../../src/core/server';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import {
+  prepareIncident,
+  createServiceError,
+  getPushedDate,
+  throwIfSubActionIsNotSupported,
+} from './utils';
+import type { ResponseError } from './types';
+
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 /**
  * The purpose of this test is to
@@ -15,7 +24,6 @@ import { prepareIncident, createServiceError, getPushedDate } from './utils';
  * such as the scope or the import set table
  * of our ServiceNow application
  */
-
 describe('utils', () => {
   describe('prepareIncident', () => {
     test('it prepares the incident correctly when useOldApi=false', async () => {
@@ -44,7 +52,7 @@ describe('utils', () => {
       const axiosError = {
         message: 'An error occurred',
         response: { data: { error: { message: 'Denied', detail: 'no access' } } },
-      } as AxiosError;
+      } as ResponseError;
 
       expect(createServiceError(axiosError, 'Unable to do action').message).toBe(
         '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: Denied: no access'
@@ -55,7 +63,7 @@ describe('utils', () => {
       const axiosError = {
         message: 'An error occurred',
         response: { data: { error: null } },
-      } as AxiosError;
+      } as ResponseError;
 
       expect(createServiceError(axiosError, 'Unable to do action').message).toBe(
         '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown: no error in error response'
@@ -79,6 +87,47 @@ describe('utils', () => {
 
     test('it formats the date correctly if timestamp is not provided', async () => {
       expect(getPushedDate()).toBe('2021-10-04T11:15:06.000Z');
+    });
+  });
+
+  describe('throwIfSubActionIsNotSupported', () => {
+    const api = { pushToService: 'whatever' };
+
+    test('it throws correctly if the subAction is not supported', async () => {
+      expect.assertions(1);
+
+      expect(() =>
+        throwIfSubActionIsNotSupported({
+          api,
+          subAction: 'addEvent',
+          supportedSubActions: ['getChoices'],
+          logger,
+        })
+      ).toThrow('[Action][ExternalService] Unsupported subAction type addEvent');
+    });
+
+    test('it throws correctly if the subAction is not implemented', async () => {
+      expect.assertions(1);
+
+      expect(() =>
+        throwIfSubActionIsNotSupported({
+          api,
+          subAction: 'pushToService',
+          supportedSubActions: ['getChoices'],
+          logger,
+        })
+      ).toThrow('[Action][ExternalService] subAction pushToService not implemented.');
+    });
+
+    test('it does not throw if the sub action is supported and implemented', async () => {
+      expect(() =>
+        throwIfSubActionIsNotSupported({
+          api,
+          subAction: 'pushToService',
+          supportedSubActions: ['pushToService'],
+          logger,
+        })
+      ).not.toThrow();
     });
   });
 });

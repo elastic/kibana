@@ -1,27 +1,17 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-This section summarizes the most important changes in this release. For previous
-releases, refer to:
-
-* {kibana-ref-all}/7.11/whats-new.html[7.11]
-* {kibana-ref-all}/7.10/whats-new.html[7.10]
-* {kibana-ref-all}/7.9/whats-new.html[7.9]
-* {kibana-ref-all}/7.8/whats-new.html[7.8]
-* {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
-* {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6]
-* {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5]
-* {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4]
-* {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3]
-* {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
-* {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
-* {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
-
-For the full list of changes in {minor-version}, refer to the <<release-notes>>.
-
-//NOTE: The notable-highlights tagged regions are re-used in the
-//Installation and Upgrade Guide
+{kib} {minor-version} is a compatibility release for the {minor-version} Elastic Stack
+and contains no major features.
+For detailed information about this release, refer to the {kibana-ref}/release-notes.html[release notes].
 
 // tag::notable-highlights[]
 
 // end::notable-highlights[]
+
+Previous versions: {kibana-ref-all}/7.16/whats-new.html[7.16] |
+{kibana-ref-all}/7.15/whats-new.html[7.15] | {kibana-ref-all}/7.14/whats-new.html[7.14] | {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.12/whats-new.html[7.12] | {kibana-ref-all}/7.11/whats-new.html[7.11] |
+{kibana-ref-all}/7.10/whats-new.html[7.10] | {kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
+{kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] | {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] |
+{kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2] | {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] |
+{kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]

@@ -18,7 +18,7 @@ import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
-import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { mountWithProvider } from '../../mocks';
 import { LensAppState, PreviewState, setState, setToggleFullscreen } from '../../state_management';
@@ -264,8 +264,10 @@ describe('suggestion_panel', () => {
       preloadedState,
     });
 
-    expect(instance.find(EuiIcon)).toHaveLength(1);
-    expect(instance.find(EuiIcon).prop('type')).toEqual(LensIconChartDatatable);
+    expect(instance.find('[data-test-subj="lnsSuggestionsPanel"]').find(EuiIcon)).toHaveLength(1);
+    expect(
+      instance.find('[data-test-subj="lnsSuggestionsPanel"]').find(EuiIcon).prop('type')
+    ).toEqual(LensIconChartDatatable);
   });
 
   it('should return no suggestion if visualization has missing index-patterns', async () => {
@@ -290,6 +292,16 @@ describe('suggestion_panel', () => {
       preloadedState: newPreloadedState,
     });
     expect(instance.html()).toEqual(null);
+  });
+
+  it('should hide the selections when the accordion is hidden', async () => {
+    const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />);
+    expect(instance.find(EuiAccordion)).toHaveLength(1);
+    act(() => {
+      instance.find(EuiAccordion).at(0).simulate('change');
+    });
+
+    expect(instance.find('[data-test-subj="lnsSuggestionsPanel"]')).toEqual({});
   });
 
   it('should render preview expression if there is one', () => {

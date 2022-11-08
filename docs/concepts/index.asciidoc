@@ -133,9 +133,18 @@ The structured filters are the only way to use the {es} Query DSL in JSON form,
 or to target a specific index pattern for filtering. Each of the structured
 filters is combined with AND logic on the rest of the query.
 
-[role="screenshot"]
-image:concepts/images/add-filter-popup.png["Add filter popup"]
-
+++++
+<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
+</script>
+<img
+style="width: 100%; margin: auto; display: block;"
+class="vidyard-player-embed"
+src="https://play.vidyard.com/xqpw9GEwma7vUj9TR4CegV.jpg"
+data-uuid="xqpw9GEwma7vUj9TR4CegV"
+data-v="4"
+data-type="inline"
+/>
+++++
 
 [float]
 === Saving objects

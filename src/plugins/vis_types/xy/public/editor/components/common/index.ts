@@ -7,4 +7,5 @@
  */
 
 export { TruncateLabelsOption } from './truncate_labels';
-export { ValidationWrapper, ValidationVisOptionsProps } from './validation_wrapper';
+export type { ValidationVisOptionsProps } from './validation_wrapper';
+export { ValidationWrapper } from './validation_wrapper';

@@ -21,12 +21,13 @@ import {
   storedPackagePoliciesToAgentPermissions,
   DEFAULT_PERMISSIONS,
 } from '../package_policies_to_agent_permissions';
-import { storedPackagePoliciesToAgentInputs, dataTypes, outputType } from '../../../common';
+import { dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
+import { storedPackagePoliciesToAgentInputs } from './';
 
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
@@ -70,17 +71,20 @@ export async function getFullAgentPolicy(
   if (!monitoringOutput) {
     throw new Error(`Monitoring output not found ${monitoringOutputId}`);
   }
-
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
-        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(output);
+        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
+          output,
+          standalone
+        );
 
         return acc;
       }, {}),
     },
-    inputs: storedPackagePoliciesToAgentInputs(
+    inputs: await storedPackagePoliciesToAgentInputs(
+      soClient,
       agentPolicy.package_policies as PackagePolicy[],
       getOutputIdForAgentPolicy(dataOutput)
     ),
@@ -179,8 +183,8 @@ function transformOutputToFullPolicyOutput(
 
   if (standalone) {
     delete newOutput.api_key;
-    newOutput.username = 'ES_USERNAME';
-    newOutput.password = 'ES_PASSWORD';
+    newOutput.username = '{ES_USERNAME}';
+    newOutput.password = '{ES_PASSWORD}';
   }
 
   return newOutput;

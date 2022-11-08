@@ -19,6 +19,7 @@ import {
   getSimpleRuleOutputWithoutRuleId,
   removeServerGeneratedPropertiesIncludingRuleId,
   createRule,
+  createLegacyRuleAction,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -124,6 +125,55 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare2 = removeServerGeneratedPropertiesIncludingRuleId(body[1]);
         expect(bodyToCompare1).to.eql(outputRule1);
         expect(bodyToCompare2).to.eql(outputRule2);
+      });
+
+      it('should bulk disable two rules and migrate their actions', async () => {
+        const [connector, rule1, rule2] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          createRule(supertest, getSimpleRule('rule-1')),
+          createRule(supertest, getSimpleRule('rule-2')),
+        ]);
+        await Promise.all([
+          createLegacyRuleAction(supertest, rule1.id, connector.body.id),
+          createLegacyRuleAction(supertest, rule2.id, connector.body.id),
+        ]);
+        // patch a simple rule's name
+        const { body } = await supertest
+          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .set('kbn-xsrf', 'true')
+          .send([
+            { id: rule1.id, enabled: false },
+            { id: rule2.id, enabled: false },
+          ])
+          .expect(200);
+
+        // @ts-expect-error
+        body.forEach((response) => {
+          const outputRule = getSimpleRuleOutput(response.rule_id, false);
+          outputRule.actions = [
+            {
+              action_type_id: '.slack',
+              group: 'default',
+              id: connector.body.id,
+              params: {
+                message:
+                  'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+            },
+          ];
+          outputRule.throttle = '1m';
+          const bodyToCompare = removeServerGeneratedProperties(response);
+          expect(bodyToCompare).to.eql(outputRule);
+        });
       });
 
       it('should patch a single rule property of name using the auto-generated id', async () => {

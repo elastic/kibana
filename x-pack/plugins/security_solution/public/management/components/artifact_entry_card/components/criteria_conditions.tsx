@@ -6,7 +6,14 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { CommonProps, EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  CommonProps,
+  EuiExpression,
+  EuiToken,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -21,6 +28,8 @@ import {
   CONDITION_OPERATOR_TYPE_MATCH_ANY,
   CONDITION_OPERATOR_TYPE_EXISTS,
   CONDITION_OPERATOR_TYPE_LIST,
+  CONDITION_OPERATOR_TYPE_NOT_MATCH_ANY,
+  CONDITION_OPERATOR_TYPE_NOT_MATCH,
 } from './translations';
 import { ArtifactInfo, ArtifactInfoEntry } from '../types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -32,7 +41,7 @@ const OS_LABELS = Object.freeze({
   windows: OS_WINDOWS,
 });
 
-const OPERATOR_TYPE_LABELS = Object.freeze({
+const OPERATOR_TYPE_LABELS_INCLUDED = Object.freeze({
   [ListOperatorTypeEnum.NESTED]: CONDITION_OPERATOR_TYPE_NESTED,
   [ListOperatorTypeEnum.MATCH_ANY]: CONDITION_OPERATOR_TYPE_MATCH_ANY,
   [ListOperatorTypeEnum.MATCH]: CONDITION_OPERATOR_TYPE_MATCH,
@@ -41,8 +50,13 @@ const OPERATOR_TYPE_LABELS = Object.freeze({
   [ListOperatorTypeEnum.LIST]: CONDITION_OPERATOR_TYPE_LIST,
 });
 
+const OPERATOR_TYPE_LABELS_EXCLUDED = Object.freeze({
+  [ListOperatorTypeEnum.MATCH_ANY]: CONDITION_OPERATOR_TYPE_NOT_MATCH_ANY,
+  [ListOperatorTypeEnum.MATCH]: CONDITION_OPERATOR_TYPE_NOT_MATCH,
+});
+
 const EuiFlexGroupNested = styled(EuiFlexGroup)`
-  margin-left: ${({ theme }) => theme.eui.spacerSizes.l};
+  margin-left: ${({ theme }) => theme.eui.spacerSizes.xl};
 `;
 
 const EuiFlexItemNested = styled(EuiFlexItem)`
@@ -67,11 +81,30 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
         .join(', ');
     }, [os]);
 
+    const getEntryValue = (type: string, value: string | string[]) => {
+      if (type === 'match_any' && Array.isArray(value)) {
+        return value.map((currentValue) => <EuiBadge color="hollow">{currentValue}</EuiBadge>);
+      }
+      return value;
+    };
+
+    const getEntryOperator = (type: string, operator: string) => {
+      if (type === 'nested') return '';
+      return operator === 'included'
+        ? OPERATOR_TYPE_LABELS_INCLUDED[type as keyof typeof OPERATOR_TYPE_LABELS_INCLUDED] ?? type
+        : OPERATOR_TYPE_LABELS_EXCLUDED[type as keyof typeof OPERATOR_TYPE_LABELS_EXCLUDED] ?? type;
+    };
+
     const getNestedEntriesContent = useCallback(
       (type: string, nestedEntries: ArtifactInfoEntry[]) => {
         if (type === 'nested' && nestedEntries.length) {
           return nestedEntries.map(
-            ({ field: nestedField, type: nestedType, value: nestedValue }) => {
+            ({
+              field: nestedField,
+              type: nestedType,
+              value: nestedValue,
+              operator: nestedOperator,
+            }) => {
               return (
                 <EuiFlexGroupNested
                   data-test-subj={getTestId('nestedCondition')}
@@ -89,11 +122,8 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
                   </EuiFlexItemNested>
                   <EuiFlexItemNested grow={false}>
                     <EuiExpression
-                      description={
-                        OPERATOR_TYPE_LABELS[nestedType as keyof typeof OPERATOR_TYPE_LABELS] ??
-                        nestedType
-                      }
-                      value={nestedValue}
+                      description={getEntryOperator(nestedType, nestedOperator)}
+                      value={getEntryValue(nestedType, nestedValue)}
                     />
                   </EuiFlexItemNested>
                 </EuiFlexGroupNested>
@@ -113,7 +143,7 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
             <EuiExpression description={CONDITION_OPERATOR_TYPE_MATCH} value={osLabel} />
           </strong>
         </div>
-        {entries.map(({ field, type, value, entries: nestedEntries = [] }) => {
+        {entries.map(({ field, type, value, operator, entries: nestedEntries = [] }) => {
           return (
             <div data-test-subj={getTestId('condition')} key={field + type + value}>
               <EuiExpression
@@ -122,10 +152,8 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
                 color="subdued"
               />
               <EuiExpression
-                description={
-                  OPERATOR_TYPE_LABELS[type as keyof typeof OPERATOR_TYPE_LABELS] ?? type
-                }
-                value={value}
+                description={getEntryOperator(type, operator)}
+                value={getEntryValue(type, value)}
               />
               {getNestedEntriesContent(type, nestedEntries)}
             </div>

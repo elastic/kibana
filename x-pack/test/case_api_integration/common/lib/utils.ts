@@ -329,6 +329,7 @@ export const getServiceNowConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
+    usesTableApi: false,
   },
 });
 
@@ -385,6 +386,7 @@ export const getServiceNowSIRConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
+    usesTableApi: false,
   },
 });
 
@@ -400,6 +402,19 @@ export const getWebhookConnector = () => ({
       'Content-Type': 'text/plain',
     },
     url: 'http://some.non.existent.com',
+  },
+});
+
+export const getEmailConnector = () => ({
+  name: 'An email action',
+  connector_type_id: '.email',
+  config: {
+    service: '__json',
+    from: 'bob@example.com',
+  },
+  secrets: {
+    user: 'bob',
+    password: 'supersecret',
   },
 });
 

@@ -33,9 +33,11 @@ const StatusContextMenuComponent: React.FC<Props> = ({
   const onContextMenuItemClick = useCallback(
     (status: CaseStatuses) => {
       closePopover();
-      onStatusChanged(status);
+      if (currentStatus !== status) {
+        onStatusChanged(status);
+      }
     },
-    [closePopover, onStatusChanged]
+    [closePopover, currentStatus, onStatusChanged]
   );
 
   const panelItems = useMemo(

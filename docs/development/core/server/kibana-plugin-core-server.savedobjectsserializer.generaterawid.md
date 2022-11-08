@@ -16,11 +16,11 @@ generateRawId(namespace: string | undefined, type: string, id: string): string;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  namespace | <code>string &#124; undefined</code> |  |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
+|  namespace | string \| undefined | The namespace of the saved object |
+|  type | string | The saved object type |
+|  id | string | The id of the saved object |
 
 <b>Returns:</b>
 
-`string`
+string
 

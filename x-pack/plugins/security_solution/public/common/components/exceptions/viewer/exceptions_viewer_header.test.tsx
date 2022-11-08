@@ -42,6 +42,22 @@ describe('ExceptionsViewerHeader', () => {
     ).toBeTruthy();
   });
 
+  // This occurs if user does not have sufficient privileges
+  it('it does not display add exception button if no list types available', () => {
+    const wrapper = mount(
+      <ExceptionsViewerHeader
+        supportedListTypes={[]}
+        isInitLoading={false}
+        detectionsListItems={0}
+        endpointListItems={0}
+        onFilterChange={jest.fn()}
+        onAddExceptionClick={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="exceptionsHeaderAddExceptionBtn"]').exists()).toBeFalsy();
+  });
+
   it('it displays toggles and add exception popover when more than one list type available', () => {
     const wrapper = mount(
       <ExceptionsViewerHeader

@@ -8,7 +8,10 @@
 import { isPlainObject } from 'lodash';
 
 import { GenericObject } from '../types';
-import { validateMappingsConfiguration, VALID_MAPPINGS_PARAMETERS } from './mappings_validator';
+import {
+  validateMappingsConfiguration,
+  mappingsConfigurationSchemaKeys,
+} from './mappings_validator';
 
 interface MappingsWithType {
   type?: string;
@@ -16,7 +19,9 @@ interface MappingsWithType {
 }
 
 const isMappingDefinition = (obj: GenericObject): boolean => {
-  const areAllKeysValid = Object.keys(obj).every((key) => VALID_MAPPINGS_PARAMETERS.includes(key));
+  const areAllKeysValid = Object.keys(obj).every((key) =>
+    mappingsConfigurationSchemaKeys.includes(key)
+  );
 
   if (!areAllKeysValid) {
     return false;

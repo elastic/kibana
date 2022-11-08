@@ -11,9 +11,9 @@ import { EmbeddableOutput, EmbeddableInput, Embeddable } from '../../embeddables
 
 /** @internal */
 export interface MockFilter {
-  $state?: any;
-  meta: any;
-  query?: any;
+  $state?: {};
+  meta: {};
+  query?: {};
 }
 
 export const FILTERABLE_EMBEDDABLE = 'FILTERABLE_EMBEDDABLE';

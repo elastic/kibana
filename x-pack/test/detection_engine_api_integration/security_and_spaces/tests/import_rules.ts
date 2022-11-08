@@ -16,16 +16,129 @@ import {
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
+  getWebHookAction,
   removeServerGeneratedProperties,
   ruleToNdjson,
   waitFor,
 } from '../../utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import { ROLES } from '../../../../plugins/security_solution/common/test';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('import_rules', () => {
+    describe('importing rules with different roles', () => {
+      before(async () => {
+        await createUserAndRole(getService, ROLES.hunter_no_actions);
+        await createUserAndRole(getService, ROLES.hunter);
+      });
+      after(async () => {
+        await deleteUserAndRole(getService, ROLES.hunter_no_actions);
+        await deleteUserAndRole(getService, ROLES.hunter);
+      });
+      beforeEach(async () => {
+        await createSignalsIndex(supertest);
+      });
+
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest);
+        await deleteAllAlerts(supertest);
+      });
+      it('should successfully import rules without actions when user has no actions privileges', async () => {
+        const { body } = await supertestWithoutAuth
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .auth(ROLES.hunter_no_actions, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [],
+          success: true,
+          success_count: 1,
+        });
+      });
+      it('should successfully import rules with actions when user has "read" actions privileges', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertestWithoutAuth
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .auth(ROLES.hunter, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [],
+          success: true,
+          success_count: 1,
+        });
+      });
+      it('should not import rules with actions when a user has no actions privileges', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertestWithoutAuth
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .auth(ROLES.hunter_no_actions, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+        expect(body).to.eql({
+          success: false,
+          success_count: 0,
+          errors: [
+            {
+              error: {
+                message:
+                  'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
+                status_code: 403,
+              },
+              rule_id: '(unknown id)',
+            },
+            {
+              error: {
+                message: `1 connector is missing. Connector id missing is: ${hookAction.id}`,
+                status_code: 404,
+              },
+              rule_id: 'rule-1',
+            },
+          ],
+        });
+      });
+    });
     describe('importing rules without an index', () => {
       it('should not create a rule if the index does not exist', async () => {
         await supertest
@@ -78,7 +191,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
     });
-
     describe('importing rules with an index', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
@@ -368,6 +480,165 @@ export default ({ getService }: FtrProviderContext): void => {
           getSimpleRuleOutput('rule-2'),
           getSimpleRuleOutput('rule-3'),
         ]);
+      });
+
+      it('should give single connector error back if we have a single connector error message', async () => {
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: '123',
+              action_type_id: '456',
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          success: false,
+          success_count: 0,
+          errors: [
+            {
+              rule_id: 'rule-1',
+              error: {
+                status_code: 404,
+                message: '1 connector is missing. Connector id missing is: 123',
+              },
+            },
+          ],
+        });
+      });
+
+      it('should be able to import a rule with an action connector that exists', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+        expect(body).to.eql({ success: true, success_count: 1, errors: [] });
+      });
+
+      it('should be able to import 2 rules with action connectors that exist', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+
+        const rule2: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-2'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const rule1String = JSON.stringify(rule1);
+        const rule2String = JSON.stringify(rule2);
+        const buffer = Buffer.from(`${rule1String}\n${rule2String}\n`);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', buffer, 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({ success: true, success_count: 2, errors: [] });
+      });
+
+      it('should be able to import 1 rule with an action connector that exists and get 1 other error back for a second rule that does not have the connector', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+
+        const rule2: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-2'),
+          actions: [
+            {
+              group: 'default',
+              id: '123', // <-- This does not exist
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const rule1String = JSON.stringify(rule1);
+        const rule2String = JSON.stringify(rule2);
+        const buffer = Buffer.from(`${rule1String}\n${rule2String}\n`);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', buffer, 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          success: false,
+          success_count: 1,
+          errors: [
+            {
+              rule_id: 'rule-2',
+              error: {
+                status_code: 404,
+                message: '1 connector is missing. Connector id missing is: 123',
+              },
+            },
+          ],
+        });
       });
     });
   });

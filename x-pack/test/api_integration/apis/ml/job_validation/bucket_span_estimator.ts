@@ -95,12 +95,12 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with default settings', function () {
       for (const testData of testDataList) {
         it(`estimates the bucket span ${testData.testTitleSuffix}`, async () => {
-          const { body } = await supertest
+          const { body, status } = await supertest
             .post('/api/ml/validate/estimate_bucket_span')
             .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
             .set(COMMON_REQUEST_HEADERS)
-            .send(testData.requestBody)
-            .expect(testData.expected.responseCode);
+            .send(testData.requestBody);
+          ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 
           expect(body).to.eql(testData.expected.responseBody);
         });
@@ -109,28 +109,28 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with transient search.max_buckets setting', function () {
       before(async () => {
-        await esSupertest
+        const { body, status } = await esSupertest
           .put('/_cluster/settings')
-          .send({ transient: { 'search.max_buckets': 9000 } })
-          .expect(200);
+          .send({ transient: { 'search.max_buckets': 9000 } });
+        ml.api.assertResponseStatusCode(200, status, body);
       });
 
       after(async () => {
-        await esSupertest
+        const { body, status } = await esSupertest
           .put('/_cluster/settings')
-          .send({ transient: { 'search.max_buckets': null } })
-          .expect(200);
+          .send({ transient: { 'search.max_buckets': null } });
+        ml.api.assertResponseStatusCode(200, status, body);
       });
 
       const testData = testDataList[0];
 
       it(`estimates the bucket span`, async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post('/api/ml/validate/estimate_bucket_span')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
-          .send(testData.requestBody)
-          .expect(testData.expected.responseCode);
+          .send(testData.requestBody);
+        ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 
         expect(body).to.eql(testData.expected.responseBody);
       });
@@ -138,28 +138,28 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with persistent search.max_buckets setting', function () {
       before(async () => {
-        await esSupertest
+        const { body, status } = await esSupertest
           .put('/_cluster/settings')
-          .send({ persistent: { 'search.max_buckets': 9000 } })
-          .expect(200);
+          .send({ persistent: { 'search.max_buckets': 9000 } });
+        ml.api.assertResponseStatusCode(200, status, body);
       });
 
       after(async () => {
-        await esSupertest
+        const { body, status } = await esSupertest
           .put('/_cluster/settings')
-          .send({ persistent: { 'search.max_buckets': null } })
-          .expect(200);
+          .send({ persistent: { 'search.max_buckets': null } });
+        ml.api.assertResponseStatusCode(200, status, body);
       });
 
       const testData = testDataList[0];
 
       it(`estimates the bucket span`, async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post('/api/ml/validate/estimate_bucket_span')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
-          .send(testData.requestBody)
-          .expect(testData.expected.responseCode);
+          .send(testData.requestBody);
+        ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 
         expect(body).to.eql(testData.expected.responseBody);
       });

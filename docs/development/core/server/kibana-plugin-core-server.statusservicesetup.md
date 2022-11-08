@@ -30,7 +30,6 @@ core.status.set(
     }) ;
   );
 );
-
 ```
 
 ## Example 2
@@ -64,18 +63,17 @@ core.status.set(
     })
   )
 );
-
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [core$](./kibana-plugin-core-server.statusservicesetup.core_.md) | <code>Observable&lt;CoreStatus&gt;</code> | Current status for all Core services. |
-|  [dependencies$](./kibana-plugin-core-server.statusservicesetup.dependencies_.md) | <code>Observable&lt;Record&lt;string, ServiceStatus&gt;&gt;</code> | Current status for all plugins this plugin depends on. Each key of the <code>Record</code> is a plugin id. |
-|  [derivedStatus$](./kibana-plugin-core-server.statusservicesetup.derivedstatus_.md) | <code>Observable&lt;ServiceStatus&gt;</code> | The status of this plugin as derived from its dependencies. |
-|  [isStatusPageAnonymous](./kibana-plugin-core-server.statusservicesetup.isstatuspageanonymous.md) | <code>() =&gt; boolean</code> | Whether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is present. |
-|  [overall$](./kibana-plugin-core-server.statusservicesetup.overall_.md) | <code>Observable&lt;ServiceStatus&gt;</code> | Overall system status for all of Kibana. |
+|  [core$](./kibana-plugin-core-server.statusservicesetup.core_.md) | Observable&lt;CoreStatus&gt; | Current status for all Core services. |
+|  [dependencies$](./kibana-plugin-core-server.statusservicesetup.dependencies_.md) | Observable&lt;Record&lt;string, ServiceStatus&gt;&gt; | Current status for all plugins this plugin depends on. Each key of the <code>Record</code> is a plugin id. |
+|  [derivedStatus$](./kibana-plugin-core-server.statusservicesetup.derivedstatus_.md) | Observable&lt;ServiceStatus&gt; | The status of this plugin as derived from its dependencies. |
+|  [isStatusPageAnonymous](./kibana-plugin-core-server.statusservicesetup.isstatuspageanonymous.md) | () =&gt; boolean | Whether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is present. |
+|  [overall$](./kibana-plugin-core-server.statusservicesetup.overall_.md) | Observable&lt;ServiceStatus&gt; | Overall system status for all of Kibana. |
 
 ## Methods
 

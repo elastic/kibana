@@ -95,6 +95,43 @@ describe('renderAllSeries', function () {
     expect(wrapper.find(BarSeries).length).toBe(1);
   });
 
+  it('renders percentage data for percentage mode', () => {
+    const barSeriesParams = [{ ...defaultSeriesParams[0], type: 'histogram', mode: 'percentage' }];
+    const config = getVisConfig();
+
+    const renderBarSeries = renderAllSeries(
+      config,
+      barSeriesParams as SeriesParam[],
+      defaultData,
+      jest.fn(),
+      jest.fn(),
+      'Europe/Athens',
+      'col-0-2',
+      []
+    );
+    const wrapper = shallow(<div>{renderBarSeries}</div>);
+    expect(wrapper.find(BarSeries).length).toBe(1);
+    expect(wrapper.find(BarSeries).prop('stackMode')).toEqual('percentage');
+    expect(wrapper.find(BarSeries).prop('data')).toEqual([
+      {
+        'col-0-2': 1610960220000,
+        'col-1-3': 1,
+      },
+      {
+        'col-0-2': 1610961300000,
+        'col-1-3': 1,
+      },
+      {
+        'col-0-2': 1610961900000,
+        'col-1-3': 1,
+      },
+      {
+        'col-0-2': 1610962980000,
+        'col-1-3': 1,
+      },
+    ]);
+  });
+
   it('renders the correct yAccessors for not percentile aggs', () => {
     const renderSeries = getAllSeries(getVisConfig(), defaultSeriesParams, defaultData);
     const wrapper = shallow(<div>{renderSeries}</div>);

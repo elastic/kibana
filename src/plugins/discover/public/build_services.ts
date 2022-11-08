@@ -36,6 +36,7 @@ import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { FieldFormatsStart } from '../../field_formats/public';
 
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 
@@ -49,6 +50,7 @@ export interface DiscoverServices {
   history: () => History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
+  fieldFormats: FieldFormatsStart;
   indexPatterns: IndexPatternsContract;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
@@ -82,6 +84,7 @@ export function buildServices(
     data: plugins.data,
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
+    fieldFormats: plugins.fieldFormats,
     filterManager: plugins.data.query.filterManager,
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,

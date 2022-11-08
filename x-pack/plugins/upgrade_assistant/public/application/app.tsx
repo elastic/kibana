@@ -14,27 +14,66 @@ import { ScopedHistory } from 'src/core/public';
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 import { API_BASE_PATH } from '../../common/constants';
 import { ClusterUpgradeState } from '../../common/types';
-import { APP_WRAPPER_CLASS, GlobalFlyout, AuthorizationProvider } from '../shared_imports';
+import {
+  APP_WRAPPER_CLASS,
+  GlobalFlyout,
+  AuthorizationProvider,
+  NotAuthorizedSection,
+} from '../shared_imports';
 import { AppDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
-import { EsDeprecations, ComingSoonPrompt, KibanaDeprecations, Overview } from './components';
+import {
+  EsDeprecations,
+  EsDeprecationLogs,
+  ComingSoonPrompt,
+  KibanaDeprecations,
+  Overview,
+} from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
   const {
     isReadOnlyMode,
-    services: { api },
+    services: { api, core },
   } = useAppContext();
 
-  const [clusterUpgradeState, setClusterUpradeState] =
+  const missingManageSpacesPrivilege = core.application.capabilities.spaces.manage !== true;
+
+  const [clusterUpgradeState, setClusterUpgradeState] =
     useState<ClusterUpgradeState>('isPreparingForUpgrade');
 
   useEffect(() => {
     api.onClusterUpgradeStateChange((newClusterUpgradeState: ClusterUpgradeState) => {
-      setClusterUpradeState(newClusterUpgradeState);
+      setClusterUpgradeState(newClusterUpgradeState);
     });
   }, [api]);
+
+  if (missingManageSpacesPrivilege) {
+    return (
+      <EuiPageContent
+        verticalPosition="center"
+        horizontalPosition="center"
+        color="subdued"
+        data-test-subj="missingKibanaPrivilegesMessage"
+      >
+        <NotAuthorizedSection
+          title={
+            <FormattedMessage
+              id="xpack.upgradeAssistant.app.deniedPrivilegeTitle"
+              defaultMessage="Kibana admin role required"
+            />
+          }
+          message={
+            <FormattedMessage
+              id="xpack.upgradeAssistant.app.deniedPrivilegeDescription"
+              defaultMessage="To use Upgrade Assistant and resolve deprecation issues, you must have access to manage all Kibana spaces."
+            />
+          }
+        />
+      </EuiPageContent>
+    );
+  }
 
   // Read-only mode will be enabled up until the last minor before the next major release
   if (isReadOnlyMode) {
@@ -112,6 +151,7 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
     <Switch>
       <Route exact path="/overview" component={Overview} />
       <Route exact path="/es_deprecations" component={EsDeprecations} />
+      <Route exact path="/es_deprecation_logs" component={EsDeprecationLogs} />
       <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
       <Redirect from="/" to="/overview" />
     </Switch>

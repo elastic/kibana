@@ -11,7 +11,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 
-export { Anomaly };
+export type { Anomaly };
 export type AnomalyResults = estypes.SearchResponse<Anomaly>;
 type MlAnomalySearch = <T>(
   searchParams: estypes.SearchRequest,

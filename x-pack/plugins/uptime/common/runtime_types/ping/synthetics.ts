@@ -22,6 +22,15 @@ export const JourneyStepType = t.intersection([
       name: t.string,
       status: t.string,
       type: t.string,
+      timespan: t.type({
+        gte: t.string,
+        lt: t.string,
+      }),
+    }),
+    observer: t.partial({
+      geo: t.type({
+        name: t.string,
+      }),
     }),
     synthetics: t.partial({
       error: t.partial({

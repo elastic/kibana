@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  MigrationDeprecationInfoDeprecation,
-  MigrationDeprecationInfoResponse,
-} from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 export type DeprecationSource = 'Kibana' | 'Elasticsearch';
@@ -31,6 +28,8 @@ export enum ReindexStep {
   reindexStarted = 40,
   reindexCompleted = 50,
   aliasCreated = 60,
+  originalIndexDeleted = 70,
+  existingAliasesUpdated = 80,
 }
 
 export enum ReindexStatus {
@@ -44,7 +43,20 @@ export enum ReindexStatus {
   fetchFailed,
 }
 
+export interface ReindexStatusResponse {
+  meta: {
+    indexName: string;
+    reindexName: string;
+    // Array of aliases pointing to the index being reindexed
+    aliases: string[];
+  };
+  warnings?: ReindexWarning[];
+  reindexOp?: ReindexOperation;
+  hasRequiredPrivileges?: boolean;
+}
+
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
+
 export interface QueueSettings extends SavedObjectAttributes {
   /**
    * A Unix timestamp of when the reindex operation was enqueued.
@@ -109,7 +121,8 @@ export interface ReindexOperation extends SavedObjectAttributes {
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 // 7.0 -> 8.0 warnings
-export type ReindexWarningTypes = 'customTypeName' | 'indexSetting';
+export type ReindexWarningTypes = 'customTypeName' | 'indexSetting' | 'replaceIndexWithAlias';
+
 export interface ReindexWarning {
   warningType: ReindexWarningTypes;
   /**
@@ -186,12 +199,18 @@ export interface IndexSettingAction {
   type: 'indexSetting';
   deprecatedSettings: string[];
 }
+
+export interface ClusterSettingAction {
+  type: 'clusterSetting';
+  deprecatedSettings: string[];
+}
+
 export interface EnrichedDeprecationInfo
-  extends Omit<MigrationDeprecationInfoDeprecation, 'level'> {
-  type: keyof MigrationDeprecationInfoResponse;
+  extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
+  type: keyof estypes.MigrationDeprecationsResponse;
   isCritical: boolean;
   index?: string;
-  correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
+  correctiveAction?: ReindexAction | MlAction | IndexSettingAction | ClusterSettingAction;
   resolveDuringUpgrade: boolean;
 }
 
@@ -242,6 +261,12 @@ export interface SystemIndicesMigrationFeature {
   indices: Array<{
     index: string;
     version: string;
+    failure_cause?: {
+      error: {
+        type: string;
+        reason: string;
+      };
+    };
   }>;
 }
 export interface SystemIndicesMigrationStatus {

@@ -2,4 +2,4 @@
 == Translations plugin
 
 Contains Elastic-supported translations. Owned by the Localizations team.
-For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/master/packages/kbn-i18n[kbn-i18n]
+For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/main/packages/kbn-i18n[kbn-i18n]

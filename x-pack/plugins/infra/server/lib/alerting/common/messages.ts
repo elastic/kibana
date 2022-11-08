@@ -173,6 +173,14 @@ export const buildErrorAlertReason = (metric: string) =>
     },
   });
 
+export const buildInvalidQueryAlertReason = (filterQueryText: string) =>
+  i18n.translate('xpack.infra.metrics.alerting.threshold.queryErrorAlertReason', {
+    defaultMessage: 'Alert is using a malformed KQL query: {filterQueryText}',
+    values: {
+      filterQueryText,
+    },
+  });
+
 export const groupActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.groupActionVariableDescription',
   {

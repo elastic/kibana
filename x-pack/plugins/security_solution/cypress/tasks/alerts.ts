@@ -34,7 +34,7 @@ import {
 } from '../screens/alerts_details';
 
 export const addExceptionFromFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
   cy.get(ADD_EXCEPTION_BTN).click();
 };
 

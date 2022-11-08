@@ -12,15 +12,15 @@ import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Migrate system indices', () => {
   let testBed: OverviewTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
-    testBed = await setupOverviewPage();
-    testBed.component.update();
-  });
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
 
-  afterAll(() => {
-    server.restore();
+    testBed = await setupOverviewPage(httpSetup);
+    testBed.component.update();
   });
 
   describe('Error state', () => {
@@ -30,7 +30,7 @@ describe('Overview - Migrate system indices', () => {
         message: 'error',
       });
 
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(httpSetup);
     });
 
     test('Is rendered', () => {
@@ -59,7 +59,7 @@ describe('Overview - Migrate system indices', () => {
       migration_status: 'NO_MIGRATION_NEEDED',
     });
 
-    testBed = await setupOverviewPage();
+    testBed = await setupOverviewPage(httpSetup);
 
     const { exists, component } = testBed;
 
@@ -75,7 +75,7 @@ describe('Overview - Migrate system indices', () => {
       migration_status: 'IN_PROGRESS',
     });
 
-    testBed = await setupOverviewPage();
+    testBed = await setupOverviewPage(httpSetup);
 
     const { exists, component, find } = testBed;
 
@@ -94,7 +94,7 @@ describe('Overview - Migrate system indices', () => {
         migration_status: 'MIGRATION_NEEDED',
       });
 
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(httpSetup);
 
       const { exists, component, find } = testBed;
 
@@ -116,7 +116,7 @@ describe('Overview - Migrate system indices', () => {
         message: 'error',
       });
 
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(httpSetup);
 
       const { exists, component, find } = testBed;
 
@@ -131,6 +131,37 @@ describe('Overview - Migrate system indices', () => {
       // CTA is enabled
       expect(exists('startSystemIndicesMigrationButton')).toBe(true);
       expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(false);
+    });
+
+    test('Handles errors from migration', async () => {
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+        migration_status: 'ERROR',
+        features: [
+          {
+            feature_name: 'kibana',
+            indices: [
+              {
+                index: '.kibana',
+                migration_status: 'ERROR',
+                failure_cause: {
+                  error: {
+                    type: 'mapper_parsing_exception',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      testBed = await setupOverviewPage(httpSetup);
+
+      const { exists } = testBed;
+
+      // Error is displayed
+      expect(exists('migrationFailedCallout')).toBe(true);
+      // CTA is enabled
+      expect(exists('startSystemIndicesMigrationButton')).toBe(true);
     });
   });
 });

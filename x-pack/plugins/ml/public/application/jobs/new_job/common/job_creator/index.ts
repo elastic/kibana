@@ -12,8 +12,8 @@ export { PopulationJobCreator } from './population_job_creator';
 export { AdvancedJobCreator } from './advanced_job_creator';
 export { CategorizationJobCreator } from './categorization_job_creator';
 export { RareJobCreator } from './rare_job_creator';
+export type { JobCreatorType } from './type_guards';
 export {
-  JobCreatorType,
   isSingleMetricJobCreator,
   isMultiMetricJobCreator,
   isPopulationJobCreator,

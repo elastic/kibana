@@ -85,7 +85,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
             search={search}
             pagination={true}
             sorting={true}
-            data-test-subj="mlDashboardSelectionTable"
+            data-test-subj={`mlDashboardSelectionTable${isLoading ? ' loading' : ' loaded'}`}
           />
         </EuiFormRow>
       </EuiModalBody>

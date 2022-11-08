@@ -72,8 +72,8 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
         justifyContent: 'center',
         alignItems: 'center',
         height: '100%',
-        marginLeft: 4,
-        marginRight: 4,
+        paddingLeft: 3,
+        paddingRight: 3,
       }}
       data-test-subj={`legend-${label}`}
       onKeyPress={() => setPopoverOpen(!popoverOpen)}

@@ -12,4 +12,8 @@ export { getTelemetryAllowChangingOptInStatus } from './get_telemetry_allow_chan
 export { getTelemetryFailureDetails } from './get_telemetry_failure_details';
 export type { TelemetryFailureDetails } from './get_telemetry_failure_details';
 export { getTelemetryChannelEndpoint } from './get_telemetry_channel_endpoint';
-export type { GetTelemetryChannelEndpointConfig } from './get_telemetry_channel_endpoint';
+export type {
+  GetTelemetryChannelEndpointConfig,
+  ChannelName,
+  TelemetryEnv,
+} from './get_telemetry_channel_endpoint';

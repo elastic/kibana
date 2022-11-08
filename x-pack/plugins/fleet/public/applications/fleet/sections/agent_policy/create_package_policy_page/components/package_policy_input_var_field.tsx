@@ -46,7 +46,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     if (multi) {
       return (
         <MultiTextInput
-          value={value}
+          value={value ?? []}
           onChange={onChange}
           onBlur={() => setIsDirty(true)}
           isDisabled={frozen}

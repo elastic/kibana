@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { buildEsQuery, Query, Filter } from '@kbn/es-query';
-import React, { useMemo, useCallback, useEffect } from 'react';
-import { noop } from 'lodash';
+import { buildEsQuery, Filter, Query } from '@kbn/es-query';
 import { JsonValue } from '@kbn/utility-types';
+import { noop } from 'lodash';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
-import { LogEntryCursor } from '../../../common/log_entry';
-
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { LogEntryCursor } from '../../../common/log_entry';
 import { useLogSource } from '../../containers/logs/log_source';
 import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
-
-import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
+import { useKibanaQuerySettings } from '../../utils/use_kibana_query_settings';
+import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogStreamErrorBoundary } from './log_stream_error_boundary';
 
 interface LogStreamPluginDeps {
@@ -105,10 +104,12 @@ export const LogStreamContent: React.FC<LogStreamContentProps> = ({
       `<LogStream /> cannot access kibana core services.
 
 Ensure the component is mounted within kibana-react's <KibanaContextProvider> hierarchy.
-Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_react/README.md"
+Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/README.md"
 `
     );
   }
+
+  const kibanaQuerySettings = useKibanaQuerySettings();
 
   const {
     derivedIndexPattern,
@@ -123,11 +124,19 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
 
   const parsedQuery = useMemo<BuiltEsQuery | undefined>(() => {
     if (typeof query === 'object' && 'bool' in query) {
-      return mergeBoolQueries(query, buildEsQuery(derivedIndexPattern, [], filters ?? []));
+      return mergeBoolQueries(
+        query,
+        buildEsQuery(derivedIndexPattern, [], filters ?? [], kibanaQuerySettings)
+      );
     } else {
-      return buildEsQuery(derivedIndexPattern, coerceToQueries(query), filters ?? []);
+      return buildEsQuery(
+        derivedIndexPattern,
+        coerceToQueries(query),
+        filters ?? [],
+        kibanaQuerySettings
+      );
     }
-  }, [derivedIndexPattern, filters, query]);
+  }, [derivedIndexPattern, filters, kibanaQuerySettings, query]);
 
   // Internal state
   const {

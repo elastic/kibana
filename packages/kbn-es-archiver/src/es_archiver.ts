@@ -50,16 +50,22 @@ export class EsArchiver {
    * @param {String|Array<String>} indices - the indices to archive
    * @param {Object} options
    * @property {Boolean} options.raw - should the archive be raw (unzipped) or not
+   * @property {Boolean} options.keepIndexNames - should the Kibana index name be kept as-is or renamed
    */
   async save(
     path: string,
     indices: string | string[],
-    { raw = false, query }: { raw?: boolean; query?: Record<string, any> } = {}
+    {
+      raw = false,
+      keepIndexNames = false,
+      query,
+    }: { raw?: boolean; keepIndexNames?: boolean; query?: Record<string, any> } = {}
   ) {
     return await saveAction({
       outputDir: Path.resolve(this.baseDir, path),
       indices,
       raw,
+      keepIndexNames,
       client: this.client,
       log: this.log,
       query,
@@ -74,18 +80,21 @@ export class EsArchiver {
    * @property {Boolean} options.skipExisting - should existing indices
    *                                           be ignored or overwritten
    * @property {Boolean} options.useCreate - use a create operation instead of index for documents
+   * @property {Boolean} options.docsOnly - load only documents, not indices
    */
   async load(
     path: string,
     {
       skipExisting = false,
       useCreate = false,
-    }: { skipExisting?: boolean; useCreate?: boolean } = {}
+      docsOnly = false,
+    }: { skipExisting?: boolean; useCreate?: boolean; docsOnly?: boolean } = {}
   ) {
     return await loadAction({
       inputDir: this.findArchive(path),
       skipExisting: !!skipExisting,
       useCreate: !!useCreate,
+      docsOnly,
       client: this.client,
       log: this.log,
       kbnClient: this.kbnClient,

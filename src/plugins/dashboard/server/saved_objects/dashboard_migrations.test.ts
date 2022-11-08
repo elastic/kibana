@@ -473,6 +473,113 @@ describe('dashboard', () => {
     });
   });
 
+  describe('7.10.0 - hidden panel titles', () => {
+    const migration = migrations['7.17.3'];
+    const doc: DashboardDoc730ToLatest = {
+      attributes: {
+        description: '',
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '',
+        },
+        optionsJSON: '',
+        panelsJSON: `[
+          {"version":"7.9.3","gridData":{"h":15,"i":"ad30af17-3897-4988-8dd9-1d4ccec60324","w":24,"x":0,"y":0},"panelIndex":"ad30af17-3897-4988-8dd9-1d4ccec60324","embeddableConfig":{"title":"Custom title"},"panelRefName":"panel_0"},
+          {"version":"7.9.3","gridData":{"h":15,"i":"1132db5f-6fe9-4762-8199-3017bb6ed936","w":24,"x":24,"y":0},"panelIndex":"1132db5f-6fe9-4762-8199-3017bb6ed936","embeddableConfig":{"title":""},"panelRefName":"panel_1"},
+          {"version":"7.9.3","gridData":{"h":15,"i":"9f0cc291-de38-42f4-b565-e13678cb5a88","w":24,"x":0,"y":15},"panelIndex":"9f0cc291-de38-42f4-b565-e13678cb5a88","embeddableConfig":{"title":""},"panelRefName":"panel_2"},
+          {"version":"7.9.3","gridData":{"h":15,"i":"94b09a97-8775-4886-be22-c1ad53a7e361","w":24,"x":24,"y":15},"panelIndex":"94b09a97-8775-4886-be22-c1ad53a7e361","embeddableConfig":{},"panelRefName":"panel_3"}
+        ]`,
+        timeRestore: false,
+        title: 'Dashboard with blank titles',
+        version: 1,
+      },
+      id: '376e6260-1f5e-11eb-91aa-7b6d5f8a61d6',
+      references: [],
+      type: 'dashboard',
+    };
+
+    test('all panels with explicitly set titles are left alone', () => {
+      const newDoc = migration(doc, contextMock);
+      const newPanels = JSON.parse(newDoc.attributes.panelsJSON);
+      expect(newPanels[0]).toMatchInlineSnapshot(`
+        Object {
+          "embeddableConfig": Object {},
+          "gridData": Object {
+            "h": 15,
+            "i": "ad30af17-3897-4988-8dd9-1d4ccec60324",
+            "w": 24,
+            "x": 0,
+            "y": 0,
+          },
+          "panelIndex": "ad30af17-3897-4988-8dd9-1d4ccec60324",
+          "panelRefName": "panel_0",
+          "title": "Custom title",
+          "version": "7.9.3",
+        }
+      `);
+    });
+
+    test('all panels with blank string titles are set to hidden', () => {
+      const newDoc = migration(doc, contextMock);
+      const newPanels = JSON.parse(newDoc.attributes.panelsJSON);
+      expect(newPanels[1]).toMatchInlineSnapshot(`
+        Object {
+          "embeddableConfig": Object {
+            "hidePanelTitles": true,
+          },
+          "gridData": Object {
+            "h": 15,
+            "i": "1132db5f-6fe9-4762-8199-3017bb6ed936",
+            "w": 24,
+            "x": 24,
+            "y": 0,
+          },
+          "panelIndex": "1132db5f-6fe9-4762-8199-3017bb6ed936",
+          "panelRefName": "panel_1",
+          "title": "",
+          "version": "7.9.3",
+        }
+      `);
+      expect(newPanels[2]).toMatchInlineSnapshot(`
+        Object {
+          "embeddableConfig": Object {
+            "hidePanelTitles": true,
+          },
+          "gridData": Object {
+            "h": 15,
+            "i": "9f0cc291-de38-42f4-b565-e13678cb5a88",
+            "w": 24,
+            "x": 0,
+            "y": 15,
+          },
+          "panelIndex": "9f0cc291-de38-42f4-b565-e13678cb5a88",
+          "panelRefName": "panel_2",
+          "title": "",
+          "version": "7.9.3",
+        }
+      `);
+    });
+
+    test('all panels with undefined titles are left alone', () => {
+      const newDoc = migration(doc, contextMock);
+      const newPanels = JSON.parse(newDoc.attributes.panelsJSON);
+      expect(newPanels[3]).toMatchInlineSnapshot(`
+        Object {
+          "embeddableConfig": Object {},
+          "gridData": Object {
+            "h": 15,
+            "i": "94b09a97-8775-4886-be22-c1ad53a7e361",
+            "w": 24,
+            "x": 24,
+            "y": 15,
+          },
+          "panelIndex": "94b09a97-8775-4886-be22-c1ad53a7e361",
+          "panelRefName": "panel_3",
+          "version": "7.9.3",
+        }
+      `);
+    });
+  });
+
   describe('7.11.0 - embeddable persistable state extraction', () => {
     const migration = migrations['7.11.0'];
     const doc: DashboardDoc730ToLatest = {

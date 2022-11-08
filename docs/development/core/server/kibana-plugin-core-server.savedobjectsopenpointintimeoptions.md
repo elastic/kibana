@@ -15,7 +15,7 @@ export interface SavedObjectsOpenPointInTimeOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [keepAlive](./kibana-plugin-core-server.savedobjectsopenpointintimeoptions.keepalive.md) | <code>string</code> | Optionally specify how long ES should keep the PIT alive until the next request. Defaults to <code>5m</code>. |
-|  [namespaces](./kibana-plugin-core-server.savedobjectsopenpointintimeoptions.namespaces.md) | <code>string[]</code> | An optional list of namespaces to be used when opening the PIT.<!-- -->When the spaces plugin is enabled: - this will default to the user's current space (as determined by the URL) - if specified, the user's current space will be ignored - <code>['*']</code> will search across all available spaces |
-|  [preference](./kibana-plugin-core-server.savedobjectsopenpointintimeoptions.preference.md) | <code>string</code> | An optional ES preference value to be used for the query. |
+|  [keepAlive?](./kibana-plugin-core-server.savedobjectsopenpointintimeoptions.keepalive.md) | string | <i>(Optional)</i> Optionally specify how long ES should keep the PIT alive until the next request. Defaults to <code>5m</code>. |
+|  [namespaces?](./kibana-plugin-core-server.savedobjectsopenpointintimeoptions.namespaces.md) | string\[\] | <i>(Optional)</i> An optional list of namespaces to be used when opening the PIT.<!-- -->When the spaces plugin is enabled: - this will default to the user's current space (as determined by the URL) - if specified, the user's current space will be ignored - <code>['*']</code> will search across all available spaces |
+|  [preference?](./kibana-plugin-core-server.savedobjectsopenpointintimeoptions.preference.md) | string | <i>(Optional)</i> An optional ES preference value to be used for the query. |
 

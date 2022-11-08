@@ -221,6 +221,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
         const { jobId } = request.params;
         const { body } = await mlClient.updateJob({
           job_id: jobId,
+          // @ts-expect-error detectors cannot be undefined
           body: request.body,
         });
         return response.ok({

@@ -612,12 +612,18 @@ describe('SavedObjectsRepository', () => {
 
       it(`should use default index`, async () => {
         await bulkCreateSuccess([obj1, obj2]);
-        expectClientCallArgsAction([obj1, obj2], { method: 'create', _index: '.kibana-test' });
+        expectClientCallArgsAction([obj1, obj2], {
+          method: 'create',
+          _index: '.kibana-test_8.0.0-testing',
+        });
       });
 
       it(`should use custom index`, async () => {
         await bulkCreateSuccess([obj1, obj2].map((x) => ({ ...x, type: CUSTOM_INDEX_TYPE })));
-        expectClientCallArgsAction([obj1, obj2], { method: 'create', _index: 'custom' });
+        expectClientCallArgsAction([obj1, obj2], {
+          method: 'create',
+          _index: 'custom_8.0.0-testing',
+        });
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
@@ -2091,7 +2097,7 @@ describe('SavedObjectsRepository', () => {
       it(`should use default index`, async () => {
         await createSuccess(type, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ index: '.kibana-test' }),
+          expect.objectContaining({ index: '.kibana-test_8.0.0-testing' }),
           expect.anything()
         );
       });
@@ -2099,14 +2105,23 @@ describe('SavedObjectsRepository', () => {
       it(`should use custom index`, async () => {
         await createSuccess(CUSTOM_INDEX_TYPE, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ index: 'custom' }),
+          expect.objectContaining({ index: 'custom_8.0.0-testing' }),
           expect.anything()
         );
       });
 
       it(`self-generates an id if none is provided`, async () => {
         await createSuccess(type, attributes);
-        expect(client.create).toHaveBeenCalledWith(
+        expect(client.create).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          }),
+          expect.anything()
+        );
+        await createSuccess(type, attributes, { id: '' });
+        expect(client.create).toHaveBeenNthCalledWith(
+          2,
           expect.objectContaining({
             id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           }),
@@ -2679,7 +2694,9 @@ describe('SavedObjectsRepository', () => {
       it(`should use all indices for types that are not namespace-agnostic`, async () => {
         await deleteByNamespaceSuccess(namespace);
         expect(client.updateByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({ index: ['.kibana-test', 'custom'] }),
+          expect.objectContaining({
+            index: ['.kibana-test_8.0.0-testing', 'custom_8.0.0-testing'],
+          }),
           expect.anything()
         );
       });
@@ -2769,7 +2786,7 @@ describe('SavedObjectsRepository', () => {
         await removeReferencesToSuccess();
         expect(client.updateByQuery).toHaveBeenCalledWith(
           expect.objectContaining({
-            index: ['.kibana-test', 'custom'],
+            index: ['.kibana-test_8.0.0-testing', 'custom_8.0.0-testing'],
           }),
           expect.anything()
         );
@@ -3284,6 +3301,20 @@ describe('SavedObjectsRepository', () => {
           ...relevantOpts,
           type: [type],
         });
+      });
+
+      it('search for the right fields when typeToNamespacesMap is set', async () => {
+        const relevantOpts = {
+          ...commonOptions,
+          fields: ['title'],
+          type: '',
+          namespaces: [],
+          typeToNamespacesMap: new Map([[type, [namespace]]]),
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        const esOptions = client.search.mock.calls[0][0];
+        expect(esOptions?._source ?? []).toContain('index-pattern.title');
       });
 
       it(`accepts hasReferenceOperator`, async () => {
@@ -3843,6 +3874,13 @@ describe('SavedObjectsRepository', () => {
         await test({});
       });
 
+      it(`throws when id is empty`, async () => {
+        await expect(
+          savedObjectsRepository.incrementCounter(type, '', counterFields)
+        ).rejects.toThrowError(createBadRequestError('id cannot be empty'));
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
       it(`throws when counterField is not CounterField type`, async () => {
         const test = async (field) => {
           await expect(
@@ -4285,6 +4323,13 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when type is hidden`, async () => {
         await expectNotFoundError(HIDDEN_TYPE, id);
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
+      it(`throws when id is empty`, async () => {
+        await expect(savedObjectsRepository.update(type, '', attributes)).rejects.toThrowError(
+          createBadRequestError('id cannot be empty')
+        );
         expect(client.update).not.toHaveBeenCalled();
       });
 

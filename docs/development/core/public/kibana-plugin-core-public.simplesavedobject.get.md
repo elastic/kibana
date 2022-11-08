@@ -14,9 +14,9 @@ get(key: string): any;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  key | <code>string</code> |  |
+|  key | string |  |
 
 <b>Returns:</b>
 
-`any`
+any
 

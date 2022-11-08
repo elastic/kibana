@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { kibanaPackageJson } from '@kbn/dev-utils';
 import { GetDeprecationsContext } from '../../../../../src/core/server';
 import { CloudSetup } from '../../../cloud/server';
 import { getDeprecations } from './';
@@ -19,7 +19,7 @@ const deprecationContext = {
 describe('getDeprecations', () => {
   describe('when fleet is disabled', () => {
     it('returns no deprecations', async () => {
-      const deprecationsCallback = getDeprecations({ branch: 'master' });
+      const deprecationsCallback = getDeprecations({ branch: 'main' });
       const deprecations = await deprecationsCallback(deprecationContext);
       expect(deprecations).toEqual([]);
     });
@@ -28,7 +28,7 @@ describe('getDeprecations', () => {
   describe('when running on cloud with legacy apm-server', () => {
     it('returns deprecations', async () => {
       const deprecationsCallback = getDeprecations({
-        branch: 'master',
+        branch: 'main',
         cloudSetup: { isCloudEnabled: true } as unknown as CloudSetup,
         fleet: {
           start: () => ({
@@ -38,17 +38,30 @@ describe('getDeprecations', () => {
       });
       const deprecations = await deprecationsCallback(deprecationContext);
       expect(deprecations).not.toEqual([]);
+      // TODO: remove when docs support "main"
+      if (kibanaPackageJson.branch === 'main') {
+        for (const { documentationUrl } of deprecations) {
+          expect(documentationUrl).toMatch(/\/master\//);
+          expect(documentationUrl).not.toMatch(/\/main\//);
+        }
+      }
     });
   });
 
   describe('when running on cloud with fleet', () => {
     it('returns no deprecations', async () => {
       const deprecationsCallback = getDeprecations({
-        branch: 'master',
+        branch: 'main',
         cloudSetup: { isCloudEnabled: true } as unknown as CloudSetup,
         fleet: {
           start: () => ({
-            agentPolicyService: { get: () => ({ id: 'foo' } as AgentPolicy) },
+            agentPolicyService: {
+              get: () =>
+                ({
+                  id: 'foo',
+                  package_policies: [{ package: { name: 'apm' } }],
+                } as AgentPolicy),
+            },
           }),
         } as unknown as APMRouteHandlerResources['plugins']['fleet'],
       });
@@ -60,7 +73,7 @@ describe('getDeprecations', () => {
   describe('when running on prem', () => {
     it('returns no deprecations', async () => {
       const deprecationsCallback = getDeprecations({
-        branch: 'master',
+        branch: 'main',
         cloudSetup: { isCloudEnabled: false } as unknown as CloudSetup,
         fleet: {
           start: () => ({ agentPolicyService: { get: () => undefined } }),

@@ -6,10 +6,7 @@
  */
 
 import { useDynamicIndexPatternFetcher } from '../../../../hooks/use_dynamic_index_pattern';
-import {
-  IndexPattern,
-  IndexPatternSpec,
-} from '../../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
@@ -26,8 +23,8 @@ export function useIndexPattern() {
   const { data } = useFetcher<Promise<IndexPattern | undefined>>(async () => {
     if (indexPatternDynamic?.title) {
       return indexPatterns.create({
-        pattern: indexPatternDynamic?.title,
-      } as IndexPatternSpec);
+        title: indexPatternDynamic?.title,
+      });
     }
   }, [indexPatternDynamic?.title, indexPatterns]);
 

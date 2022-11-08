@@ -24,7 +24,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { getErrorMessage, request } from '../lib/axios_utils';
+import { getErrorMessage, request, throwIfResponseIsNotValid } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VIEW_INCIDENT_URL = `#incidents`;
@@ -134,6 +134,10 @@ export const createExternalService = (
         configurationUtilities,
       });
 
+      throwIfResponseIsNotValid({
+        res,
+      });
+
       return { ...res.data, description: res.data.description?.content ?? '' };
     } catch (error) {
       throw new Error(
@@ -182,6 +186,11 @@ export const createExternalService = (
         configurationUtilities,
       });
 
+      throwIfResponseIsNotValid({
+        res,
+        requiredAttributesToBeInTheResponse: ['id', 'create_date'],
+      });
+
       return {
         title: `${res.data.id}`,
         id: `${res.data.id}`,
@@ -210,6 +219,10 @@ export const createExternalService = (
         logger,
         data,
         configurationUtilities,
+      });
+
+      throwIfResponseIsNotValid({
+        res,
       });
 
       if (!res.data.success) {
@@ -245,6 +258,10 @@ export const createExternalService = (
         configurationUtilities,
       });
 
+      throwIfResponseIsNotValid({
+        res,
+      });
+
       return {
         commentId: comment.commentId,
         externalCommentId: res.data.id,
@@ -270,6 +287,10 @@ export const createExternalService = (
         configurationUtilities,
       });
 
+      throwIfResponseIsNotValid({
+        res,
+      });
+
       const incidentTypes = res.data?.values ?? [];
       return incidentTypes.map((type: { value: string; label: string }) => ({
         id: type.value,
@@ -292,6 +313,10 @@ export const createExternalService = (
         configurationUtilities,
       });
 
+      throwIfResponseIsNotValid({
+        res,
+      });
+
       const incidentTypes = res.data?.values ?? [];
       return incidentTypes.map((type: { value: string; label: string }) => ({
         id: type.value,
@@ -312,6 +337,11 @@ export const createExternalService = (
         logger,
         configurationUtilities,
       });
+
+      throwIfResponseIsNotValid({
+        res,
+      });
+
       return res.data ?? [];
     } catch (error) {
       throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}.`));

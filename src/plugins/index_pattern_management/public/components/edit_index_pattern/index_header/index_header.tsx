@@ -33,11 +33,11 @@ const setDefaultTooltip = i18n.translate(
 );
 
 const removeAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.removeAria', {
-  defaultMessage: 'Remove index pattern.',
+  defaultMessage: 'Delete index pattern.',
 });
 
 const removeTooltip = i18n.translate('indexPatternManagement.editIndexPattern.removeTooltip', {
-  defaultMessage: 'Remove index pattern.',
+  defaultMessage: 'Delete index pattern.',
 });
 
 export const IndexHeader: React.FC<IndexHeaderProps> = ({

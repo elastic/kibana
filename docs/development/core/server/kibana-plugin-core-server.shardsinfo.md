@@ -15,8 +15,8 @@ export interface ShardsInfo
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [failed](./kibana-plugin-core-server.shardsinfo.failed.md) | <code>number</code> |  |
-|  [skipped](./kibana-plugin-core-server.shardsinfo.skipped.md) | <code>number</code> |  |
-|  [successful](./kibana-plugin-core-server.shardsinfo.successful.md) | <code>number</code> |  |
-|  [total](./kibana-plugin-core-server.shardsinfo.total.md) | <code>number</code> |  |
+|  [failed](./kibana-plugin-core-server.shardsinfo.failed.md) | number |  |
+|  [skipped](./kibana-plugin-core-server.shardsinfo.skipped.md) | number |  |
+|  [successful](./kibana-plugin-core-server.shardsinfo.successful.md) | number |  |
+|  [total](./kibana-plugin-core-server.shardsinfo.total.md) | number |  |
 

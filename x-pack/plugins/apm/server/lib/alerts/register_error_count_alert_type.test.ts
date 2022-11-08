@@ -51,6 +51,7 @@ describe('Error count alert', () => {
     const params = { threshold: 2, windowSize: 5, windowUnit: 'm' };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+      // @ts-expect-error not full interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [],

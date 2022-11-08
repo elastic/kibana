@@ -51,12 +51,11 @@ export {
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
 
+export type { UiTracker, TrackMetricOptions } from './hooks/use_track_metric';
 export {
   useTrackPageview,
   useUiTracker,
   useTrackMetric,
-  UiTracker,
-  TrackMetricOptions,
   METRIC_TYPE,
 } from './hooks/use_track_metric';
 
@@ -83,8 +82,8 @@ export type {
 export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
 export type { ExploratoryEmbeddableProps } from './components/shared/exploratory_view/embeddable/embeddable';
 
-export {
-  InspectorContextProvider,
-  AddInspectorRequest,
-} from './context/inspector/inspector_context';
+export type { AddInspectorRequest } from './context/inspector/inspector_context';
+export { InspectorContextProvider } from './context/inspector/inspector_context';
 export { useInspectorContext } from './context/inspector/use_inspector_context';
+
+export { enableComparisonByDefault } from '../common/ui_settings_keys';

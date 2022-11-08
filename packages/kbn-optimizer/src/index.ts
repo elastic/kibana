@@ -14,3 +14,4 @@ export * from './node';
 export * from './limits';
 export * from './cli';
 export * from './report_optimizer_timings';
+export * from './babel_runtime_helpers';

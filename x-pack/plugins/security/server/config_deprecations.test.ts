@@ -54,11 +54,11 @@ describe('Config Deprecations', () => {
       Array [
         Object {
           "level": "warning",
-          "message": "The session idle timeout will default to 1 hour in 8.0.",
+          "message": "User sessions will automatically time out after 8 hours of inactivity starting in 8.0. Override this value to change the timeout.",
         },
         Object {
           "level": "warning",
-          "message": "The session lifespan will default to 30 days in 8.0.",
+          "message": "Users are automatically required to log in again after 30 days starting in 8.0. Override this value to change the timeout.",
         },
       ]
     `);
@@ -72,7 +72,7 @@ describe('Config Deprecations', () => {
       Array [
         Object {
           "level": "warning",
-          "message": "The session idle timeout will default to 1 hour in 8.0.",
+          "message": "User sessions will automatically time out after 8 hours of inactivity starting in 8.0. Override this value to change the timeout.",
         },
       ]
     `);
@@ -86,7 +86,7 @@ describe('Config Deprecations', () => {
       Array [
         Object {
           "level": "warning",
-          "message": "The session lifespan will default to 30 days in 8.0.",
+          "message": "Users are automatically required to log in again after 30 days starting in 8.0. Override this value to change the timeout.",
         },
       ]
     `);
@@ -111,7 +111,7 @@ describe('Config Deprecations', () => {
         },
         Object {
           "level": "warning",
-          "message": "The session lifespan will default to 30 days in 8.0.",
+          "message": "Users are automatically required to log in again after 30 days starting in 8.0. Override this value to change the timeout.",
         },
       ]
     `);

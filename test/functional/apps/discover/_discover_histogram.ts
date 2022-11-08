@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { TimeStrings } from '../../page_objects/common_page';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -40,10 +41,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/es_archiver/long_window_logstash_index_pattern'
       );
       await security.testUser.restoreDefaults();
+      await PageObjects.common.unsetTime();
     });
 
-    async function prepareTest(fromTime: string, toTime: string, interval?: string) {
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    async function prepareTest(time: TimeStrings, interval?: string) {
+      await PageObjects.common.setTime(time);
+      await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       if (interval) {
         await PageObjects.discover.setChartInterval(interval);
@@ -52,32 +55,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     it('should visualize monthly data with different day intervals', async () => {
-      const fromTime = 'Nov 1, 2017 @ 00:00:00.000';
-      const toTime = 'Mar 21, 2018 @ 00:00:00.000';
-      await prepareTest(fromTime, toTime, 'Month');
+      const from = 'Nov 1, 2017 @ 00:00:00.000';
+      const to = 'Mar 21, 2018 @ 00:00:00.000';
+      await prepareTest({ from, to }, 'Month');
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
     it('should visualize weekly data with within DST changes', async () => {
-      const fromTime = 'Mar 1, 2018 @ 00:00:00.000';
-      const toTime = 'May 1, 2018 @ 00:00:00.000';
-      await prepareTest(fromTime, toTime, 'Week');
+      const from = 'Mar 1, 2018 @ 00:00:00.000';
+      const to = 'May 1, 2018 @ 00:00:00.000';
+      await prepareTest({ from, to }, 'Week');
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
     it('should visualize monthly data with different years scaled to 30 days', async () => {
-      const fromTime = 'Jan 1, 2010 @ 00:00:00.000';
-      const toTime = 'Mar 21, 2019 @ 00:00:00.000';
-      await prepareTest(fromTime, toTime, 'Day');
+      const from = 'Jan 1, 2010 @ 00:00:00.000';
+      const to = 'Mar 21, 2019 @ 00:00:00.000';
+      await prepareTest({ from, to }, 'Day');
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
       const chartIntervalIconTip = await PageObjects.discover.getChartIntervalWarningIcon();
       expect(chartIntervalIconTip).to.be(true);
     });
     it('should allow hide/show histogram, persisted in url state', async () => {
-      const fromTime = 'Jan 1, 2010 @ 00:00:00.000';
-      const toTime = 'Mar 21, 2019 @ 00:00:00.000';
-      await prepareTest(fromTime, toTime);
+      const from = 'Jan 1, 2010 @ 00:00:00.000';
+      const to = 'Mar 21, 2019 @ 00:00:00.000';
+      await prepareTest({ from, to });
       let canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
       await testSubjects.click('discoverChartOptionsToggle');
@@ -95,24 +98,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(canvasExists).to.be(true);
     });
     it('should allow hiding the histogram, persisted in saved search', async () => {
-      const fromTime = 'Jan 1, 2010 @ 00:00:00.000';
-      const toTime = 'Mar 21, 2019 @ 00:00:00.000';
+      const from = 'Jan 1, 2010 @ 00:00:00.000';
+      const to = 'Mar 21, 2019 @ 00:00:00.000';
       const savedSearch = 'persisted hidden histogram';
-      await prepareTest(fromTime, toTime);
+      await prepareTest({ from, to });
+
+      // close chart for saved search
       await testSubjects.click('discoverChartOptionsToggle');
       await testSubjects.click('discoverChartToggle');
       let canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
+
+      // save search
       await PageObjects.discover.saveSearch(savedSearch);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      // open new search
       await PageObjects.discover.clickNewSearchButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.discover.loadSavedSearch('persisted hidden histogram');
+      // load saved search
+      await PageObjects.discover.loadSavedSearch(savedSearch);
       await PageObjects.header.waitUntilLoadingHasFinished();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
+
+      // open chart for saved search
       await testSubjects.click('discoverChartOptionsToggle');
       await testSubjects.click('discoverChartToggle');
       await retry.waitFor(`Discover histogram to be displayed`, async () => {
@@ -120,14 +131,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return canvasExists;
       });
 
-      await PageObjects.discover.saveSearch('persisted hidden histogram');
+      // save search
+      await PageObjects.discover.saveSearch(savedSearch);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      // open new search
       await PageObjects.discover.clickNewSearchButton();
-      await PageObjects.discover.loadSavedSearch('persisted hidden histogram');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // load saved search
+      await PageObjects.discover.loadSavedSearch(savedSearch);
       await PageObjects.header.waitUntilLoadingHasFinished();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
+    });
+    it('should show permitted hidden histogram state when returning back to discover', async () => {
+      // close chart
+      await testSubjects.click('discoverChartOptionsToggle');
+      await testSubjects.click('discoverChartToggle');
+      let canvasExists = await elasticChart.canvasExists();
+      expect(canvasExists).to.be(false);
+
+      // save search
+      await PageObjects.discover.saveSearch('persisted hidden histogram');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // open chart
+      await testSubjects.click('discoverChartOptionsToggle');
+      await testSubjects.click('discoverChartToggle');
+      canvasExists = await elasticChart.canvasExists();
+      expect(canvasExists).to.be(true);
+
+      // go to dashboard
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // go to discover
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      canvasExists = await elasticChart.canvasExists();
+      expect(canvasExists).to.be(true);
+
+      // close chart
+      await testSubjects.click('discoverChartOptionsToggle');
+      await testSubjects.click('discoverChartToggle');
+      canvasExists = await elasticChart.canvasExists();
+      expect(canvasExists).to.be(false);
     });
   });
 }

@@ -107,9 +107,7 @@ export class DrilldownManagerState {
       triggerIncompatible: !this.deps.triggers.find((t) => t === firstTrigger),
     };
   };
-  public readonly events$ = new BehaviorSubject<DrilldownTableItem[]>(
-    this.deps.dynamicActionManager.state.get().events.map(this.mapEventToDrilldownItem)
-  );
+  public readonly events$: BehaviorSubject<DrilldownTableItem[]>;
 
   /**
    * State for each drilldown type used for new drilldown creation, so when user
@@ -134,6 +132,10 @@ export class DrilldownManagerState {
     this.hideWelcomeMessage$ = new BehaviorSubject<boolean>(hideWelcomeMessage ?? false);
     this.canUnlockMoreDrilldowns = deps.actionFactories.some(
       (factory) => !factory.isCompatibleLicense
+    );
+
+    this.events$ = new BehaviorSubject<DrilldownTableItem[]>(
+      this.deps.dynamicActionManager.state.get().events.map(this.mapEventToDrilldownItem)
     );
 
     deps.dynamicActionManager.state.state$
@@ -468,7 +470,6 @@ export class DrilldownManagerState {
   // Below are convenience React hooks for consuming observables in connected
   // React components.
 
-  /* eslint-disable react-hooks/rules-of-hooks */
   public readonly useTitle = () => useObservable(this.title$, this.title$.getValue());
   public readonly useFooter = () => useObservable(this.footer$, this.footer$.getValue());
   public readonly useRoute = () => useObservable(this.route$, this.route$.getValue());
@@ -477,5 +478,4 @@ export class DrilldownManagerState {
   public readonly useActionFactory = () =>
     useObservable(this.actionFactory$, this.actionFactory$.getValue());
   public readonly useEvents = () => useObservable(this.events$, this.events$.getValue());
-  /* eslint-enable react-hooks/rules-of-hooks */
 }

@@ -16,6 +16,7 @@ export function MachineLearningCustomUrlsProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
@@ -169,7 +170,13 @@ export function MachineLearningCustomUrlsProvider({
 
     async assertDiscoverCustomUrlAction(expectedHitCountFormatted: string) {
       await PageObjects.discover.waitForDiscoverAppOnScreen();
-      await retry.tryForTime(5000, async () => {
+      // Make sure all existing popovers are closed
+      await browser.pressKeys(browser.keys.ESCAPE);
+
+      // During cloud tests, the small browser width might cause hit count to be invisible
+      // so temporarily collapsing the sidebar ensures the count shows
+      await PageObjects.discover.closeSidebar();
+      await retry.tryForTime(10 * 1000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         expect(hitCount).to.eql(
           expectedHitCountFormatted,

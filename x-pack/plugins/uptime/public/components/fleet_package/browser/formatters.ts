@@ -9,9 +9,9 @@ import { BrowserFields, ConfigKeys } from '../types';
 import {
   Formatter,
   commonFormatters,
+  objectToJsonFormatter,
   arrayToJsonFormatter,
   stringToJsonFormatter,
-  objectToJsonFormatter,
 } from '../common/formatters';
 import {
   tlsValueToYamlFormatter,

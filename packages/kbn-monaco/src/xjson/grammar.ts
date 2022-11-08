@@ -57,10 +57,6 @@ export const createParser = () => {
         text: m,
       });
     },
-    reset = function (newAt: number) {
-      ch = text.charAt(newAt);
-      at = newAt + 1;
-    },
     next = function (c?: string) {
       return (
         c && c !== ch && error("Expected '" + c + "' instead of '" + ch + "'"),
@@ -68,15 +64,6 @@ export const createParser = () => {
         (at += 1),
         ch
       );
-    },
-    nextUpTo = function (upTo: any, errorMessage: string) {
-      let currentAt = at,
-        i = text.indexOf(upTo, currentAt);
-      if (i < 0) {
-        error(errorMessage || "Expected '" + upTo + "'");
-      }
-      reset(i + upTo.length);
-      return text.substring(currentAt, i);
     },
     peek = function (c: string) {
       return text.substr(at, c.length) === c; // nocommit - double check
@@ -96,37 +83,50 @@ export const createParser = () => {
           (string += ch), next();
       return (number = +string), isNaN(number) ? (error('Bad number'), void 0) : number;
     },
+    stringLiteral = function () {
+      let quotes = '"""';
+      let end = text.indexOf('\\"' + quotes, at + quotes.length);
+
+      if (end >= 0) {
+        quotes = '\\"' + quotes;
+      } else {
+        end = text.indexOf(quotes, at + quotes.length);
+      }
+
+      if (end >= 0) {
+        for (let l = end - at + quotes.length; l > 0; l--) {
+          next();
+        }
+      }
+
+      return next();
+    },
     string = function () {
       let hex: any,
         i: any,
         uffff: any,
         string = '';
+
       if ('"' === ch) {
-        if (peek('""')) {
-          // literal
-          next('"');
-          next('"');
-          return nextUpTo('"""', 'failed to find closing \'"""\'');
-        } else {
-          for (; next(); ) {
-            if ('"' === ch) return next(), string;
-            if ('\\' === ch)
-              if ((next(), 'u' === ch)) {
-                for (
-                  uffff = 0, i = 0;
-                  4 > i && ((hex = parseInt(next(), 16)), isFinite(hex));
-                  i += 1
-                )
-                  uffff = 16 * uffff + hex;
-                string += String.fromCharCode(uffff);
-              } else {
-                if ('string' != typeof escapee[ch]) break;
-                string += escapee[ch];
-              }
-            else string += ch;
-          }
+        for (; next(); ) {
+          if ('"' === ch) return next(), string;
+          if ('\\' === ch)
+            if ((next(), 'u' === ch)) {
+              for (
+                uffff = 0, i = 0;
+                4 > i && ((hex = parseInt(next(), 16)), isFinite(hex));
+                i += 1
+              )
+                uffff = 16 * uffff + hex;
+              string += String.fromCharCode(uffff);
+            } else {
+              if ('string' != typeof escapee[ch]) break;
+              string += escapee[ch];
+            }
+          else string += ch;
         }
       }
+
       error('Bad string');
     },
     white = function () {
@@ -165,9 +165,9 @@ export const createParser = () => {
             ((key = string()),
             white(),
             next(':'),
-            Object.hasOwnProperty.call(object, key) &&
+            Object.hasOwnProperty.call(object, key!) &&
               warning('Duplicate key "' + key + '"', latchKeyStart),
-            (object[key] = value()),
+            (object[key!] = value()),
             white(),
             '}' === ch)
           )
@@ -179,6 +179,9 @@ export const createParser = () => {
     };
   return (
     (value = function () {
+      if (peek('"""')) {
+        return stringLiteral();
+      }
       switch ((white(), ch)) {
         case '{':
           return object();

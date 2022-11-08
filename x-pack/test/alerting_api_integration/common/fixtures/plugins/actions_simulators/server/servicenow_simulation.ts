@@ -175,6 +175,14 @@ const handler = async (request: http.IncomingMessage, response: http.ServerRespo
     });
   }
 
+  if (pathName === '/api/global/em/jsonv2') {
+    return sendResponse(response, {
+      result: {
+        'Default Bulk Endpoint': '1 events were inserted',
+      },
+    });
+  }
+
   // Return an 400 error if endpoint is not supported
   response.statusCode = 400;
   response.setHeader('Content-Type', 'application/json');

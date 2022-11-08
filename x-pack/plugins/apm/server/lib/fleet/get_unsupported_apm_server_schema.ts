@@ -10,7 +10,10 @@ import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
 } from '../../../common/apm_saved_object_constants';
-import { apmConfigMapping } from './get_apm_package_policy_definition';
+import {
+  apmConfigMapping,
+  preprocessLegacyFields,
+} from './get_apm_package_policy_definition';
 
 export async function getUnsupportedApmServerSchema({
   savedObjectsClient,
@@ -24,7 +27,10 @@ export async function getUnsupportedApmServerSchema({
   const apmServerSchema: Record<string, any> = JSON.parse(
     (attributes as { schemaJson: string }).schemaJson
   );
-  return Object.entries(apmServerSchema)
+  const preprocessedApmServerSchema = preprocessLegacyFields({
+    apmServerSchema,
+  });
+  return Object.entries(preprocessedApmServerSchema)
     .filter(([name]) => !(name in apmConfigMapping))
     .map(([key, value]) => ({ key, value }));
 }

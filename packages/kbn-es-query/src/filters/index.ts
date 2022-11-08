@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+export type { FilterCompareOptions } from './helpers';
 export {
   dedupFilters,
   uniqFilters,
   compareFilters,
   COMPARE_ALL_OPTIONS,
-  FilterCompareOptions,
   cleanFilter,
   isFilter,
   isFilters,
@@ -53,7 +53,7 @@ export {
   getFilterParams,
 } from './build_filters';
 
-export {
+export type {
   Query,
   Filter,
   LatLon,

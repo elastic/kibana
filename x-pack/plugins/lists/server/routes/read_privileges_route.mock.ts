@@ -88,7 +88,7 @@ export const getReadPrivilegeMock = (
       manage_index_templates: booleanValues,
       manage_ingest_pipelines: booleanValues,
       manage_ml: booleanValues,
-      manage_own_api_key: false,
+      manage_own_api_key: booleanValues,
       manage_pipeline: booleanValues,
       manage_rollup: booleanValues,
       manage_saml: booleanValues,
@@ -105,7 +105,7 @@ export const getReadPrivilegeMock = (
       read_ilm: booleanValues,
       transport_client: booleanValues,
     },
-    has_all_requested: false,
+    has_all_requested: booleanValues,
     index: {
       [listItemsIndex]: {
         all: booleanValues,
@@ -141,7 +141,7 @@ export const getReadPrivilegeMock = (
       manage_index_templates: booleanValues,
       manage_ingest_pipelines: booleanValues,
       manage_ml: booleanValues,
-      manage_own_api_key: false,
+      manage_own_api_key: booleanValues,
       manage_pipeline: booleanValues,
       manage_rollup: booleanValues,
       manage_saml: booleanValues,
@@ -158,7 +158,7 @@ export const getReadPrivilegeMock = (
       read_ilm: booleanValues,
       transport_client: booleanValues,
     },
-    has_all_requested: false,
+    has_all_requested: booleanValues,
     index: {
       [listIndex]: {
         all: booleanValues,

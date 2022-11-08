@@ -180,7 +180,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           sort: [{ record_score: { order: 'desc' } }],
         },
       },
-      []
+      jobIds
     );
 
     const tableData: {
@@ -311,7 +311,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       },
     };
 
-    const { body } = await mlClient.anomalySearch(query, []);
+    const { body } = await mlClient.anomalySearch(query, jobIds);
     const maxScore = get(body, ['aggregations', 'max_score', 'value'], null);
 
     return { maxScore };
@@ -375,7 +375,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      jobIds
     );
 
     const bucketsByJobId: Array<{ key: string; maxTimestamp: { value?: number } }> = get(
@@ -406,7 +406,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
 
     const examplesByCategoryId: { [key: string]: any } = {};
@@ -443,7 +443,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
 
     const definition = { categoryId, terms: null, regex: null, examples: [] };
@@ -492,7 +492,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
     return body ? body.hits.hits.map((r) => r._source) : [];
   }
@@ -583,7 +583,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
             aggs,
           },
         },
-        []
+        jobIds
       );
       if (fieldToBucket === JOB_ID) {
         finalResults = {
@@ -638,7 +638,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     }
 
     const jobConfig = jobsResponse.jobs[0];
-    const timefield = jobConfig.data_description.time_field;
+    const timefield = jobConfig.data_description.time_field!;
     const bucketSpan = jobConfig.analysis_config.bucket_span;
 
     if (datafeedConfig === undefined) {
@@ -708,6 +708,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     const [bucketResp, annotationResp, { body: modelSnapshotsResp }] = await Promise.all([
       mlClient.getBuckets({
         job_id: jobId,
+        // @ts-expect-error page is not defined on body
         body: { desc: true, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
       }),
       getAnnotations({

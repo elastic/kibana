@@ -19,6 +19,12 @@ describe('useSwimlaneInputResolver', () => {
   let services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
   let onInputChange: jest.Mock;
 
+  const renderCallbacks = {
+    onRenderComplete: jest.fn(),
+    onLoading: jest.fn(),
+    onError: jest.fn(),
+  };
+
   beforeEach(() => {
     jest.useFakeTimers();
 
@@ -78,6 +84,7 @@ describe('useSwimlaneInputResolver', () => {
     ];
     onInputChange = jest.fn();
   });
+
   afterEach(() => {
     jest.useRealTimers();
     jest.clearAllMocks();
@@ -91,7 +98,8 @@ describe('useSwimlaneInputResolver', () => {
         refresh,
         services,
         1000,
-        1
+        1,
+        renderCallbacks
       )
     );
 
@@ -105,6 +113,9 @@ describe('useSwimlaneInputResolver', () => {
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
     expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(1);
+
+    expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(1);
+    expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       embeddableInput.next({
@@ -121,6 +132,9 @@ describe('useSwimlaneInputResolver', () => {
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
     expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(2);
 
+    expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(2);
+    expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(2);
+
     await act(async () => {
       embeddableInput.next({
         id: 'test-swimlane-embeddable',
@@ -135,6 +149,9 @@ describe('useSwimlaneInputResolver', () => {
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
     expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(3);
+
+    expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(3);
+    expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(3);
   });
 
   test('should not complete the observable on error', async () => {
@@ -145,7 +162,8 @@ describe('useSwimlaneInputResolver', () => {
         refresh,
         services,
         1000,
-        1
+        1,
+        renderCallbacks
       )
     );
 
@@ -160,5 +178,7 @@ describe('useSwimlaneInputResolver', () => {
     });
 
     expect(result.current[6]?.message).toBe('Invalid job');
+
+    expect(renderCallbacks.onError).toHaveBeenCalledTimes(1);
   });
 });

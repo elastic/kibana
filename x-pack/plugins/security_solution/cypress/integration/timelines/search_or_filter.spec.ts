@@ -16,7 +16,11 @@ import { cleanKibana } from '../../tasks/common';
 
 import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
-import { executeTimelineKQL } from '../../tasks/timeline';
+import {
+  changeTimelineQueryLanguage,
+  executeTimelineKQL,
+  executeTimelineSearch,
+} from '../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { HOSTS_URL, TIMELINES_URL } from '../../urls/navigation';
@@ -31,6 +35,15 @@ describe('timeline search or filter KQL bar', () => {
     const hostExistsQuery = 'host.name: *';
     openTimelineUsingToggle();
     executeTimelineKQL(hostExistsQuery);
+
+    cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
+  });
+
+  it('executes a Lucene query', () => {
+    const messageProcessQuery = 'message:Process\\ zsh*';
+    openTimelineUsingToggle();
+    changeTimelineQueryLanguage();
+    executeTimelineSearch(messageProcessQuery);
 
     cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
   });

@@ -8,21 +8,16 @@
 import { AutoFollowPatternForm } from '../../app/components/auto_follow_pattern_form';
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
-import { AUTO_FOLLOW_PATTERN_EDIT } from './helpers/constants';
+import { AUTO_FOLLOW_PATTERN_EDIT, AUTO_FOLLOW_PATTERN_EDIT_NAME } from './helpers/constants';
 
 const { setup } = pageHelpers.autoFollowPatternEdit;
 const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;
 
 describe('Edit Auto-follow pattern', () => {
-  let server;
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   describe('on component mount', () => {
@@ -36,7 +31,10 @@ describe('Edit Auto-follow pattern', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
-      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(AUTO_FOLLOW_PATTERN_EDIT);
+      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(
+        AUTO_FOLLOW_PATTERN_EDIT_NAME,
+        AUTO_FOLLOW_PATTERN_EDIT
+      );
       ({ component, find } = setup());
 
       await nextTick();
@@ -83,7 +81,10 @@ describe('Edit Auto-follow pattern', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([
         { name: 'cluster-2', seeds: ['localhost:123'], isConnected: false },
       ]);
-      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(AUTO_FOLLOW_PATTERN_EDIT);
+      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(
+        AUTO_FOLLOW_PATTERN_EDIT_NAME,
+        AUTO_FOLLOW_PATTERN_EDIT
+      );
       ({ component, find, exists, actions, form } = setup());
 
       await nextTick();

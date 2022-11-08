@@ -8,4 +8,4 @@
 
 export * from './json_editor';
 
-export { OnJsonEditorUpdateHandler, JsonEditorState } from './use_json';
+export type { OnJsonEditorUpdateHandler, JsonEditorState } from './use_json';

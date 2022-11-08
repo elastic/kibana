@@ -16,11 +16,11 @@ intercept(interceptor: HttpInterceptor): () => void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  interceptor | <code>HttpInterceptor</code> |  |
+|  interceptor | HttpInterceptor | a [HttpInterceptor](./kibana-plugin-core-public.httpinterceptor.md) |
 
 <b>Returns:</b>
 
-`() => void`
+() =&gt; void
 
 a function for removing the attached interceptor.
 

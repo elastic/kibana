@@ -132,7 +132,7 @@ export class Server {
 
   public async preboot() {
     this.log.debug('prebooting server');
-    const prebootTransaction = apm.startTransaction('server_preboot', 'kibana_platform');
+    const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
     const environmentPreboot = await this.environment.preboot();
 
@@ -188,7 +188,7 @@ export class Server {
 
   public async setup() {
     this.log.debug('setting up server');
-    const setupTransaction = apm.startTransaction('server_setup', 'kibana_platform');
+    const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
 
     const environmentSetup = this.environment.setup();
 
@@ -298,7 +298,7 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
-    const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
+    const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
     const executionContextStart = this.executionContext.start();
     const elasticsearchStart = await this.elasticsearch.start();

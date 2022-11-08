@@ -178,7 +178,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 };
 
 export const setup = async (props: Props): Promise<SetupResult> => {
-  const testBed = await testBedSetup(props);
+  const testBed = testBedSetup(props);
   return {
     ...testBed,
     actions: createActions(testBed),

@@ -8,7 +8,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
+import { getActionsColumnWidth } from './helpers';
+
 import { defaultHeaders } from './default_headers';
 import { Sort } from '../sort';
 
@@ -51,12 +52,15 @@ const timelineId = 'test';
 
 describe('ColumnHeaders', () => {
   const mount = useMountAppended();
+  const ACTION_BUTTON_COUNT = 4;
+  const actionsColumnWidth = getActionsColumnWidth(ACTION_BUTTON_COUNT);
 
   describe('rendering', () => {
     const sort: Sort[] = [
       {
         columnId: '@timestamp',
-        columnType: 'number',
+        columnType: 'date',
+        esTypes: ['date'],
         sortDirection: Direction.desc,
       },
     ];
@@ -65,7 +69,7 @@ describe('ColumnHeaders', () => {
       const wrapper = shallow(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
@@ -88,7 +92,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
@@ -111,7 +115,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
@@ -137,12 +141,14 @@ describe('ColumnHeaders', () => {
     let mockSort: Sort[] = [
       {
         columnId: '@timestamp',
-        columnType: 'number',
+        columnType: 'date',
+        esTypes: ['date'],
         sortDirection: Direction.desc,
       },
       {
         columnId: 'host.name',
-        columnType: 'text',
+        columnType: 'string',
+        esTypes: [],
         sortDirection: Direction.asc,
       },
     ];
@@ -157,12 +163,14 @@ describe('ColumnHeaders', () => {
       mockSort = [
         {
           columnId: '@timestamp',
-          columnType: 'number',
+          columnType: 'date',
+          esTypes: ['date'],
           sortDirection: Direction.desc,
         },
         {
           columnId: 'host.name',
-          columnType: 'text',
+          columnType: 'string',
+          esTypes: [],
           sortDirection: Direction.asc,
         },
       ];
@@ -172,7 +180,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}
@@ -198,15 +206,22 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
-              columnType: 'number',
+              columnType: 'date',
+              esTypes: ['date'],
               sortDirection: Direction.desc,
             },
             {
               columnId: 'host.name',
-              columnType: 'text',
+              columnType: 'string',
+              esTypes: [],
               sortDirection: Direction.asc,
             },
-            { columnId: 'event.category', columnType: 'text', sortDirection: Direction.desc },
+            {
+              columnId: 'event.category',
+              columnType: '',
+              esTypes: [],
+              sortDirection: Direction.desc,
+            },
           ],
         })
       );
@@ -216,7 +231,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}
@@ -242,10 +257,16 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
-              columnType: 'number',
+              columnType: 'date',
+              esTypes: ['date'],
               sortDirection: Direction.asc,
             },
-            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.asc },
+            {
+              columnId: 'host.name',
+              columnType: 'string',
+              esTypes: [],
+              sortDirection: Direction.asc,
+            },
           ],
         })
       );
@@ -255,7 +276,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}
@@ -281,10 +302,16 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
-              columnType: 'number',
+              columnType: 'date',
+              esTypes: ['date'],
               sortDirection: Direction.desc,
             },
-            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.desc },
+            {
+              columnId: 'host.name',
+              columnType: '',
+              esTypes: [],
+              sortDirection: Direction.desc,
+            },
           ],
         })
       );
@@ -293,7 +320,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}

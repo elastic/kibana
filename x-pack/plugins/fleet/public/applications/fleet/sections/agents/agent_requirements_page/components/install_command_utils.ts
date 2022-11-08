@@ -20,10 +20,12 @@ export function getInstallCommandForPlatform(
 
   if (isProductionDeployment && fleetServerHost) {
     commandArguments += `--url=${fleetServerHost} ${newLineSeparator}\n`;
+  } else {
+    commandArguments += `  ${newLineSeparator}\n`;
   }
 
-  commandArguments += ` -f ${newLineSeparator}\n --fleet-server-es=${esHost}`;
-  commandArguments += ` ${newLineSeparator}\n --fleet-server-service-token=${serviceToken}`;
+  commandArguments += `  --fleet-server-es=${esHost}`;
+  commandArguments += ` ${newLineSeparator}\n  --fleet-server-service-token=${serviceToken}`;
   if (policyId) {
     commandArguments += ` ${newLineSeparator}\n  --fleet-server-policy=${policyId}`;
   }
@@ -33,6 +35,8 @@ export function getInstallCommandForPlatform(
     commandArguments += ` ${newLineSeparator}\n  --fleet-server-es-ca=<PATH_TO_ES_CERT>`;
     commandArguments += ` ${newLineSeparator}\n  --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT>`;
     commandArguments += ` ${newLineSeparator}\n  --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>`;
+  } else {
+    commandArguments += ` ${newLineSeparator}\n  --fleet-server-insecure-http`;
   }
 
   switch (platform) {

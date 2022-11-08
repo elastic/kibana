@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Legacy } from '../../../legacy_shims';
 import { capitalize } from 'lodash';
 import { formatMetric } from '../../../lib/format_number';
 import { formatDateTimeLocal } from '../../../../common/formatting';
@@ -42,21 +41,12 @@ export const parseProps = (props) => {
 
   const { files, size } = index;
 
-  let thisTimezone;
-  // react version passes timezone while Angular uses injector
-  if (!timezone) {
-    const injector = Legacy.shims.getAngularInjector();
-    thisTimezone = injector.get('config').get('dateFormat:tz');
-  } else {
-    thisTimezone = timezone;
-  }
-
   return {
     name: indexName || index.name,
     shard: `${id} / ${isPrimary ? 'Primary' : 'Replica'}`,
     relocationType: type === 'PRIMARY_RELOCATION' ? 'Primary Relocation' : normalizeString(type),
     stage: normalizeString(stage),
-    startTime: formatDateTimeLocal(startTimeInMillis, thisTimezone),
+    startTime: formatDateTimeLocal(startTimeInMillis, timezone),
     totalTime: formatMetric(Math.floor(totalTimeInMillis / 1000), '00:00:00'),
     isCopiedFromPrimary: !isPrimary || type === 'PRIMARY_RELOCATION',
     sourceName: source.name === undefined ? 'n/a' : source.name,

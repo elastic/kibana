@@ -7,11 +7,7 @@
 
 import { Logger, SavedObjectReference } from 'src/core/server';
 import { RuleParams } from '../../schemas/rule_schemas';
-import {
-  getSavedObjectReferenceForExceptionsList,
-  logMissingSavedObjectError,
-  logWarningIfDifferentReferencesDetected,
-} from './utils';
+import { getSavedObjectReferenceForExceptionsList, logMissingSavedObjectError } from './utils';
 
 /**
  * This injects any "exceptionsList" "id"'s from saved object reference and returns the "exceptionsList" using the saved object reference. If for
@@ -44,11 +40,6 @@ export const injectExceptionsReferences = ({
       savedObjectReferences,
     });
     if (savedObjectReference != null) {
-      logWarningIfDifferentReferencesDetected({
-        logger,
-        savedObjectReferenceId: savedObjectReference.id,
-        savedObjectId: exceptionItem.id,
-      });
       const reference: RuleParams['exceptionsList'][0] = {
         ...exceptionItem,
         id: savedObjectReference.id,

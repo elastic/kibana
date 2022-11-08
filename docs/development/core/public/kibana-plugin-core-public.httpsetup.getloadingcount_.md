@@ -13,5 +13,5 @@ getLoadingCount$(): Observable<number>;
 ```
 <b>Returns:</b>
 
-`Observable<number>`
+Observable&lt;number&gt;
 

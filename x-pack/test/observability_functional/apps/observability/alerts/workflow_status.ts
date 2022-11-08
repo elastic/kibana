@@ -13,7 +13,8 @@ const OPEN_ALERTS_ROWS_COUNT = 12;
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('alert workflow status', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/117290
+  describe.skip('alert workflow status', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
@@ -21,11 +22,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await observability.alerts.common.navigateToTimeWithData();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
     it('is filtered to only show "open" alerts by default', async () => {

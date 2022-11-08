@@ -41,7 +41,7 @@ import {
 
 import { patchRules } from '../../rules/patch_rules';
 import { legacyMigrate } from '../../rules/utils';
-import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
+import { getTupleDuplicateErrorsAndUniqueRules, getInvalidConnectors } from './utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';
@@ -78,14 +78,11 @@ export const importRulesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const rulesClient = context.alerting?.getRulesClient();
+        const rulesClient = context.alerting.getRulesClient();
+        const actionsClient = context.actions.getActionsClient();
         const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution?.getAppClient();
-
-        if (!siemClient || !rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const siemClient = context.securitySolution.getAppClient();
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -103,6 +100,7 @@ export const importRulesRoute = (
             body: `Invalid file extension ${fileExtension}`,
           });
         }
+
         const signalsIndex = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
         if (!isRuleRegistryEnabled && !indexExists) {
@@ -118,13 +116,34 @@ export const importRulesRoute = (
           request.body.file as HapiReadableStream,
           ...readStream,
         ]);
-        const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueRules(
-          parsedObjects,
-          request.query.overwrite
+
+        const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
+          getTupleDuplicateErrorsAndUniqueRules(parsedObjects, request.query.overwrite);
+
+        let parsedRules;
+        let actionErrors: BulkError[] = [];
+        const actualRules = parsedObjects.filter(
+          (rule): rule is ImportRulesSchemaDecoded => !(rule instanceof Error)
         );
 
-        const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
+        if (actualRules.some((rule) => rule.actions.length > 0)) {
+          const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
+            parsedObjectsWithoutDuplicateErrors,
+            actionsClient
+          );
+          parsedRules = uniqueParsedObjects;
+          actionErrors = nonExistentActionErrors;
+        } else {
+          parsedRules = parsedObjectsWithoutDuplicateErrors;
+        }
+        const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
         let importRuleResponse: ImportRuleResponse[] = [];
+
+        // If we had 100% errors and no successful rule could be imported we still have to output an error.
+        // otherwise we would output we are success importing 0 rules.
+        if (chunkParseObjects.length === 0) {
+          importRuleResponse = [...actionErrors, ...duplicateIdErrors];
+        }
 
         while (chunkParseObjects.length) {
           const batchParseObjects = chunkParseObjects.shift() ?? [];
@@ -194,6 +213,7 @@ export const importRulesRoute = (
                       throttle,
                       version,
                       exceptions_list: exceptionsList,
+                      actions,
                     } = parsedRule;
 
                     try {
@@ -265,7 +285,7 @@ export const importRulesRoute = (
                           note,
                           version,
                           exceptionsList,
-                          actions: [], // Actions are not imported nor exported at this time
+                          actions,
                         });
                         resolve({
                           rule_id: ruleId,
@@ -328,7 +348,7 @@ export const importRulesRoute = (
                           exceptionsList,
                           anomalyThreshold,
                           machineLearningJobId,
-                          actions: undefined,
+                          actions,
                         });
                         resolve({
                           rule_id: ruleId,
@@ -361,6 +381,7 @@ export const importRulesRoute = (
             }, [])
           );
           importRuleResponse = [
+            ...actionErrors,
             ...duplicateIdErrors,
             ...importRuleResponse,
             ...newImportRuleResponse,

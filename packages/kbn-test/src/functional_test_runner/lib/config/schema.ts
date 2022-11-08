@@ -89,6 +89,7 @@ export const schema = Joi.object()
       })
       .default(),
 
+    servicesRequiredForTestAnalysis: Joi.array().items(Joi.string()).default([]),
     services: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
 
     pageObjects: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
@@ -99,6 +100,7 @@ export const schema = Joi.object()
         try: Joi.number().default(120000),
         waitFor: Joi.number().default(20000),
         esRequestTimeout: Joi.number().default(30000),
+        kibanaReportCompletion: Joi.number().default(60_000),
         kibanaStabilize: Joi.number().default(15000),
         navigateStatusPageCheck: Joi.number().default(250),
 
@@ -122,6 +124,7 @@ export const schema = Joi.object()
     mochaOpts: Joi.object()
       .keys({
         bail: Joi.boolean().default(false),
+        dryRun: Joi.boolean().default(false),
         grep: Joi.string(),
         invert: Joi.boolean().default(false),
         slow: Joi.number().default(30000),
@@ -150,7 +153,10 @@ export const schema = Joi.object()
 
     mochaReporter: Joi.object()
       .keys({
-        captureLogOutput: Joi.boolean().default(!!process.env.CI),
+        captureLogOutput: Joi.boolean().default(
+          !!process.env.CI && !process.env.DISABLE_CI_LOG_OUTPUT_CAPTURE
+        ),
+        sendToCiStats: Joi.boolean().default(!!process.env.CI),
       })
       .default(),
 

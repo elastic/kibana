@@ -13,41 +13,47 @@ import { Form, UseField } from '../components';
 import React from 'react';
 import { useForm } from '.';
 import { emptyField } from '../../helpers/field_validators';
-import { FieldHook, FieldValidateResponse, VALIDATION_TYPES } from '..';
+import { FieldHook, FieldValidateResponse, VALIDATION_TYPES, FieldConfig } from '..';
 
 describe('useField() hook', () => {
+  let fieldHook: FieldHook;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  const TestField = ({ field }: { field: FieldHook }) => {
+    fieldHook = field;
+    return null;
+  };
+
+  const getTestForm = (config?: FieldConfig) => () => {
+    const { form } = useForm();
+
+    return (
+      <Form form={form}>
+        <UseField path="test-path" component={TestField} config={config} />
+      </Form>
+    );
+  };
+
   describe('field.validate()', () => {
     const EMPTY_VALUE = '   ';
 
-    test('It should not invalidate a field with arrayItem validation when isBlocking is false', async () => {
-      let fieldHook: FieldHook;
-
-      const TestField = ({ field }: { field: FieldHook }) => {
-        fieldHook = field;
-        return null;
-      };
-
-      const TestForm = () => {
-        const { form } = useForm();
-
-        return (
-          <Form form={form}>
-            <UseField
-              path="test-path"
-              component={TestField}
-              config={{
-                validations: [
-                  {
-                    validator: emptyField('error-message'),
-                    type: VALIDATION_TYPES.ARRAY_ITEM,
-                    isBlocking: false,
-                  },
-                ],
-              }}
-            />
-          </Form>
-        );
-      };
+    test('it should not invalidate a field with arrayItem validation when isBlocking is false', async () => {
+      const TestForm = getTestForm({
+        validations: [
+          {
+            validator: emptyField('error-message'),
+            type: VALIDATION_TYPES.ARRAY_ITEM,
+            isBlocking: false,
+          },
+        ],
+      });
 
       registerTestBed(TestForm)();
 
@@ -78,35 +84,16 @@ describe('useField() hook', () => {
       expect(fieldHook!.isValid).toBe(true);
     });
 
-    test('It should invalidate an arrayItem field when isBlocking is true', async () => {
-      let fieldHook: FieldHook;
-
-      const TestField = ({ field }: { field: FieldHook }) => {
-        fieldHook = field;
-        return null;
-      };
-
-      const TestForm = () => {
-        const { form } = useForm();
-
-        return (
-          <Form form={form}>
-            <UseField
-              path="test-path"
-              component={TestField}
-              config={{
-                validations: [
-                  {
-                    validator: emptyField('error-message'),
-                    type: VALIDATION_TYPES.ARRAY_ITEM,
-                    isBlocking: true,
-                  },
-                ],
-              }}
-            />
-          </Form>
-        );
-      };
+    test('it should invalidate an arrayItem field when isBlocking is true', async () => {
+      const TestForm = getTestForm({
+        validations: [
+          {
+            validator: emptyField('error-message'),
+            type: VALIDATION_TYPES.ARRAY_ITEM,
+            isBlocking: true,
+          },
+        ],
+      });
 
       registerTestBed(TestForm)();
 
@@ -135,6 +122,31 @@ describe('useField() hook', () => {
 
       // expect the field to be invalid because the validation error is blocking
       expect(fieldHook!.isValid).toBe(false);
+    });
+
+    test('it should only run the FIELD validadtion type when no type is specified', async () => {
+      const validatorFn = jest.fn(() => undefined);
+      const TestForm = getTestForm({
+        validations: [
+          {
+            validator: validatorFn,
+            type: VALIDATION_TYPES.ARRAY_ITEM,
+          },
+        ],
+      });
+
+      registerTestBed(TestForm)();
+
+      act(() => {
+        // This should **not** call our validator as it is of type ARRAY_ITEM
+        // and here, as we don't specify the validation type, we validate the default "FIELD" type.
+        fieldHook!.validate({
+          value: 'foo',
+          validationType: undefined, // Although not necessary adding it to be explicit
+        });
+      });
+
+      expect(validatorFn).toBeCalledTimes(0);
     });
   });
 });

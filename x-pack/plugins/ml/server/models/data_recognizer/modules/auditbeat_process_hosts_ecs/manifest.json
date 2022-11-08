@@ -13,9 +13,10 @@
       "must": {
         "exists": { "field": "auditd.data.syscall" }
       },
-      "must_not": {
-        "exists": { "field": "container.runtime" }
-      }
+      "must_not": [
+        { "exists": { "field": "container.runtime" } },
+        { "terms": { "_tier": [ "data_frozen", "data_cold" ] } }
+      ]
     }
   },
   "jobs": [

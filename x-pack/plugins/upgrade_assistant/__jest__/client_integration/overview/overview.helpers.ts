@@ -6,11 +6,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { Overview } from '../../../public/application/components/overview';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
+import { HttpSetup } from 'src/core/public';
+import { Overview } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`/overview`],
     componentRoutePath: '/overview',
@@ -26,36 +27,6 @@ const createActions = (testBed: TestBed) => {
   /**
    * User Actions
    */
-
-  const clickDeprecationToggle = async () => {
-    const { find, component } = testBed;
-
-    await act(async () => {
-      find('deprecationLoggingToggle').simulate('click');
-    });
-
-    component.update();
-  };
-
-  const clickRetryButton = async () => {
-    const { find, component } = testBed;
-
-    await act(async () => {
-      find('retryButton').simulate('click');
-    });
-
-    component.update();
-  };
-
-  const clickResetButton = async () => {
-    const { find, component } = testBed;
-
-    await act(async () => {
-      find('resetLastStoredDate').simulate('click');
-    });
-
-    component.update();
-  };
 
   const clickViewSystemIndicesState = async () => {
     const { find, component } = testBed;
@@ -78,18 +49,19 @@ const createActions = (testBed: TestBed) => {
   };
 
   return {
-    clickDeprecationToggle,
-    clickRetryButton,
-    clickResetButton,
     clickViewSystemIndicesState,
     clickRetrySystemIndicesButton,
   };
 };
 
 export const setupOverviewPage = async (
+  httpSetup: HttpSetup,
   overrides?: Record<string, unknown>
 ): Promise<OverviewTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(Overview, overrides), testBedConfig);
+  const initTestBed = registerTestBed(
+    WithAppDependencies(Overview, httpSetup, overrides),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

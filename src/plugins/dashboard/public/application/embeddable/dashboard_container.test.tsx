@@ -43,11 +43,13 @@ import { getStubPluginServices } from '../../../../presentation_util/public';
 const presentationUtil = getStubPluginServices();
 
 const options: DashboardContainerServices = {
+  // TODO: clean up use of any
   application: {} as any,
   embeddable: {} as any,
   notifications: {} as any,
   overlays: {} as any,
   inspector: {} as any,
+  screenshotMode: {} as any,
   SavedObjectFinder: () => null,
   ExitFullScreenButton: () => null,
   uiActions: {} as any,

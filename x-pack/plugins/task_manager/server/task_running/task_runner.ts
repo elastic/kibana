@@ -13,7 +13,6 @@
 
 import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
-import { performance } from 'perf_hooks';
 import { identity, defaults, flow } from 'lodash';
 import {
   Logger,
@@ -38,7 +37,7 @@ import {
   TaskMarkRunning,
   asTaskRunEvent,
   asTaskMarkRunningEvent,
-  startTaskTimer,
+  startTaskTimerWithEventLoopMonitoring,
   TaskTiming,
   TaskPersistence,
 } from '../task_events';
@@ -56,9 +55,14 @@ import {
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError } from './errors';
+import type { EventLoopDelayConfig } from '../config';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
+
+export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
+export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
+export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -98,6 +102,7 @@ type Opts = {
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
+  eventLoopDelayConfig: EventLoopDelayConfig;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -143,6 +148,7 @@ export class TaskManagerRunner implements TaskRunner {
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
   private readonly executionContext: ExecutionContextStart;
+  private eventLoopDelayConfig: EventLoopDelayConfig;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -164,6 +170,7 @@ export class TaskManagerRunner implements TaskRunner {
     defaultMaxAttempts,
     onTaskEvent = identity,
     executionContext,
+    eventLoopDelayConfig,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -174,6 +181,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
+    this.eventLoopDelayConfig = eventLoopDelayConfig;
   }
 
   /**
@@ -257,7 +265,7 @@ export class TaskManagerRunner implements TaskRunner {
     }
     this.logger.debug(`Running task ${this}`);
 
-    const apmTrans = apm.startTransaction(this.taskType, 'taskManager run', {
+    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
 
@@ -265,7 +273,7 @@ export class TaskManagerRunner implements TaskRunner {
       taskInstance: this.instance.task,
     });
 
-    const stopTaskTimer = startTaskTimer();
+    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
 
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
@@ -313,9 +321,12 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
-    performance.mark('markTaskAsRunning_start');
 
-    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE
+    );
+    apmTrans?.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {
@@ -372,12 +383,10 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       if (apmTrans) apmTrans.end('success');
-      performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance.task)));
       return true;
     } catch (error) {
       if (apmTrans) apmTrans.end('failure');
-      performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
@@ -575,6 +584,18 @@ export class TaskManagerRunner implements TaskRunner {
         );
       }
     );
+
+    const { eventLoopBlockMs = 0 } = taskTiming;
+    const taskLabel = `${this.taskType} ${this.instance.task.id}`;
+    if (eventLoopBlockMs > this.eventLoopDelayConfig.warn_threshold) {
+      this.logger.warn(
+        `event loop blocked for at least ${eventLoopBlockMs} ms while running task ${taskLabel}`,
+        {
+          tags: [this.taskType, taskLabel, 'event-loop-blocked'],
+        }
+      );
+    }
+
     return result;
   }
 
@@ -615,15 +636,6 @@ function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance 
 
 function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
   return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
-}
-
-function performanceStopMarkingTaskAsRunning() {
-  performance.mark('markTaskAsRunning_stop');
-  performance.measure(
-    'taskRunner.markTaskAsRunning',
-    'markTaskAsRunning_start',
-    'markTaskAsRunning_stop'
-  );
 }
 
 // A type that extracts the Instance type out of TaskRunningStage

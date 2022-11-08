@@ -41,7 +41,7 @@ describe('annotation_service', () => {
 
       const annotationMockId = 'mockId';
       const deleteParamsMock: DeleteParams = {
-        index: '.ml-annotations-6',
+        index: '.ml-annotations-000001',
         id: annotationMockId,
         refresh: 'wait_for',
       };

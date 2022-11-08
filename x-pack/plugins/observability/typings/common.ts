@@ -23,6 +23,6 @@ export type PromiseReturnType<Func> = Func extends (...args: any[]) => Promise<i
   ? Value
   : Func;
 
-export { Coordinates } from '../public/typings/fetch_overview_data/';
+export type { Coordinates } from '../public/typings/fetch_overview_data/';
 
 export type InspectResponse = Request[];

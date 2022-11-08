@@ -28,6 +28,7 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowML: false,
       allowLegacyAuditLogging: false,
     });
   });
@@ -51,6 +52,7 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowML: false,
       allowLegacyAuditLogging: false,
     });
   });
@@ -75,6 +77,7 @@ describe('license features', function () {
             "allowAuditLogging": false,
             "allowLegacyAuditLogging": false,
             "allowLogin": false,
+            "allowML": false,
             "allowRbac": false,
             "allowRoleDocumentLevelSecurity": false,
             "allowRoleFieldLevelSecurity": false,
@@ -97,6 +100,7 @@ describe('license features', function () {
             "allowAuditLogging": true,
             "allowLegacyAuditLogging": true,
             "allowLogin": true,
+            "allowML": true,
             "allowRbac": true,
             "allowRoleDocumentLevelSecurity": true,
             "allowRoleFieldLevelSecurity": true,
@@ -134,10 +138,12 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowML: false,
       allowLegacyAuditLogging: false,
     });
-    expect(getFeatureSpy).toHaveBeenCalledTimes(1);
+    expect(getFeatureSpy).toHaveBeenCalledTimes(2);
     expect(getFeatureSpy).toHaveBeenCalledWith('security');
+    expect(getFeatureSpy).toHaveBeenCalledWith('ml');
   });
 
   it('should not show login page or other security elements if security is disabled in Elasticsearch.', () => {
@@ -160,6 +166,7 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowML: false,
       allowLegacyAuditLogging: false,
     });
   });
@@ -185,6 +192,7 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowML: false,
       allowLegacyAuditLogging: true,
     });
   });
@@ -210,6 +218,7 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
+      allowML: false,
       allowLegacyAuditLogging: true,
     });
   });
@@ -217,7 +226,10 @@ describe('license features', function () {
   it('should allow to login, allow RBAC, role mappings, access agreement, sub-feature privileges, and DLS if license >= platinum', () => {
     const mockRawLicense = licenseMock.createLicense({
       license: { mode: 'platinum', type: 'platinum' },
-      features: { security: { isEnabled: true, isAvailable: true } },
+      features: {
+        security: { isEnabled: true, isAvailable: true },
+        ml: { isEnabled: true, isAvailable: true },
+      },
     });
 
     const serviceSetup = new SecurityLicenseService().setup({
@@ -235,6 +247,7 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
+      allowML: true,
       allowLegacyAuditLogging: true,
     });
   });

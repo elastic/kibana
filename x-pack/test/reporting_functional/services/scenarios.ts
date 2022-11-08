@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
 import { createScenarios as createAPIScenarios } from '../../reporting_api_integration/services/scenarios';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export function createScenarios(
   context: Pick<FtrProviderContext, 'getPageObjects' | 'getService'>

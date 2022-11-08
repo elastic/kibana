@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { SourceRow, ISourceRow } from './source_row';
+export type { ISourceRow } from './source_row';
+export { SourceRow } from './source_row';

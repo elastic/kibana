@@ -8,18 +8,18 @@
 import { PluginInitializerContext } from 'src/core/public';
 import { DashboardEnhancedPlugin } from './plugin';
 
-export {
+export type {
   SetupContract as DashboardEnhancedSetupContract,
   SetupDependencies as DashboardEnhancedSetupDependencies,
   StartContract as DashboardEnhancedStartContract,
   StartDependencies as DashboardEnhancedStartDependencies,
 } from './plugin';
 
-export {
-  AbstractDashboardDrilldown as DashboardEnhancedAbstractDashboardDrilldown,
+export type {
   AbstractDashboardDrilldownConfig as DashboardEnhancedAbstractDashboardDrilldownConfig,
   AbstractDashboardDrilldownParams as DashboardEnhancedAbstractDashboardDrilldownParams,
 } from './services/drilldowns/abstract_dashboard_drilldown';
+export { AbstractDashboardDrilldown as DashboardEnhancedAbstractDashboardDrilldown } from './services/drilldowns/abstract_dashboard_drilldown';
 
 export function plugin(context: PluginInitializerContext) {
   return new DashboardEnhancedPlugin(context);

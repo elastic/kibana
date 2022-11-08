@@ -16,6 +16,6 @@ constructor(parentHistory: History, basePath: string);
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  parentHistory | <code>History</code> |  |
-|  basePath | <code>string</code> |  |
+|  parentHistory | History |  |
+|  basePath | string |  |
 

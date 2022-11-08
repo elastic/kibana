@@ -62,6 +62,11 @@ const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
     padding-bottom: ${(props) => props.theme.eui.paddingSizes.m};
   }
+
+  // compensating for EuiBottomBar hiding the content
+  @media (max-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    margin-bottom: 100px;
+  }
 `;
 
 const CustomEuiBottomBar = styled(EuiBottomBar)`
@@ -140,6 +145,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     inputs: [],
   });
 
+  const [wasNewAgentPolicyCreated, setWasNewAgentPolicyCreated] = useState<boolean>(false);
+
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
@@ -165,17 +172,17 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       if (updatedAgentPolicy) {
         setAgentPolicy(updatedAgentPolicy);
         if (packageInfo) {
-          setFormState('VALID');
+          setHasAgentPolicyError(false);
         }
       } else {
-        setFormState('INVALID');
+        setHasAgentPolicyError(true);
         setAgentPolicy(undefined);
       }
 
       // eslint-disable-next-line no-console
       console.debug('Agent policy updated', updatedAgentPolicy);
     },
-    [packageInfo, setAgentPolicy, setFormState]
+    [packageInfo, setAgentPolicy]
   );
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
@@ -218,6 +225,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       const hasAgentPolicy = newPackagePolicy.policy_id && newPackagePolicy.policy_id !== '';
       if (hasPackage && hasAgentPolicy && !hasValidationErrors) {
         setFormState('VALID');
+      } else {
+        setFormState('INVALID');
       }
     },
     [packagePolicy, updatePackagePolicyValidation]
@@ -269,6 +278,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   }, [packagePolicy, agentCount]);
   const doOnSaveNavigation = useRef<boolean>(true);
 
+  const handleInlineAgentPolicyCreate = useCallback(() => {
+    setWasNewAgentPolicyCreated(true);
+  }, []);
+
   // Detect if user left page
   useEffect(() => {
     return () => {
@@ -288,12 +301,18 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         return;
       }
 
+      const integrationPoliciesPath = getPath('integration_details_policies', {
+        pkgkey: params.pkgkey,
+      });
+
       if (routeState?.onSaveNavigateTo && policy) {
         const [appId, options] = routeState.onSaveNavigateTo;
 
         if (options?.path) {
           const pathWithQueryString = appendOnSaveQueryParamsToPath({
-            path: options.path,
+            // In cases where we created a new agent policy inline, we need to override the initial `path`
+            // value and navigate to the newly-created agent policy instead
+            path: wasNewAgentPolicyCreated ? integrationPoliciesPath : options.path,
             policy,
             mappingOptions: routeState.onSaveQueryParams,
             paramsToApply,
@@ -303,10 +322,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           handleNavigateTo(routeState.onSaveNavigateTo);
         }
       } else {
-        history.push(getPath('policy_details', { policyId: agentPolicy!.id }));
+        history.push(integrationPoliciesPath);
       }
     },
-    [agentPolicy, getPath, handleNavigateTo, history, routeState]
+    [getPath, params.pkgkey, routeState, wasNewAgentPolicyCreated, handleNavigateTo, history]
   );
 
   const onSubmit = useCallback(async () => {
@@ -393,9 +412,16 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         agentPolicy={agentPolicy}
         updateAgentPolicy={updateAgentPolicy}
         setHasAgentPolicyError={setHasAgentPolicyError}
+        onNewAgentPolicyCreate={handleInlineAgentPolicyCreate}
       />
     ),
-    [packageInfo, queryParamsPolicyId, agentPolicy, updateAgentPolicy]
+    [
+      packageInfo,
+      queryParamsPolicyId,
+      agentPolicy,
+      updateAgentPolicy,
+      handleInlineAgentPolicyCreate,
+    ]
   );
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
@@ -553,7 +579,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   >
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.saveButton"
-                      defaultMessage="Save integration"
+                      defaultMessage="Save and continue"
                     />
                   </EuiButton>
                 </EuiFlexItem>

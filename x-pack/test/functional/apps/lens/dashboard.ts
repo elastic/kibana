@@ -69,7 +69,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
-      await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+      await retry.try(async () => {
+        await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        await testSubjects.existOrFail('applyFiltersPopoverButton', { timeout: 2500 });
+      });
 
       await retry.try(async () => {
         await testSubjects.click('applyFiltersPopoverButton');

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { transformElasticsearchRoleToRole, ElasticsearchRole } from './elasticsearch_role';
+export type { ElasticsearchRole } from './elasticsearch_role';
+export { transformElasticsearchRoleToRole } from './elasticsearch_role';

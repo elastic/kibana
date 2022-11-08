@@ -29,6 +29,18 @@ export interface HasPrivilegesResponse {
   };
 }
 
+/**
+ * Options to influce the privilege checks.
+ */
+export interface CheckPrivilegesOptions {
+  /**
+   * Whether or not the `login` action should be required (default: true).
+   * Setting this to false is not advised except for special circumstances, when you do not require
+   * the request to belong to a user capable of logging into Kibana.
+   */
+  requireLoginAction?: boolean;
+}
+
 export interface CheckPrivilegesResponse {
   hasAllRequested: boolean;
   username: string;
@@ -59,12 +71,20 @@ export interface CheckPrivilegesResponse {
 export type CheckPrivilegesWithRequest = (request: KibanaRequest) => CheckPrivileges;
 
 export interface CheckPrivileges {
-  atSpace(spaceId: string, privileges: CheckPrivilegesPayload): Promise<CheckPrivilegesResponse>;
+  atSpace(
+    spaceId: string,
+    privileges: CheckPrivilegesPayload,
+    options?: CheckPrivilegesOptions
+  ): Promise<CheckPrivilegesResponse>;
   atSpaces(
     spaceIds: string[],
-    privileges: CheckPrivilegesPayload
+    privileges: CheckPrivilegesPayload,
+    options?: CheckPrivilegesOptions
   ): Promise<CheckPrivilegesResponse>;
-  globally(privileges: CheckPrivilegesPayload): Promise<CheckPrivilegesResponse>;
+  globally(
+    privileges: CheckPrivilegesPayload,
+    options?: CheckPrivilegesOptions
+  ): Promise<CheckPrivilegesResponse>;
 }
 
 export interface CheckPrivilegesPayload {

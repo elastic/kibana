@@ -108,7 +108,7 @@ export const IndexPatternSelect = ({
         defaultIndexPatternHelpText + (!useKibanaIndices ? queryAllIndexesHelpText : '')
       }
       labelAppend={
-        fetchedIndex.indexPatternString && !fetchedIndex.indexPattern ? (
+        !useKibanaIndices && fetchedIndex.indexPatternString && !fetchedIndex.indexPattern ? (
           <EuiLink onClick={navigateToCreateIndexPatternPage}>
             <EuiText size="xs">
               <FormattedMessage

@@ -16,6 +16,6 @@ export interface OnPreResponseToolkit
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [next](./kibana-plugin-core-server.onpreresponsetoolkit.next.md) | <code>(responseExtensions?: OnPreResponseExtensions) =&gt; OnPreResponseResult</code> | To pass request to the next handler |
-|  [render](./kibana-plugin-core-server.onpreresponsetoolkit.render.md) | <code>(responseRender: OnPreResponseRender) =&gt; OnPreResponseResult</code> | To override the response with a different body |
+|  [next](./kibana-plugin-core-server.onpreresponsetoolkit.next.md) | (responseExtensions?: OnPreResponseExtensions) =&gt; OnPreResponseResult | To pass request to the next handler |
+|  [render](./kibana-plugin-core-server.onpreresponsetoolkit.render.md) | (responseRender: OnPreResponseRender) =&gt; OnPreResponseResult | To override the response with a different body |
 

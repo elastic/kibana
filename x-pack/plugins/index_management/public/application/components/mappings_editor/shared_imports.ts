@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-export {
-  FIELD_TYPES,
+export type {
   FieldConfig,
   FieldHook,
-  Form,
-  FormDataProvider,
   FormHook,
   FormSchema,
-  getUseField,
   OnFormUpdateArg,
   SerializerFunc,
+  ArrayItem,
+  ValidationFunc,
+  ValidationFuncArg,
+} from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+export {
+  FIELD_TYPES,
+  Form,
+  FormDataProvider,
+  getUseField,
   UseField,
   UseArray,
-  ArrayItem,
   useForm,
   useFormContext,
   UseMultiFields,
   VALIDATION_TYPES,
-  ValidationFunc,
-  ValidationFuncArg,
 } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
@@ -47,20 +49,17 @@ export {
   fieldValidators,
 } from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
 
-export {
-  JsonEditor,
-  OnJsonEditorUpdateHandler,
-  GlobalFlyout,
-} from '../../../../../../../src/plugins/es_ui_shared/public';
+export type { OnJsonEditorUpdateHandler } from '../../../../../../../src/plugins/es_ui_shared/public';
+export { JsonEditor, GlobalFlyout } from '../../../../../../../src/plugins/es_ui_shared/public';
 
 export { documentationService } from '../../services/documentation';
 
-export {
+export type {
   RuntimeField,
-  RuntimeFieldEditorFlyoutContent,
   RuntimeFieldEditorFlyoutContentProps,
 } from '../../../../../runtime_fields/public';
+export { RuntimeFieldEditorFlyoutContent } from '../../../../../runtime_fields/public';
 
 export { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 
-export { DocLinksStart } from '../../../../../../../src/core/public';
+export type { DocLinksStart } from '../../../../../../../src/core/public';

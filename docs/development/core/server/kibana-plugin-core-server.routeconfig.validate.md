@@ -57,6 +57,5 @@ router.get({
   console.log(req.params.id); // value
   myValidationLibrary.validate({ params: req.params });
 });
-
 ```
 

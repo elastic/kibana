@@ -16,5 +16,5 @@ export interface DeprecationsClient
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [getAllDeprecations](./kibana-plugin-core-server.deprecationsclient.getalldeprecations.md) | <code>() =&gt; Promise&lt;DomainDeprecationDetails[]&gt;</code> |  |
+|  [getAllDeprecations](./kibana-plugin-core-server.deprecationsclient.getalldeprecations.md) | () =&gt; Promise&lt;DomainDeprecationDetails\[\]&gt; |  |
 

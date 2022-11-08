@@ -29,7 +29,7 @@ export const extendSearchParamsWithRuntimeFields = async (
     let runtimeMappings = requestParams.body?.runtime_mappings;
 
     if (!runtimeMappings) {
-      const indexPattern = (await indexPatterns.find(indexPatternString)).find(
+      const indexPattern = (await indexPatterns.find(indexPatternString, 1)).find(
         (index) => index.title === indexPatternString
       );
       runtimeMappings = indexPattern?.getComputedFields().runtimeFields;

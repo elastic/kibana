@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import path from 'path';
 import globby from 'globby';
 
 import { getFileHash, write, GlobalTask } from '../lib';
@@ -21,7 +22,10 @@ export const WriteShaSums: GlobalTask = {
     });
 
     for (const artifact of artifacts) {
-      await write(`${artifact}.sha1.txt`, await getFileHash(artifact, 'sha1'));
+      await write(
+        `${artifact}.sha512.txt`,
+        `${await getFileHash(artifact, 'sha512')} ${path.basename(artifact)}`
+      );
     }
   },
 };

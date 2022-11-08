@@ -3,37 +3,50 @@
     "dashboard": {
       "properties": {
         "panels": {
-          "type": "long"
-        },
-        "panelsByValue": {
-          "type": "long"
-        },
-        "lensByValue": {
           "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics for Lens visualizations, which are added to dashboard by \"value\"."
-              }
-            }
-          }
-        },
-        "visualizationByValue": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics for visualizations, which are added to dashboard by \"value\"."
-              }
-            }
-          }
-        },
-        "embeddable": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
+            "total": {
+              "type": "long"
+            },
+            "by_reference": {
+              "type": "long"
+            },
+            "by_value": {
+              "type": "long"
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_reference": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by reference\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_value": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by value\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "details": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -6248,13 +6261,13 @@
                       "docsCount": {
                         "type": "long",
                         "_meta": {
-                          "description": "The number of documents in the index, including hidden nested documents."
+                          "description": "The number of lucene documents in the index, including hidden nested documents."
                         }
                       },
                       "docsDeleted": {
                         "type": "long",
                         "_meta": {
-                          "description": "The number of deleted documents in the index, including hidden nested documents."
+                          "description": "The number of deleted lucene documents in the index, including hidden nested documents."
                         }
                       },
                       "alias": {
@@ -6273,6 +6286,12 @@
                         "type": "long",
                         "_meta": {
                           "description": "The size in bytes of the index, for primaries and replicas."
+                        }
+                      },
+                      "savedObjectsDocsCount": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "The number of saved objects documents in the index."
                         }
                       }
                     }
@@ -7075,19 +7094,19 @@
               "min": {
                 "type": "long",
                 "_meta": {
-                  "description": "The minimum recorded event loop delay."
+                  "description": "The minimum recorded event loop delay in ms."
                 }
               },
               "max": {
                 "type": "long",
                 "_meta": {
-                  "description": "The maximum recorded event loop delay."
+                  "description": "The maximum recorded event loop delay in ms."
                 }
               },
               "mean": {
                 "type": "long",
                 "_meta": {
-                  "description": "The mean of the recorded event loop delays."
+                  "description": "The mean of the recorded event loop delays in ms."
                 }
               },
               "exceeds": {
@@ -7099,7 +7118,7 @@
               "stddev": {
                 "type": "long",
                 "_meta": {
-                  "description": "The standard deviation of the recorded event loop delays."
+                  "description": "The standard deviation of the recorded event loop delays  in ms."
                 }
               },
               "percentiles": {
@@ -7107,25 +7126,25 @@
                   "50": {
                     "type": "long",
                     "_meta": {
-                      "description": "The 50th accumulated percentile distribution"
+                      "description": "The 50th accumulated percentile distribution in ms"
                     }
                   },
                   "75": {
                     "type": "long",
                     "_meta": {
-                      "description": "The 75th accumulated percentile distribution"
+                      "description": "The 75th accumulated percentile distribution in ms"
                     }
                   },
                   "95": {
                     "type": "long",
                     "_meta": {
-                      "description": "The 95th accumulated percentile distribution"
+                      "description": "The 95th accumulated percentile distribution in ms"
                     }
                   },
                   "99": {
                     "type": "long",
                     "_meta": {
-                      "description": "The 99th accumulated percentile distribution"
+                      "description": "The 99th accumulated percentile distribution in ms"
                     }
                   }
                 }
@@ -7577,6 +7596,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "metrics:allowCheckingForFailedShards": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "query:allowLeadingWildcards": {
           "type": "boolean",
           "_meta": {
@@ -7780,6 +7805,12 @@
         },
         "observability:maxSuggestions": {
           "type": "integer",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableComparisonByDefault": {
+          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }

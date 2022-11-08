@@ -7,7 +7,7 @@
  */
 
 import { PromiseType } from 'utility-types';
-export { $Values, Assign, Class, Optional, Required } from 'utility-types';
+export type { $Values, Assign, Class, Optional, Required } from 'utility-types';
 
 export type {
   JsonArray,

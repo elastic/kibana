@@ -8,6 +8,7 @@
     "data",
     "embeddable",
     "inspector",
+    "fieldFormats",
     "kibanaLegacy",
     "urlForwarding",
     "navigation",
@@ -16,7 +17,7 @@
     "indexPatternFieldEditor"
   ],
   "optionalPlugins": ["home", "share", "usageCollection", "spaces"],
-  "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "fieldFormats", "dataViews"],
+  "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "dataViews"],
   "extraPublicDirs": ["common"],
   "owner": {
     "name": "Data Discovery",

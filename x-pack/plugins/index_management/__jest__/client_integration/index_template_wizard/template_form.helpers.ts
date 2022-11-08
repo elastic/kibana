@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { TestBed, SetupFunc, UnwrapPromise } from '@kbn/test/jest';
 import { TemplateDeserialized } from '../../../common';
 
-interface MappingField {
+export interface MappingField {
   name: string;
   type: string;
 }
@@ -339,4 +339,6 @@ export type TestSubjects =
   | 'versionField'
   | 'aliasesEditor'
   | 'settingsEditor'
-  | 'versionField.input';
+  | 'versionField.input'
+  | 'mappingsEditor.formTab'
+  | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle';

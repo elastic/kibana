@@ -221,6 +221,10 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.getVisibleText('discoverQueryHits');
   }
 
+  public async getHitCountInt() {
+    return parseInt(await this.getHitCount(), 10);
+  }
+
   public async getDocHeader() {
     const table = await this.getDocTable();
     const docHeader = await table.getHeaders();
@@ -312,6 +316,13 @@ export class DiscoverPageObject extends FtrService {
 
   public async toggleSidebarCollapse() {
     return await this.testSubjects.click('collapseSideBarButton');
+  }
+
+  public async closeSidebar() {
+    await this.retry.tryForTime(2 * 1000, async () => {
+      await this.toggleSidebarCollapse();
+      await this.testSubjects.missingOrFail('discover-sidebar');
+    });
   }
 
   public async getAllFieldNames() {

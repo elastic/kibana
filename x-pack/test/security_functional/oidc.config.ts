@@ -42,7 +42,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       from: 'snapshot',
       serverArgs: [
         'xpack.security.authc.token.enabled=true',
-        'xpack.security.authc.realms.oidc.oidc1.order=0',
+        'xpack.security.authc.realms.native.native1.order=0',
+        'xpack.security.authc.realms.oidc.oidc1.order=1',
         `xpack.security.authc.realms.oidc.oidc1.rp.client_id=0oa8sqpov3TxMWJOt356`,
         `xpack.security.authc.realms.oidc.oidc1.rp.client_secret=0oa8sqpov3TxMWJOt356`,
         `xpack.security.authc.realms.oidc.oidc1.rp.response_type=code`,

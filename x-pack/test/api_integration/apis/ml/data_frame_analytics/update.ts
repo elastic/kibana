@@ -99,12 +99,12 @@ export default ({ getService }: FtrProviderContext) => {
           max_num_threads: 2,
         };
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(200);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).not.to.be(undefined);
 
@@ -123,12 +123,12 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Edited description for job 1',
         };
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(200);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).not.to.be(undefined);
 
@@ -147,12 +147,12 @@ export default ({ getService }: FtrProviderContext) => {
           allow_lazy_start: true,
         };
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(200);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).not.to.be(undefined);
 
@@ -171,12 +171,12 @@ export default ({ getService }: FtrProviderContext) => {
           model_memory_limit: '61mb',
         };
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(200);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).not.to.be(undefined);
 
@@ -195,12 +195,12 @@ export default ({ getService }: FtrProviderContext) => {
           max_num_threads: 2,
         };
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(200);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).not.to.be(undefined);
 
@@ -218,12 +218,12 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Unauthorized',
         };
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(403);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
@@ -239,12 +239,12 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'View only',
         };
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(403);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
@@ -261,12 +261,12 @@ export default ({ getService }: FtrProviderContext) => {
         const id = `${jobId}_invalid`;
         const message = `No known job with id '${id}'`;
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${id}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(404);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(404, status, body);
 
         expect(body.error).to.eql('Not Found');
         expect(body.message).to.eql(message);

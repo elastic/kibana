@@ -12,6 +12,7 @@ import { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import * as fixtures from '../../test/fixtures';
+import { API_BASE_PATH } from '../../common';
 
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
@@ -36,12 +37,7 @@ const repository = fixtures.getRepository({ name: `a${getRandomString()}`, type:
 
 describe('<PolicyAdd />', () => {
   let testBed: PolicyFormTestBed;
-
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   describe('on component mount', () => {
     beforeEach(async () => {
@@ -51,7 +47,7 @@ describe('<PolicyAdd />', () => {
         dataStreams: ['my_data_stream', 'my_other_data_stream'],
       });
 
-      testBed = await setup();
+      testBed = await setup(httpSetup);
       await nextTick();
       testBed.component.update();
     });
@@ -241,36 +237,37 @@ describe('<PolicyAdd />', () => {
           await nextTick();
         });
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
-        const expected = {
-          config: {},
-          isManagedPolicy: false,
-          name: POLICY_NAME,
-          repository: repository.name,
-          retention: {
-            expireAfterUnit: 'd', // default
-            expireAfterValue: Number(EXPIRE_AFTER_VALUE),
-            maxCount: Number(MAX_COUNT),
-            minCount: Number(MIN_COUNT),
-          },
-          schedule: DEFAULT_POLICY_SCHEDULE,
-          snapshotName: SNAPSHOT_NAME,
-        };
-
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}policies`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: POLICY_NAME,
+              snapshotName: SNAPSHOT_NAME,
+              schedule: DEFAULT_POLICY_SCHEDULE,
+              repository: repository.name,
+              config: {},
+              retention: {
+                expireAfterValue: Number(EXPIRE_AFTER_VALUE),
+                expireAfterUnit: 'd', // default
+                maxCount: Number(MAX_COUNT),
+                minCount: Number(MIN_COUNT),
+              },
+              isManagedPolicy: false,
+            }),
+          })
+        );
       });
 
       it('should surface the API errors from the put HTTP request', async () => {
         const { component, actions, find, exists } = testBed;
 
         const error = {
-          status: 409,
+          statusCode: 409,
           error: 'Conflict',
           message: `There is already a policy with name '${POLICY_NAME}'`,
         };
 
-        httpRequestsMockHelpers.setAddPolicyResponse(undefined, { body: error });
+        httpRequestsMockHelpers.setAddPolicyResponse(undefined, error);
 
         await act(async () => {
           actions.clickSubmitButton();

@@ -10,7 +10,7 @@ import axios from 'axios';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { Logger } from '../../../../../../src/core/server';
 import { actionsConfigMock } from '../../actions_config.mock';
-import * as utils from '../lib/axios_utils';
+import { request, createAxiosResponse } from '../lib/axios_utils';
 import { createExternalService } from './service';
 import { mappings } from './mocks';
 import { ExternalService } from './types';
@@ -27,7 +27,7 @@ jest.mock('../lib/axios_utils', () => {
 });
 
 axios.create = jest.fn(() => axios);
-const requestMock = utils.request as jest.Mock;
+const requestMock = request as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
 
 describe('Swimlane Service', () => {
@@ -152,9 +152,7 @@ describe('Swimlane Service', () => {
     };
 
     test('it creates a record correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data,
-      }));
+      requestMock.mockImplementation(() => createAxiosResponse({ data }));
 
       const res = await service.createRecord({
         incident,
@@ -169,9 +167,7 @@ describe('Swimlane Service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data,
-      }));
+      requestMock.mockImplementation(() => createAxiosResponse({ data }));
 
       await service.createRecord({
         incident,
@@ -207,6 +203,24 @@ describe('Swimlane Service', () => {
         `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Status: 500. Error: An error has occurred. Reason: unknown`
       );
     });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.createRecord({ incident })).rejects.toThrow(
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Status: 500. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown`
+      );
+    });
+
+    test('it should throw if the required attributes are not there', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
+
+      await expect(service.createRecord({ incident })).rejects.toThrow(
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Status: 500. Error: Response is missing at least one of the expected fields: id,name,createdDate. Reason: unknown`
+      );
+    });
   });
 
   describe('updateRecord', () => {
@@ -218,9 +232,7 @@ describe('Swimlane Service', () => {
     const incidentId = '123';
 
     test('it updates a record correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data,
-      }));
+      requestMock.mockImplementation(() => createAxiosResponse({ data }));
 
       const res = await service.updateRecord({
         incident,
@@ -236,9 +248,7 @@ describe('Swimlane Service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data,
-      }));
+      requestMock.mockImplementation(() => createAxiosResponse({ data }));
 
       await service.updateRecord({
         incident,
@@ -276,6 +286,24 @@ describe('Swimlane Service', () => {
         `[Action][Swimlane]: Unable to update record in application with id ${config.appId}. Status: 500. Error: An error has occurred. Reason: unknown`
       );
     });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.updateRecord({ incident, incidentId })).rejects.toThrow(
+        `[Action][Swimlane]: Unable to update record in application with id ${config.appId}. Status: 500. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown`
+      );
+    });
+
+    test('it should throw if the required attributes are not there', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
+
+      await expect(service.updateRecord({ incident, incidentId })).rejects.toThrow(
+        `[Action][Swimlane]: Unable to update record in application with id ${config.appId}. Status: 500. Error: Response is missing at least one of the expected fields: id,name,modifiedDate. Reason: unknown`
+      );
+    });
   });
 
   describe('createComment', () => {
@@ -289,9 +317,7 @@ describe('Swimlane Service', () => {
     const createdDate = '2021-06-01T17:29:51.092Z';
 
     test('it updates a record correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data,
-      }));
+      requestMock.mockImplementation(() => createAxiosResponse({ data }));
 
       const res = await service.createComment({
         comment,
@@ -306,9 +332,7 @@ describe('Swimlane Service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data,
-      }));
+      requestMock.mockImplementation(() => createAxiosResponse({ data }));
 
       await service.createComment({
         comment,

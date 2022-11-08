@@ -64,7 +64,7 @@ const myPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginAp
 
 For more information on where to locate new platform `data` services,
 please refer to the table of
-https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
+https://github.com/elastic/kibana/blob/main/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
 in `src/core/MIGRATION.md`.
 
 *via {kib-pull}60449[#60449]*
@@ -227,7 +227,7 @@ const trigger = {
 ==== Use log4j pattern syntax
 
 Logging output of the New platform plugins can use adjusted
-via https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[new config].
+via https://github.com/elastic/kibana/blob/main/src/core/server/logging/README.md[new config].
 
 *via {kib-pull}57433[#57433]*
 
@@ -385,14 +385,14 @@ const reactToUiComponent: (comp: React.ComponentType) => UiComponent;
 ==== Start consuming np logging config
 
 Provides experimental support of new logging format for **new platform plugins**.
-More about https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[the logging format].
+More about https://github.com/elastic/kibana/blob/main/src/core/server/logging/README.md[the logging format].
 
 *via {kib-pull}56480[#56480]*
 
 [discrete]
 ==== [State Management] State syncing utils docs
 
-Refer to https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync[these docs]
+Refer to https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync[these docs]
 on state syncing utils.
 
 *via {kib-pull}56479[#56479]*
@@ -508,8 +508,8 @@ import { BUCKET_TYPES, METRIC_TYPES } from 'src/plugins/data/public';
 
 The above examples are not comprehensive, but represent some of the more
 common uses of `agg_types`. For more details, please refer to the interfaces
-in https://github.com/elastic/kibana/blob/master/src/plugins/data/public/types.ts#L50[the source code],
-as well as the data plugin's https://github.com/elastic/kibana/blob/master/src/plugins/data/public/index.ts#L282[`public/index` file].
+in https://github.com/elastic/kibana/blob/main/src/plugins/data/public/types.ts#L50[the source code],
+as well as the data plugin's https://github.com/elastic/kibana/blob/main/src/plugins/data/public/index.ts#L282[`public/index` file].
 
 
 *`ui/time_buckets`* https://github.com/elastic/kibana/pull/58805[#58805]

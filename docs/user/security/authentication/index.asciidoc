@@ -5,7 +5,7 @@
 <titleabbrev>Authentication</titleabbrev>
 ++++
 :keywords: administrator, concept, security, authentication
-:description: A list of the supported authentication mechanisms in {kib}. 
+:description: A list of the supported authentication mechanisms in {kib}.
 
 {kib} supports the following authentication mechanisms:
 
@@ -437,14 +437,14 @@ This type of authentication is usually useful for machine-to-machine interaction
 
 By default {kib} supports <<api-keys, `ApiKey`>> authentication scheme _and_ any scheme supported by the currently enabled authentication provider. For example, `Basic` authentication scheme is automatically supported when basic authentication provider is enabled, or `Bearer` scheme when any of the token based authentication providers is enabled (Token, SAML, OpenID Connect, PKI or Kerberos). But it's also possible to add support for any other authentication scheme in the `kibana.yml` configuration file, as follows:
 
-NOTE: Don't forget to explicitly specify default `apikey` scheme when you just want to add a new one to the list.
+NOTE: Don't forget to explicitly specify the default `apikey` and `bearer` schemes when you just want to add a new one to the list.
 
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.authc.http.schemes: [apikey, basic, something-custom]
+xpack.security.authc.http.schemes: [apikey, bearer, basic, something-custom]
 --------------------------------------------------------------------------------
 
-With this configuration, you can send requests to {kib} with the `Authorization` header using `ApiKey`, `Basic` or `Something-Custom` HTTP schemes (case insensitive). Under the hood, {kib} relays this header to {es}, then {es} authenticates the request using the credentials in the header.
+With this configuration, you can send requests to {kib} with the `Authorization` header using `ApiKey`, `Bearer`, `Basic` or `Something-Custom` HTTP schemes (case insensitive). Under the hood, {kib} relays this header to {es}, then {es} authenticates the request using the credentials in the header.
 
 [float]
 [[embedded-content-authentication]]
@@ -483,4 +483,4 @@ To make this iframe leverage anonymous access automatically, you will need to mo
 
 NOTE: `auth_provider_hint` query string parameter goes *before* the hash URL fragment.
 
-For more information on how to embed, refer to <<embedding, Embed {kib} content in a web page>>.
+For more information, refer to <<embed-code, Embed code>>.

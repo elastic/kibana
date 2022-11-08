@@ -20,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('maps security feature controls', () => {
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
     });
 
@@ -53,6 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_maps_all_role'),

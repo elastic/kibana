@@ -31,9 +31,9 @@ export type {
   RuleParamsAndRefs,
 } from './types';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
-export { PluginSetupContract, PluginStartContract } from './plugin';
-export { FindResult } from './rules_client';
-export { PublicAlertInstance as AlertInstance } from './alert_instance';
+export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { FindResult } from './rules_client';
+export type { PublicAlertInstance as AlertInstance } from './alert_instance';
 export { parseDuration } from './lib';
 export { getEsErrorMessage } from './lib/errors';
 export {
@@ -49,14 +49,16 @@ export const plugin = (initContext: PluginInitializerContext) => new AlertingPlu
 export const config: PluginConfigDescriptor<AlertsConfigType> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck'),
+    renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.interval',
-      'xpack.alerting.invalidateApiKeysTask.interval'
+      'xpack.alerting.invalidateApiKeysTask.interval',
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.removalDelay',
-      'xpack.alerting.invalidateApiKeysTask.removalDelay'
+      'xpack.alerting.invalidateApiKeysTask.removalDelay',
+      { level: 'warning' }
     ),
     (settings, fromPath, addDeprecation) => {
       const alerting = get(settings, fromPath);

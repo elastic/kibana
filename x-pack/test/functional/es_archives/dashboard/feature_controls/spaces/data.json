@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "index-pattern:logstash-*",
     "source": {
       "index-pattern": {
@@ -23,7 +23,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "config:6.0.0",
     "source": {
       "config": {
@@ -40,7 +40,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "custom_space:index-pattern:logstash-*",
     "source": {
       "namespace": "custom_space",
@@ -62,7 +62,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "custom_space:visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
       "namespace": "custom_space",
@@ -86,7 +86,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "custom_space:dashboard:i-exist",
     "source": {
       "namespace": "custom_space",
@@ -112,7 +112,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "custom_space:config:6.0.0",
     "source": {
       "namespace": "custom_space",

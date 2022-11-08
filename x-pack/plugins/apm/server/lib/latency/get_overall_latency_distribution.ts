@@ -14,8 +14,8 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getHistogramIntervalRequest,
   getHistogramRangeSteps,
-} from '../search_strategies/queries/query_histogram_range_steps';
-import { getTransactionDurationRangesRequest } from '../search_strategies/queries/query_ranges';
+} from '../correlations/queries/query_histogram_range_steps';
+import { getTransactionDurationRangesRequest } from '../correlations/queries/query_ranges';
 
 import { getPercentileThresholdValue } from './get_percentile_threshold_value';
 import type {
@@ -27,11 +27,9 @@ export async function getOverallLatencyDistribution(
   options: OverallLatencyDistributionOptions
 ) {
   return withApmSpan('get_overall_latency_distribution', async () => {
-    const overallLatencyDistribution: OverallLatencyDistributionResponse = {
-      log: [],
-    };
+    const overallLatencyDistribution: OverallLatencyDistributionResponse = {};
 
-    const { setup, ...rawParams } = options;
+    const { setup, termFilters, ...rawParams } = options;
     const { apmEventClient } = setup;
     const params = {
       // pass on an empty index because we're using only the body attribute
@@ -86,7 +84,11 @@ export async function getOverallLatencyDistribution(
 
     // #3: get histogram chart data
     const { body: transactionDurationRangesRequestBody } =
-      getTransactionDurationRangesRequest(params, histogramRangeSteps);
+      getTransactionDurationRangesRequest(
+        params,
+        histogramRangeSteps,
+        termFilters
+      );
 
     const transactionDurationRangesResponse = (await apmEventClient.search(
       'get_transaction_duration_ranges',

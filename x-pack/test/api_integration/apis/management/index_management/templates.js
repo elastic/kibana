@@ -25,7 +25,9 @@ export default function ({ getService }) {
     cleanUpTemplates,
   } = registerHelpers({ supertest });
 
-  describe('index templates', () => {
+  describe('index templates', function () {
+    this.onlyEsVersion('<=7');
+
     after(() => Promise.all([cleanUpEsResources(), cleanUpTemplates()]));
 
     describe('get all', () => {

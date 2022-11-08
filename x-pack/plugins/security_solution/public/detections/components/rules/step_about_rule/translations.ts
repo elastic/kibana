@@ -73,7 +73,7 @@ export const CRITICAL = i18n.translate(
 export const URL_FORMAT_INVALID = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.referencesUrlInvalidError',
   {
-    defaultMessage: 'Url is invalid format',
+    defaultMessage: 'URL is invalid format',
   }
 );
 

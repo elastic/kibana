@@ -34,5 +34,5 @@ export function createReindexWorker({
   security,
 }: CreateReindexWorker) {
   const esClient = elasticsearchService.client;
-  return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing, security);
+  return ReindexWorker.create(savedObjects, credentialStore, esClient, logger, licensing, security);
 }

@@ -41,10 +41,13 @@ interface EditUserParams {
 export const usersManagementApp = Object.freeze({
   id: 'users',
   create({ authc, getStartServices }: CreateParams) {
+    const title = i18n.translate('xpack.security.management.usersTitle', {
+      defaultMessage: 'Users',
+    });
     return {
       id: this.id,
       order: 10,
-      title: i18n.translate('xpack.security.management.usersTitle', { defaultMessage: 'Users' }),
+      title,
       async mount({ element, setBreadcrumbs, history }) {
         const [
           [coreStart],

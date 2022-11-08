@@ -8,28 +8,13 @@
 
 APM is available via the navigation sidebar in {Kib}.
 If you have not already installed and configured Elastic APM,
-the *Add data* page will get you started.
+follow the three steps on the *Add data* page to get started:
+
+. Start APM Server
+. Add APM agents
+. Load Kibana objects
 
 [role="screenshot"]
 image::apm/images/apm-setup.png[Installation instructions on the APM page in Kibana]
 
-[float]
-[[apm-configure-index-pattern]]
-=== Load the index pattern
-
-Index patterns tell {kib} which {es} indices you want to explore.
-An APM index pattern is necessary for certain features in the APM app, like the query bar.
-To set up the correct index pattern, on the *Add data* page, click *Load Kibana objects*.
-
-[role="screenshot"]
-image::apm/images/apm-index-pattern.png[Setup index pattern for APM in Kibana]
-
-TIP: To use a custom index pattern,
-adjust Kibana's <<apm-settings-in-kibana,settings>> or use the <<api-create-apm-index-pattern,Kibana API>>.
-
-[float]
-[[apm-getting-started-next]]
-=== Next steps
-
-No further configuration in the APM app is required.
-Install an APM Agent library in your service to begin visualizing and analyzing your data!
+That's it! You're now ready to explore your data.

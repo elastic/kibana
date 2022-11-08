@@ -10,12 +10,16 @@ import React from 'react';
 import { shallowWithIntl } from '@kbn/test/jest';
 
 import { Introduction } from './introduction';
+import { httpServiceMock } from '../../../../../../core/public/mocks';
+
+const basePathMock = httpServiceMock.createBasePath();
 
 test('render', () => {
   const component = shallowWithIntl(
     <Introduction.WrappedComponent
       description="this is a great tutorial about..."
       title="Great tutorial"
+      basePath={basePathMock}
     />
   );
   expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -27,6 +31,7 @@ describe('props', () => {
       <Introduction.WrappedComponent
         description="this is a great tutorial about..."
         title="Great tutorial"
+        basePath={basePathMock}
         iconType="logoElastic"
       />
     );
@@ -38,6 +43,7 @@ describe('props', () => {
       <Introduction.WrappedComponent
         description="this is a great tutorial about..."
         title="Great tutorial"
+        basePath={basePathMock}
         exportedFieldsUrl="exported_fields_url"
       />
     );
@@ -49,6 +55,7 @@ describe('props', () => {
       <Introduction.WrappedComponent
         description="this is a great tutorial about..."
         title="Great tutorial"
+        basePath={basePathMock}
         previewUrl="preview_image_url"
       />
     );
@@ -60,6 +67,7 @@ describe('props', () => {
       <Introduction.WrappedComponent
         description="this is a great tutorial about..."
         title="Great tutorial"
+        basePath={basePathMock}
         isBeta={true}
       />
     );

@@ -20,18 +20,19 @@ Should never be used in code outside of Core but is exported for documentation p
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [configPath](./kibana-plugin-core-server.pluginmanifest.configpath.md) | <code>ConfigPath</code> | Root  used by the plugin, defaults to "id" in snake\_case format. |
-|  [description](./kibana-plugin-core-server.pluginmanifest.description.md) | <code>string</code> | TODO: make required once all plugins specify this. A brief description of what this plugin does and any capabilities it provides. |
-|  [extraPublicDirs](./kibana-plugin-core-server.pluginmanifest.extrapublicdirs.md) | <code>string[]</code> | Specifies directory names that can be imported by other ui-plugins built using the same instance of the @<!-- -->kbn/optimizer. A temporary measure we plan to replace with better mechanisms for sharing static code between plugins |
-|  [id](./kibana-plugin-core-server.pluginmanifest.id.md) | <code>PluginName</code> | Identifier of the plugin. Must be a string in camelCase. Part of a plugin public contract. Other plugins leverage it to access plugin API, navigate to the plugin, etc. |
-|  [kibanaVersion](./kibana-plugin-core-server.pluginmanifest.kibanaversion.md) | <code>string</code> | The version of Kibana the plugin is compatible with, defaults to "version". |
-|  [optionalPlugins](./kibana-plugin-core-server.pluginmanifest.optionalplugins.md) | <code>readonly PluginName[]</code> | An optional list of the other plugins that if installed and enabled \*\*may be\*\* leveraged by this plugin for some additional functionality but otherwise are not required for this plugin to work properly. |
-|  [owner](./kibana-plugin-core-server.pluginmanifest.owner.md) | <code>{</code><br/><code>        readonly name: string;</code><br/><code>        readonly githubTeam?: string;</code><br/><code>    }</code> |  |
-|  [requiredBundles](./kibana-plugin-core-server.pluginmanifest.requiredbundles.md) | <code>readonly string[]</code> | List of plugin ids that this plugin's UI code imports modules from that are not in <code>requiredPlugins</code>. |
-|  [requiredPlugins](./kibana-plugin-core-server.pluginmanifest.requiredplugins.md) | <code>readonly PluginName[]</code> | An optional list of the other plugins that \*\*must be\*\* installed and enabled for this plugin to function properly. |
-|  [server](./kibana-plugin-core-server.pluginmanifest.server.md) | <code>boolean</code> | Specifies whether plugin includes some server-side specific functionality. |
-|  [serviceFolders](./kibana-plugin-core-server.pluginmanifest.servicefolders.md) | <code>readonly string[]</code> | Only used for the automatically generated API documentation. Specifying service folders will cause your plugin API reference to be broken up into sub sections. |
-|  [type](./kibana-plugin-core-server.pluginmanifest.type.md) | <code>PluginType</code> | Type of the plugin, defaults to <code>standard</code>. |
-|  [ui](./kibana-plugin-core-server.pluginmanifest.ui.md) | <code>boolean</code> | Specifies whether plugin includes some client/browser specific functionality that should be included into client bundle via <code>public/ui_plugin.js</code> file. |
-|  [version](./kibana-plugin-core-server.pluginmanifest.version.md) | <code>string</code> | Version of the plugin. |
+|  [configPath](./kibana-plugin-core-server.pluginmanifest.configpath.md) | ConfigPath | Root  used by the plugin, defaults to "id" in snake\_case format. |
+|  [description?](./kibana-plugin-core-server.pluginmanifest.description.md) | string | <i>(Optional)</i> TODO: make required once all plugins specify this. A brief description of what this plugin does and any capabilities it provides. |
+|  [enabledOnAnonymousPages?](./kibana-plugin-core-server.pluginmanifest.enabledonanonymouspages.md) | boolean | <i>(Optional)</i> Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when configured, etc.) Default is false. |
+|  [extraPublicDirs?](./kibana-plugin-core-server.pluginmanifest.extrapublicdirs.md) | string\[\] | <i>(Optional)</i> Specifies directory names that can be imported by other ui-plugins built using the same instance of the @<!-- -->kbn/optimizer. A temporary measure we plan to replace with better mechanisms for sharing static code between plugins |
+|  [id](./kibana-plugin-core-server.pluginmanifest.id.md) | PluginName | Identifier of the plugin. Must be a string in camelCase. Part of a plugin public contract. Other plugins leverage it to access plugin API, navigate to the plugin, etc. |
+|  [kibanaVersion](./kibana-plugin-core-server.pluginmanifest.kibanaversion.md) | string | The version of Kibana the plugin is compatible with, defaults to "version". |
+|  [optionalPlugins](./kibana-plugin-core-server.pluginmanifest.optionalplugins.md) | readonly PluginName\[\] | An optional list of the other plugins that if installed and enabled \*\*may be\*\* leveraged by this plugin for some additional functionality but otherwise are not required for this plugin to work properly. |
+|  [owner](./kibana-plugin-core-server.pluginmanifest.owner.md) | { readonly name: string; readonly githubTeam?: string; } |  |
+|  [requiredBundles](./kibana-plugin-core-server.pluginmanifest.requiredbundles.md) | readonly string\[\] | List of plugin ids that this plugin's UI code imports modules from that are not in <code>requiredPlugins</code>. |
+|  [requiredPlugins](./kibana-plugin-core-server.pluginmanifest.requiredplugins.md) | readonly PluginName\[\] | An optional list of the other plugins that \*\*must be\*\* installed and enabled for this plugin to function properly. |
+|  [server](./kibana-plugin-core-server.pluginmanifest.server.md) | boolean | Specifies whether plugin includes some server-side specific functionality. |
+|  [serviceFolders?](./kibana-plugin-core-server.pluginmanifest.servicefolders.md) | readonly string\[\] | <i>(Optional)</i> Only used for the automatically generated API documentation. Specifying service folders will cause your plugin API reference to be broken up into sub sections. |
+|  [type](./kibana-plugin-core-server.pluginmanifest.type.md) | PluginType | Type of the plugin, defaults to <code>standard</code>. |
+|  [ui](./kibana-plugin-core-server.pluginmanifest.ui.md) | boolean | Specifies whether plugin includes some client/browser specific functionality that should be included into client bundle via <code>public/ui_plugin.js</code> file. |
+|  [version](./kibana-plugin-core-server.pluginmanifest.version.md) | string | Version of the plugin. |
 

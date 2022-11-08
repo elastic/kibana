@@ -18,7 +18,7 @@ describe('parseEventEnrichmentResponse', () => {
     const parsedResponse = await parseEventEnrichmentResponse(options, response);
 
     const expectedInspect = expect.objectContaining({
-      allowNoIndices: true,
+      allow_no_indices: true,
       body: {
         _source: false,
         fields: ['*'],
@@ -41,23 +41,23 @@ describe('parseEventEnrichmentResponse', () => {
             should: [
               {
                 match: {
-                  'threat.indicator.file.hash.md5': {
+                  'threatintel.indicator.file.hash.md5': {
                     _name: 'file.hash.md5',
                     query: '1eee2bf3f56d8abed72da2bc523e7431',
                   },
                 },
               },
-              { match: { 'threat.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
+              { match: { 'threatintel.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
               {
                 match: {
-                  'threat.indicator.url.full': { _name: 'url.full', query: 'elastic.co' },
+                  'threatintel.indicator.url.full': { _name: 'url.full', query: 'elastic.co' },
                 },
               },
             ],
           },
         },
       },
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       index: ['filebeat-*'],
     });
     const parsedInspect = JSON.parse(parsedResponse.inspect.dsl[0]);

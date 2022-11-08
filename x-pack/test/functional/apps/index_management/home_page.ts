@@ -14,9 +14,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const browser = getService('browser');
   const retry = getService('retry');
+  const security = getService('security');
 
   describe('Home page', function () {
+    this.onlyEsVersion('<=7');
+
     before(async () => {
+      await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
     });
 

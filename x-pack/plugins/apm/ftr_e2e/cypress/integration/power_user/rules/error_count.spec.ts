@@ -52,6 +52,10 @@ describe('Rules', () => {
           cy.contains('Error count').click();
           cy.contains('Create threshold rule').click();
 
+          // Check for the existence of this element to make sure the form
+          // has loaded.
+          cy.contains('for the last');
+
           // Save, with no actions
           cy.contains('button:not(:disabled)', 'Save').click();
           cy.get(confirmModalButtonSelector).click();

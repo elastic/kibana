@@ -1133,6 +1133,8 @@
           "<number, string, unknown>; }>, ",
           "TypeC",
           "<{ bucketSize: ",
+          "Type",
+          "<number, unknown, unknown>; intervalString: ",
           "StringC",
           "; }>]>; }>, ",
           {
@@ -1142,7 +1144,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { serviceCount: number; transactionPerMinute: { value: undefined; timeseries: never[]; } | { value: number; timeseries: { x: number; y: number | null; }[]; }; }, ",
+          ", { serviceCount: number; transactionPerMinute: { value: undefined; timeseries: never[]; } | { value: number; timeseries: { x: number; y: number; }[]; }; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /internal/apm/observability_overview/has_data\": ",
           {
@@ -2398,9 +2400,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: { x: number; y: number | null; }[]; previousPeriod: { x: number; y: number | null | undefined; }[]; throughputUnit: ",
-          "ThroughputUnit",
-          "; }, ",
+          ", { currentPeriod: { x: number; y: number; }[]; previousPeriod: { x: number; y: number | null | undefined; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics\": ",
           {
@@ -4744,7 +4744,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentTimeseries: { x: number; y: number | null; }[]; comparisonTimeseries: { x: number; y: number | null; }[] | null; }, ",
+          ", { currentTimeseries: { x: number; y: number; }[]; comparisonTimeseries: { x: number; y: number; }[] | null; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /internal/apm/backends/{backendName}/charts/error_rate\": ",
           {

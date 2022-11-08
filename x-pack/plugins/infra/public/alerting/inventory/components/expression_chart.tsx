@@ -36,7 +36,7 @@ import { useWaffleOptionsContext } from '../../../pages/metrics/inventory_view/h
 
 interface Props {
   expression: InventoryMetricConditions;
-  filterQuery?: string;
+  filterQuery?: string | symbol;
   nodeType: InventoryItemType;
   sourceId: string;
 }

@@ -150,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
           enabled: true,
           metadata: {
             pki_delegated_by_realm: 'reserved',
-            pki_delegated_by_user: 'kibana',
+            pki_delegated_by_user: 'kibana_system',
             pki_dn: 'CN=first_client',
           },
           authentication_realm: { name: 'pki1', type: 'pki' },
@@ -187,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
           enabled: true,
           metadata: {
             pki_delegated_by_realm: 'reserved',
-            pki_delegated_by_user: 'kibana',
+            pki_delegated_by_user: 'kibana_system',
             pki_dn: 'CN=second_client',
           },
           authentication_realm: { name: 'pki1', type: 'pki' },

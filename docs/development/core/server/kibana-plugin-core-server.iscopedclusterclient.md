@@ -16,6 +16,6 @@ export interface IScopedClusterClient
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [asCurrentUser](./kibana-plugin-core-server.iscopedclusterclient.ascurrentuser.md) | <code>ElasticsearchClient</code> | A [client](./kibana-plugin-core-server.elasticsearchclient.md) to be used to query the elasticsearch cluster on behalf of the user that initiated the request to the Kibana server. |
-|  [asInternalUser](./kibana-plugin-core-server.iscopedclusterclient.asinternaluser.md) | <code>ElasticsearchClient</code> | A [client](./kibana-plugin-core-server.elasticsearchclient.md) to be used to query the elasticsearch cluster on behalf of the internal Kibana user. |
+|  [asCurrentUser](./kibana-plugin-core-server.iscopedclusterclient.ascurrentuser.md) | ElasticsearchClient | A [client](./kibana-plugin-core-server.elasticsearchclient.md) to be used to query the elasticsearch cluster on behalf of the user that initiated the request to the Kibana server. |
+|  [asInternalUser](./kibana-plugin-core-server.iscopedclusterclient.asinternaluser.md) | ElasticsearchClient | A [client](./kibana-plugin-core-server.elasticsearchclient.md) to be used to query the elasticsearch cluster on behalf of the internal Kibana user. |
 

@@ -18,8 +18,7 @@ import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import type { IKibanaSearchResponse } from 'src/plugins/data/public';
 import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import type { LatencyCorrelationsRawResponse } from '../../../../common/search_strategies/latency_correlations/types';
-import type { RawResponseBase } from '../../../../common/search_strategies/types';
+import type { LatencyCorrelationsResponse } from '../../../../common/correlations/latency_correlations/types';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -35,9 +34,7 @@ function Wrapper({
   dataSearchResponse,
 }: {
   children?: ReactNode;
-  dataSearchResponse: IKibanaSearchResponse<
-    LatencyCorrelationsRawResponse & RawResponseBase
-  >;
+  dataSearchResponse: IKibanaSearchResponse<LatencyCorrelationsResponse>;
 }) {
   const mockDataSearch = jest.fn(() => of(dataSearchResponse));
 
@@ -99,9 +96,7 @@ describe('correlations', () => {
             isRunning: true,
             rawResponse: {
               ccsWarning: false,
-              took: 1234,
               latencyCorrelations: [],
-              log: [],
             },
           }}
         >
@@ -122,9 +117,7 @@ describe('correlations', () => {
             isRunning: false,
             rawResponse: {
               ccsWarning: false,
-              took: 1234,
               latencyCorrelations: [],
-              log: [],
             },
           }}
         >

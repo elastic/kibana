@@ -6,11 +6,26 @@
  * Side Public License, v 1.
  */
 
-export function createRecursiveSerializer(test: (v: any) => boolean, print: (v: any) => string) {
+class RawPrint {
+  static fromString(s: string) {
+    return new RawPrint(s);
+  }
+  constructor(public readonly v: string) {}
+}
+
+export function createRecursiveSerializer(
+  test: (v: any) => boolean,
+  print: (v: any, printRaw: (v: string) => RawPrint) => string | RawPrint
+) {
   return {
     test: (v: any) => test(v),
     serialize: (v: any, ...rest: any[]) => {
-      const replacement = print(v);
+      const replacement = print(v, RawPrint.fromString);
+
+      if (replacement instanceof RawPrint) {
+        return replacement.v;
+      }
+
       const printer = rest.pop()!;
       return printer(replacement, ...rest);
     },

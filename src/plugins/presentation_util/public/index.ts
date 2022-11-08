@@ -11,26 +11,25 @@
 
 import { PresentationUtilPlugin } from './plugin';
 
-export {
+export type {
   PresentationCapabilitiesService,
   PresentationDashboardsService,
   PresentationLabsService,
-  getStubPluginServices,
 } from './services';
+export { getStubPluginServices } from './services';
 
-export {
+export type {
   KibanaPluginServiceFactory,
   PluginServiceFactory,
-  PluginServices,
   PluginServiceProviders,
-  PluginServiceProvider,
-  PluginServiceRegistry,
   KibanaPluginServiceParams,
 } from './services/create';
+export { PluginServices, PluginServiceProvider, PluginServiceRegistry } from './services/create';
 
-export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
-export { SaveModalDashboardProps } from './components/types';
-export { projectIDs, ProjectID, Project } from '../common/labs';
+export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
+export type { SaveModalDashboardProps } from './components/types';
+export type { ProjectID, Project } from '../common/labs';
+export { projectIDs } from '../common/labs';
 export * from '../common/lib';
 
 export {
@@ -43,12 +42,12 @@ export {
 
 export * from './components/types';
 
+export type { QuickButtonProps } from './components/solution_toolbar';
 export {
   AddFromLibraryButton,
   PrimaryActionButton,
   PrimaryActionPopover,
   QuickButtonGroup,
-  QuickButtonProps,
   SolutionToolbar,
   SolutionToolbarButton,
   SolutionToolbarPopover,

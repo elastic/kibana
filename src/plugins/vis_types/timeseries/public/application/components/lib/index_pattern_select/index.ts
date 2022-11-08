@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { IndexPatternSelect, IndexPatternSelectProps } from './index_pattern_select';
+export type { IndexPatternSelectProps } from './index_pattern_select';
+export { IndexPatternSelect } from './index_pattern_select';

@@ -171,7 +171,8 @@ export const TrustedAppsPage = memo(() => {
       }
       headerBackComponent={backButton}
       subtitle={ABOUT_TRUSTED_APPS}
-      actions={canDisplayContent() ? addButton : <></>}
+      actions={addButton}
+      hideHeader={!canDisplayContent()}
     >
       <TrustedAppsNotifications />
 

@@ -10,13 +10,44 @@ import { registerBuiltInActionTypes } from '../index';
 import { ActionTypeModel } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { getEmailServices } from './email';
+import {
+  ValidatedEmail,
+  InvalidEmailReason,
+  ValidateEmailAddressesOptions,
+  MustacheInEmailRegExp,
+} from '../../../../../../actions/common';
 
 const ACTION_TYPE_ID = '.email';
 let actionTypeModel: ActionTypeModel;
 
+const RegistrationServices = {
+  validateEmailAddresses: validateEmails,
+};
+
+// stub for the real validator
+function validateEmails(
+  addresses: string[],
+  options?: ValidateEmailAddressesOptions
+): ValidatedEmail[] {
+  return addresses.map((address) => {
+    if (address.includes('invalid'))
+      return { address, valid: false, reason: InvalidEmailReason.invalid };
+    else if (address.includes('notallowed'))
+      return { address, valid: false, reason: InvalidEmailReason.notAllowed };
+    else if (options?.treatMustacheTemplatesAsValid) return { address, valid: true };
+    else if (address.match(MustacheInEmailRegExp))
+      return { address, valid: false, reason: InvalidEmailReason.invalid };
+    else return { address, valid: true };
+  });
+}
+
+beforeEach(() => {
+  jest.resetAllMocks();
+});
+
 beforeAll(() => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
+  registerBuiltInActionTypes({ actionTypeRegistry, services: RegistrationServices });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
@@ -136,7 +167,7 @@ describe('connector validation', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {
-        from: 'test@test.com',
+        from: 'test@notallowed.com',
         hasAuth: true,
         service: 'other',
       },
@@ -145,7 +176,7 @@ describe('connector validation', () => {
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          from: [],
+          from: ['Email address test@notallowed.com is not allowed.'],
           port: ['Port is required.'],
           host: ['Host is required.'],
           service: [],
@@ -161,7 +192,13 @@ describe('connector validation', () => {
         },
       },
     });
+
+    // also check that mustache is not valid
+    actionConnector.config.from = '{{mustached}}';
+    const validation = await actionTypeModel.validateConnector(actionConnector);
+    expect(validation?.config?.errors?.from).toEqual(['Email address {{mustached}} is not valid.']);
   });
+
   test('connector validation fails when user specified but not password', async () => {
     const actionConnector = {
       secrets: {
@@ -330,6 +367,7 @@ describe('action params validation', () => {
     const actionParams = {
       to: [],
       cc: ['test1@test.com'],
+      bcc: ['mustache {{\n}} template'],
       message: 'message {test}',
       subject: 'test',
     };
@@ -347,15 +385,17 @@ describe('action params validation', () => {
 
   test('action params validation fails when action params is not valid', async () => {
     const actionParams = {
-      to: ['test@test.com'],
+      to: ['invalid.com'],
+      cc: ['bob@notallowed.com'],
+      bcc: ['another-invalid.com'],
       subject: 'test',
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        to: [],
-        cc: [],
-        bcc: [],
+        to: ['Email address invalid.com is not valid.'],
+        cc: ['Email address bob@notallowed.com is not allowed.'],
+        bcc: ['Email address another-invalid.com is not valid.'],
         message: ['Message is required.'],
         subject: [],
       },

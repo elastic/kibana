@@ -17,6 +17,12 @@ export class EndpointError extends Error {
 
 export class NotFoundError extends EndpointError {}
 
+export class EndpointAppContentServicesNotSetUpError extends EndpointError {
+  constructor() {
+    super('EndpointAppContextService has not been set up (EndpointAppContextService.setup())');
+  }
+}
+
 export class EndpointAppContentServicesNotStartedError extends EndpointError {
   constructor() {
     super('EndpointAppContextService has not been started (EndpointAppContextService.start())');

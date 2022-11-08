@@ -37,7 +37,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-datemath",
+  "//packages/elastic-datemath:npm_module_types",
   "@npm//fp-ts",
   "@npm//io-ts",
   "@npm//moment",

@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart, AppUpdater } from '../../../../../../src/core/pub
 import { CanvasSetupDeps, CanvasStartDeps } from '../../plugin';
 import { searchServiceFactory } from './search';
 
-export { SearchService } from './search';
+export type { SearchService } from './search';
 export { ExpressionsService } from '../../../../../../src/plugins/expressions/common';
 export * from './context';
 

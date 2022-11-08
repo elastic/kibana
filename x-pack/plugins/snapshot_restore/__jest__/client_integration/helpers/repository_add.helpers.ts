@@ -6,13 +6,10 @@
  */
 
 import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { HttpSetup } from 'src/core/public';
 import { RepositoryType } from '../../../common/types';
 import { RepositoryAdd } from '../../../public/application/sections/repository_add';
 import { WithAppDependencies } from './setup_environment';
-
-const initTestBed = registerTestBed<RepositoryAddTestSubjects>(WithAppDependencies(RepositoryAdd), {
-  doMountAsync: true,
-});
 
 export interface RepositoryAddTestBed extends TestBed<RepositoryAddTestSubjects> {
   actions: {
@@ -23,7 +20,13 @@ export interface RepositoryAddTestBed extends TestBed<RepositoryAddTestSubjects>
   };
 }
 
-export const setup = async (): Promise<RepositoryAddTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<RepositoryAddTestBed> => {
+  const initTestBed = registerTestBed<RepositoryAddTestSubjects>(
+    WithAppDependencies(RepositoryAdd, httpSetup),
+    {
+      doMountAsync: true,
+    }
+  );
   const testBed = await initTestBed();
 
   // User actions

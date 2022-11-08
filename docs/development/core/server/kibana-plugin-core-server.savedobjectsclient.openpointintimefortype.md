@@ -18,10 +18,10 @@ openPointInTimeForType(type: string | string[], options?: SavedObjectsOpenPointI
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string &#124; string[]</code> |  |
-|  options | <code>SavedObjectsOpenPointInTimeOptions</code> |  |
+|  type | string \| string\[\] |  |
+|  options | SavedObjectsOpenPointInTimeOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsOpenPointInTimeResponse>`
+Promise&lt;SavedObjectsOpenPointInTimeResponse&gt;
 

@@ -12,7 +12,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ElasticsearchMLJobs } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import type { MLJobs } from '../../../types';

@@ -24,4 +24,4 @@ export interface ActionFactory<P extends SerializedEvent = SerializedEvent>
   id: string;
 }
 
-export { SerializedEvent, SerializedAction, DynamicActionsState };
+export type { SerializedEvent, SerializedAction, DynamicActionsState };

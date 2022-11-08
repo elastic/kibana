@@ -123,8 +123,8 @@ describe('getSavedSearch', () => {
           "serialize": [MockFunction],
           "setField": [MockFunction],
           "setFields": [MockFunction],
+          "setOverwriteDataViewType": [MockFunction],
           "setParent": [MockFunction],
-          "setPreferredSearchStrategyId": [MockFunction],
         },
         "sharingSavedObjectProps": Object {
           "aliasTargetId": undefined,

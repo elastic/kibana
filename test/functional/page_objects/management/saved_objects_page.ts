@@ -107,6 +107,7 @@ export class SavedObjectsPageObject extends FtrService {
       if (isLoaded) {
         return true;
       } else {
+        this.log.debug(`still waiting for the table to load ${isLoaded}`);
         throw new Error('Waiting');
       }
     });

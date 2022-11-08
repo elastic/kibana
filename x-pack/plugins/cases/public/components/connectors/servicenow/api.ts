@@ -6,8 +6,11 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import { ActionTypeExecutorResult } from '../../../../../actions/common';
 import { getExecuteConnectorUrl } from '../../../../common/utils/connectors_api';
+import {
+  ConnectorExecutorResult,
+  rewriteResponseToCamelCase,
+} from '../rewrite_response_to_camel_case';
 import { Choice } from './types';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
@@ -20,10 +23,14 @@ export interface GetChoicesProps {
 }
 
 export async function getChoices({ http, signal, connectorId, fields }: GetChoicesProps) {
-  return http.post<ActionTypeExecutorResult<Choice[]>>(getExecuteConnectorUrl(connectorId), {
-    body: JSON.stringify({
-      params: { subAction: 'getChoices', subActionParams: { fields } },
-    }),
-    signal,
-  });
+  const res = await http.post<ConnectorExecutorResult<Choice[]>>(
+    getExecuteConnectorUrl(connectorId),
+    {
+      body: JSON.stringify({
+        params: { subAction: 'getChoices', subActionParams: { fields } },
+      }),
+      signal,
+    }
+  );
+  return rewriteResponseToCamelCase(res);
 }

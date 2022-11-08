@@ -16,11 +16,11 @@ showOnly(id: string): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  id | <code>string</code> |  |
+|  id | string |  |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Remarks
 

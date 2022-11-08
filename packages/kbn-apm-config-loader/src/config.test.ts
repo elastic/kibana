@@ -5,23 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Labels } from 'elastic-apm-node';
+import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
 import {
   packageMock,
   mockedRootDir,
   gitRevExecMock,
-  devConfigMock,
   readUuidFileMock,
   resetAllMocks,
 } from './config.test.mocks';
 
-import { ApmConfiguration } from './config';
+import { ApmConfiguration, CENTRALIZED_SERVICE_BASE_CONFIG } from './config';
 
 describe('ApmConfiguration', () => {
   beforeEach(() => {
     // start with an empty env to avoid CI from spoiling snapshots, env is unique for each jest file
     process.env = {};
-
     packageMock.raw = {
       version: '8.0.0',
       build: {
@@ -94,8 +92,9 @@ describe('ApmConfiguration', () => {
         "globalLabels": Object {},
         "logUncaughtExceptions": true,
         "metricsInterval": "30s",
-        "secretToken": "7YKhoXsO4MzjhXjx2c",
-        "serverUrl": "https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io",
+        "propagateTracestate": true,
+        "secretToken": "JpBCcOQxN81D5yucs2",
+        "serverUrl": "https://kibana-cloud-apm.apm.us-east-1.aws.found.io",
         "serviceName": "serviceName",
         "serviceVersion": "8.0.0",
         "transactionSampleRate": 1,
@@ -117,11 +116,12 @@ describe('ApmConfiguration', () => {
         },
         "logUncaughtExceptions": true,
         "metricsInterval": "120s",
-        "secretToken": "7YKhoXsO4MzjhXjx2c",
-        "serverUrl": "https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io",
+        "propagateTracestate": true,
+        "secretToken": "JpBCcOQxN81D5yucs2",
+        "serverUrl": "https://kibana-cloud-apm.apm.us-east-1.aws.found.io",
         "serviceName": "serviceName",
         "serviceVersion": "8.0.0",
-        "transactionSampleRate": 1,
+        "transactionSampleRate": 0.1,
       }
     `);
   });
@@ -146,82 +146,57 @@ describe('ApmConfiguration', () => {
     );
   });
 
-  it('loads the configuration from the dev config is present', () => {
-    devConfigMock.raw = {
-      active: true,
-      serverUrl: 'https://dev-url.co',
-    };
-    const config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        active: true,
-        serverUrl: 'https://dev-url.co',
-      })
-    );
-  });
+  describe('env vars', () => {
+    beforeEach(() => {
+      delete process.env.ELASTIC_APM_ENVIRONMENT;
+      delete process.env.ELASTIC_APM_SECRET_TOKEN;
+      delete process.env.ELASTIC_APM_SERVER_URL;
+      delete process.env.NODE_ENV;
+    });
 
-  it('does not load the configuration from the dev config in distributable', () => {
-    devConfigMock.raw = {
-      active: true,
-      serverUrl: 'https://dev-url.co',
-    };
-    const config = new ApmConfiguration(mockedRootDir, {}, true);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        active: false,
-      })
-    );
-  });
+    it('correctly sets environment by reading env vars', () => {
+      let config = new ApmConfiguration(mockedRootDir, {}, false);
+      expect(config.getConfig('serviceName')).toEqual(
+        expect.objectContaining({
+          environment: 'development',
+        })
+      );
 
-  it('overwrites the standard config file with the dev config', () => {
-    const kibanaConfig = {
-      elastic: {
-        apm: {
-          active: true,
-          serverUrl: 'https://url',
-          secretToken: 'secret',
-        },
-      },
-    };
-    devConfigMock.raw = {
-      active: true,
-      serverUrl: 'https://dev-url.co',
-    };
-    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        active: true,
-        serverUrl: 'https://dev-url.co',
-        secretToken: 'secret',
-      })
-    );
-  });
+      process.env.NODE_ENV = 'production';
+      config = new ApmConfiguration(mockedRootDir, {}, false);
+      expect(config.getConfig('serviceName')).toEqual(
+        expect.objectContaining({
+          environment: 'production',
+        })
+      );
 
-  it('correctly sets environment by reading env vars', () => {
-    delete process.env.ELASTIC_APM_ENVIRONMENT;
-    delete process.env.NODE_ENV;
+      process.env.ELASTIC_APM_ENVIRONMENT = 'ci';
+      config = new ApmConfiguration(mockedRootDir, {}, false);
+      expect(config.getConfig('serviceName')).toEqual(
+        expect.objectContaining({
+          environment: 'ci',
+        })
+      );
+    });
 
-    let config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        environment: 'development',
-      })
-    );
+    it('uses default config if serverUrl is not set', () => {
+      process.env.ELASTIC_APM_SECRET_TOKEN = 'banana';
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      const serverConfig = config.getConfig('serviceName');
+      expect(serverConfig).toHaveProperty(
+        'secretToken',
+        (CENTRALIZED_SERVICE_BASE_CONFIG as AgentConfigOptions).secretToken
+      );
+      expect(serverConfig).toHaveProperty('serverUrl', CENTRALIZED_SERVICE_BASE_CONFIG.serverUrl);
+    });
 
-    process.env.NODE_ENV = 'production';
-    config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        environment: 'production',
-      })
-    );
-
-    process.env.ELASTIC_APM_ENVIRONMENT = 'ci';
-    config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        environment: 'ci',
-      })
-    );
+    it('uses env vars config if serverUrl is set', () => {
+      process.env.ELASTIC_APM_SECRET_TOKEN = 'banana';
+      process.env.ELASTIC_APM_SERVER_URL = 'http://banana.com/';
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      const serverConfig = config.getConfig('serviceName');
+      expect(serverConfig).toHaveProperty('secretToken', process.env.ELASTIC_APM_SECRET_TOKEN);
+      expect(serverConfig).toHaveProperty('serverUrl', process.env.ELASTIC_APM_SERVER_URL);
+    });
   });
 });

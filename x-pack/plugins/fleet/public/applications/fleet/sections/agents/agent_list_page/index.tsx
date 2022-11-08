@@ -42,7 +42,7 @@ import {
   ContextMenuActions,
 } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENT_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../../constants';
+import { AGENT_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
@@ -233,7 +233,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         .join(' or ');
 
       if (kueryBuilder) {
-        kueryBuilder = `(${kueryBuilder}) and ${kueryStatus}`;
+        kueryBuilder = `(${kueryBuilder}) and (${kueryStatus})`;
       } else {
         kueryBuilder = kueryStatus;
       }
@@ -631,7 +631,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
-          totalItemCount: totalAgents,
+          totalItemCount: Math.min(totalAgents, SO_SEARCH_LIMIT),
           pageSizeOptions,
         }}
         isSelectable={true}

@@ -7,7 +7,7 @@
 
 import { ColumnId } from './body/column_id';
 import { DataProvider, QueryOperator } from './data_providers/data_provider';
-export {
+export type {
   OnColumnSorted,
   OnColumnsSorted,
   OnColumnRemoved,

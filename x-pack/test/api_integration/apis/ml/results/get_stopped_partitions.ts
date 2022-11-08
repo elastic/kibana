@@ -102,12 +102,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch all the stopped partitions correctly', async () => {
       const { jobId } = testSetUps[0];
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post(`/api/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: [jobId] })
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
+
       expect(body.jobs).to.not.be(undefined);
       expect(body.jobs[jobId]).to.be.an('array');
       expect(body.jobs[jobId].length).to.be.greaterThan(0);
@@ -115,24 +116,25 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not return jobId in response if stopped_on_warn is false', async () => {
       const { jobId } = testSetUps[1];
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post(`/api/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: [jobId] })
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
+
       expect(body.jobs).to.not.be(undefined);
       expect(body.jobs).to.not.have.property(jobId);
     });
 
     it('should fetch stopped partitions for user with view permission', async () => {
       const { jobId } = testSetUps[2];
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post(`/api/ml/results/category_stopped_partitions`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .send({ jobIds: [jobId] })
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.jobs).to.not.be(undefined);
       expect(body.jobs[jobId]).to.be.an('array');
@@ -142,24 +144,25 @@ export default ({ getService }: FtrProviderContext) => {
     it('should not fetch stopped partitions for unauthorized user', async () => {
       const { jobId } = testSetUps[3];
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post(`/api/ml/results/category_stopped_partitions`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .send({ jobIds: [jobId] })
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(403);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.be('Forbidden');
       expect(body.message).to.be('Forbidden');
     });
 
     it('should fetch stopped partitions for multiple job ids', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post(`/api/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: testJobIds })
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
+
       expect(body.jobs).to.not.be(undefined);
       expect(body.jobs).to.not.have.property(testSetUps[1].jobId);
 
@@ -171,12 +174,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return array of jobIds with stopped_partitions for multiple job ids when bucketed by job_id', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post(`/api/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: testJobIds, fieldToBucket: 'job_id' })
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.jobs).to.not.be(undefined);
       body.jobs.forEach((currentJobId: string) => {

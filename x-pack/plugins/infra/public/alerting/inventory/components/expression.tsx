@@ -40,6 +40,7 @@ import {
   IErrorObject,
   AlertTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
+import { FilterQuery, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
@@ -84,7 +85,7 @@ type Props = Omit<
     {
       criteria: Criteria;
       nodeType: InventoryItemType;
-      filterQuery?: string;
+      filterQuery?: FilterQuery;
       filterQueryText?: string;
       sourceId: string;
       alertOnNoData?: boolean;
@@ -157,10 +158,14 @@ export const Expressions: React.FC<Props> = (props) => {
   const onFilterChange = useCallback(
     (filter: any) => {
       setAlertParams('filterQueryText', filter || '');
-      setAlertParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      try {
+        setAlertParams(
+          'filterQuery',
+          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+        );
+      } catch (e) {
+        setAlertParams('filterQuery', QUERY_INVALID);
+      }
     },
     [derivedIndexPattern, setAlertParams]
   );

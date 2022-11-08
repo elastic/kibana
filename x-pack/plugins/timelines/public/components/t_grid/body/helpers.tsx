@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
+} from '@kbn/rule-data-utils/technical_field_names';
 import { isEmpty } from 'lodash/fp';
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
@@ -123,11 +126,18 @@ export const mapSortingColumns = ({
     direction: 'asc' | 'desc';
   }>;
 }): SortColumnTimeline[] =>
-  columns.map(({ id, direction }) => ({
-    columnId: id,
-    columnType: columnHeaders.find((ch) => ch.id === id)?.type ?? 'text',
-    sortDirection: direction,
-  }));
+  columns.map(({ id, direction }) => {
+    const columnHeader = columnHeaders.find((ch) => ch.id === id);
+    const columnType = columnHeader?.type ?? '';
+    const esTypes = columnHeader?.esTypes ?? [];
+
+    return {
+      columnId: id,
+      columnType,
+      esTypes,
+      sortDirection: direction,
+    };
+  });
 
 export const allowSorting = ({
   browserField,
@@ -236,3 +246,12 @@ export const addBuildingBlockStyle = (
     });
   }
 };
+
+/** Returns true when the specified column has cell actions */
+export const hasCellActions = ({
+  columnId,
+  disabledCellActions,
+}: {
+  columnId: string;
+  disabledCellActions: string[];
+}) => !disabledCellActions.includes(columnId);

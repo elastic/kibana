@@ -28,6 +28,7 @@ const variables = {
   st: '*',
   ul: '_',
   st_lt: '*<',
+  vl: '|',
 };
 
 describe('mustache_renderer', () => {
@@ -77,6 +78,7 @@ describe('mustache_renderer', () => {
       expect(renderMustacheString('{{bs}}', variables, 'markdown')).toBe('\\' + variables.bs);
       expect(renderMustacheString('{{st}}', variables, 'markdown')).toBe('\\' + variables.st);
       expect(renderMustacheString('{{ul}}', variables, 'markdown')).toBe('\\' + variables.ul);
+      expect(renderMustacheString('{{vl}}', variables, 'markdown')).toBe('\\' + variables.vl);
     });
 
     it('handles triple escapes', () => {

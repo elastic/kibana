@@ -57,12 +57,15 @@ const CountRow = React.memo<Pick<Props, 'filteredBrowserFields'>>(({ filteredBro
 
 CountRow.displayName = 'CountRow';
 
+const inputRef = (node: HTMLInputElement | null) => node?.focus();
+
 export const Search = React.memo<Props>(
   ({ isSearching, filteredBrowserFields, onSearchInputChange, searchInput, timelineId }) => (
     <>
       <EuiFieldSearch
         className={getFieldBrowserSearchInputClassName(timelineId)}
         data-test-subj="field-search"
+        inputRef={inputRef}
         isLoading={isSearching}
         onChange={onSearchInputChange}
         placeholder={i18n.FILTER_PLACEHOLDER}

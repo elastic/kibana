@@ -55,7 +55,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             // only foo is disabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
-              (value, catalogueId) => catalogueId !== 'foo'
+              (enabled, catalogueId) => catalogueId !== 'foo'
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;

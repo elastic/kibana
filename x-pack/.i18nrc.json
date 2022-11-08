@@ -10,6 +10,7 @@
     "xpack.canvas": "plugins/canvas",
     "xpack.cases": "plugins/cases",
     "xpack.cloud": "plugins/cloud",
+    "xpack.code": "plugins/code",
     "xpack.dashboard": "plugins/dashboard_enhanced",
     "xpack.discover": "plugins/discover_enhanced",
     "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
@@ -54,7 +55,7 @@
     "xpack.snapshotRestore": "plugins/snapshot_restore",
     "xpack.spaces": "plugins/spaces",
     "xpack.savedObjectsTagging": ["plugins/saved_objects_tagging"],
-    "xpack.taskManager": "legacy/plugins/task_manager",
+    "xpack.taskManager": ["legacy/plugins/task_manager", "plugins/task_manager"],
     "xpack.timelines": "plugins/timelines",
     "xpack.transform": "plugins/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
@@ -65,7 +66,7 @@
     "xpack.observability": "plugins/observability",
     "xpack.banners": "plugins/banners"
   },
-  "exclude": ["examples", "plugins/monitoring/public/angular/angular_i18n"],
+  "exclude": ["examples"],
   "translations": [
     "plugins/translations/translations/zh-CN.json",
     "plugins/translations/translations/ja-JP.json"

@@ -25,7 +25,8 @@ import {
   getTelemetryFailureDetails,
 } from '../common/telemetry_config';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
-import { REPORT_INTERVAL_MS } from '../common/constants';
+import { REPORT_INTERVAL_MS, PAYLOAD_CONTENT_ENCODING } from '../common/constants';
+import type { EncryptedTelemetryPayload } from '../common/types';
 import { TelemetryConfigType } from './config';
 
 export interface FetcherTaskDepsStart {
@@ -82,10 +83,6 @@ export class FetcherTask {
     }
   }
 
-  private async areAllCollectorsReady() {
-    return (await this.telemetryCollectionManager?.areAllCollectorsReady()) ?? false;
-  }
-
   private async sendIfDue() {
     if (this.isSending) {
       return;
@@ -103,14 +100,10 @@ export class FetcherTask {
       return;
     }
 
-    let clusters: string[] = [];
+    let clusters: EncryptedTelemetryPayload = [];
     this.isSending = true;
 
     try {
-      const allCollectorsReady = await this.areAllCollectorsReady();
-      if (!allCollectorsReady) {
-        throw new Error('Not all collectors are ready.');
-      }
       clusters = await this.fetchTelemetry();
     } catch (err) {
       this.logger.warn(`Error fetching usage. (${err})`);
@@ -120,9 +113,7 @@ export class FetcherTask {
 
     try {
       const { telemetryUrl } = telemetryConfig;
-      for (const cluster of clusters) {
-        await this.sendTelemetry(telemetryUrl, cluster);
-      }
+      await this.sendTelemetry(telemetryUrl, clusters);
 
       await this.updateLastReported();
     } catch (err) {
@@ -141,7 +132,7 @@ export class FetcherTask {
     const allowChangingOptInStatus = config.allowChangingOptInStatus;
     const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
     const telemetryUrl = getTelemetryChannelEndpoint({
-      channelName: 'main',
+      channelName: 'snapshot',
       env: config.sendUsageTo,
     });
     const { failureCount, failureVersion } = getTelemetryFailureDetails({
@@ -206,13 +197,16 @@ export class FetcherTask {
     return false;
   }
 
-  private async fetchTelemetry() {
+  private async fetchTelemetry(): Promise<EncryptedTelemetryPayload> {
     return await this.telemetryCollectionManager!.getStats({
       unencrypted: false,
     });
   }
 
-  private async sendTelemetry(telemetryUrl: string, cluster: string): Promise<void> {
+  private async sendTelemetry(
+    telemetryUrl: string,
+    payload: EncryptedTelemetryPayload
+  ): Promise<void> {
     this.logger.debug(`Sending usage stats.`);
     /**
      * send OPTIONS before sending usage data.
@@ -222,10 +216,19 @@ export class FetcherTask {
       method: 'options',
     });
 
-    await fetch(telemetryUrl, {
-      method: 'post',
-      body: cluster,
-      headers: { 'X-Elastic-Stack-Version': this.currentKibanaVersion },
-    });
+    await Promise.all(
+      payload.map(async ({ clusterUuid, stats }) => {
+        await fetch(telemetryUrl, {
+          method: 'post',
+          body: stats,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Elastic-Stack-Version': this.currentKibanaVersion,
+            'X-Elastic-Cluster-ID': clusterUuid,
+            'X-Elastic-Content-Encoding': PAYLOAD_CONTENT_ENCODING,
+          },
+        });
+      })
+    );
   }
 }

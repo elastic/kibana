@@ -10,7 +10,6 @@ import uuid from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import type { DomainDeprecationDetails } from 'kibana/public';
@@ -30,21 +29,9 @@ const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageTitle', {
     defaultMessage: 'Kibana deprecation issues',
   }),
-  pageDescription: (
-    <FormattedMessage
-      id="xpack.upgradeAssistant.kibanaDeprecations.pageDescription"
-      defaultMessage="You must resolve all critical issues before upgrading. Follow the instructions or use {quickResolve} to fix issues automatically."
-      values={{
-        quickResolve: (
-          <strong>
-            {i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.quickResolveText', {
-              defaultMessage: 'Quick Resolve',
-            })}
-          </strong>
-        ),
-      }}
-    />
-  ),
+  pageDescription: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageDescription', {
+    defaultMessage: 'Resolve all critical issues before upgrading.',
+  }),
   docLinkText: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.docLinkText', {
     defaultMessage: 'Documentation',
   }),

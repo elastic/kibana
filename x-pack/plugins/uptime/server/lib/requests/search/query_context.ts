@@ -103,6 +103,17 @@ export class QueryContext {
     // only slower, but only marginally so, and prevents people from seeing weird
     // behavior.
 
+    if (this.dateRangeEnd === 'now') {
+      return {
+        range: {
+          'monitor.timespan': {
+            gte: 'now-5m',
+            lte: 'now',
+          },
+        },
+      };
+    }
+
     const tsEnd = parseRelativeDate(this.dateRangeEnd, { roundUp: true })!;
     const tsStart = moment(tsEnd).subtract(5, 'minutes');
 

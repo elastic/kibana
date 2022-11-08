@@ -20,6 +20,7 @@ interface Options {
 }
 
 export class Config {
+  public readonly path: string;
   private [$values]: Record<string, any>;
 
   constructor(options: Options) {
@@ -29,6 +30,7 @@ export class Config {
       throw new TypeError('path is a required option');
     }
 
+    this.path = path;
     const { error, value } = schema.validate(settings, {
       abortEarly: false,
       context: {

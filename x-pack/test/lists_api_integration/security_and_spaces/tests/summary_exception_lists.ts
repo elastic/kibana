@@ -21,7 +21,6 @@ interface SummaryResponseType {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('summary_exception_lists', () => {
     describe('summary exception lists', () => {
@@ -30,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       afterEach(async () => {
         await deleteListsIndex(supertest);
-        await deleteAllExceptions(es);
+        await deleteAllExceptions(supertest);
       });
 
       it('should give a validation error if the list_id and the id are not supplied', async () => {

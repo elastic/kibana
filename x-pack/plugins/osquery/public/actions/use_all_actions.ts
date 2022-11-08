@@ -8,7 +8,12 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { createFilter } from '../common/helpers';
+import {
+  createFilter,
+  generateTablePaginationOptions,
+  getInspectResponse,
+  InspectResponse,
+} from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
   ActionEdges,
@@ -20,7 +25,6 @@ import {
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
 
-import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionsArgs {

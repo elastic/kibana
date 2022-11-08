@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  MigrationDeprecationInfoDeprecation,
-  MigrationDeprecationInfoResponse,
-} from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { indexSettingDeprecations } from '../../common/constants';
 import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
@@ -41,8 +37,8 @@ export async function getESUpgradeStatus(
         combinedDeprecations = combinedDeprecations.concat(withoutSystemIndices);
       } else {
         const deprecationsByType = deprecations[
-          deprecationType as keyof MigrationDeprecationInfoResponse
-        ] as MigrationDeprecationInfoDeprecation[];
+          deprecationType as keyof estypes.MigrationDeprecationsResponse
+        ] as estypes.MigrationDeprecationsDeprecation[];
 
         const enrichedDeprecationInfo = deprecationsByType.map(
           ({
@@ -59,7 +55,7 @@ export async function getESUpgradeStatus(
               details,
               message,
               url,
-              type: deprecationType as keyof MigrationDeprecationInfoResponse,
+              type: deprecationType as keyof estypes.MigrationDeprecationsResponse,
               isCritical: level === 'critical',
               resolveDuringUpgrade,
               correctiveAction: getCorrectiveAction(message, metadata),
@@ -85,7 +81,7 @@ export async function getESUpgradeStatus(
 
 // Reformats the index deprecations to an array of deprecation warnings extended with an index field.
 const getCombinedIndexInfos = async (
-  deprecations: MigrationDeprecationInfoResponse,
+  deprecations: estypes.MigrationDeprecationsResponse,
   dataClient: IScopedClusterClient
 ) => {
   const indices = Object.keys(deprecations.index_settings).reduce(
@@ -97,6 +93,8 @@ const getCombinedIndexInfos = async (
             message,
             url,
             level,
+            // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
+            _meta: metadata,
             // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
             resolve_during_rolling_upgrade: resolveDuringUpgrade,
           }) =>
@@ -107,7 +105,7 @@ const getCombinedIndexInfos = async (
               index: indexName,
               type: 'index_settings',
               isCritical: level === 'critical',
-              correctiveAction: getCorrectiveAction(message),
+              correctiveAction: getCorrectiveAction(message, metadata, indexName),
               resolveDuringUpgrade,
             } as EnrichedDeprecationInfo)
         )
@@ -133,16 +131,34 @@ const getCombinedIndexInfos = async (
   return indices as EnrichedDeprecationInfo[];
 };
 
+interface Action {
+  action_type: 'remove_settings';
+  objects: string[];
+}
+
+interface Actions {
+  actions: Action[];
+}
+
+type EsMetadata = Actions & {
+  [key: string]: string;
+};
+
 const getCorrectiveAction = (
   message: string,
-  metadata?: { [key: string]: string }
+  metadata: EsMetadata,
+  indexName?: string
 ): EnrichedDeprecationInfo['correctiveAction'] => {
-  const indexSettingDeprecation = Object.values(indexSettingDeprecations).find(
-    ({ deprecationMessage }) => deprecationMessage === message
+  const indexSettingDeprecation = metadata?.actions?.find(
+    (action) => action.action_type === 'remove_settings' && indexName
+  );
+  const clusterSettingDeprecation = metadata?.actions?.find(
+    (action) => action.action_type === 'remove_settings' && typeof indexName === 'undefined'
   );
   const requiresReindexAction = /Index created before/.test(message);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
-  const requiresMlAction = /model snapshot/.test(message);
+  const requiresClusterSettingsAction = Boolean(clusterSettingDeprecation);
+  const requiresMlAction = /[Mm]odel snapshot/.test(message);
 
   if (requiresReindexAction) {
     return {
@@ -153,7 +169,14 @@ const getCorrectiveAction = (
   if (requiresIndexSettingsAction) {
     return {
       type: 'indexSetting',
-      deprecatedSettings: indexSettingDeprecation!.settings,
+      deprecatedSettings: indexSettingDeprecation!.objects,
+    };
+  }
+
+  if (requiresClusterSettingsAction) {
+    return {
+      type: 'clusterSetting',
+      deprecatedSettings: clusterSettingDeprecation!.objects,
     };
   }
 

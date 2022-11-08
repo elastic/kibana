@@ -8,9 +8,9 @@
 import { Unit } from '@elastic/datemath';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import { SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { Comparator, AlertStates } from '../common/types';
+import { Comparator, AlertStates, Aggregators } from '../common/types';
 
-export { Comparator, AlertStates };
+export { Comparator, AlertStates, Aggregators };
 
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
 

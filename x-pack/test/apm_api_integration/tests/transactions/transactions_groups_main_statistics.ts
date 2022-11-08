@@ -11,12 +11,12 @@ import url from 'url';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
-import { registry } from '../../common/registry';
 
 type TransactionsGroupsPrimaryStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';

@@ -64,6 +64,7 @@ export const enhancedEsSearchStrategyProvider = (
             ...(await getDefaultAsyncSubmitParams(
               uiSettingsClient,
               searchSessionsClient.getConfig(),
+              request.params?.body,
               options
             )),
             ...request.params,
@@ -110,7 +111,7 @@ export const enhancedEsSearchStrategyProvider = (
     const querystring = {
       ...getShardTimeout(legacyConfig),
       ...(await getIgnoreThrottled(uiSettingsClient)),
-      ...(await getDefaultSearchParams(uiSettingsClient)),
+      ...(await getDefaultSearchParams(uiSettingsClient, request.params?.body)),
       ...params,
     };
 

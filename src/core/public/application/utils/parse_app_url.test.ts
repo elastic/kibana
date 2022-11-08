@@ -39,6 +39,12 @@ describe('parseAppUrl', () => {
       id: 'bar',
       appRoute: '/custom-bar',
     });
+    createApp({
+      id: 're',
+    });
+    createApp({
+      id: 'retail',
+    });
   });
 
   describe('with absolute paths', () => {
@@ -49,6 +55,14 @@ describe('parseAppUrl', () => {
       });
       expect(parseAppUrl('/base-path/custom-bar', basePath, apps, currentUrl)).toEqual({
         app: 'bar',
+        path: undefined,
+      });
+      expect(parseAppUrl('/base-path/app/re', basePath, apps, currentUrl)).toEqual({
+        app: 're',
+        path: undefined,
+      });
+      expect(parseAppUrl('/base-path/app/retail', basePath, apps, currentUrl)).toEqual({
+        app: 'retail',
         path: undefined,
       });
     });
@@ -62,6 +76,14 @@ describe('parseAppUrl', () => {
       ).toEqual({
         app: 'bar',
         path: '/another/path/',
+      });
+      expect(parseAppUrl('/base-path/app/re/tail', basePath, apps, currentUrl)).toEqual({
+        app: 're',
+        path: '/tail',
+      });
+      expect(parseAppUrl('/base-path/app/retail/path', basePath, apps, currentUrl)).toEqual({
+        app: 'retail',
+        path: '/path',
       });
     });
     it('includes query and hash in the path for default app route', () => {
@@ -88,6 +110,18 @@ describe('parseAppUrl', () => {
       ).toEqual({
         app: 'foo',
         path: '/path#hash/bang?hello=dolly',
+      });
+      expect(parseAppUrl('/base-path/app/re#hash/bang', basePath, apps, currentUrl)).toEqual({
+        app: 're',
+        path: '#hash/bang',
+      });
+      expect(parseAppUrl('/base-path/app/retail?hello=dolly', basePath, apps, currentUrl)).toEqual({
+        app: 'retail',
+        path: '?hello=dolly',
+      });
+      expect(parseAppUrl('/base-path/app/retail#hash/bang', basePath, apps, currentUrl)).toEqual({
+        app: 'retail',
+        path: '#hash/bang',
       });
     });
     it('includes query and hash in the path for custom app route', () => {
@@ -190,7 +224,6 @@ describe('parseAppUrl', () => {
         path: '/path#hash?hello=dolly',
       });
     });
-
     it('returns undefined if the relative path redirect outside of the basePath', () => {
       expect(
         parseAppUrl(
@@ -200,6 +233,19 @@ describe('parseAppUrl', () => {
           'https://kibana.local:8080/base-path/app/current'
         )
       ).toBeUndefined();
+    });
+    it('works with inclusive app ids', () => {
+      expect(
+        parseAppUrl(
+          './retail/path',
+          basePath,
+          apps,
+          'https://kibana.local:8080/base-path/app/current'
+        )
+      ).toEqual({
+        app: 'retail',
+        path: '/path',
+      });
     });
   });
 
@@ -215,6 +261,18 @@ describe('parseAppUrl', () => {
         parseAppUrl('https://kibana.local:8080/base-path/custom-bar', basePath, apps, currentUrl)
       ).toEqual({
         app: 'bar',
+        path: undefined,
+      });
+      expect(
+        parseAppUrl('https://kibana.local:8080/base-path/app/re', basePath, apps, currentUrl)
+      ).toEqual({
+        app: 're',
+        path: undefined,
+      });
+      expect(
+        parseAppUrl('https://kibana.local:8080/base-path/app/retail', basePath, apps, currentUrl)
+      ).toEqual({
+        app: 'retail',
         path: undefined,
       });
     });
@@ -239,6 +297,29 @@ describe('parseAppUrl', () => {
         )
       ).toEqual({
         app: 'bar',
+        path: '/another/path/',
+      });
+
+      expect(
+        parseAppUrl(
+          'https://kibana.local:8080/base-path/app/re/some/path',
+          basePath,
+          apps,
+          currentUrl
+        )
+      ).toEqual({
+        app: 're',
+        path: '/some/path',
+      });
+      expect(
+        parseAppUrl(
+          'https://kibana.local:8080/base-path/app/retail/another/path/',
+          basePath,
+          apps,
+          currentUrl
+        )
+      ).toEqual({
+        app: 'retail',
         path: '/another/path/',
       });
     });
@@ -297,6 +378,28 @@ describe('parseAppUrl', () => {
       ).toEqual({
         app: 'foo',
         path: '/path#hash/bang?hello=dolly',
+      });
+      expect(
+        parseAppUrl(
+          'https://kibana.local:8080/base-path/app/re#hash/bang',
+          basePath,
+          apps,
+          currentUrl
+        )
+      ).toEqual({
+        app: 're',
+        path: '#hash/bang',
+      });
+      expect(
+        parseAppUrl(
+          'https://kibana.local:8080/base-path/app/re?hello=dolly',
+          basePath,
+          apps,
+          currentUrl
+        )
+      ).toEqual({
+        app: 're',
+        path: '?hello=dolly',
       });
     });
     it('includes query and hash in the path for custom app route', () => {

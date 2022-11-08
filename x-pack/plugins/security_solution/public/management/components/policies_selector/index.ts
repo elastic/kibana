@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { PoliciesSelector, PolicySelectionItem, PoliciesSelectorProps } from './policies_selector';
+export type { PolicySelectionItem, PoliciesSelectorProps } from './policies_selector';
+export { PoliciesSelector } from './policies_selector';

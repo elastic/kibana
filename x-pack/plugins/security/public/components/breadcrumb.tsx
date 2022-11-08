@@ -80,11 +80,17 @@ export const BreadcrumbsProvider: FunctionComponent<BreadcrumbsProviderProps> = 
   const breadcrumbsRef = useRef<BreadcrumbProps[]>([]);
 
   const handleChange = (breadcrumbs: BreadcrumbProps[]) => {
+    const newBreadcrumbs = breadcrumbs.map((item, index) => {
+      if (index === breadcrumbs.length - 1) {
+        return { ...item, href: undefined };
+      }
+      return item;
+    });
     if (onChange) {
-      onChange(breadcrumbs);
+      onChange(newBreadcrumbs);
     } else if (services.chrome) {
       const setBreadcrumbs = createBreadcrumbsChangeHandler(services.chrome);
-      setBreadcrumbs(breadcrumbs);
+      setBreadcrumbs(newBreadcrumbs);
     }
   };
 

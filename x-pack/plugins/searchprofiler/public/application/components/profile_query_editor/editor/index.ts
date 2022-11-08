@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { Editor, EditorInstance } from './editor';
+export type { EditorInstance } from './editor';
+export { Editor } from './editor';

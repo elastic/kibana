@@ -76,6 +76,10 @@ interface ValidationErrors {
     message: string;
     type: { operation: string; text: string; type: string };
   };
+  wrongReturnedType: {
+    message: string;
+    type: { text: string };
+  };
 }
 
 type ErrorTypes = keyof ValidationErrors;
@@ -306,6 +310,13 @@ function getMessageFromId<K extends ErrorTypes>({
         defaultMessage:
           'The operation {operation} in the Formula does not support {type} parameters, found: {text}',
         values: { operation: out.operation, text: out.text, type: out.type },
+      });
+      break;
+    case 'wrongReturnedType':
+      message = i18n.translate('xpack.lens.indexPattern.formulaOperationWrongReturnedType', {
+        defaultMessage:
+          'The return value type of the operation {text} is not supported in Formula.',
+        values: { text: out.text },
       });
       break;
     // case 'mathRequiresFunction':
@@ -602,6 +613,7 @@ function runFullASTValidation(
             const fieldErrors = validateFieldArguments(node, variables, {
               isFieldOperation: true,
               firstArg,
+              returnedType: getReturnedType(nodeOperation, indexPattern, firstArg),
             });
             if (fieldErrors.length) {
               errors.push(...fieldErrors);
@@ -711,6 +723,7 @@ function runFullASTValidation(
           const fieldErrors = validateFieldArguments(node, variables, {
             isFieldOperation: false,
             firstArg,
+            returnedType: undefined,
           });
           if (fieldErrors.length) {
             errors.push(...fieldErrors);
@@ -773,6 +786,25 @@ export function getWrongTypeParams(
   return validateParams(operation, params).filter(
     ({ isCorrectType, isMissing }) => !isCorrectType && !isMissing
   );
+}
+
+function getReturnedType(
+  operation: OperationDefinition<IndexPatternColumn, 'field'>,
+  indexPattern: IndexPattern,
+  firstArg: TinymathAST
+) {
+  const variables = findVariables(firstArg);
+  if (variables.length !== 1) {
+    return;
+  }
+  const field = indexPattern.getFieldByName(getValueOrName(variables[0]) as string);
+  // while usually this is used where it is safe, as generic function it should check anyway
+  if (!field) {
+    return;
+  }
+  // here we're validating the support of the returned type for Formula, not for the operation itself
+  // that is already handled indipendently by the operation. So return the scale type
+  return operation.getPossibleOperationForField(field)?.scale;
 }
 
 function getDuplicateParams(params: TinymathNamedArgument[] = []) {
@@ -898,7 +930,15 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
 function validateFieldArguments(
   node: TinymathFunction,
   variables: Array<string | number | TinymathVariable>,
-  { isFieldOperation, firstArg }: { isFieldOperation: boolean; firstArg: TinymathAST }
+  {
+    isFieldOperation,
+    firstArg,
+    returnedType,
+  }: {
+    isFieldOperation: boolean;
+    firstArg: TinymathAST;
+    returnedType: 'ratio' | 'ordinal' | 'interval' | undefined;
+  }
 ) {
   const fields = variables.filter(
     (arg) => isArgumentValidType(arg, 'variable') && !isMathNode(arg)
@@ -919,6 +959,19 @@ function validateFieldArguments(
         locations: node.location ? [node.location] : [],
       })
     );
+  }
+  if (isFieldOperation && fields.length === 1 && fields[0] === firstArg) {
+    if (returnedType === 'ordinal') {
+      errors.push(
+        getMessageFromId({
+          messageId: 'wrongReturnedType',
+          values: {
+            text: node.text ?? `${node.name}(${getValueOrName(firstArg)})`,
+          },
+          locations: node.location ? [node.location] : [],
+        })
+      );
+    }
   }
   if (!isFieldOperation && fields.length) {
     errors.push(

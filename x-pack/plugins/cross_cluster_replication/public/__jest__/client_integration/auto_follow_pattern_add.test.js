@@ -12,15 +12,10 @@ import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './help
 const { setup } = pageHelpers.autoFollowPatternAdd;
 
 describe('Create Auto-follow pattern', () => {
-  let server;
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   beforeEach(() => {

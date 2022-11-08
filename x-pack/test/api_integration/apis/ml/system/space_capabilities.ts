@@ -21,11 +21,11 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   async function runRequest(user: USER, space?: string): Promise<MlCapabilitiesResponse> {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`${space ? `/s/${space}` : ''}/api/ml/ml_capabilities`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(200);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(200, status, body);
 
     return body;
   }

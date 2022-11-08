@@ -37,6 +37,7 @@ export interface UsageStats {
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
   'observability:maxSuggestions': number;
+  'observability:enableComparisonByDefault': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -94,6 +95,7 @@ export interface UsageStats {
   'savedObjects:listingLimit': number;
   'query:queryString:options': string;
   'metrics:max_buckets': number;
+  'metrics:allowCheckingForFailedShards': boolean;
   'query:allowLeadingWildcards': boolean;
   metaFields: string[];
   'indexPattern:placeholder': string;

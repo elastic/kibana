@@ -37,5 +37,5 @@ export function ObservabilityHeaderMenu(): React.ReactElement | null {
 }
 
 const addDataLinkText = i18n.translate('xpack.observability.home.addData', {
-  defaultMessage: 'Add data',
+  defaultMessage: 'Add integrations',
 });

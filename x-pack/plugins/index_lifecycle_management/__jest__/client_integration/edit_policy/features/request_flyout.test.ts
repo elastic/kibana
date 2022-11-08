@@ -12,7 +12,7 @@ import { getDefaultHotPhasePolicy } from '../constants';
 
 describe('<EditPolicy /> request flyout', () => {
   let testBed: RequestFlyoutTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -20,14 +20,13 @@ describe('<EditPolicy /> request flyout', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setupRequestFlyoutTestBed();
+      testBed = await setupRequestFlyoutTestBed(httpSetup);
     });
 
     const { component } = testBed;
@@ -93,7 +92,7 @@ describe('<EditPolicy /> request flyout', () => {
 
   test('renders the correct json and name for a new policy', async () => {
     await act(async () => {
-      testBed = await setupRequestFlyoutTestBed(true);
+      testBed = await setupRequestFlyoutTestBed(httpSetup, true);
     });
 
     const { component, actions } = testBed;
@@ -154,7 +153,7 @@ describe('<EditPolicy /> request flyout', () => {
     httpRequestsMockHelpers.setLoadPolicies([policyWithMetaField]);
 
     await act(async () => {
-      testBed = await setupRequestFlyoutTestBed();
+      testBed = await setupRequestFlyoutTestBed(httpSetup);
     });
 
     const { component, actions } = testBed;

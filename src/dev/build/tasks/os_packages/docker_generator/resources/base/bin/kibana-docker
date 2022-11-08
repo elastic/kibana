@@ -109,7 +109,6 @@ kibana_vars=(
     map.tilemap.url
     migrations.batchSize
     migrations.maxBatchSizeBytes
-    migrations.enableV2
     migrations.pollInterval
     migrations.retryAttempts
     migrations.scrollDuration
@@ -205,6 +204,7 @@ kibana_vars=(
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
     xpack.actions.enabled
+    xpack.actions.email.domain_allowlist
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
@@ -280,6 +280,7 @@ kibana_vars=(
     xpack.fleet.agents.tlsCheckDisabled
     xpack.fleet.enabled
     xpack.fleet.packages
+    xpack.fleet.registryProxyUrl
     xpack.fleet.registryUrl
     xpack.graph.canEditDrillDownUrls
     xpack.graph.enabled
@@ -422,6 +423,8 @@ kibana_vars=(
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
     xpack.task_manager.version_conflict_threshold
+    xpack.task_manager.event_loop_delay.monitor
+    xpack.task_manager.event_loop_delay.warn_threshold
 )
 
 longopts=''

@@ -12,7 +12,8 @@
         { "exists": { "field": "source.address" } },
         { "exists": { "field": "url.original" } },
         { "exists": { "field": "http.response.status_code" } }
-      ]
+      ],
+      "must_not": { "terms": { "_tier": [ "data_frozen", "data_cold" ] } }
     }
   },
   "jobs": [

@@ -14,13 +14,15 @@ import {
   LIST_TRUSTED_APPLICATION,
 } from './constants';
 import {
+  extractEndpointPolicyConfig,
   getPreviousDiagTaskTimestamp,
   getPreviousDailyTaskTimestamp,
   batchTelemetryRecords,
   isPackagePolicyList,
   templateExceptionList,
 } from './helpers';
-import { ExceptionListItem } from './types';
+import type { ExceptionListItem } from './types';
+import { PolicyData } from '../../../common/endpoint/types';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -218,5 +220,41 @@ describe('list telemetry schema', () => {
     expect(templatedItems[1]?.endpoint_event_filter).not.toBeUndefined();
     expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
     expect(templatedItems[0]?.trusted_application).toBeUndefined();
+  });
+});
+
+describe('test endpoint policy data config extraction', () => {
+  const stubPolicyData = {
+    id: '872de8c5-85cf-4e1b-a504-9fd39b38570c',
+    version: 'WzU4MjkwLDFd',
+    name: 'Test Policy Data',
+    namespace: 'default',
+    description: '',
+    package: {
+      name: 'endpoint',
+      title: 'Endpoint Security',
+      version: '1.4.1',
+    },
+    enabled: true,
+    policy_id: '499b5aa7-d214-5b5d-838b-3cd76469844e',
+    output_id: '',
+    inputs: [
+      {
+        type: 'endpoint',
+        enabled: true,
+        streams: [],
+        config: null,
+      },
+    ],
+    revision: 1,
+    created_at: '2022-01-18T14:52:17.385Z',
+    created_by: 'elastic',
+    updated_at: '2022-01-18T14:52:17.385Z',
+    updated_by: 'elastic',
+  } as unknown as PolicyData;
+
+  test('can succeed when policy config is null or empty', async () => {
+    const endpointPolicyConfig = extractEndpointPolicyConfig(stubPolicyData);
+    expect(endpointPolicyConfig).toBeNull();
   });
 });

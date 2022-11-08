@@ -28,7 +28,7 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
 import { EventsTh, EventsThContent } from '../../styles';
 import { EventsSelect } from '../column_headers/events_select';
@@ -121,11 +121,18 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       dispatch(
         timelineActions.updateSort({
           id: timelineId,
-          sort: cols.map(({ id, direction }) => ({
-            columnId: id,
-            columnType: columnHeaders.find((ch) => ch.id === id)?.type ?? 'text',
-            sortDirection: direction as SortDirection,
-          })),
+          sort: cols.map(({ id, direction }) => {
+            const columnHeader = columnHeaders.find((ch) => ch.id === id);
+            const columnType = columnHeader?.type ?? '';
+            const esTypes = columnHeader?.esTypes ?? [];
+
+            return {
+              columnId: id,
+              columnType,
+              esTypes,
+              sortDirection: direction as SortDirection,
+            };
+          }),
         })
       ),
     [columnHeaders, dispatch, timelineId]
@@ -166,7 +173,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
     <ActionsContainer>
       {showSelectAllCheckbox && (
         <EventsTh role="checkbox">
-          <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             <EuiCheckbox
               data-test-subj="select-all-events"
               id={'select-all-events'}
@@ -195,7 +202,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       </EventsTh>
 
       <EventsTh role="button">
-        <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+        <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
           <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
             <EuiButtonIcon
               aria-label={
@@ -218,7 +225,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       </EventsTh>
       {tabType !== TimelineTabs.eql && (
         <EventsTh role="button" data-test-subj="timeline-sorting-fields">
-          <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             <EuiToolTip content={i18n.SORT_FIELDS}>
               <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
             </EuiToolTip>
@@ -228,7 +235,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
 
       {showEventsSelect && (
         <EventsTh role="button">
-          <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             <EventsSelect checkState="unchecked" timelineId={timelineId} />
           </EventsThContent>
         </EventsTh>

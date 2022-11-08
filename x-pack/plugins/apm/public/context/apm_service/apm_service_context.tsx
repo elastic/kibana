@@ -23,14 +23,20 @@ export type APMServiceAlert = ValuesType<
   APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
 >;
 
-export const APMServiceContext = createContext<{
+export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
   transactionType?: string;
   transactionTypes: string[];
   alerts: APMServiceAlert[];
   runtimeName?: string;
-}>({ serviceName: '', transactionTypes: [], alerts: [] });
+}
+
+export const APMServiceContext = createContext<APMServiceContextValue>({
+  serviceName: '',
+  transactionTypes: [],
+  alerts: [],
+});
 
 export function ApmServiceContextProvider({
   children,

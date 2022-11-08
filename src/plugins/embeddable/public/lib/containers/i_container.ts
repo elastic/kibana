@@ -15,7 +15,7 @@ import {
 } from '../embeddables';
 import { PanelState } from '../../../common/types';
 
-export { PanelState };
+export type { PanelState };
 
 export interface ContainerOutput extends EmbeddableOutput {
   embeddableLoaded: { [key: string]: boolean };
@@ -49,7 +49,7 @@ export interface IContainer<
   getInputForChild<EEI extends EmbeddableInput>(id: string): EEI;
 
   /**
-   * Changes the input for a given child. Note, this will override any inherited state taken from
+   * Changes the input for a given child. Note, this will override all inherited state taken from
    * the container itself.
    * @param id
    * @param changes

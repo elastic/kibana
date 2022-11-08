@@ -21,7 +21,7 @@ import type { RuntimeFieldPainlessError } from '../../public/lib';
 import { setup, FieldEditorTestBed, defaultProps } from './field_editor.helpers';
 
 describe('<FieldEditor />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpRequestsMockHelpers } = setupEnvironment();
 
   let testBed: FieldEditorTestBed;
   let onChange: jest.Mock<Props['onChange']> = jest.fn();
@@ -70,7 +70,6 @@ describe('<FieldEditor />', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(async () => {

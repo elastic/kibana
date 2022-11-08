@@ -20,7 +20,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const commonConfig = MachineLearningCommonConfigsProvider(context);
   const securityCommon = MachineLearningSecurityCommonProvider(context);
   const testExecution = MachineLearningTestExecutionProvider(context);
-  const testResources = MachineLearningTestResourcesProvider(context);
+  const testResources = MachineLearningTestResourcesProvider(context, api);
 
   return {
     api,

@@ -105,6 +105,41 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             },
           ],
         },
+        only_actions_role: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        discover_alert: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+                stackAlerts: ['all'],
+                discover: ['all'],
+                advancedSettings: ['all'],
+                indexPatterns: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['search-source-alert', 'search-source-alert-output'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+        },
       },
       defaultRoles: ['superuser'],
     },

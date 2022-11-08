@@ -41,6 +41,14 @@ export const taskExecutionFailureThresholdSchema = schema.object(
   }
 );
 
+const eventLoopDelaySchema = schema.object({
+  monitor: schema.boolean({ defaultValue: true }),
+  warn_threshold: schema.number({
+    defaultValue: 5000,
+    min: 10,
+  }),
+});
+
 export const configSchema = schema.object(
   {
     enabled: schema.boolean({ defaultValue: true }),
@@ -128,6 +136,7 @@ export const configSchema = schema.object(
         max: DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY,
       }),
     }),
+    event_loop_delay: eventLoopDelaySchema,
     /* These are not designed to be used by most users. Please use caution when changing these */
     unsafe: schema.object({
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -148,3 +157,4 @@ export const configSchema = schema.object(
 
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
+export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;

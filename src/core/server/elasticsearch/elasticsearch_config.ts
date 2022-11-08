@@ -147,6 +147,7 @@ const deprecations: ConfigDeprecationProvider = () => [
 
     if (es.username === 'elastic' || es.username === 'kibana') {
       const username = es.username;
+      const level = es.username === 'elastic' ? 'critical' : 'warning';
       addDeprecation({
         configPath: `${fromPath}.username`,
         title: i18n.translate('core.deprecations.elasticsearchUsername.title', {
@@ -158,16 +159,17 @@ const deprecations: ConfigDeprecationProvider = () => [
             'Kibana is configured to authenticate to Elasticsearch with the "{username}" user. Use a service account token instead.',
           values: { username },
         }),
-        level: 'warning',
+        level,
         documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${branch}/service-accounts.html`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('core.deprecations.elasticsearchUsername.manualSteps1', {
               defaultMessage:
-                'Use the elasticsearch-service-tokens CLI tool to create a new service account token for the "elastic/kibana" service account.',
+                'Use Kibana Dev Tools to create a service account token using the API: "POST /_security/service/elastic/kibana/credential/token"',
             }),
             i18n.translate('core.deprecations.elasticsearchUsername.manualSteps2', {
-              defaultMessage: 'Add the "elasticsearch.serviceAccountToken" setting to kibana.yml.',
+              defaultMessage:
+                'Copy the returned token.value and add it as the "elasticsearch.serviceAccountToken" setting to kibana.yml.',
             }),
             i18n.translate('core.deprecations.elasticsearchUsername.manualSteps3', {
               defaultMessage:

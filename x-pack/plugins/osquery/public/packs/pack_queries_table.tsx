@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { PlatformIcons } from './queries/platforms';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 
-interface PackQueriesTableProps {
+export interface PackQueriesTableProps {
   data: OsqueryManagerPackagePolicyInputStream[];
   onDeleteClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
   onEditClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
@@ -184,3 +184,5 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
 };
 
 export const PackQueriesTable = React.memo(PackQueriesTableComponent);
+// eslint-disable-next-line import/no-default-export
+export default PackQueriesTable;

@@ -51,6 +51,10 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     const mockRequest: RequestMock = {
       method: 'get',
       path: addBasePath('snapshots'),
+      query: {
+        sortField: 'startTimeInMillis',
+        sortDirection: 'desc',
+      },
     };
 
     const mockSnapshotGetManagedRepositoryEsResponse = {

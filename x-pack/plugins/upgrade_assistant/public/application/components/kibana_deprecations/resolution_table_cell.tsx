@@ -29,7 +29,7 @@ const i18nTexts = {
   manualCellTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.manualCellTooltipLabel',
     {
-      defaultMessage: 'Resolve this deprecation manually.',
+      defaultMessage: 'This issue needs to be resolved manually.',
     }
   ),
   automatedCellLabel: i18n.translate(
@@ -59,7 +59,7 @@ const i18nTexts = {
   automatedCellTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.automatedCellTooltipLabel',
     {
-      defaultMessage: 'This is an automated resolution.',
+      defaultMessage: 'This issue can be resolved automatically.',
     }
   ),
 };

@@ -30,6 +30,15 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   return {
+    assertResponseStatusCode(expectedStatus: number, actualStatus: number, responseBody: object) {
+      expect(actualStatus).to.eql(
+        expectedStatus,
+        `Expected status code ${expectedStatus}, got ${actualStatus} with body '${JSON.stringify(
+          responseBody
+        )}'`
+      );
+    },
+
     async createIndices(indices: string) {
       log.debug(`Creating indices: '${indices}'...`);
       if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === true) {
@@ -93,18 +102,24 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     async cleanTransformIndices() {
       // Delete all transforms using the API since we mustn't just delete
       // all `.transform-*` indices since this might result in orphaned ES tasks.
-      const {
-        body: { transforms },
-      } = await esSupertest.get(`/_transform/`).expect(200);
-      const transformIds = transforms.map((t: { id: string }) => t.id);
+      const { body: getRspBody, status: getRspStatus } = await esSupertest.get(`/_transform/`);
+      this.assertResponseStatusCode(200, getRspStatus, getRspBody);
+
+      const transformIds = getRspBody.transforms.map((t: { id: string }) => t.id);
 
       await asyncForEach(transformIds, async (transformId: string) => {
-        await esSupertest
-          .post(`/_transform/${transformId}/_stop?force=true&wait_for_completion`)
-          .expect(200);
+        const { body: stopRspBody, status: stopRspStatus } = await esSupertest.post(
+          `/_transform/${transformId}/_stop?force=true&wait_for_completion`
+        );
+        this.assertResponseStatusCode(200, stopRspStatus, stopRspBody);
+
         await this.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
 
-        await esSupertest.delete(`/_transform/${transformId}`).expect(200);
+        const { body: deleteRspBody, status: deleteRspstatus } = await esSupertest.delete(
+          `/_transform/${transformId}`
+        );
+        this.assertResponseStatusCode(200, deleteRspstatus, deleteRspBody);
+
         await this.waitForTransformNotToExist(transformId);
       });
 
@@ -115,10 +130,10 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async getTransformStats(transformId: string): Promise<TransformStats> {
       log.debug(`Fetching transform stats for transform ${transformId}`);
-      const statsResponse = await esSupertest
-        .get(`/_transform/${transformId}/_stats`)
-        .expect(200)
-        .then((res: any) => res.body);
+      const { body: statsResponse, status } = await esSupertest.get(
+        `/_transform/${transformId}/_stats`
+      );
+      this.assertResponseStatusCode(200, status, statsResponse);
 
       expect(statsResponse.transforms).to.have.length(
         1,
@@ -178,30 +193,36 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async getTransformList(size: number = 10): Promise<GetTransformsResponseSchema> {
-      return (await esSupertest
-        .get(`/_transform`)
-        .expect(200)
-        .then((response) => response.body)) as GetTransformsResponseSchema;
+      const { body, status } = await esSupertest.get(`/_transform`);
+      this.assertResponseStatusCode(200, status, body);
+
+      return body as GetTransformsResponseSchema;
     },
 
     async getTransform(transformId: string, expectedCode = 200) {
-      return await esSupertest.get(`/_transform/${transformId}`).expect(expectedCode);
+      const response = await esSupertest.get(`/_transform/${transformId}`);
+      this.assertResponseStatusCode(expectedCode, response.status, response.body);
+      return response;
     },
 
     async updateTransform(
       transformId: string,
       updates: Partial<PostTransformsUpdateRequestSchema>
     ): Promise<TransformPivotConfig> {
-      return await esSupertest
+      const { body, status } = await esSupertest
         .post(`/_transform/${transformId}/_update`)
-        .send(updates)
-        .expect(200)
-        .then((response: { body: TransformPivotConfig }) => response.body);
+        .send(updates);
+      this.assertResponseStatusCode(200, status, body);
+
+      return body as TransformPivotConfig;
     },
 
     async createTransform(transformId: string, transformConfig: PutTransformsRequestSchema) {
       log.debug(`Creating transform with id '${transformId}'...`);
-      await esSupertest.put(`/_transform/${transformId}`).send(transformConfig).expect(200);
+      const { body, status } = await esSupertest
+        .put(`/_transform/${transformId}`)
+        .send(transformConfig);
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForTransformToExist(
         transformId,
@@ -231,12 +252,14 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async startTransform(transformId: string) {
       log.debug(`Starting transform '${transformId}' ...`);
-      await esSupertest.post(`/_transform/${transformId}/_start`).expect(200);
+      const { body, status } = await esSupertest.post(`/_transform/${transformId}/_start`);
+      this.assertResponseStatusCode(200, status, body);
     },
 
     async stopTransform(transformId: string) {
       log.debug(`Stopping transform '${transformId}' ...`);
-      await esSupertest.post(`/_transform/${transformId}/_stop`).expect(200);
+      const { body, status } = await esSupertest.post(`/_transform/${transformId}/_stop`);
+      this.assertResponseStatusCode(200, status, body);
     },
 
     async createAndRunTransform(transformId: string, transformConfig: PutTransformsRequestSchema) {

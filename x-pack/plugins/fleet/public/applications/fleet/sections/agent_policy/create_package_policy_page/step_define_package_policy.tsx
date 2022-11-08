@@ -22,16 +22,12 @@ import {
 
 import styled from 'styled-components';
 
-import type {
-  AgentPolicy,
-  PackageInfo,
-  PackagePolicy,
-  NewPackagePolicy,
-  RegistryVarsEntry,
-} from '../../../types';
+import type { AgentPolicy, PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../types';
 import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../services';
 import { Loading } from '../../../components';
-import { useStartServices } from '../../../hooks';
+import { useStartServices, useGetPackagePolicies } from '../../../hooks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+import { SO_SEARCH_LIMIT } from '../../../../../../common';
 
 import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';
@@ -54,17 +50,27 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
+  isUpdate?: boolean;
 }> = memo(
   ({
     agentPolicy,
     packageInfo,
     packagePolicy,
     integrationToEnable,
+    isUpdate,
     updatePackagePolicy,
     validationResults,
     submitAttempted,
   }) => {
     const { docLinks } = useStartServices();
+
+    // Fetch all packagePolicies having the package name
+    const { data: packagePolicyData, isLoading: isLoadingPackagePolicies } = useGetPackagePolicies({
+      perPage: SO_SEARCH_LIMIT,
+      page: 1,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
+    });
+
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
@@ -84,20 +90,48 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     // Update package policy's package and agent policy info
     useEffect(() => {
+      if (isLoadingPackagePolicies) {
+        return;
+      }
+
+      if (isUpdate) {
+        // If we're upgrading, we need to make sure we catch an addition of package-level
+        // vars when they were previously no package-level vars defined
+        if (!packagePolicy.vars && packageInfo.vars) {
+          updatePackagePolicy(
+            packageToPackagePolicy(
+              packageInfo,
+              agentPolicy?.id || '',
+              packagePolicy.output_id,
+              packagePolicy.namespace,
+              packagePolicy.name,
+              packagePolicy.description,
+              integrationToEnable
+            )
+          );
+        }
+      }
+
       const pkg = packagePolicy.package;
       const currentPkgKey = pkg ? pkgKeyFromPackageInfo(pkg) : '';
       const pkgKey = pkgKeyFromPackageInfo(packageInfo);
 
       // If package has changed, create shell package policy with input&stream values based on package info
       if (currentPkgKey !== pkgKey) {
-        // Existing package policies on the agent policy using the package name, retrieve highest number appended to package policy name
+        // Retrieve highest number appended to package policy name and increment it by one
         const pkgPoliciesNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
-        const pkgPoliciesWithMatchingNames = agentPolicy
-          ? (agentPolicy.package_policies as PackagePolicy[])
+        const pkgPoliciesWithMatchingNames = packagePolicyData?.items
+          ? packagePolicyData.items
               .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
               .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
               .sort((a, b) => a - b)
           : [];
+
+        const incrementedName = `${packageInfo.name}-${
+          pkgPoliciesWithMatchingNames.length
+            ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
+            : 1
+        }`;
 
         updatePackagePolicy(
           packageToPackagePolicy(
@@ -105,11 +139,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             agentPolicy?.id || '',
             packagePolicy.output_id,
             packagePolicy.namespace,
-            `${packageInfo.name}-${
-              pkgPoliciesWithMatchingNames.length
-                ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-                : 1
-            }`,
+            packagePolicy.name || incrementedName,
             packagePolicy.description,
             integrationToEnable
           )
@@ -123,7 +153,16 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           namespace: agentPolicy.namespace,
         });
       }
-    }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy, integrationToEnable]);
+    }, [
+      isUpdate,
+      packagePolicy,
+      agentPolicy,
+      packageInfo,
+      updatePackagePolicy,
+      integrationToEnable,
+      packagePolicyData,
+      isLoadingPackagePolicies,
+    ]);
 
     return validationResults ? (
       <FormGroupResponsiveFields
@@ -204,6 +243,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             const { name: varName, type: varType } = varDef;
             if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
             const value = packagePolicy.vars[varName].value;
+
             return (
               <EuiFlexItem key={varName}>
                 <PackagePolicyInputVarField

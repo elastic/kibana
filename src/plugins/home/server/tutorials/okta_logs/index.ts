@@ -24,12 +24,12 @@ export function oktaLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'oktaLogs',
     name: i18n.translate('home.tutorials.oktaLogs.nameTitle', {
-      defaultMessage: 'Okta logs',
+      defaultMessage: 'Okta Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.oktaLogs.shortDescription', {
-      defaultMessage: 'Collect the Okta system log via the Okta API.',
+      defaultMessage: 'Collect and parse logs from the Okta API with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.oktaLogs.longDescription', {
       defaultMessage:

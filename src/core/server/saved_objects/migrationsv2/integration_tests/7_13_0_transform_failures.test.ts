@@ -155,7 +155,6 @@ function createRoot() {
     {
       migrations: {
         skip: false,
-        enableV2: true,
         batchSize: 5,
       },
       logging: {
@@ -171,6 +170,7 @@ function createRoot() {
         loggers: [
           {
             name: 'root',
+            level: 'info',
             appenders: ['file'],
           },
         ],

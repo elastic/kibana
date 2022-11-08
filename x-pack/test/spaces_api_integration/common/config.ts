@@ -39,6 +39,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         retry: config.xpack.api.get('services.retry'),
         esArchiver: config.kibana.functional.get('services.esArchiver'),
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
+        spaces: config.xpack.api.get('services.spaces'),
       },
       junit: {
         reportName: 'X-Pack Spaces API Integration Tests -- ' + name,
@@ -61,7 +62,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
           `--plugin-path=${path.join(__dirname, 'fixtures', 'spaces_test_plugin')}`,
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

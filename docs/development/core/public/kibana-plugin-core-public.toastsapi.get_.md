@@ -13,5 +13,5 @@ get$(): Rx.Observable<Toast[]>;
 ```
 <b>Returns:</b>
 
-`Rx.Observable<Toast[]>`
+Rx.Observable&lt;Toast\[\]&gt;
 

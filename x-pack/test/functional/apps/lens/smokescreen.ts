@@ -59,6 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('Afancilenstest');
       await PageObjects.lens.clickVisualizeListItemTitle('Afancilenstest');
       await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.waitForVisualization();
 
       expect(await PageObjects.lens.getTitle()).to.eql('Afancilenstest');
 
@@ -80,6 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         keepOpen: true,
       });
       await PageObjects.lens.addFilterToAgg(`geo.src : CN`);
+      await PageObjects.lens.waitForVisualization();
 
       // Verify that the field was persisted from the transition
       expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`ip : *`, `geo.src : CN`]);

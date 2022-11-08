@@ -31,15 +31,15 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number,
     requestBody: unknown
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/s/${space}/api/ml/data_frame/analytics/${jobId}/_update`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
       .set(COMMON_REQUEST_HEADERS)
-      .send(requestBody)
-      .expect(expectedStatusCode);
+      .send(requestBody);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }

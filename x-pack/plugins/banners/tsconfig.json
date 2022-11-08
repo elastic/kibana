@@ -6,16 +6,11 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": [
-    "public/**/*",
-    "server/**/*",
-    "common/**/*",
-    "../../../typings/**/*"
-  ],
+  "include": ["public/**/*", "server/**/*", "common/**/*", "../../../typings/**/*"],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/screenshot_mode/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" }
   ]
 }
-

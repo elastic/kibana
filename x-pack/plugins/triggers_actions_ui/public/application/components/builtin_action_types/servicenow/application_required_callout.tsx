@@ -25,10 +25,11 @@ const ERROR_MESSAGE = i18n.translate(
 );
 
 interface Props {
+  appId: string;
   message?: string | null;
 }
 
-const ApplicationRequiredCalloutComponent: React.FC<Props> = ({ message }) => {
+const ApplicationRequiredCalloutComponent: React.FC<Props> = ({ appId, message }) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -50,7 +51,7 @@ const ApplicationRequiredCalloutComponent: React.FC<Props> = ({ message }) => {
             {ERROR_MESSAGE}: {message}
           </p>
         )}
-        <SNStoreButton color="danger" />
+        <SNStoreButton color="danger" appId={appId} />
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

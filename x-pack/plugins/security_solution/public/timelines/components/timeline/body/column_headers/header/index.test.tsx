@@ -43,7 +43,8 @@ describe('Header', () => {
   const sort: Sort[] = [
     {
       columnId: columnHeader.id,
-      columnType: columnHeader.type ?? 'number',
+      columnType: columnHeader.type ?? '',
+      esTypes: columnHeader.esTypes ?? [],
       sortDirection: Direction.desc,
     },
   ];
@@ -183,6 +184,7 @@ describe('Header', () => {
             {
               columnId: columnHeader.id,
               columnType: columnHeader.type ?? 'number',
+              esTypes: columnHeader.esTypes ?? [],
               sortDirection: Direction.asc, // (because the previous state was Direction.desc)
             },
           ],
@@ -251,6 +253,7 @@ describe('Header', () => {
         {
           columnId: 'differentSocks',
           columnType: columnHeader.type ?? 'number',
+          esTypes: columnHeader.esTypes ?? [],
           sortDirection: Direction.desc,
         },
       ];
@@ -264,6 +267,7 @@ describe('Header', () => {
       const sortDescending: Sort = {
         columnId: columnHeader.id,
         columnType: columnHeader.type ?? 'number',
+        esTypes: columnHeader.esTypes ?? [],
         sortDirection: Direction.desc,
       };
 
@@ -274,6 +278,7 @@ describe('Header', () => {
       const sortAscending: Sort = {
         columnId: columnHeader.id,
         columnType: columnHeader.type ?? 'number',
+        esTypes: columnHeader.esTypes ?? [],
         sortDirection: Direction.asc,
       };
 
@@ -284,6 +289,7 @@ describe('Header', () => {
       const sortNone: Sort = {
         columnId: columnHeader.id,
         columnType: columnHeader.type ?? 'number',
+        esTypes: columnHeader.esTypes ?? [],
         sortDirection: 'none',
       };
 
@@ -297,6 +303,7 @@ describe('Header', () => {
         {
           columnId: columnHeader.id,
           columnType: columnHeader.type ?? 'number',
+          esTypes: columnHeader.esTypes ?? [],
           sortDirection: Direction.desc,
         },
       ];
@@ -314,6 +321,7 @@ describe('Header', () => {
         {
           columnId: 'someOtherColumn',
           columnType: columnHeader.type ?? 'number',
+          esTypes: columnHeader.esTypes ?? [],
           sortDirection: 'none',
         },
       ];

@@ -34,6 +34,36 @@ export const getDuplicateFields = (entries: ConditionEntry[]) => {
     .map((entry) => entry[0]);
 };
 
+/**
+ * checks if the filename of a given path (if any) is a simple executable (does NOT have the
+ * wildcards supported by endpoing (`*` and `?`))
+ * @param os
+ * @param type
+ * @param value
+ */
+export const hasSimpleExecutableName = ({
+  os,
+  type,
+  value,
+}: {
+  os: OperatingSystem;
+  type: TrustedAppEntryTypes;
+  value: string;
+}): boolean => {
+  if (type !== 'wildcard') {
+    return true;
+  }
+
+  const separator = os === OperatingSystem.WINDOWS ? '\\' : '/';
+  const lastString = value.split(separator).pop();
+
+  if (!lastString) {
+    return false;
+  }
+
+  return (lastString.split('*').length || lastString.split('?').length) === 1;
+};
+
 export const isPathValid = ({
   os,
   field,

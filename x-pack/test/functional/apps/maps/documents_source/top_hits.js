@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }) {
   const inspector = getService('inspector');
   const find = getService('find');
   const security = getService('security');
+  const retry = getService('retry');
 
   describe('geo top hits', () => {
     describe('split on string field', () => {
@@ -42,13 +43,22 @@ export default function ({ getPageObjects, getService }) {
       describe('configuration', () => {
         before(async () => {
           await PageObjects.maps.openLayerPanel('logstash');
-          // Can not use testSubjects because data-test-subj is placed range input and number input
-          const sizeInput = await find.byCssSelector(
-            `input[data-test-subj="layerPanelTopHitsSize"][type='number']`
-          );
-          await sizeInput.click();
-          await sizeInput.clearValue();
-          await sizeInput.type('3');
+
+          await retry.try(async () => {
+            // Can not use testSubjects because data-test-subj is placed range input and number input
+            const sizeInput = await find.byCssSelector(
+              `input[data-test-subj="layerPanelTopHitsSize"][type='number']`
+            );
+            await sizeInput.click();
+            await sizeInput.clearValue();
+            await sizeInput.type('3');
+
+            const sizeValue = await sizeInput.getAttribute('value');
+            if (sizeValue !== '3') {
+              throw new Error('layerPanelTopHitsSize not set to 3');
+            }
+          });
+
           await PageObjects.maps.waitForLayersToLoad();
         });
 

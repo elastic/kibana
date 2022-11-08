@@ -135,7 +135,7 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
     const dropdownItems = useMemo(
       () =>
         itemsList.map((item, index) =>
-          item.name.match(new RegExp(query, 'i')) ? (
+          item.name.toLowerCase().includes(query.toLowerCase()) ? (
             <EuiFilterSelectItem
               checked={item.checked}
               key={index}

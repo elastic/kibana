@@ -52,7 +52,6 @@ export function StandardAgg(props) {
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}
-            uiRestrictions={uiRestrictions}
             onChange={handleSelectChange('type')}
             fullWidth
           />

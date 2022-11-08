@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { Setup } from '../helpers/setup_request';
-import { CorrelationsOptions } from '../search_strategies/queries/get_filters';
+import type {
+  FieldValuePair,
+  CorrelationsClientParams,
+} from '../../../common/correlations/types';
 
-export interface OverallLatencyDistributionOptions extends CorrelationsOptions {
+import { Setup } from '../helpers/setup_request';
+
+export interface OverallLatencyDistributionOptions
+  extends CorrelationsClientParams {
   percentileThreshold: number;
+  termFilters?: FieldValuePair[];
   setup: Setup;
 }
 
 export interface OverallLatencyDistributionResponse {
-  log: string[];
   percentileThresholdValue?: number;
   overallHistogram?: Array<{
     key: number;

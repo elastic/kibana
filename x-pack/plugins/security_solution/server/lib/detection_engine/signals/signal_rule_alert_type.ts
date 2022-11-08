@@ -8,12 +8,9 @@
 
 import { Logger, SavedObject } from 'src/core/server';
 import isEmpty from 'lodash/isEmpty';
-import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
-import { flow } from 'fp-ts/lib/function';
 
 import * as t from 'io-ts';
 import { validateNonExact, parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { toError, toPromise } from '@kbn/securitysolution-list-api';
 
 import {
   SIGNALS_ID,
@@ -191,53 +188,44 @@ export const signalRulesAlertType = ({
             index,
             experimentalFeatures,
           });
-          const [privileges, timestampFieldCaps] = await Promise.all([
-            checkPrivileges(services, inputIndices),
-            services.scopedClusterClient.asCurrentUser.fieldCaps({
+          const privileges = await checkPrivileges(services, inputIndices);
+
+          wroteWarningStatus = await hasReadIndexPrivileges({
+            ...basicLogArguments,
+            privileges,
+            logger,
+            buildRuleMessage,
+            ruleStatusClient,
+          });
+
+          if (!wroteWarningStatus) {
+            const timestampFieldCaps = await services.scopedClusterClient.asCurrentUser.fieldCaps({
               index,
               fields: hasTimestampOverride
                 ? ['@timestamp', timestampOverride as string]
                 : ['@timestamp'],
               include_unmapped: true,
-            }),
-          ]);
-
-          wroteWarningStatus = await flow(
-            () =>
-              tryCatch(
-                () =>
-                  hasReadIndexPrivileges({
-                    ...basicLogArguments,
-                    privileges,
-                    logger,
-                    buildRuleMessage,
-                    ruleStatusClient,
-                  }),
-                toError
-              ),
-            chain((wroteStatus) =>
-              tryCatch(
-                () =>
-                  hasTimestampFields({
-                    ...basicLogArguments,
-                    wroteStatus: wroteStatus as boolean,
-                    timestampField: hasTimestampOverride
-                      ? (timestampOverride as string)
-                      : '@timestamp',
-                    timestampFieldCapsResponse: timestampFieldCaps,
-                    inputIndices,
-                    ruleStatusClient,
-                    logger,
-                    buildRuleMessage,
-                  }),
-                toError
-              )
-            ),
-            toPromise
-          )();
+            });
+            wroteWarningStatus = await hasTimestampFields({
+              ...basicLogArguments,
+              timestampField: hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
+              timestampFieldCapsResponse: timestampFieldCaps,
+              inputIndices,
+              ruleStatusClient,
+              logger,
+              buildRuleMessage,
+            });
+          }
         }
       } catch (exc) {
-        logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
+        const errorMessage = buildRuleMessage(`Check privileges failed to execute ${exc}`);
+        logger.error(errorMessage);
+        await ruleStatusClient.logStatusChange({
+          ...basicLogArguments,
+          message: errorMessage,
+          newStatus: RuleExecutionStatus['partial failure'],
+        });
+        wroteWarningStatus = true;
       }
       const { tuples, remainingGap } = getRuleRangeTuples({
         logger,
@@ -412,7 +400,7 @@ export const signalRulesAlertType = ({
                 ?.kibana_siem_app_url,
             });
 
-            logger.info(
+            logger.debug(
               buildRuleMessage(`Found ${result.createdSignalsCount} signals for notification.`)
             );
 
@@ -462,8 +450,7 @@ export const signalRulesAlertType = ({
             });
           }
 
-          // adding this log line so we can get some information from cloud
-          logger.info(
+          logger.debug(
             buildRuleMessage(
               `[+] Finished indexing ${result.createdSignalsCount}  ${
                 !isEmpty(tuples)

@@ -16,7 +16,8 @@ import {
   AgentsStrategyResponse,
 } from '../../common/search_strategy';
 
-import { generateTablePaginationOptions, processAggregations } from './helpers';
+import { processAggregations } from './helpers';
+import { generateTablePaginationOptions } from '../common/helpers';
 import { Overlap, Group } from './types';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 

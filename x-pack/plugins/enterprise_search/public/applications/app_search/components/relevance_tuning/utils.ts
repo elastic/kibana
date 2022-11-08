@@ -16,7 +16,7 @@ export const filterIfTerm = (array: string[], filterTerm: string): string[] => {
   return filterTerm === '' ? array : array.filter((item) => item.includes(filterTerm));
 };
 
-export const removeBoostStateProps = (searchSettings: SearchSettings) => {
+export const removeBoostStateProps = (searchSettings: SearchSettings): SearchSettings => {
   const updatedSettings = cloneDeep(searchSettings);
   const { boosts } = updatedSettings;
   const keys = Object.keys(boosts);

@@ -14,10 +14,10 @@ start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  core | <code>CoreStart</code> |  |
-|  plugins | <code>TPluginsStart</code> |  |
+|  core | CoreStart |  |
+|  plugins | TPluginsStart |  |
 
 <b>Returns:</b>
 
-`TStart | Promise<TStart>`
+TStart \| Promise&lt;TStart&gt;
 

@@ -91,7 +91,7 @@ export function getColumns(
                 })
           }
           data-row-id={item.rowId}
-          data-test-subj="mlJobListRowDetailsToggle"
+          data-test-subj="mlAnomaliesListRowDetailsToggle"
         />
       ),
     },

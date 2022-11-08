@@ -11,6 +11,7 @@ import type {
   RequestHandlerContext,
   RouteMethod,
   SavedObjectsClientContract,
+  IRouter,
 } from '../../../../../src/core/server';
 
 /** @internal */
@@ -37,3 +38,9 @@ export type FleetRequestHandler<
   Method extends RouteMethod = any,
   ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
 > = RequestHandler<P, Q, B, FleetRequestHandlerContext, Method, ResponseFactory>;
+
+/**
+ * Convenience type for routers in Fleet that includes the FleetRequestHandlerContext type
+ * @internal
+ */
+export type FleetRouter = IRouter<FleetRequestHandlerContext>;

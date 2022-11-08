@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
@@ -22,11 +23,12 @@ export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppC
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const soClient = context.core.savedObjects.client;
-
+      const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+        osqueryContext.getStartServices
+      );
       const packageInfo = await osqueryContext.service
         .getAgentPolicyService()
-        ?.get(soClient, request.params.id);
+        ?.get(internalSavedObjectsClient, request.params.id);
 
       return response.ok({ body: { item: packageInfo } });
     }

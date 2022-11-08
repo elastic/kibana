@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('total feature importance panel and decision path popover', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/115415
+  describe.skip('total feature importance panel and decision path popover', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -63,6 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
                 training_percent: 35,
                 prediction_field_name: 'CentralAir_prediction',
                 num_top_classes: -1,
+                max_trees: 10,
               },
             },
             model_memory_limit: '60mb',
@@ -108,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
                 training_percent: 35,
                 prediction_field_name: 'heatingqc',
                 num_top_classes: -1,
+                max_trees: 10,
               },
             },
             model_memory_limit: '60mb',
@@ -139,6 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
                 dependent_variable: 'stab',
                 num_top_feature_importance_values: 5,
                 training_percent: 35,
+                max_trees: 10,
               },
             },
             analyzed_fields: {
@@ -180,6 +184,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      for (const testData of testDataList) {
+        await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
+      }
     });
 
     for (const testData of testDataList) {

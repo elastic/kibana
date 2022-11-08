@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 const fs = require('fs');
 const { execSync } = require('child_process');
 const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
@@ -47,7 +55,7 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
           version: parts[1],
           platform: parts[3],
           architecture: parts[4].split('.')[0],
-          license: parts[0] == 'oss' ? 'oss' : 'default',
+          license: parts[0] === 'oss' ? 'oss' : 'default',
         };
       });
 
@@ -75,7 +83,7 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
       cd "${destination}"
       gsutil -m cp -r *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
       cp manifest.json manifest-latest.json
-      gsutil cp manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}
+      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}
 
       buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST 'https://storage.googleapis.com/${BASE_BUCKET_DAILY}/${DESTINATION}/manifest.json'
       buildkite-agent meta-data set ES_SNAPSHOT_VERSION '${VERSION}'

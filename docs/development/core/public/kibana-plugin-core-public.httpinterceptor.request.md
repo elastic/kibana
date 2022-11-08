@@ -16,10 +16,10 @@ request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInte
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  fetchOptions | <code>Readonly&lt;HttpFetchOptionsWithPath&gt;</code> |  |
-|  controller | <code>IHttpInterceptController</code> |  |
+|  fetchOptions | Readonly&lt;HttpFetchOptionsWithPath&gt; |  |
+|  controller | IHttpInterceptController | [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md) |
 
 <b>Returns:</b>
 
-`MaybePromise<Partial<HttpFetchOptionsWithPath>> | void`
+MaybePromise&lt;Partial&lt;HttpFetchOptionsWithPath&gt;&gt; \| void
 

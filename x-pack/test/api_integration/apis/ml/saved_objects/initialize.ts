@@ -21,11 +21,11 @@ export default ({ getService }: FtrProviderContext) => {
   const dfaJobId = 'ihp_od';
 
   async function runRequest(user: USER, expectedStatusCode: number) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/api/ml/saved_objects/initialize`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(expectedStatusCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }

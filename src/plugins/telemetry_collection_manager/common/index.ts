@@ -8,3 +8,10 @@
 
 export const PLUGIN_ID = 'telemetryCollectionManager';
 export const PLUGIN_NAME = 'telemetry_collection_manager';
+
+/**
+ * The duration, in milliseconds, to cache stats
+ * Currently 4 hours.
+ */
+const hour = 1000 * 60 * 60;
+export const CACHE_DURATION_MS = 4 * hour;

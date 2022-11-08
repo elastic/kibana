@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
 import { ReportingCore } from '..';
 import { chromium, HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
@@ -60,6 +59,9 @@ mockBrowserEvaluate.mockImplementation(() => {
   const lastCallIndex = mockBrowserEvaluate.mock.calls.length - 1;
   const { context: mockCall } = mockBrowserEvaluate.mock.calls[lastCallIndex][1];
 
+  if (mockCall === contexts.CONTEXT_DEBUG) {
+    return Promise.resolve();
+  }
   if (mockCall === contexts.CONTEXT_SKIPTELEMETRY) {
     return Promise.resolve();
   }
@@ -124,7 +126,7 @@ export const createMockBrowserDriverFactory = async (
 
   const binaryPath = '/usr/local/share/common/secure/super_awesome_binary';
   const mockBrowserDriverFactory = chromium.createDriverFactory(core, binaryPath, logger);
-  const mockPage = { setViewport: () => {} } as unknown as Page;
+  const mockPage = { setViewport: () => {} } as unknown;
   const mockBrowserDriver = new HeadlessChromiumDriver(core, mockPage, {
     inspect: true,
     networkPolicy: captureConfig.networkPolicy,

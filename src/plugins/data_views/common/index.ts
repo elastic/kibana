@@ -55,13 +55,10 @@ export type {
   SourceFilter,
 } from './types';
 export { DataViewType, IndexPatternType } from './types';
-export {
-  IndexPatternsService,
-  IndexPatternsContract,
-  DataViewsService,
-  DataViewsContract,
-} from './data_views';
-export { IndexPattern, IndexPatternListItem, DataView, DataViewListItem } from './data_views';
+export type { IndexPatternsContract, DataViewsContract } from './data_views';
+export { IndexPatternsService, DataViewsService } from './data_views';
+export type { IndexPatternListItem, DataViewListItem } from './data_views';
+export { IndexPattern, DataView } from './data_views';
 export { DuplicateDataViewError, DataViewSavedObjectConflictError } from './errors';
 export type {
   IndexPatternExpressionType,

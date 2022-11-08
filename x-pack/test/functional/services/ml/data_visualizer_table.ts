@@ -295,7 +295,7 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public async setSampleSizeInputValue(
-      sampleSize: number,
+      sampleSize: number | 'all',
       fieldName: string,
       docCountFormatted: string
     ) {

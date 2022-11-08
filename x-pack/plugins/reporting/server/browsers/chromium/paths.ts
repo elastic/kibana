@@ -8,13 +8,16 @@
 import path from 'path';
 
 interface PackageInfo {
-  platform: string;
-  architecture: string;
+  platform: 'linux' | 'darwin' | 'win32';
+  architecture: 'x64' | 'arm64';
   archiveFilename: string;
   archiveChecksum: string;
   binaryChecksum: string;
   binaryRelativePath: string;
+  location: 'custom' | 'common';
 }
+
+const REVISION = 1036745;
 
 enum BaseUrl {
   // see https://www.chromium.org/getting-involved/download-chromium
@@ -31,34 +34,37 @@ interface CommonPackageInfo extends PackageInfo {
   archivePath: string;
 }
 
-export class ChromiumArchivePaths {
-  public readonly revision = '856583';
+function isCommonPackage(p: PackageInfo): p is CommonPackageInfo {
+  return p.location === 'common';
+}
 
+export class ChromiumArchivePaths {
   public readonly packages: Array<CustomPackageInfo | CommonPackageInfo> = [
     {
       platform: 'darwin',
       architecture: 'x64',
-      archiveFilename: 'chromium-d163fd7-darwin_x64.zip',
-      archiveChecksum: '19aa88bd59e2575816425bf72786c53f',
-      binaryChecksum: 'dfcd6e007214175997663c50c8d871ea',
-      binaryRelativePath: 'headless_shell-darwin_x64/headless_shell',
-      location: 'custom',
+      archiveFilename: 'chrome-mac.zip',
+      archiveChecksum: 'dd4d44ad97ba2fef5dc47d7f2a39ccaa',
+      binaryChecksum: '4a7a663b2656d66ce975b00a30df3ab4',
+      binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
+      location: 'common',
+      archivePath: 'Mac',
     },
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-d163fd7-linux_x64.zip',
-      archiveChecksum: 'fba0a240d409228a3494aef415c300fc',
-      binaryChecksum: '99cfab472d516038b94ef86649e52871',
+      archiveFilename: 'chromium-749e738-locales-linux_x64.zip',
+      archiveChecksum: '09ba194e6c720397728fbec3d3895b0b',
+      binaryChecksum: 'df1c957f41dcca8e33369b1d255406c2',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
     },
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-d163fd7-linux_arm64.zip',
-      archiveChecksum: '29834735bc2f0e0d9134c33bc0580fb6',
-      binaryChecksum: '13baccf2e5c8385cb9d9588db6a9e2c2',
+      archiveFilename: 'chromium-749e738-locales-linux_arm64.zip',
+      archiveChecksum: '1f535b1c2875d471829c6ff128a13262',
+      binaryChecksum: 'ca6b91d0ba8a65712554572dabc66968',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
     },
@@ -66,9 +72,9 @@ export class ChromiumArchivePaths {
       platform: 'win32',
       architecture: 'x64',
       archiveFilename: 'chrome-win.zip',
-      archiveChecksum: '64999a384bfb6c96c50c4cb6810dbc05',
-      binaryChecksum: '13b8bbb4a12f9036b8cc3b57b3a71fec',
-      binaryRelativePath: 'chrome-win\\chrome.exe',
+      archiveChecksum: '42db052673414b89d8cb45657c1a6aeb',
+      binaryChecksum: '1b6eef775198ffd48fb9669ac0c818f7',
+      binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
       location: 'common',
       archivePath: 'Win',
     },
@@ -77,12 +83,13 @@ export class ChromiumArchivePaths {
   // zip files get downloaded to a .chromium directory in the kibana root
   public readonly archivesPath = path.resolve(__dirname, '../../../../../../.chromium');
 
-  public find(platform: string, architecture: string) {
-    return this.packages.find((p) => p.platform === platform && p.architecture === architecture);
+  public find(platform: string, architecture: string, packages: PackageInfo[] = this.packages) {
+    return packages.find((p) => p.platform === platform && p.architecture === architecture);
   }
 
   public resolvePath(p: PackageInfo) {
-    return path.resolve(this.archivesPath, p.archiveFilename);
+    // adding architecture to the path allows it to download two binaries that have the same name, but are different architecture
+    return path.resolve(this.archivesPath, p.architecture, p.archiveFilename);
   }
 
   public getAllArchiveFilenames(): string[] {
@@ -90,10 +97,10 @@ export class ChromiumArchivePaths {
   }
 
   public getDownloadUrl(p: CustomPackageInfo | CommonPackageInfo) {
-    if (p.location === 'common') {
-      return `${BaseUrl.common}/${p.archivePath}/${this.revision}/${p.archiveFilename}`;
+    if (isCommonPackage(p)) {
+      return `${BaseUrl.common}/${p.archivePath}/${REVISION}/${p.archiveFilename}`;
     }
-    return BaseUrl.custom + '/' + p.archiveFilename;
+    return BaseUrl.custom + '/' + p.archiveFilename; // revision is not used for URL if package is a custom build
   }
 
   public getBinaryPath(p: PackageInfo) {

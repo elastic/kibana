@@ -11,7 +11,7 @@ export function plugin() {
   return new DataVisualizerPlugin();
 }
 
-export { DataVisualizerPluginStart } from './plugin';
+export type { DataVisualizerPluginStart } from './plugin';
 
 export type {
   FileDataVisualizerSpec,

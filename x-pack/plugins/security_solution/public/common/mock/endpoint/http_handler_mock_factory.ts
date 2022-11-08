@@ -161,7 +161,7 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
     const responseProvider: MockedApi<R>['responseProvider'] = mocks.reduce(
       (providers, routeMock) => {
         // FIXME: find a way to remove the ignore below. May need to limit the calling signature of `RouteMock['handler']`
-        // @ts-ignore
+        // @ts-expect-error TS2322
         const routeResponseCallbackMock: SingleResponseProvider<R[keyof R]> = jest.fn(
           routeMock.handler
         );
@@ -210,7 +210,7 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
                 // Ignore below is needed because the http service methods are defined via an overloaded interface.
                 // If the first argument is NOT fetch with options, then we know that its a string and `args` has
                 // a potential for being of `.length` 2.
-                // @ts-ignore
+                // @ts-expect-error TS2493
                 ...(args[1] || {}),
                 path: args[0],
               };
@@ -303,7 +303,7 @@ export const composeHttpHandlerMocks = <
       },
       // Ignore here because we populate this object with the entries provided
       // via the input argument `handlerMocks`
-      // @ts-ignore
+      // @ts-expect-error TS2322
       responseProvider: {},
     };
 

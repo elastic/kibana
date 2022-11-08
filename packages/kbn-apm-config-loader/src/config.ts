@@ -13,6 +13,7 @@ import { execSync } from 'child_process';
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
 import type { AgentConfigOptions } from 'elastic-apm-node';
+import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
 const DEFAULT_CONFIG: AgentConfigOptions = {
@@ -22,28 +23,30 @@ const DEFAULT_CONFIG: AgentConfigOptions = {
   globalLabels: {},
 };
 
-const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions = {
-  serverUrl: 'https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io',
+export const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfigOptions = {
+  serverUrl: 'https://kibana-cloud-apm.apm.us-east-1.aws.found.io',
 
   // The secretToken below is intended to be hardcoded in this file even though
   // it makes it public. This is not a security/privacy issue. Normally we'd
   // instead disable the need for a secretToken in the APM Server config where
   // the data is transmitted to, but due to how it's being hosted, it's easier,
   // for now, to simply leave it in.
-  secretToken: '7YKhoXsO4MzjhXjx2c',
+  secretToken: 'JpBCcOQxN81D5yucs2',
 
+  breakdownMetrics: true,
+  captureSpanStackTraces: false,
   centralConfig: false,
   metricsInterval: '30s',
-  captureSpanStackTraces: false,
+  propagateTracestate: true,
   transactionSampleRate: 1.0,
-  breakdownMetrics: true,
 };
 
 const CENTRALIZED_SERVICE_DIST_CONFIG: AgentConfigOptions = {
-  metricsInterval: '120s',
+  breakdownMetrics: false,
   captureBody: 'off',
   captureHeaders: false,
-  breakdownMetrics: false,
+  metricsInterval: '120s',
+  transactionSampleRate: 0.1,
 };
 
 export class ApmConfiguration {
@@ -71,6 +74,8 @@ export class ApmConfiguration {
 
   private getBaseConfig() {
     if (!this.baseConfig) {
+      const configFromSources = this.getConfigFromAllSources();
+
       this.baseConfig = merge(
         {
           serviceVersion: this.kibanaVersion,
@@ -79,9 +84,7 @@ export class ApmConfiguration {
         this.getUuidConfig(),
         this.getGitConfig(),
         this.getCiConfig(),
-        this.getConfigFromKibanaConfig(),
-        this.getDevConfig(),
-        this.getConfigFromEnv()
+        configFromSources
       );
 
       /**
@@ -126,6 +129,10 @@ export class ApmConfiguration {
       config.serverUrl = process.env.ELASTIC_APM_SERVER_URL;
     }
 
+    if (process.env.ELASTIC_APM_SECRET_TOKEN) {
+      config.secretToken = process.env.ELASTIC_APM_SECRET_TOKEN;
+    }
+
     if (process.env.ELASTIC_APM_GLOBAL_LABELS) {
       config.globalLabels = Object.fromEntries(
         process.env.ELASTIC_APM_GLOBAL_LABELS.split(',').map((p) => {
@@ -144,23 +151,6 @@ export class ApmConfiguration {
    */
   private getConfigFromKibanaConfig(): AgentConfigOptions {
     return this.rawKibanaConfig?.elastic?.apm ?? {};
-  }
-
-  /**
-   * Get the configuration from the apm.dev.js file, supersedes config
-   * from the --config file, disabled when running the distributable
-   */
-  private getDevConfig(): AgentConfigOptions {
-    if (this.isDistributable) {
-      return {};
-    }
-
-    try {
-      const apmDevConfigPath = join(this.rootDir, 'config', 'apm.dev.js');
-      return require(apmDevConfigPath);
-    } catch (e) {
-      return {};
-    }
   }
 
   /**
@@ -215,10 +205,12 @@ export class ApmConfiguration {
     return {
       globalLabels: {
         branch: process.env.GIT_BRANCH || '',
-        targetBranch: process.env.PR_TARGET_BRANCH || '',
-        ciBuildNumber: process.env.BUILD_NUMBER || '',
-        isPr: process.env.GITHUB_PR_NUMBER ? true : false,
-        prId: process.env.GITHUB_PR_NUMBER || '',
+        targetBranch: process.env.GITHUB_PR_TARGET_BRANCH || '',
+        ciBuildNumber: process.env.BUILDKITE_BUILD_NUMBER || '',
+        ciBuildId: process.env.BUILDKITE_BUILD_ID || '',
+        ciBuildJobId: process.env.BUILDKITE_JOB_ID || '',
+        isPr: process.env.BUILDKITE_PULL_REQUEST ? true : false,
+        prId: process.env.BUILDKITE_PULL_REQUEST || '',
       },
     };
   }
@@ -248,5 +240,12 @@ export class ApmConfiguration {
     } catch {
       return {};
     }
+  }
+
+  /**
+   * Reads APM configuration from different sources and merges them together.
+   */
+  private getConfigFromAllSources(): AgentConfigOptions {
+    return merge({}, this.getConfigFromKibanaConfig(), this.getConfigFromEnv());
   }
 }

@@ -11,4 +11,5 @@ export { DeleteWatchesModal } from './delete_watches_modal';
 export { ErrableFormRow } from './form_errors';
 export { WatchStatus } from './watch_status';
 export { SectionLoading } from './section_loading';
-export { SectionError, Error } from './section_error';
+export type { Error } from './section_error';
+export { SectionError } from './section_error';

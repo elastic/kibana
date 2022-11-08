@@ -15,6 +15,7 @@ import {
   TimelineRequestSortField,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../server/utils/build_query';
+import { getPreferredEsType } from './helpers';
 
 export const buildTimelineEventsAllQuery = ({
   defaultIndex,
@@ -57,15 +58,15 @@ export const buildTimelineEventsAllQuery = ({
       return {
         [field]: {
           order: item.direction,
-          unmapped_type: item.type,
+          unmapped_type: getPreferredEsType(item.esTypes),
         },
       };
     });
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {

@@ -45,7 +45,7 @@ describe('getSeriesParams', () => {
     );
     expect(seriesParams).toStrictEqual([
       {
-        circlesRadius: 3,
+        circlesRadius: 1,
         data: {
           id: '1',
           label: 'Total quantity',

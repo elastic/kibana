@@ -14,7 +14,7 @@ import { SearchSource } from './search_source';
 import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
 
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
-  setPreferredSearchStrategyId: jest.fn(),
+  setOverwriteDataViewType: jest.fn(),
   setFields: jest.fn().mockReturnThis(),
   setField: jest.fn().mockReturnThis(),
   removeField: jest.fn().mockReturnThis(),

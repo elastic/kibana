@@ -93,7 +93,7 @@ describe('CTI Enrichment', () => {
           atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
           field: 'myhash.mysha256',
           id: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
-          index: 'logs-ti_abusech.malware',
+          index: 'filebeat-7.12.0-2021.03.10-000001',
           type: 'indicator_match_rule',
         },
       },
@@ -136,7 +136,7 @@ describe('CTI Enrichment', () => {
         field: 'matched.id',
         value: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
       },
-      { field: 'matched.index', value: 'logs-ti_abusech.malware' },
+      { field: 'matched.index', value: 'filebeat-7.12.0-2021.03.10-000001' },
       { field: 'matched.type', value: 'indicator_match_rule' },
     ];
 

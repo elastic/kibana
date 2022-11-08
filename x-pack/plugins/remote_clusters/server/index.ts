@@ -9,6 +9,6 @@ import { PluginInitializerContext } from 'kibana/server';
 import { RemoteClustersServerPlugin } from './plugin';
 
 export { config } from './config';
-export { RemoteClustersPluginSetup } from './plugin';
+export type { RemoteClustersPluginSetup } from './plugin';
 
 export const plugin = (ctx: PluginInitializerContext) => new RemoteClustersServerPlugin(ctx);

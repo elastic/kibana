@@ -54,3 +54,7 @@ export const Expression = ({ alertParams, config, setAlertParams, data }: Props)
     </EuiForm>
   );
 };
+
+// for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default Expression;

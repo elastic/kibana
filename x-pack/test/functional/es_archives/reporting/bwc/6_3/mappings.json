@@ -3,81 +3,79 @@
   "value": {
     "index": ".reporting-2018.05.06",
     "mappings": {
-      "esqueue": {
-        "properties": {
-          "attempts": {
-            "type": "short"
-          },
-          "completed_at": {
-            "type": "date"
-          },
-          "created_at": {
-            "type": "date"
-          },
-          "created_by": {
-            "type": "keyword"
-          },
-          "jobtype": {
-            "type": "keyword"
-          },
-          "max_attempts": {
-            "type": "short"
-          },
-          "meta": {
-            "properties": {
-              "layout": {
-                "fields": {
-                  "keyword": {
-                    "ignore_above": 256,
-                    "type": "keyword"
-                  }
-                },
-                "type": "text"
+      "properties": {
+        "attempts": {
+          "type": "short"
+        },
+        "completed_at": {
+          "type": "date"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "created_by": {
+          "type": "keyword"
+        },
+        "jobtype": {
+          "type": "keyword"
+        },
+        "max_attempts": {
+          "type": "short"
+        },
+        "meta": {
+          "properties": {
+            "layout": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
               },
-              "objectType": {
-                "fields": {
-                  "keyword": {
-                    "ignore_above": 256,
-                    "type": "keyword"
-                  }
-                },
-                "type": "text"
-              }
+              "type": "text"
+            },
+            "objectType": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
             }
-          },
-          "output": {
-            "properties": {
-              "content": {
-                "enabled": false,
-                "type": "object"
-              },
-              "content_type": {
-                "type": "keyword"
-              },
-              "max_size_reached": {
-                "type": "boolean"
-              }
-            }
-          },
-          "payload": {
-            "enabled": false,
-            "type": "object"
-          },
-          "priority": {
-            "type": "byte"
-          },
-          "process_expiration": {
-            "type": "date"
-          },
-          "started_at": {
-            "type": "date"
-          },
-          "status": {
-            "type": "keyword"
-          },
-          "timeout": {
-            "type": "long"
           }
+        },
+        "output": {
+          "properties": {
+            "content": {
+              "enabled": false,
+              "type": "object"
+            },
+            "content_type": {
+              "type": "keyword"
+            },
+            "max_size_reached": {
+              "type": "boolean"
+            }
+          }
+        },
+        "payload": {
+          "enabled": false,
+          "type": "object"
+        },
+        "priority": {
+          "type": "byte"
+        },
+        "process_expiration": {
+          "type": "date"
+        },
+        "started_at": {
+          "type": "date"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "timeout": {
+          "type": "long"
         }
       }
     },

@@ -15,7 +15,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('Privileges', () => {
+  describe('Privileges', function () {
+    this.onlyEsVersion('<=7');
+
     describe('GET /api/upgrade_assistant/privileges', () => {
       it('User with with index privileges', async () => {
         const { body } = await supertest

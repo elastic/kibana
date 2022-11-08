@@ -178,6 +178,36 @@ describe('GET /api/reporting/jobs/download', () => {
     await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(401);
   });
 
+  it(`returns job's info`, async () => {
+    mockEsClient.search.mockResolvedValueOnce({
+      body: getHits({
+        jobtype: 'base64EncodedJobType',
+        payload: {}, // payload is irrelevant
+      }),
+    } as any);
+
+    registerJobInfoRoutes(core);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/info/test').expect(200);
+  });
+
+  it(`returns 403 if a user cannot view a job's info`, async () => {
+    mockEsClient.search.mockResolvedValueOnce({
+      body: getHits({
+        jobtype: 'customForbiddenJobType',
+        payload: {}, // payload is irrelevant
+      }),
+    } as any);
+
+    registerJobInfoRoutes(core);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/info/test').expect(403);
+  });
+
   it('when a job is incomplete', async () => {
     mockEsClient.search.mockResolvedValueOnce({
       body: getHits({
