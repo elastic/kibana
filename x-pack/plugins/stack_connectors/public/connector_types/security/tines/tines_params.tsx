@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -14,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHighlight,
   EuiSpacer,
 } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -37,17 +39,30 @@ import * as i18n from './translations';
 type StoryOption = EuiComboBoxOptionOption<TinesStoryObject>;
 type WebhookOption = EuiComboBoxOptionOption<TinesWebhookObject>;
 
-const createStoryOption = (story: TinesStoryObject): StoryOption => ({
-  key: story.id.toString(),
-  value: story,
-  label: story.published ? story.name : `${story.name} (${i18n.STORY_DRAFT_TEXT})`,
+const createOption = <T extends TinesStoryObject | TinesWebhookObject>(
+  item: T
+): EuiComboBoxOptionOption<T> => ({
+  key: item.id.toString(),
+  value: item,
+  label: item.name,
 });
 
-const createWebhookOption = (webhook: TinesWebhookObject): WebhookOption => ({
-  key: webhook.id.toString(),
-  value: webhook,
-  label: webhook.name,
-});
+const renderStory = (
+  { label, value }: StoryOption,
+  searchValue: string,
+  contentClassName: string
+) => (
+  <EuiFlexGroup className={contentClassName} direction="row" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+    </EuiFlexItem>
+    {value?.published && (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">{i18n.STORY_PUBLISHED_BADGE_TEXT}</EuiBadge>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);
 
 const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteActionParams>> = ({
   actionConnector,
@@ -112,8 +127,8 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     }
   }, [actionConnector?.id, connectorId]);
 
-  const storiesOptions = useMemo(() => stories?.map(createStoryOption) ?? [], [stories]);
-  const webhooksOptions = useMemo(() => webhooks?.map(createWebhookOption) ?? [], [webhooks]);
+  const storiesOptions = useMemo(() => stories?.map(createOption) ?? [], [stories]);
+  const webhooksOptions = useMemo(() => webhooks?.map(createOption) ?? [], [webhooks]);
 
   useEffect(() => {
     if (storiesError) {
@@ -148,7 +163,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       // Set the initial selected story option from saved storyId when stories are loaded
       const selectedStory = stories.find(({ id }) => id === webhook.storyId);
       if (selectedStory) {
-        setSelectedStoryOption(createStoryOption(selectedStory));
+        setSelectedStoryOption(createOption(selectedStory));
       } else {
         toasts.warning({ title: i18n.STORY_NOT_FOUND_WARNING });
         editSubActionParams({ webhook: undefined });
@@ -167,7 +182,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       // Set the initial selected webhook option from saved webhookId when webhooks are loaded
       const selectedWebhook = webhooks.find(({ id }) => id === webhook.id);
       if (selectedWebhook) {
-        setSelectedWebhookOption(createWebhookOption(selectedWebhook));
+        setSelectedWebhookOption(createOption(selectedWebhook));
       } else {
         toasts.warning({ title: i18n.WEBHOOK_NOT_FOUND_WARNING });
         editSubActionParams({ webhook: { storyId: webhook?.storyId } });
@@ -221,6 +236,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             onChange={onChangeStory}
             isDisabled={isLoadingStories || !!webhookUrl}
             isLoading={isLoadingStories}
+            renderOption={renderStory}
             fullWidth
             data-test-subj="tines-storySelector"
           />

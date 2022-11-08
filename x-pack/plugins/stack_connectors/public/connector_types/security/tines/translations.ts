@@ -75,10 +75,10 @@ export const STORY_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Select a Tines story',
   }
 );
-export const STORY_DRAFT_TEXT = i18n.translate(
-  'xpack.stackConnectors.security.tines.params.storyDraftText',
+export const STORY_PUBLISHED_BADGE_TEXT = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.storyPublishedBadgeText',
   {
-    defaultMessage: 'draft',
+    defaultMessage: 'Published',
   }
 );
 

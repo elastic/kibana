@@ -66,7 +66,7 @@ const webhook = {
   path: 'somePath',
   secret: 'someSecret',
 };
-const story = { id: webhook.storyId, name: 'test story', published: true };
+const story = { id: webhook.storyId, name: 'test story', published: false };
 const actionParams = { subActionParams: { webhook } };
 const emptyErrors = { subAction: [], subActionParams: [] };
 const messageVariables = [
@@ -180,10 +180,10 @@ describe('TinesParamsFields renders', () => {
       ).toBe(true);
     });
 
-    it('should render with a draft story in the selectable', () => {
+    it('should render with a story option with Published badge', () => {
       mockUseSubActionStories.mockReturnValueOnce({
         isLoading: false,
-        response: { stories: [{ ...story, published: false }], incompleteResponse: false },
+        response: { stories: [{ ...story, published: true }], incompleteResponse: false },
         error: null,
       });
 
@@ -201,8 +201,8 @@ describe('TinesParamsFields renders', () => {
         .first()
         .simulate('click');
 
-      expect(wrapper.find('[data-test-subj="tines-storySelector-optionsList"]').text()).toBe(
-        `${story.name} (draft)`
+      expect(wrapper.find('[data-test-subj="tines-storySelector-optionsList"]').text()).toContain(
+        'Published'
       );
     });
 
