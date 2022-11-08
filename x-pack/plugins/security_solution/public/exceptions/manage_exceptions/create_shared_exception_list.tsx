@@ -64,7 +64,7 @@ export const CreateSharedListFlyout = memo(
       setDescription(e.target.value);
     };
 
-    const hanadleCreateSharedExceptionList = useCallback(() => {
+    const handleCreateSharedExceptionList = useCallback(() => {
       if (!createSharedExceptionListState.loading && listName !== '') {
         ctrl.current = new AbortController();
 
@@ -178,7 +178,7 @@ export const CreateSharedListFlyout = memo(
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="exception-lists-form-create-shared"
-                onClick={hanadleCreateSharedExceptionList}
+                onClick={handleCreateSharedExceptionList}
                 disabled={listName === ''}
               >
                 {CREATE_BUTTON}
