@@ -216,7 +216,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 const useActionsColumn = ({
   showExceptionsDuplicateConfirmation,
 }: ActionColumnsProps): EuiTableActionsColumnType<Rule> => {
-  const actions = useRulesTableActions({showExceptionsDuplicateConfirmation});
+  const actions = useRulesTableActions({ showExceptionsDuplicateConfirmation });
 
   return useMemo(() => ({ actions, width: '40px' }), [actions]);
 };
