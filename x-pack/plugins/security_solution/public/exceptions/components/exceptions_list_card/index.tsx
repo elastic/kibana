@@ -104,32 +104,6 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       handleDelete,
     });
 
-    if (showAddExceptionFlyout)
-      return (
-        <AddExceptionFlyout
-          rules={null}
-          isBulkAction={false}
-          isEndpointItem={listType === ExceptionListTypeEnum.ENDPOINT}
-          sharedListToAddTo={[exceptionsList]}
-          onCancel={handleCancelExceptionItemFlyout}
-          onConfirm={handleConfirmExceptionFlyout}
-          data-test-subj="addExceptionItemFlyoutInSharedLists"
-          showAlertCloseOptions={false}
-        />
-      );
-    if (showEditExceptionFlyout && exceptionToEdit)
-      return (
-        <EditExceptionFlyout
-          list={exceptionsList}
-          itemToEdit={exceptionToEdit}
-          showAlertCloseOptions
-          openedFromListDetailPage
-          onCancel={handleCancelExceptionItemFlyout}
-          onConfirm={handleConfirmExceptionFlyout}
-          data-test-subj="editExceptionItemFlyoutInSharedLists"
-        />
-      );
-
     return (
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
@@ -214,6 +188,29 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             </EuiAccordion>
           </EuiPanel>
         </EuiFlexItem>
+        {showAddExceptionFlyout ? (
+          <AddExceptionFlyout
+            rules={null}
+            isBulkAction={false}
+            isEndpointItem={listType === ExceptionListTypeEnum.ENDPOINT}
+            sharedListToAddTo={[exceptionsList]}
+            onCancel={handleCancelExceptionItemFlyout}
+            onConfirm={handleConfirmExceptionFlyout}
+            data-test-subj="addExceptionItemFlyoutInSharedLists"
+            showAlertCloseOptions={false}
+          />
+        ) : null}
+        {showEditExceptionFlyout && exceptionToEdit ? (
+          <EditExceptionFlyout
+            list={exceptionsList}
+            itemToEdit={exceptionToEdit}
+            showAlertCloseOptions
+            openedFromListDetailPage
+            onCancel={handleCancelExceptionItemFlyout}
+            onConfirm={handleConfirmExceptionFlyout}
+            data-test-subj="editExceptionItemFlyoutInSharedLists"
+          />
+        ) : null}
       </EuiFlexGroup>
     );
   }

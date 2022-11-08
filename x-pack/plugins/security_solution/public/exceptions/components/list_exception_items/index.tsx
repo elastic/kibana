@@ -20,7 +20,7 @@ import type {
 
 import type { Pagination } from '@elastic/eui';
 import { FormattedDate } from '../../../common/components/formatted_date';
-import { getFormattedComments } from '../../utils/helpers';
+import { getFormattedComments } from '../../utils/ui.helpers';
 import { ListDetailsLinkAnchor } from '../list_details_link_anchor';
 import { ExceptionsUtility } from '../exceptions_utility';
 import * as i18n from '../../translations/list_exception_items.translations';

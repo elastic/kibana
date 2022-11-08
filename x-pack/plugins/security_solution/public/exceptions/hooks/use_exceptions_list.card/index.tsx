@@ -125,8 +125,7 @@ export const useExceptionsListCard = ({
   // as their own states
   const onAddExceptionClick = useCallback(() => {
     setShowAddExceptionFlyout(true);
-    fetchItems();
-  }, [fetchItems, setShowAddExceptionFlyout]);
+  }, [setShowAddExceptionFlyout]);
 
   const handleCancelExceptionItemFlyout = () => {
     setShowAddExceptionFlyout(false);
