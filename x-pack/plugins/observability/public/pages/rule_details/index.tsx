@@ -105,7 +105,7 @@ export function RuleDetailsPage() {
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
   ] as Query[]);
 
-  function updateUrl(nextQuery: { tabId: TabId }) {
+  const updateUrl = (nextQuery: { tabId: TabId }) => {
     history.push({
       ...location,
       search: fromQuery({
@@ -113,12 +113,12 @@ export function RuleDetailsPage() {
         ...nextQuery,
       }),
     });
-  }
+  };
 
-  function onTabIdChange(newTabId: TabId) {
+  const onTabIdChange = (newTabId: TabId) => {
     setTabId(newTabId);
     updateUrl({ tabId: newTabId });
-  }
+  };
 
   const NOTIFY_WHEN_OPTIONS = useRef<Array<EuiSuperSelectOption<unknown>>>([]);
   useEffect(() => {
@@ -271,8 +271,6 @@ export function RuleDetailsPage() {
     ? ALERT_STATUS_LICENSE_ERROR
     : rulesStatusesTranslationsMapping[rule.executionStatus.status];
 
-  const selectedTab = tabs.find((tab) => tab.id === tabId);
-
   return (
     <ObservabilityPageTemplate
       data-test-subj="ruleDetails"
@@ -364,7 +362,7 @@ export function RuleDetailsPage() {
       <EuiTabbedContent
         data-test-subj="ruleDetailsTabbedContent"
         tabs={tabs}
-        selectedTab={selectedTab}
+        selectedTab={tabs.find((tab) => tab.id === tabId)}
         onTabClick={(tab) => {
           onTabIdChange(tab.id as TabId);
         }}
@@ -397,11 +395,3 @@ export function RuleDetailsPage() {
     </ObservabilityPageTemplate>
   );
 }
-
-// export function RuleDetailsPage() {
-//   return (
-//     <Provider value={alertsPageStateContainer}>
-//       <InternalRuleDetailsPage />
-//     </Provider>
-//   );
-// }
