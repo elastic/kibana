@@ -46,7 +46,7 @@ export function AlertDetails() {
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases();
-  const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({
+  const { rule } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
     http,
   });
