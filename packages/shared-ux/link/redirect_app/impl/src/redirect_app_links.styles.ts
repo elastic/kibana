@@ -10,7 +10,5 @@ import { css } from '@emotion/react';
 
 export const redirectAppLinksStyles = css({
   display: 'flex',
-  alignItems: 'flex-start',
   flex: '1',
-  flexDirection: 'column',
 });
