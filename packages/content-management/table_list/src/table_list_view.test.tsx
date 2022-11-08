@@ -528,7 +528,14 @@ describe('TableListView', () => {
 
   describe('tag filtering', () => {
     const setupTagFiltering = registerTestBed<string, TableListViewProps>(
-      WithServices<TableListViewProps>(TableListView),
+      WithServices<TableListViewProps>(TableListView, {
+        getTagList: () => [
+          { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
+          { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
+          { id: 'id-tag-3', name: 'tag-3', type: 'tag', description: '', color: '' },
+          { id: 'id-tag-4', name: 'tag-4', type: 'tag', description: '', color: '' },
+        ],
+      }),
       {
         defaultProps: { ...requiredProps },
         memoryRouter: { wrapComponent: false },
@@ -604,6 +611,59 @@ describe('TableListView', () => {
       // Ctrl + click on a tag
       await act(async () => {
         find('tag-id-tag-2').simulate('click', { ctrlKey: true });
+      });
+      component.update();
+
+      expected = 'tag:(tag-1) -tag:(tag-2)';
+      [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+    });
+
+    test('should filter by tag from the search bar filter', async () => {
+      let testBed: TestBed;
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find, exists } = testBed!;
+      component.update();
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+      const getLastCallArgsFromFindItems = () =>
+        findItems.mock.calls[findItems.mock.calls.length - 1];
+
+      // Open the tag filter dropdown
+      await act(async () => {
+        find('tagFilterPopoverButton').simulate('click');
+      });
+      component.update();
+
+      expect(exists('tagSelectableList')).toBe(true);
+
+      await act(async () => {
+        find('tag-searchbar-option-tag-1').simulate('click');
+      });
+      component.update();
+
+      // The search bar should be updated and search term sent to the findItems() handler
+      let expected = 'tag:(tag-1)';
+      let [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+
+      await act(async () => {
+        find('tagFilterPopoverButton').simulate('click');
+      });
+      component.update();
+
+      // Ctrl + click one item
+      await act(async () => {
+        find('tag-searchbar-option-tag-2').simulate('click', { ctrlKey: true });
       });
       component.update();
 

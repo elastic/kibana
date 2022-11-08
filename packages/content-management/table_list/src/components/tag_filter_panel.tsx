@@ -161,16 +161,15 @@ export const TagFilterPanel: FC<Props> = ({
         checked,
         view: (
           <CtrlClickDetect onClick={onOptionClick(tag)}>
-            {(ref) => (
+            {(ref, onClickWrapped) => (
               <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" ref={ref}>
                 <EuiFlexItem>
                   <EuiHealth
                     color={color}
                     data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}
+                    onClick={onClickWrapped}
                   >
-                    <span>
-                      <EuiText>{name}</EuiText>
-                    </span>
+                    <EuiText>{name}</EuiText>
                   </EuiHealth>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -226,7 +225,7 @@ export const TagFilterPanel: FC<Props> = ({
             iconType="arrowDown"
             iconSide="right"
             onClick={togglePopOver}
-            data-test-subj="tableSortSelectBtn"
+            data-test-subj="tagFilterPopoverButton"
             hasActiveFilters={totalActiveFilters > 0}
             numActiveFilters={totalActiveFilters}
             grow
@@ -251,6 +250,7 @@ export const TagFilterPanel: FC<Props> = ({
               emptyMessage="There aren't any tags"
               noMatchesMessage="No tag matches the search"
               onChange={onSelectChange}
+              data-test-subj="tagSelectableList"
               {...searchProps}
             >
               {(list, search) => (
