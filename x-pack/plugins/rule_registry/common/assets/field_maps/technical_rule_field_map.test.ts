@@ -231,8 +231,18 @@ it('matches snapshot', () => {
         "required": false,
         "type": "version",
       },
+      "service.name": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "tags": Object {
         "array": true,
+        "required": false,
+        "type": "keyword",
+      },
+      "transaction.type": Object {
+        "array": false,
         "required": false,
         "type": "keyword",
       },
