@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elast
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { ErrorsLink } from '../../../../common/links/view_errors';
 import { MonitorErrorSparklines } from '../../../../monitor_details/monitor_summary/monitor_error_sparklines';
 import { MonitorErrorsCount } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 import { selectOverviewStatus } from '../../../../../state';
@@ -28,6 +29,9 @@ export function OverviewErrors() {
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <MonitorErrorSparklines from="now-6h/h" to="now" monitorId={status?.enabledIds ?? []} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ alignSelf: 'center' }}>
+          <ErrorsLink disabled={true} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
