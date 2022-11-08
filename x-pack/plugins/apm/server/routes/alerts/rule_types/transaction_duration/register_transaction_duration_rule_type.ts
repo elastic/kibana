@@ -79,6 +79,7 @@ export function registerTransactionDurationRuleType({
   alerting,
   ruleDataClient,
   config$,
+  getAlertDetailsConfig,
   logger,
   basePath,
 }: RegisterRuleDependencies) {
@@ -97,7 +98,9 @@ export function registerTransactionDurationRuleType({
     },
     actionVariables: {
       context: [
-        apmActionVariables.alertDetailsUrl,
+        ...(getAlertDetailsConfig()?.apm.enabled
+          ? [apmActionVariables.alertDetailsUrl]
+          : []),
         apmActionVariables.environment,
         apmActionVariables.interval,
         apmActionVariables.reason,
