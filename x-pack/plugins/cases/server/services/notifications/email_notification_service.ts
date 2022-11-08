@@ -52,7 +52,10 @@ export class EmailNotificationService implements NotificationService {
     message = `${message}Title: ${theCase.attributes.title}${lineBreak}`;
     message = `${message}Status: ${theCase.attributes.status}${lineBreak}`;
     message = `${message}Severity: ${theCase.attributes.severity}${lineBreak}`;
-    message = `${message}Tags: ${theCase.attributes.tags.join(',')}${lineBreak}`;
+
+    if (theCase.attributes.tags.length > 0) {
+      message = `${message}Tags: ${theCase.attributes.tags.join(', ')}${lineBreak}`;
+    }
 
     if (publicBaseUrl) {
       const caseUrl = getCaseViewPath({
