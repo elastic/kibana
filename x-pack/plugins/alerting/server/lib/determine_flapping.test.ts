@@ -8,7 +8,8 @@
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { size } from 'lodash';
 import { Alert } from '../alert';
-import { determineFlapping } from './determine_flapping';
+import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
+import { atCapacity, determineFlapping, isFlapping } from './determine_flapping';
 
 describe('determineFlapping', () => {
   let logger: MockedLogger;
@@ -60,5 +61,57 @@ describe('determineFlapping', () => {
     expect(logger.info).toHaveBeenCalledTimes(2);
     expect(logger.info.mock.calls[0][0]).toContain('Alert:1 is flapping.');
     expect(logger.info.mock.calls[1][0]).toContain('Alert:3 is flapping.');
+  });
+
+  describe('isFlapping', () => {
+    test('returns true if at capacity and flap count exceeds the threshold', () => {
+      const flappingHistory = [true, true, true, true].concat(new Array(16).fill(false));
+      const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+        meta: { flappingHistory },
+      });
+      expect(isFlapping(alert)).toEqual(true);
+    });
+
+    test("returns false if at capacity and flap count doesn't exceed the threshold", () => {
+      const flappingHistory = [true, true].concat(new Array(20).fill(false));
+      const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+        meta: { flappingHistory },
+      });
+      expect(isFlapping(alert)).toEqual(false);
+    });
+
+    test('returns false if not at capacity', () => {
+      const flappingHistory = new Array(5).fill(true);
+      const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+        meta: { flappingHistory },
+      });
+      expect(isFlapping(alert)).toEqual(false);
+    });
+  });
+
+  describe('atCapacity', () => {
+    test('returns true if flappingHistory == set capacity', () => {
+      const flappingHistory = new Array(20).fill(false);
+      const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+        meta: { flappingHistory },
+      });
+      expect(atCapacity(alert.getFlappingHistory())).toEqual(true);
+    });
+
+    test('returns true if flappingHistory > set capacity', () => {
+      const flappingHistory = new Array(25).fill(false);
+      const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+        meta: { flappingHistory },
+      });
+      expect(atCapacity(alert.getFlappingHistory())).toEqual(true);
+    });
+
+    test('returns false if flappingHistory < set capacity', () => {
+      const flappingHistory = new Array(15).fill(false);
+      const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+        meta: { flappingHistory },
+      });
+      expect(atCapacity(alert.getFlappingHistory())).toEqual(false);
+    });
   });
 });

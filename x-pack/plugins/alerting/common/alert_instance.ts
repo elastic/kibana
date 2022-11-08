@@ -33,8 +33,3 @@ export const rawAlertInstance = t.partial({
   meta: metaSchema,
 });
 export type RawAlertInstance = t.TypeOf<typeof rawAlertInstance>;
-
-export const rawAlertFlappingHistory = t.partial({
-  meta: metaSchema,
-});
-export type RawAlertFlappingHistory = t.TypeOf<typeof rawAlertFlappingHistory>;

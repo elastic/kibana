@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { drop, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -13,7 +13,6 @@ import {
   rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
-  RawAlertFlappingHistory,
 } from '../../common';
 
 import { parseDuration } from '../lib';
@@ -173,53 +172,24 @@ export class Alert<
     return rawAlertInstance.encode(this.toRaw());
   }
 
-  toRaw(): RawAlertInstance {
-    return {
-      state: this.state,
-      meta: this.meta,
-    };
+  toRaw(recovered: boolean = false): RawAlertInstance {
+    return recovered
+      ? {
+          meta: {
+            flappingHistory: this.meta.flappingHistory,
+          },
+        }
+      : {
+          state: this.state,
+          meta: this.meta,
+        };
   }
 
-  toRawRecovered(): RawAlertFlappingHistory {
-    return {
-      meta: this.meta,
-    };
-  }
-
-  setFlappingHistory(fh: boolean[]) {
+  setFlappingHistory(fh: boolean[] = []) {
     this.meta.flappingHistory = fh;
   }
 
   getFlappingHistory() {
     return this.meta.flappingHistory;
-  }
-
-  updateFlappingHistory(state: boolean) {
-    let flappingHistory: boolean[] = this.meta.flappingHistory || [];
-    const { atCapacity, diff } = this.flappingHistoryAtCapacity();
-    if (atCapacity) {
-      flappingHistory = drop(flappingHistory, diff);
-    }
-    flappingHistory.push(state);
-    this.meta.flappingHistory = flappingHistory;
-  }
-
-  isFlapping(): boolean {
-    const flappingHistory: boolean[] = this.meta.flappingHistory || [];
-    const { atCapacity } = this.flappingHistoryAtCapacity();
-    if (atCapacity) {
-      const numStateChanges = flappingHistory.filter((f) => f).length;
-      return numStateChanges >= 4;
-    }
-    return false;
-  }
-
-  flappingHistoryAtCapacity() {
-    const flappingHistory: boolean[] = this.meta.flappingHistory || [];
-    const len = flappingHistory.length;
-    return {
-      atCapacity: len >= 20,
-      diff: len + 1 - 20,
-    };
   }
 }

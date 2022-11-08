@@ -6,9 +6,11 @@
  */
 
 import { millisToNanos } from '@kbn/event-log-plugin/server';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, drop } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
+
+const MAX_CAPACITY = 20;
 
 interface ProcessAlertsOpts<
   State extends AlertInstanceState,
@@ -95,16 +97,16 @@ function processAlertsHelper<
             // this alert has flapped from recovered to active
             if (setFlapping) {
               activeAlerts[id].setFlappingHistory(
-                previouslyRecoveredAlerts[id].getFlappingHistory() || []
+                previouslyRecoveredAlerts[id].getFlappingHistory()
               );
-              activeAlerts[id].updateFlappingHistory(true);
+              updateFlappingHistory(activeAlerts[id], true);
               previouslyRecoveredAlertsIds.delete(id);
             }
           } else {
             // this alert was not recovered in the previous run, it is considered "new"
             newAlerts[id] = alerts[id];
             if (setFlapping) {
-              newAlerts[id].updateFlappingHistory(false);
+              updateFlappingHistory(newAlerts[id], false);
             }
           }
         } else {
@@ -122,7 +124,7 @@ function processAlertsHelper<
 
           // this alert is still active
           if (setFlapping) {
-            activeAlerts[id].updateFlappingHistory(false);
+            updateFlappingHistory(activeAlerts[id], false);
           }
         }
       } else if (existingAlertIds.has(id)) {
@@ -140,7 +142,7 @@ function processAlertsHelper<
         });
         // this alert has flapped from active to recovered
         if (setFlapping) {
-          recoveredAlerts[id].updateFlappingHistory(true);
+          updateFlappingHistory(recoveredAlerts[id], true);
         }
       }
     }
@@ -150,7 +152,7 @@ function processAlertsHelper<
   for (const id of previouslyRecoveredAlertsIds) {
     recoveredAlerts[id] = previouslyRecoveredAlerts[id];
     if (setFlapping) {
-      recoveredAlerts[id].updateFlappingHistory(false);
+      updateFlappingHistory(recoveredAlerts[id], false);
     }
   }
 
@@ -203,7 +205,7 @@ function processAlertsLimitReached<
 
       // this alert is still active
       if (setFlapping) {
-        activeAlerts[id].updateFlappingHistory(false);
+        updateFlappingHistory(activeAlerts[id], false);
       }
     }
   }
@@ -231,16 +233,14 @@ function processAlertsLimitReached<
         if (previouslyRecoveredAlertsIds.has(id)) {
           // this alert has flapped from recovered to active
           if (setFlapping) {
-            activeAlerts[id].setFlappingHistory(
-              previouslyRecoveredAlerts[id].getFlappingHistory() || []
-            );
-            activeAlerts[id].updateFlappingHistory(true);
+            activeAlerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
+            updateFlappingHistory(activeAlerts[id], true);
           }
         } else {
           // this alert was not recovered in the previous run, it is considered "new"
           newAlerts[id] = alerts[id];
           if (setFlapping) {
-            newAlerts[id].updateFlappingHistory(false);
+            updateFlappingHistory(newAlerts[id], false);
           }
         }
 
@@ -251,4 +251,27 @@ function processAlertsLimitReached<
     }
   }
   return { recoveredAlerts: {}, newAlerts, activeAlerts };
+}
+
+export function updateFlappingHistory<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+>(alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>, state: boolean) {
+  let flappingHistory: boolean[] = alert.getFlappingHistory() || [];
+  const { atCapacity, diff } = determineAtCapacity(flappingHistory);
+  if (atCapacity) {
+    flappingHistory = drop(flappingHistory, diff);
+  }
+  flappingHistory.push(state);
+  alert.setFlappingHistory(flappingHistory);
+}
+
+export function determineAtCapacity(flappingHistory: boolean[] = []) {
+  const len = flappingHistory.length;
+  return {
+    atCapacity: len >= MAX_CAPACITY,
+    diff: len + 1 - MAX_CAPACITY,
+  };
 }

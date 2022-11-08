@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { cloneDeep } from 'lodash';
-import { processAlerts } from './process_alerts';
+import { determineAtCapacity, processAlerts, updateFlappingHistory } from './process_alerts';
 import { Alert } from '../alert';
 import { DefaultActionGroupId } from '../types';
 
@@ -1231,6 +1231,108 @@ describe('processAlerts', () => {
         `);
         expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
       });
+    });
+  });
+
+  describe('updateFlappingHistory function', () => {
+    test('correctly updates flappingHistory', () => {
+      const alert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+        meta: { flappingHistory: [false, false] },
+      });
+      updateFlappingHistory(alert, true);
+      expect(alert.getFlappingHistory()).toEqual([false, false, true]);
+    });
+
+    test('correctly updates flappingHistory while maintaining a fixed size', () => {
+      const flappingHistory = new Array(20).fill(false);
+      const alert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+        meta: { flappingHistory },
+      });
+      updateFlappingHistory(alert, true);
+      const fh = alert.getFlappingHistory() || [];
+      expect(fh.length).toEqual(20);
+      expect(fh).toEqual([
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+      ]);
+    });
+
+    test('correctly updates flappingHistory while maintaining if array is larger than fixed size', () => {
+      const flappingHistory = new Array(23).fill(false);
+      const alert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+        meta: { flappingHistory },
+      });
+      updateFlappingHistory(alert, true);
+      const fh = alert.getFlappingHistory() || [];
+      expect(fh.length).toEqual(20);
+      expect(fh).toEqual([
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+      ]);
+    });
+  });
+
+  describe('determineAtCapacity', () => {
+    test('returns true if flappingHistory == set capacity', () => {
+      const flappingHistory = new Array(20).fill(false);
+      const alert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+        meta: { flappingHistory },
+      });
+      expect(determineAtCapacity(alert.getFlappingHistory()).atCapacity).toEqual(true);
+      expect(determineAtCapacity(alert.getFlappingHistory()).diff).toEqual(1);
+    });
+
+    test('returns true if flappingHistory > set capacity', () => {
+      const flappingHistory = new Array(25).fill(false);
+      const alert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+        meta: { flappingHistory },
+      });
+      expect(determineAtCapacity(alert.getFlappingHistory()).atCapacity).toEqual(true);
+      expect(determineAtCapacity(alert.getFlappingHistory()).diff).toEqual(6);
+    });
+
+    test('returns false if flappingHistory < set capacity', () => {
+      const flappingHistory = new Array(15).fill(false);
+      const alert = new Alert<{}, {}, DefaultActionGroupId>('1', {
+        meta: { flappingHistory },
+      });
+      expect(determineAtCapacity(alert.getFlappingHistory()).atCapacity).toEqual(false);
     });
   });
 });
