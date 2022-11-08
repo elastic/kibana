@@ -209,6 +209,7 @@ describe('Guided setup', () => {
       const readyToCompleteGuideState: GuideState = {
         guideId: 'testGuide',
         status: 'ready_to_complete',
+        isActive: true,
         steps: [
           {
             id: 'step1',
