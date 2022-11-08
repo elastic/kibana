@@ -15,7 +15,13 @@ export const withReduxDevTools = <StateContainer extends ReduxLikeStateContainer
   if (process.env.NODE_ENV !== 'production' && (window as any).__REDUX_DEVTOOLS_EXTENSION__) {
     const devToolsExtension = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
 
-    const devToolsInstance = devToolsExtension.connect(config);
+    const devToolsInstance = devToolsExtension.connect({
+      ...config,
+      serialize: {
+        ...(typeof config?.serialize === 'object' ? config.serialize : {}),
+        replacer: (_key: string, value: unknown) => replaceReactSyntheticEvent(value),
+      },
+    });
 
     devToolsInstance.init(stateContainer.getState());
 
@@ -27,3 +33,9 @@ export const withReduxDevTools = <StateContainer extends ReduxLikeStateContainer
 
   return stateContainer;
 };
+
+const isReactSyntheticEvent = (value: unknown) =>
+  typeof value === 'object' && value != null && (value as any).nativeEvent instanceof Event;
+
+const replaceReactSyntheticEvent = (value: unknown) =>
+  isReactSyntheticEvent(value) ? '[ReactSyntheticEvent]' : value;
