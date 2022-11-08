@@ -180,6 +180,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
         '1': {
           status: 'OK',
           muted: true,
+          flapping: false,
         },
       });
     });
@@ -239,20 +240,24 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           muted: false,
           actionGroupId: 'default',
           activeStartDate: actualAlerts.alertA.activeStartDate,
+          flapping: false,
         },
         alertB: {
           status: 'OK',
           muted: false,
+          flapping: false,
         },
         alertC: {
           status: 'Active',
           muted: true,
           actionGroupId: 'default',
           activeStartDate: actualAlerts.alertC.activeStartDate,
+          flapping: false,
         },
         alertD: {
           status: 'OK',
           muted: true,
+          flapping: false,
         },
       };
       expect(actualAlerts).to.eql(expectedAlerts);
@@ -294,20 +299,24 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
             muted: false,
             actionGroupId: 'default',
             activeStartDate: actualAlerts.alertA.activeStartDate,
+            flapping: false,
           },
           alertB: {
             status: 'OK',
             muted: false,
+            flapping: false,
           },
           alertC: {
             status: 'Active',
             muted: true,
             actionGroupId: 'default',
             activeStartDate: actualAlerts.alertC.activeStartDate,
+            flapping: false,
           },
           alertD: {
             status: 'OK',
             muted: true,
+            flapping: false,
           },
         };
         expect(actualAlerts).to.eql(expectedAlerts);
