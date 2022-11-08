@@ -6,7 +6,6 @@
  */
 
 import {
-  ADD_INTEGRATIONS_BUTTON,
   BREADCRUMBS,
   DEFAULT_LAYOUT_TITLE,
   EMPTY_STATE,
@@ -268,5 +267,4 @@ describe('Indicators', () => {
       });
     });
   });
-  
 });
