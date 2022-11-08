@@ -25,7 +25,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
     unifiedSearchDateRange,
     unifiedSearchQuery,
     unifiedSearchFilters,
-    submitFilterChange,
+    onSubmit,
     saveQuery,
     clearSavedQUery,
   } = useUnifiedSearchContext();
@@ -55,7 +55,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
     payload?: { dateRange: TimeRange; query?: Query };
     filters?: Filter[];
   }) => {
-    submitFilterChange(payload?.query, payload?.dateRange, filters);
+    onSubmit(payload?.query, payload?.dateRange, filters);
   };
 
   return (
@@ -63,9 +63,9 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
       appName={'Infra Hosts'}
       indexPatterns={[dataView]}
       query={unifiedSearchQuery}
-      filters={unifiedSearchFilters}
       dateRangeFrom={unifiedSearchDateRange.from}
       dateRangeTo={unifiedSearchDateRange.to}
+      filters={unifiedSearchFilters}
       onQuerySubmit={onQuerySubmit}
       onSaved={onQuerySave}
       onSavedQueryUpdated={onQuerySave}
