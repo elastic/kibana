@@ -192,7 +192,7 @@ export function registerErrorCountRuleType({
               relativeViewInAppUrl
             );
 
-            const alertUuid = getAlertUuid(id);
+            const alertUuid = getAlertUuid?.(id) || '';
             const alertDetailsUrl = getAlertDetailsUrl(
               basePath,
               spaceId,
