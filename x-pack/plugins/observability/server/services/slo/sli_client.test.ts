@@ -6,6 +6,8 @@
  */
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import moment from 'moment';
+
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services';
 import { InternalQueryError } from '../../errors';
@@ -79,7 +81,15 @@ describe('SLIClient', () => {
 
           const result = await sliClient.fetchCurrentSLIData(slo);
 
-          expect(result).toEqual({ good: 90, total: 100 });
+          const expectedDateRange = toDateRange(slo.time_window);
+
+          expect(result).toMatchObject({
+            good: 90,
+            total: 100,
+          });
+          expect(result.date_range.from).toBeClose(expectedDateRange.from);
+          expect(result.date_range.to).toBeClose(expectedDateRange.to);
+
           expect(esClientMock.search).toHaveBeenCalledWith(
             expect.objectContaining({
               index: `${SLO_DESTINATION_INDEX_NAME}*`,
@@ -90,7 +100,7 @@ describe('SLIClient', () => {
                     { term: { 'slo.revision': slo.revision } },
                     {
                       range: {
-                        '@timestamp': { gte: 'now-7d/m', lt: 'now/m' },
+                        '@timestamp': { gte: expect.anything(), lt: expect.anything() },
                       },
                     },
                   ],
@@ -138,7 +148,9 @@ describe('SLIClient', () => {
 
           const expectedDateRange = toDateRange(slo.time_window);
 
-          expect(result).toEqual({ good: 90, total: 100 });
+          expect(result).toMatchObject({ good: 90, total: 100 });
+          expect(result.date_range.from).toBeClose(expectedDateRange.from);
+          expect(result.date_range.to).toBeClose(expectedDateRange.to);
           expect(esClientMock.search).toHaveBeenCalledWith(
             expect.objectContaining({
               index: `${SLO_DESTINATION_INDEX_NAME}*`,
@@ -239,8 +251,9 @@ describe('SLIClient', () => {
           const result = await sliClient.fetchCurrentSLIData(slo);
 
           const expectedDateRange = toDateRange(slo.time_window);
-
-          expect(result).toEqual({ good: 90, total: 100 });
+          expect(result).toMatchObject({ good: 90, total: 100 });
+          expect(result.date_range.from).toBeClose(expectedDateRange.from);
+          expect(result.date_range.to).toBeClose(expectedDateRange.to);
           expect(esClientMock.search).toHaveBeenCalledWith(
             expect.objectContaining({
               index: `${SLO_DESTINATION_INDEX_NAME}*`,
@@ -345,7 +358,10 @@ describe('SLIClient', () => {
 
           const result = await sliClient.fetchCurrentSLIData(slo);
 
-          expect(result).toEqual({ good: 90, total: 100 });
+          const expectedDateRange = toDateRange(slo.time_window);
+          expect(result).toMatchObject({ good: 90, total: 100 });
+          expect(result.date_range.from).toBeClose(expectedDateRange.from);
+          expect(result.date_range.to).toBeClose(expectedDateRange.to);
           expect(esClientMock.search).toHaveBeenCalledWith(
             expect.objectContaining({
               index: `${SLO_DESTINATION_INDEX_NAME}*`,
@@ -356,10 +372,7 @@ describe('SLIClient', () => {
                     { term: { 'slo.revision': slo.revision } },
                     {
                       range: {
-                        '@timestamp': {
-                          gte: 'now-1M/m',
-                          lt: 'now/m',
-                        },
+                        '@timestamp': { gte: expect.anything(), lt: expect.anything() },
                       },
                     },
                   ],
@@ -417,3 +430,23 @@ describe('SLIClient', () => {
     });
   });
 });
+
+expect.extend({
+  toBeClose(received: Date | string, actual: Date | string) {
+    const receivedDate = moment(received);
+    const actualDate = moment(actual);
+    return {
+      message: () =>
+        `expected ${receivedDate.toISOString()} to be close to ${actualDate.toISOString()}`,
+      pass: Math.abs(receivedDate.diff(actualDate, 'seconds')) <= 120,
+    };
+  },
+});
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace jest {
+    interface Matchers<R> {
+      toBeClose(actual: Date | string): R;
+    }
+  }
+}
