@@ -14,7 +14,6 @@ import {
   EuiPopover,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiButton,
   EuiResizeObserver,
 } from '@elastic/eui';
 
@@ -59,7 +58,9 @@ describe('SyncsContextMenu', () => {
   it('Can cancel syncs', () => {
     setMockValues({ ...mockValues, isSyncing: true });
     const wrapper = mountWithIntl(<SyncsContextMenu />);
-    const button = wrapper.find(EuiButton);
+    const button = wrapper.find(
+      'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
+    );
     button.simulate('click');
 
     const menuItems = wrapper
@@ -83,7 +84,9 @@ describe('SyncsContextMenu', () => {
   it('Can start a sync', () => {
     setMockValues({ ...mockValues, ingestionStatus: IngestionStatus.ERROR });
     const wrapper = mountWithIntl(<SyncsContextMenu />);
-    const button = wrapper.find(EuiButton);
+    const button = wrapper.find(
+      'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
+    );
     button.simulate('click');
 
     const menuItems = wrapper
