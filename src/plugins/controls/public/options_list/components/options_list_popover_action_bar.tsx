@@ -19,23 +19,27 @@ import {
   EuiPopover,
   EuiSelectable,
   EuiPopoverTitle,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
+import { SuggestionsSorting } from '../../../common/options_list/types';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
   setShowOnlySelected: (value: boolean) => void;
+  updateSort: (sort: SuggestionsSorting) => void;
   updateSearchString: (newSearchString: string) => void;
 }
 
 export const OptionsListPopoverActionBar = ({
+  updateSort,
   showOnlySelected,
-  setShowOnlySelected,
   updateSearchString,
+  setShowOnlySelected,
 }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const {
@@ -49,25 +53,32 @@ export const OptionsListPopoverActionBar = ({
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality);
   const searchString = select((state) => state.componentState.searchString);
-
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
+  const sort = select((state) => state.componentState.sort);
   const [options, setOptions] = useState<EuiSelectableOption[]>([
     {
       label: 'Document count (descending)',
       'data-test-subj': 'optionsList__sortByDocCount_desc',
-      checked: 'on',
+      checked: sort.by === '_count' && sort.direction === 'desc' ? 'on' : undefined,
+      data: { by: '_count', direction: 'desc' },
     },
     {
       label: 'Document count (ascending)',
       'data-test-subj': 'optionsList__sortByDocCount_asc',
+      checked: sort.by === '_count' && sort.direction === 'asc' ? 'on' : undefined,
+      data: { by: '_count', direction: 'asc' },
     },
     {
       label: 'Alphabetical (descending)',
       'data-test-subj': 'optionsList__sortByAlphabetical_desc',
+      checked: sort.by === '_key' && sort.direction === 'desc' ? 'on' : undefined,
+      data: { by: '_key', direction: 'desc' },
     },
     {
       label: 'Alphabetical (ascending)',
       'data-test-subj': 'optionsList__sortByAlphabetical_asc',
+      checked: sort.by === '_key' && sort.direction === 'asc' ? 'on' : undefined,
+      data: { by: '_key', direction: 'asc' },
     },
   ]);
 
@@ -117,6 +128,7 @@ export const OptionsListPopoverActionBar = ({
                 <EuiButtonIcon
                   iconType="sortable"
                   onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
+                  aria-label={'sort by'}
                 />
               }
               isOpen={isSortingPopoverOpen}
@@ -131,6 +143,9 @@ export const OptionsListPopoverActionBar = ({
                 singleSelection={'always'}
                 listProps={{ bordered: false }}
                 style={{ width: 300 }}
+                onActiveOptionChange={(option) => {
+                  if (option?.data) updateSort(option.data as SuggestionsSorting);
+                }}
               >
                 {(list) => list}
               </EuiSelectable>

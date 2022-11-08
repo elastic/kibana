@@ -44,6 +44,7 @@ export const setupOptionsListSuggestionsRoute = (
             fieldSpec: schema.maybe(schema.any()),
             searchString: schema.maybe(schema.string()),
             selectedOptions: schema.maybe(schema.arrayOf(schema.string())),
+            sort: schema.maybe(schema.any()),
           },
           { unknowns: 'allow' }
         ),
@@ -127,7 +128,7 @@ export const setupOptionsListSuggestionsRoute = (
         ...runtimeFieldMap,
       },
     };
-
+    // console.log(JSON.stringify(body));
     /**
      * Run ES query
      */

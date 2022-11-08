@@ -14,6 +14,7 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
+import { SuggestionsSorting } from '../../../common/options_list/types';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListPopover } from './options_list_popover';
 import { optionsListReducers } from '../options_list_reducers';
@@ -21,7 +22,13 @@ import { OptionsListReduxState } from '../types';
 
 import './options_list.scss';
 
-export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Subject<string> }) => {
+export const OptionsListControl = ({
+  typeaheadSubject,
+  sortSubject,
+}: {
+  typeaheadSubject: Subject<string>;
+  sortSubject: Subject<SuggestionsSorting>;
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const resizeRef = useRef(null);
@@ -30,7 +37,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   // Redux embeddable Context
   const {
     useEmbeddableDispatch,
-    actions: { replaceSelection, setSearchString },
+    actions: { replaceSelection, setSearchString, setSort },
     useEmbeddableSelector: select,
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
@@ -69,6 +76,14 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       dispatch(setSearchString(newSearchString));
     },
     [typeaheadSubject, dispatch, setSearchString]
+  );
+
+  const updateSort = useCallback(
+    (newSort: SuggestionsSorting) => {
+      sortSubject.next(newSort);
+      dispatch(setSort(newSort));
+    },
+    [sortSubject, dispatch, setSort]
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
@@ -147,7 +162,11 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         anchorClassName="optionsList__anchorOverride"
         aria-labelledby={`control-popover-${id}`}
       >
-        <OptionsListPopover width={dimensions.width} updateSearchString={updateSearchString} />
+        <OptionsListPopover
+          width={dimensions.width}
+          updateSearchString={updateSearchString}
+          updateSort={updateSort}
+        />
       </EuiPopover>
     </EuiFilterGroup>
   );

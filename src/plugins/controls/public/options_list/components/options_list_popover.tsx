@@ -15,6 +15,7 @@ import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public'
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
+import { SuggestionsSorting } from '../../../common/options_list/types';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
@@ -23,9 +24,14 @@ import { OptionsListPopoverInvalidSelections } from './options_list_popover_inva
 export interface OptionsListPopoverProps {
   width: number;
   updateSearchString: (newSearchString: string) => void;
+  updateSort: (sort: SuggestionsSorting) => void;
 }
 
-export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPopoverProps) => {
+export const OptionsListPopover = ({
+  width,
+  updateSearchString,
+  updateSort,
+}: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
     OptionsListReduxState,
@@ -56,6 +62,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
           showOnlySelected={showOnlySelected}
           setShowOnlySelected={setShowOnlySelected}
           updateSearchString={updateSearchString}
+          updateSort={updateSort}
         />
       )}
       <div

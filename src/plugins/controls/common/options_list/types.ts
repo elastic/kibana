@@ -13,6 +13,11 @@ import { DataControlInput } from '../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
+export interface SuggestionsSorting {
+  by: '_count' | '_key';
+  direction: 'asc' | 'desc';
+}
+
 export interface OptionsListEmbeddableInput extends DataControlInput {
   selectedOptions?: string[];
   existsSelected?: boolean;
@@ -64,6 +69,7 @@ export interface OptionsListRequestBody {
   parentFieldName?: string;
   textFieldName?: string;
   searchString?: string;
+  sort?: SuggestionsSorting;
   fieldSpec?: FieldSpec;
   fieldName: string;
 }

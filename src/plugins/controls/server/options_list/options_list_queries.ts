@@ -96,12 +96,17 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
    * the "Keyword only" query / parser should be used when the options list is built on a field which has only keyword mappings.
    */
   keywordOnly: {
-    buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => ({
+    buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => ({
       terms: {
         field: fieldName,
         include: `${getEscapedQuery(searchString)}.*`,
         execution_hint: 'map',
         shard_size: 10,
+        order: sort
+          ? {
+              [sort.by]: sort.direction,
+            }
+          : undefined,
       },
     }),
     parse: (rawEsResult) =>
@@ -119,7 +124,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         // if there is no textFieldName specified, or if there is no search string yet fall back to keywordOnly
         return suggestionAggSubtypes.keywordOnly.buildAggregation(req);
       }
-      const { fieldName, searchString, textFieldName } = req;
+      const { fieldName, searchString, textFieldName, sort } = req;
       return {
         filter: {
           match_phrase_prefix: {
@@ -131,6 +136,11 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
             terms: {
               field: fieldName,
               shard_size: 10,
+              order: sort
+                ? {
+                    [sort.by]: sort.direction,
+                  }
+                : undefined,
             },
           },
         },
@@ -146,11 +156,16 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
    * the "Boolean" query / parser should be used when the options list is built on a field of type boolean. The query is slightly different than a keyword query.
    */
   boolean: {
-    buildAggregation: ({ fieldName }: OptionsListRequestBody) => ({
+    buildAggregation: ({ fieldName, sort }: OptionsListRequestBody) => ({
       terms: {
         field: fieldName,
         execution_hint: 'map',
         shard_size: 10,
+        order: sort
+          ? {
+              [sort.by]: sort.direction,
+            }
+          : undefined,
       },
     }),
     parse: (rawEsResult) =>
@@ -163,7 +178,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
    * the "IP" query / parser should be used when the options list is built on a field of type IP.
    */
   ip: {
-    buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => {
+    buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => {
       let ipRangeQuery: IpRangeQuery = {
         validSearch: true,
         rangeQuery: [
@@ -196,6 +211,11 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
               field: fieldName,
               execution_hint: 'map',
               shard_size: 10,
+              order: sort
+                ? {
+                    [sort.by]: sort.direction,
+                  }
+                : undefined,
             },
           },
         },
@@ -223,7 +243,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
    */
   subtypeNested: {
     buildAggregation: (req: OptionsListRequestBody) => {
-      const { fieldSpec, fieldName, searchString } = req;
+      const { fieldSpec, fieldName, searchString, sort } = req;
       const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
       if (!subTypeNested) {
         // if this field is not subtype nested, fall back to keywordOnly
@@ -240,6 +260,11 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
               include: `${getEscapedQuery(searchString)}.*`,
               execution_hint: 'map',
               shard_size: 10,
+              order: sort
+                ? {
+                    [sort.by]: sort.direction,
+                  }
+                : undefined,
             },
           },
         },

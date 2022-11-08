@@ -40,7 +40,7 @@ import { getDefaultComponentState, optionsListReducers } from '../options_list_r
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { OptionsListField } from '../../../common/options_list/types';
+import { OptionsListField, SuggestionsSorting } from '../../../common/options_list/types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -76,6 +76,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
+  private sortSubject: Subject<SuggestionsSorting> = new Subject<SuggestionsSorting>();
   private abortController?: AbortController;
   private dataView?: DataView;
   private field?: OptionsListField;
@@ -98,6 +99,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       pluginServices.getServices());
 
     this.typeaheadSubject = new Subject<string>();
+    this.sortSubject = new Subject<SuggestionsSorting>();
 
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
@@ -141,12 +143,13 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       distinctUntilChanged(diffDataFetchProps)
     );
 
-    // debounce typeahead pipe to slow down search string related queries
+    // debounce pipes to slow down search string + sorting related queries
     const typeaheadPipe = this.typeaheadSubject.pipe(debounceTime(100));
+    const sortSubjectPipe = this.sortSubject.pipe(debounceTime(200));
 
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
-      merge(dataFetchPipe, typeaheadPipe)
+      merge(dataFetchPipe, typeaheadPipe, sortSubjectPipe)
         .pipe(skip(1)) // Skip the first input update because options list query will be run by initialize.
         .subscribe(this.runOptionsListQuery)
     );
@@ -283,7 +286,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     const {
-      componentState: { searchString },
+      componentState: { searchString, sort },
       explicitInput: { selectedOptions, runPastTimeout, existsSelected },
     } = getState();
     dispatch(setLoading(true));
@@ -296,7 +299,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         timeRange: globalTimeRange,
         timeslice,
       } = this.getInput();
-
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
       const timeRange =
@@ -310,6 +312,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       const { suggestions, invalidSelections, totalCardinality } =
         await this.optionsListService.runOptionsListRequest(
           {
+            sort,
             field,
             query,
             filters,
@@ -418,7 +421,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <OptionsListReduxWrapper>
-          <OptionsListControl typeaheadSubject={this.typeaheadSubject} />
+          <OptionsListControl
+            typeaheadSubject={this.typeaheadSubject}
+            sortSubject={this.sortSubject}
+          />
         </OptionsListReduxWrapper>
       </KibanaThemeProvider>,
       node
