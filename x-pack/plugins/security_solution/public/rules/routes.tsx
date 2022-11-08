@@ -12,13 +12,13 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
 import { RULES_PATH, SecurityPageName } from '../../common/constants';
 import { NotFoundPage } from '../app/404';
-import { RulesPage } from '../detections/pages/detection_engine/rules';
-import { CreateRulePage } from '../detections/pages/detection_engine/rules/create';
+import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
+import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
 import {
   RuleDetailsPage,
   RuleDetailTabs,
-} from '../detections/pages/detection_engine/rules/details';
-import { EditRulePage } from '../detections/pages/detection_engine/rules/edit';
+} from '../detection_engine/rule_details_ui/pages/rule_details';
+import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_editing';
 import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';

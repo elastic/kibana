@@ -16,7 +16,7 @@ import type {
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
-import type { Threshold, ThresholdNormalized } from './schemas/common';
+import type { Threshold, ThresholdNormalized } from './rule_schema';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>

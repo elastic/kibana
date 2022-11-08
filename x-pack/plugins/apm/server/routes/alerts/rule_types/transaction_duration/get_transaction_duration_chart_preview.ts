@@ -21,21 +21,23 @@ import {
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
-import { averageOrPercentileAgg } from '../../average_or_percentile_agg';
+import { averageOrPercentileAgg } from './average_or_percentile_agg';
+import { APMConfig } from '../../../..';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
-  setup,
+  config,
+  apmEventClient,
 }: {
   alertParams: AlertParams;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
 }) {
-  const { apmEventClient } = setup;
   const {
     aggregationType = AggregationType.Avg,
     environment,
@@ -46,7 +48,8 @@ export async function getTransactionDurationChartPreview({
     end,
   } = alertParams;
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
-    ...setup,
+    config,
+    apmEventClient,
     kuery: '',
   });
 

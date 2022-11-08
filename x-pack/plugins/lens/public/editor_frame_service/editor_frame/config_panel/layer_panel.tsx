@@ -46,6 +46,7 @@ import {
 } from '../../../state_management';
 import { onDropForVisualization, shouldRemoveSource } from './buttons/drop_targets_utils';
 import { getSharedActions } from './layer_actions/layer_actions';
+import { FlyoutContainer } from './flyout_container';
 
 const initialActiveDimensionState = {
   isNew: false,
@@ -89,6 +90,8 @@ export function LayerPanel(
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
     initialActiveDimensionState
   );
+  const [isPanelSettingsOpen, setPanelSettingsOpen] = useState(false);
+
   const [hideTooltip, setHideTooltip] = useState<boolean>(false);
 
   const {
@@ -120,6 +123,7 @@ export function LayerPanel(
   }, [activeVisualization.id]);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const settingsPanelRef = useRef<HTMLDivElement | null>(null);
   const registerLayerRef = useCallback(
     (el) => registerNewLayerRef(layerId, el),
     [layerId, registerNewLayerRef]
@@ -316,7 +320,14 @@ export function LayerPanel(
         ...(activeVisualization.getSupportedActionsForLayer?.(
           layerId,
           visualizationState,
-          updateVisualization
+          updateVisualization,
+          () => setPanelSettingsOpen(true)
+        ) || []),
+        ...(layerDatasource?.getSupportedActionsForLayer?.(
+          layerId,
+          layerDatasourceState,
+          (newState) => updateDatasource(datasourceId, newState),
+          () => setPanelSettingsOpen(true)
         ) || []),
         ...getSharedActions({
           activeVisualization,
@@ -332,12 +343,16 @@ export function LayerPanel(
     [
       activeVisualization,
       core,
+      datasourceId,
       isOnlyLayer,
       isTextBasedLanguage,
+      layerDatasource,
+      layerDatasourceState,
       layerId,
       layerIndex,
       onCloneLayer,
       onRemoveLayer,
+      updateDatasource,
       updateVisualization,
       visualizationState,
     ]
@@ -553,7 +568,6 @@ export function LayerPanel(
                                       invalid: group.invalid,
                                       invalidMessage: group.invalidMessage,
                                       indexPatterns: dataViews.indexPatterns,
-                                      existingFields: dataViews.existingFields,
                                     }}
                                   />
                                 ) : (
@@ -591,6 +605,7 @@ export function LayerPanel(
                         filterOperations: group.filterOperations,
                         prioritizedOperation: group.prioritizedOperation,
                         isNewColumn: true,
+                        isMetricDimension: group?.isMetricDimension,
                         indexPatternId: layerDatasource
                           ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
                           : activeVisualization.getUsedDataView?.(visualizationState, layerId),
@@ -624,7 +639,42 @@ export function LayerPanel(
           })}
         </EuiPanel>
       </section>
-
+      {(layerDatasource?.renderLayerSettings || activeVisualization?.renderLayerSettings) && (
+        <FlyoutContainer
+          panelRef={(el) => (settingsPanelRef.current = el)}
+          isOpen={isPanelSettingsOpen}
+          isFullscreen={false}
+          groupLabel={i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
+            defaultMessage: 'Layer settings',
+          })}
+          handleClose={() => {
+            // update the current layer settings
+            setPanelSettingsOpen(false);
+            return true;
+          }}
+        >
+          <div id={layerId}>
+            <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
+              {layerDatasource?.renderLayerSettings && (
+                <NativeRenderer
+                  render={layerDatasource.renderLayerSettings}
+                  nativeProps={layerDatasourceConfigProps}
+                />
+              )}
+              {activeVisualization?.renderLayerSettings && (
+                <NativeRenderer
+                  render={activeVisualization?.renderLayerSettings}
+                  nativeProps={{
+                    ...layerVisualizationConfigProps,
+                    setState: props.updateVisualization,
+                    panelRef: settingsPanelRef,
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </FlyoutContainer>
+      )}
       <DimensionContainer
         panelRef={(el) => (panelRef.current = el)}
         isOpen={isDimensionPanelOpen}
@@ -668,6 +718,7 @@ export function LayerPanel(
                   groupId: activeGroup.groupId,
                   hideGrouping: activeGroup.hideGrouping,
                   filterOperations: activeGroup.filterOperations,
+                  isMetricDimension: activeGroup?.isMetricDimension,
                   dimensionGroups,
                   toggleFullscreen,
                   isFullscreen,
@@ -678,7 +729,6 @@ export function LayerPanel(
                   formatSelectorOptions: activeGroup.formatSelectorOptions,
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                   indexPatterns: dataViews.indexPatterns,
-                  existingFields: dataViews.existingFields,
                   activeData: layerVisualizationConfigProps.activeData,
                 }}
               />

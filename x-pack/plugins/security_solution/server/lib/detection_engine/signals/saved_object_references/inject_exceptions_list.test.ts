@@ -8,8 +8,9 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
+
+import type { RuleParams } from '../../rule_schema';
 import { injectExceptionsReferences } from './inject_exceptions_list';
-import type { RuleParams } from '../../schemas/rule_schemas';
 import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils/constants';
 
 describe('inject_exceptions_list', () => {

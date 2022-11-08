@@ -8,23 +8,21 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Setup } from '../../lib/helpers/setup_request';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { SavedServiceGroup } from '../../../common/service_groups';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServicesCounts({
-  setup,
+  apmEventClient,
   start,
   end,
   serviceGroups,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   serviceGroups: SavedServiceGroup[];
 }) {
-  const { apmEventClient } = setup;
-
   const serviceGroupsKueryMap: Record<string, QueryDslQueryContainer> =
     serviceGroups.reduce((acc, sg) => {
       return {

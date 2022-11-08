@@ -19,9 +19,7 @@ import { Config } from '../config';
 import { ProviderCollection } from '../providers';
 import { EsVersion } from '../es_version';
 
-// @ts-expect-error not ts yet
 import { MochaReporterProvider } from './reporter';
-// @ts-expect-error not ts yet
 import { validateCiGroupTags } from './validate_ci_group_tags';
 
 interface Options {

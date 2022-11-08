@@ -45,7 +45,10 @@ const getMaxFormula = (metric: Metric, column?: Column) => {
   }))`;
 };
 
-export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
+export const convertToLens: ConvertTsvbToLensVisualization = async (
+  { params: model },
+  timeRange
+) => {
   const dataViews = getDataViewsStart();
 
   const series = model.series[0];

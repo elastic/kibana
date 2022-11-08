@@ -463,9 +463,6 @@
                 "label": "rightOperand",
                 "description": [],
                 "signature": [
-                  "A | ",
-                  "Reference",
-                  "<A> | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "server",
@@ -473,7 +470,9 @@
                     "section": "def-server.Type",
                     "text": "Type"
                   },
-                  "<unknown>"
+                  "<unknown> | A | ",
+                  "Reference",
+                  "<A>"
                 ],
                 "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
                 "deprecated": false,

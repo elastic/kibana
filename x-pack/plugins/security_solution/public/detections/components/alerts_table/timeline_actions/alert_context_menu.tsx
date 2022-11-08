@@ -42,7 +42,8 @@ import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/t
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
-import type { Rule } from '../../../containers/detection_engine/rules/types';
+import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
+import { useOpenAlertDetailsAction } from './use_open_alert_details';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -50,7 +51,6 @@ interface AlertContextMenuProps {
   columnValues: string;
   disabled: boolean;
   ecsRowData: Ecs;
-  refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
   scopeId: string;
 }
@@ -61,7 +61,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   columnValues,
   disabled,
   ecsRowData,
-  refetch,
   onRuleChange,
   scopeId,
   globalQuery,
@@ -75,7 +74,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     setPopover(false);
   }, []);
 
-  const alertId = ecsRowData?.kibana?.alert ? ecsRowData?._id : null;
+  const getAlertId = () => (ecsRowData?.kibana?.alert ? ecsRowData?._id : null);
+  const alertId = getAlertId();
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
   const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
@@ -209,6 +209,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 
   const { osqueryActionItems } = useOsqueryContextActionItem({ handleClick: handleOnOsqueryClick });
 
+  const { alertDetailsActionItems } = useOpenAlertDetailsAction({
+    alertId,
+    closePopover,
+    ruleId,
+  });
+
   const items: React.ReactElement[] = useMemo(
     () =>
       !isEvent && ruleId
@@ -217,6 +223,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             ...statusActionItems,
             ...exceptionActionItems,
             ...(agentId ? osqueryActionItems : []),
+            ...alertDetailsActionItems,
           ]
         : [
             ...addToCaseActionItems,
@@ -231,6 +238,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       exceptionActionItems,
       agentId,
       osqueryActionItems,
+      alertDetailsActionItems,
       eventFilterActionItems,
     ]
   );
@@ -275,6 +283,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
           agentId={agentId}
           defaultValues={alertId ? { alertIds: [alertId] } : undefined}
           onClose={handleOnOsqueryClick}
+          ecsData={ecsRowData}
         />
       )}
     </>

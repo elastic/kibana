@@ -18,29 +18,30 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup } from '../../lib/helpers/setup_request';
 import { serviceGroupQuery } from '../../lib/service_group_query';
 import { ServiceGroup } from '../../../common/service_groups';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMConfig } from '../..';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 
 export async function getTraceSampleIds({
   serviceNames,
   environment,
-  setup,
+  config,
+  apmEventClient,
   start,
   end,
   serviceGroup,
 }: {
   serviceNames?: string[];
   environment: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
 }) {
-  const { apmEventClient, config } = setup;
-
   const query = {
     bool: {
       filter: [...rangeQuery(start, end), ...serviceGroupQuery(serviceGroup)],

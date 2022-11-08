@@ -87,6 +87,11 @@ Any modifications made to this file will be overwritten.
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
   "comments" : [ null, null ],
+  "assignees" : [ {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  }, {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  } ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -199,6 +204,11 @@ Any modifications made to this file will be overwritten.
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
   "comments" : [ null, null ],
+  "assignees" : [ {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  }, {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  } ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -376,6 +386,11 @@ Any modifications made to this file will be overwritten.
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
   "comments" : [ null, null ],
+  "assignees" : [ {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  }, {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  } ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -488,6 +503,11 @@ Any modifications made to this file will be overwritten.
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
   "comments" : [ null, null ],
+  "assignees" : [ {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  }, {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  } ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -602,6 +622,11 @@ Any modifications made to this file will be overwritten.
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
   "comments" : [ null, null ],
+  "assignees" : [ {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  }, {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  } ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -677,6 +702,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#case_response_closed_by_properties"><code>case_response_closed_by_properties</code> - Case response properties for closed_by</a></li>
     <li><a href="#case_response_created_by_properties"><code>case_response_created_by_properties</code> - Case response properties for created_by</a></li>
     <li><a href="#case_response_properties"><code>case_response_properties</code> - Case response properties</a></li>
+    <li><a href="#case_response_properties_assignees_inner"><code>case_response_properties_assignees_inner</code> - </a></li>
     <li><a href="#case_response_pushed_by_properties"><code>case_response_pushed_by_properties</code> - Case response properties for pushed_by</a></li>
     <li><a href="#case_response_updated_by_properties"><code>case_response_updated_by_properties</code> - Case response properties for updated_by</a></li>
     <li><a href="#connector_properties_cases_webhook"><code>connector_properties_cases_webhook</code> - Create or upate case request properties for Cases Webhook connector</a></li>
@@ -692,6 +718,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#connector_properties_swimlane"><code>connector_properties_swimlane</code> - Create case request properties for a Swimlane connector</a></li>
     <li><a href="#connector_properties_swimlane_fields"><code>connector_properties_swimlane_fields</code> - </a></li>
     <li><a href="#create_case_request"><code>create_case_request</code> - Create case request</a></li>
+    <li><a href="#create_case_request_assignees_inner"><code>create_case_request_assignees_inner</code> - </a></li>
     <li><a href="#create_case_request_connector"><code>create_case_request_connector</code> - </a></li>
     <li><a href="#external_service"><code>external_service</code> - </a></li>
     <li><a href="#owners"><code>owners</code> - </a></li>
@@ -864,7 +891,8 @@ Any modifications made to this file will be overwritten.
     <h3><a name="case_response_properties"><code>case_response_properties</code> - Case response properties</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">closed_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#case_response_properties_assignees_inner">array[case_response_properties_assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+<div class="param">closed_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">closed_by </div><div class="param-desc"><span class="param-type"><a href="#case_response_closed_by_properties">case_response_closed_by_properties</a></span>  </div>
 <div class="param">comments </div><div class="param-desc"><span class="param-type"><a href="#Case_response_properties_for_comments_inner">array[Case_response_properties_for_comments_inner]</a></span> An array of comment objects for the case. </div>
 <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#Case_response_properties_for_connectors">Case_response_properties_for_connectors</a></span>  </div>
@@ -885,6 +913,13 @@ Any modifications made to this file will be overwritten.
 <div class="param">updated_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">updated_by </div><div class="param-desc"><span class="param-type"><a href="#case_response_updated_by_properties">case_response_updated_by_properties</a></span>  </div>
 <div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="case_response_properties_assignees_inner"><code>case_response_properties_assignees_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">uid </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A unique identifier for the user profile. You can use the get user profile API to retrieve more details. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1043,13 +1078,21 @@ Any modifications made to this file will be overwritten.
     <h3><a name="create_case_request"><code>create_case_request</code> - Create case request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The create case API request body varies depending on the type of connector.</div>
     <div class="field-items">
-      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#create_case_request_connector">create_case_request_connector</a></span>  </div>
+      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#create_case_request_assignees_inner">array[create_case_request_assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+<div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#create_case_request_connector">create_case_request_connector</a></span>  </div>
 <div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
 <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
 <div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
 <div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
 <div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
 <div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_case_request_assignees_inner"><code>create_case_request_assignees_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">uid </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1152,7 +1195,8 @@ Any modifications made to this file will be overwritten.
     <h3><a name="update_case_request_cases_inner"><code>update_case_request_cases_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#create_case_request_connector">create_case_request_connector</a></span>  </div>
+      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#create_case_request_assignees_inner">array[create_case_request_assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+<div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#create_case_request_connector">create_case_request_connector</a></span>  </div>
 <div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
 <div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
 <div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>

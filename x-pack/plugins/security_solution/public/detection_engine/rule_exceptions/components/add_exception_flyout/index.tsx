@@ -24,16 +24,18 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
+
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { OsTypeArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18n from './translations';
+import { ExceptionItemComments } from '../item_comments';
 import {
   defaultEndpointExceptionItems,
   retrieveAlertOsTypes,
@@ -44,14 +46,13 @@ import { initialState, createExceptionItemsReducer } from './reducer';
 import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
 import { ExceptionsConditions } from '../flyout_components/item_conditions';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../rule_management/logic/types';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
 import { useAddNewExceptionItems } from './use_add_new_exceptions';
 import { entrichNewExceptionItems } from '../flyout_components/utils';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
-import { ExceptionItemComments } from '../item_comments';
 
 const SectionHeader = styled(EuiTitle)`
   ${() => css`

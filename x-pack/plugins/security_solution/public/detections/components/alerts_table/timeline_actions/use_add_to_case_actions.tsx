@@ -9,6 +9,12 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding_tour/tour_step';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../../common/components/guided_onboarding_tour/tour_config';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { Ecs } from '../../../../../common/ecs';
@@ -53,9 +59,18 @@ export const useAddToCaseActions = ({
       : [];
   }, [casesUi.helpers, ecsData, nonEcsData]);
 
+  const { activeStep, endTourStep, incrementStep, isTourShown } = useTourContext();
+
+  const afterCaseCreated = useCallback(async () => {
+    if (isTourShown(SecurityStepId.alertsCases)) {
+      endTourStep(SecurityStepId.alertsCases);
+    }
+  }, [endTourStep, isTourShown]);
+
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
     onClose: onMenuItemClick,
     onSuccess,
+    afterCaseCreated,
   });
 
   const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
@@ -66,8 +81,29 @@ export const useAddToCaseActions = ({
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    createCaseFlyout.open({ attachments: caseAttachments });
-  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
+    createCaseFlyout.open({
+      attachments: caseAttachments,
+      // activeStep will be 4 on first render because not yet incremented
+      // if the user closes the flyout without completing the form and comes back, we will be at step 5
+      ...(isTourShown(SecurityStepId.alertsCases) &&
+      (activeStep === AlertsCasesTourSteps.addAlertToCase ||
+        activeStep === AlertsCasesTourSteps.createCase)
+        ? {
+            headerContent: (
+              // isTourAnchor=true no matter what in order to
+              // force active guide step outside of security solution (cases)
+              <GuidedOnboardingTourStep isTourAnchor step={5} stepId={SecurityStepId.alertsCases} />
+            ),
+          }
+        : {}),
+    });
+    if (
+      isTourShown(SecurityStepId.alertsCases) &&
+      activeStep === AlertsCasesTourSteps.addAlertToCase
+    ) {
+      incrementStep(SecurityStepId.alertsCases);
+    }
+  }, [onMenuItemClick, createCaseFlyout, caseAttachments, isTourShown, activeStep, incrementStep]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`

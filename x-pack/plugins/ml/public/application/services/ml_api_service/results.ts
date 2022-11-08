@@ -26,6 +26,13 @@ import type { EntityField } from '../../../../common/util/anomaly_utils';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { ExplorerChartsData } from '../../../../common/types/results';
 
+export interface CategoryDefinition {
+  categoryId: number;
+  terms: string;
+  regex: string;
+  examples: string[];
+}
+
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
     jobIds: string[],
@@ -78,7 +85,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   getCategoryDefinition(jobId: string, categoryId: string) {
     const body = JSON.stringify({ jobId, categoryId });
-    return httpService.http<any>({
+    return httpService.http<CategoryDefinition>({
       path: `${basePath()}/results/category_definition`,
       method: 'POST',
       body,

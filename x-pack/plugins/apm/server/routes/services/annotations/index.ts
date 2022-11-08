@@ -7,12 +7,12 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { getStoredAnnotations } from './get_stored_annotations';
 
 export async function getServiceAnnotations({
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   serviceName,
   environment,
@@ -24,7 +24,7 @@ export async function getServiceAnnotations({
 }: {
   serviceName: string;
   environment: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   annotationsClient?: ScopedAnnotationsClient;
   client: ElasticsearchClient;
@@ -38,7 +38,7 @@ export async function getServiceAnnotations({
   // start fetching derived annotations (based on transactions), but don't wait on it
   // it will likely be significantly slower than the stored annotations
   const derivedAnnotationsPromise = getDerivedServiceAnnotations({
-    setup,
+    apmEventClient,
     serviceName,
     environment,
     searchAggregatedTransactions,

@@ -639,6 +639,19 @@
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.modelPlotEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "modelPlotEnabled",
+            "description": [
+              "\nReturns true if the job has the model plot enabled"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2066,6 +2079,19 @@
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.modelPlotEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "modelPlotEnabled",
+            "description": [
+              "\nReturns true if the job has the model plot enabled"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2430,6 +2456,22 @@
             ],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.anomaly_score_explanation",
+            "type": "Object",
+            "tags": [],
+            "label": "anomaly_score_explanation",
+            "description": [
+              "\nAn explanation for the anomaly score"
+            ],
+            "signature": [
+              "{ anomaly_type?: \"dip\" | \"spike\" | undefined; anomaly_length?: number | undefined; single_bucket_impact?: number | undefined; multi_bucket_impact?: number | undefined; anomaly_characteristics_impact?: number | undefined; lower_confidence_bound?: number | undefined; typical_value?: number | undefined; upper_confidence_bound?: number | undefined; high_variance_penalty?: boolean | undefined; incomplete_bucket_penalty?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false,
@@ -3093,9 +3135,21 @@
         " & ",
         "ResultsServiceProvider",
         " & { alertingServiceProvider(savedObjectsClient: ",
-        "SavedObjectsClientContract",
+        {
+          "pluginId": "@kbn/core-saved-objects-api-server",
+          "scope": "server",
+          "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+          "section": "def-server.SavedObjectsClientContract",
+          "text": "SavedObjectsClientContract"
+        },
         ", request: ",
-        "KibanaRequest",
+        {
+          "pluginId": "@kbn/core-http-server",
+          "scope": "server",
+          "docId": "kibKbnCoreHttpServerPluginApi",
+          "section": "def-server.KibanaRequest",
+          "text": "KibanaRequest"
+        },
         "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>) => Promise<{ context: ",
         "AnomalyDetectionAlertContext",
         "; name: string; isHealthy: boolean; } | undefined>; }; } & ",

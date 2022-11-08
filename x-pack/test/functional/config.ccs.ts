@@ -15,7 +15,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
 
-    testFiles: [require.resolve('./apps/canvas'), require.resolve('./apps/lens/group1')],
+    testFiles: [
+      require.resolve('./apps/canvas'),
+      require.resolve('./apps/lens/group1'),
+      require.resolve('./apps/remote_clusters/ccs/remote_clusters_index_management_flow'),
+      require.resolve('./apps/rollup_job'),
+    ],
 
     junit: {
       reportName: 'X-Pack CCS Tests',
@@ -25,10 +30,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('security'),
       remoteEsRoles: {
         ccs_remote_search: {
+          cluster: ['manage', 'manage_ccr'],
           indices: [
             {
               names: ['*'],
-              privileges: ['read', 'view_index_metadata', 'read_cross_cluster'],
+              privileges: ['read', 'view_index_metadata', 'read_cross_cluster', 'monitor'],
             },
           ],
         },

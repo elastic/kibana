@@ -35,6 +35,8 @@ export const createNewSavedObjectMonitorBulk = async ({
     type: syntheticsMonitorType,
     attributes: formatSecrets({
       ...monitor,
+      [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+      [ConfigKey.CONFIG_ID]: id,
       revision: 1,
     }),
   }));
@@ -138,7 +140,7 @@ const sendNewMonitorTelemetry = (
         errors,
         monitor,
         isInlineScript: Boolean((monitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-        kibanaVersion: server.kibanaVersion,
+        stackVersion: server.stackVersion,
       })
     );
   }

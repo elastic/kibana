@@ -9,12 +9,12 @@ import dateMath from '@kbn/datemath';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { mlExecutor } from './ml';
-import { getCompleteRuleMock, getMlRuleParams } from '../../schemas/rule_schemas.mock';
+import { getCompleteRuleMock, getMlRuleParams } from '../../rule_schema/mocks';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { findMlSignals } from '../find_ml_signals';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
-import type { MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import type { MachineLearningRuleParams } from '../../rule_schema';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
 jest.mock('../find_ml_signals');

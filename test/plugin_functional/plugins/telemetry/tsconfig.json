@@ -5,7 +5,7 @@
   },
   "include": ["public/**/*.ts", "types.ts", "../../../../typings/**/*"],
   "exclude": [],
-  "references": [
+  "kbn_references": [
     { "path": "../../../../src/core/tsconfig.json" },
     { "path": "../../../../src/plugins/telemetry/tsconfig.json" },
   ]

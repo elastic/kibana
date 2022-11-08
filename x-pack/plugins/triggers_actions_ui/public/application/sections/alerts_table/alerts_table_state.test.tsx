@@ -363,32 +363,4 @@ describe('AlertsTableState', () => {
       expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
     });
   });
-
-  describe('refresh alerts', () => {
-    beforeEach(() => {
-      refecthMock.mockClear();
-      hookUseFetchAlerts.mockClear();
-      hookUseFetchAlerts.mockImplementation(() => [
-        false,
-        {
-          alerts: [],
-          isInitializing: false,
-          getInspectQuery: jest.fn(),
-          refetch: refecthMock,
-          totalAlerts: 0,
-        },
-      ]);
-    });
-
-    it('should NOT refetch the alert at initialization', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
-      expect(refecthMock).toBeCalledTimes(0);
-    });
-    it('should refetch the alert when refreshNow is updated', async () => {
-      const result = render(<AlertsTableWithLocale {...tableProps} />);
-      const props = { ...tableProps, refreshNow: 123456789 };
-      result.rerender(<AlertsTableWithLocale {...props} />);
-      expect(refecthMock).toBeCalledTimes(1);
-    });
-  });
 });

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 
-import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -31,7 +31,7 @@ import {
 } from '../../utils';
 
 // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-// x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
+// x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json
 const RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
 
 // eslint-disable-next-line import/no-default-export
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
         const hookAction = await createNewAction(supertest, log);
         const rule = getSimpleRule();
         await createRule(supertest, log, rule);
-        const ruleToUpdate: CreateRulesSchema = {
+        const ruleToUpdate: RuleCreateProps = {
           ...getRuleWithWebHookAction(hookAction.id, true, rule),
           meta: {}, // create a rule with the action attached and a meta field
         };

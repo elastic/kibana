@@ -17,7 +17,7 @@ Object {
           },
           Object {
             "term": Object {
-              "signal.rule.rule_id": "threshold-rule",
+              "kibana.alert.rule.uuid": "threshold-rule",
             },
           },
           Object {
@@ -91,7 +91,7 @@ Object {
           },
           Object {
             "term": Object {
-              "signal.rule.rule_id": "threshold-rule",
+              "kibana.alert.rule.uuid": "threshold-rule",
             },
           },
           Object {

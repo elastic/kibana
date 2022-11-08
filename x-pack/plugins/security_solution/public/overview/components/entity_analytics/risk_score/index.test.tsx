@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
+import type { UserRiskScore } from '../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import type { SeverityCount } from '../../../../common/components/severity/types';
 import { useRiskScore, useRiskScoreKpi } from '../../../../risk_score/containers';
+import { openAlertsFilter } from '../../detection_response/utils';
 
 const mockSeverityCount: SeverityCount = {
   [RiskSeverity.low]: 1,
@@ -40,6 +42,15 @@ const defaultProps = {
 const mockUseRiskScore = useRiskScore as jest.Mock;
 const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
 jest.mock('../../../../risk_score/containers');
+
+const mockOpenTimelineWithFilters = jest.fn();
+jest.mock('../../detection_response/hooks/use_navigate_to_timeline', () => {
+  return {
+    useNavigateToTimeline: () => ({
+      openTimelineWithFilters: mockOpenTimelineWithFilters,
+    }),
+  };
+});
 
 describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'EntityAnalyticsRiskScores entityType: %s',
@@ -115,6 +126,82 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       );
 
       expect(queryByTestId('entity_analytics_content')).not.toBeInTheDocument();
+    });
+
+    it('renders alerts count', () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+      mockUseRiskScoreKpi.mockReturnValue({
+        severityCount: mockSeverityCount,
+        loading: false,
+      });
+      const alertsCount = 999;
+      const data: UserRiskScore[] = [
+        {
+          '@timestamp': '1234567899',
+          user: {
+            name: 'testUsermame',
+            risk: {
+              rule_risks: [],
+              calculated_level: RiskSeverity.high,
+              calculated_score_norm: 75,
+              multipliers: [],
+            },
+          },
+          alertsCount,
+        },
+      ];
+      mockUseRiskScore.mockReturnValue({ ...defaultProps, data });
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <EntityAnalyticsRiskScores riskEntity={riskEntity} />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('risk-score-alerts')).toHaveTextContent(alertsCount.toString());
+    });
+
+    it('navigates to timeline with filters when alerts count is clicked', () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+      mockUseRiskScoreKpi.mockReturnValue({
+        severityCount: mockSeverityCount,
+        loading: false,
+      });
+      const name = 'testName';
+      const data = [
+        {
+          '@timestamp': '1234567899',
+          [riskEntity]: {
+            name,
+            risk: {
+              rule_risks: [],
+              calculated_level: RiskSeverity.high,
+              calculated_score_norm: 75,
+              multipliers: [],
+            },
+          },
+          alertsCount: 999,
+        },
+      ];
+      mockUseRiskScore.mockReturnValue({ ...defaultProps, data });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <EntityAnalyticsRiskScores riskEntity={riskEntity} />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId('risk-score-alerts'));
+
+      expect(mockOpenTimelineWithFilters.mock.calls[0][0]).toEqual([
+        [
+          {
+            field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+            value: name,
+          },
+          openAlertsFilter,
+        ],
+      ]);
     });
   }
 );

@@ -24,10 +24,10 @@ describe('registerTransactionDurationRuleType', () => {
         },
       },
       aggregations: {
-        environments: {
+        series: {
           buckets: [
             {
-              key: 'ENVIRONMENT_NOT_DEFINED',
+              key: ['opbeans-java', 'ENVIRONMENT_NOT_DEFINED', 'request'],
               avgLatency: {
                 value: 5500000,
               },

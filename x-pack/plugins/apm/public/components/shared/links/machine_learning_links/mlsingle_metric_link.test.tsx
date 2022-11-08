@@ -23,7 +23,7 @@ describe('MLSingleMetricLink', () => {
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:0),time:(from:now%2Fw,to:now-4h))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:()))"`
+      `"/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:10000),time:(from:now%2Fw,to:now-4h))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:()))"`
     );
   });
   it('should produce the correct URL with jobId, serviceName, and transactionType', async () => {
@@ -42,7 +42,7 @@ describe('MLSingleMetricLink', () => {
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:0),time:(from:now%2Fw,to:now-4h))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:(entities:(service.name:opbeans-test,transaction.type:request))))"`
+      `"/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:10000),time:(from:now%2Fw,to:now-4h))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:(entities:(service.name:opbeans-test,transaction.type:request))))"`
     );
   });
 

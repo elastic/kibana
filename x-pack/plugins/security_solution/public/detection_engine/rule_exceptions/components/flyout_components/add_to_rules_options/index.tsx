@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiRadio, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { Rule } from '../../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../../rule_management/logic/types';
 import { ExceptionsAddToRulesTable } from '../add_to_rules_table';
 
 export type AddToRuleListsRadioOptions = 'select_rules_to_add_to' | 'add_to_rules' | 'add_to_rule';
