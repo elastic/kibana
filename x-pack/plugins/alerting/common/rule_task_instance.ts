@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { rawAlertInstance, rawAlertRecoveredInstance } from './alert_instance';
+import { rawAlertInstance, rawAlertFlappingHistory } from './alert_instance';
 import { DateFromString } from './date_from_string';
 
 export enum ActionsCompletion {
@@ -17,7 +17,7 @@ export enum ActionsCompletion {
 export const ruleStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
   alertInstances: t.record(t.string, rawAlertInstance),
-  alertRecoveredInstances: t.record(t.string, rawAlertRecoveredInstance),
+  alertRecoveredInstances: t.record(t.string, rawAlertFlappingHistory),
   previousStartedAt: t.union([t.null, DateFromString]),
 });
 

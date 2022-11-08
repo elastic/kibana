@@ -13,7 +13,7 @@ import {
   rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
-  RawAlertRecoveredInstance,
+  RawAlertFlappingHistory,
 } from '../../common';
 
 import { parseDuration } from '../lib';
@@ -180,7 +180,7 @@ export class Alert<
     };
   }
 
-  toRawRecovered(): RawAlertRecoveredInstance {
+  toRawRecovered(): RawAlertFlappingHistory {
     return {
       meta: this.meta,
     };

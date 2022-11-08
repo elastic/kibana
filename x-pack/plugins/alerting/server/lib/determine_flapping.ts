@@ -12,7 +12,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RawAlertInstance,
-  RawAlertRecoveredInstance,
+  RawAlertFlappingHistory,
 } from '../types';
 
 export function determineFlapping<
@@ -26,10 +26,10 @@ export function determineFlapping<
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
 ): {
   alertsToReturn: Record<string, RawAlertInstance>;
-  recoveredAlertsToReturn: Record<string, RawAlertRecoveredInstance>;
+  recoveredAlertsToReturn: Record<string, RawAlertFlappingHistory>;
 } {
   const alertsToReturn: Record<string, RawAlertInstance> = {};
-  const recoveredAlertsToReturn: Record<string, RawAlertRecoveredInstance> = {};
+  const recoveredAlertsToReturn: Record<string, RawAlertFlappingHistory> = {};
 
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];

@@ -8,7 +8,6 @@
 import sinon from 'sinon';
 import { Alert } from './alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
-import { last } from 'lodash';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -424,7 +423,28 @@ describe('updateFlappingHistory', () => {
     alert.updateFlappingHistory(true);
     const fh = alert.getFlappingHistory() || [];
     expect(fh.length).toEqual(20);
-    expect(last(fh)).toEqual(true);
+    expect(fh).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+    ]);
   });
 
   test('correctly updates flappingHistory while maintaining if array is larger than fixed size', () => {
@@ -435,7 +455,28 @@ describe('updateFlappingHistory', () => {
     alert.updateFlappingHistory(true);
     const fh = alert.getFlappingHistory() || [];
     expect(fh.length).toEqual(20);
-    expect(last(fh)).toEqual(true);
+    expect(fh).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+    ]);
   });
 });
 
