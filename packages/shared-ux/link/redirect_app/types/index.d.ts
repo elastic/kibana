@@ -32,10 +32,7 @@ export interface RedirectAppLinksKibanaDependencies {
 }
 
 /** Props for the `RedirectAppLinks` component. */
-export type RedirectAppLinksProps = { className?: string } & (
-  | RedirectAppLinksServices
-  | RedirectAppLinksKibanaDependencies
-);
+export type RedirectAppLinksProps = RedirectAppLinksServices | RedirectAppLinksKibanaDependencies;
 
 /** Props for the `RedirectAppLinksComponent`. */
 export interface RedirectAppLinksComponentProps
