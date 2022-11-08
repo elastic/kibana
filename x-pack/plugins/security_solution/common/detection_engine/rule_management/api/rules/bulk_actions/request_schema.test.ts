@@ -37,6 +37,7 @@ describe('Perform bulk action request schema', () => {
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "undefined" supplied to "action"',
+        'Invalid value "undefined" supplied to "duplicate"',
         'Invalid value "undefined" supplied to "edit"',
       ]);
       expect(message.schema).toEqual({});
@@ -51,6 +52,7 @@ describe('Perform bulk action request schema', () => {
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "unknown" supplied to "action"',
+        'Invalid value "undefined" supplied to "duplicate"',
         'Invalid value "undefined" supplied to "edit"',
       ]);
       expect(message.schema).toEqual({});
@@ -129,10 +131,27 @@ describe('Perform bulk action request schema', () => {
   });
 
   describe('bulk duplicate', () => {
+    test('invalid request: missing duplicate payload', () => {
+      const payload = {
+        query: 'name: test',
+        action: BulkActionType.duplicate,
+      };
+
+      const message = retrieveValidationMessage(payload);
+
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "duplicate" supplied to "action"',
+        'Invalid value "undefined" supplied to "duplicate"',
+        'Invalid value "undefined" supplied to "edit"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
     test('valid request', () => {
       const payload: PerformBulkActionRequestBody = {
         query: 'name: test',
         action: BulkActionType.duplicate,
+        [BulkActionType.duplicate]: { include_exceptions: false },
       };
       const message = retrieveValidationMessage(payload);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -152,6 +171,7 @@ describe('Perform bulk action request schema', () => {
 
         expect(getPaths(left(message.errors))).toEqual([
           'Invalid value "edit" supplied to "action"',
+          'Invalid value "undefined" supplied to "duplicate"',
           'Invalid value "undefined" supplied to "edit"',
         ]);
         expect(message.schema).toEqual({});
@@ -183,6 +203,7 @@ describe('Perform bulk action request schema', () => {
 
         expect(getPaths(left(message.errors))).toEqual([
           'Invalid value "edit" supplied to "action"',
+          'Invalid value "undefined" supplied to "duplicate"',
           'Invalid value "{"type":"set_tags","value":["test-tag"]}" supplied to "edit"',
         ]);
         expect(message.schema).toEqual({});
@@ -201,6 +222,7 @@ describe('Perform bulk action request schema', () => {
 
         expect(getPaths(left(message.errors))).toEqual([
           'Invalid value "edit" supplied to "action"',
+          'Invalid value "undefined" supplied to "duplicate"',
           'Invalid value "test-tag" supplied to "edit,value"',
           'Invalid value "set_tags" supplied to "edit,type"',
         ]);
@@ -259,6 +281,7 @@ describe('Perform bulk action request schema', () => {
 
         expect(getPaths(left(message.errors))).toEqual([
           'Invalid value "edit" supplied to "action"',
+          'Invalid value "undefined" supplied to "duplicate"',
           'Invalid value "logs-*" supplied to "edit,value"',
           'Invalid value "set_tags" supplied to "edit,type"',
         ]);
@@ -323,6 +346,7 @@ describe('Perform bulk action request schema', () => {
 
         expect(getPaths(left(message.errors))).toEqual([
           'Invalid value "edit" supplied to "action"',
+          'Invalid value "undefined" supplied to "duplicate"',
           'Invalid value "set_timeline" supplied to "edit,type"',
           'Invalid value "[]" supplied to "edit,value"',
         ]);
@@ -388,6 +412,7 @@ describe('Perform bulk action request schema', () => {
 
         expect(getPaths(left(message.errors))).toEqual([
           'Invalid value "edit" supplied to "action"',
+          'Invalid value "undefined" supplied to "duplicate"',
           'Invalid value "set_schedule" supplied to "edit,type"',
           'Invalid value "[]" supplied to "edit,value"',
         ]);
@@ -414,6 +439,7 @@ describe('Perform bulk action request schema', () => {
         expect(getPaths(left(message.errors))).toEqual(
           expect.arrayContaining([
             'Invalid value "edit" supplied to "action"',
+            'Invalid value "undefined" supplied to "duplicate"',
             'Invalid value "{"interval":"-10m","lookback":"1m"}" supplied to "edit,value"',
             'Invalid value "-10m" supplied to "edit,value,interval"',
           ])
@@ -440,6 +466,7 @@ describe('Perform bulk action request schema', () => {
         expect(getPaths(left(message.errors))).toEqual(
           expect.arrayContaining([
             'Invalid value "edit" supplied to "action"',
+            'Invalid value "undefined" supplied to "duplicate"',
             'Invalid value "{"lookback":"1m"}" supplied to "edit,value"',
             'Invalid value "undefined" supplied to "edit,value,interval"',
           ])

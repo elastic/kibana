@@ -11,7 +11,7 @@ import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { SavedObjectType, getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
@@ -30,7 +30,6 @@ export const bulkCreateExceptionListItems = async ({
   tieBreaker,
   user,
 }: BulkCreateExceptionListItemsOptions): Promise<ExceptionListItemSchema[]> => {
-  console.log('BULK ITEMS', { items });
   const formattedItems = items.map((item) => {
     const savedObjectType = getSavedObjectType({ namespaceType: item.namespace_type ?? 'single' });
     const dateNow = new Date().toISOString();
@@ -42,7 +41,7 @@ export const bulkCreateExceptionListItems = async ({
         created_by: user,
         description: item.description,
         entries: item.entries,
-        immutable: undefined,
+        immutable: false,
         item_id: item.item_id,
         list_id: item.list_id,
         list_type: 'item',
@@ -56,14 +55,15 @@ export const bulkCreateExceptionListItems = async ({
         version: undefined,
       },
       type: savedObjectType,
-    };
+    } as { attributes: ExceptionListSoSchema; type: SavedObjectType };
   });
-  console.log({ formattedItems: JSON.stringify(formattedItems) });
 
   const { saved_objects: savedObjects } =
     await savedObjectsClient.bulkCreate<ExceptionListSoSchema>(formattedItems);
 
-  return savedObjects.map<ExceptionListSoSchema>((so) =>
+  const result = savedObjects.map<ExceptionListItemSchema>((so) =>
     transformSavedObjectToExceptionListItem({ savedObject: so })
   );
+
+  return result;
 };
