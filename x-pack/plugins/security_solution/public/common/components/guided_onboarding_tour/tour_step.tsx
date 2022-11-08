@@ -116,13 +116,9 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
     // guided onboarding does not allow skipping tour through the steps
     onFinish: () => null,
     stepsTotal: securityTourConfig[stepId].length,
-    // TODO: re-add panelProps
-    // EUI has a bug https://github.com/elastic/eui/issues/6297
-    // where any panelProps overwrite their panelProps,
-    // so we lose cool things like the EuiBeacon
-    // panelProps: {
-    //   'data-test-subj': dataTestSubj,
-    // }
+    panelProps: {
+      'data-test-subj': dataTestSubj,
+    },
   };
 
   // tour step either needs children or an anchor element
