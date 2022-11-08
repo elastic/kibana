@@ -193,7 +193,7 @@ describe('<InspectorFlyoutContent />', () => {
       expect(notifyError).toHaveBeenCalledWith(
         <FormattedMessage
           defaultMessage="Unable to save {entityName}"
-          id="contentManagement.tableList.listing.unableToDeleteDangerMessage"
+          id="contentManagement.inspector.metadataForm.unableToSaveDangerMessage"
           values={{ entityName: 'foo' }}
         />,
         'Houston we got a problem'
