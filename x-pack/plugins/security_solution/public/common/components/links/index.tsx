@@ -289,7 +289,7 @@ const CaseDetailsLinkComponent: React.FC<{
 
   useEffect(() => {
     if (isTourActive)
-      document.querySelector(`[data-test-subj="RelatedCases-accordion"]`)?.scrollIntoView();
+      document.querySelector(`[tour-step="RelatedCases-accordion"]`)?.scrollIntoView();
   }, [isTourActive]);
 
   return (

@@ -145,7 +145,7 @@ const alertsCasesConfig: StepConfig[] = [
         defaultMessage: `In addition to the alert, you can add any relevant information you need to the case.`,
       }
     ),
-    anchor: `[data-test-subj="create-case-flyout"] [data-test-subj="caseTitle"] label`,
+    anchor: `[tour-step="create-case-flyout"] label`,
     anchorPosition: 'leftUp',
     dataTestSubj: getTourAnchor(AlertsCasesTourSteps.createCase, SecurityStepId.alertsCases),
     offset: 20,
@@ -163,13 +163,13 @@ const alertsCasesConfig: StepConfig[] = [
         defaultMessage: `Press Create case to advance the tour.`,
       }
     ),
-    anchor: `[data-test-subj="create-case-flyout"] [data-test-subj="create-case-submit"]`,
+    anchor: `[tour-step="create-case-flyout"] [tour-step="create-case-submit"]`,
     anchorPosition: 'leftUp',
     hideNextButton: true,
     dataTestSubj: getTourAnchor(AlertsCasesTourSteps.submitCase, SecurityStepId.alertsCases),
     offset: 20,
     ownFocus: false,
-    initialFocus: `[data-test-subj="create-case-flyout"] [data-test-subj="create-case-submit"]`,
+    initialFocus: `[tour-step="create-case-flyout"] [tour-step="create-case-submit"]`,
   },
   {
     ...defaultConfig,

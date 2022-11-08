@@ -59,7 +59,9 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
             })) ?? [];
         }
       } catch (error) {
-        setHasError(true);
+        if (!ignore) {
+          setHasError(true);
+        }
         toasts.addWarning(CASES_ERROR_TOAST(error));
       }
       if (!ignore) {

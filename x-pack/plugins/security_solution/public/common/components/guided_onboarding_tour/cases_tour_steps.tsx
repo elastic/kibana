@@ -10,7 +10,7 @@ import { AlertsCasesTourSteps, SecurityStepId } from './tour_config';
 import { GuidedOnboardingTourStep } from './tour_step';
 
 const getSubmitButton = (): HTMLElement | null =>
-  document.querySelector(`[data-test-subj="create-case-submit"]`);
+  document.querySelector(`[tour-step="create-case-submit"]`);
 
 export const CasesTourSteps = () => {
   const [activeStep, setActiveStep] = useState(AlertsCasesTourSteps.createCase);
