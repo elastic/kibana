@@ -40,19 +40,10 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   const [isFleetServerHostSubmitted, setIsFleetServerHostSubmitted] = useState<boolean>(false);
 
   const isPreconfigured = fleetServerHost?.is_preconfigured ?? false;
-  const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isPreconfigured);
+  const nameInput = useInput('', validateName, isPreconfigured);
+  const isDefaultInput = useSwitchInput(false, isPreconfigured || fleetServerHost?.is_default);
+  const hostUrlsInput = useComboInput('hostUrls', [], validateFleetServerHosts, isPreconfigured);
 
-  const isDefaultInput = useSwitchInput(
-    fleetServerHost?.is_default ?? false,
-    isPreconfigured || fleetServerHost?.is_default
-  );
-
-  const hostUrlsInput = useComboInput(
-    'hostUrls',
-    fleetServerHost?.host_urls || [],
-    validateFleetServerHosts,
-    isPreconfigured
-  );
   const validate = useCallback(
     () => hostUrlsInput.validate() && nameInput.validate(),
     [hostUrlsInput, nameInput]
@@ -62,14 +53,17 @@ export const useFleetServerHost = (): FleetServerHostForm => {
 
   const fleetServerHosts = useMemo(() => data?.items ?? [], [data?.items]);
 
+  const setDefaultInputValue = isDefaultInput.setValue;
   useEffect(() => {
     const defaultHost = fleetServerHosts.find((item) => item.is_default === true);
     if (defaultHost) {
       setFleetServerHost(defaultHost);
+      setDefaultInputValue(false);
     } else {
       setFleetServerHost(null);
+      setDefaultInputValue(true);
     }
-  }, [fleetServerHosts]);
+  }, [fleetServerHosts, setDefaultInputValue]);
 
   const saveFleetServerHost = useCallback(
     async (newFleetServerHost: Omit<FleetServerHost, 'id'>) => {
