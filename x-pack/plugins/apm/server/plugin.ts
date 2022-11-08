@@ -190,12 +190,13 @@ export class APMPlugin
 
     if (plugins.alerting) {
       registerApmRuleTypes({
-        ruleDataClient,
         alerting: plugins.alerting,
-        ml: plugins.ml,
-        config$,
-        logger: this.logger!.get('rule'),
         basePath: core.http.basePath,
+        config$,
+        getAlertDetailsConfig: plugins.observability.getAlertDetailsConfig,
+        logger: this.logger!.get('rule'),
+        ml: plugins.ml,
+        ruleDataClient,
       });
     }
 

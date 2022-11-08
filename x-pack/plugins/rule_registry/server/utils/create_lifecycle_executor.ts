@@ -69,8 +69,8 @@ export interface LifecycleAlertServices<
   ActionGroupIds extends string = never
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
-  getAlertStartedDate: (alertInstanceId: string) => string | null;
-  getAlertUuid: (alertInstanceId: string) => string | null;
+  getAlertStartedDate: (alertId: string) => string | null;
+  getAlertUuid: (alertId: string) => string | null;
 }
 
 export type LifecycleRuleExecutor<
