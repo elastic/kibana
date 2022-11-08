@@ -44,6 +44,4 @@ export const journey = new Journey({
 }).step('Go to dashboard 6', async ({ page, kbnUrl, log }) => {
   await page.goto(kbnUrl.get(`/app/dashboards#/view/92b143a0-2e9c-11ed-b1b6-a504560b392c`));
   await waitForVisualizations(page, log, 1);
-  await page.goto(kbnUrl.get('/app/home'));
-  await sleep(1000);
 });
