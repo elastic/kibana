@@ -28,9 +28,12 @@ import {
 } from '../common/messages';
 import {
   createScopedLogger,
+  AdditionalContext,
   getAlertDetailsUrl,
   getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
+  hasAdditionalContext,
+  validGroupByForContext,
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
@@ -60,6 +63,7 @@ type MetricThresholdAlert = Alert<
 type MetricThresholdAlertFactory = (
   id: string,
   reason: string,
+  additionalContext?: AdditionalContext | null,
   threshold?: number | undefined,
   value?: number | undefined
 ) => MetricThresholdAlert;
@@ -94,11 +98,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     const { alertWithLifecycle, savedObjectsClient, getAlertUuid } = services;
 
-    const alertFactory: MetricThresholdAlertFactory = (id, reason) =>
+    const alertFactory: MetricThresholdAlertFactory = (id, reason, additionalContext) =>
       alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
+          ...additionalContext,
         },
       });
 
@@ -255,7 +260,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
-        const alert = alertFactory(`${group}`, reason);
+
+        const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
+          ? alertResults && alertResults.length > 0
+            ? alertResults[0][group].context
+            : null
+          : null;
+
+        const alert = alertFactory(`${group}`, reason, additionalContext);
         const alertUuid = getAlertUuid(group);
         scheduledActionsCount++;
 
@@ -275,6 +287,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             (result) => formatAlertResult(result[group]).currentValue
           ),
           viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
+          ...additionalContext,
         });
       }
     }
