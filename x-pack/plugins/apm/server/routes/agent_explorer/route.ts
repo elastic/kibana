@@ -86,7 +86,7 @@ const agentExplorerInstanceRoute = createApmServerRoute({
   }),
   async handler(resources): Promise<{
     items: Array<{
-      serviceNode: string;
+      serviceNode?: string;
       environments: string[];
       agentVersion: string;
       lastReport: string;

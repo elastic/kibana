@@ -68,27 +68,42 @@ export async function getAgentInstances({
         },
       },
       aggs: {
-        sample: {
-          random_sampler: randomSampler,
+        serviceNodes: {
+          terms: {
+            field: SERVICE_NODE_NAME,
+            size: MAX_NUMBER_OF_SERVICES,
+          },
           aggs: {
-            serviceNodes: {
+            environments: {
               terms: {
-                field: SERVICE_NODE_NAME,
-                size: MAX_NUMBER_OF_SERVICES,
+                field: SERVICE_ENVIRONMENT,
               },
-              aggs: {
-                environments: {
-                  terms: {
-                    field: SERVICE_ENVIRONMENT,
-                  },
+            },
+            sample: {
+              top_metrics: {
+                metrics: [{ field: AGENT_VERSION } as const],
+                sort: {
+                  '@timestamp': 'desc' as const,
                 },
-                sample: {
-                  top_metrics: {
-                    metrics: [{ field: AGENT_VERSION } as const],
-                    sort: {
-                      '@timestamp': 'desc' as const,
-                    },
-                  },
+              },
+            },
+          },
+        },
+        missingServiceNodes: {
+          missing: {
+            field: SERVICE_NODE_NAME,
+          },
+          aggs: {
+            environments: {
+              terms: {
+                field: SERVICE_ENVIRONMENT,
+              },
+            },
+            sample: {
+              top_metrics: {
+                metrics: [{ field: AGENT_VERSION } as const],
+                sort: {
+                  '@timestamp': 'desc' as const,
                 },
               },
             },
@@ -98,8 +113,8 @@ export async function getAgentInstances({
     },
   });
 
-  return (
-    response.aggregations?.sample.serviceNodes.buckets.map((agentInstance) => ({
+  const serviceNodeInstances =
+    response.aggregations?.serviceNodes.buckets.map((agentInstance) => ({
       serviceNode: agentInstance.key as string,
       environments: agentInstance.environments.buckets.map(
         (environmentBucket) => environmentBucket.key as string
@@ -108,6 +123,24 @@ export async function getAgentInstances({
         AGENT_VERSION
       ] as string,
       lastReport: agentInstance.sample.top[0].sort[0] as string,
-    })) ?? []
-  );
+    })) ?? [];
+
+  const missingServiceNodeInstances =
+    response.aggregations?.missingServiceNodes?.doc_count &&
+    response.aggregations?.missingServiceNodes?.doc_count > 0
+      ? [
+          {
+            environments:
+              response.aggregations?.missingServiceNodes.environments.buckets.map(
+                (environmentBucket) => environmentBucket.key as string
+              ),
+            agentVersion: response.aggregations?.missingServiceNodes.sample
+              .top[0].metrics[AGENT_VERSION] as string,
+            lastReport: response.aggregations?.missingServiceNodes.sample.top[0]
+              .sort[0] as string,
+          },
+        ]
+      : [];
+
+  return [...serviceNodeInstances, ...missingServiceNodeInstances];
 }

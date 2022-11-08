@@ -11,7 +11,6 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server/utils/queries';
-import { map, uniq } from 'lodash';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -92,23 +91,16 @@ export async function getAgentsItems({
                     field: SERVICE_NODE_NAME,
                   },
                 },
-                serviceNodes: {
+                agentVersions: {
                   terms: {
-                    field: SERVICE_NODE_NAME,
-                    size: MAX_NUMBER_OF_SERVICES,
+                    field: AGENT_VERSION,
                   },
-                  aggs: {
-                    sample: {
-                      top_metrics: {
-                        metrics: [
-                          { field: AGENT_NAME } as const,
-                          { field: AGENT_VERSION } as const,
-                          { field: SERVICE_LANGUAGE_NAME } as const,
-                        ],
-                        sort: {
-                          '@timestamp': 'desc' as const,
-                        },
-                      },
+                },
+                sample: {
+                  top_metrics: {
+                    metrics: [{ field: AGENT_NAME } as const],
+                    sort: {
+                      '@timestamp': 'desc' as const,
                     },
                   },
                 },
@@ -127,20 +119,17 @@ export async function getAgentsItems({
 
   return (
     response.aggregations?.sample.services.buckets.map((bucket) => {
-      const agents = bucket.serviceNodes.buckets.map((serviceNode) => ({
-        name: serviceNode.sample.top[0].metrics[AGENT_NAME] as AgentName,
-        version: serviceNode.sample.top[0].metrics[AGENT_VERSION] as string,
-      }));
-
       return {
         serviceName: bucket.key as string,
         environments: bucket.environments.buckets.map(
           (env) => env.key as string
         ),
-        agentName: map(agents, 'name')?.[0],
-        agentVersion: uniq(map(agents, 'version')),
+        agentName: bucket.sample.top[0].metrics[AGENT_NAME] as AgentName,
+        agentVersion: bucket.agentVersions.buckets.map(
+          (version) => version.key as string
+        ),
         // service.node.name is set by the server only if a container.id or host.name are set. Otherwise should be explicitly set by agents.
-        instances: (bucket.instances.value as number) || 0,
+        instances: (bucket.instances.value as number) || 1,
       };
     }) ?? []
   );
