@@ -15,7 +15,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateQuery, Query, Filter, TimeRange } from '@kbn/es-query';
-import type {
+import {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
@@ -32,6 +32,7 @@ import { useTimeRange } from './use_time_range';
 export interface HistogramProps {
   services: UnifiedHistogramServices;
   dataView: DataView;
+  lastReloadRequestTime: number | undefined;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
@@ -46,6 +47,7 @@ export interface HistogramProps {
 export function Histogram({
   services: { data, lens, uiSettings },
   dataView,
+  lastReloadRequestTime,
   request,
   hits,
   chart: { timeInterval },
@@ -72,7 +74,10 @@ export function Histogram({
     (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
       const totalHits = adapters?.tables?.tables?.unifiedHistogram?.meta?.statistics?.totalCount;
 
-      onTotalHitsChange?.(isLoading ? 'loading' : 'complete', totalHits ?? hits?.total);
+      onTotalHitsChange?.(
+        isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
+        totalHits ?? hits?.total
+      );
 
       const lensRequest = adapters?.requests?.getRequests()[0];
       const json = lensRequest?.response?.json as IKibanaSearchResponse<estypes.SearchResponse>;
@@ -128,7 +133,7 @@ export function Histogram({
           executionContext={{
             description: 'fetch chart data and total hits',
           }}
-          lastReloadRequestTime={request?.lastReloadRequestTime}
+          lastReloadRequestTime={lastReloadRequestTime}
           onLoad={onLoad}
         />
       </div>

@@ -26,7 +26,6 @@ import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/pu
 import { useInspector } from '../../hooks/use_inspector';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
-import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
@@ -196,6 +195,72 @@ export function DiscoverLayout({
 
   const resizeRef = useRef<HTMLDivElement>(null);
 
+  const mainDisplay = useMemo(() => {
+    if (resultState === 'none') {
+      return (
+        <DiscoverNoResults
+          isTimeBased={isTimeBased}
+          data={data}
+          error={dataState.error}
+          hasQuery={isOfQueryType(state.query) && !!state.query?.query}
+          hasFilters={hasActiveFilter(state.filters)}
+          onDisableFilters={onDisableFilters}
+        />
+      );
+    }
+
+    if (resultState === 'uninitialized') {
+      return <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />;
+    }
+
+    return (
+      <DiscoverMainContent
+        isPlainRecord={isPlainRecord}
+        dataView={dataView}
+        navigateTo={navigateTo}
+        resetSavedSearch={resetSavedSearch}
+        expandedDoc={expandedDoc}
+        setExpandedDoc={setExpandedDoc}
+        savedSearch={savedSearch}
+        savedSearchData$={savedSearchData$}
+        savedSearchRefetch$={savedSearchRefetch$}
+        state={state}
+        stateContainer={stateContainer}
+        isTimeBased={isTimeBased}
+        viewMode={viewMode}
+        onAddFilter={onAddFilter as DocViewFilterFn}
+        onFieldEdited={onFieldEdited}
+        columns={columns}
+        resizeRef={resizeRef}
+        inspectorAdapters={inspectorAdapters}
+        searchSessionManager={searchSessionManager}
+      />
+    );
+  }, [
+    columns,
+    data,
+    dataState.error,
+    dataView,
+    expandedDoc,
+    inspectorAdapters,
+    isPlainRecord,
+    isTimeBased,
+    navigateTo,
+    onAddFilter,
+    onDisableFilters,
+    onFieldEdited,
+    resetSavedSearch,
+    resultState,
+    savedSearch,
+    savedSearchData$,
+    savedSearchRefetch$,
+    searchSessionManager,
+    setExpandedDoc,
+    state,
+    stateContainer,
+    viewMode,
+  ]);
+
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <h1
@@ -292,43 +357,7 @@ export function DiscoverLayout({
                 'dscPageContent--emptyPrompt': resultState === 'none',
               })}
             >
-              {resultState === 'none' && (
-                <DiscoverNoResults
-                  isTimeBased={isTimeBased}
-                  data={data}
-                  error={dataState.error}
-                  hasQuery={isOfQueryType(state.query) && !!state.query?.query}
-                  hasFilters={hasActiveFilter(state.filters)}
-                  onDisableFilters={onDisableFilters}
-                />
-              )}
-              {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />
-              )}
-              {resultState === 'loading' && <LoadingSpinner />}
-              {resultState === 'ready' && (
-                <DiscoverMainContent
-                  isPlainRecord={isPlainRecord}
-                  dataView={dataView}
-                  navigateTo={navigateTo}
-                  resetSavedSearch={resetSavedSearch}
-                  expandedDoc={expandedDoc}
-                  setExpandedDoc={setExpandedDoc}
-                  savedSearch={savedSearch}
-                  savedSearchData$={savedSearchData$}
-                  savedSearchRefetch$={savedSearchRefetch$}
-                  state={state}
-                  stateContainer={stateContainer}
-                  isTimeBased={isTimeBased}
-                  viewMode={viewMode}
-                  onAddFilter={onAddFilter as DocViewFilterFn}
-                  onFieldEdited={onFieldEdited}
-                  columns={columns}
-                  resizeRef={resizeRef}
-                  inspectorAdapters={inspectorAdapters}
-                  searchSessionManager={searchSessionManager}
-                />
-              )}
+              {mainDisplay}
             </EuiPageContent>
           </EuiFlexItem>
         </EuiFlexGroup>

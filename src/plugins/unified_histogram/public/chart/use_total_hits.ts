@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, isEqual } from 'lodash';
 import { MutableRefObject, useEffect, useRef } from 'react';
 import { filter, lastValueFrom, map } from 'rxjs';
-import type {
+import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
   UnifiedHistogramRequestContext,
@@ -22,6 +22,7 @@ import type {
 
 export const useTotalHits = ({
   services,
+  lastReloadRequestTime,
   request,
   chartVisible,
   hits,
@@ -32,6 +33,7 @@ export const useTotalHits = ({
   onTotalHitsChange,
 }: {
   services: UnifiedHistogramServices;
+  lastReloadRequestTime: number | undefined;
   request: UnifiedHistogramRequestContext | undefined;
   chartVisible: boolean;
   hits: UnifiedHistogramHitsContext | undefined;
@@ -44,10 +46,25 @@ export const useTotalHits = ({
   const abortController = useRef<AbortController>();
   const totalHitsDeps = useRef<ReturnType<typeof getTotalHitsDeps>>();
 
+  // When the unified histogram props change, we must compare the current subset
+  // that should trigger a total hits refetch against the previous subset. If they
+  // are different, we must refetch the total hits to ensure it's up to date with
+  // the chart. These are the props we care about:
+  //   - chartVisible:
+  //       We only need to fetch the total hits when the chart is hidden,
+  //       otherwise Lens will be responsible for updating the display.
+  //   - lastReloadRequestTime: A refetch has been manually triggered by the consumer.
+  //   - hits:
+  //       If the hits context is undefined, we don't need to fetch the
+  //       total hits because the display will be hidden.
+  //   - dataView: The current data view has changed.
+  //   - filters: The current filters have changed.
+  //   - query: The current query has been updated.
+  //   - timeRange: The selected time range has changed.
   useEffect(() => {
     const newTotalHitsDeps = getTotalHitsDeps({
       chartVisible,
-      request,
+      lastReloadRequestTime,
       hits,
       dataView,
       filters,
@@ -76,6 +93,7 @@ export const useTotalHits = ({
     dataView,
     filters,
     hits,
+    lastReloadRequestTime,
     onTotalHitsChange,
     query,
     request,
@@ -86,7 +104,7 @@ export const useTotalHits = ({
 
 const getTotalHitsDeps = ({
   chartVisible,
-  request,
+  lastReloadRequestTime,
   hits,
   dataView,
   filters,
@@ -94,7 +112,7 @@ const getTotalHitsDeps = ({
   timeRange,
 }: {
   chartVisible: boolean;
-  request: UnifiedHistogramRequestContext | undefined;
+  lastReloadRequestTime: number | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
   dataView: DataView;
   filters: Filter[];
@@ -108,7 +126,7 @@ const getTotalHitsDeps = ({
     filters,
     query,
     timeRange,
-    request?.lastReloadRequestTime,
+    lastReloadRequestTime,
   ]);
 
 const fetchTotalHits = async ({
@@ -143,7 +161,7 @@ const fetchTotalHits = async ({
     return;
   }
 
-  onTotalHitsChange?.('loading', hits.total);
+  onTotalHitsChange?.(UnifiedHistogramFetchStatus.loading, hits.total);
 
   const searchSource = data.search.searchSource.createEmpty();
 
@@ -175,6 +193,7 @@ const fetchTotalHits = async ({
 
   abortController.current = new AbortController();
 
+  // Let the consumer inspect the request if they want to track it
   const inspector = request?.adapter
     ? {
         adapter: request.adapter,
@@ -203,5 +222,5 @@ const fetchTotalHits = async ({
 
   const totalHits = await lastValueFrom(fetch$);
 
-  onTotalHitsChange?.('complete', totalHits);
+  onTotalHitsChange?.(UnifiedHistogramFetchStatus.complete, totalHits);
 };

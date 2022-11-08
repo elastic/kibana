@@ -40,6 +40,7 @@ export interface ChartProps {
   className?: string;
   services: UnifiedHistogramServices;
   dataView: DataView;
+  lastReloadRequestTime: number | undefined;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
@@ -61,6 +62,7 @@ export function Chart({
   className,
   services,
   dataView,
+  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -102,10 +104,15 @@ export function Chart({
     dataView.isTimeBased()
   );
 
-  const { filters, query, timeRange } = useRequestParams({ services, request });
+  const { filters, query, timeRange } = useRequestParams({
+    services,
+    lastReloadRequestTime,
+    request,
+  });
 
   useTotalHits({
     services,
+    lastReloadRequestTime,
     request,
     chartVisible,
     hits,
@@ -226,6 +233,7 @@ export function Chart({
             <HistogramMemoized
               services={services}
               dataView={dataView}
+              lastReloadRequestTime={lastReloadRequestTime}
               request={request}
               hits={hits}
               chart={chart}

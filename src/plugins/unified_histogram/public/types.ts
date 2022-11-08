@@ -18,12 +18,13 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 /**
  * The fetch status of a unified histogram request
  */
-export type UnifiedHistogramFetchStatus =
-  | 'uninitialized'
-  | 'loading'
-  | 'partial'
-  | 'complete'
-  | 'error';
+export enum UnifiedHistogramFetchStatus {
+  uninitialized = 'uninitialized',
+  loading = 'loading',
+  partial = 'partial',
+  complete = 'complete',
+  error = 'error',
+}
 
 /**
  * The services required by the unified histogram components
@@ -74,10 +75,6 @@ export interface UnifiedHistogramRequestContext {
    * The adapter to use for requests
    */
   adapter?: RequestAdapter;
-  /**
-   * Can be updated to `Date.now()` to force a refresh
-   */
-  lastReloadRequestTime?: number;
 }
 
 /**

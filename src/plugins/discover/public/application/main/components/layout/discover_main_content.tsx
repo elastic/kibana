@@ -8,7 +8,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import React, { RefObject, useCallback, useEffect, useState } from 'react';
+import React, { RefObject, useCallback } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
@@ -97,6 +97,7 @@ export const DiscoverMainContent = ({
 
   const {
     topPanelHeight,
+    lastReloadRequestTime,
     request,
     hits,
     chart,
@@ -120,19 +121,12 @@ export const DiscoverMainContent = ({
     searchSessionManager,
   });
 
-  // The documents grid doesn't rerender when the chart visbility changes
-  // which causes it to render blank space, so we need to force a rerender
-  const [documentsKey, setDocumentsKey] = useState(0);
-
-  useEffect(() => {
-    setDocumentsKey((key) => key + 1);
-  }, [chart?.hidden]);
-
   return (
     <UnifiedHistogramLayout
       className="dscPageContent__inner"
       services={services}
       dataView={dataView}
+      lastReloadRequestTime={lastReloadRequestTime}
       request={request}
       hits={hits}
       chart={chart}
@@ -181,7 +175,9 @@ export const DiscoverMainContent = ({
         )}
         {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
           <DiscoverDocuments
-            key={documentsKey}
+            // The documents grid doesn't rerender when the chart visbility changes
+            // which causes it to render blank space, so we need to force a rerender
+            key={`docKey${chart?.hidden}`}
             documents$={savedSearchData$.documents$}
             expandedDoc={expandedDoc}
             dataView={dataView}
