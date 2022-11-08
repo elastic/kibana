@@ -39,8 +39,8 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 describe('useWaffleTime', () => {
-  const today = new Date(new Date().setDate(new Date().getDate())).getTime();
-  const yesterday = new Date(today - 1).getTime();
+  const today = new Date('2022-01-01 01:00:00').getTime();
+  const yesterday = new Date('2021-12-31 01:00:00').getTime();
   beforeEach(() => {
     delete STORE.waffleTime;
     jest.useFakeTimers();
@@ -51,9 +51,9 @@ describe('useWaffleTime', () => {
     jest.useRealTimers();
   });
 
-  it('should work with default values', () => {
+  it('should work with current time', () => {
     const { result } = renderUseWaffleTimeHook();
-    expect(result.current.currentTime).toEqual(DEFAULT_WAFFLE_TIME_STATE.currentTime);
+    expect(result.current.currentTime).toEqual(today);
     expect(result.current.isAutoReloading).toEqual(false);
   });
 
