@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { mockCases } from '../../routes/api/__fixtures__';
-
 import {
   comment as commentObj,
   userActions,
@@ -36,6 +34,7 @@ import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
+import { mockCases } from '../../mocks';
 
 const allComments = [
   commentObj,

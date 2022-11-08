@@ -7,7 +7,6 @@
 
 import type {
   Logger,
-  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsBulkResponse,
@@ -36,7 +35,7 @@ import type {
   CaseStatuses,
 } from '../../../common/api';
 import { caseStatuses } from '../../../common/api';
-import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import type { CaseSavedObject, SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
@@ -93,7 +92,7 @@ interface PostCaseArgs extends IndexRefresh {
 interface PatchCase extends IndexRefresh {
   caseId: string;
   updatedAttributes: Partial<CaseAttributes & PushedArgs>;
-  originalCase: SavedObject<CaseAttributes>;
+  originalCase: CaseSavedObject;
   version?: string;
 }
 type PatchCaseArgs = PatchCase;
@@ -309,7 +308,7 @@ export class CasesService {
     }
   }
 
-  public async getCase({ id: caseId }: GetCaseArgs): Promise<SavedObject<CaseAttributes>> {
+  public async getCase({ id: caseId }: GetCaseArgs): Promise<CaseSavedObject> {
     try {
       this.log.debug(`Attempting to GET case ${caseId}`);
       const caseSavedObject = await this.unsecuredSavedObjectsClient.get<ESCaseAttributes>(
@@ -543,11 +542,7 @@ export class CasesService {
     }
   }
 
-  public async postNewCase({
-    attributes,
-    id,
-    refresh,
-  }: PostCaseArgs): Promise<SavedObject<CaseAttributes>> {
+  public async postNewCase({ attributes, id, refresh }: PostCaseArgs): Promise<CaseSavedObject> {
     try {
       this.log.debug(`Attempting to POST a new case`);
       const transformedAttributes = transformAttributesToESModel(attributes);

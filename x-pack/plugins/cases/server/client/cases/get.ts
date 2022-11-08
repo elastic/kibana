@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
+import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type {
   CaseResponse,
   CaseResolveResponse,
@@ -37,6 +37,7 @@ import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
+import type { CaseSavedObject } from '../../common/types';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -182,7 +183,7 @@ export const get = async (
   } = clientArgs;
 
   try {
-    const theCase: SavedObject<CaseAttributes> = await caseService.getCase({
+    const theCase: CaseSavedObject = await caseService.getCase({
       id,
     });
 

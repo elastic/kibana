@@ -17,14 +17,14 @@ import {
 import {
   externalReferenceAttachmentES,
   externalReferenceAttachmentSO,
-  getPersistableStateAttachmentTypeRegistry,
+  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
 import { BuilderFactory } from './builder_factory';
 import { casePayload, externalService } from './mocks';
 
 describe('UserActionBuilder', () => {
-  const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   const builderFactory = new BuilderFactory({ persistableStateAttachmentTypeRegistry });
   const commonArgs = {
     caseId: '123',
