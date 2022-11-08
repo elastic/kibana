@@ -46,7 +46,7 @@ describe('renderParameterTemplates', () => {
         {
           subAction: OpsgenieSubActions.CreateAlert,
           subActionParams: {
-            tags: ['{{rule.something}}'],
+            tags: ['a tag'],
           },
         },
         variables
@@ -56,7 +56,7 @@ describe('renderParameterTemplates', () => {
         "subAction": "createAlert",
         "subActionParams": Object {
           "tags": Array [
-            "",
+            "a tag",
           ],
         },
       }

@@ -14,7 +14,6 @@ import {
   SimpleConnectorForm,
 } from './simple_connector_form';
 import userEvent from '@testing-library/user-event';
-import { EuiText } from '@elastic/eui';
 
 const fillForm = async ({ getByTestId }: RenderResult) => {
   await act(async () => {
@@ -84,7 +83,7 @@ describe('SimpleConnectorForm', () => {
       {
         id: 'test-config-default-value',
         label: 'Test config default',
-        helpText: <EuiText>{'Test help text in a component'}</EuiText>,
+        helpText: <>{'Test help text in a component'}</>,
         defaultValue: 'a default',
       },
     ];
