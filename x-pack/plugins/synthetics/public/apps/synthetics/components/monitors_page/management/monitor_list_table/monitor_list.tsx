@@ -77,7 +77,7 @@ export const MonitorList = ({
       loadPage({
         pageIndex: index,
         pageSize: size,
-        sortField: `${field}.keyword`,
+        sortField: field === 'enabled' ? field : `${field}.keyword`,
         sortOrder: direction,
       });
     },
