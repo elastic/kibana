@@ -27,8 +27,8 @@ import { getSettingsRouteConfig } from './components/settings/route_config';
 import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { ErrorDetailsPage } from './components/error_details/error_details_page';
 import { StepTitle } from './components/step_details_page/step_title';
-import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
-import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
+import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/monitor_add_page';
+import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
 import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
 import { MonitorDetailsPage } from './components/monitor_details/monitor_details_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
@@ -36,7 +36,6 @@ import { MonitorsPageHeader } from './components/monitors_page/management/page_h
 import { OverviewPage } from './components/monitors_page/overview/overview_page';
 import { SyntheticsPageTemplateComponent } from './components/common/pages/synthetics_page_template';
 import { NotFoundPage } from './components/common/pages/not_found';
-import { ServiceAllowedWrapper } from './components/common/wrappers/service_allowed_wrapper';
 import {
   MonitorTypePortalNode,
   MonitorDetailsLinkPortalNode,
@@ -55,7 +54,7 @@ import {
   TEST_RUN_DETAILS_ROUTE,
 } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
-import { MonitorPage } from './components/monitors_page/monitor_page';
+import { MonitorsPageWithServiceAllowed } from './components/monitors_page/monitor_page';
 import { apiService } from '../../utils/api_service';
 import { RunTestManually } from './components/monitor_details/run_test_manually';
 import { MonitorDetailsStatus } from './components/monitor_details/monitor_details_status';
@@ -196,13 +195,7 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITORS_ROUTE,
-      component: () => (
-        <>
-          <ServiceAllowedWrapper>
-            <MonitorPage />
-          </ServiceAllowedWrapper>
-        </>
-      ),
+      component: MonitorsPageWithServiceAllowed,
       dataTestSubj: 'syntheticsMonitorManagementPage',
       pageHeader: {
         pageTitle: <MonitorsPageHeader />,
@@ -234,11 +227,7 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_ADD_ROUTE,
-      component: () => (
-        <ServiceAllowedWrapper>
-          <MonitorAddPage />
-        </ServiceAllowedWrapper>
-      ),
+      component: MonitorAddPageWithServiceAllowed,
       dataTestSubj: 'syntheticsMonitorAddPage',
       pageHeader: {
         pageTitle: (
@@ -271,11 +260,7 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_EDIT_ROUTE,
-      component: () => (
-        <ServiceAllowedWrapper>
-          <MonitorEditPage />
-        </ServiceAllowedWrapper>
-      ),
+      component: MonitorEditPageWithServiceAllowed,
       dataTestSubj: 'syntheticsMonitorEditPage',
       pageHeader: {
         pageTitle: (

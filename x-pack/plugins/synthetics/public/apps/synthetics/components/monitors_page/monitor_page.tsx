@@ -12,6 +12,7 @@ import { useTrackPageview } from '@kbn/observability-plugin/public';
 
 import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 
+import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 import { useLocations } from '../../hooks';
 
 import { Loader } from './management/loader/loader';
@@ -23,7 +24,7 @@ import { useMonitorListBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useMonitorList } from './hooks/use_monitor_list';
 import * as labels from './management/labels';
 
-export const MonitorPage: React.FC = () => {
+const MonitorPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'monitors' });
   useTrackPageview({ app: 'synthetics', path: 'monitors', delay: 15000 });
 
@@ -91,3 +92,9 @@ export const MonitorPage: React.FC = () => {
     </>
   );
 };
+
+export const MonitorsPageWithServiceAllowed = React.memo(() => (
+  <ServiceAllowedWrapper>
+    <MonitorPage />
+  </ServiceAllowedWrapper>
+));
