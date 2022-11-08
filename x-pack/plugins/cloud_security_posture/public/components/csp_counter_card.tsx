@@ -27,7 +27,8 @@ export const CspCounterCard = (counter: CspCounterCardProps) => {
       hasBorder
       onClick={counter.onClick}
       paddingSize="m"
-      layout="horizontal"
+      textAlign="left"
+      layout="vertical"
       css={css`
         position: relative;
 
