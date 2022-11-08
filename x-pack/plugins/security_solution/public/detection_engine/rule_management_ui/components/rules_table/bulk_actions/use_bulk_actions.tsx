@@ -131,7 +131,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionType.duplicate,
-          payload: { duplicate: { include_exceptions: duplicateExceptions } },
+          duplicatePayload: { include_exceptions: duplicateExceptions },
           ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
         clearRulesSelection();

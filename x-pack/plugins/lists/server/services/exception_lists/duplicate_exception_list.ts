@@ -22,8 +22,8 @@ import { getExceptionList } from './get_exception_list';
 import { createExceptionList } from './create_exception_list';
 
 const LISTS_ABLE_TO_DUPLICATE = [
-  ExceptionListTypeEnum.DETECTION,
-  ExceptionListTypeEnum.RULE_DEFAULT,
+  ExceptionListTypeEnum.DETECTION.toString(),
+  ExceptionListTypeEnum.RULE_DEFAULT.toString(),
 ];
 
 interface CreateExceptionListOptions {
@@ -75,7 +75,6 @@ export const duplicateExceptionListAndItems = async ({
   // fetch associated items
   let itemsToBeDuplicated: CreateExceptionListItemSchema[] = [];
   const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
-    console.log({ RESPONSE: response.data });
     const transformedItems = response.data.map((item) => {
       // Generate a new static listId
       const newItemId = uuid.v4();

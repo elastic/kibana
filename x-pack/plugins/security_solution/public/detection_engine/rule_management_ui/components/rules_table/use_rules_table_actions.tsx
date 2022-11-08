@@ -23,7 +23,11 @@ import {
 import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 
-export const useRulesTableActions = ({showExceptionsDuplicateConfirmation}): Array<DefaultItemAction<Rule>> => {
+export const useRulesTableActions = ({
+  showExceptionsDuplicateConfirmation,
+}: {
+  showExceptionsDuplicateConfirmation: () => Promise<boolean>;
+}): Array<DefaultItemAction<Rule>> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { startTransaction } = useStartTransaction();
@@ -67,7 +71,7 @@ export const useRulesTableActions = ({showExceptionsDuplicateConfirmation}): Arr
         const result = await executeBulkAction({
           type: BulkActionType.duplicate,
           ids: [rule.id],
-          payload: { duplicate: { include_exceptions: duplicateExceptions } },
+          duplicatePayload: { include_exceptions: duplicateExceptions },
         });
         const createdRules = result?.attributes.results.created;
         if (createdRules?.length) {

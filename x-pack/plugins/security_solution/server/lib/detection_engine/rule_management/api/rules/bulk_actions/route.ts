@@ -497,22 +497,19 @@ export const performBulkActionRoute = (
                 if (isDryRun) {
                   return rule;
                 }
-
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
                   rule,
                 });
-
                 const duplicateRuleToCreate = await duplicateRule(
                   migratedRule,
-                  body.duplicate.include_exceptions
+                  body.duplicate.include_exceptions,
+                  exceptionsClient
                 );
-
                 const createdRule = await rulesClient.create({
                   data: duplicateRuleToCreate,
                 });
-
                 return createdRule;
               },
               abortSignal: abortController.signal,

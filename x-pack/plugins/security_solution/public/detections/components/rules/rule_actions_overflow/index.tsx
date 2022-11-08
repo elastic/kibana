@@ -90,8 +90,7 @@ const RuleActionsOverflowComponent = ({
                 const result = await executeBulkAction({
                   type: BulkActionType.duplicate,
                   ids: [rule.id],
-                  payload: { duplicate: { include_exceptions: duplicateExceptions } },
-                  search: { ids: [rule.id] },
+                  duplicatePayload: { include_exceptions: duplicateExceptions },
                 });
 
                 const createdRules = result?.attributes.results.created;

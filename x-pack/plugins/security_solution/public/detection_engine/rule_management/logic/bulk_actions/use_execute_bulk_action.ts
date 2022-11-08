@@ -10,10 +10,6 @@ import { useCallback } from 'react';
 import type { BulkActionResponse } from '..';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type {
-  BulkActionDuplicatePayload,
-  BulkActionEditPayload,
-} from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { SecurityPageName } from '../../../../app/types';
 import { getEditRuleUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
@@ -64,7 +60,9 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
             editPayload:
               bulkAction.type === BulkActionType.edit ? bulkAction.editPayload : undefined,
             duplicatePayload:
-              bulkAction.type === BulkActionType.duplicate ? bulkAction.duplicatePayload : undefined,
+              bulkAction.type === BulkActionType.duplicate
+                ? bulkAction.duplicatePayload
+                : undefined,
           });
         }
 

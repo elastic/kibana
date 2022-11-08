@@ -7,7 +7,7 @@
 import { useCallback } from 'react';
 import { useAsyncCheckboxConfirmation } from '../rules_table/use_async_checkbox_confirm';
 
-import { useBoolState } from '../../../../../../common/hooks/use_bool_state';
+import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 
 /**
  * hook that controls bulk duplicate actions exceptions confirmation modal window and its content
@@ -23,7 +23,7 @@ export const useBulkDuplicateExceptionsConfirmation = () => {
   const showBulkDuplicateConfirmation = useCallback(async () => {
     const confirmation = await confirmForm();
     if (confirmation) {
-      onConfirm();
+      onConfirm(true);
     }
 
     return confirmation;

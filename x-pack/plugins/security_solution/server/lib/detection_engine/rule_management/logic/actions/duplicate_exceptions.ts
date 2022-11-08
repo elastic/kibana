@@ -9,7 +9,7 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { RuleParams } from '../schemas/rule_schemas';
+import type { RuleParams } from '../../../rule_schema';
 
 export const duplicateExceptions = async (
   ruleId: RuleParams['ruleId'],
@@ -17,7 +17,6 @@ export const duplicateExceptions = async (
   shouldDuplicate: boolean,
   exceptionsClient: ExceptionListClient | undefined
 ): Promise<RuleParams['exceptionsList']> => {
-  console.log({ exceptionLists });
   if (exceptionLists == null) {
     return [];
   }
@@ -35,18 +34,17 @@ export const duplicateExceptions = async (
     },
     [[], []]
   );
-  console.log({ ruleDefaultList, sharedLists });
   // If user does not want exceptions duplicated, return empty array.
   // This will remove the shared list references between rule<-->exceptions.
   // The rule_default list, associated only with that rule will still need to be deleted.
   if (!shouldDuplicate) {
-    if (ruleDefaultList != null && exceptionsClient != null) {
-      await exceptionsClient.deleteExceptionList({
-        id: ruleDefaultList.id,
-        listId: ruleDefaultList.list_id,
-        namespaceType: ruleDefaultList.namespace_type,
-      });
-    }
+    // if (ruleDefaultList != null && exceptionsClient != null) {
+    //   await exceptionsClient.deleteExceptionList({
+    //     id: ruleDefaultList.id,
+    //     listId: ruleDefaultList.list_id,
+    //     namespaceType: ruleDefaultList.namespace_type,
+    //   });
+    // }
 
     return [];
   }
