@@ -12,7 +12,7 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isEqual } from 'lodash';
 import { MutableRefObject, useEffect, useRef } from 'react';
-import { filter, lastValueFrom, map } from 'rxjs';
+import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
@@ -41,7 +41,7 @@ export const useTotalHits = ({
   filters: Filter[];
   query: Query | AggregateQuery;
   timeRange: TimeRange;
-  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, totalHits?: number) => void;
+  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
 }) => {
   const abortController = useRef<AbortController>();
   const totalHitsDeps = useRef<ReturnType<typeof getTotalHitsDeps>>();
@@ -150,7 +150,7 @@ const fetchTotalHits = async ({
   filters: Filter[];
   query: Query | AggregateQuery;
   timeRange: TimeRange;
-  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, totalHits?: number) => void;
+  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
 }) => {
   abortController.current?.abort();
   abortController.current = undefined;
@@ -217,10 +217,15 @@ const fetchTotalHits = async ({
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
-      map((res) => res.rawResponse.hits.total as number)
+      map((res) => res.rawResponse.hits.total as number),
+      catchError((error: Error) => of(error))
     );
 
-  const totalHits = await lastValueFrom(fetch$);
+  const result = await lastValueFrom(fetch$);
 
-  onTotalHitsChange?.(UnifiedHistogramFetchStatus.complete, totalHits);
+  const resultStatus =
+    result instanceof Error
+      ? UnifiedHistogramFetchStatus.error
+      : UnifiedHistogramFetchStatus.complete;
+  onTotalHitsChange?.(resultStatus, result);
 };

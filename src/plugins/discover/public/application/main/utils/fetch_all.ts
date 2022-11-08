@@ -44,6 +44,25 @@ export interface FetchDeps {
 }
 
 /**
+ * Method to create an error handler that will forward the received error
+ * to the specified subjects. It will ignore AbortErrors and will use the data
+ * plugin to show a toast for the error (e.g. allowing better insights into shard failures).
+ */
+export const sendErrorTo = (
+  data: DataPublicPluginStart,
+  ...errorSubjects: Array<DataMain$ | DataDocuments$>
+) => {
+  return (error: Error) => {
+    if (error instanceof Error && error.name === 'AbortError') {
+      return;
+    }
+
+    data.search.showError(error);
+    errorSubjects.forEach((subject) => sendErrorMsg(subject, error));
+  };
+};
+
+/**
  * This function starts fetching all required queries in Discover. This will be the query to load the individual
  * documents as well as any other requests that might be required to load the main view.
  *
@@ -57,22 +76,6 @@ export function fetchAll(
   fetchDeps: FetchDeps
 ): Promise<void> {
   const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
-
-  /**
-   * Method to create an error handler that will forward the received error
-   * to the specified subjects. It will ignore AbortErrors and will use the data
-   * plugin to show a toast for the error (e.g. allowing better insights into shard failures).
-   */
-  const sendErrorTo = (...errorSubjects: Array<DataMain$ | DataDocuments$>) => {
-    return (error: Error) => {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return;
-      }
-
-      data.search.showError(error);
-      errorSubjects.forEach((subject) => sendErrorMsg(subject, error));
-    };
-  };
 
   try {
     const dataView = searchSource.getField('index')!;
@@ -145,7 +148,7 @@ export function fetchAll(
       // Only the document query should send its errors to main$, to cause the full Discover app
       // to get into an error state. The other queries will not cause all of Discover to error out
       // but their errors will be shown in-place (e.g. of the chart).
-      .catch(sendErrorTo(dataSubjects.documents$, dataSubjects.main$));
+      .catch(sendErrorTo(data, dataSubjects.documents$, dataSubjects.main$));
 
     // Return a promise that will resolve once all the requests have finished or failed
     return documents.then(() => {

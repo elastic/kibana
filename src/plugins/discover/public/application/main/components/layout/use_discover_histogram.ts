@@ -25,6 +25,7 @@ import type { AppState, GetStateReturn } from '../../services/discover_state';
 import { FetchStatus } from '../../../types';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
+import { sendErrorTo } from '../../utils/fetch_all';
 
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
@@ -51,7 +52,7 @@ export const useDiscoverHistogram = ({
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
 }) => {
-  const { storage } = useDiscoverServices();
+  const { storage, data } = useDiscoverServices();
 
   /**
    * Visualize
@@ -133,9 +134,19 @@ export const useDiscoverHistogram = ({
    * Total hits
    */
 
+  const sendTotalHitsError = useMemo(
+    () => sendErrorTo(data, savedSearchData$.totalHits$),
+    [data, savedSearchData$.totalHits$]
+  );
+
   const onTotalHitsChange = useCallback(
-    (status: UnifiedHistogramFetchStatus, totalHits?: number) => {
+    (status: UnifiedHistogramFetchStatus, result?: number | Error) => {
       const { fetchStatus, recordRawType } = savedSearchData$.totalHits$.getValue();
+
+      if (result instanceof Error) {
+        sendTotalHitsError(result);
+        return;
+      }
 
       // If we have a partial result already, we don't
       // want to update the total hits back to loading
@@ -145,11 +156,11 @@ export const useDiscoverHistogram = ({
 
       savedSearchData$.totalHits$.next({
         fetchStatus: status.toString() as FetchStatus,
-        result: totalHits,
+        result,
         recordRawType,
       });
     },
-    [savedSearchData$.totalHits$]
+    [savedSearchData$.totalHits$, sendTotalHitsError]
   );
 
   const { fetchStatus: hitsFetchStatus, result: hitsTotal } = useDataState(

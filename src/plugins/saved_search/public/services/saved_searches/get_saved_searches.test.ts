@@ -100,6 +100,7 @@ describe('getSavedSearch', () => {
     expect(savedObjectsClient.resolve).toHaveBeenCalled();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "_source",
         ],
@@ -197,6 +198,7 @@ describe('getSavedSearch', () => {
     expect(savedObjectsClient.resolve).toHaveBeenCalled();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "_source",
         ],

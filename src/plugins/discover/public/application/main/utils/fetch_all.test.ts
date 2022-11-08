@@ -20,12 +20,12 @@ import {
   DataDocumentsMsg,
   DataMainMsg,
   DataTotalHitsMsg,
+  RecordRawType,
   SavedSearchData,
 } from '../hooks/use_saved_search';
 
 import { fetchDocuments } from './fetch_documents';
 import { fetchSql } from './fetch_sql';
-import { fetchTotalHits } from './fetch_total_hits';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { dataViewMock } from '../../../__mocks__/data_view';
 
@@ -37,12 +37,7 @@ jest.mock('./fetch_sql', () => ({
   fetchSql: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('./fetch_total_hits', () => ({
-  fetchTotalHits: jest.fn(),
-}));
-
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
-const mockFetchTotalHits = fetchTotalHits as unknown as jest.MockedFunction<typeof fetchTotalHits>;
 const mockFetchSQL = fetchSql as unknown as jest.MockedFunction<typeof fetchSql>;
 
 function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
@@ -88,7 +83,6 @@ describe('test fetchAll', () => {
 
     mockFetchDocuments.mockReset().mockResolvedValue([]);
     mockFetchSQL.mockReset().mockResolvedValue([]);
-    mockFetchTotalHits.mockReset().mockResolvedValue(42);
   });
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
@@ -135,8 +129,12 @@ describe('test fetchAll', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
 
-    mockFetchTotalHits.mockResolvedValue(42);
     await fetchAll(subjects, searchSource, false, deps);
+    subjects.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      recordRawType: RecordRawType.DOCUMENT,
+      result: 42,
+    });
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -149,24 +147,36 @@ describe('test fetchAll', () => {
     const collect = subjectCollector(subjects.totalHits$);
     searchSource.getField('index')!.isTimeBased = () => true;
     await fetchAll(subjects, searchSource, false, deps);
+
+    subjects.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      recordRawType: RecordRawType.DOCUMENT,
+      result: 32,
+    });
+
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
       { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document', result: 0 }, // From documents query
       { fetchStatus: FetchStatus.COMPLETE, recordRawType: 'document', result: 32 },
     ]);
-    expect(mockFetchTotalHits).not.toHaveBeenCalled();
   });
 
   test('should only fail totalHits$ query not main$ for error from that query', async () => {
     const collectTotalHits = subjectCollector(subjects.totalHits$);
     const collectMain = subjectCollector(subjects.main$);
     searchSource.getField('index')!.isTimeBased = () => false;
-    mockFetchTotalHits.mockRejectedValue({ msg: 'Oh noes!' });
     const hits = [{ _id: '1', _index: 'logs' }];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
     await fetchAll(subjects, searchSource, false, deps);
+
+    subjects.totalHits$.next({
+      fetchStatus: FetchStatus.ERROR,
+      recordRawType: RecordRawType.DOCUMENT,
+      error: { msg: 'Oh noes!' } as unknown as Error,
+    });
+
     expect(await collectTotalHits()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
