@@ -185,7 +185,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                         <EuiFlexItem>
                           <HeaderMenu
                             disableActions={readOnly}
-                            dataTestSubj="exceptionsListCardOverflowActions"
+                            dataTestSubj="sharedListOverflowCard"
                             actions={menuActionItems}
                           />
                         </EuiFlexItem>

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../common/mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
@@ -17,6 +16,7 @@ import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
 import { useHistory } from 'react-router-dom';
 import { generateHistoryMock } from '../../../common/utils/route/mocks';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 
 jest.mock('../../../detections/components/user_info');
 jest.mock('../../../common/utils/route/mocks');
@@ -42,8 +42,6 @@ jest.mock('@kbn/i18n-react', () => {
 jest.mock('../../../detections/containers/detection_engine/lists/use_lists_config', () => ({
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
-
-// TODO Change tests to use REACT-TESTING_LIBRARY, SKIP until finish logic
 
 describe('SharedLists', () => {
   const mockHistory = generateHistoryMock();
@@ -92,25 +90,22 @@ describe('SharedLists', () => {
     ]);
   });
 
-  it.skip('renders delete option as disabled if list is "endpoint_list"', async () => {
-    const wrapper = mount(
+  it('renders delete option as disabled if list is "endpoint_list"', async () => {
+    const wrapper = render(
       <TestProviders>
         <SharedLists />
       </TestProviders>
     );
+    const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    fireEvent.click(allMenuActions[0]);
 
-    wrapper
-      .find('[data-test-subj="exceptionsListCardOverflowActions"] button')
-      .at(0)
-      .simulate('click');
-
-    expect(wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button')).toHaveLength(1);
-    expect(
-      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
-    ).toBeTruthy();
+    await waitFor(() => {
+      const allDeleteActions = wrapper.getAllByTestId('sharedListOverflowCardActionItemDelete');
+      expect(allDeleteActions[0]).toBeDisabled();
+    });
   });
 
-  it.skip('renders delete option as disabled if user is read only', async () => {
+  it('renders delete option as disabled if user is read only', async () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         loading: false,
@@ -119,17 +114,19 @@ describe('SharedLists', () => {
       },
     ]);
 
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <SharedLists />
       </TestProviders>
     );
-    wrapper
-      .find('[data-test-subj="exceptionsListCardOverflowActions"] button')
-      .at(0)
-      .simulate('click');
-    expect(
-      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
-    ).toBeTruthy();
+    const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    fireEvent.click(allMenuActions[1]);
+
+    await waitFor(() => {
+      const allDeleteActions = wrapper.queryAllByTestId('sharedListOverflowCardActionItemDelete');
+      expect(allDeleteActions).toEqual([]);
+      const allExportActions = wrapper.queryAllByTestId('sharedListOverflowCardActionItemExport');
+      expect(allExportActions).toEqual([]);
+    });
   });
 });

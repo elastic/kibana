@@ -301,6 +301,7 @@ export const SharedLists = React.memo(() => {
       iconSide="right"
       onClick={onRowSizeButtonClick}
     >
+      {/* TODO move to translations */}
       {`Rows per page: ${rowSize}`}
     </EuiButtonEmpty>
   );
@@ -411,21 +412,19 @@ export const SharedLists = React.memo(() => {
               onRefresh={handleRefresh}
             />
             {exceptionListsWithRuleRefs.length > 0 && canUserCRUD !== null && canUserREAD !== null && (
-              <React.Fragment data-test-subj="exceptionsTable">
+              <div data-test-subj="exceptionsTable">
                 {exceptionListsWithRuleRefs.map((excList) => (
-                  <>
-                    <ExceptionsListCard
-                      key={excList.list_id}
-                      data-test-subj="exceptionsListCard"
-                      readOnly={canUserREAD && !canUserCRUD}
-                      http={http}
-                      exceptionsList={excList}
-                      handleDelete={handleDelete}
-                      handleExport={handleExport}
-                    />
-                  </>
+                  <ExceptionsListCard
+                    key={excList.list_id}
+                    data-test-subj="exceptionsListCard"
+                    readOnly={canUserREAD && !canUserCRUD}
+                    http={http}
+                    exceptionsList={excList}
+                    handleDelete={handleDelete}
+                    handleExport={handleExport}
+                  />
                 ))}
-              </React.Fragment>
+              </div>
             )}
           </>
         )}

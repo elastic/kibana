@@ -86,7 +86,7 @@ export const useExceptionsListCard = ({
   const menuActionItems = useMemo(
     () => [
       {
-        key: '1',
+        key: 'Export',
         icon: 'exportAction',
         label: i18n.EXPORT_EXCEPTION_LIST,
         onClick: (e: React.MouseEvent<Element, MouseEvent>) => {
@@ -98,7 +98,7 @@ export const useExceptionsListCard = ({
         },
       },
       {
-        key: '2',
+        key: 'Delete',
         icon: 'trash',
         disabled: listCannotBeEdited,
         label: i18n.DELETE_EXCEPTION_LIST,
