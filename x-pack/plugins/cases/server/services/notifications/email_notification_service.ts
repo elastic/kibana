@@ -43,7 +43,7 @@ export class EmailNotificationService implements NotificationService {
   }
 
   private static getTitle(theCase: CaseSavedObject) {
-    return `[Elastic] ${theCase.attributes.title}`;
+    return `[Elastic][Cases] ${theCase.attributes.title}`;
   }
 
   private static getMessage(theCase: CaseSavedObject, publicBaseUrl?: IBasePath['publicBaseUrl']) {
@@ -111,13 +111,17 @@ export class EmailNotificationService implements NotificationService {
     }
   }
 
-  public async bulkNotifyAssignees(args: NotifyArgs[]) {
-    if (args.length === 0) {
+  public async bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment: NotifyArgs[]) {
+    if (casesAndAssigneesToNotifyForAssignment.length === 0) {
       return;
     }
 
-    await pMap(args, this.notifyAssignees, {
-      concurrency: MAX_CONCURRENT_SEARCHES,
-    });
+    await pMap(
+      casesAndAssigneesToNotifyForAssignment,
+      (args: NotifyArgs) => this.notifyAssignees(args),
+      {
+        concurrency: MAX_CONCURRENT_SEARCHES,
+      }
+    );
   }
 }
