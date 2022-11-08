@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiFieldSearch,
@@ -16,6 +16,9 @@ import {
   EuiFormRow,
   EuiToolTip,
   EuiBadge,
+  EuiPopover,
+  EuiSelectable,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
@@ -46,6 +49,27 @@ export const OptionsListPopoverActionBar = ({
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality);
   const searchString = select((state) => state.componentState.searchString);
+
+  const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
+  const [options, setOptions] = useState<EuiSelectableOption[]>([
+    {
+      label: 'Document count (descending)',
+      'data-test-subj': 'optionsList__sortByDocCount_desc',
+      checked: 'on',
+    },
+    {
+      label: 'Document count (ascending)',
+      'data-test-subj': 'optionsList__sortByDocCount_asc',
+    },
+    {
+      label: 'Alphabetical (descending)',
+      'data-test-subj': 'optionsList__sortByAlphabetical_desc',
+    },
+    {
+      label: 'Alphabetical (ascending)',
+      'data-test-subj': 'optionsList__sortByAlphabetical_asc',
+    },
+  ]);
 
   return (
     <div className="optionsList__actions">
@@ -86,6 +110,31 @@ export const OptionsListPopoverActionBar = ({
                 </EuiBadge>
               </EuiToolTip>
             )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  iconType="sortable"
+                  onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
+                />
+              }
+              isOpen={isSortingPopoverOpen}
+              closePopover={() => setIsSortingPopoverOpen(false)}
+              panelPaddingSize="none"
+            >
+              <EuiPopoverTitle paddingSize="s">Sort</EuiPopoverTitle>
+              <EuiSelectable
+                aria-label="Single selection example"
+                options={options}
+                onChange={(newOptions) => setOptions(newOptions)}
+                singleSelection={'always'}
+                listProps={{ bordered: false }}
+                style={{ width: 300 }}
+              >
+                {(list) => list}
+              </EuiSelectable>
+            </EuiPopover>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip
