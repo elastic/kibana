@@ -87,11 +87,13 @@ export const mockState: SyntheticsAppState = {
   overview: {
     pageState: {
       perPage: 10,
+      sortOrder: 'asc',
+      sortField: 'name.keyword',
     },
     data: {
       total: 0,
       allMonitorIds: [],
-      pages: {},
+      monitors: [],
     },
     error: null,
     loaded: false,
@@ -360,6 +362,7 @@ function getMonitorDetailsMockSlice() {
     },
     syntheticsMonitor: {
       id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
+      config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
       type: DataStream.BROWSER,
       enabled: true,
       schedule: { unit: ScheduleUnit.MINUTES, number: '10' },

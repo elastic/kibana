@@ -605,6 +605,7 @@ export function LayerPanel(
                         filterOperations: group.filterOperations,
                         prioritizedOperation: group.prioritizedOperation,
                         isNewColumn: true,
+                        isMetricDimension: group?.isMetricDimension,
                         indexPatternId: layerDatasource
                           ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
                           : activeVisualization.getUsedDataView?.(visualizationState, layerId),
@@ -717,6 +718,7 @@ export function LayerPanel(
                   groupId: activeGroup.groupId,
                   hideGrouping: activeGroup.hideGrouping,
                   filterOperations: activeGroup.filterOperations,
+                  isMetricDimension: activeGroup?.isMetricDimension,
                   dimensionGroups,
                   toggleFullscreen,
                   isFullscreen,

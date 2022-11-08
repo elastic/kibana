@@ -54,7 +54,7 @@ export const getNormalizeBrowserFields = ({
       monitor.throttling?.upload || defaultFields[ConfigKey.UPLOAD_SPEED]
     }`,
     [ConfigKey.IS_THROTTLING_ENABLED]:
-      Boolean(monitor.throttling) || defaultFields[ConfigKey.IS_THROTTLING_ENABLED],
+      Boolean(monitor.throttling) ?? defaultFields[ConfigKey.IS_THROTTLING_ENABLED],
     [ConfigKey.LATENCY]: `${monitor.throttling?.latency || defaultFields[ConfigKey.LATENCY]}`,
     [ConfigKey.IGNORE_HTTPS_ERRORS]:
       monitor.ignoreHTTPSErrors || defaultFields[ConfigKey.IGNORE_HTTPS_ERRORS],

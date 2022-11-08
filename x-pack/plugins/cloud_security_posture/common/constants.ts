@@ -42,6 +42,7 @@ export const INTERNAL_FEATURE_FLAGS = {
   showManageRulesMock: false,
   showFindingFlyoutEvidence: false,
   showFindingsGroupBy: true,
+  showNewDashboard: false,
 } as const;
 
 export const CSP_RULE_SAVED_OBJECT_TYPE = 'csp_rule';
