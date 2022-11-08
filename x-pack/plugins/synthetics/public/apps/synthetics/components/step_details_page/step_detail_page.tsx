@@ -20,6 +20,7 @@ import { BreakdownLegend } from './components/timings_breakdown/breakdown_legend
 import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
 import { ObjectWeightList } from './components/object_weight_list';
 import { NetworkTimingsDonut } from './components/network_timings_donut';
+import { StepMetrics } from './components/step_metrics';
 import { NetworkTimingsBreakdown } from './network_timings_breakdown';
 import { ObjectCountList } from './components/object_count_list';
 import { StepImage } from './components/step_image';
@@ -90,8 +91,8 @@ export const StepDetailPage = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel hasShadow={false} hasBorder>
-            {/* TODO: Add step metrics*/}{' '}
+          <EuiPanel>
+            <StepMetrics />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
