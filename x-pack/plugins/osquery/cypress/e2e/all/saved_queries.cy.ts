@@ -23,4 +23,13 @@ describe('ALL - Saved queries', () => {
   });
 
   getSavedQueriesComplexTest(SAVED_QUERY_ID, SAVED_QUERY_DESCRIPTION);
+
+  it('checks default values on new saved query', () => {
+    cy.contains('Saved queries').click();
+    cy.contains('Add saved query').click();
+    // ADD MORE FIELDS HERE
+    cy.getBySel('resultsTypeField').within(() => {
+      cy.contains('Snapshot');
+    });
+  });
 });
