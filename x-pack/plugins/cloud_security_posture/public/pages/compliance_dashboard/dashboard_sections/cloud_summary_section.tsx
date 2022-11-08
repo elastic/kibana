@@ -67,18 +67,20 @@ export const CloudSummarySection = ({
     () => [
       {
         id: DASHBOARD_COUNTER_CARDS.CLUSTERS_EVALUATED,
-        title: <CompactFormattedNumber number={complianceData.clusters.length} />,
-        description: i18n.translate(
+        title: i18n.translate(
           'xpack.csp.dashboard.summarySection.counterCard.clustersEvaluatedDescription',
           { defaultMessage: 'Clusters Evaluated' }
         ),
+        description: <CompactFormattedNumber number={complianceData.clusters.length} />,
       },
       {
         id: DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED,
-        title: <CompactFormattedNumber number={complianceData.stats.resourcesEvaluated || 0} />,
-        description: i18n.translate(
+        title: i18n.translate(
           'xpack.csp.dashboard.summarySection.counterCard.resourcesEvaluatedDescription',
           { defaultMessage: 'Resources Evaluated' }
+        ),
+        description: (
+          <CompactFormattedNumber number={complianceData.stats.resourcesEvaluated || 0} />
         ),
         onClick: () => {
           navToFindingsByResource();
@@ -86,11 +88,11 @@ export const CloudSummarySection = ({
       },
       {
         id: DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS,
-        title: <CompactFormattedNumber number={complianceData.stats.totalFailed} />,
-        description: i18n.translate(
+        title: i18n.translate(
           'xpack.csp.dashboard.summarySection.counterCard.failingFindingsDescription',
           { defaultMessage: 'Failing Findings' }
         ),
+        description: <CompactFormattedNumber number={complianceData.stats.totalFailed} />,
         titleColor: complianceData.stats.totalFailed > 0 ? 'danger' : 'text',
         onClick: () => {
           navToFindings({ 'result.evaluation': RULE_FAILED });
@@ -112,7 +114,7 @@ export const CloudSummarySection = ({
         <EuiFlexGroup direction="column">
           {counters.map((counter) => (
             <EuiFlexItem key={counter.id}>
-              <CspCounterCard counter={counter} />
+              <CspCounterCard {...counter} />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>

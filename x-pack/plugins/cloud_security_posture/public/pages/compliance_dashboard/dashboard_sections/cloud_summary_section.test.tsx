@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { coreMock } from '@kbn/core/public/mocks';
 import { render } from '@testing-library/react';
 import { expectIdsInDoc } from '../../../test/utils';
 import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
@@ -16,28 +15,9 @@ import { TestProvider } from '../../../test/test_provider';
 import { screen } from '@testing-library/react';
 
 describe('<CloudSummarySection />', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   const renderCloudSummarySection = (alterMockData = {}) => {
-    const mockCore = coreMock.createStart();
-
     render(
-      <TestProvider
-        core={{
-          ...mockCore,
-          application: {
-            ...mockCore.application,
-            capabilities: {
-              ...mockCore.application.capabilities,
-              // This is required so that the `noDataConfig` view will show the action button
-              navLinks: { integrations: true },
-            },
-          },
-        }}
-      >
-        {/* <ComplianceDashboard />*/}
+      <TestProvider>
         <CloudSummarySection complianceData={{ ...mockDashboardData, ...alterMockData }} />
       </TestProvider>
     );

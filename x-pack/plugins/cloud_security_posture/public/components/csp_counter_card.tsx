@@ -7,27 +7,28 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiCard, EuiIcon, EuiStat, useEuiTheme } from '@elastic/eui';
+import { EuiCard, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { EuiStatProps, EuiCardProps } from '@elastic/eui';
 
 export type CspCounterCardProps = Pick<EuiCardProps, 'onClick' | 'id'> &
   Pick<EuiStatProps, 'title' | 'description' | 'titleColor' | 'isLoading'>;
 
-export const CspCounterCard = ({ counter }: { counter: CspCounterCardProps }) => {
+export const CspCounterCard = (counter: CspCounterCardProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiCard
-      title=""
+      title={
+        <EuiTitle size="xxxs">
+          <h6>{counter.title}</h6>
+        </EuiTitle>
+      }
       hasBorder
       onClick={counter.onClick}
       paddingSize="m"
+      layout="horizontal"
       css={css`
         position: relative;
-
-        .euiCard__title {
-          display: none;
-        }
 
         :hover .euiIcon {
           color: ${euiTheme.colors.primary};
@@ -36,19 +37,11 @@ export const CspCounterCard = ({ counter }: { counter: CspCounterCardProps }) =>
       `}
       data-test-subj={counter.id}
     >
-      <EuiStat
-        descriptionElement="h5"
-        titleSize="s"
-        isLoading={counter.isLoading}
-        description={counter.description}
-        title={counter.title || 0}
-        titleColor={counter.titleColor}
-        css={css`
-          display: flex;
-          flex-direction: column;
-          gap: ${euiTheme.size.m};
-        `}
-      />
+      <EuiText color={counter.titleColor}>
+        <EuiTitle size="xs">
+          <h3>{counter.description}</h3>
+        </EuiTitle>
+      </EuiText>
       {counter.onClick && (
         <EuiIcon
           type="link"
