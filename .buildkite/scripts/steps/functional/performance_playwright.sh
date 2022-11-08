@@ -15,6 +15,14 @@ function is_running {
   kill -0 "$1" &>/dev/null
 }
 
+function kill_all_by_name {
+  killall "$1" &>/dev/null || echo "node found process: $1"
+}
+
+function check_running_processes {
+  ps aux | grep -e 'java' -e 'node' -e 'chrome' || echo "failed to run 'ps aux'"
+}
+
 # unset env vars defined in other parts of CI for automatic APM collection of
 # Kibana. We manage APM config in our FTR config and performance service, and
 # APM treats config in the ENV with a very high precedence.
@@ -52,18 +60,12 @@ fi
 # track failed journeys here which might get written to metadata
 failedJourneys=()
 
-echo "--- Stop bazel(kibana) process"
-bazelPid=(pgrep -f bazel)
-echo "bazelPid=$bazelPid"
-killall -SIGKILL "$bazelPid" || true
-
 echo "--- Stopping all 'java' 'node' 'chrome' processes"
-killall -SIGKILL node || true
-killall -SIGKILL chrome || true
-killall -SIGKILL java || true
+kill_all_by_name "node"
+kill_all_by_name "chrome"
+kill_all_by_name "java"
 sleep 5;
-ps aux | grep -e 'java' -e 'node' -e 'chrome' || true
-#top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
+check_running_processes
 
 echo "--- 🔎 Start es"
 
@@ -105,15 +107,12 @@ for ((i=1;i<=20;i++)); do
       --debug \
       --bail
 
-    killall -SIGKILL chrome || true
-    # echo "--- Check running processes: top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'"
-    # top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
-    ps aux | grep -e 'java' -e 'node' -e 'chrome' || true
+    kill_all_by_name "chrome"
+    check_running_processes
 done
 
 echo "--- 🔎 Shutdown ES"
-#top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
-ps aux | grep -e 'java' -e 'node' -e 'chrome' || true
+check_running_processes
 echo "waiting for $esPid to exit gracefully";
 
 timeout=30 #seconds
