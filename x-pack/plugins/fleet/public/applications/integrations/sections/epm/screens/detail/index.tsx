@@ -25,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
+import { getPackageReleaseLabel } from '../../../../../../services/package_prerelease';
+
 import { splitPkgKey } from '../../../../../../../common/services';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
@@ -312,7 +314,7 @@ export function Detail() {
                     </EuiFlexItem>
                     {packageInfo?.release && packageInfo.release !== 'ga' ? (
                       <EuiFlexItem grow={false}>
-                        <HeaderReleaseBadge release={packageInfo.release} />
+                        <HeaderReleaseBadge release={getPackageReleaseLabel(packageInfo.version)} />
                       </EuiFlexItem>
                     ) : null}
                   </EuiFlexGroup>
