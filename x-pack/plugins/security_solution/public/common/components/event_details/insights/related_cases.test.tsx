@@ -63,75 +63,67 @@ describe('Related Cases', () => {
       (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
     });
 
-    describe('When related cases are loading', () => {
-      test('should show the loading message', async () => {
-        await act(async () => {
-          mockGetRelatedCases.mockReturnValue([]);
-          render(
-            <TestProviders>
-              <RelatedCases eventId={eventId} />
-            </TestProviders>
-          );
+    test('When related cases are loading should show the loading message', async () => {
+      await act(async () => {
+        mockGetRelatedCases.mockReturnValue([]);
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
 
-          expect(screen.getByText(CASES_LOADING)).toBeInTheDocument();
+        expect(screen.getByText(CASES_LOADING)).toBeInTheDocument();
+      });
+    });
+
+    test('When related cases are unable to be retrieved should show 0 related cases when there are none', async () => {
+      await act(async () => {
+        mockGetRelatedCases.mockReturnValue([]);
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByText(CASES_COUNT(0))).toBeInTheDocument();
         });
       });
     });
 
-    describe('When related cases are unable to be retrieved', () => {
-      test('should show 0 related cases when there are none', async () => {
-        await act(async () => {
-          mockGetRelatedCases.mockReturnValue([]);
-          render(
-            <TestProviders>
-              <RelatedCases eventId={eventId} />
-            </TestProviders>
-          );
-
-          await waitFor(() => {
-            expect(screen.getByText(CASES_COUNT(0))).toBeInTheDocument();
-          });
+    test('When 1 related case is retrieved should show 1 related case', async () => {
+      await act(async () => {
+        mockGetRelatedCases.mockReturnValue([{ id: '789', title: 'Test Case' }]);
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
+        await waitFor(() => {
+          expect(screen.getByText(CASES_COUNT(1))).toBeInTheDocument();
+          expect(screen.getByTestId('case-details-link')).toHaveTextContent('Test Case');
         });
       });
     });
 
-    describe('When 1 related case is retrieved', () => {
-      test('should show 1 related case', async () => {
-        await act(async () => {
-          mockGetRelatedCases.mockReturnValue([{ id: '789', title: 'Test Case' }]);
-          render(
-            <TestProviders>
-              <RelatedCases eventId={eventId} />
-            </TestProviders>
-          );
-          await waitFor(() => {
-            expect(screen.getByText(CASES_COUNT(1))).toBeInTheDocument();
-            expect(screen.getByTestId('case-details-link')).toHaveTextContent('Test Case');
-          });
-        });
-      });
-    });
+    test('When 2 related cases are retrieved should show 2 related cases', async () => {
+      await act(async () => {
+        mockGetRelatedCases.mockReturnValue([
+          { id: '789', title: 'Test Case 1' },
+          { id: '456', title: 'Test Case 2' },
+        ]);
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
 
-    describe('When 2 related cases are retrieved', () => {
-      test('should show 2 related cases', async () => {
-        await act(async () => {
-          mockGetRelatedCases.mockReturnValue([
-            { id: '789', title: 'Test Case 1' },
-            { id: '456', title: 'Test Case 2' },
-          ]);
-          render(
-            <TestProviders>
-              <RelatedCases eventId={eventId} />
-            </TestProviders>
-          );
-
-          await waitFor(() => {
-            expect(screen.getByText(CASES_COUNT(2))).toBeInTheDocument();
-            const cases = screen.getAllByTestId('case-details-link');
-            expect(cases).toHaveLength(2);
-            expect(cases[0]).toHaveTextContent('Test Case 1');
-            expect(cases[1]).toHaveTextContent('Test Case 2');
-          });
+        await waitFor(() => {
+          expect(screen.getByText(CASES_COUNT(2))).toBeInTheDocument();
+          const cases = screen.getAllByTestId('case-details-link');
+          expect(cases).toHaveLength(2);
+          expect(cases[0]).toHaveTextContent('Test Case 1');
+          expect(cases[1]).toHaveTextContent('Test Case 2');
         });
       });
     });
