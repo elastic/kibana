@@ -5,37 +5,45 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import type { FC, ReactNode, MutableRefObject, MouseEvent as ReactMouseEvent } from 'react';
 
 type ClickHandlerWithMeta = (e: ReactMouseEvent, meta: { isCtrlKey: boolean }) => void;
 
 interface Props {
   onClick: ClickHandlerWithMeta;
-  children: (ref: MutableRefObject<HTMLDivElement | null>) => ReactNode;
+  children: (
+    ref: MutableRefObject<HTMLButtonElement | null>,
+    onClick: (e: ReactMouseEvent) => void
+  ) => ReactNode;
 }
 
 export const CtrlClickDetect: FC<Props> = ({ onClick, children }) => {
-  const elRef = useRef<HTMLDivElement | null>(null);
+  const elRef = useRef<HTMLButtonElement | null>(null);
   const isMounted = useRef(false);
 
-  useEffect(() => {
-    function onElClick(e: MouseEvent) {
+  const onElClick = useCallback(
+    (e: ReactMouseEvent) => {
       e.preventDefault();
-      onClick(e as unknown as ReactMouseEvent, { isCtrlKey: e.ctrlKey });
-    }
+      onClick(e, { isCtrlKey: e.ctrlKey });
+    },
+    [onClick]
+  );
 
-    function onElContextmenu(e: MouseEvent) {
+  const onElContextmenu = useCallback(
+    (e: MouseEvent) => {
       // Disable context menu as on Mac "ctrl + click" equals "right clicking"
       // which opens the context menu
       e.preventDefault();
       onClick(e as unknown as ReactMouseEvent, { isCtrlKey: true });
-    }
+    },
+    [onClick]
+  );
 
+  useEffect(() => {
     const el = elRef.current;
 
     if (el && !isMounted.current && onClick) {
-      el.addEventListener('click', onElClick);
       el.addEventListener('contextmenu', onElContextmenu, false);
     }
 
@@ -43,12 +51,11 @@ export const CtrlClickDetect: FC<Props> = ({ onClick, children }) => {
 
     return () => {
       if (el) {
-        el.removeEventListener('click', onElClick);
         el.removeEventListener('contextmenu', onElContextmenu);
       }
       isMounted.current = false;
     };
-  }, [onClick]);
+  }, [onClick, onElContextmenu]);
 
-  return <>{children(elRef)}</>;
+  return <>{children(elRef, onElClick)}</>;
 };

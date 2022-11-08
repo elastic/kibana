@@ -119,7 +119,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
           <EuiSpacer size="s" />
           <TagList
             references={references}
-            tagRender={(tag) => <TagBadge tag={tag} onClick={onClickTag} />}
+            tagRender={(tag) => <TagBadge key={tag.name} tag={tag} onClick={onClickTag} />}
           />
         </>
       )}
