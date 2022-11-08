@@ -102,6 +102,7 @@ export type UrlQueryParams = Partial<QueryParams>;
 export type ParsedUrlQueryParams = Partial<Omit<QueryParams, 'page' | 'perPage'>> & {
   page?: string;
   perPage?: string;
+  [index: string]: string | string[] | undefined | null;
 };
 
 export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;

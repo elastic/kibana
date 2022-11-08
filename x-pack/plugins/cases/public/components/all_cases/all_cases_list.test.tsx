@@ -401,7 +401,7 @@ describe('AllCasesListGeneric', () => {
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          queryParams: { ...DEFAULT_QUERY_PARAMS },
+          queryParams: { ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.closedAt },
         })
       );
     });

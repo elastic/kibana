@@ -5,28 +5,36 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { stringify } from 'query-string';
+import { parse, stringify } from 'query-string';
 
 import { DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 import { parseUrlQueryParams } from './utils';
+import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 
 import type {
   LocalStorageQueryParams,
+  ParsedUrlQueryParams,
   QueryParams,
   UrlQueryParams,
 } from '../../../common/ui/types';
+import { useCasesContext } from '../cases_context/use_cases_context';
+
+export const getQueryParamsLocalStorageKey = (appId: string) => {
+  const filteringKey = LOCAL_STORAGE_KEYS.casesFiltering;
+  return `${appId}.${filteringKey}`;
+};
 
 const getQueryParams = (
   params: UrlQueryParams,
   queryParams: UrlQueryParams,
   urlParams: UrlQueryParams,
   localStorageQueryParams?: LocalStorageQueryParams
-) => {
+): QueryParams => {
   const result = { ...DEFAULT_QUERY_PARAMS };
 
   result.perPage =
@@ -49,13 +57,15 @@ const getQueryParams = (
 };
 
 export function useAllCasesQueryParams(isModalView: boolean = false) {
+  const { appId } = useCasesContext();
   const location = useLocation();
   const history = useHistory();
+  const isFirstRenderRef = useRef(true);
 
   const [queryParams, setQueryParams] = useState<QueryParams>({ ...DEFAULT_QUERY_PARAMS });
 
   const [localStorageQueryParams, setLocalStorageQueryParams] =
-    useLocalStorage<LocalStorageQueryParams>('cases.list.preferences');
+    useLocalStorage<LocalStorageQueryParams>(getQueryParamsLocalStorageKey(appId));
 
   const persistAndUpdateQueryParams = useCallback(
     (params) => {
@@ -64,7 +74,8 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
         return;
       }
 
-      const urlParams: UrlQueryParams = parseUrlQueryParams(location.search);
+      const parsedUrlParams: ParsedUrlQueryParams = parse(location.search);
+      const urlParams: UrlQueryParams = parseUrlQueryParams(parsedUrlParams);
       const newQueryParams: QueryParams = getQueryParams(
         params,
         queryParams,
@@ -81,14 +92,18 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
       };
 
       if (!isEqual(newUrlParams, urlParams)) {
-        history.push({
-          ...location,
-          search: stringify(newUrlParams),
-        });
-
-        setLocalStorageQueryParams(newLocalStorageQueryParams);
-        setQueryParams(newQueryParams);
+        try {
+          history.push({
+            ...location,
+            search: stringify({ ...parsedUrlParams, ...newUrlParams }),
+          });
+        } catch {
+          // silently fail
+        }
       }
+
+      setLocalStorageQueryParams(newLocalStorageQueryParams);
+      setQueryParams(newQueryParams);
     },
     [
       isModalView,
@@ -100,11 +115,10 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
     ]
   );
 
-  useEffect(() => {
+  if (isFirstRenderRef.current) {
     persistAndUpdateQueryParams(isModalView ? DEFAULT_QUERY_PARAMS : {});
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    isFirstRenderRef.current = false;
+  }
 
   return {
     queryParams,

@@ -10,13 +10,13 @@ import { useHistory } from 'react-router-dom';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { TestProviders } from '../../common/mock';
-import { useAllCasesQueryParams } from './use_all_cases_query_params';
+import {
+  useAllCasesQueryParams,
+  getQueryParamsLocalStorageKey,
+} from './use_all_cases_query_params';
 import { DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { stringify } from 'query-string';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
-
-jest.mock('react-use/lib/useLocalStorage');
 
 const LOCAL_STORAGE_DEFAULTS = {
   perPage: DEFAULT_QUERY_PARAMS.perPage,
@@ -28,10 +28,6 @@ const URL_DEFAULTS = {
   sortOrder: DEFAULT_QUERY_PARAMS.sortOrder,
 };
 
-const useLocalStorageMock = useLocalStorage as jest.Mock;
-
-const localStorageQueryParams = {};
-const setLocalStorageQueryParams = jest.fn();
 const mockLocation = { search: '' };
 
 jest.mock('react-router-dom', () => ({
@@ -47,92 +43,113 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-describe('hooks', () => {
+const APP_ID = 'testAppId';
+const LOCALSTORAGE_KEY = getQueryParamsLocalStorageKey(APP_ID);
+
+describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    global.localStorage.clear();
   });
 
-  describe('useUrlState', () => {
-    beforeEach(() => {
-      useLocalStorageMock.mockReturnValue([localStorageQueryParams, setLocalStorageQueryParams]);
+  it('calls setState with default values on first run', () => {
+    const { result } = renderHook(() => useAllCasesQueryParams(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    it('calls setState with default values on first run', () => {
-      const { result } = renderHook(() => useAllCasesQueryParams(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
+    expect(result.current.queryParams).toStrictEqual(DEFAULT_QUERY_PARAMS);
+  });
 
-      expect(result.current.queryParams).toStrictEqual(DEFAULT_QUERY_PARAMS);
+  it('updates localstorage with default values on first run', () => {
+    expect(global.localStorage.getItem(LOCALSTORAGE_KEY)).toStrictEqual(null);
+
+    renderHook(() => useAllCasesQueryParams(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    it('updates localstorage with default values on first run', () => {
-      renderHook(() => useAllCasesQueryParams(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
+    expect(JSON.parse(global.localStorage.getItem(LOCALSTORAGE_KEY) ?? '{}')).toMatchObject({
+      ...LOCAL_STORAGE_DEFAULTS,
+    });
+  });
 
-      expect(setLocalStorageQueryParams).toHaveBeenCalledWith(LOCAL_STORAGE_DEFAULTS);
+  it('calls history.push with default values on first run', () => {
+    renderHook(() => useAllCasesQueryParams(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    it('calls history.push with default values on first run', () => {
-      renderHook(() => useAllCasesQueryParams(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
+    expect(useHistory().push).toHaveBeenCalledWith({
+      search: stringify(URL_DEFAULTS),
+    });
+  });
 
-      expect(useHistory().push).toHaveBeenCalledWith({
-        search: stringify(URL_DEFAULTS),
-      });
+  it('takes into account existing localStorage values on first run', () => {
+    const existingLocalStorageValues = { perPage: DEFAULT_TABLE_LIMIT + 10, sortOrder: 'asc' };
+
+    global.localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(existingLocalStorageValues));
+
+    const { result } = renderHook(() => useAllCasesQueryParams(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    it('takes into account existing localStorage values on first run', () => {
-      const existingLocalStorageValues = { perPage: DEFAULT_TABLE_LIMIT + 10, sortOrder: 'asc' };
+    expect(result.current.queryParams).toMatchObject({
+      ...LOCAL_STORAGE_DEFAULTS,
+      ...existingLocalStorageValues,
+    });
+  });
 
-      useLocalStorageMock.mockReturnValue([existingLocalStorageValues, setLocalStorageQueryParams]);
+  it('takes into account existing urlParams on first run', () => {
+    const nonDefaultUrlParams = {
+      page: DEFAULT_TABLE_ACTIVE_PAGE + 1,
+      perPage: DEFAULT_TABLE_LIMIT + 5,
+    };
+    const expectedUrl = { ...URL_DEFAULTS, ...nonDefaultUrlParams };
 
-      renderHook(() => useAllCasesQueryParams(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
+    mockLocation.search = stringify(nonDefaultUrlParams);
 
-      expect(setLocalStorageQueryParams).toHaveBeenCalledWith({
-        ...LOCAL_STORAGE_DEFAULTS,
-        ...existingLocalStorageValues,
-      });
+    renderHook(() => useAllCasesQueryParams(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    it('takes into account existing urlParams on first run', () => {
-      const nonDefaultUrlParams = {
-        page: DEFAULT_TABLE_ACTIVE_PAGE + 1,
-        perPage: DEFAULT_TABLE_LIMIT + 5,
-      };
-      const expectedUrl = { ...URL_DEFAULTS, ...nonDefaultUrlParams };
+    expect(useHistory().push).toHaveBeenCalledWith({
+      search: stringify(expectedUrl),
+    });
+  });
 
-      mockLocation.search = stringify(nonDefaultUrlParams);
+  it('preserves other url parameters', () => {
+    const nonDefaultUrlParams = {
+      foo: 'bar',
+    };
+    const expectedUrl = { ...URL_DEFAULTS, ...nonDefaultUrlParams };
 
-      renderHook(() => useAllCasesQueryParams(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
+    mockLocation.search = stringify(nonDefaultUrlParams);
 
-      expect(useHistory().push).toHaveBeenCalledWith({
-        search: stringify(expectedUrl),
-      });
+    renderHook(() => useAllCasesQueryParams(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    it('urlParams take precedence over localStorage values', () => {
-      const nonDefaultUrlParams = {
-        perPage: DEFAULT_TABLE_LIMIT + 5,
-      };
-      const existingLocalStorageValues = { perPage: DEFAULT_TABLE_LIMIT + 10 };
+    expect(useHistory().push).toHaveBeenCalledWith({
+      search: stringify(expectedUrl),
+    });
+  });
 
-      mockLocation.search = stringify(nonDefaultUrlParams);
-      useLocalStorageMock.mockReturnValue([existingLocalStorageValues, setLocalStorageQueryParams]);
+  it('urlParams take precedence over localStorage values', () => {
+    const nonDefaultUrlParams = {
+      perPage: DEFAULT_TABLE_LIMIT + 5,
+    };
 
-      const { result } = renderHook(() => useAllCasesQueryParams(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
+    mockLocation.search = stringify(nonDefaultUrlParams);
 
-      expect(result.current.queryParams).toMatchObject({
-        ...DEFAULT_QUERY_PARAMS,
-        ...nonDefaultUrlParams,
-      });
+    global.localStorage.setItem(
+      LOCALSTORAGE_KEY,
+      JSON.stringify({ perPage: DEFAULT_TABLE_LIMIT + 10 }) // existingLocalStorageValues
+    );
+
+    const { result } = renderHook(() => useAllCasesQueryParams(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(result.current.queryParams).toMatchObject({
+      ...DEFAULT_QUERY_PARAMS,
+      ...nonDefaultUrlParams,
     });
   });
 });

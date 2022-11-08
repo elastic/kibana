@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
-
 import type { ParsedUrlQueryParams, UrlQueryParams } from '../../../common/ui/types';
 
-export const parseUrlQueryParams = (search: string): UrlQueryParams => {
-  const parsedUrlParams: ParsedUrlQueryParams = parse(search);
-
+export const parseUrlQueryParams = (parsedUrlParams: ParsedUrlQueryParams): UrlQueryParams => {
   const urlParams: UrlQueryParams = {
     ...(parsedUrlParams.sortField && { sortField: parsedUrlParams.sortField }),
     ...(parsedUrlParams.sortOrder && { sortOrder: parsedUrlParams.sortOrder }),
