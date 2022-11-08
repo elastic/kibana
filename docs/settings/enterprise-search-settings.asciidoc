@@ -8,7 +8,7 @@
 On Elastic Cloud, you do not need to configure any settings to use Enterprise Search in {kib}. It is enabled by default. On self-managed installations, you must configure `enterpriseSearch.host`.
 
 `enterpriseSearch.host`::
-The http(s) URL of your Enterprise Search instance. For example, in a local self-managed setup,
+The http(s) URL of your Enterprise Search instance. Accepts a single Enterprise Search host or a load balancer URL for High Availability across multiple Enterprise Search hosts. For example, in a local self-managed setup,
 set this to `http://localhost:3002`. Authentication between {kib} and the Enterprise Search host URL,
 such as via OAuth, is not supported. You can also
 {enterprise-search-ref}/configure-ssl-tls.html#configure-ssl-tls-in-kibana[configure {kib} to trust
