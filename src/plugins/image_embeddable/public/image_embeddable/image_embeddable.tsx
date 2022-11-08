@@ -38,10 +38,23 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
       const input = useObservable(props.embeddable.getInput$(), props.embeddable.getInput());
 
       return (
-        <div data-test-subj="imageEmbeddable" data-render-complete="true">
+        <div
+          data-test-subj="imageEmbeddable"
+          data-render-complete="true"
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: input.imageConfig.backgroundColor,
+          }}
+        >
           {input.imageConfig.src.type === 'file' && (
             <Image
-              style={{ maxWidth: '100%', maxHeight: '100%' }}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: input.imageConfig.sizing?.objectFit ?? 'contain',
+              }}
+              wrapperProps={{ style: { display: 'block', height: '100%', width: '100%' } }}
               src={this.deps.getImageDownloadHref(input.imageConfig.src.fileId)}
               alt={input.imageConfig.alt ?? ''}
             />

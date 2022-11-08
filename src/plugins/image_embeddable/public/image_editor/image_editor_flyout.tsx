@@ -38,6 +38,9 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
         type: 'file',
         fileId,
       },
+      sizing: {
+        objectFit: 'none',
+      },
     });
   };
 
@@ -54,6 +57,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             type: 'file',
             fileId,
           }}
+          sizing={{ objectFit: 'none' }}
         />
         <FilePickerButton onFilePicked={(file) => setFileId(file.fileId)} />
         {/* <EuiFieldText*/}

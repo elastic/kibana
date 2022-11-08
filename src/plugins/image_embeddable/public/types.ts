@@ -8,7 +8,13 @@
 
 export interface ImageConfig {
   src: ImageFileSrc | ImageUrlSrc;
+  darkThemeSrc?: ImageFileSrc | ImageUrlSrc;
   alt?: string;
+  sizing: {
+    objectFit: `fill` | `contain` | `cover` | `none`;
+  };
+  backgroundColor?: string;
+  darkThemeBackgroundColor?: string;
 }
 
 export interface ImageFileSrc {

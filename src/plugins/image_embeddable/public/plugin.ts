@@ -43,7 +43,7 @@ export class ImageEmbeddablePlugin
         start: () => ({
           application: start().core.application,
           overlays: start().core.overlays,
-          files: start().plugins.files.filesClientFactory.asScoped(imageEmbeddableFileKind.id),
+          files: start().plugins.files.filesClientFactory.asUnscoped(),
         }),
       })
     );
