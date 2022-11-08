@@ -70,6 +70,7 @@ export function FrameLayout(props: FrameLayoutProps) {
                 'lnsFrameLayout__pageBody-isFullscreen': isFullscreen,
               })}
               aria-labelledby="workspaceId"
+              role="main"
             >
               <EuiScreenReaderOnly>
                 <h2 id="workspaceId">
