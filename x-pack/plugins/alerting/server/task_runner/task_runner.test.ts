@@ -481,7 +481,7 @@ describe('Task Runner', () => {
             action: 'new-instance',
             category: ['alerts'],
             kind: 'alert',
-            duration: 0,
+            duration: '0',
             start: '1970-01-01T00:00:00.000Z',
           },
           kibana: {
@@ -514,7 +514,7 @@ describe('Task Runner', () => {
           event: {
             action: 'active-instance',
             category: ['alerts'],
-            duration: 0,
+            duration: '0',
             kind: 'alert',
             start: '1970-01-01T00:00:00.000Z',
           },
@@ -701,7 +701,7 @@ describe('Task Runner', () => {
         action: 'new-instance',
         category: ['alerts'],
         kind: 'alert',
-        duration: 0,
+        duration: '0',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
@@ -734,7 +734,7 @@ describe('Task Runner', () => {
         action: 'active-instance',
         category: ['alerts'],
         kind: 'alert',
-        duration: 0,
+        duration: '0',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
@@ -3459,7 +3459,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T00:00:00.000Z',
-                duration: 80000000000,
+                duration: '80000000000',
               },
             },
             '2': {
@@ -3467,7 +3467,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
+                duration: '70000000000',
               },
             },
           },
@@ -3862,7 +3862,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T00:00:00.000Z',
-                duration: 80000000000,
+                duration: '80000000000',
               },
             },
             '2': {
@@ -3870,7 +3870,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
+                duration: '70000000000',
               },
             },
           },
