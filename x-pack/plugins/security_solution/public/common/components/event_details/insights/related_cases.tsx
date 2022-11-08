@@ -42,25 +42,40 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
   );
   const renderContent = useCallback(() => renderCaseContent(relatedCases), [relatedCases]);
 
-  const getRelatedCases = useCallback(async () => {
-    let relatedCaseList: RelatedCaseList = [];
-    try {
-      if (eventId) {
-        relatedCaseList =
-          (await cases.api.getRelatedCases(eventId, {
-            owner: APP_ID,
-          })) ?? [];
-      }
-    } catch (error) {
-      setHasError(true);
-      toasts.addWarning(CASES_ERROR_TOAST(error));
-    }
-    setRelatedCases(relatedCaseList);
-  }, [eventId, cases.api, toasts]);
+  const [shouldFetch, setShouldFetch] = useState<boolean>(false);
 
   useEffect(() => {
-    getRelatedCases();
-  }, [eventId, getRelatedCases]);
+    if (!shouldFetch) {
+      return;
+    }
+    let ignore = false;
+    const fetch = async () => {
+      let relatedCaseList: RelatedCaseList = [];
+      try {
+        if (eventId) {
+          relatedCaseList =
+            (await cases.api.getRelatedCases(eventId, {
+              owner: APP_ID,
+            })) ?? [];
+        }
+      } catch (error) {
+        setHasError(true);
+        toasts.addWarning(CASES_ERROR_TOAST(error));
+      }
+      if (!ignore) {
+        setRelatedCases(relatedCaseList);
+        setShouldFetch(false);
+      }
+    };
+    fetch();
+    return () => {
+      ignore = true;
+    };
+  }, [cases.api, eventId, shouldFetch, toasts]);
+
+  useEffect(() => {
+    setShouldFetch(true);
+  }, [eventId]);
 
   let state: InsightAccordionState = 'loading';
   if (hasError) {
