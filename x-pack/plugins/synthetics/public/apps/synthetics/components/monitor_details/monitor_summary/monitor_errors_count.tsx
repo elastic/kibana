@@ -23,6 +23,10 @@ export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
 
   const monitorId = useMonitorQueryId();
 
+  if (!monitorId) {
+    return null;
+  }
+
   return (
     <ExploratoryViewEmbeddable
       customHeight="70px"

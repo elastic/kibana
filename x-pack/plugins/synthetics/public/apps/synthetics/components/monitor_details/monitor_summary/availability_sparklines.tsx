@@ -26,6 +26,10 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
 
   const theme = useTheme();
 
+  if (!monitorId) {
+    return null;
+  }
+
   return (
     <ExploratoryViewEmbeddable
       customHeight="70px"

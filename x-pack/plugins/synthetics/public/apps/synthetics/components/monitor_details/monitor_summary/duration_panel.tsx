@@ -25,6 +25,10 @@ export const DurationPanel = (props: DurationPanelProps) => {
   } = useKibana<ClientPluginsStart>();
   const monitorId = useMonitorQueryId();
 
+  if (!monitorId) {
+    return null;
+  }
+
   return (
     <ExploratoryViewEmbeddable
       customHeight="70px"

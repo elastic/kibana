@@ -24,6 +24,10 @@ export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
 
   const metricsToShow = ['min', 'max', 'median', '25th', '75th'];
 
+  if (!monitorId) {
+    return null;
+  }
+
   return (
     <ExploratoryViewEmbeddable
       customHeight="240px"

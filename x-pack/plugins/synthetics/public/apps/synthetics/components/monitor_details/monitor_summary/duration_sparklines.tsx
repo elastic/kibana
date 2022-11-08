@@ -25,6 +25,10 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
   const monitorId = useMonitorQueryId();
   const theme = useTheme();
 
+  if (!monitorId) {
+    return null;
+  }
+
   return (
     <>
       <ExploratoryViewEmbeddable
