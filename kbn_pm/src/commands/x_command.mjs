@@ -129,7 +129,7 @@ function duplicateRule(starlark, name, newName, mod) {
 
 /** @type {import('../lib/command').Command} */
 export const command = {
-  name: '_test',
+  name: '_x',
   async run({ log }) {
     const updates = { pkgJson: 0, buildBazel: 0, tsconfig: 0, tsconfigRefs: 0 };
 
