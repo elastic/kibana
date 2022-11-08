@@ -29,7 +29,8 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
   dataProviders: DataProvider[] | null;
   filters?: Filter[] | null;
   timeRange?: string;
-}> = ({ asEmptyButton, children, dataProviders, filters, timeRange, ...rest }) => {
+  keepDataView?: boolean;
+}> = ({ asEmptyButton, children, dataProviders, filters, timeRange, keepDataView, ...rest }) => {
   const dispatch = useDispatch();
 
   const getDataViewsSelector = useMemo(
@@ -72,13 +73,15 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
       }
       // Only show detection alerts
       // (This is required so the timeline event count matches the prevalence count)
-      dispatch(
-        sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
-          selectedDataViewId: defaultDataView.id,
-          selectedPatterns: [signalIndexName || ''],
-        })
-      );
+      if (!keepDataView) {
+        dispatch(
+          sourcererActions.setSelectedDataView({
+            id: SourcererScopeName.timeline,
+            selectedDataViewId: defaultDataView.id,
+            selectedPatterns: [signalIndexName || ''],
+          })
+        );
+      }
       // Unlock the time range from the global time range
       dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
     }

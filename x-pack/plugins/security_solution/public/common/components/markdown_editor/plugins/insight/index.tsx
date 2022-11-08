@@ -149,6 +149,7 @@ const OpenInsightInTimeline = (scopeId) => {
           asEmptyButton={false}
           dataProviders={dataProviders}
           timeRange={oldestTimestamp}
+          keepDataView={false}
         >
           {label ??
             i18n.translate('xpack.securitySolution.markdown.insights.openInsightButtonLabel', {
