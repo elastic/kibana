@@ -142,9 +142,14 @@ export const getAlertDetailsUrl = (
   alertUuid: string | null
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
-export const NUMBER_OF_DOCUMENTS = 10;
+const HOST_NAME = 'host.name';
+const HOST_HOSTNAME = 'host.hostname';
+const HOST_ID = 'host.id';
+const CONTAINER_ID = 'container.id';
+
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
-export const termsAggField: Record<string, string> = { [KUBERNETES_POD_UID]: 'container.id' };
+export const NUMBER_OF_DOCUMENTS = 10;
+export const termsAggField: Record<string, string> = { [KUBERNETES_POD_UID]: CONTAINER_ID };
 
 export interface AdditionalContext {
   [x: string]: any;
@@ -179,4 +184,29 @@ export const doFieldsExist = async (
   });
 
   return fieldsExisted;
+};
+
+export const validGroupByForContext: string[] = [
+  HOST_NAME,
+  HOST_HOSTNAME,
+  HOST_ID,
+  KUBERNETES_POD_UID,
+  CONTAINER_ID,
+];
+
+export const hasAdditionalContext = (
+  groupBy: string | string[] | undefined,
+  validGroups: string[]
+): boolean => {
+  return groupBy
+    ? Array.isArray(groupBy)
+      ? groupBy.every((group) => validGroups.includes(group))
+      : validGroups.includes(groupBy)
+    : false;
+};
+
+export const shouldTermsAggOnContainer = (groupBy: string | string[] | undefined) => {
+  return groupBy && Array.isArray(groupBy)
+    ? groupBy.includes(KUBERNETES_POD_UID)
+    : groupBy === KUBERNETES_POD_UID;
 };
