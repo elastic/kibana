@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { registerLanguage, LangModuleType } from '@kbn/monaco';
-import { lexerRules, languageConfiguration } from '@kbn/monaco/src/xjson/lexer_rules';
+import { registerLanguage } from '@kbn/monaco';
 import { CssLang, HandlebarsLang, MarkdownLang, YamlLang, HJson } from './languages';
 
-// const LANG =  <Lang, 'css' | 'handlebars' | 'markdown' | 'hjson' | 'markdown' | 'yaml'>; 
+// const LANG =  <Lang, 'css' | 'handlebars' | 'markdown' | 'hjson' | 'markdown' | 'yaml'>;
 // const Lang: LangModuleType = { ID: LANG, lexerRules, languageConfiguration };
 
 registerLanguage(CssLang);
