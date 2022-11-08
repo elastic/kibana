@@ -7,13 +7,13 @@
 
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiLoadingElastic, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { Redirect } from 'react-router-dom';
 import { useEnablement } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
+  quietFetchOverviewAction,
   selectOverviewState,
   selectServiceLocationsState,
 } from '../../../state';
@@ -34,7 +34,7 @@ export const OverviewPage: React.FC = () => {
 
   const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
 
-  const { loading, pageState } = useSelector(selectOverviewState);
+  const { pageState } = useSelector(selectOverviewState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
 
   useEffect(() => {
@@ -48,10 +48,14 @@ export const OverviewPage: React.FC = () => {
     if (!locationsLoading && !locationsLoaded) {
       dispatch(getServiceLocations());
     }
-  }, [dispatch, locationsLoaded, locationsLoading, pageState]);
+  }, [dispatch, locationsLoaded, locationsLoading]);
 
   useEffect(() => {
     dispatch(fetchMonitorOverviewAction.get(pageState));
+  }, [dispatch, pageState]);
+
+  useEffect(() => {
+    dispatch(quietFetchOverviewAction.get(pageState));
   }, [dispatch, pageState, lastRefresh]);
 
   const {
@@ -69,14 +73,5 @@ export const OverviewPage: React.FC = () => {
     return <Redirect to={MONITORS_ROUTE} />;
   }
 
-  return !loading ? (
-    <OverviewGrid />
-  ) : (
-    <EuiFlexGroup alignItems="center" justifyContent="center">
-      <EuiSpacer size="xxl" />
-      <EuiFlexItem grow={false}>
-        <EuiLoadingElastic size="xxl" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  return <OverviewGrid />;
 };
