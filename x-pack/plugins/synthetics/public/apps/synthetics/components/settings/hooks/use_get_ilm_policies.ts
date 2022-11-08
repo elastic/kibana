@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { PolicyFromES } from '@kbn/index-lifecycle-management-plugin/common/types';
 import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -13,9 +14,24 @@ import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { apiService } from '../../../../../utils/api_service';
 
 const policyLabels = [
-  { name: 'synthetics', label: 'All Checks' },
-  { name: 'synthetics-synthetics.browser-default_policy', label: 'Browser Checks' },
-  { name: 'synthetics-synthetics.browser_network-default_policy', label: 'Browser Network Checks' },
+  {
+    name: 'synthetics',
+    label: i18n.translate('xpack.synthetics.settingsRoute.allChecks', {
+      defaultMessage: 'All Checks',
+    }),
+  },
+  {
+    name: 'synthetics-synthetics.browser-default_policy',
+    label: i18n.translate('xpack.synthetics.settingsRoute.browserChecks', {
+      defaultMessage: 'Browser Checks',
+    }),
+  },
+  {
+    name: 'synthetics-synthetics.browser_network-default_policy',
+    label: i18n.translate('xpack.synthetics.settingsRoute.browserNetworkRequests', {
+      defaultMessage: 'Browser Network Requests',
+    }),
+  },
   { name: 'synthetics-synthetics.browser_screenshot-default_policy', label: 'Browser Screenshots' },
   { name: 'synthetics-synthetics.http-default_policy', label: 'HTTP Pings' },
   { name: 'synthetics-synthetics.icmp-default_policy', label: 'ICMP Pings' },
@@ -27,7 +43,7 @@ export const useGetIlmPolicies = () => {
     return getIlmPolicies();
   }, []);
 
-  const { data: sizeData } = useFetcher(async () => {
+  const { data: sizeData, loading: indicesLoading } = useFetcher(async () => {
     return getIndicesData();
   }, []);
 
@@ -58,13 +74,24 @@ export const useGetIlmPolicies = () => {
         name,
         label,
         policy,
-        retentionPeriod: deletePhase?.min_age ?? '',
+        retentionPeriod: formatAge(deletePhase?.min_age),
         currentSize: formatBytes(totalSize),
       };
     }),
     error,
-    loading,
+    loading: loading || indicesLoading,
   };
+};
+
+const formatAge = (age?: string) => {
+  if (!age) {
+    return '';
+  }
+  const [value] = age.split('d');
+  return i18n.translate('xpack.synthetics.settingsRoute.table.retentionPeriodValue', {
+    defaultMessage: '{value} days -> rollover',
+    values: { value },
+  });
 };
 
 export const getIlmPolicies = async (): Promise<PolicyFromES[]> => {

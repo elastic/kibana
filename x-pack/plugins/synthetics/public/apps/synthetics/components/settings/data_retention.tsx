@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBasicTable, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { PolicyLink } from './policy_link';
 import { useGetIlmPolicies } from './hooks/use_get_ilm_policies';
 
 export const DataRetentionTab = () => {
-  const { data } = useGetIlmPolicies();
+  const { data, loading } = useGetIlmPolicies();
 
   const columns = [
     {
@@ -26,8 +27,6 @@ export const DataRetentionTab = () => {
       name: i18n.translate('xpack.synthetics.settingsRoute.table.currentSize', {
         defaultMessage: 'Current size',
       }),
-      truncateText: true,
-      render: (name: string, _item: typeof data[0]) => <EuiText>{name}</EuiText>,
     },
     {
       field: 'retentionPeriod',
@@ -47,17 +46,24 @@ export const DataRetentionTab = () => {
   return (
     <div>
       <EuiCallOut title={CALLOUT_TITLE} iconType="iInCircle">
-        <p>{CALLOUT_DESCRIPTION}</p>
         <p>
-          {FOR_MORE_INFO}
-          <EuiLink href="https://www.elastic.co/guide/en/observability/current/synthetics-manage-retention.html">
-            {READ_OUR_DOCS}
-          </EuiLink>
-          .
+          <FormattedMessage
+            id="xpack.synthetics.settingsRoute.retentionCalloutDescription"
+            defaultMessage="To change your data retention settings, we recommend creating your own index lifecycle policy and attaching it to the relevant custom Component Template in {stackManagement}. For more information, {docsLink}."
+            values={{
+              stackManagement: <strong>{STACK_MANAGEMENT}</strong>,
+              docsLink: (
+                <EuiLink href="https://www.elastic.co/guide/en/observability/current/synthetics-manage-retention.html">
+                  {READ_OUR_DOCS}
+                </EuiLink>
+              ),
+            }}
+          />
         </p>
       </EuiCallOut>
       <EuiSpacer size="m" />
       <EuiBasicTable
+        loading={loading}
         tableCaption={RETENTION_TABLE}
         items={data}
         columns={columns}
@@ -71,21 +77,12 @@ const CALLOUT_TITLE = i18n.translate('xpack.synthetics.settingsRoute.retentionCa
   defaultMessage: 'Synthetics data is configured by managed index lifecycle policies',
 });
 
-const CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.settingsRoute.retentionCalloutDescription',
-  {
-    defaultMessage:
-      'To change your data retention settings, we recommend creating your own index lifecycle\n' +
-      '          policy and attaching it to the relevant custom Component Template in Stack Management.',
-  }
-);
-
-const FOR_MORE_INFO = i18n.translate('xpack.synthetics.settingsRoute.forMoreInfo', {
-  defaultMessage: 'For more information,',
+const STACK_MANAGEMENT = i18n.translate('xpack.synthetics.stackManagement', {
+  defaultMessage: 'Stack Management',
 });
 
 const READ_OUR_DOCS = i18n.translate('xpack.synthetics.settingsRoute.readDocs', {
-  defaultMessage: 'read our documentation.',
+  defaultMessage: 'read our documentation',
 });
 
 const RETENTION_TABLE = i18n.translate('xpack.synthetics.settingsRoute.tableCaption', {
