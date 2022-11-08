@@ -230,15 +230,20 @@ export class LensAttributes {
     alphabeticOrder?: boolean;
     size?: number;
   }): TermsIndexPatternColumn {
-    const { dataView, seriesConfig } = layerConfig;
+    const { dataView, seriesConfig, selectedMetricField } = layerConfig;
 
     const fieldMeta = dataView.getFieldByName(sourceField);
-
+    const { metricOptions } = seriesConfig;
     const { sourceField: yAxisSourceField } = seriesConfig.yAxisColumns[0];
 
     const labels = seriesConfig.labels ?? {};
 
-    const isFormulaColumn = yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
+    const isFormulaColumn =
+      Boolean(
+        metricOptions &&
+          (metricOptions.find((option) => option.id === selectedMetricField) as MetricOption)
+            ?.formula
+      ) || yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
 
     let orderBy: TermColumnParamsOrderBy = {
       type: 'column',
