@@ -43,12 +43,20 @@ function createRawObject(date: moment.MomentInput): SavedObject<EventLoopDelaysD
   };
 }
 
-function createRawEventLoopDelaysDailyDocs() {
+function createRawEventLoopDelaysDailyDocs(logger: Logger) {
+  let edgeDocumentToKeep = 3;
+  // If we are too close to midnight, let's reduce the age of the eldest document to keep.
+  // Otherwise, the rollups may delete it.
+  if (moment().endOf('day').diff(moment(), 'hour', true) < 1) {
+    edgeDocumentToKeep--;
+  }
+  logger.info(`The eldest document to keep is ${edgeDocumentToKeep} days old.`);
+
   const rawEventLoopDelaysDaily = [
     createRawObject(moment.now()),
     createRawObject(moment.now()),
     createRawObject(moment().subtract(1, 'days')),
-    createRawObject(moment().subtract(3, 'days')),
+    createRawObject(moment().subtract(edgeDocumentToKeep, 'days')),
   ];
 
   const outdatedRawEventLoopDelaysDaily = [
@@ -59,8 +67,7 @@ function createRawEventLoopDelaysDailyDocs() {
   return { rawEventLoopDelaysDaily, outdatedRawEventLoopDelaysDaily };
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/111821
-describe.skip(`daily rollups integration test`, () => {
+describe(`daily rollups integration test`, () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
   let internalRepository: ISavedObjectsRepository;
@@ -82,17 +89,8 @@ describe.skip(`daily rollups integration test`, () => {
     logger = root.logger.get('test daily rollups');
     internalRepository = start.savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
 
-    // If we are less than 1 second away from midnight, let's wait 1 second before creating the docs.
-    // Otherwise, we may receive 1 document less than the expected ones.
-    if (moment().endOf('day').diff(moment(), 's', true) < 1) {
-      logger.info(
-        'Delaying the creation of the docs 1s, just in case we create them before midnight and run the tests on the following day.'
-      );
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-
     // Create the docs now
-    const rawDailyDocs = createRawEventLoopDelaysDailyDocs();
+    const rawDailyDocs = createRawEventLoopDelaysDailyDocs(logger);
     rawEventLoopDelaysDaily = rawDailyDocs.rawEventLoopDelaysDaily;
     outdatedRawEventLoopDelaysDaily = rawDailyDocs.outdatedRawEventLoopDelaysDaily;
 
