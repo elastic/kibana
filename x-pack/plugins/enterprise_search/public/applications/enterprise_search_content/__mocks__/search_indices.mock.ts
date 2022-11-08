@@ -172,14 +172,14 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
         },
       ],
       id: '4',
-      index_name: 'connector-crawler',
+      index_name: 'crawler',
       is_native: true,
       language: 'en',
       last_seen: null,
       last_sync_error: null,
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
-      name: 'connector-crawler',
+      name: 'crawler',
       scheduling: {
         enabled: false,
         interval: '',
@@ -194,7 +194,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       index_name: 'crawler',
     },
     hidden: false,
-    name: 'connector-crawler',
+    name: 'crawler',
     total: {
       docs: {
         count: 1,

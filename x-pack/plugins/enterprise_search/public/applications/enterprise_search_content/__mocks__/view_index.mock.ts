@@ -116,7 +116,7 @@ export const connectorIndex: ConnectorViewIndex = {
   count: 1,
   hidden: false,
   ingestionMethod: IngestionMethod.CONNECTOR,
-  ingestionStatus: IngestionStatus.INCOMPLETE,
+  ingestionStatus: IngestionStatus.CONFIGURED,
   lastUpdated: 'never',
   name: 'connector',
   total: {
@@ -209,7 +209,7 @@ export const crawlerIndex: CrawlerViewIndex = {
   },
   hidden: false,
   ingestionMethod: IngestionMethod.CRAWLER,
-  ingestionStatus: IngestionStatus.INCOMPLETE,
+  ingestionStatus: IngestionStatus.CONFIGURED,
   lastUpdated: null,
   name: 'crawler',
   total: {
