@@ -11,11 +11,11 @@ import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiCallOut,
   EuiButton,
   EuiLoadingSpinner,
   EuiDescriptionList,
   EuiTitle,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { Chart, Axis, Position, HistogramBarSeries, ScaleType } from '@elastic/charts';
 import numeral from '@elastic/numeral';
@@ -30,7 +30,7 @@ interface Props {
 
 export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
   const { filesClient } = useFilesManagementContext();
-  const { status, refetch, data } = useQuery(['filesDiagnostics'], async () => {
+  const { status, refetch, data, isLoading, error } = useQuery(['filesDiagnostics'], async () => {
     return filesClient.getMetrics();
   });
 
@@ -43,10 +43,17 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {status === 'error' ? (
-          <EuiCallOut color="danger">
-            <p>{i18nTexts.failedToFetchDiagnostics}</p>
-            <EuiButton onClick={() => refetch()}>{i18nTexts.retry}</EuiButton>
-          </EuiCallOut>
+          <EuiEmptyPrompt
+            titleSize="xs"
+            title={<h3>{i18nTexts.failedToFetchDiagnostics}</h3>}
+            body={(error as Error)?.message ?? ''}
+            color="danger"
+            actions={[
+              <EuiButton isLoading={isLoading} color="danger" onClick={() => refetch()}>
+                {i18nTexts.retry}
+              </EuiButton>,
+            ]}
+          />
         ) : status === 'loading' ? (
           <EuiLoadingSpinner size="xl" />
         ) : (

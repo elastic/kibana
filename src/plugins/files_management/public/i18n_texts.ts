@@ -30,7 +30,7 @@ export const i18nTexts = {
     defaultMessage: 'Size',
   }),
   diagnosticsFlyoutTitle: i18n.translate('filesManagement.diagnostics.flyoutTitle', {
-    defaultMessage: 'Diagnostics',
+    defaultMessage: 'Statistics',
   }),
   failedToFetchDiagnostics: i18n.translate('filesManagement.diagnostics.errorMessage', {
     defaultMessage: 'Could not fetch diagnostics',

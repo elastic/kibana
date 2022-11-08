@@ -66,7 +66,7 @@ export const App: FunctionComponent = () => {
         }}
         withoutPageTemplateWrapper
         additionalRightSideActions={[
-          <EuiButtonEmpty onClick={() => setShowDiagnosticsFlyout(true)} iconType="iInCircle">
+          <EuiButtonEmpty onClick={() => setShowDiagnosticsFlyout(true)}>
             {i18nTexts.diagnosticsFlyoutTitle}
           </EuiButtonEmpty>,
         ]}
