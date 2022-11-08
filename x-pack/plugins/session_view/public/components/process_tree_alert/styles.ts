@@ -98,7 +98,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       alertName,
       actionBadge,
       processPanel,
-      processAlertDisplayContainer
+      processAlertDisplayContainer,
     };
   }, [euiTheme, isInvestigated, isSelected, euiVars]);
 
