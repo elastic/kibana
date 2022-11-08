@@ -46,13 +46,18 @@ function hasPermission(
  * @param licenseService
  * @param fleetAuthz
  * @param userRoles
+ * @param isEndpointRbacEnabled
+ * @param permissions
+ * @param hostIsolationExceptionsExists if set to `true`, then Host Isolation Exceptions related authz properties
+ * may be adjusted to account for a license downgrade scenario
  */
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz,
   userRoles: MaybeImmutable<string[]>,
   isEndpointRbacEnabled: boolean = false,
-  permissions: Partial<EndpointPermissions> = defaultEndpointPermissions()
+  permissions: Partial<EndpointPermissions> = defaultEndpointPermissions(),
+  hostIsolationExceptionsExists: boolean = false
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
@@ -126,14 +131,14 @@ export const calculateEndpointAuthz = (
       hasEndpointManagementAccess,
       'readTrustedApplications'
     );
-  const canWriteHostIsolationExceptions = hasPermission(
+  const hasWriteHostIsolationExceptionsPermission = hasPermission(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
     'writeHostIsolationExceptions'
   );
-  const canReadHostIsolationExceptions =
-    canWriteHostIsolationExceptions ||
+  const hasReadHostIsolationExceptionsPermission =
+    hasWriteHostIsolationExceptionsPermission ||
     hasPermission(
       fleetAuthz,
       isEndpointRbacEnabled,
@@ -170,6 +175,25 @@ export const calculateEndpointAuthz = (
     'writeFileOperations'
   );
 
+  // Calculate the Host Isolation Exceptions Authz. Some of these authz properties could be
+  // set to `true` in cases where license was downgraded, but entries still exist.
+  const canWriteHostIsolationExceptions =
+    hasWriteHostIsolationExceptionsPermission && isPlatinumPlusLicense;
+
+  const canReadHostIsolationExceptions =
+    (hasReadHostIsolationExceptionsPermission && isPlatinumPlusLicense) ||
+    // Should be able to see Host Isolation Exceptions if license was downgraded
+    (hasReadHostIsolationExceptionsPermission &&
+      !isPlatinumPlusLicense &&
+      hostIsolationExceptionsExists);
+
+  const canDeleteHostIsolationExceptions =
+    canWriteHostIsolationExceptions ||
+    // Should be able to delete if host isolation exceptions exists and license is not platinum+
+    (hasWriteHostIsolationExceptionsPermission &&
+      !isPlatinumPlusLicense &&
+      hostIsolationExceptionsExists);
+
   return {
     canWriteSecuritySolution,
     canReadSecuritySolution,
@@ -195,8 +219,9 @@ export const calculateEndpointAuthz = (
     // artifacts
     canWriteTrustedApplications,
     canReadTrustedApplications,
-    canWriteHostIsolationExceptions: canWriteHostIsolationExceptions && isPlatinumPlusLicense,
+    canWriteHostIsolationExceptions,
     canReadHostIsolationExceptions,
+    canDeleteHostIsolationExceptions,
     canWriteBlocklist,
     canReadBlocklist,
     canWriteEventFilters,
@@ -227,6 +252,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadTrustedApplications: false,
     canWriteHostIsolationExceptions: false,
     canReadHostIsolationExceptions: false,
+    canDeleteHostIsolationExceptions: false,
     canWriteBlocklist: false,
     canReadBlocklist: false,
     canWriteEventFilters: false,
