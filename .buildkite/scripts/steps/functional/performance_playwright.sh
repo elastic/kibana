@@ -62,7 +62,8 @@ killall -SIGKILL node || true
 killall -SIGKILL chrome || true
 killall -SIGKILL java || true
 sleep 5;
-top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
+ps aux | grep -e 'java' -e 'node' -e 'chrome' || true
+#top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
 
 echo "--- 🔎 Start es"
 
@@ -105,12 +106,14 @@ for ((i=1;i<=20;i++)); do
       --bail
 
     killall -SIGKILL chrome || true
-    echo "--- Check running processes: top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'"
-    top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
+    # echo "--- Check running processes: top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'"
+    # top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
+    ps aux | grep -e 'java' -e 'node' -e 'chrome' || true
 done
 
 echo "--- 🔎 Shutdown ES"
-top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
+#top -c -bn1 | grep -e 'java' -e 'node' -e 'chrome'
+ps aux | grep -e 'java' -e 'node' -e 'chrome' || true
 echo "waiting for $esPid to exit gracefully";
 
 timeout=30 #seconds
