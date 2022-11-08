@@ -250,7 +250,12 @@ export const getManagementFilteredLinks = async (
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const { canReadActionsLogManagement, canIsolateHost, canAccessEndpointManagement } = fleetAuthz
+    const {
+      canReadActionsLogManagement,
+      canIsolateHost: hasPlatinumLicense,
+      canUnIsolateHost: canIsolateHost,
+      canAccessEndpointManagement,
+    } = fleetAuthz
       ? calculateEndpointAuthz(
           licenseService,
           fleetAuthz,
@@ -264,8 +269,7 @@ export const getManagementFilteredLinks = async (
       linksToExclude.push(SecurityPageName.responseActionsHistory);
     }
 
-    if (!canIsolateHost) {
-      // same as: !canIsolateHost || !platinum
+    if (canIsolateHost && !hasPlatinumLicense) {
       let shouldBeAbleToViewAndDeleteHIEArtifacts: boolean;
       try {
         const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
@@ -279,7 +283,7 @@ export const getManagementFilteredLinks = async (
       if (!shouldBeAbleToViewAndDeleteHIEArtifacts) {
         linksToExclude.push(SecurityPageName.hostIsolationExceptions);
       }
-    } else if (!canIsolateHost) {
+    } else if (!hasPlatinumLicense) {
       linksToExclude.push(SecurityPageName.hostIsolationExceptions);
     }
   } catch {

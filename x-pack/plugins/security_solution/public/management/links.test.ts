@@ -130,6 +130,7 @@ describe('links', () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue({
         canIsolateHost: false,
         canUnIsolateHost: true,
+        canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 1 });
