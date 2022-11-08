@@ -47,8 +47,8 @@ describe('Indices util functions', () => {
     it('should return connected for undefined', () => {
       expect(getIngestionStatus(undefined)).toEqual(IngestionStatus.CONNECTED);
     });
-    it('should return incomplete for incomplete connector', () => {
-      expect(getIngestionStatus(connectorIndex)).toEqual(IngestionStatus.INCOMPLETE);
+    it('should return configured for configured connector', () => {
+      expect(getIngestionStatus(connectorIndex)).toEqual(IngestionStatus.CONFIGURED);
     });
     it('should return connected for complete connector', () => {
       expect(
@@ -57,6 +57,14 @@ describe('Indices util functions', () => {
           connector: { ...connectorIndex.connector, status: ConnectorStatus.CONNECTED },
         })
       ).toEqual(IngestionStatus.CONNECTED);
+    });
+    it('should return incomplete for needs_configuration connector', () => {
+      expect(
+        getIngestionStatus({
+          ...connectorIndex,
+          connector: { ...connectorIndex.connector, status: ConnectorStatus.NEEDS_CONFIGURATION },
+        })
+      ).toEqual(IngestionStatus.INCOMPLETE);
     });
     it('should return error for connector that last checked in more than 30 minutes ago', () => {
       const lastSeen = moment().subtract(31, 'minutes').format();

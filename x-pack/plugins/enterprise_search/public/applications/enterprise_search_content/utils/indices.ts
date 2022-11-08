@@ -96,6 +96,9 @@ export function getIngestionStatus(index?: ElasticsearchIndexWithIngestion): Ing
     if (index.connector.status === ConnectorStatus.ERROR) {
       return IngestionStatus.ERROR;
     }
+    if (index.connector.status === ConnectorStatus.CONFIGURED) {
+      return IngestionStatus.CONFIGURED;
+    }
   }
   return IngestionStatus.INCOMPLETE;
 }
