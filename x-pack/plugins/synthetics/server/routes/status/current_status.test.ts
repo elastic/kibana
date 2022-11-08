@@ -166,6 +166,7 @@ describe('current status route', () => {
       );
       expect(await queryMonitorStatus(uptimeEsClient, 3, 140000, ['id1', 'id2'])).toEqual({
         down: 1,
+        enabledIds: ['id1', 'id2'],
         up: 2,
         upConfigs: [
           {
@@ -302,6 +303,7 @@ describe('current status route', () => {
        */
       expect(await queryMonitorStatus(uptimeEsClient, 10000, 2500, ['id1', 'id2'])).toEqual({
         down: 1,
+        enabledIds: ['id1', 'id2'],
         up: 2,
         upConfigs: [
           {
