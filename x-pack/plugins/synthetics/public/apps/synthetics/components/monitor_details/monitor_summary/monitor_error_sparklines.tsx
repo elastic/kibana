@@ -6,21 +6,19 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 interface Props {
   from: string;
   to: string;
+  monitorId: string[];
 }
-export const MonitorErrorSparklines = (props: Props) => {
+export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
-
-  const { monitorId } = useParams<{ monitorId: string }>();
 
   const { euiTheme } = useEuiTheme();
 
@@ -33,8 +31,8 @@ export const MonitorErrorSparklines = (props: Props) => {
       attributes={[
         {
           seriesType: 'area',
-          time: props,
-          reportDefinitions: { 'monitor.id': [monitorId] },
+          time: useMemo(() => ({ from, to }), [from, to]),
+          reportDefinitions: { 'monitor.id': monitorId },
           dataType: 'synthetics',
           selectedMetricField: 'state.id',
           name: 'Monitor errors',

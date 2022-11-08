@@ -6,22 +6,20 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
 interface MonitorErrorsCountProps {
   from: string;
   to: string;
+  monitorId: string[];
 }
 
-export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
+export const MonitorErrorsCount = ({ monitorId, from, to }: MonitorErrorsCountProps) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
-
-  const monitorId = useMonitorQueryId();
 
   return (
     <ExploratoryViewEmbeddable
@@ -29,8 +27,8 @@ export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
         {
-          time: props,
-          reportDefinitions: { 'monitor.id': [monitorId] },
+          time: useMemo(() => ({ from, to }), [from, to]),
+          reportDefinitions: { 'monitor.id': monitorId },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
           name: 'synthetics-series-1',

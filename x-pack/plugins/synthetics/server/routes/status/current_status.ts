@@ -192,6 +192,7 @@ export async function getStatus(
   );
 
   return {
+    enabledIds,
     disabledCount,
     up,
     down,

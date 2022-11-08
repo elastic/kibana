@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiText,
 } from '@elastic/eui';
+import { OverviewErrors } from './overview_errors/overview_errors';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import {
   quietFetchOverviewAction,
@@ -96,6 +97,9 @@ export const OverviewGrid = () => {
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false}>
           <OverviewStatus />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <OverviewErrors />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

@@ -19,6 +19,7 @@ export const OverviewStatusType = t.type({
   disabledCount: t.number,
   upConfigs: t.array(OverviewStatusMetaDataCodec),
   downConfigs: t.array(OverviewStatusMetaDataCodec),
+  enabledIds: t.array(t.string),
 });
 
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusType>;

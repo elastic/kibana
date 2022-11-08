@@ -42,11 +42,11 @@ export function OverviewStatus() {
   }, [dispatch, statusError]);
 
   return (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} hasBorder>
       <EuiTitle size="xs">
         <h3>{headingText}</h3>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={false}>
           <EuiStat
