@@ -7,7 +7,9 @@
 import type { ComponentType } from 'react';
 import React, { memo } from 'react';
 import { Route } from '@kbn/kibana-react-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { NoPermissions } from '../no_permissons';
+import { AdministrationSubTab } from '../../types';
 
 export interface PrivilegedRouteProps {
   path: string;
@@ -15,7 +17,24 @@ export interface PrivilegedRouteProps {
   privilege: boolean;
 }
 
+const DummyNoPrivilegesComponent = () => <div>{'you need to update your privileges'}</div>;
+
 export const PrivilegedRoute = memo(({ component, privilege, path }: PrivilegedRouteProps) => {
-  return <Route path={path} component={privilege ? component : NoPermissions} />;
+  const isEndpointRbacEnabled = useIsExperimentalFeatureEnabled('endpointRbacEnabled');
+  const isEndpointRbacV1Enabled = useIsExperimentalFeatureEnabled('endpointRbacV1Enabled');
+
+  let componentToRender = component;
+
+  if (!privilege) {
+    const shouldUseMissingPrivilegesScreen =
+      isEndpointRbacEnabled ||
+      (isEndpointRbacV1Enabled && path.includes(AdministrationSubTab.responseActionsHistory));
+
+    componentToRender = shouldUseMissingPrivilegesScreen
+      ? DummyNoPrivilegesComponent
+      : NoPermissions;
+  }
+
+  return <Route path={path} component={componentToRender} />;
 });
 PrivilegedRoute.displayName = 'PrivilegedRoute';

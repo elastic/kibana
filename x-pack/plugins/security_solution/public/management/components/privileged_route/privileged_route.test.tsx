@@ -11,15 +11,23 @@ import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { PrivilegedRoute } from './privileged_route';
 import type { PrivilegedRouteProps } from './privileged_route';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { AdministrationSubTab } from '../../types';
+
+jest.mock('../../../common/hooks/use_experimental_features');
 
 describe('PrivilegedRoute', () => {
   const componentTestId = 'component-to-render';
+  let featureFlags: { endpointRbacEnabled: boolean; endpointRbacV1Enabled: boolean };
 
+  let currentPath: string;
   let renderProps: PrivilegedRouteProps;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: () => void;
 
   beforeEach(() => {
+    featureFlags = { endpointRbacEnabled: false, endpointRbacV1Enabled: false };
+    currentPath = 'path';
     renderProps = {
       component: () => <div data-test-subj={componentTestId} />,
       path: 'path',
@@ -30,37 +38,99 @@ describe('PrivilegedRoute', () => {
 
     render = () => {
       renderResult = renderer.render(
-        <MemoryRouter initialEntries={['path']}>
+        <MemoryRouter initialEntries={[currentPath]}>
           <Switch>
             <PrivilegedRoute {...renderProps} />
           </Switch>
         </MemoryRouter>
       );
     };
+
+    const useIsExperimentalFeatureEnabledMock = (feature: keyof typeof featureFlags) =>
+      featureFlags[feature];
+
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+      useIsExperimentalFeatureEnabledMock
+    );
   });
 
-  it('renders component if it has privileges and on correct path', async () => {
-    render();
+  const testCommonPathsForAllFeatureFlags = () => {
+    it('renders component if it has privileges and on correct path', async () => {
+      render();
 
-    expect(renderResult.getByTestId(componentTestId)).toBeTruthy();
-    expect(renderResult.queryByText(/superuser/)).toBeNull();
+      expect(renderResult.getByTestId(componentTestId)).toBeTruthy();
+      expect(renderResult.queryByText(/superuser/)).toBeNull();
+      expect(renderResult.queryByText(/privileges/)).toBeNull();
+    });
+
+    it('renders nothing if path is different', async () => {
+      renderProps.path = 'different';
+
+      render();
+
+      expect(renderResult.queryByTestId(componentTestId)).toBeNull();
+      expect(renderResult.queryByText(/superuser/)).toBeNull();
+      expect(renderResult.queryByText(/privileges/)).toBeNull();
+    });
+  };
+
+  describe('no feature flags', () => {
+    testCommonPathsForAllFeatureFlags();
+
+    it('renders `you need to be superuser` if no privileges', async () => {
+      renderProps.privilege = false;
+
+      render();
+
+      expect(renderResult.getByText(/superuser/)).toBeTruthy();
+      expect(renderResult.queryByTestId(componentTestId)).toBeNull();
+    });
   });
 
-  it('renders NoPermission if does not have privileges', async () => {
-    renderProps.privilege = false;
+  describe('endpointRbacV1Enabled', () => {
+    beforeEach(() => {
+      featureFlags.endpointRbacV1Enabled = true;
+    });
 
-    render();
+    testCommonPathsForAllFeatureFlags();
 
-    expect(renderResult.getByText(/superuser/)).toBeTruthy();
-    expect(renderResult.queryByTestId(componentTestId)).toBeNull();
+    describe('no privileges', () => {
+      it('renders `you need to have privileges` on Response actions history', async () => {
+        renderProps.privilege = false;
+        renderProps.path = AdministrationSubTab.responseActionsHistory;
+        currentPath = AdministrationSubTab.responseActionsHistory;
+
+        render();
+
+        expect(renderResult.getByText(/privileges/)).toBeTruthy();
+        expect(renderResult.queryByTestId(componentTestId)).toBeNull();
+      });
+
+      it('renders `you need to be superuser` on other pages', async () => {
+        renderProps.privilege = false;
+
+        render();
+
+        expect(renderResult.getByText(/superuser/)).toBeTruthy();
+        expect(renderResult.queryByTestId(componentTestId)).toBeNull();
+      });
+    });
   });
 
-  it('renders nothing if path is different', async () => {
-    renderProps.path = 'different';
+  describe('endpointRbacEnabled', () => {
+    beforeEach(() => {
+      featureFlags.endpointRbacEnabled = true;
+    });
 
-    render();
+    testCommonPathsForAllFeatureFlags();
 
-    expect(renderResult.queryByTestId(componentTestId)).toBeNull();
-    expect(renderResult.queryByText(/superuser/)).toBeNull();
+    it('renders `you need to have RBAC privileges` if no privileges', async () => {
+      renderProps.privilege = false;
+
+      render();
+
+      expect(renderResult.getByText(/privileges/)).toBeTruthy();
+      expect(renderResult.queryByTestId(componentTestId)).toBeNull();
+    });
   });
 });
