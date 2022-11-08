@@ -174,7 +174,10 @@ const indices: IndexDefinition[] = [
         version: 1,
       },
       properties: {
+        cancelation_requested_at: { type: 'date' },
+        canceled_at: { type: 'date' },
         completed_at: { type: 'date' },
+        configuration: { type: 'object' },
         connector_id: { type: 'keyword' },
         created_at: { type: 'date' },
         deleted_document_count: { type: 'integer' },
@@ -209,8 +212,23 @@ const indices: IndexDefinition[] = [
             },
           },
         },
+        index_name: { type: 'keyword' },
         indexed_document_count: { type: 'integer' },
+        indexed_document_volume: { type: 'integer' },
+        last_seen: { type: 'date' },
+        metadata: { type: 'object' },
+        pipeline: {
+          properties: {
+            extract_binary_content: { type: 'boolean' },
+            name: { type: 'keyword' },
+            reduce_whitespace: { type: 'boolean' },
+            run_ml_inference: { type: 'boolean' }
+          }
+        },
+        started_at: { type: 'date' },
         status: { type: 'keyword' },
+        total_document_count: { type: 'integer' },
+        trigger_method: { type: 'keyword' },
         worker_hostname: { type: 'keyword' },
       },
     },
