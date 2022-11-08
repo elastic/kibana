@@ -7,8 +7,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
   IContainer,
   EmbeddableInput,
@@ -81,32 +79,5 @@ export class ImageEmbeddableFactoryDefinition
     );
 
     return { imageConfig };
-  }
-
-  public extract(state: EmbeddableStateWithType) {
-    const imageEmbeddableInput = state as unknown as ImageEmbeddableInput;
-    const references: SavedObjectReference[] = [];
-    if (imageEmbeddableInput.imageConfig?.src?.type === 'file') {
-      references.push({
-        id: imageEmbeddableInput.imageConfig.src.fileId,
-        type: 'file',
-        name: imageEmbeddableInput.imageConfig.src.fileId,
-      });
-    }
-
-    return { state, references };
-  }
-
-  public inject(state: EmbeddableStateWithType, references: SavedObjectReference[]) {
-    const imageEmbeddableInput = state as unknown as ImageEmbeddableInput & { type: string };
-
-    if (imageEmbeddableInput.imageConfig?.src?.type === 'file') {
-      imageEmbeddableInput.imageConfig.src.fileId = references.find(
-        (r) =>
-          imageEmbeddableInput.imageConfig?.src?.type === 'file' &&
-          r.name === imageEmbeddableInput.imageConfig?.src?.fileId
-      )?.id!;
-    }
-    return imageEmbeddableInput;
   }
 }

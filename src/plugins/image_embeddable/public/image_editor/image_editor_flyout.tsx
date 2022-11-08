@@ -15,6 +15,8 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FilePicker } from '@kbn/files-plugin/public';
@@ -24,12 +26,13 @@ import { ImageViewer } from '../image_viewer';
 
 export interface ImageEditorFlyoutProps {
   onCancel: () => void;
-  onSave: (imageConfigWithReferences: ImageConfig) => void;
+  onSave: (imageConfig: ImageConfig) => void;
   initialImageConfig?: ImageConfig;
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
   const [fileId, setFileId] = useState('');
+  const [srcType, setSrcType] = useState<ImageConfig['src']['type']>('file');
 
   const onSave = () => {
     props.onSave({
@@ -48,7 +51,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
     <>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
-          <h2>Flyout header</h2>
+          <h2>Configure Image</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -59,6 +62,16 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           }}
           sizing={{ objectFit: 'none' }}
         />
+
+        <EuiTabs size={'s'} bottomBorder={true}>
+          <EuiTab onClick={() => setSrcType('file')} isSelected={srcType === 'file'}>
+            Upload
+          </EuiTab>
+          <EuiTab onClick={() => setSrcType('url')} isSelected={srcType === 'url'}>
+            By URL
+          </EuiTab>
+        </EuiTabs>
+
         <FilePickerButton onFilePicked={(file) => setFileId(file.fileId)} />
         {/* <EuiFieldText*/}
         {/*  placeholder="Image src"*/}

@@ -50,8 +50,8 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
           {input.imageConfig.src.type === 'file' && (
             <Image
               style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
+                width: '100%',
+                height: '100%',
                 objectFit: input.imageConfig.sizing?.objectFit ?? 'contain',
               }}
               wrapperProps={{ style: { display: 'block', height: '100%', width: '100%' } }}
