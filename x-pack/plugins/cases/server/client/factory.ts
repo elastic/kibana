@@ -117,6 +117,7 @@ export class CasesClientFactory {
     const services = this.createServices({
       unsecuredSavedObjectsClient,
       esClient: scopedClusterClient,
+      request,
     });
 
     const userInfo = await this.getUserInfo(request);
@@ -146,9 +147,11 @@ export class CasesClientFactory {
   private createServices({
     unsecuredSavedObjectsClient,
     esClient,
+    request,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     esClient: ElasticsearchClient;
+    request: KibanaRequest;
   }): CasesServices {
     this.validateInitialization();
 
@@ -178,6 +181,7 @@ export class CasesClientFactory {
       notifications: this.options.notifications,
       security: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
+      spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
     });
 
     return {

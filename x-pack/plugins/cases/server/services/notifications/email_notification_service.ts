@@ -23,6 +23,7 @@ export class EmailNotificationService implements NotificationService {
   private readonly logger: Logger;
   private readonly notifications: NotificationsPluginStart;
   private readonly security: SecurityPluginStart;
+  private readonly spaceId: string;
   private readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
 
   constructor({
@@ -30,15 +31,18 @@ export class EmailNotificationService implements NotificationService {
     notifications,
     security,
     publicBaseUrl,
+    spaceId,
   }: {
     logger: Logger;
     notifications: NotificationsPluginStart;
     security: SecurityPluginStart;
+    spaceId: string;
     publicBaseUrl?: IBasePath['publicBaseUrl'];
   }) {
     this.logger = logger;
     this.notifications = notifications;
     this.security = security;
+    this.spaceId = spaceId;
     this.publicBaseUrl = publicBaseUrl;
   }
 
@@ -46,7 +50,11 @@ export class EmailNotificationService implements NotificationService {
     return `[Elastic][Cases] ${theCase.attributes.title}`;
   }
 
-  private static getMessage(theCase: CaseSavedObject, publicBaseUrl?: IBasePath['publicBaseUrl']) {
+  private static getMessage(
+    theCase: CaseSavedObject,
+    spaceId: string,
+    publicBaseUrl?: IBasePath['publicBaseUrl']
+  ) {
     const lineBreak = '\r\n\r\n';
     let message = `You are assigned to an Elastic Kibana Case.${lineBreak}`;
     message = `${message}Title: ${theCase.attributes.title}${lineBreak}`;
@@ -62,6 +70,7 @@ export class EmailNotificationService implements NotificationService {
         publicBaseUrl,
         caseId: theCase.id,
         owner: theCase.attributes.owner,
+        spaceId,
       });
 
       message = `${message}${lineBreak}[View the case details](${caseUrl})`;
@@ -86,7 +95,11 @@ export class EmailNotificationService implements NotificationService {
         .map((user) => user.email);
 
       const subject = EmailNotificationService.getTitle(theCase);
-      const message = EmailNotificationService.getMessage(theCase, this.publicBaseUrl);
+      const message = EmailNotificationService.getMessage(
+        theCase,
+        this.spaceId,
+        this.publicBaseUrl
+      );
 
       await this.notifications.getEmailService().sendPlainTextEmail({
         to,

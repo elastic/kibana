@@ -146,6 +146,7 @@ export const createCasesClientMockArgs = () => {
       full_name: 'Damaged Raccoon',
       profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
     },
+    spaceId: 'default',
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     securityStartPlugin: securityMock.createStart(),

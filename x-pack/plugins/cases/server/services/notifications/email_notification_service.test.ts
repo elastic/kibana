@@ -30,6 +30,7 @@ describe('EmailNotificationService', () => {
       security: clientArgs.securityStartPlugin,
       publicBaseUrl: 'https://example.com',
       notifications,
+      spaceId: 'default',
     });
   });
 
@@ -130,11 +131,43 @@ describe('EmailNotificationService', () => {
     });
   });
 
+  it('adds a backlink URL correctly with spaceId', async () => {
+    emailNotificationService = new EmailNotificationService({
+      logger: clientArgs.logger,
+      security: clientArgs.securityStartPlugin,
+      publicBaseUrl: 'https://example.com',
+      notifications,
+      spaceId: 'test-space',
+    });
+
+    await emailNotificationService.notifyAssignees({
+      assignees,
+      theCase: caseSO,
+    });
+
+    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
+      context: {
+        relatedObjects: [
+          {
+            id: 'mock-id-1',
+            namespace: undefined,
+            type: 'cases',
+          },
+        ],
+      },
+      message:
+        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/s/test-space/app/security/cases/mock-id-1)',
+      subject: '[Elastic][Cases] Super Bad Security Issue',
+      to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
+    });
+  });
+
   it('does not include the backlink of the publicBaseUrl is not defined', async () => {
     emailNotificationService = new EmailNotificationService({
       logger: clientArgs.logger,
       security: clientArgs.securityStartPlugin,
       notifications,
+      spaceId: 'default',
     });
 
     await emailNotificationService.notifyAssignees({
