@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import React, { useState, useCallback } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
 import {
-  EuiSuperSelect,
   EuiSwitch,
   EuiButton,
   EuiCallOut,
@@ -22,17 +19,16 @@ import {
   EuiText,
   EuiFormRow,
   EuiFieldText,
-  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useTheme } from 'styled-components';
 
 import type { FleetServerHost } from '../../../types';
 
 import { useStartServices, useLink } from '../../../hooks';
 import type { FleetServerHostForm } from '../hooks';
 import { MultiRowInput } from '../../../sections/settings/components/multi_row_input';
+import { FleetServerHostSelect } from '../components';
 
 export const getAddFleetServerHostStep = ({
   fleetServerHostForm,
@@ -66,43 +62,10 @@ export const AddFleetServerHostStepContent = ({
     validate,
     inputs,
   } = fleetServerHostForm;
-  const theme = useTheme() as EuiTheme;
-
   const [isLoading, setIsLoading] = useState(false);
   const [submittedFleetServerHost, setSubmittedFleetServerHost] = useState<FleetServerHost>();
   const { notifications } = useStartServices();
   const { getHref } = useLink();
-
-  const fleetServerHostsOptions = useMemo(
-    () => [
-      ...fleetServerHosts.map((fleetServerHost) => {
-        return {
-          inputDisplay: `${fleetServerHost.name} (${fleetServerHost.host_urls[0]})`,
-          value: fleetServerHost.id,
-        };
-      }),
-      {
-        icon: <EuiIcon type="plus" size="m" color="primary" />,
-        inputDisplay: (
-          <FormattedMessage
-            id="xpack.fleet.fleetServerSetup.addFleetServerHostBtn"
-            defaultMessage="Add new Fleet Server Hosts"
-          />
-        ),
-        dropdownDisplay: (
-          <EuiText size="relative" color={theme.eui.euiColorPrimary}>
-            <FormattedMessage
-              id="xpack.fleet.fleetServerSetup.addFleetServerHostBtn"
-              defaultMessage="Add new Fleet Server Hosts"
-            />
-          </EuiText>
-        ),
-        'data-test-subj': 'fleetServerSetup.addNewHostBtn',
-        value: '@@##ADD_FLEET_SERVER_HOST##@@',
-      },
-    ],
-    [fleetServerHosts, theme.eui.euiColorPrimary]
-  );
 
   const onSubmit = useCallback(async () => {
     try {
@@ -150,28 +113,11 @@ export const AddFleetServerHostStepContent = ({
       </EuiText>
       <EuiSpacer size="m" />
       {selectedFleetServerHost ? (
-        <>
-          <EuiSuperSelect
-            fullWidth
-            data-test-subj="fleetServerSetup.fleetServerHostsSelect"
-            prepend={
-              <EuiText size="relative" color={''}>
-                <FormattedMessage
-                  id="xpack.fleet.fleetServerSetup.fleetServerHostsLabel"
-                  defaultMessage="Fleet Server Hosts"
-                />
-              </EuiText>
-            }
-            onChange={(fleetServerHostId) =>
-              setFleetServerHost(
-                fleetServerHosts.find((fleetServerHost) => fleetServerHost.id === fleetServerHostId)
-              )
-            }
-            valueOfSelected={selectedFleetServerHost?.id}
-            options={fleetServerHostsOptions}
-          />
-          <EuiSpacer size="m" />
-        </>
+        <FleetServerHostSelect
+          setFleetServerHost={setFleetServerHost}
+          selectedFleetServerHost={selectedFleetServerHost}
+          fleetServerHosts={fleetServerHosts}
+        />
       ) : null}
       {!selectedFleetServerHost ? (
         <>
