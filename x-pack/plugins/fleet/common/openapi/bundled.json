@@ -4457,6 +4457,8 @@
           },
           "release": {
             "type": "string",
+            "deprecated": true,
+            "description": "release label is deprecated, derive from the version instead (packages follow semver)",
             "enum": [
               "experimental",
               "beta",
@@ -5072,6 +5074,14 @@
           "monitoring_output_id": {
             "type": "string",
             "nullable": true
+          },
+          "fleet_server_host_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -5221,10 +5231,20 @@
                 "type": "string"
               },
               "data_output_id": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
               },
               "monitoring_output_id": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
+              },
+              "fleet_server_host_id": {
+                "type": "string",
+                "nullable": true
+              },
+              "download_source_id": {
+                "type": "string",
+                "nullable": true
               },
               "revision": {
                 "type": "number"
