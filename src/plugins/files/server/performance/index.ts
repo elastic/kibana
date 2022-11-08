@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/packages/shared-ux/link/redirect_app/mocks'],
-};
+export type { PerfArgs } from './report_performance';
+export { withReportPerformanceMetric } from './report_performance';
+
+export {
+  FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
+  FILE_UPLOAD_PERFORMANCE_EVENT_NAME,
+} from './event_names';
