@@ -196,7 +196,8 @@ export const validGroupByForContext: string[] = [
 
 export const hasAdditionalContext = (
   groupBy: string | string[] | undefined,
-  validGroups: string[]): boolean => {
+  validGroups: string[]
+): boolean => {
   return groupBy
     ? Array.isArray(groupBy)
       ? groupBy.every((group) => validGroups.includes(group))

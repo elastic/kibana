@@ -103,9 +103,7 @@ const createContainerList = (containerContext: ContainerContext) => {
   return containerContext.buckets
     .map((bucket) => {
       const containerHits = bucket.container.hits?.hits;
-      return containerHits?.length > 0
-        ? containerHits[0]._source?.container
-        : undefined;
+      return containerHits?.length > 0 ? containerHits[0]._source?.container : undefined;
     })
     .filter((container) => container !== undefined);
 };
