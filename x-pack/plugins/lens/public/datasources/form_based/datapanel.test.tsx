@@ -548,8 +548,8 @@ describe('FormBased Data Panel', () => {
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
         expect.objectContaining({
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
+          fromDate: '2019-01-01T05:00:00.000Z',
+          toDate: '2020-01-01T05:00:59.999Z',
           dslQuery,
           dataView: indexPatterns.a,
           timeFieldName: indexPatterns.a.timeFieldName,
@@ -564,8 +564,8 @@ describe('FormBased Data Panel', () => {
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(2);
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
         expect.objectContaining({
-          fromDate: '2019-01-01',
-          toDate: '2020-01-02',
+          fromDate: '2019-01-01T05:00:00.000Z',
+          toDate: '2020-01-02T05:00:59.999Z',
           dslQuery,
           dataView: indexPatterns.a,
           timeFieldName: indexPatterns.a.timeFieldName,
@@ -604,8 +604,8 @@ describe('FormBased Data Panel', () => {
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
         expect.objectContaining({
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
+          fromDate: '2019-01-01T05:00:00.000Z',
+          toDate: '2020-01-01T05:00:59.999Z',
           dslQuery,
           dataView: indexPatterns.a,
           timeFieldName: indexPatterns.a.timeFieldName,
@@ -636,8 +636,8 @@ describe('FormBased Data Panel', () => {
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(2);
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
         expect.objectContaining({
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
+          fromDate: '2019-01-01T05:00:00.000Z',
+          toDate: '2020-01-01T05:00:59.999Z',
           dslQuery,
           dataView: indexPatterns.b,
           timeFieldName: indexPatterns.b.timeFieldName,
