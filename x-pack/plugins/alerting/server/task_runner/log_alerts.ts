@@ -107,6 +107,7 @@ export function logAlerts<
           state,
           flapping: false,
         });
+      }
     }
 
     for (const id of newAlertIds) {
