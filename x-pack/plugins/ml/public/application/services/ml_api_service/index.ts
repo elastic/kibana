@@ -55,6 +55,7 @@ export interface MlInfoResponse {
   };
   upgrade_mode: boolean;
   cloudId?: string;
+  trialEndDate?: string;
 }
 
 export interface BucketSpanEstimatorResponse {

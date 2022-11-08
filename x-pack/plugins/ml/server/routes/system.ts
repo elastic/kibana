@@ -166,8 +166,9 @@ export function systemRoutes(
       try {
         const body = await mlClient.info();
         const cloudId = cloud && cloud.cloudId;
+        const trialEndDate = cloud && cloud.trialEndDate?.toISOString();
         return response.ok({
-          body: { ...body, cloudId },
+          body: { ...body, cloudId, trialEndDate },
         });
       } catch (error) {
         return response.customError(wrapError(error));
