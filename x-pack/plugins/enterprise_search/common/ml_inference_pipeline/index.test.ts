@@ -78,7 +78,7 @@ describe('getSetProcessorForInferenceType lib function', () => {
       description:
         "Copy the predicted_value to 'dest' if the prediction_probability is greater than 0.5",
       field: destinationField,
-      if: 'ml.inference.dest.prediction_probability > 0.5',
+      if: 'ctx.ml.inference.dest.prediction_probability > 0.5',
       value: undefined,
     };
 
@@ -191,7 +191,7 @@ describe('generateMlInferencePipelineBody lib function', () => {
               description:
                 "Copy the predicted_value to 'my-destination-field' if the prediction_probability is greater than 0.5",
               field: 'my-destination-field',
-              if: 'ml.inference.my-destination-field.prediction_probability > 0.5',
+              if: 'ctx.ml.inference.my-destination-field.prediction_probability > 0.5',
             },
           }),
         ]),
