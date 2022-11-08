@@ -46,8 +46,8 @@ describe('Configuration Statistics Aggregator', () => {
       },
     };
 
-    const maxWorkers$ = new BehaviorSubject<number>(8);
-    const pollInterval$ = new BehaviorSubject<number>(3000);
+    const maxWorkers$ = new BehaviorSubject<number>(configuration.max_workers);
+    const pollInterval$ = new BehaviorSubject<number>(configuration.poll_interval);
 
     return new Promise<void>(async (resolve, reject) => {
       try {
@@ -101,6 +101,8 @@ describe('Configuration Statistics Aggregator', () => {
             });
             resolve();
           }, reject);
+        maxWorkers$.next(8);
+        pollInterval$.next(3000);
       } catch (error) {
         reject(error);
       }
