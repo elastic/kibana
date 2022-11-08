@@ -131,3 +131,7 @@ export const FLEET_SERVER_SETUP = {
   DEFAULT_SWITCH: 'fleetServerHostsFlyout.isDefaultSwitch',
   ADD_HOST_BTN: 'fleetServerSetup.addNewHostBtn',
 };
+
+export const API_KEYS = {
+  REVOKE_KEY_BUTTON: 'enrollmentTokenTable.revokeBtn',
+};
