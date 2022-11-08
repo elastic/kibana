@@ -31,7 +31,8 @@
      "triggersActionsUi",
      "management",
      "spaces",
-     "security"
+     "security",
+     "notifications"
   ],
   "requiredBundles": [
     "savedObjects"

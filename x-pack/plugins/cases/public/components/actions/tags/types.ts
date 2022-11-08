@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export * from './mock_saved_objects';
+export interface TagsSelectionState {
+  selectedTags: string[];
+  unSelectedTags: string[];
+}
