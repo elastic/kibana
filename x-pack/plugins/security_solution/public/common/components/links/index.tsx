@@ -268,7 +268,7 @@ const CaseDetailsLinkComponent: React.FC<{
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const { activeStep, isTourShown } = useTourContext();
-  const isTourActive = useMemo(
+  const isTourStepActive = useMemo(
     () =>
       activeStep === AlertsCasesTourSteps.viewCase &&
       isTourShown(SecurityStepId.alertsCases) &&
@@ -279,7 +279,7 @@ const CaseDetailsLinkComponent: React.FC<{
   const goToCaseDetails = useCallback(
     async (ev?) => {
       if (ev) ev.preventDefault();
-      await navigateToApp(APP_UI_ID, {
+      return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCaseDetailsUrl({ id: detailName, search }),
       });
@@ -288,14 +288,14 @@ const CaseDetailsLinkComponent: React.FC<{
   );
 
   useEffect(() => {
-    if (isTourActive)
+    if (isTourStepActive)
       document.querySelector(`[tour-step="RelatedCases-accordion"]`)?.scrollIntoView();
-  }, [isTourActive]);
+  }, [isTourStepActive]);
 
   return (
     <GuidedOnboardingTourStep
       onClick={goToCaseDetails}
-      isTourAnchor={isTourActive}
+      isTourAnchor={isTourStepActive}
       step={AlertsCasesTourSteps.viewCase}
       stepId={SecurityStepId.alertsCases}
     >

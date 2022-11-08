@@ -41,8 +41,8 @@ describe('useTourContext', () => {
     jest.clearAllMocks();
   });
   // @ts-ignore
-  const stepIds = Object.values(SecurityStepId);
-  describe.each(stepIds)('%s', (stepId) => {
+  const stepIds = [SecurityStepId.alertsCases];
+  describe.each(stepIds)('%s', (stepId: SecurityStepId) => {
     it('if guidedOnboardingApi?.isGuideStepActive$ is false, isTourShown should be false', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -80,7 +80,7 @@ describe('useTourContext', () => {
       });
       expect(result.current.activeStep).toBe(1);
     });
-    it('increment step properly increments for each stepId, and if attempted to increment beyond length of tour config steps resets activeStep to 1', async () => {
+    it('incrementStep properly increments for each stepId, and if attempted to increment beyond length of tour config steps resets activeStep to 1', async () => {
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
           wrapper: TourContextProvider,
@@ -94,6 +94,17 @@ describe('useTourContext', () => {
         expect(result.current.activeStep).toBe(lastStep);
         result.current.incrementStep(stepId);
         expect(result.current.activeStep).toBe(1);
+      });
+    });
+
+    it('when provided, incrementStep sets activeStep to step number argument', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
+          wrapper: TourContextProvider,
+        });
+        await waitForNextUpdate();
+        result.current.incrementStep(stepId, 7);
+        expect(result.current.activeStep).toBe(7);
       });
     });
   });
