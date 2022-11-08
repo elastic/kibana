@@ -32325,6 +32325,42 @@
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionExecutionParams.partial",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "partial",
+            "description": [
+              "\nToggles the partial results support."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionExecutionParams.throttle",
+            "type": "number",
+            "tags": [
+              "deafult"
+            ],
+            "label": "throttle",
+            "description": [
+              "\nThrottling of partial results in milliseconds. 0 is disabling the throttling."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
