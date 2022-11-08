@@ -15,14 +15,15 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <span
-        className="euiToolTipAnchor"
+        className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
         <button
           aria-label="Edit element"
-          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+          className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
           data-test-subj="canvasElementCard__editButton"
+          disabled={false}
           onBlur={[Function]}
           onClick={[Function]}
           onFocus={[Function]}
@@ -44,14 +45,15 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <span
-        className="euiToolTipAnchor"
+        className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
         <button
           aria-label="Delete element"
-          className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+          className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-danger-hoverStyles"
           data-test-subj="canvasElementCard__deleteButton"
+          disabled={false}
           onBlur={[Function]}
           onClick={[Function]}
           onFocus={[Function]}
