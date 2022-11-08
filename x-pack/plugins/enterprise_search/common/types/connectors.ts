@@ -138,14 +138,14 @@ export interface ConnectorSyncJob {
   created_at: string;
   deleted_document_count: number;
   error: string | null;
-  filtering: FilteringRules;
+  filtering: FilteringRules | null;
   id: string;
   index_name: string;
   indexed_document_count: number;
   indexed_document_volume: number;
   last_seen: string;
   metadata: Record<string, unknown>;
-  pipeline: IngestPipelineParams;
+  pipeline: IngestPipelineParams | null;
   started_at: string;
   status: SyncStatus;
   trigger_method: TriggerMethod;

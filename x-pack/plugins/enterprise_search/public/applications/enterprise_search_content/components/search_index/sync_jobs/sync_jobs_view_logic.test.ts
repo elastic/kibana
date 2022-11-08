@@ -13,7 +13,11 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../../common/types/api';
 
-import { SyncStatus } from '../../../../../../common/types/connectors';
+import {
+  ConnectorSyncJob,
+  SyncStatus,
+  TriggerMethod,
+} from '../../../../../../common/types/connectors';
 import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
@@ -55,23 +59,31 @@ describe('SyncJobsViewLogic', () => {
 
   describe('actions', () => {
     describe('FetchIndexApiLogic.apiSuccess', () => {
-      const syncJob = {
+      const syncJob: ConnectorSyncJob = {
+        canceled_at: null,
+        cancelation_requested_at: null,
         completed_at: '2022-09-05T15:59:39.816+00:00',
         connector_id: 'we2284IBjobuR2-lAuXh',
         created_at: '2022-09-05T14:59:39.816+00:00',
         deleted_document_count: 20,
         error: null,
+        filtering: null,
         id: 'id',
         index_name: 'indexName',
         indexed_document_count: 50,
-        indexed_document_size: 40,
+        indexed_document_volume: 40,
+        last_seen: '2022-09-05T15:59:39.816+00:00',
+        metadata: {},
+        pipeline: null,
+        trigger_method: TriggerMethod.ON_DEMAND,
+        started_at: '2022-09-05T14:59:39.816+00:00',
         status: SyncStatus.COMPLETED,
         worker_hostname: 'hostname_fake',
       };
       const syncJobView: SyncJobView = {
         ...syncJob,
         duration: moment.duration(1, 'hour'),
-        lastSync: syncJob.completed_at,
+        lastSync: syncJob.completed_at ?? '',
         status: SyncStatus.COMPLETED,
       };
       it('should update values', async () => {
