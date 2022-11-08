@@ -49,6 +49,7 @@ export const fromSavedSearchAttributes = (
   timeRange: attributes.timeRange,
   refreshInterval: attributes.refreshInterval,
   rowsPerPage: attributes.rowsPerPage,
+  breakdownField: attributes.breakdownField,
 });
 
 export const toSavedSearchAttributes = (
@@ -70,4 +71,5 @@ export const toSavedSearchAttributes = (
   timeRange: savedSearch.timeRange,
   refreshInterval: savedSearch.refreshInterval,
   rowsPerPage: savedSearch.rowsPerPage,
+  breakdownField: savedSearch.breakdownField,
 });

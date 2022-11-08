@@ -91,5 +91,9 @@ export function getStateDefaults({
     defaultState.rowsPerPage = savedSearch.rowsPerPage;
   }
 
+  if (savedSearch.breakdownField) {
+    defaultState.breakdownField = savedSearch.breakdownField;
+  }
+
   return defaultState;
 }
