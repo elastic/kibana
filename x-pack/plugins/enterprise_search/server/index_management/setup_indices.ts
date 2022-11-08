@@ -222,8 +222,8 @@ const indices: IndexDefinition[] = [
             extract_binary_content: { type: 'boolean' },
             name: { type: 'keyword' },
             reduce_whitespace: { type: 'boolean' },
-            run_ml_inference: { type: 'boolean' }
-          }
+            run_ml_inference: { type: 'boolean' },
+          },
         },
         started_at: { type: 'date' },
         status: { type: 'keyword' },
