@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function createJobs(mockJobConfigs: TestConfig[]) {
     for (const jobConfig of mockJobConfigs) {
-      await ml.api.createAndRunDFAJobWoSync(jobConfig.config as DataFrameAnalyticsConfig);
+      await ml.api.createAndRunDFAJob(jobConfig.config as DataFrameAnalyticsConfig);
     }
   }
 
@@ -125,6 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
         await ml.api.deleteDataFrameAnalyticsJobES(testConfig.config.id!);
       }
       await ml.api.cleanMlIndices();
+      await ml.api.syncSavedObjects();
     });
 
     testJobConfigs.forEach((testConfig) => {
