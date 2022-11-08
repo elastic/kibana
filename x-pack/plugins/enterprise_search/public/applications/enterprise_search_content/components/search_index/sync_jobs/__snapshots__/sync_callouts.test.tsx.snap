@@ -8,7 +8,7 @@ exports[`SyncCalloutsPanel renders 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      Completed at Mon Sep 05 2022 17:59:39 GMT+0200
+      Completed at Mon Sep 05 2022 15:59:39 GMT+0000
     </EuiCallOut>
   </EuiFlexItem>
   <EuiFlexItem>
@@ -17,7 +17,7 @@ exports[`SyncCalloutsPanel renders 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      Started at Mon Sep 05 2022 16:59:39 GMT+0200.
+      Started at Mon Sep 05 2022 14:59:39 GMT+0000.
     </EuiCallOut>
   </EuiFlexItem>
 </Fragment>
@@ -31,7 +31,7 @@ exports[`SyncCalloutsPanel renders canceled job 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      Completed at Mon Sep 05 2022 17:59:39 GMT+0200
+      Completed at Mon Sep 05 2022 15:59:39 GMT+0000
     </EuiCallOut>
   </EuiFlexItem>
   <EuiFlexItem>
@@ -49,7 +49,7 @@ exports[`SyncCalloutsPanel renders canceled job 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      Started at Mon Sep 05 2022 16:59:39 GMT+0200.
+      Started at Mon Sep 05 2022 14:59:39 GMT+0000.
     </EuiCallOut>
   </EuiFlexItem>
 </Fragment>
@@ -63,7 +63,7 @@ exports[`SyncCalloutsPanel renders different trigger method 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      Completed at Mon Sep 05 2022 17:59:39 GMT+0200
+      Completed at Mon Sep 05 2022 15:59:39 GMT+0000
     </EuiCallOut>
   </EuiFlexItem>
   <EuiFlexItem>
@@ -81,7 +81,7 @@ exports[`SyncCalloutsPanel renders different trigger method 1`] = `
       iconType="iInCircle"
       title="Sync started by schedule"
     >
-      Started at Mon Sep 05 2022 16:59:39 GMT+0200.
+      Started at Mon Sep 05 2022 14:59:39 GMT+0000.
     </EuiCallOut>
   </EuiFlexItem>
 </Fragment>
@@ -95,7 +95,7 @@ exports[`SyncCalloutsPanel renders error job 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      Completed at Mon Sep 05 2022 17:59:39 GMT+0200
+      Completed at Mon Sep 05 2022 15:59:39 GMT+0000
     </EuiCallOut>
   </EuiFlexItem>
   <EuiFlexItem>
@@ -113,7 +113,7 @@ exports[`SyncCalloutsPanel renders error job 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      Started at Mon Sep 05 2022 16:59:39 GMT+0200.
+      Started at Mon Sep 05 2022 14:59:39 GMT+0000.
     </EuiCallOut>
   </EuiFlexItem>
 </Fragment>
@@ -127,7 +127,7 @@ exports[`SyncCalloutsPanel renders in progress job 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      Completed at Mon Sep 05 2022 17:59:39 GMT+0200
+      Completed at Mon Sep 05 2022 15:59:39 GMT+0000
     </EuiCallOut>
   </EuiFlexItem>
   <EuiFlexItem>
@@ -145,7 +145,7 @@ exports[`SyncCalloutsPanel renders in progress job 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      Started at Mon Sep 05 2022 16:59:39 GMT+0200.
+      Started at Mon Sep 05 2022 14:59:39 GMT+0000.
     </EuiCallOut>
   </EuiFlexItem>
 </Fragment>
