@@ -112,6 +112,6 @@ export const PRIORITY_5 = i18n.translate('xpack.stackConnectors.components.opsge
 export const RULE_TAGS_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.ruleTagsDescription',
   {
-    defaultMessage: 'The tags from the rule.',
+    defaultMessage: 'The tags of the rule.',
   }
 );
