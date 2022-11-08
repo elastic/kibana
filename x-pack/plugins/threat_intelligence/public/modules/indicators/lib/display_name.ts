@@ -56,7 +56,7 @@ const mappingsArray: Mappings = [
  * Generates Painless condition checking if given `type` is matched
  */
 const fieldTypeCheck = (type: string) =>
-  `if (doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='${type.toLowerCase()}')`;
+  `if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='${type.toLowerCase()}')`;
 
 /**
  * Generates Painless condition checking if given `field` has value
