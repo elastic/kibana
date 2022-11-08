@@ -43,9 +43,6 @@ it('matches snapshot', () => {
       "kibana.alert.end": Object {
         "type": "date",
       },
-      "kibana.alert.flapping": Object {
-        "type": "boolean",
-      },
       "kibana.alert.instance.id": Object {
         "required": true,
         "type": "keyword",
@@ -235,7 +232,7 @@ it('matches snapshot', () => {
         "type": "version",
       },
       "service.name": Object {
-        "array": true,
+        "array": false,
         "required": false,
         "type": "keyword",
       },
@@ -248,6 +245,9 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "undefined": Object {
+        "type": "boolean",
       },
     }
   `);
