@@ -123,6 +123,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [allFields, setAllFields] = useState<DataViewField[] | null>(null);
   const [fieldCounts, setFieldCounts] = useState<Record<string, number> | null>(null);
+  const [dateRange, setDateRange] = useState(data.query.timefilter.timefilter.getAbsoluteTime());
   const dataViewFields = selectedDataView?.fields;
 
   useEffect(() => {
@@ -131,10 +132,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         setFieldCounts(calcFieldCounts(documentState.result));
       } else {
         setFieldCounts(null);
+        setDateRange(data.query.timefilter.timefilter.getAbsoluteTime());
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, setAllFields, setFieldCounts]);
+  }, [
+    props.documents$,
+    setAllFields,
+    setFieldCounts,
+    setDateRange,
+    data.query.timefilter.timefilter,
+  ]);
 
   useEffect(() => {
     setAllFields(getDataViewFieldList(selectedDataView, fieldCounts, isPlainRecord));
@@ -143,7 +151,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const query = useAppStateSelector((state) => state.query);
   const filters = useAppStateSelector((state) => state.filters);
-  const dateRange = data.query.timefilter.timefilter.getAbsoluteTime();
 
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
     dataViews: !isPlainRecord && selectedDataView ? [selectedDataView] : [],

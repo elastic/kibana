@@ -8,7 +8,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
@@ -204,13 +203,9 @@ export const useExistingFieldsFetcher = (
     ]
   );
 
-  useDebounce(
-    () => {
-      refetchFieldsExistenceInfo();
-    },
-    250,
-    [refetchFieldsExistenceInfo]
-  );
+  useEffect(() => {
+    refetchFieldsExistenceInfo();
+  }, [refetchFieldsExistenceInfo]);
 
   useEffect(() => {
     return () => {
