@@ -12,7 +12,7 @@ import {
   getVisualizeInformation,
   triggerVisualizeActions,
 } from '@kbn/unified-field-list-plugin/public';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
@@ -241,14 +241,17 @@ export const useDiscoverHistogram = ({
 
   const [lastReloadRequestTime, setLastReloadRequestTime] = useState(0);
   const { fetchStatus: mainFetchStatus } = useDataState(savedSearchData$.main$);
+  const firstRun = useRef(true);
 
   // Reload unified histogram when a refetch is triggered,
   // with a debounce to avoid multiple requests
   const [, cancelDebounce] = useDebounce(
     () => {
-      if (mainFetchStatus === FetchStatus.LOADING) {
+      if (mainFetchStatus === FetchStatus.LOADING && !firstRun.current) {
         setLastReloadRequestTime(Date.now());
       }
+
+      firstRun.current = false;
     },
     100,
     [mainFetchStatus]
