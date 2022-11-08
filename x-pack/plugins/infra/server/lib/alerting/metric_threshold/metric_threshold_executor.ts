@@ -33,6 +33,7 @@ import {
   getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
   hasAdditionalContext,
+  validGroupByForContext,
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
@@ -249,7 +250,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
 
-        const additionalContext = hasAdditionalContext(params.groupBy)
+        const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
           ? alertResults && alertResults.length > 0
             ? alertResults[0][group].context
             : null

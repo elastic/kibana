@@ -100,16 +100,14 @@ const NO_DATA_RESPONSE = {
 };
 
 const createContainerList = (containerContext: ContainerContext) => {
-  const containerList = [];
-  for (const containerBucket of containerContext.buckets) {
-    const containerHits = containerBucket.container.hits?.hits;
-    const containerSource =
-      containerHits && containerHits.length > 0 ? containerHits[0]._source : null;
-    if (containerSource && containerSource.container) {
-      containerList.push(containerSource.container);
-    }
-  }
-  return containerList;
+  return containerContext.buckets
+    .map((bucket) => {
+      const containerHits = bucket.container.hits?.hits;
+      return containerHits?.length > 0
+        ? containerHits[0]._source?.container
+        : undefined;
+    })
+    .filter((container) => container !== undefined);
 };
 
 export const getData = async (
@@ -150,7 +148,7 @@ export const getData = async (
           containerContext,
         } = bucket;
 
-        const containerList = containerContext ? createContainerList(containerContext) : void 0;
+        const containerList = containerContext ? createContainerList(containerContext) : undefined;
 
         const bucketHits = additionalContext?.hits?.hits;
         const additionalContextSource =

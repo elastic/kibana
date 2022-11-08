@@ -13,6 +13,7 @@ import {
   NUMBER_OF_DOCUMENTS,
   shouldTermsAggOnContainer,
   termsAggField,
+  validGroupByForContext,
 } from '../../common/utils';
 import { createBucketSelector } from './create_bucket_selector';
 import { createPercentileAggregation } from './create_percentile_aggregation';
@@ -151,7 +152,7 @@ export const getElasticsearchMetricQuery = (
   const excludesList = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
   if (!containerContextAgg) includesList.push('container.*');
 
-  const additionalContextAgg = hasAdditionalContext(groupBy)
+  const additionalContextAgg = hasAdditionalContext(groupBy, validGroupByForContext)
     ? {
         additionalContext: {
           top_hits: {
