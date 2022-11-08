@@ -19,6 +19,7 @@ import {
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
+import { hasUserCRUDPermission } from '../../../../../../common/utils/privileges';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../../../../common/lib/kibana';
@@ -36,7 +37,6 @@ import { ExceptionsSearchBar } from './exceptions_search_bar';
 import { getSearchFilters } from '../helpers';
 import { SecurityPageName } from '../../../../../../../common/constants';
 import { useUserData } from '../../../../../components/user_info';
-import { userHasPermissions } from '../../helpers';
 import { useListsConfig } from '../../../../../containers/detection_engine/lists/use_lists_config';
 import type { ExceptionsTableItem } from './types';
 import { MissingPrivilegesCallOut } from '../../../../../components/callouts/missing_privileges_callout';
@@ -63,7 +63,7 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 export const ExceptionListsTable = React.memo(() => {
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
-  const hasPermissions = userHasPermissions(canUserCRUD);
+  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
 
   const { loading: listsConfigLoading } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
