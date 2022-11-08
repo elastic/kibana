@@ -36,8 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardPanelActions.openContextMenuMorePanel(header);
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/142762
-  describe.skip('create jobs from lens', function () {
+  describe('create jobs from lens', function () {
     this.tags(['ml']);
 
     before(async () => {
