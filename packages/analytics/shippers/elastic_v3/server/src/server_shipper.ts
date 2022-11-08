@@ -138,9 +138,9 @@ export class ElasticV3ServerShipper implements IShipper {
     }
 
     this.initContext.logger.debug(
-      `[Server shipper]: adding events to queue ${
-        events.length
-      } - ${events.map((e) => e.event_type).join(',')}`
+      `[Server shipper]: adding events to queue ${events.length} - ${events
+        .map((e) => e.event_type)
+        .join(',')}`
     );
 
     const freeSpace = MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE - this.internalQueue.length;
@@ -319,9 +319,9 @@ export class ElasticV3ServerShipper implements IShipper {
 
   private async makeRequest(events: Event[]): Promise<string> {
     this.initContext.logger.debug(
-      `[Server shipper]: sending ${
-        events.length
-      } events - ${events.map((e) => e.event_type).join(',')}`
+      `[Server shipper]: sending ${events.length} events - ${events
+        .map((e) => e.event_type)
+        .join(',')}`
     );
 
     const response = await fetch(this.url, {

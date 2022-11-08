@@ -88,9 +88,9 @@ export class ElasticV3BrowserShipper implements IShipper {
    */
   public reportEvents(events: Event[]) {
     this.initContext.logger.debug(
-      `[${ElasticV3BrowserShipper.shipperName}]: adding events to queue ${
-        events.length
-      } - ${events.map((e) => e.event_type).join(',')}`
+      `[${ElasticV3BrowserShipper.shipperName}]: adding events to queue ${events.length} - ${events
+        .map((e) => e.event_type)
+        .join(',')}`
     );
 
     events.forEach((event) => {
@@ -133,9 +133,9 @@ export class ElasticV3BrowserShipper implements IShipper {
 
   private async makeRequest(events: Event[]): Promise<string> {
     this.initContext.logger.debug(
-      `[${ElasticV3BrowserShipper.shipperName}]: sending ${
-        events.length
-      } events - ${events.map((e) => e.event_type).join(',')}`
+      `[${ElasticV3BrowserShipper.shipperName}]: sending ${events.length} events - ${events
+        .map((e) => e.event_type)
+        .join(',')}`
     );
 
     const response = await fetch(this.url, {
