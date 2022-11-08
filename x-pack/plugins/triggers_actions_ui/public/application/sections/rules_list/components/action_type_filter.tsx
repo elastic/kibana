@@ -12,7 +12,7 @@ import { ActionType } from '../../../../types';
 
 interface ActionTypeFilterProps {
   actionTypes: ActionType[];
-  onChange?: (selectedActionTypeIds: string[]) => void;
+  onChange: (selectedActionTypeIds: string[]) => void;
   filters: string[];
 }
 
@@ -26,8 +26,6 @@ export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = 
   const onClick = useCallback(
     (item: ActionType) => {
       return () => {
-        if (!onFilterChange) return;
-
         const isPreviouslyChecked = filters.includes(item.id);
         if (isPreviouslyChecked) {
           onFilterChange(filters.filter((val) => val !== item.id));

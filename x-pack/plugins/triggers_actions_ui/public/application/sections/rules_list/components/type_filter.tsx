@@ -17,7 +17,7 @@ interface TypeFilterProps {
       name: string;
     }>;
   }>;
-  onChange?: (selectedTags: string[]) => void;
+  onChange: (selectedTags: string[]) => void;
   filters: string[];
 }
 
@@ -58,8 +58,6 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
               <EuiFilterSelectItem
                 key={index}
                 onClick={() => {
-                  if (!onFilterChange) return;
-
                   const isPreviouslyChecked = filters.includes(item.value);
                   if (isPreviouslyChecked) {
                     onFilterChange(filters.filter((val) => val !== item.value));

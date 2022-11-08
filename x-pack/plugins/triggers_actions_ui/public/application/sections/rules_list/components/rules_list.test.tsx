@@ -1167,7 +1167,7 @@ describe('rules_list component with items', () => {
       );
 
       wrapper
-        .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
+        .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"] EuiToolTipAnchor')
         .first()
         .simulate('mouseOut');
     });
@@ -1186,14 +1186,14 @@ describe('rules_list component with items', () => {
 
       // Run the timers so the EuiTooltip will be visible
       jest.runOnlyPendingTimers();
-
       wrapper.update();
       expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
         'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
       );
-
-      wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOut');
-
+      wrapper
+        .find('[data-test-subj="ruleInterval-config-tooltip-0"] EuiToolTipAnchor')
+        .first()
+        .simulate('mouseOut');
       // Duration column
       expect(
         wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-duration"]').length
@@ -1215,10 +1215,8 @@ describe('rules_list component with items', () => {
 
       // Run the timers so the EuiTooltip will be visible
       jest.runOnlyPendingTimers();
-
       wrapper.update();
-
-      expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+      expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
         'The length of time it took for the rule to run (mm:ss).'
       );
     });
