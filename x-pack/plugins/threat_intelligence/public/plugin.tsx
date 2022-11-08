@@ -8,7 +8,7 @@
 import { CoreStart, Plugin } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from './hooks/use_kibana';
 import {
@@ -41,7 +41,9 @@ export const createApp =
           <SecuritySolutionContext.Provider value={securitySolutionContext}>
             <KibanaContextProvider services={services}>
               <EnterpriseGuard>
-                <LazyIndicatorsPageWrapper />
+                <Suspense fallback={<div />}>
+                  <LazyIndicatorsPageWrapper />
+                </Suspense>
               </EnterpriseGuard>
             </KibanaContextProvider>
           </SecuritySolutionContext.Provider>

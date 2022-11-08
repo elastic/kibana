@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { Suspense, VFC } from 'react';
+import React, { VFC } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IndicatorsPage } from '../modules/indicators/pages';
+import { IntegrationsGuard } from './integrations_guard/integrations_guard';
 import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugin_template_wrapper';
 
 export const IndicatorsPageWrapper: VFC = () => {
@@ -15,11 +16,11 @@ export const IndicatorsPageWrapper: VFC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SecuritySolutionPluginTemplateWrapper>
-        <Suspense fallback={<div />}>
+      <IntegrationsGuard>
+        <SecuritySolutionPluginTemplateWrapper>
           <IndicatorsPage />
-        </Suspense>
-      </SecuritySolutionPluginTemplateWrapper>
+        </SecuritySolutionPluginTemplateWrapper>
+      </IntegrationsGuard>
     </QueryClientProvider>
   );
 };

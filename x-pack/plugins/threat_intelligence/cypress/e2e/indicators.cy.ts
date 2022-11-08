@@ -24,6 +24,11 @@ import {
   FLYOUT_TITLE,
   INDICATOR_TYPE_CELL,
   INDICATORS_TABLE,
+  INDICATORS_TABLE_FEED_NAME_COLUMN_HEADER,
+  INDICATORS_TABLE_FIRST_SEEN_COLUMN_HEADER,
+  INDICATORS_TABLE_INDICATOR_NAME_COLUMN_HEADER,
+  INDICATORS_TABLE_INDICATOR_TYPE_COLUMN_HEADER,
+  INDICATORS_TABLE_LAST_SEEN_COLUMN_HEADER,
   INSPECTOR_BUTTON,
   INSPECTOR_PANEL,
   LEADING_BREADCRUMB,
@@ -79,6 +84,12 @@ describe('Indicators', () => {
       cy.get(DEFAULT_LAYOUT_TITLE).should('have.text', 'Indicators');
 
       cy.get(INDICATORS_TABLE).should('exist');
+
+      cy.get(INDICATORS_TABLE_INDICATOR_NAME_COLUMN_HEADER).should('exist');
+      cy.get(INDICATORS_TABLE_INDICATOR_TYPE_COLUMN_HEADER).should('exist');
+      cy.get(INDICATORS_TABLE_FEED_NAME_COLUMN_HEADER).should('exist');
+      cy.get(INDICATORS_TABLE_FIRST_SEEN_COLUMN_HEADER).should('exist');
+      cy.get(INDICATORS_TABLE_LAST_SEEN_COLUMN_HEADER).should('exist');
 
       cy.get(FILTERS_GLOBAL_CONTAINER).should('exist');
 
@@ -149,7 +160,7 @@ describe('Indicators', () => {
         selectRange();
       });
 
-      it('should not display the table when contractictory filters are set', () => {
+      it('should not display the table when contradictory filters are set', () => {
         cy.get(FLYOUT_TABLE).should('not.exist');
 
         cy.get(EMPTY_STATE).should('exist').and('contain.text', 'No results');
