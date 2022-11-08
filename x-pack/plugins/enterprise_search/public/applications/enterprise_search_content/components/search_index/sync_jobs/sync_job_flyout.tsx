@@ -87,7 +87,10 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <FilteringPanel filteringRules={syncJob.filtering?.rules ?? []} />
+            <FilteringPanel
+              advancedSnippet={syncJob.filtering?.advanced_snippet}
+              filteringRules={syncJob.filtering?.rules ?? []}
+            />
           </EuiFlexItem>
           {syncJob.pipeline && (
             <EuiFlexItem>

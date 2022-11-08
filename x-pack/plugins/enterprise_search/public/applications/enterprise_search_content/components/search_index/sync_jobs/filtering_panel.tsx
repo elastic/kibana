@@ -7,7 +7,14 @@
 
 import React from 'react';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiCode } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiCode,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -15,6 +22,7 @@ import {
   FilteringPolicy,
   FilteringRule,
   FilteringRuleRule,
+  FilteringRules,
 } from '../../../../../../common/types/connectors';
 
 import { filteringRuleToText, filteringPolicyToText } from '../../../utils/filtering_rule_helpers';
@@ -22,10 +30,14 @@ import { filteringRuleToText, filteringPolicyToText } from '../../../utils/filte
 import { FlyoutPanel } from './flyout_panel';
 
 interface FilteringPanelProps {
+  advancedSnippet?: FilteringRules['advanced_snippet'];
   filteringRules: FilteringRule[];
 }
 
-export const FilteringPanel: React.FC<FilteringPanelProps> = ({ filteringRules }) => {
+export const FilteringPanel: React.FC<FilteringPanelProps> = ({
+  advancedSnippet,
+  filteringRules,
+}) => {
   const columns: Array<EuiBasicTableColumn<FilteringRule>> = [
     {
       field: 'policy',
@@ -56,6 +68,22 @@ export const FilteringPanel: React.FC<FilteringPanelProps> = ({ filteringRules }
       })}
     >
       <EuiBasicTable columns={columns} items={filteringRules} />
+      {advancedSnippet && (
+        <>
+          <EuiSpacer />
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.index.syncJobs.advancedFilteringRules',
+                {
+                  defaultMessage: 'Advanced filtering rules',
+                }
+              )}
+            </h4>
+          </EuiTitle>
+          <EuiCodeBlock language="json">{advancedSnippet.value}</EuiCodeBlock>
+        </>
+      )}
     </FlyoutPanel>
   );
 };
