@@ -13,6 +13,7 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import { useAuthz, useLink, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 export const TableRowActions: React.FunctionComponent<{
   agent: Agent;
@@ -37,6 +38,7 @@ export const TableRowActions: React.FunctionComponent<{
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { showRequestDiagnostics } = ExperimentalFeaturesService.get();
   const menuItems = [
     <EuiContextMenuItem
       icon="inspect"
@@ -105,20 +107,25 @@ export const TableRowActions: React.FunctionComponent<{
           id="xpack.fleet.agentList.upgradeOneButton"
           defaultMessage="Upgrade agent"
         />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        icon="download"
-        disabled={!hasFleetAllPrivileges}
-        onClick={() => {
-          onRequestDiagnosticsClick();
-        }}
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.diagnosticsOneButton"
-          defaultMessage="Request diagnostics .zip"
-        />
       </EuiContextMenuItem>
     );
+
+    if (showRequestDiagnostics) {
+      menuItems.push(
+        <EuiContextMenuItem
+          icon="download"
+          disabled={!hasFleetAllPrivileges}
+          onClick={() => {
+            onRequestDiagnosticsClick();
+          }}
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.diagnosticsOneButton"
+            defaultMessage="Request diagnostics .zip"
+          />
+        </EuiContextMenuItem>
+      );
+    }
   }
   return (
     <ContextMenuActions
