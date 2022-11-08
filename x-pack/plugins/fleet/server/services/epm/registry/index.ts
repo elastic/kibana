@@ -288,8 +288,12 @@ export async function getPackage(
 }> {
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
   let paths = getArchiveFilelist({ name, version });
+  let packageInfo = getPackageInfo({ name, version });
   let verificationResult = verifyPackage ? getVerificationResult({ name, version }) : undefined;
 
+  if (paths && packageInfo) {
+    return { paths, packageInfo, verificationResult };
+  }
   const {
     archiveBuffer,
     archivePath,
@@ -318,12 +322,10 @@ export async function getPackage(
     );
   }
 
-  const packageInfo = await getPackageInfoFromArchiveOrCache(
-    name,
-    version,
-    archiveBuffer,
-    archivePath
-  );
+  if (!packageInfo) {
+    packageInfo = await getPackageInfoFromArchiveOrCache(name, version, archiveBuffer, archivePath);
+  }
+
   return { paths, packageInfo, verificationResult };
 }
 
