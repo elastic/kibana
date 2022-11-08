@@ -15,8 +15,8 @@ import { LayerConfig, LensAttributes } from '../lens_attributes';
 import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
-import { DataTypes } from '../constants';
 import { sampleMetricFormulaAttribute } from '../test_data/test_formula_metric_attribute';
+import { DataTypes } from '../..';
 
 describe('SingleMetricAttributes', () => {
   mockAppDataView();
@@ -57,9 +57,9 @@ describe('SingleMetricAttributes', () => {
   });
 
   it('returns attributes as expected', () => {
-    const jsonAttr = lnsAttr.getJSON();
+    const jsonAttr = lnsAttr.getJSON('lnsLegacyMetric');
     expect(jsonAttr).toEqual({
-      description: 'undefined',
+      description: '',
       references: [],
       state: {
         adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
@@ -88,6 +88,9 @@ describe('SingleMetricAttributes', () => {
                     operationType: 'median',
                     scale: 'ratio',
                     sourceField: 'transaction.duration.us',
+                    params: {
+                      emptyAsNull: true,
+                    },
                   },
                 },
                 incompleteColumns: {},
@@ -121,9 +124,9 @@ describe('SingleMetricAttributes', () => {
       formulaHelper
     );
 
-    const jsonAttr = lnsAttr.getJSON();
+    const jsonAttr = lnsAttr.getJSON('lnsLegacyMetric');
     expect(jsonAttr).toEqual({
-      description: 'undefined',
+      description: '',
       references: [],
       state: {
         adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
@@ -206,7 +209,7 @@ describe('SingleMetricAttributes', () => {
       formulaHelper
     );
 
-    const jsonAttr = lnsAttr.getJSON();
+    const jsonAttr = lnsAttr.getJSON('lnsLegacyMetric');
     expect(jsonAttr).toEqual(sampleMetricFormulaAttribute);
   });
 });

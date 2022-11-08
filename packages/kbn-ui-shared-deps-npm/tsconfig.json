@@ -1,10 +1,9 @@
 {
   "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "allowJs": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "./target_types",
+    "outDir": "target_types",
     "types": [
       "node",
     ]

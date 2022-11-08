@@ -7,13 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel, EuiLoadingChart } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useLocationName, useStatusByLocation } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
 import { MonitorOverviewItem, Ping } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
+import { OverviewGridItemLoader } from './overview_grid_item_loader';
 
 export const getColor = (theme: ReturnType<typeof useTheme>, isEnabled: boolean, ping?: Ping) => {
   if (!isEnabled) {
@@ -29,11 +30,13 @@ export const MetricItem = ({
   averageDuration,
   data,
   loaded,
+  onClick,
 }: {
   monitor: MonitorOverviewItem;
   data: Array<{ x: number; y: number }>;
   averageDuration: number;
   loaded: boolean;
+  onClick: (id: string, location: string) => void;
 }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -44,6 +47,7 @@ export const MetricItem = ({
 
   return (
     <div
+      data-test-subj={`${monitor.name}-metric-item`}
       style={{
         height: '160px',
       }}
@@ -67,7 +71,10 @@ export const MetricItem = ({
           }}
         >
           <Chart>
-            <Settings baseTheme={DARK_THEME} />
+            <Settings
+              onElementClick={() => monitor.id && locationName && onClick(monitor.id, locationName)}
+              baseTheme={DARK_THEME}
+            />
             <Metric
               id={`${monitor.id}-${monitor.location?.id}`}
               data={[
@@ -97,11 +104,12 @@ export const MetricItem = ({
               monitor={monitor}
               isPopoverOpen={isPopoverOpen}
               setIsPopoverOpen={setIsPopoverOpen}
+              position="relative"
             />
           )}
         </EuiPanel>
       ) : (
-        <EuiLoadingChart mono />
+        <OverviewGridItemLoader />
       )}
     </div>
   );

@@ -158,6 +158,7 @@ Object {
     },
     "visualization": Object {
       "accessor": "0374e520-eae0-4ac1-bcfe-37565e7fc9e3",
+      "autoScaleMetricAlignment": "left",
       "colorMode": "None",
       "layerId": "cea37c70-8f91-43bf-b9fe-72d8c049f6a3",
       "layerType": "data",
