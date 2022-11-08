@@ -31,6 +31,12 @@ export type DateFormatter = (props: {
   children: (formattedDate: string) => JSX.Element;
 }) => JSX.Element;
 
+export interface TagListProps {
+  references: SavedObjectsReference[];
+  onClick?: (tag: Tag) => void;
+  tagRender?: (tag: Tag) => JSX.Element;
+}
+
 /**
  * Abstract external services for this component.
  */
@@ -48,11 +54,7 @@ export interface Services {
   DateFormatterComp?: DateFormatter;
   /** Handler to retrieve the list of available tags */
   getTagList: () => Tag[];
-  TagList: FC<{
-    references: SavedObjectsReference[];
-    onClick?: (tag: Tag) => void;
-    tagRender?: (tag: Tag) => JSX.Element;
-  }>;
+  TagList: FC<TagListProps>;
   /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
   /** Handler to return the url to navigate to the kibana tags management */

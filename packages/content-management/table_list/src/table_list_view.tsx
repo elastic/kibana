@@ -190,7 +190,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     pagination,
     tableSort,
   } = state;
-  const hasNoItems = !isFetchingItems && items.length === 0 && !searchQuery;
+  const hasNoItems = !isFetchingItems && items.length === 0 && searchQuery.query === null;
   const pageDataTestSubject = `${entityName}LandingPage`;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
@@ -482,7 +482,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     return null;
   }
 
-  if (!fetchError && hasNoItems) {
+  if (!showFetchError && hasNoItems) {
     return (
       <KibanaPageTemplate panelled isEmptyState={true} data-test-subj={pageDataTestSubject}>
         <KibanaPageTemplate.Section
