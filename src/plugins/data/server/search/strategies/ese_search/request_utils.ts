@@ -11,7 +11,7 @@ import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithB
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions, UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
-import { SearchSessionsConfigSchema } from '../../../../config';
+import { SearchConfigSchema } from '../../../../config';
 import {
   getCommonDefaultAsyncGetParams,
   getCommonDefaultAsyncSubmitParams,
@@ -32,7 +32,7 @@ export async function getIgnoreThrottled(
  */
 export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
-  searchSessionsConfig: SearchSessionsConfigSchema | null,
+  searchConfig: SearchConfigSchema,
   options: ISearchOptions
 ): Promise<
   Pick<
@@ -49,11 +49,10 @@ export async function getDefaultAsyncSubmitParams(
 > {
   return {
     // TODO: adjust for partial results
-    batched_reduce_size: 64,
-    ...getCommonDefaultAsyncSubmitParams(searchSessionsConfig, options),
+    batched_reduce_size: searchConfig.asyncSearch.batchedReduceSize,
+    ...getCommonDefaultAsyncSubmitParams(searchConfig, options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
-    // If search sessions are used, set the initial expiration time.
   };
 }
 
@@ -61,10 +60,10 @@ export async function getDefaultAsyncSubmitParams(
  @internal
  */
 export function getDefaultAsyncGetParams(
-  searchSessionsConfig: SearchSessionsConfigSchema | null,
+  searchConfig: SearchConfigSchema,
   options: ISearchOptions
 ): Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
   return {
-    ...getCommonDefaultAsyncGetParams(searchSessionsConfig, options),
+    ...getCommonDefaultAsyncGetParams(searchConfig, options),
   };
 }

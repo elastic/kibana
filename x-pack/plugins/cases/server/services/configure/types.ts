@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CasesConfigureAttributes } from '../../../common/api';
-import { ESCaseConnector } from '..';
+import type { CasesConfigureAttributes } from '../../../common/api';
+import type { ESCaseConnector } from '..';
 
 /**
  * This type should only be used within the configure service. It represents how the configure saved object will be layed

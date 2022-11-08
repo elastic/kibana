@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesCapabilities, CasesPermissions } from '../../containers/types';
+import type { CasesCapabilities, CasesPermissions } from '../../containers/types';
 
 export const allCasesPermissions = () => buildCasesPermissions();
 export const noCasesPermissions = () =>
@@ -17,6 +17,8 @@ export const noUpdateCasesPermissions = () => buildCasesPermissions({ update: fa
 export const noPushCasesPermissions = () => buildCasesPermissions({ push: false });
 export const noDeleteCasesPermissions = () => buildCasesPermissions({ delete: false });
 export const writeCasesPermissions = () => buildCasesPermissions({ read: false });
+export const onlyDeleteCasesPermission = () =>
+  buildCasesPermissions({ read: false, create: false, update: false, delete: true, push: false });
 
 export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 'all'>> = {}) => {
   const create = overrides.create ?? true;

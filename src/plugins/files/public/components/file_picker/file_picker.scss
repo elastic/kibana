@@ -1,0 +1,8 @@
+.filesFilePicker--fixed {
+  @include euiBreakpoint('m', 'l', 'xl', 'xxl') {
+    width: 75vw;
+    .euiModal__flex {
+      height: 75vw;
+    }
+  }
+}

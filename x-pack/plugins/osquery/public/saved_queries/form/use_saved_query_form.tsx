@@ -72,11 +72,6 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
       draft.interval = draft.interval + '';
     }
 
-    if (draft.snapshot) {
-      delete draft.snapshot;
-      delete draft.removed;
-    }
-
     return draft;
   });
 
@@ -101,6 +96,7 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
             query: '',
             interval: 3600,
             ecs_mapping: {},
+            snapshot: true,
           },
     }),
   };

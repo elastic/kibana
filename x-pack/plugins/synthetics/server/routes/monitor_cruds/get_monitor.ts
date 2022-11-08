@@ -4,24 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-  SavedObjectsFindResponse,
-} from '@kbn/core/server';
-import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitor,
-  ServiceLocations,
-} from '../../../common/runtime_types';
-import { monitorAttributes } from '../../../common/types/saved_objects';
+import { schema } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ConfigKey, MonitorOverviewItem, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
+import { getMonitors } from '../common';
 
 const querySchema = schema.object({
   page: schema.maybe(schema.number()),
@@ -35,44 +26,6 @@ const querySchema = schema.object({
   locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
 });
-
-type MonitorsQuery = TypeOf<typeof querySchema>;
-
-const getMonitors = (
-  request: MonitorsQuery,
-  syntheticsService: SyntheticsService,
-  savedObjectsClient: SavedObjectsClientContract
-): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitor>> => {
-  const {
-    perPage = 50,
-    page,
-    sortField,
-    sortOrder,
-    query,
-    tags,
-    monitorType,
-    locations,
-    filter = '',
-  } = request as MonitorsQuery;
-
-  const locationFilter = parseLocationFilter(syntheticsService.locations, locations);
-
-  const filters =
-    getFilter('tags', tags) +
-    getFilter('type', monitorType) +
-    getFilter('locations.id', locationFilter);
-
-  return savedObjectsClient.find({
-    type: syntheticsMonitorType,
-    perPage,
-    page,
-    sortField: sortField === 'schedule.keyword' ? 'schedule.number' : sortField,
-    sortOrder,
-    searchFields: ['name', 'tags.text', 'locations.id.text', 'urls'],
-    search: query ? `${query}*` : undefined,
-    filter: filters + filter,
-  });
-};
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -152,38 +105,6 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
   },
 });
 
-const getFilter = (field: string, values?: string | string[], operator = 'OR') => {
-  if (!values) {
-    return '';
-  }
-
-  const fieldKey = `${monitorAttributes}.${field}`;
-
-  if (Array.isArray(values)) {
-    return `${fieldKey}:${values.join(` ${operator} ${fieldKey}:`)}`;
-  }
-
-  return `${fieldKey}:${values}`;
-};
-
-const parseLocationFilter = (serviceLocations: ServiceLocations, locations?: string | string[]) => {
-  if (!locations) {
-    return '';
-  }
-
-  if (Array.isArray(locations)) {
-    return locations
-      .map((loc) => findLocationItem(loc, serviceLocations)?.id ?? '')
-      .filter((val) => !val);
-  }
-
-  return findLocationItem(locations, serviceLocations)?.id ?? '';
-};
-
-export const findLocationItem = (query: string, locations: ServiceLocations) => {
-  return locations.find(({ id, label }) => query === id || label === query);
-};
-
 export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
@@ -191,55 +112,42 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     query: querySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const { perPage = 5 } = request.query;
-    const { saved_objects: monitors } = await getMonitors(
-      {
-        perPage: 1000,
-        sortField: 'name.keyword',
-        sortOrder: 'asc',
-        page: 1,
-      },
-      syntheticsMonitorClient.syntheticsService,
-      savedObjectsClient
-    );
-
-    const allMonitorIds: string[] = [];
-    const pages: Record<number, unknown[]> = {};
-    let currentPage = 0;
-    let currentItem = 0;
-    let total = 0;
-
-    monitors.forEach((monitor) => {
-      /* collect all monitor ids for use
-       * in filtering overview requests */
-      const id = monitor.id;
-      allMonitorIds.push(id);
-
-      /* for reach location, add a config item */
-      const locations = monitor.attributes[ConfigKey.LOCATIONS];
-      locations.forEach((location) => {
-        const config = {
-          id,
-          name: monitor.attributes[ConfigKey.NAME],
-          location,
-          isEnabled: monitor.attributes[ConfigKey.ENABLED],
-        };
-        if (!pages[currentPage]) {
-          pages[currentPage] = [config];
-        } else {
-          pages[currentPage].push(config);
-        }
-        currentItem++;
-        total++;
-        if (currentItem % perPage === 0) {
-          currentPage++;
-          currentItem = 0;
-        }
-      });
+    const { sortField, sortOrder } = request.query;
+    const finder = savedObjectsClient.createPointInTimeFinder<SyntheticsMonitor>({
+      type: syntheticsMonitorType,
+      sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
+      sortOrder,
+      perPage: 500,
     });
 
+    const allMonitorIds: string[] = [];
+    let total = 0;
+    const allMonitors: MonitorOverviewItem[] = [];
+
+    for await (const result of finder.find()) {
+      /* collect all monitor ids for use
+       * in filtering overview requests */
+      result.saved_objects.forEach((monitor) => {
+        const id = monitor.id;
+        allMonitorIds.push(id);
+
+        /* for reach location, add a config item */
+        const locations = monitor.attributes[ConfigKey.LOCATIONS];
+        locations.forEach((location) => {
+          const config = {
+            id,
+            name: monitor.attributes[ConfigKey.NAME],
+            location,
+            isEnabled: monitor.attributes[ConfigKey.ENABLED],
+          };
+          allMonitors.push(config);
+          total++;
+        });
+      });
+    }
+
     return {
-      pages,
+      monitors: allMonitors,
       total,
       allMonitorIds,
     };

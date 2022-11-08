@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TOP_VALUE, UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes } from '../../types';
 
 /* Exported from Kibana Saved Object */
@@ -88,7 +89,7 @@ export const dnsTopDomainsLensAttributes: LensAttributes = {
       },
     ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           'b1c3efc6-c886-4fba-978f-3b6bb5e7948a': {
             columns: {
@@ -104,7 +105,7 @@ export const dnsTopDomainsLensAttributes: LensAttributes = {
                 },
               },
               '2a4d5e20-f570-48e4-b9ab-ff3068919377': {
-                label: 'Unique count of dns.question.registered_domain',
+                label: UNIQUE_COUNT('dns.question.registered_domain'),
                 dataType: 'number',
                 operationType: 'unique_count',
                 scale: 'ratio',
@@ -112,7 +113,7 @@ export const dnsTopDomainsLensAttributes: LensAttributes = {
                 isBucketed: false,
               },
               'e8842815-2a45-4c74-86de-c19a391e2424': {
-                label: 'Top values of dns.question.name',
+                label: TOP_VALUE('dns.question.name'),
                 dataType: 'string',
                 operationType: 'terms',
                 scale: 'ordinal',

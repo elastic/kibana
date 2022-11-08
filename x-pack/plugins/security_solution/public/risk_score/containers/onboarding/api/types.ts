@@ -25,14 +25,6 @@ export interface DeleteIngestPipeline extends RiskyScoreApiBase {
   names: string;
 }
 
-export interface CreateIndices extends RiskyScoreApiBase {
-  options: { index: string; mappings: string | Record<string, unknown> };
-}
-
-export interface DeleteIndices extends RiskyScoreApiBase {
-  options: { indices: string[] };
-}
-
 export interface CreateStoredScript extends RiskyScoreApiBase {
   options: {
     id: string;

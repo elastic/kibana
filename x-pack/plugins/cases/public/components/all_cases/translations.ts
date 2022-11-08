@@ -71,10 +71,6 @@ export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {
   defaultMessage: 'Closed',
 });
 
-export const DELETE = i18n.translate('xpack.cases.caseTable.delete', {
-  defaultMessage: 'Delete',
-});
-
 export const SELECT = i18n.translate('xpack.cases.caseTable.select', {
   defaultMessage: 'Select',
 });
@@ -134,3 +130,10 @@ export const TOTAL_ASSIGNEES_FILTERED = (total: number) =>
     defaultMessage: '{total, plural, one {# assignee} other {# assignees}} filtered',
     values: { total },
   });
+
+export const NO_ASSIGNEES = i18n.translate(
+  'xpack.cases.allCasesView.filterAssignees.noAssigneesLabel',
+  {
+    defaultMessage: 'No assignees',
+  }
+);

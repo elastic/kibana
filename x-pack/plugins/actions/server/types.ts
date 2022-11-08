@@ -14,6 +14,7 @@ import {
   ElasticsearchClient,
   CustomRequestHandlerContext,
   SavedObjectReference,
+  Logger,
 } from '@kbn/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -60,6 +61,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
+  logger: Logger;
   isEphemeral?: boolean;
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -91,7 +93,7 @@ export type ExecutorType<Config, Secrets, Params, ResultData> = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-interface ValidatorType<Type> {
+export interface ValidatorType<Type> {
   schema: {
     validate(value: unknown): Type;
   };
@@ -107,6 +109,12 @@ export interface ActionValidationService {
 
   isUriAllowed(uri: string): boolean;
 }
+
+export type RenderParameterTemplates<Params extends ActionTypeParams> = (
+  params: Params,
+  variables: Record<string, unknown>,
+  actionId?: string
+) => Params;
 
 export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
@@ -126,11 +134,7 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
 
-  renderParameterTemplates?(
-    params: Params,
-    variables: Record<string, unknown>,
-    actionId?: string
-  ): Params;
+  renderParameterTemplates?: RenderParameterTemplates<Params>;
 
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }

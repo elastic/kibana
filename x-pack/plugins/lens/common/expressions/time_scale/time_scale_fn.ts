@@ -24,12 +24,39 @@ const unitInMs: Record<TimeScaleUnit, number> = {
   d: 1000 * 60 * 60 * 24,
 };
 
+// the datemath plugin always parses dates by using the current default moment time zone.
+// to use the configured time zone, we are temporary switching it just for the calculation.
+
+// The code between this call and the reset in the finally block is not allowed to get async,
+// otherwise the timezone setting can leak out of this function.
+const withChangedTimeZone = <TReturnedValue = unknown>(
+  timeZone: string | undefined,
+  action: () => TReturnedValue
+): TReturnedValue => {
+  if (timeZone) {
+    const defaultTimezone = moment().zoneName();
+    try {
+      moment.tz.setDefault(timeZone);
+      return action();
+    } finally {
+      // reset default moment timezone
+      moment.tz.setDefault(defaultTimezone);
+    }
+  } else {
+    return action();
+  }
+};
+
+const getTimeBounds = (timeRange: TimeRange, timeZone?: string, getForceNow?: () => Date) =>
+  withChangedTimeZone(timeZone, () => calculateBounds(timeRange, { forceNow: getForceNow?.() }));
+
 export const timeScaleFn =
   (
     getDatatableUtilities: (
       context: ExecutionContext
     ) => DatatableUtilitiesService | Promise<DatatableUtilitiesService>,
-    getTimezone: (context: ExecutionContext) => string | Promise<string>
+    getTimezone: (context: ExecutionContext) => string | Promise<string>,
+    getForceNow?: () => Date
   ): TimeScaleExpressionFunction['fn'] =>
   async (
     input,
@@ -69,7 +96,9 @@ export const timeScaleFn =
         timeZone: contextTimeZone,
       });
       const intervalDuration = timeInfo?.interval && parseInterval(timeInfo.interval);
-      timeBounds = timeInfo?.timeRange && calculateBounds(timeInfo.timeRange);
+
+      timeBounds =
+        timeInfo?.timeRange && getTimeBounds(timeInfo.timeRange, timeInfo?.timeZone, getForceNow);
 
       getStartEndOfBucketMeta = (row) => {
         const startOfBucket = moment.tz(row[dateColumnId], timeInfo?.timeZone ?? contextTimeZone);
@@ -89,8 +118,18 @@ export const timeScaleFn =
       }
     } else {
       const timeRange = context.getSearchContext().timeRange as TimeRange;
-      const endOfBucket = moment.tz(timeRange.to, contextTimeZone);
-      let startOfBucket = moment.tz(timeRange.from, contextTimeZone);
+      timeBounds = getTimeBounds(timeRange, contextTimeZone, getForceNow);
+
+      if (!timeBounds.max || !timeBounds.min) {
+        throw new Error(
+          i18n.translate('xpack.lens.functions.timeScale.timeBoundsMissingMessage', {
+            defaultMessage: 'Could not parse "Time Range"',
+          })
+        );
+      }
+
+      const endOfBucket = timeBounds.max;
+      let startOfBucket = timeBounds.min;
 
       if (reducedTimeRange) {
         const reducedStartOfBucket = endOfBucket.clone().subtract(parseInterval(reducedTimeRange));
@@ -99,8 +138,6 @@ export const timeScaleFn =
           startOfBucket = reducedStartOfBucket;
         }
       }
-
-      timeBounds = calculateBounds(timeRange);
 
       getStartEndOfBucketMeta = () => ({
         startOfBucket,

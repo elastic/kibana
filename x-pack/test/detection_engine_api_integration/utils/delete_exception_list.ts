@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * Helper to cut down on the noise in some of the tests. Does a delete of an exception list.
@@ -21,7 +21,7 @@ export const deleteExceptionList = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   listId: string
-): Promise<FullResponseSchema> => {
+): Promise<RuleResponse> => {
   const response = await supertest
     .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}`)
     .set('kbn-xsrf', 'true');

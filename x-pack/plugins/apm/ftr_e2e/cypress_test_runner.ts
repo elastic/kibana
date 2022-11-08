@@ -11,7 +11,7 @@ import { esTestConfig } from '@kbn/test';
 import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import path from 'path';
 import { FtrProviderContext } from './ftr_provider_context';
-import { createApmUsers } from '../scripts/create_apm_users/create_apm_users';
+import { createApmUsers } from '../server/test_helpers/create_apm_users/create_apm_users';
 
 export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
@@ -26,17 +26,17 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
 
-  // Creates APM users
-  await createApmUsers({
-    elasticsearch: { username, password },
-    kibana: { hostname: kibanaUrl },
-  });
-
   const esNode = Url.format({
     protocol: config.get('servers.elasticsearch.protocol'),
     port: config.get('servers.elasticsearch.port'),
     hostname: config.get('servers.elasticsearch.hostname'),
     auth: `${username}:${password}`,
+  });
+
+  // Creates APM users
+  await createApmUsers({
+    elasticsearch: { node: esNode, username, password },
+    kibana: { hostname: kibanaUrl },
   });
 
   const esRequestTimeout = config.get('timeouts.esRequestTimeout');

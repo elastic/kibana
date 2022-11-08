@@ -117,6 +117,15 @@ Contains configuration for ingest outputs that can be shared across multiple `in
 only exposes a single Elasticsearch output that will be used for all package policies, but in the future this may be
 used for other types of outputs like separate monitoring clusters, Logstash, etc.
 
+### `ingest-download-sources`
+- Constant in code: `DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE`
+- Introduced in ?
+- [Code Link](../server/saved_objects/index.ts#329)
+- Migrations: 8.4.0, 8.5.0
+
+Contains configuration for the download source objects that allow users to configure a custom registry
+for downloading the Elastic Agent. The default value is for the registry is `https://artifacts.elastic.co/downloads/`. The UI exposes this configuration in Settings.
+
 ### `epm-packages`
 
 - Constant in code: `PACKAGES_SAVED_OBJECT_TYPE`

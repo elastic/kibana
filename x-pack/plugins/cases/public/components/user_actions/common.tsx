@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { Actions, ConnectorUserAction, UserAction } from '../../../common/api';
+import type { ConnectorUserAction, UserAction } from '../../../common/api';
+import { Actions } from '../../../common/api';
 import { UserActionTimestamp } from './timestamp';
-import { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from './types';
+import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from './types';
 import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
 import { HoverableUserWithAvatarResolver } from '../user_profiles/hoverable_user_with_avatar_resolver';

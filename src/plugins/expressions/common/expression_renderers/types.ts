@@ -93,6 +93,8 @@ export interface IInterpreterRenderHandlers {
 
   isSyncColorsEnabled(): boolean;
 
+  isSyncCursorEnabled(): boolean;
+
   isSyncTooltipsEnabled(): boolean;
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,

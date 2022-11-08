@@ -19,14 +19,15 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { SecurityPageName } from '../../../../../common/constants';
-import type { RuleReferenceSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/rule_exceptions';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
-import { RuleDetailTabs } from '../../../../detections/pages/detection_engine/rules/details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 
 const StyledFlexItem = styled(EuiFlexItem)`
@@ -36,24 +37,27 @@ const StyledFlexItem = styled(EuiFlexItem)`
 
 export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;
-  references: RuleReferenceSchema[];
+  listAndReferences: ExceptionListRuleReferencesSchema | null;
   dataTestSubj: string;
 }
 
 export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
-  ({ item, references, dataTestSubj }) => {
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  ({ item, listAndReferences, dataTestSubj }) => {
+    const [isListsPopoverOpen, setIsListsPopoverOpen] = useState(false);
+    const [isRulesPopoverOpen, setIsRulesPopoverOpen] = useState(false);
 
-    const onAffectedRulesClick = () => setIsPopoverOpen((isOpen) => !isOpen);
-    const onClosePopover = () => setIsPopoverOpen(false);
+    const onAffectedRulesClick = () => setIsRulesPopoverOpen((isOpen) => !isOpen);
+    const onAffectedListsClick = () => setIsListsPopoverOpen((isOpen) => !isOpen);
+    const onCloseRulesPopover = () => setIsRulesPopoverOpen(false);
+    const onClosListsPopover = () => setIsListsPopoverOpen(false);
 
     const itemActions = useMemo((): EuiContextMenuPanelProps['items'] => {
-      if (references == null) {
+      if (listAndReferences == null) {
         return [];
       }
-      return references.map((reference) => (
+      return listAndReferences.referenced_rules.map((reference) => (
         <EuiContextMenuItem
-          data-test-subj={`${dataTestSubj}-actionItem-${reference.id}`}
+          data-test-subj={`${dataTestSubj}-rulesAffected-${reference.id}`}
           key={reference.id}
         >
           <EuiToolTip content={reference.name} anchorClassName="eui-textTruncate">
@@ -61,13 +65,92 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
               data-test-subj="ruleName"
               deepLinkId={SecurityPageName.rules}
               path={getRuleDetailsTabUrl(reference.id, RuleDetailTabs.alerts)}
+              external
             >
               {reference.name}
             </SecuritySolutionLinkAnchor>
           </EuiToolTip>
         </EuiContextMenuItem>
       ));
-    }, [references, dataTestSubj]);
+    }, [listAndReferences, dataTestSubj]);
+
+    const rulesAffected = useMemo((): JSX.Element => {
+      if (listAndReferences == null) return <></>;
+
+      return (
+        <StyledFlexItem grow={false}>
+          <EuiPopover
+            button={
+              <EuiButtonEmpty
+                onClick={onAffectedRulesClick}
+                iconType="list"
+                data-test-subj={`${dataTestSubj}-affectedRulesButton`}
+              >
+                {i18n.AFFECTED_RULES(listAndReferences?.referenced_rules.length ?? 0)}
+              </EuiButtonEmpty>
+            }
+            panelPaddingSize="none"
+            isOpen={isRulesPopoverOpen}
+            closePopover={onCloseRulesPopover}
+            data-test-subj={`${dataTestSubj}-rulesPopover`}
+            id={'rulesPopover'}
+          >
+            <EuiContextMenuPanel size="s" items={itemActions} />
+          </EuiPopover>
+        </StyledFlexItem>
+      );
+    }, [listAndReferences, dataTestSubj, isRulesPopoverOpen, itemActions]);
+
+    const listsAffected = useMemo((): JSX.Element => {
+      if (listAndReferences == null) return <></>;
+
+      if (listAndReferences.type !== ExceptionListTypeEnum.RULE_DEFAULT) {
+        return (
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButtonEmpty
+                  onClick={onAffectedListsClick}
+                  iconType="list"
+                  data-test-subj={`${dataTestSubj}-affectedListsButton`}
+                >
+                  {i18n.AFFECTED_LIST}
+                </EuiButtonEmpty>
+              }
+              panelPaddingSize="none"
+              isOpen={isListsPopoverOpen}
+              closePopover={onClosListsPopover}
+              data-test-subj={`${dataTestSubj}-listsPopover`}
+              id={'listsPopover'}
+            >
+              <EuiContextMenuPanel
+                size="s"
+                items={[
+                  <EuiContextMenuItem
+                    data-test-subj={`${dataTestSubj}-listsAffected-${listAndReferences.id}`}
+                    key={listAndReferences.id}
+                  >
+                    <EuiToolTip content={listAndReferences.name} anchorClassName="eui-textTruncate">
+                      <SecuritySolutionLinkAnchor
+                        data-test-subj="ruleName"
+                        deepLinkId={SecurityPageName.rules}
+                        // TODO: Update to list details URL once available
+                        path={getRuleDetailsTabUrl(listAndReferences.id, RuleDetailTabs.alerts)}
+                        external
+                      >
+                        {listAndReferences.name}
+                      </SecuritySolutionLinkAnchor>
+                    </EuiToolTip>
+                  </EuiContextMenuItem>,
+                ]}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        );
+      } else {
+        return <></>;
+      }
+    }, [listAndReferences, dataTestSubj, isListsPopoverOpen]);
 
     return (
       <EuiFlexGroup
@@ -94,25 +177,12 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             dataTestSubj={`${dataTestSubj}-updatedBy`}
           />
         </StyledFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={
-              <EuiButtonEmpty
-                onClick={onAffectedRulesClick}
-                iconType="list"
-                data-test-subj={`${dataTestSubj}-affectedRulesButton`}
-              >
-                {i18n.AFFECTED_RULES(references?.length ?? 0)}
-              </EuiButtonEmpty>
-            }
-            panelPaddingSize="none"
-            isOpen={isPopoverOpen}
-            closePopover={onClosePopover}
-            data-test-subj={`${dataTestSubj}-items`}
-          >
-            <EuiContextMenuPanel size="s" items={itemActions} />
-          </EuiPopover>
-        </EuiFlexItem>
+        {listAndReferences != null && (
+          <>
+            {rulesAffected}
+            {listsAffected}
+          </>
+        )}
       </EuiFlexGroup>
     );
   }

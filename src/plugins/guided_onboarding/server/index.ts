@@ -9,8 +9,6 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 import { GuidedOnboardingPlugin } from './plugin';
 
-export { config } from './config';
-
 export function plugin(initializerContext: PluginInitializerContext) {
   return new GuidedOnboardingPlugin(initializerContext);
 }

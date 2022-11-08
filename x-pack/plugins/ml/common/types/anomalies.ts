@@ -183,6 +183,52 @@ export interface AnomalyRecordDoc {
    * purely single bucket and +5.0 means the anomaly is purely multi bucket.
    */
   multi_bucket_impact?: number;
+
+  /**
+   * An explanation for the anomaly score
+   */
+  anomaly_score_explanation?: {
+    /**
+     * Type of the detected anomaly: spike or dip.
+     */
+    anomaly_type?: 'dip' | 'spike';
+    /**
+     * Length of the detected anomaly in the number of buckets.
+     */
+    anomaly_length?: number;
+    /**
+     * Impact of the deviation between actual and typical in the current bucket.
+     */
+    single_bucket_impact?: number;
+    /**
+     * Impact of the deviation between actual and typical in the past 12 buckets.
+     */
+    multi_bucket_impact?: number;
+    /**
+     * Impact of the statistical properties of the detected anomalous interval.
+     */
+    anomaly_characteristics_impact?: number;
+    /**
+     * Lower bound of the 95% confidence interval.
+     */
+    lower_confidence_bound?: number;
+    /**
+     * Typical (expected) value for this bucket.
+     */
+    typical_value?: number;
+    /**
+     * Upper bound of the 95% confidence interval.
+     */
+    upper_confidence_bound?: number;
+    /**
+     * Indicates a reduction of anomaly score for the bucket with large confidence intervals.
+     */
+    high_variance_penalty?: boolean;
+    /**
+     * Indicates a reduction of anomaly score if the bucket contains fewer samples than historically expected.
+     */
+    incomplete_bucket_penalty?: boolean;
+  };
 }
 
 /**
@@ -283,6 +329,21 @@ export interface AnomaliesTableRecord {
    * Returns true if the anomaly record represented by the table row can be shown in the maps plugin
    */
   isGeoRecord?: boolean;
+
+  /**
+   * Returns true if the job has the model plot enabled
+   */
+  modelPlotEnabled: boolean;
+}
+
+/**
+ * Customized version of AnomaliesTableRecord which inserts the detector description
+ * and rules length.
+ * Used by the AnomaliesTable component
+ */
+export interface AnomaliesTableRecordExtended extends AnomaliesTableRecord {
+  detector: string;
+  rulesLength?: number;
 }
 
 export type PartitionFieldsType = typeof PARTITION_FIELDS[number];

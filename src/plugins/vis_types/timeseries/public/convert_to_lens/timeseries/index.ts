@@ -7,10 +7,13 @@
  */
 
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import {
+  getIndexPatternIds,
+  isAnnotationsLayer,
+  Layer,
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { Panel } from '../../../common/types';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
@@ -37,7 +40,7 @@ const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<st
   return newLayers;
 };
 
-export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel) => {
+export const convertToLens: ConvertTsvbToLensVisualization = async ({ params: model }) => {
   const dataViews: DataViewsPublicPluginStart = getDataViewsStart();
   const extendedLayers: Record<number, ExtendedLayer> = {};
   const seriesNum = model.series.filter((series) => !series.hidden).length;
@@ -57,7 +60,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
       return null;
     }
 
-    const { indexPatternId, indexPattern, timeField } = await getDataSourceInfo(
+    const datasourceInfo = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
       Boolean(series.override_index_pattern),
@@ -65,7 +68,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
       series.series_time_field,
       dataViews
     );
+    if (!datasourceInfo) {
+      return null;
+    }
 
+    const { indexPatternId, indexPattern, timeField } = datasourceInfo;
     if (!timeField) {
       return null;
     }
@@ -78,7 +85,9 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
       return null;
     }
     // handle multiple metrics
-    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum);
+    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, {
+      isStaticValueColumnSupported: true,
+    });
     if (metricsColumns === null) {
       return null;
     }
@@ -88,20 +97,43 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
       return null;
     }
 
+    const isReferenceLine =
+      metricsColumns.length === 1 && metricsColumns[0].operationType === 'static_value';
+
+    // only static value without split is supported
+    if (isReferenceLine && bucketsColumns.length) {
+      return null;
+    }
+
     const layerId = uuid();
     extendedLayers[layerIdx] = {
       indexPatternId,
       layerId,
-      columns: [...metricsColumns, dateHistogramColumn, ...bucketsColumns],
+      columns: isReferenceLine
+        ? [...metricsColumns]
+        : [...metricsColumns, dateHistogramColumn, ...bucketsColumns],
       columnOrder: [],
     };
   }
 
   const configLayers = await getLayers(extendedLayers, model, dataViews);
+  if (configLayers === null) {
+    return null;
+  }
+
+  const configuration = getConfiguration(model, configLayers);
+  const layers = Object.values(excludeMetaFromLayers(extendedLayers));
+  const annotationIndexPatterns = configuration.layers.reduce<string[]>((acc, layer) => {
+    if (isAnnotationsLayer(layer)) {
+      return [...acc, layer.indexPatternId];
+    }
+    return acc;
+  }, []);
 
   return {
     type: 'lnsXY',
-    layers: Object.values(excludeMetaFromLayers(extendedLayers)),
-    configuration: getConfiguration(model, configLayers),
+    layers,
+    configuration,
+    indexPatternIds: [...getIndexPatternIds(layers), ...annotationIndexPatterns],
   };
 };

@@ -30,7 +30,7 @@ describe('getColumns', () => {
     eventId: 'some-event',
     getLinkValue: jest.fn(),
     onUpdateColumns: jest.fn(),
-    timelineId: 'some-timeline',
+    scopeId: 'some-timeline',
     toggleColumn: jest.fn(),
   };
 

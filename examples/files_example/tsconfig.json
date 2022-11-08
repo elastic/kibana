@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../typings/**/*"
+  ],
+  "exclude": [],
+  "kbn_references": [
+    { "path": "../../src/core/tsconfig.json" },
+    { "path": "../developer_examples/tsconfig.json" },
+    { "path": "../../src/plugins/files/tsconfig.json" },
+  ]
+}

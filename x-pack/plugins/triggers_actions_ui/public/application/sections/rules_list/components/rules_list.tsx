@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { capitalize, isEmpty, sortBy } from 'lodash';
+import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import {
@@ -161,7 +162,7 @@ export const RulesList = ({
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
-  const [typesFilter, setTypesFilter] = useState<string[]>();
+  const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>(
     lastResponseFilter || []
@@ -206,17 +207,36 @@ export const RulesList = ({
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
 
+  // TODO - tech debt: Right now we're using null and undefined to determine if we should
+  // render the bulk edit modal. Refactor this to only keep track of 1 set of rules and types
+  // to determine which modal to show
   const [rulesToSnooze, setRulesToSnooze] = useState<RuleTableItem[]>([]);
-  const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<string>('');
+  const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<KueryNode | null | undefined>();
+
+  const [rulesToUnsnooze, setRulesToUnsnooze] = useState<RuleTableItem[]>([]);
+  const [rulesToUnsnoozeFilter, setRulesToUnsnoozeFilter] = useState<
+    KueryNode | null | undefined
+  >();
 
   const [rulesToSchedule, setRulesToSchedule] = useState<RuleTableItem[]>([]);
-  const [rulesToScheduleFilter, setRulesToScheduleFilter] = useState<string>('');
+  const [rulesToScheduleFilter, setRulesToScheduleFilter] = useState<
+    KueryNode | null | undefined
+  >();
+
+  const [rulesToUnschedule, setRulesToUnschedule] = useState<RuleTableItem[]>([]);
+  const [rulesToUnscheduleFilter, setRulesToUnscheduleFilter] = useState<
+    KueryNode | null | undefined
+  >();
 
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
-  const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<string>('');
+  const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<
+    KueryNode | null | undefined
+  >();
 
   const [isSnoozingRules, setIsSnoozingRules] = useState<boolean>(false);
   const [isSchedulingRules, setIsSchedulingRules] = useState<boolean>(false);
+  const [isUnsnoozingRules, setIsUnsnoozingRules] = useState<boolean>(false);
+  const [isUnschedulingRules, setIsUnschedulingRules] = useState<boolean>(false);
   const [isUpdatingRuleAPIKeys, setIsUpdatingRuleAPIKeys] = useState<boolean>(false);
 
   const hasAnyAuthorizedRuleType = useMemo(() => {
@@ -304,11 +324,7 @@ export const RulesList = ({
 
   useEffect(() => {
     loadData();
-  }, [loadData, refresh]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData, percentileOptions]);
+  }, [loadData, refresh, percentileOptions]);
 
   useEffect(() => {
     (async () => {
@@ -534,14 +550,16 @@ export const RulesList = ({
   const toolsRight = [
     <TypeFilter
       key="type-filter"
-      onChange={(types: string[]) => setTypesFilter(types)}
+      onChange={setTypesFilter}
       options={filterOptions}
+      filters={typesFilter}
     />,
     showActionFilter && (
       <ActionTypeFilter
         key="action-type-filter"
         actionTypes={actionTypes}
-        onChange={(ids: string[]) => setActionTypesFilter(ids)}
+        onChange={setActionTypesFilter}
+        filters={typesFilter}
       />
     ),
     <RuleExecutionStatusFilter
@@ -578,6 +596,12 @@ export const RulesList = ({
   } = useBulkEditSelect({
     totalItemCount: rulesState.totalItemCount,
     items: tableItems,
+    searchText,
+    typesFilter: rulesTypesFilter,
+    actionTypesFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+    tagsFilter,
   });
 
   const authorizedToModifySelectedRules = useMemo(() => {
@@ -594,17 +618,27 @@ export const RulesList = ({
 
   const clearRulesToSnooze = () => {
     setRulesToSnooze([]);
-    setRulesToSnoozeFilter('');
+    setRulesToSnoozeFilter(undefined);
+  };
+
+  const clearRulesToUnsnooze = () => {
+    setRulesToUnsnooze([]);
+    setRulesToUnsnoozeFilter(undefined);
   };
 
   const clearRulesToSchedule = () => {
     setRulesToSchedule([]);
-    setRulesToScheduleFilter('');
+    setRulesToScheduleFilter(undefined);
+  };
+
+  const clearRulesToUnschedule = () => {
+    setRulesToUnschedule([]);
+    setRulesToUnscheduleFilter(undefined);
   };
 
   const clearRulesToUpdateAPIKey = () => {
     setRulesToUpdateAPIKey([]);
-    setRulesToUpdateAPIKeyFilter('');
+    setRulesToUpdateAPIKeyFilter(undefined);
   };
 
   const isRulesTableLoading = useMemo(() => {
@@ -613,7 +647,9 @@ export const RulesList = ({
       ruleTypesState.isLoading ||
       isPerformingAction ||
       isSnoozingRules ||
+      isUnsnoozingRules ||
       isSchedulingRules ||
+      isUnschedulingRules ||
       isUpdatingRuleAPIKeys
     );
   }, [
@@ -621,7 +657,9 @@ export const RulesList = ({
     ruleTypesState,
     isPerformingAction,
     isSnoozingRules,
+    isUnsnoozingRules,
     isSchedulingRules,
+    isUnschedulingRules,
     isUpdatingRuleAPIKeys,
   ]);
 
@@ -903,14 +941,20 @@ export const RulesList = ({
                   setIsPerformingAction(false);
                 }}
                 isSnoozingRules={isSnoozingRules}
+                isUnsnoozingRules={isUnsnoozingRules}
                 isSchedulingRules={isSchedulingRules}
+                isUnschedulingRules={isUnschedulingRules}
                 isUpdatingRuleAPIKeys={isUpdatingRuleAPIKeys}
                 setRulesToDelete={setRulesToDelete}
                 setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
                 setRulesToSnooze={setRulesToSnooze}
+                setRulesToUnsnooze={setRulesToUnsnooze}
                 setRulesToSchedule={setRulesToSchedule}
+                setRulesToUnschedule={setRulesToUnschedule}
                 setRulesToSnoozeFilter={setRulesToSnoozeFilter}
+                setRulesToUnsnoozeFilter={setRulesToUnsnoozeFilter}
                 setRulesToScheduleFilter={setRulesToScheduleFilter}
+                setRulesToUnscheduleFilter={setRulesToUnscheduleFilter}
                 setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
               />
             </BulkOperationPopover>
@@ -983,13 +1027,19 @@ export const RulesList = ({
       />
       <BulkSnoozeModal
         rulesToSnooze={rulesToSnooze}
+        rulesToUnsnooze={rulesToUnsnooze}
         rulesToSnoozeFilter={rulesToSnoozeFilter}
-        setIsLoading={setIsSnoozingRules}
+        rulesToUnsnoozeFilter={rulesToUnsnoozeFilter}
+        numberOfSelectedRules={numberOfSelectedItems}
+        setIsSnoozingRule={setIsSnoozingRules}
+        setIsUnsnoozingRule={setIsUnsnoozingRules}
         onClose={() => {
           clearRulesToSnooze();
+          clearRulesToUnsnooze();
         }}
         onSave={async () => {
           clearRulesToSnooze();
+          clearRulesToUnsnooze();
           onClearSelection();
           await loadData();
         }}
@@ -997,14 +1047,19 @@ export const RulesList = ({
       />
       <BulkSnoozeScheduleModal
         rulesToSchedule={rulesToSchedule}
+        rulesToUnschedule={rulesToUnschedule}
         rulesToScheduleFilter={rulesToScheduleFilter}
+        rulesToUnscheduleFilter={rulesToUnscheduleFilter}
         numberOfSelectedRules={numberOfSelectedItems}
-        setIsLoading={setIsSchedulingRules}
+        setIsSchedulingRule={setIsSchedulingRules}
+        setIsUnschedulingRule={setIsUnschedulingRules}
         onClose={() => {
           clearRulesToSchedule();
+          clearRulesToUnschedule();
         }}
         onSave={async () => {
           clearRulesToSchedule();
+          clearRulesToUnschedule();
           onClearSelection();
           await loadData();
         }}

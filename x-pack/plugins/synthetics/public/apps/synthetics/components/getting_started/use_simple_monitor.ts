@@ -9,6 +9,7 @@ import { useFetcher } from '@kbn/observability-plugin/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
+import { useSyntheticsRefreshContext } from '../../contexts';
 import { selectServiceLocationsState } from '../../state';
 import { showSyncErrors } from '../monitors_page/management/show_sync_errors';
 import { fetchCreateMonitor } from '../../state';
@@ -19,12 +20,14 @@ import {
   ServiceLocationErrors,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
-import { MONITOR_SUCCESS_LABEL, MY_FIRST_MONITOR, SimpleFormData } from './simple_monitor_form';
+import { MONITOR_SUCCESS_LABEL, SimpleFormData } from './simple_monitor_form';
 import { kibanaService } from '../../../../utils/kibana_service';
 
 export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData }) => {
   const { application } = useKibana().services;
   const { locations: serviceLocations } = useSelector(selectServiceLocationsState);
+
+  const { refreshApp } = useSyntheticsRefreshContext();
 
   const { data, loading } = useFetcher(() => {
     if (!monitorData) {
@@ -39,7 +42,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
   await page.goto('${urls}');
 });`,
         [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
-        [ConfigKey.NAME]: MY_FIRST_MONITOR,
+        [ConfigKey.NAME]: urls,
         [ConfigKey.LOCATIONS]: locations,
         [ConfigKey.URLS]: urls,
       },
@@ -62,9 +65,10 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
         title: MONITOR_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
       });
-      application?.navigateToApp('uptime', { path: `/monitor/${btoa(newMonitor.id)}` });
+      refreshApp();
+      application?.navigateToApp('synthetics', { path: 'monitors' });
     }
-  }, [application, data, loading, serviceLocations]);
+  }, [application, data, loading, refreshApp, serviceLocations]);
 
-  return { data, loading };
+  return { data: data as SyntheticsMonitorWithId, loading };
 };

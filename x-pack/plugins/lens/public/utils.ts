@@ -14,16 +14,23 @@ import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { ISearchStart } from '@kbn/data-plugin/public';
+import React from 'react';
 import type { Document } from './persistence/saved_object_store';
-import type {
+import {
   Datasource,
   DatasourceMap,
   Visualization,
   IndexPatternMap,
   IndexPatternRef,
+  DraggedField,
+  DragDropOperation,
+  isOperation,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
-import { IndexPatternServiceAPI } from './data_views_service/service';
+import type { IndexPatternServiceAPI } from './data_views_service/service';
+import type { DraggingIdentifier } from './drag_drop';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -73,8 +80,6 @@ export function getInitialDataViewsObject(
   return {
     indexPatterns,
     indexPatternRefs,
-    existingFields: {},
-    isFirstExistenceFetch: true,
   };
 }
 
@@ -100,9 +105,6 @@ export async function refreshIndexPatternsList({
     onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
   });
   const indexPattern = newlyMappedIndexPattern[indexPatternId];
-  // But what about existingFields here?
-  // When the indexPatterns cache object gets updated, the data panel will
-  // notice it and refetch the fields list existence map
   indexPatternService.updateDataViewsState({
     indexPatterns: {
       ...indexPatternsCache,
@@ -126,7 +128,7 @@ export function getIndexPatternsIds({
   const references: SavedObjectReference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
-    const indexPatternId = datasource.getCurrentIndexPatternId(datasourceStates[id].state);
+    const indexPatternId = datasource.getUsedDataView(datasourceStates[id].state);
     currentIndexPatternId = indexPatternId;
     references.push(...savedObjectReferences);
   });
@@ -242,3 +244,75 @@ export function renewIDs<T = unknown>(
  */
 export const DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS =
   'lensDontCloseDimensionContainerOnClick';
+
+export function isDraggedField(fieldCandidate: unknown): fieldCandidate is DraggedField {
+  return (
+    typeof fieldCandidate === 'object' &&
+    fieldCandidate !== null &&
+    ['id', 'field'].every((prop) => prop in fieldCandidate)
+  );
+}
+
+export function isDraggedDataViewField(fieldCandidate: unknown): fieldCandidate is DraggedField {
+  return (
+    typeof fieldCandidate === 'object' &&
+    fieldCandidate !== null &&
+    ['id', 'field', 'indexPatternId'].every((prop) => prop in fieldCandidate)
+  );
+}
+
+export const isOperationFromCompatibleGroup = (
+  op1?: DraggingIdentifier,
+  op2?: DragDropOperation
+) => {
+  return (
+    isOperation(op1) &&
+    isOperation(op2) &&
+    op1.columnId !== op2.columnId &&
+    op1.groupId === op2.groupId &&
+    op1.layerId !== op2.layerId
+  );
+};
+
+export const isOperationFromTheSameGroup = (op1?: DraggingIdentifier, op2?: DragDropOperation) => {
+  return (
+    isOperation(op1) &&
+    isOperation(op2) &&
+    op1.columnId !== op2.columnId &&
+    op1.groupId === op2.groupId &&
+    op1.layerId === op2.layerId
+  );
+};
+
+export const getSearchWarningMessages = (
+  adapter: RequestAdapter,
+  datasource: Datasource,
+  state: unknown,
+  deps: {
+    searchService: ISearchStart;
+  }
+) => {
+  const warningsMap: Map<string, Array<string | React.ReactNode>> = new Map();
+
+  deps.searchService.showWarnings(adapter, (warning, meta) => {
+    const { request, response, requestId } = meta;
+
+    const warningMessages = datasource.getSearchWarningMessages?.(
+      state,
+      warning,
+      request,
+      response
+    );
+
+    if (warningMessages?.length) {
+      const key = (requestId ?? '') + warning.type + warning.reason?.type ?? '';
+      if (!warningsMap.has(key)) {
+        warningsMap.set(key, warningMessages);
+      }
+      return true;
+    }
+    return false;
+  });
+
+  return [...warningsMap.values()].flat();
+};

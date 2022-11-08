@@ -1,0 +1,19 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+  },
+  "include": [
+    ".storybook/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    { "path": "../../../../src/core/tsconfig.json" },
+    { "path": "../../cloud/tsconfig.json" },
+  ]
+}

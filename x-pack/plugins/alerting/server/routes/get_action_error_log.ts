@@ -34,15 +34,19 @@ const querySchema = schema.object({
   per_page: schema.number({ defaultValue: 10, min: 1 }),
   page: schema.number({ defaultValue: 1, min: 1 }),
   sort: sortFieldsSchema,
+  namespace: schema.maybe(schema.string()),
+  with_auth: schema.maybe(schema.boolean()),
 });
 
 const rewriteReq: RewriteRequestCase<GetActionErrorLogByIdParams> = ({
   date_start: dateStart,
   date_end: dateEnd,
   per_page: perPage,
+  namespace,
   ...rest
 }) => ({
   ...rest,
+  namespace,
   dateStart,
   dateEnd,
   perPage,
@@ -64,8 +68,13 @@ export const getActionErrorLogRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
+        const withAuth = req.query.with_auth;
+        const rewrittenReq = rewriteReq({ id, ...req.query });
+        const getter = (
+          withAuth ? rulesClient.getActionErrorLogWithAuth : rulesClient.getActionErrorLog
+        ).bind(rulesClient);
         return res.ok({
-          body: await rulesClient.getActionErrorLog(rewriteReq({ id, ...req.query })),
+          body: await getter(rewrittenReq),
         });
       })
     )

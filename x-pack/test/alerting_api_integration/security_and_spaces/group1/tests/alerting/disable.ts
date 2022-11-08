@@ -26,7 +26,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/140797
+  // Failing: See https://github.com/elastic/kibana/issues/141849
   describe.skip('disable', () => {
     const objectRemover = new ObjectRemover(supertest);
 
@@ -110,21 +110,23 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.body).to.eql('');
 
               // task should still exist but be disabled
-              const taskRecord2 = await getScheduledTask(createdAlert.scheduled_task_id);
-              expect(taskRecord2.type).to.eql('task');
-              expect(taskRecord2.task.taskType).to.eql('alerting:test.noop');
-              expect(JSON.parse(taskRecord2.task.params)).to.eql({
-                alertId: createdAlert.id,
-                spaceId: space.id,
-                consumer: 'alertsFixture',
-              });
-              expect(taskRecord2.task.enabled).to.eql(false);
-              // Ensure AAD isn't broken
-              await checkAAD({
-                supertest,
-                spaceId: space.id,
-                type: 'alert',
-                id: createdAlert.id,
+              await retry.try(async () => {
+                const taskRecord2 = await getScheduledTask(createdAlert.scheduled_task_id);
+                expect(taskRecord2.type).to.eql('task');
+                expect(taskRecord2.task.taskType).to.eql('alerting:test.noop');
+                expect(JSON.parse(taskRecord2.task.params)).to.eql({
+                  alertId: createdAlert.id,
+                  spaceId: space.id,
+                  consumer: 'alertsFixture',
+                });
+                expect(taskRecord2.task.enabled).to.eql(false);
+                // Ensure AAD isn't broken
+                await checkAAD({
+                  supertest,
+                  spaceId: space.id,
+                  type: 'alert',
+                  id: createdAlert.id,
+                });
               });
               break;
             default:
@@ -295,15 +297,17 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               // task should still exist but be disabled
-              const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
-              expect(taskRecord.type).to.eql('task');
-              expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
-              expect(JSON.parse(taskRecord.task.params)).to.eql({
-                alertId: createdAlert.id,
-                spaceId: space.id,
-                consumer: 'alerts',
+              await retry.try(async () => {
+                const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
+                expect(taskRecord.type).to.eql('task');
+                expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+                expect(JSON.parse(taskRecord.task.params)).to.eql({
+                  alertId: createdAlert.id,
+                  spaceId: space.id,
+                  consumer: 'alerts',
+                });
+                expect(taskRecord.task.enabled).to.eql(false);
               });
-              expect(taskRecord.task.enabled).to.eql(false);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -366,15 +370,17 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               // task should still exist but be disabled
-              const taskRecord2 = await getScheduledTask(createdAlert.scheduled_task_id);
-              expect(taskRecord2.type).to.eql('task');
-              expect(taskRecord2.task.taskType).to.eql('alerting:test.noop');
-              expect(JSON.parse(taskRecord2.task.params)).to.eql({
-                alertId: createdAlert.id,
-                spaceId: space.id,
-                consumer: 'alertsFixture',
+              await retry.try(async () => {
+                const taskRecord2 = await getScheduledTask(createdAlert.scheduled_task_id);
+                expect(taskRecord2.type).to.eql('task');
+                expect(taskRecord2.task.taskType).to.eql('alerting:test.noop');
+                expect(JSON.parse(taskRecord2.task.params)).to.eql({
+                  alertId: createdAlert.id,
+                  spaceId: space.id,
+                  consumer: 'alertsFixture',
+                });
+                expect(taskRecord2.task.enabled).to.eql(false);
               });
-              expect(taskRecord2.task.enabled).to.eql(false);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

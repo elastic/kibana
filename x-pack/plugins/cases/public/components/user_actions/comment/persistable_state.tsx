@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CommentResponseTypePersistableState } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs } from '../types';
-import { SnakeToCamelCase } from '../../../../common/types';
+import type { CommentResponseTypePersistableState } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
 
 type BuilderArgs = Pick<

@@ -11,6 +11,7 @@ import { registerRoutes } from './routes';
 
 export type { TimeSeriesQuery, CoreQueryParams } from './lib';
 export {
+  TIME_SERIES_BUCKET_SELECTOR_FIELD,
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
   validateTimeWindowUnits,

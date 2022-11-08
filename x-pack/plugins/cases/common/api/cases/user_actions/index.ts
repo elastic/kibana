@@ -7,12 +7,8 @@
 
 import * as rt from 'io-ts';
 
-import {
-  ActionsRt,
-  UserActionCommonAttributesRt,
-  CaseUserActionSavedObjectIdsRt,
-  ActionTypesRt,
-} from './common';
+import type { ActionsRt, ActionTypesRt } from './common';
+import { UserActionCommonAttributesRt, CaseUserActionSavedObjectIdsRt } from './common';
 import { CreateCaseUserActionRt } from './create_case';
 import { DescriptionUserActionRt } from './description';
 import { CommentUserActionRt } from './comment';

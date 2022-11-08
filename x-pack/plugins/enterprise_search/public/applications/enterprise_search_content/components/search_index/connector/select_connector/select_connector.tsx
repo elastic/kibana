@@ -136,7 +136,13 @@ export const SelectConnector: React.FC = () => {
             ))}
           </EuiFlexGroup>
           <EuiSpacer />
-          <EuiButton fill color="primary" type="submit" disabled={selectedNativeConnector === null}>
+          <EuiButton
+            data-telemetry-id="entSearchContent-connector-selectConnector-selectAndConfigure"
+            fill
+            color="primary"
+            type="submit"
+            disabled={selectedNativeConnector === null}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.selectConnector.selectAndConfigureButtonLabel',
               {

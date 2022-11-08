@@ -105,6 +105,7 @@ const WaffleMapOuterContainer = euiStyled.div<{ bottomMargin: number; staticHeig
   overflow-x: hidden;
   overflow-y: auto;
   margin-bottom: ${(props) => props.bottomMargin}px;
+  max-width: calc(100vw - 90px);
   ${(props) => props.staticHeight && 'min-height: 300px;'}
 `;
 

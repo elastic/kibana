@@ -20,6 +20,12 @@ steps:
     depends_on: build
     key: tests
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
 
   - label: '🚢 Performance Tests dataset extraction for scalability benchmarking'
     command: .buildkite/scripts/steps/functional/scalability_dataset_extraction.sh

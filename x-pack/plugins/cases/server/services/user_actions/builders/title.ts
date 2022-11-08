@@ -7,7 +7,7 @@
 
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { BuilderReturnValue, UserActionParameters } from '../types';
+import type { BuilderReturnValue, UserActionParameters } from '../types';
 
 export class TitleUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'title'>): BuilderReturnValue {

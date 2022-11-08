@@ -95,6 +95,7 @@ const createMockStore = () => {
 
 const mockAppUrls: Record<string, string> = {
   uptime: '/app/uptime',
+  synthetics: '/app/synthetics',
   observability: '/app/observability',
   '/home#/tutorial/uptimeMonitors': '/home#/tutorial/uptimeMonitors',
 };
@@ -225,6 +226,10 @@ export function WrappedHelper<ExtraCore>({
   history = createMemoryHistory(),
 }: RenderRouterOptions<ExtraCore> & { children: ReactElement; useRealStore?: boolean }) {
   const testState: AppState = merge({}, mockState, state);
+
+  if (url) {
+    history = getHistoryFromUrl(url);
+  }
 
   return (
     <MountWithReduxProvider state={testState} useRealStore={useRealStore}>

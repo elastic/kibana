@@ -14,7 +14,7 @@ import type {
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { getActionList } from './action_list';
+import { getActionList, getActionListByStatus } from './action_list';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import {
   applyActionListEsSearchMock,
@@ -648,5 +648,61 @@ describe('When using `getActionList()', () => {
       'Unknown error while fetching action requests'
     );
     await expect(getActionListPromise).rejects.toBeInstanceOf(CustomHttpRequestError);
+  });
+});
+
+describe('When using `getActionListByStatus()', () => {
+  let esClient: ElasticsearchClientMock;
+  let logger: MockedLogger;
+  // let endpointActionGenerator: EndpointActionGenerator;
+  let actionRequests: estypes.SearchResponse<LogsEndpointAction>;
+  let actionResponses: estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>;
+  let endpointAppContextService: EndpointAppContextService;
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+    logger = loggingSystemMock.createLogger();
+    // endpointActionGenerator = new EndpointActionGenerator('seed');
+    endpointAppContextService = new EndpointAppContextService();
+    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
+    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
+
+    actionRequests = createActionRequestsEsSearchResultsMock(undefined);
+    actionResponses = createActionResponsesEsSearchResultsMock();
+
+    applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
+  });
+
+  afterEach(() => {
+    endpointAppContextService.stop();
+  });
+
+  it('should return expected output `data` length for selected statuses', async () => {
+    actionRequests = createActionRequestsEsSearchResultsMock(undefined, true);
+    actionResponses = createActionResponsesEsSearchResultsMock();
+
+    applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
+
+    const getActionListByStatusPromise = ({ page }: { page: number }) =>
+      getActionListByStatus({
+        esClient,
+        logger,
+        metadataService: endpointAppContextService.getEndpointMetadataService(),
+        page: page ?? 1,
+        pageSize: 10,
+        statuses: ['failed', 'pending', 'successful'],
+      });
+
+    expect(await (await getActionListByStatusPromise({ page: 1 })).data.length).toEqual(10);
+
+    expect(await (await getActionListByStatusPromise({ page: 2 })).data.length).toEqual(10);
+
+    expect(await (await getActionListByStatusPromise({ page: 3 })).data.length).toEqual(3);
   });
 });

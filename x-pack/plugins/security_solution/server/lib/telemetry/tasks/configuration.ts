@@ -18,7 +18,7 @@ export function createTelemetryConfigurationTaskConfig() {
   return {
     type: 'security:telemetry-configuration',
     title: 'Security Solution Telemetry Configuration Task',
-    interval: '45m',
+    interval: '1h',
     timeout: '1m',
     version: '1.0.0',
     runTask: async (
@@ -29,7 +29,7 @@ export function createTelemetryConfigurationTaskConfig() {
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       try {
-        const artifactName = 'telemetry-configuration-v1';
+        const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
         const configArtifact = (await artifactService.getArtifact(
           artifactName
         )) as unknown as TelemetryConfiguration;

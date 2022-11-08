@@ -6,22 +6,19 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-
-import { DocumentTitle } from '../../../components/document_title';
-
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { MetricsPageTemplate } from '../page_template';
 import { hostsTitle } from '../../../translations';
-import { HostsContent } from './hosts_content';
 import { MetricsDataViewProvider } from './hooks/use_data_view';
 import { fullHeightContentStyles } from '../../../page_template.styles';
+import { UnifiedSearchProvider } from './hooks/use_unified_search';
+import { HostContainer } from './components/hosts_container';
 
 export const HostsPage = () => {
   const {
@@ -42,16 +39,6 @@ export const HostsPage = () => {
   ]);
   return (
     <EuiErrorBoundary>
-      <DocumentTitle
-        title={(previousTitle: string) =>
-          i18n.translate('xpack.infra.infrastructureHostsPage.documentTitle', {
-            defaultMessage: '{previousTitle} | Hosts',
-            values: {
-              previousTitle,
-            },
-          })
-        }
-      />
       {isLoading && !source ? (
         <SourceLoadingPage />
       ) : metricIndicesExist && source ? (
@@ -69,7 +56,9 @@ export const HostsPage = () => {
               }}
             >
               <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
-                <HostsContent />
+                <UnifiedSearchProvider>
+                  <HostContainer />
+                </UnifiedSearchProvider>
               </MetricsDataViewProvider>
             </MetricsPageTemplate>
           </div>

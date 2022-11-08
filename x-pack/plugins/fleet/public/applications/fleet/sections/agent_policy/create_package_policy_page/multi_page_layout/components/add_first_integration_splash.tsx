@@ -230,7 +230,7 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
   error?: RequestError | null;
   packageInfo?: PackageInfo;
   isLoading: boolean;
-  cancelClickHandler: React.ReactEventHandler;
+  cancelClickHandler?: React.ReactEventHandler;
   cancelUrl: string;
   onNext: () => void;
 }> = ({
@@ -276,6 +276,12 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
         </NotObscuredByBottomBar>
         <CreatePackagePolicyBottomBar
           cancelUrl={cancelUrl}
+          cancelMessage={
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicyBottomBar.skipAddAgentButton"
+              defaultMessage="Add integration only (skip agent installation)"
+            />
+          }
           cancelClickHandler={cancelClickHandler}
           isLoading={isLoading}
           onNext={onNext}

@@ -37,6 +37,7 @@ export interface Field {
   include_in_root?: boolean;
   null_value?: string;
   dimension?: boolean;
+  default_field?: boolean;
 
   // Meta fields
   metric_type?: string;

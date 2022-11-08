@@ -6,14 +6,10 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { FilterBar } from './components/filter_bar';
-
-import { DocumentTitle } from '../../../components/document_title';
-
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
@@ -49,16 +45,6 @@ export const SnapshotPage = () => {
 
   return (
     <EuiErrorBoundary>
-      <DocumentTitle
-        title={(previousTitle: string) =>
-          i18n.translate('xpack.infra.infrastructureSnapshotPage.documentTitle', {
-            defaultMessage: '{previousTitle} | Inventory',
-            values: {
-              previousTitle,
-            },
-          })
-        }
-      />
       {isLoading && !source ? (
         <SourceLoadingPage />
       ) : metricIndicesExist ? (

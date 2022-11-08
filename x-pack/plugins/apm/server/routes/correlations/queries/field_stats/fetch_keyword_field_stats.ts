@@ -11,11 +11,11 @@ import {
   FieldValuePair,
 } from '../../../../../common/correlations/types';
 import { KeywordFieldStats } from '../../../../../common/correlations/field_stats_types';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from '../get_common_correlations_query';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchKeywordFieldStats = async ({
-  setup,
+  apmEventClient,
   eventType,
   start,
   end,
@@ -24,12 +24,10 @@ export const fetchKeywordFieldStats = async ({
   query,
   field,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   eventType: ProcessorEvent;
   field: FieldValuePair;
 }): Promise<KeywordFieldStats> => {
-  const { apmEventClient } = setup;
-
   const body = await apmEventClient.search('get_keyword_field_stats', {
     apm: {
       events: [eventType],

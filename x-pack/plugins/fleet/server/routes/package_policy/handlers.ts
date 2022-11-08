@@ -204,6 +204,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         pkgName: pkg.name,
         pkgVersion: pkg.version,
         ignoreUnverified: force,
+        prerelease: true,
       });
       newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
         experimental_data_stream_features: pkg.experimental_data_stream_features,

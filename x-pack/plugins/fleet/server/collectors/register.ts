@@ -19,12 +19,33 @@ import type { PackageUsage } from './package_collectors';
 import { getFleetServerUsage } from './fleet_server_collector';
 import type { FleetServerUsage } from './fleet_server_collector';
 
-interface Usage {
+export interface Usage {
   agents_enabled: boolean;
   agents: AgentUsage;
   packages: PackageUsage[];
   fleet_server: FleetServerUsage;
 }
+
+export const fetchUsage = async (core: CoreSetup, config: FleetConfigType) => {
+  const [soClient, esClient] = await getInternalClients(core);
+  const usage = {
+    agents_enabled: getIsAgentsEnabled(config),
+    agents: await getAgentUsage(config, soClient, esClient),
+    fleet_server: await getFleetServerUsage(soClient, esClient),
+    packages: await getPackageUsage(soClient),
+  };
+  return usage;
+};
+
+export const fetchAgentsUsage = async (core: CoreSetup, config: FleetConfigType) => {
+  const [soClient, esClient] = await getInternalClients(core);
+  const usage = {
+    agents_enabled: getIsAgentsEnabled(config),
+    agents: await getAgentUsage(config, soClient, esClient),
+    fleet_server: await getFleetServerUsage(soClient, esClient),
+  };
+  return usage;
+};
 
 export function registerFleetUsageCollector(
   core: CoreSetup,
@@ -41,15 +62,7 @@ export function registerFleetUsageCollector(
   const fleetCollector = usageCollection.makeUsageCollector<Usage>({
     type: 'fleet',
     isReady: () => true,
-    fetch: async () => {
-      const [soClient, esClient] = await getInternalClients(core);
-      return {
-        agents_enabled: getIsAgentsEnabled(config),
-        agents: await getAgentUsage(config, soClient, esClient),
-        fleet_server: await getFleetServerUsage(soClient, esClient),
-        packages: await getPackageUsage(soClient),
-      };
-    },
+    fetch: async () => fetchUsage(core, config),
     schema: {
       agents_enabled: { type: 'boolean' },
       agents: {

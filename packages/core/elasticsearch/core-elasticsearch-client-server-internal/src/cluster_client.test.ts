@@ -18,6 +18,7 @@ import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { ClusterClient } from './cluster_client';
 import { DEFAULT_HEADERS, getDefaultHeaders } from './headers';
 import { AgentManager } from './agent_manager';
+import { duration } from 'moment';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -27,6 +28,8 @@ const createConfig = (
     sniffOnConnectionFault: false,
     sniffInterval: false,
     maxSockets: Infinity,
+    maxIdleSockets: 200,
+    idleSocketTimeout: duration('30s'),
     compression: false,
     requestHeadersWhitelist: ['authorization'],
     customHeaders: {},
@@ -46,7 +49,7 @@ describe('ClusterClient', () => {
   let authHeaders: ReturnType<typeof httpServiceMock.createAuthHeaderStorage>;
   let internalClient: jest.Mocked<Client>;
   let scopedClient: jest.Mocked<Client>;
-  let agentManager: AgentManager;
+  let agentFactoryProvider: AgentManager;
 
   const mockTransport = { mockTransport: true };
 
@@ -54,7 +57,7 @@ describe('ClusterClient', () => {
     logger = loggingSystemMock.createLogger();
     internalClient = createClient();
     scopedClient = createClient();
-    agentManager = new AgentManager();
+    agentFactoryProvider = new AgentManager();
 
     authHeaders = httpServiceMock.createAuthHeaderStorage();
     authHeaders.get.mockImplementation(() => ({
@@ -84,21 +87,21 @@ describe('ClusterClient', () => {
       authHeaders,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
-      agentManager,
+      agentFactoryProvider,
       kibanaVersion,
     });
 
     expect(configureClientMock).toHaveBeenCalledTimes(2);
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
-      agentManager,
+      agentFactoryProvider,
       kibanaVersion,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
     });
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
-      agentManager,
+      agentFactoryProvider,
       kibanaVersion,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
@@ -113,7 +116,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
 
@@ -128,7 +131,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest();
@@ -155,7 +158,7 @@ describe('ClusterClient', () => {
         authHeaders,
         getExecutionContext,
         getUnauthorizedErrorHandler,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest();
@@ -179,7 +182,7 @@ describe('ClusterClient', () => {
         authHeaders,
         getExecutionContext,
         getUnauthorizedErrorHandler,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest();
@@ -212,7 +215,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest();
@@ -237,7 +240,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
@@ -271,7 +274,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({});
@@ -305,7 +308,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
@@ -344,7 +347,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({});
@@ -373,7 +376,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
@@ -410,7 +413,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({});
@@ -445,7 +448,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
@@ -482,7 +485,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest();
@@ -513,7 +516,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
@@ -547,7 +550,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
@@ -579,7 +582,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = {
@@ -612,7 +615,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
       const request = {
@@ -640,7 +643,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
 
@@ -658,7 +661,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
 
@@ -703,7 +706,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
 
@@ -720,7 +723,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
         kibanaVersion,
       });
 

@@ -4,16 +4,16 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "__jest__/**/*",
+    "integration_tests/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
     "../../../typings/**/*",
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     // required plugins
     { "path": "../licensing/tsconfig.json" },

@@ -27,21 +27,27 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
       height: auto;
       animation: euiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
       box-shadow: none;
-      "@media only screen and (max-width: 574px)": {
-        right: 25px;
-        width: 100%;
-      },
+      @media (max-width: ${euiTheme.breakpoint.s}px) {
+        right: 25px !important;
+      }
     `,
     flyoutBody: css`
       .euiFlyoutBody__overflowContent {
         width: 480px;
         padding-top: 10px;
+        @media (max-width: ${euiTheme.breakpoint.s}px) {
+          width: 100%;
+        }
       }
     `,
     flyoutFooter: css`
       border-radius: 0 0 6px 6px;
-      background: ${euiTheme.colors.ghost};
+      background: transparent;
       padding: 24px 30px;
+    `,
+    flyoutFooterLink: css`
+      color: ${euiTheme.colors.darkShade};
+      font-weight: 400;
     `,
   },
 });

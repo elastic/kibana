@@ -7,6 +7,7 @@
 
 export interface InferencePipelineConfiguration {
   destinationField: string;
+  existingPipeline?: boolean;
   modelID: string;
   pipelineName: string;
   sourceField: string;
@@ -14,5 +15,7 @@ export interface InferencePipelineConfiguration {
 
 export interface AddInferencePipelineFormErrors {
   destinationField?: string;
+  modelID?: string;
   pipelineName?: string;
+  sourceField?: string;
 }

@@ -9,18 +9,19 @@ import { isEmpty, uniqBy } from 'lodash/fp';
 import deepEqual from 'fast-deep-equal';
 
 import { useQuery } from '@tanstack/react-query';
-import { CaseUserActions, CaseExternalService } from '../../common/ui/types';
-import { ActionTypes, CaseConnector, NONE_CONNECTOR_ID } from '../../common/api';
+import type { CaseUserActions, CaseExternalService } from '../../common/ui/types';
+import type { CaseConnector } from '../../common/api';
+import { ActionTypes, NONE_CONNECTOR_ID } from '../../common/api';
 import { getCaseUserActions } from './api';
 import {
   isPushedUserAction,
   isConnectorUserAction,
   isCreateCaseUserAction,
 } from '../../common/utils/user_actions';
-import { ServerError } from '../types';
+import type { ServerError } from '../types';
 import { useToasts } from '../common/lib/kibana';
 import { ERROR_TITLE } from './translations';
-import { CASE_VIEW_ACTIONS_CACHE_KEY, CASE_VIEW_CACHE_KEY } from './constants';
+import { casesQueriesKeys } from './constants';
 
 export interface CaseService extends CaseExternalService {
   firstPushIndex: number;
@@ -238,7 +239,7 @@ export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) =
   const toasts = useToasts();
   const abortCtrlRef = new AbortController();
   return useQuery(
-    [CASE_VIEW_CACHE_KEY, CASE_VIEW_ACTIONS_CACHE_KEY, caseId, caseConnectorId],
+    casesQueriesKeys.userActions(caseId, caseConnectorId),
     async () => {
       const response = await getCaseUserActions(caseId, abortCtrlRef.signal);
       const participants = !isEmpty(response)

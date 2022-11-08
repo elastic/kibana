@@ -7,7 +7,7 @@
 
 import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { esTestConfig } from '@kbn/test';
-import { APM_TEST_PASSWORD } from './authentication';
+import { APM_TEST_PASSWORD } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function bootstrapApmSynthtrace(

@@ -52,6 +52,7 @@ const mockLayer = {
 } as unknown as ILayer;
 
 const defaultProps = {
+  depth: 0,
   layer: mockLayer,
   selectedLayer: undefined,
   openLayerPanel: async () => {},
@@ -84,6 +85,17 @@ describe('TOCEntry', () => {
   describe('props', () => {
     test('isReadOnly', async () => {
       const component = shallow(<TOCEntry {...defaultProps} isReadOnly={true} />);
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('Should indent child layer', async () => {
+      const component = shallow(<TOCEntry {...defaultProps} depth={2} />);
 
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));

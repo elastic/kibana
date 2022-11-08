@@ -48,6 +48,8 @@ export enum RuleExecutionStatusWarningReasons {
   MAX_ALERTS = 'maxAlerts',
 }
 
+export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
+
 export interface RuleExecutionStatus {
   status: RuleExecutionStatuses;
   lastExecutionDate: Date;
@@ -122,6 +124,7 @@ export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = Sanit
 
 export type SanitizedRuleConfig = Pick<
   SanitizedRule,
+  | 'id'
   | 'name'
   | 'tags'
   | 'consumer'

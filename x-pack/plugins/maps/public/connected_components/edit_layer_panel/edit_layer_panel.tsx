@@ -35,6 +35,7 @@ import { ILayer } from '../../classes/layers/layer';
 import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
 import { ImmutableSourceProperty, OnSourceChangeArgs } from '../../classes/sources/source';
 import { IField } from '../../classes/fields/field';
+import { isLayerGroup } from '../../classes/layers/layer_group';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -95,7 +96,7 @@ export class EditLayerPanel extends Component<Props, State> {
   };
 
   _loadImmutableSourceProperties = async () => {
-    if (!this.props.selectedLayer) {
+    if (!this.props.selectedLayer || isLayerGroup(this.props.selectedLayer)) {
       return;
     }
 
@@ -160,7 +161,11 @@ export class EditLayerPanel extends Component<Props, State> {
   }
 
   _renderFilterSection() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.supportsElasticsearchFilters()) {
+    if (
+      !this.props.selectedLayer ||
+      isLayerGroup(this.props.selectedLayer) ||
+      !this.props.selectedLayer.supportsElasticsearchFilters()
+    ) {
       return null;
     }
 
@@ -197,25 +202,63 @@ export class EditLayerPanel extends Component<Props, State> {
     );
   }
 
-  _renderSourceProperties() {
-    return this.state.immutableSourceProps.map(
-      ({ label, value, link }: ImmutableSourceProperty) => {
-        function renderValue() {
-          if (link) {
-            return (
-              <EuiLink href={link} target="_blank">
-                {value}
-              </EuiLink>
-            );
-          }
-          return <span>{value}</span>;
-        }
-        return (
-          <p key={label} className="mapLayerPanel__sourceDetail">
-            <strong>{label}</strong> {renderValue()}
-          </p>
-        );
-      }
+  _renderSourceDetails() {
+    return !this.props.selectedLayer || isLayerGroup(this.props.selectedLayer) ? null : (
+      <div className="mapLayerPanel__sourceDetails">
+        <EuiAccordion
+          id="accordion1"
+          buttonContent={i18n.translate('xpack.maps.layerPanel.sourceDetailsLabel', {
+            defaultMessage: 'Source details',
+          })}
+        >
+          <EuiText color="subdued" size="s">
+            <EuiSpacer size="xs" />
+            {this.state.immutableSourceProps.map(
+              ({ label, value, link }: ImmutableSourceProperty) => {
+                function renderValue() {
+                  if (link) {
+                    return (
+                      <EuiLink href={link} target="_blank">
+                        {value}
+                      </EuiLink>
+                    );
+                  }
+                  return <span>{value}</span>;
+                }
+                return (
+                  <p key={label} className="mapLayerPanel__sourceDetail">
+                    <strong>{label}</strong> {renderValue()}
+                  </p>
+                );
+              }
+            )}
+          </EuiText>
+        </EuiAccordion>
+      </div>
+    );
+  }
+
+  _renderSourceEditor() {
+    if (!this.props.selectedLayer) {
+      return null;
+    }
+
+    const descriptor = this.props.selectedLayer.getDescriptor() as VectorLayerDescriptor;
+    const numberOfJoins = descriptor.joins ? descriptor.joins.length : 0;
+    return isLayerGroup(this.props.selectedLayer)
+      ? null
+      : this.props.selectedLayer.renderSourceSettingsEditor({
+          currentLayerType: this.props.selectedLayer.getType(),
+          numberOfJoins,
+          onChange: this._onSourceChange,
+          onStyleDescriptorChange: this.props.updateStyleDescriptor,
+          style: this.props.selectedLayer.getStyleForEditing(),
+        });
+  }
+
+  _renderStyleEditor() {
+    return !this.props.selectedLayer || isLayerGroup(this.props.selectedLayer) ? null : (
+      <StyleSettings />
     );
   }
 
@@ -223,9 +266,6 @@ export class EditLayerPanel extends Component<Props, State> {
     if (!this.props.selectedLayer) {
       return null;
     }
-
-    const descriptor = this.props.selectedLayer.getDescriptor() as VectorLayerDescriptor;
-    const numberOfJoins = descriptor.joins ? descriptor.joins.length : 0;
 
     return (
       <KibanaContextProvider
@@ -249,19 +289,7 @@ export class EditLayerPanel extends Component<Props, State> {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="xs" />
-            <div className="mapLayerPanel__sourceDetails">
-              <EuiAccordion
-                id="accordion1"
-                buttonContent={i18n.translate('xpack.maps.layerPanel.sourceDetailsLabel', {
-                  defaultMessage: 'Source details',
-                })}
-              >
-                <EuiText color="subdued" size="s">
-                  <EuiSpacer size="xs" />
-                  {this._renderSourceProperties()}
-                </EuiText>
-              </EuiAccordion>
-            </div>
+            {this._renderSourceDetails()}
           </EuiFlyoutHeader>
 
           <div className="mapLayerPanel__body">
@@ -273,19 +301,13 @@ export class EditLayerPanel extends Component<Props, State> {
                 supportsFitToBounds={this.state.supportsFitToBounds}
               />
 
-              {this.props.selectedLayer.renderSourceSettingsEditor({
-                currentLayerType: this.props.selectedLayer.getType(),
-                numberOfJoins,
-                onChange: this._onSourceChange,
-                onStyleDescriptorChange: this.props.updateStyleDescriptor,
-                style: this.props.selectedLayer.getStyleForEditing(),
-              })}
+              {this._renderSourceEditor()}
 
               {this._renderFilterSection()}
 
               {this._renderJoinSection()}
 
-              <StyleSettings />
+              {this._renderStyleEditor()}
             </div>
           </div>
 

@@ -10,10 +10,11 @@ import { waitFor, render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { TimelineId } from '@kbn/timelines-plugin/common';
 import type { SessionsComponentsProps } from './types';
 import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
+import { TableId } from '../../../../common/types';
+import { licenseService } from '../../hooks/use_license';
 
 jest.mock('../../lib/kibana');
 
@@ -33,7 +34,7 @@ const filterQuery =
   '{"bool":{"must":[],"filter":[{"match_phrase":{"host.name":{"query":"ubuntu-impish"}}}],"should":[],"must_not":[]}}';
 
 const testProps: SessionsComponentsProps = {
-  timelineId: TimelineId.hostsPageSessions,
+  tableId: TableId.hostsPageSessions,
   entityType: 'sessions',
   pageFilters: [],
   startDate,
@@ -47,9 +48,27 @@ type Props = Partial<TimelineModel> & {
   entityType: EntityType;
 };
 
+const mockGetDefaultControlColumn = jest.fn();
+jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({
+  getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
+}));
+
 const TEST_PREFIX = 'security_solution:sessions_viewer:sessions_view';
 
 const callFilters = jest.fn();
+
+jest.mock('../../hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+    isEnterprise: jest.fn(() => false),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 // creating a dummy component for testing TGrid to avoid mocking all the implementation details
 // but still test if the TGrid will render properly
@@ -142,6 +161,44 @@ describe('SessionsView', () => {
           },
         },
       ]);
+    });
+  });
+  it('Action tab should have 4 columns for non Enterprise users', async () => {
+    render(
+      <TestProviders>
+        <SessionsView {...testProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
+    });
+  });
+
+  it('Action tab should have 5 columns for Enterprise or above users', async () => {
+    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+    licenseServiceMock.isEnterprise.mockReturnValue(true);
+    render(
+      <TestProviders>
+        <SessionsView {...testProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
+    });
+  });
+
+  it('Action tab should have 5 columns when accessed via K8S dahsboard', async () => {
+    render(
+      <TestProviders>
+        <SessionsView {...testProps} tableId={TableId.kubernetesPageSessions} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
     });
   });
 });

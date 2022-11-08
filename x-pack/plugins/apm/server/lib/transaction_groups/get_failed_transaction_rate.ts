@@ -24,13 +24,13 @@ import {
   getProcessorEventForTransactions,
 } from '../helpers/transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup } from '../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
   getFailedTransactionRateTimeSeries,
 } from '../helpers/transaction_error_rate';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
 
 export async function getFailedTransactionRate({
   environment,
@@ -38,7 +38,7 @@ export async function getFailedTransactionRate({
   serviceName,
   transactionTypes,
   transactionName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
@@ -50,7 +50,7 @@ export async function getFailedTransactionRate({
   serviceName: string;
   transactionTypes: string[];
   transactionName?: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
@@ -60,8 +60,6 @@ export async function getFailedTransactionRate({
   timeseries: Coordinate[];
   average: number | null;
 }> {
-  const { apmEventClient } = setup;
-
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,

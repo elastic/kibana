@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
@@ -62,9 +62,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     formState: { isSubmitting },
     resetField,
   } = hooksForm;
-  const onSubmit = (payload: PackQueryFormData) => {
+  const onSubmit = async (payload: PackQueryFormData) => {
     const serializedData: PackSOQueryFormData = serializer(payload);
-    onSave(serializedData);
+    await onSave(serializedData);
     onClose();
   };
 
@@ -79,22 +79,20 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         resetField('version', { defaultValue: savedQuery.version ? [savedQuery.version] : [] });
         resetField('interval', { defaultValue: savedQuery.interval ? savedQuery.interval : 3600 });
         resetField('snapshot', { defaultValue: savedQuery.snapshot ?? true });
-        resetField('removed');
+        resetField('removed', { defaultValue: savedQuery.removed });
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
       }
     },
     [resetField]
   );
-  /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
-  const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
 
   return (
     <EuiFlyout
       size="m"
       onClose={onClose}
       aria-labelledby="flyoutTitle"
+      ownFocus={true}
       outsideClickCloses={false}
-      maskProps={maskProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">

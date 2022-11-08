@@ -10,6 +10,7 @@ import React from 'react';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { TestProviders } from '../../../mock';
 import { ShowTopNButton } from './show_top_n';
+import { TimelineId } from '../../../../../common/types';
 
 jest.mock('../../visualization_actions', () => ({
   VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
@@ -39,7 +40,7 @@ describe('show topN button', () => {
     onClick: jest.fn(),
     ownFocus: false,
     showTopN: false,
-    timelineId: 'timeline-1',
+    scopeId: TimelineId.active,
     value: ['rule_name'],
   };
 
@@ -178,9 +179,7 @@ describe('show topN button', () => {
       expect(wrapper.find('[data-test-subj="top-n"]').prop('toggleTopN')).toEqual(
         testProps.onClick
       );
-      expect(wrapper.find('[data-test-subj="top-n"]').prop('timelineId')).toEqual(
-        testProps.timelineId
-      );
+      expect(wrapper.find('[data-test-subj="top-n"]').prop('scopeId')).toEqual(testProps.scopeId);
       expect(wrapper.find('[data-test-subj="top-n"]').prop('onFilterAdded')).toEqual(
         testProps.onFilterAdded
       );

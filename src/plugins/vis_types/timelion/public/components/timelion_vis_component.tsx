@@ -59,6 +59,7 @@ interface TimelionVisComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
   ariaLabel?: string;
   syncTooltips?: boolean;
+  syncCursor?: boolean;
 }
 
 const DefaultYAxis = () => (
@@ -104,6 +105,7 @@ export const TimelionVisComponent = ({
   onBrushEvent,
   ariaLabel,
   syncTooltips,
+  syncCursor,
 }: TimelionVisComponentProps) => {
   const kibana = useKibana<TimelionVisDependencies>();
   const chartRef = useRef<Chart>(null);
@@ -203,7 +205,7 @@ export const TimelionVisComponent = ({
           showLegendExtra={true}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
-          onPointerUpdate={handleCursorUpdate}
+          onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
           externalPointerEvents={{
             tooltip: { visible: syncTooltips, placement: Placement.Right },
           }}

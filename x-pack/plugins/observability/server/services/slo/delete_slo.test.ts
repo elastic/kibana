@@ -29,12 +29,18 @@ describe('DeleteSLO', () => {
 
   describe('happy path', () => {
     it('removes the transform, the roll up data and the SLO from the repository', async () => {
-      const slo = createSLO(createAPMTransactionErrorRateIndicator());
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
+      mockRepository.findById.mockResolvedValueOnce(slo);
 
       await deleteSLO.execute(slo.id);
 
-      expect(mockTransformManager.stop).toHaveBeenCalledWith(getSLOTransformId(slo.id));
-      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(getSLOTransformId(slo.id));
+      expect(mockRepository.findById).toHaveBeenCalledWith(slo.id);
+      expect(mockTransformManager.stop).toHaveBeenCalledWith(
+        getSLOTransformId(slo.id, slo.revision)
+      );
+      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(
+        getSLOTransformId(slo.id, slo.revision)
+      );
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: `${SLO_INDEX_TEMPLATE_NAME}*`,

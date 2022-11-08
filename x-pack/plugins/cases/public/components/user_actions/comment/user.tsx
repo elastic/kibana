@@ -8,15 +8,15 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import { CommentResponseUserType } from '../../../../common/api';
+import type { CommentResponseUserType } from '../../../../common/api';
 import { UserActionTimestamp } from '../timestamp';
-import { SnakeToCamelCase } from '../../../../common/types';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionMarkdown } from '../markdown_form';
 import { UserActionContentToolbar } from '../content_toolbar';
-import * as i18n from '../translations';
-import { UserActionBuilderArgs, UserActionBuilder } from '../types';
+import type { UserActionBuilderArgs, UserActionBuilder } from '../types';
 import { HoverableUsernameResolver } from '../../user_profiles/hoverable_username_resolver';
 import { HoverableAvatarResolver } from '../../user_profiles/hoverable_avatar_resolver';
+import { UserCommentPropertyActions } from '../property_actions/user_comment_property_actions';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -76,18 +76,15 @@ export const createUserAttachmentUserActionBuilder = ({
         <HoverableAvatarResolver user={comment.createdBy} userProfiles={userProfiles} />
       ),
       actions: (
-        <UserActionContentToolbar
-          id={comment.id}
-          commentMarkdown={comment.comment}
-          editLabel={i18n.EDIT_COMMENT}
-          deleteLabel={i18n.DELETE_COMMENT}
-          deleteConfirmTitle={i18n.DELETE_COMMENT_TITLE}
-          quoteLabel={i18n.QUOTE}
-          isLoading={isLoading}
-          onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
-          onQuote={handleManageQuote.bind(null, comment.comment)}
-          onDelete={handleDeleteComment.bind(null, comment.id)}
-        />
+        <UserActionContentToolbar id={comment.id}>
+          <UserCommentPropertyActions
+            isLoading={isLoading}
+            commentContent={comment.comment}
+            onEdit={() => handleManageMarkdownEditId(comment.id)}
+            onDelete={() => handleDeleteComment(comment.id)}
+            onQuote={() => handleManageQuote(comment.id)}
+          />
+        </UserActionContentToolbar>
       ),
     },
   ],

@@ -66,7 +66,7 @@
                 "id": "def-server.KibanaMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n  }",
+                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -193,9 +193,21 @@
             "description": [],
             "signature": [
               "(doc: ",
-              "SavedObjectUnsanitizedDoc",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
               "<unknown>) => ",
-              "SavedObjectUnsanitizedDoc",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
               "<unknown>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
@@ -210,7 +222,13 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  "SavedObjectUnsanitizedDoc",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectUnsanitizedDoc",
+                    "text": "SavedObjectUnsanitizedDoc"
+                  },
                   "<unknown>"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
@@ -297,7 +315,13 @@
         ],
         "signature": [
           "(typeDefinitions: ",
-          "SavedObjectsMappingProperties",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsMappingProperties",
+            "text": "SavedObjectsMappingProperties"
+          },
           " | ",
           "SavedObjectsTypeMappingDefinitions",
           ") => ",
@@ -317,7 +341,13 @@
               "- the type definitions to build mapping from."
             ],
             "signature": [
-              "SavedObjectsMappingProperties",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsMappingProperties",
+                "text": "SavedObjectsMappingProperties"
+              },
               " | ",
               "SavedObjectsTypeMappingDefinitions"
             ],
@@ -833,7 +863,13 @@
         ],
         "signature": [
           "(types: ",
-          "SavedObjectsType",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
           "<any>[]) => ",
           "SavedObjectsTypeMappingDefinitions"
         ],
@@ -849,7 +885,13 @@
             "label": "types",
             "description": [],
             "signature": [
-              "SavedObjectsType",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
               "<any>[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
@@ -913,7 +955,13 @@
         ],
         "signature": [
           "(client: ",
-          "ElasticsearchClient",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
           ", index: string) => ",
           "TaskEither",
           "<",
@@ -940,7 +988,13 @@
             "label": "client",
             "description": [],
             "signature": [
-              "ElasticsearchClient"
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
             "deprecated": false,
@@ -1143,7 +1197,13 @@
         ],
         "signature": [
           "(client: ",
-          "ElasticsearchClient",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
           ", options: ",
           "SearchForOutdatedDocumentsOptions",
           ") => ",
@@ -1166,7 +1226,13 @@
             "label": "client",
             "description": [],
             "signature": [
-              "ElasticsearchClient"
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/search_for_outdated_documents.ts",
             "deprecated": false,
@@ -1699,7 +1765,13 @@
             "label": "processedDocs",
             "description": [],
             "signature": [
-              "SavedObjectsRawDoc",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsRawDoc",
+                "text": "SavedObjectsRawDoc"
+              },
               "[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
@@ -1728,7 +1800,13 @@
             "label": "processedDocs",
             "description": [],
             "signature": [
-              "SavedObjectsRawDoc",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsRawDoc",
+                "text": "SavedObjectsRawDoc"
+              },
               "[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
@@ -1927,17 +2005,15 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
-              "default",
-              "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -2959,7 +3035,13 @@
             "label": "typeRegistry",
             "description": [],
             "signature": [
-              "ISavedObjectTypeRegistry"
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
@@ -2974,7 +3056,13 @@
             "description": [],
             "signature": [
               "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly pollInterval: number; readonly skip: boolean; readonly batchSize: number; readonly maxBatchSizeBytes: ",
-              "ByteSizeValue",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
               "; readonly scrollDuration: string; readonly retryAttempts: number; }"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
@@ -3011,7 +3099,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
@@ -3025,8 +3119,25 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              "DocLinksServiceSetup"
+              {
+                "pluginId": "@kbn/core-doc-links-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDocLinksServerPluginApi",
+                "section": "def-server.DocLinksServiceSetup",
+                "text": "DocLinksServiceSetup"
+              }
             ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.KibanaMigratorOptions.waitForMigrationCompletion",
+            "type": "boolean",
+            "tags": [],
+            "label": "waitForMigrationCompletion",
+            "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -20,19 +20,6 @@ export const INGEST_PIPELINE_DELETION_ERROR_MESSAGE = (totalCount: number) =>
     defaultMessage: `Failed to delete Ingest {totalCount, plural, =1 {pipeline} other {pipelines}}`,
   });
 
-export const INDICES_CREATION_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskScore.api.indices.create.errorMessageTitle',
-  {
-    defaultMessage: 'Failed to create index',
-  }
-);
-
-export const INDICES_DELETION_ERROR_MESSAGE = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.riskScore.api.indices.delete.errorMessageTitle', {
-    values: { totalCount },
-    defaultMessage: `Failed to delete {totalCount, plural, =1 {index} other {indices}}`,
-  });
-
 export const STORED_SCRIPT_CREATION_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskScore.api.storedScript.create.errorMessageTitle',
   {
@@ -119,3 +106,23 @@ export const DELETE_SAVED_OBJECTS_FAILURE = i18n.translate(
     defaultMessage: `Failed to delete saved objects`,
   }
 );
+
+export const HOST_RISK_SCORES_ENABLED_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.hostRiskScoresEnabledTitle',
+  {
+    defaultMessage: `Host Risk Scores enabled`,
+  }
+);
+
+export const USER_RISK_SCORES_ENABLED_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.userRiskScoresEnabledTitle',
+  {
+    defaultMessage: `User Risk Scores enabled`,
+  }
+);
+
+export const RISK_SCORES_ENABLED_TEXT = (items: string) =>
+  i18n.translate('xpack.securitySolution.riskScore.savedObjects.enableRiskScoreSuccessTitle', {
+    values: { items },
+    defaultMessage: `{items} imported successfully`,
+  });

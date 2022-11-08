@@ -14,8 +14,8 @@ import type {
   LensSavedObjectAttributes,
   FieldBasedIndexPatternColumn,
   XYDataLayerConfig,
-  IndexPatternPersistedState,
-  IndexPatternLayer,
+  FormBasedPersistedState,
+  FormBasedLayer,
   XYLayerConfig,
 } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
@@ -68,7 +68,7 @@ export class VisualizationExtractor {
       );
     }
 
-    const indexpattern = vis.state.datasourceStates.indexpattern as IndexPatternPersistedState;
+    const indexpattern = vis.state.datasourceStates.formBased as FormBasedPersistedState;
     const compatibleIndexPatternLayer = Object.entries(indexpattern.layers).find(
       ([id]) => layer.layerId === id
     );
@@ -192,10 +192,7 @@ export class VisualizationExtractor {
   }
 }
 
-function getColumns(
-  { columns }: Omit<IndexPatternLayer, 'indexPatternId'>,
-  layer: XYDataLayerConfig
-) {
+function getColumns({ columns }: Omit<FormBasedLayer, 'indexPatternId'>, layer: XYDataLayerConfig) {
   layer.accessors.forEach((a) => {
     const col = columns[a];
     // fail early if any of the cols being used as accessors

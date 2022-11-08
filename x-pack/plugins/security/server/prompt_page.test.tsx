@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 
 import { PromptPage } from './prompt_page';
 
-jest.mock('@kbn/core/server/rendering/views/fonts', () => ({
+jest.mock('@kbn/core-rendering-server-internal', () => ({
   Fonts: () => <>MockedFonts</>,
 }));
 

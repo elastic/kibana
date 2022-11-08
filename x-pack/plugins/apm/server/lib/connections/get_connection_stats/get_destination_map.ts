@@ -24,10 +24,10 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Node, NodeType } from '../../../../common/connections';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
+import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 
 type Destination = {
   dependencyName: string;
@@ -48,21 +48,19 @@ type Destination = {
 // - for each span, find the transaction it creates
 // - if there is a transaction, match the dependency name (span.destination.service.resource) to a service
 export const getDestinationMap = ({
-  setup,
+  apmEventClient,
   start,
   end,
   filter,
   offset,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   filter: QueryDslQueryContainer[];
   offset?: string;
 }) => {
   return withApmSpan('get_destination_map', async () => {
-    const { apmEventClient } = setup;
-
     const { startWithOffset, endWithOffset } = getOffsetInMs({
       start,
       end,

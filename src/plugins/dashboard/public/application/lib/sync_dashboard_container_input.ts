@@ -10,12 +10,11 @@ import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 
-import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
-import type { Query } from '@kbn/es-query';
 
 import type { DashboardContainer } from '../embeddable';
-import { DashboardConstants, type DashboardSavedObject } from '../..';
+import { DashboardConstants } from '../..';
 import {
   setControlGroupState,
   setExpandedPanelId,
@@ -36,16 +35,13 @@ import { pluginServices } from '../../services/plugin_services';
 
 type SyncDashboardContainerCommon = DashboardBuildContext & {
   dashboardContainer: DashboardContainer;
-  savedDashboard: DashboardSavedObject;
 };
 
 type ApplyStateChangesToContainerProps = SyncDashboardContainerCommon & {
   force: boolean;
 };
 
-type ApplyContainerChangesToStateProps = SyncDashboardContainerCommon & {
-  applyFilters: (query: Query, filters: Filter[]) => void;
-};
+type ApplyContainerChangesToStateProps = SyncDashboardContainerCommon;
 
 type SyncDashboardContainerProps = SyncDashboardContainerCommon & ApplyContainerChangesToStateProps;
 
@@ -94,7 +90,6 @@ export const syncDashboardContainerInput = (
 };
 
 export const applyContainerChangesToState = ({
-  applyFilters,
   dashboardContainer,
   getLatestDashboardState,
   dispatchDashboardStateChange,
@@ -112,7 +107,6 @@ export const applyContainerChangesToState = ({
   if (!compareFilters(input.filters, filterManager.getFilters(), COMPARE_ALL_OPTIONS)) {
     // Add filters modifies the object passed to it, hence the clone deep.
     filterManager.addFilters(_.cloneDeep(input.filters));
-    applyFilters(latestState.query, input.filters);
   }
 
   if (!_.isEqual(input.panels, latestState.panels)) {
@@ -144,7 +138,6 @@ export const applyContainerChangesToState = ({
 export const applyStateChangesToContainer = ({
   force,
   history,
-  savedDashboard,
   dashboardContainer,
   kbnUrlStateStorage,
   isEmbeddedExternally,
@@ -161,7 +154,6 @@ export const applyStateChangesToContainer = ({
   const currentDashboardStateAsInput = stateToDashboardContainerInput({
     dashboardState: latestState,
     isEmbeddedExternally,
-    savedDashboard,
   });
   const differences = diffDashboardContainerInput(
     dashboardContainer.getInput(),

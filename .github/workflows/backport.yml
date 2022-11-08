@@ -3,6 +3,9 @@ on:
     branches: ['main']
     types: ['labeled', 'closed']
 
+env:
+  NODE_ENV: kibana-github-action
+
 jobs:
   backport:
     name: Backport PR
@@ -16,7 +19,7 @@ jobs:
       )
     steps:
       - name: Backport Action
-        uses: sqren/backport-github-action@v8.9.2
+        uses: sqren/backport-github-action@v8.9.7
         with:
           github_token: ${{secrets.KIBANAMACHINE_TOKEN}}
 

@@ -6,13 +6,13 @@
  */
 
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { documentField } from '../indexpattern_datasource/document_field';
+import { documentField } from '../datasources/form_based/document_field';
 import {
   createMockedIndexPattern,
   createMockedRestrictedIndexPattern,
-} from '../indexpattern_datasource/mocks';
+} from '../datasources/form_based/mocks';
 import { DataViewsState } from '../state_management';
-import { ExistingFieldsMap, IndexPattern } from '../types';
+import { IndexPattern } from '../types';
 import { getFieldByNameFactory } from './loader';
 
 /**
@@ -22,25 +22,13 @@ import { getFieldByNameFactory } from './loader';
 export const createMockDataViewsState = ({
   indexPatterns,
   indexPatternRefs,
-  isFirstExistenceFetch,
-  existingFields,
 }: Partial<DataViewsState> = {}): DataViewsState => {
   const refs =
     indexPatternRefs ??
     Object.values(indexPatterns ?? {}).map(({ id, title, name }) => ({ id, title, name }));
-  const allFields =
-    existingFields ??
-    refs.reduce((acc, { id, title }) => {
-      if (indexPatterns && id in indexPatterns) {
-        acc[title] = Object.fromEntries(indexPatterns[id].fields.map((f) => [f.displayName, true]));
-      }
-      return acc;
-    }, {} as ExistingFieldsMap);
   return {
     indexPatterns: indexPatterns ?? {},
     indexPatternRefs: refs,
-    isFirstExistenceFetch: Boolean(isFirstExistenceFetch),
-    existingFields: allFields,
   };
 };
 

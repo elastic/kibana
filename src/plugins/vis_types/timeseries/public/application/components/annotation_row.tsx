@@ -154,7 +154,7 @@ export const AnnotationRow = ({
                 label={
                   <FormattedMessage
                     id="visTypeTimeseries.annotationsEditor.timeFieldLabel"
-                    defaultMessage="Time field (required)"
+                    defaultMessage="Time field"
                   />
                 }
                 restrict={RESTRICT_FIELDS}
@@ -165,6 +165,10 @@ export const AnnotationRow = ({
                   })
                 }
                 indexPattern={model.index_pattern}
+                placeholder={
+                  fetchedIndex?.indexPattern?.timeFieldName ??
+                  fetchedIndex?.defaultIndex?.timeFieldName
+                }
                 fields={fields}
               />
             </EuiFlexItem>

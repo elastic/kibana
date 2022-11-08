@@ -17,7 +17,7 @@ import {
   IKibanaResponse,
 } from '@kbn/core/server';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { UMServerLibs, UptimeESClient } from '../lib/lib';
+import { UMServerLibs, UptimeEsClient } from '../lib/lib';
 import type { UptimeRequestHandlerContext } from '../../types';
 import { UptimeServerSetup } from '../lib/adapters';
 
@@ -100,7 +100,7 @@ export type UMRouteHandler = ({
   savedObjectsClient,
   subject,
 }: {
-  uptimeEsClient: UptimeESClient;
+  uptimeEsClient: UptimeEsClient;
   context: UptimeRequestHandlerContext;
   request: SyntheticsRequest;
   response: KibanaResponseFactory;
@@ -118,7 +118,7 @@ export type SyntheticsRouteHandler = ({
   savedObjectsClient,
   subject: Subject,
 }: {
-  uptimeEsClient: UptimeESClient;
+  uptimeEsClient: UptimeEsClient;
   context: UptimeRequestHandlerContext;
   request: SyntheticsRequest;
   response: KibanaResponseFactory;
@@ -136,7 +136,7 @@ export type SyntheticsStreamingRouteHandler = ({
   savedObjectsClient,
   subject: Subject,
 }: {
-  uptimeEsClient: UptimeESClient;
+  uptimeEsClient: UptimeEsClient;
   context: UptimeRequestHandlerContext;
   request: SyntheticsRequest;
   savedObjectsClient: SavedObjectsClientContract;

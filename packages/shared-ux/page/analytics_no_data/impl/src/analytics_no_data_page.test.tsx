@@ -27,7 +27,7 @@ describe('AnalyticsNoDataPage', () => {
   it('renders correctly', async () => {
     const component = mountWithIntl(
       <AnalyticsNoDataPageProvider {...services}>
-        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
+        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} allowAdHocDataView={true} />
       </AnalyticsNoDataPageProvider>
     );
 
@@ -36,5 +36,6 @@ describe('AnalyticsNoDataPage', () => {
     expect(component.find(Component).length).toBe(1);
     expect(component.find(Component).props().kibanaGuideDocLink).toBe(services.kibanaGuideDocLink);
     expect(component.find(Component).props().onDataViewCreated).toBe(onDataViewCreated);
+    expect(component.find(Component).props().allowAdHocDataView).toBe(true);
   });
 });

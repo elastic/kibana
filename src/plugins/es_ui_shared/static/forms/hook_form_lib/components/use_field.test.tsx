@@ -19,7 +19,7 @@ import { UseField } from './use_field';
 
 describe('<UseField />', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {

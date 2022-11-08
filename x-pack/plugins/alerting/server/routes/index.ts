@@ -22,7 +22,9 @@ import { findRulesRoute, findInternalRulesRoute } from './find_rules';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleExecutionLogRoute } from './get_rule_execution_log';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
+import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
 import { getActionErrorLogRoute } from './get_action_error_log';
+import { getRuleExecutionKPIRoute } from './get_rule_execution_kpi';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
 import { resolveRuleRoute } from './resolve_rule';
@@ -36,6 +38,7 @@ import { bulkEditInternalRulesRoute } from './bulk_edit_rules';
 import { snoozeRuleRoute } from './snooze_rule';
 import { unsnoozeRuleRoute } from './unsnooze_rule';
 import { runSoonRoute } from './run_soon';
+import { bulkDeleteRulesRoute } from './bulk_delete_rules';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -63,6 +66,8 @@ export function defineRoutes(opts: RouteOptions) {
   getRuleExecutionLogRoute(router, licenseState);
   getGlobalExecutionLogRoute(router, licenseState);
   getActionErrorLogRoute(router, licenseState);
+  getRuleExecutionKPIRoute(router, licenseState);
+  getGlobalExecutionKPIRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   ruleTypesRoute(router, licenseState);
@@ -72,6 +77,7 @@ export function defineRoutes(opts: RouteOptions) {
   unmuteAlertRoute(router, licenseState);
   updateRuleApiKeyRoute(router, licenseState);
   bulkEditInternalRulesRoute(router, licenseState);
+  bulkDeleteRulesRoute({ router, licenseState });
   snoozeRuleRoute(router, licenseState);
   unsnoozeRuleRoute(router, licenseState);
   runSoonRoute(router, licenseState);

@@ -21,7 +21,7 @@ import {
 } from '../types';
 import { ISessionsClient } from '../../sessions_client';
 import { SearchUsageCollector } from '../../../collectors';
-import { SearchSessionStatus } from '../../../../../common';
+import { SearchSessionsFindResponse, SearchSessionStatus } from '../../../../../common';
 import { SearchSessionsConfigSchema } from '../../../../../config';
 
 type LocatorsStart = SharePluginStart['url']['locators'];
@@ -35,30 +35,15 @@ function getActions(status: UISearchSessionState) {
     actions.push(ACTION.DELETE);
   }
 
-  if (status === SearchSessionStatus.EXPIRED) {
+  if (
+    status === SearchSessionStatus.EXPIRED ||
+    status === SearchSessionStatus.ERROR ||
+    status === SearchSessionStatus.CANCELLED
+  ) {
     actions.push(ACTION.DELETE);
   }
 
   return actions;
-}
-
-/**
- * Status we display on mgtm UI might be different from the one inside the saved object
- * @param status
- */
-function getUIStatus(session: PersistedSearchSessionSavedObjectAttributes): UISearchSessionState {
-  const isSessionExpired = () => {
-    const curTime = moment();
-    return curTime.diff(moment(session.expires), 'ms') > 0;
-  };
-
-  switch (session.status) {
-    case SearchSessionStatus.COMPLETE:
-    case SearchSessionStatus.IN_PROGRESS:
-      return isSessionExpired() ? SearchSessionStatus.EXPIRED : session.status;
-  }
-
-  return session.status;
 }
 
 function getUrlFromState(locators: LocatorsStart, locatorId: string, state: SerializableRecord) {
@@ -75,7 +60,11 @@ function getUrlFromState(locators: LocatorsStart, locatorId: string, state: Seri
 
 // Helper: factory for a function to map server objects to UI objects
 const mapToUISession =
-  (locators: LocatorsStart, config: SearchSessionsConfigSchema) =>
+  (
+    locators: LocatorsStart,
+    config: SearchSessionsConfigSchema,
+    sessionStatuses: SearchSessionsFindResponse['statuses']
+  ) =>
   async (
     savedObject: SavedObject<PersistedSearchSessionSavedObjectAttributes>
   ): Promise<UISession> => {
@@ -91,7 +80,8 @@ const mapToUISession =
       version,
     } = savedObject.attributes;
 
-    const status = getUIStatus(savedObject.attributes);
+    const status = sessionStatuses[savedObject.id]?.status;
+    const errors = sessionStatuses[savedObject.id]?.errors;
     const actions = getActions(status);
 
     // TODO: initialState should be saved without the searchSessionID
@@ -112,8 +102,10 @@ const mapToUISession =
       reloadUrl: reloadUrl!,
       initialState,
       restoreState,
+      idMapping,
       numSearches: Object.keys(idMapping).length,
       version,
+      errors,
     };
   };
 
@@ -141,9 +133,7 @@ export class SearchSessionsMgmtAPI {
         page: 1,
         perPage: mgmtConfig.maxSessions,
         sortField: 'created',
-        sortOrder: 'asc',
-        searchFields: ['persisted'],
-        search: 'true',
+        sortOrder: 'desc',
       })
     );
     const timeout$ = timer(refreshTimeout.asMilliseconds()).pipe(
@@ -165,7 +155,9 @@ export class SearchSessionsMgmtAPI {
         const savedObjects = result.saved_objects as Array<
           SavedObject<PersistedSearchSessionSavedObjectAttributes>
         >;
-        return await Promise.all(savedObjects.map(mapToUISession(this.deps.locators, this.config)));
+        return await Promise.all(
+          savedObjects.map(mapToUISession(this.deps.locators, this.config, result.statuses))
+        );
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -180,17 +172,12 @@ export class SearchSessionsMgmtAPI {
     return [];
   }
 
-  public reloadSearchSession(reloadUrl: string) {
-    this.deps.usageCollector?.trackSessionReloaded();
-    this.deps.application.navigateToUrl(reloadUrl);
-  }
-
   public getExtendByDuration() {
     return this.config.defaultExpiration;
   }
 
-  // Cancel and expire
-  public async sendCancel(id: string): Promise<void> {
+  // Delete and expire
+  public async sendDelete(id: string): Promise<void> {
     this.deps.usageCollector?.trackSessionDeleted();
     try {
       await this.sessionsClient.delete(id);

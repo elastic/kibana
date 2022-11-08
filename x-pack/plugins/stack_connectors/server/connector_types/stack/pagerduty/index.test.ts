@@ -34,9 +34,7 @@ let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
-  connectorType = getConnectorType({
-    logger: mockedLogger,
-  });
+  connectorType = getConnectorType();
 });
 
 describe('get()', () => {
@@ -75,9 +73,7 @@ describe('validateConfig()', () => {
         expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
       },
     };
-    connectorType = getConnectorType({
-      logger: mockedLogger,
-    });
+    connectorType = getConnectorType();
 
     expect(
       validateConfig(
@@ -95,9 +91,7 @@ describe('validateConfig()', () => {
         throw new Error(`target url is not added to allowedHosts`);
       },
     };
-    connectorType = getConnectorType({
-      logger: mockedLogger,
-    });
+    connectorType = getConnectorType();
 
     expect(() => {
       validateConfig(
@@ -274,6 +268,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -335,6 +330,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -401,6 +397,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -458,6 +455,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -500,6 +498,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -529,6 +528,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -558,6 +558,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -587,6 +588,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -626,6 +628,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -688,6 +691,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -753,6 +757,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -817,6 +822,7 @@ describe('execute()', () => {
       secrets,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];

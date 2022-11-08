@@ -15,7 +15,7 @@ export interface IArtifact {
   getArtifact(name: string): Promise<unknown>;
 }
 
-class Artifact implements IArtifact {
+export class Artifact implements IArtifact {
   private manifestUrl?: string;
   private readonly CDN_URL = 'https://artifacts.security.elastic.co';
   private readonly AXIOS_TIMEOUT_MS = 10_000;
@@ -26,7 +26,7 @@ class Artifact implements IArtifact {
     this.receiver = receiver;
     this.esClusterInfo = await this.receiver.fetchClusterInfo();
     const version = this.esClusterInfo?.version?.number;
-    this.manifestUrl = `${this.CDN_URL}/downloads/endpoint/manifest/artifacts-${version}.zip`;
+    this.manifestUrl = `${this.CDN_URL}/downloads/kibana/manifest/artifacts-${version}.zip`;
   }
 
   public async getArtifact(name: string): Promise<unknown> {

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -16,6 +15,5 @@ export interface GuidedOnboardingExamplePluginSetup {}
 export interface GuidedOnboardingExamplePluginStart {}
 
 export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
 }

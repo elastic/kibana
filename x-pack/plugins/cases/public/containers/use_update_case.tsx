@@ -9,7 +9,7 @@ import { useReducer, useCallback, useRef, useEffect } from 'react';
 
 import { useToasts } from '../common/lib/kibana';
 import { patchCase } from './api';
-import { UpdateKey, UpdateByKey } from '../../common/ui/types';
+import type { UpdateKey, UpdateByKey } from '../../common/ui/types';
 import * as i18n from './translations';
 import { createUpdateSuccessToaster } from './utils';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';

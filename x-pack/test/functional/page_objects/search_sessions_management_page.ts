@@ -59,6 +59,14 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
               );
               await PageObjects.common.clickConfirmOnModal();
             },
+            extend: async () => {
+              log.debug('management ui: extend the session');
+              await actionsCell.click();
+              await find.clickByCssSelector(
+                '[data-test-subj="sessionManagementPopoverAction-extend"]'
+              );
+              await PageObjects.common.clickConfirmOnModal();
+            },
           };
         })
       );

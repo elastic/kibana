@@ -26,10 +26,10 @@ import type {
   TimelineEventsDetailsItem,
   RiskSeverity,
 } from '../../../../../common/search_strategy';
-import { HostRiskSummary } from './host_risk_summary';
-import { UserRiskSummary } from './user_risk_summary';
+import { RiskSummary } from './risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
 import type { HostRisk, UserRisk } from '../../../../risk_score/containers';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 
 const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
@@ -126,7 +126,7 @@ const ThreatSummaryViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
   enrichments: CtiEnrichment[];
   eventId: string;
-  timelineId: string;
+  scopeId: string;
   hostRisk: HostRisk;
   userRisk: UserRisk;
   isDraggable?: boolean;
@@ -136,7 +136,7 @@ const ThreatSummaryViewComponent: React.FC<{
   data,
   enrichments,
   eventId,
-  timelineId,
+  scopeId,
   hostRisk,
   userRisk,
   isDraggable,
@@ -161,18 +161,26 @@ const ThreatSummaryViewComponent: React.FC<{
 
       <EuiFlexGroup direction="column" gutterSize="m" style={{ flexGrow: 0 }}>
         <EuiFlexItem grow={false}>
-          <HostRiskSummary hostRisk={hostRisk} originalHostRisk={originalHostRisk} />
+          <RiskSummary
+            riskEntity={RiskScoreEntity.host}
+            risk={hostRisk}
+            originalRisk={originalHostRisk}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <UserRiskSummary userRisk={userRisk} originalUserRisk={originalUserRisk} />
+          <RiskSummary
+            riskEntity={RiskScoreEntity.user}
+            risk={userRisk}
+            originalRisk={originalUserRisk}
+          />
         </EuiFlexItem>
 
         <EnrichmentSummary
           browserFields={browserFields}
           data={data}
           enrichments={enrichments}
-          timelineId={timelineId}
+          scopeId={scopeId}
           eventId={eventId}
           isDraggable={isDraggable}
           isReadOnly={isReadOnly}

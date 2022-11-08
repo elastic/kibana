@@ -115,6 +115,11 @@ export function loadInitial(
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
   };
 
+  let activeDatasourceId: string | undefined;
+  if (initialContext && 'query' in initialContext) {
+    activeDatasourceId = 'textBased';
+  }
+
   if (
     !initialInput ||
     (attributeService.inputIsRefType(initialInput) &&
@@ -141,6 +146,7 @@ export function loadInitial(
               ...emptyState,
               dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
               searchSessionId: data.search.session.getSessionId() || data.search.session.start(),
+              ...(activeDatasourceId && { activeDatasourceId }),
               datasourceStates: Object.entries(datasourceStates).reduce(
                 (state, [datasourceId, datasourceState]) => ({
                   ...state,

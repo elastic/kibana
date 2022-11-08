@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { AggregateQuery } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
@@ -19,6 +20,7 @@ export interface VisualizeFieldContext {
   dataViewSpec: DataViewSpec;
   contextualFields?: string[];
   originatingApp?: string;
+  query?: AggregateQuery;
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';

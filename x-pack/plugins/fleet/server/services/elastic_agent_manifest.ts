@@ -81,20 +81,11 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
-            - name: etc-kubernetes
-              mountPath: /hostfs/etc/kubernetes
+            - name: etc-full
+              mountPath: /hostfs/etc
               readOnly: true
             - name: var-lib
               mountPath: /hostfs/var/lib
-              readOnly: true
-            - name: passwd
-              mountPath: /hostfs/etc/passwd
-              readOnly: true
-            - name: group
-              mountPath: /hostfs/etc/group
-              readOnly: true
-            - name: etcsysmd
-              mountPath: /hostfs/etc/systemd
               readOnly: true
       volumes:
         - name: datastreams
@@ -113,26 +104,15 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
-        # Needed for cloudbeat
-        - name: etc-kubernetes
+        # The following volumes are needed for Cloud Security Posture integration (cloudbeat)
+        # If you are not using this integration, then these volumes and the corresponding
+        # mounts can be removed.
+        - name: etc-full
           hostPath:
-            path: /etc/kubernetes
-        # Needed for cloudbeat
+            path: /etc
         - name: var-lib
           hostPath:
             path: /var/lib
-        # Needed for cloudbeat
-        - name: passwd
-          hostPath:
-            path: /etc/passwd
-        # Needed for cloudbeat
-        - name: group
-          hostPath:
-            path: /etc/group
-        # Needed for cloudbeat
-        - name: etcsysmd
-          hostPath:
-            path: /etc/systemd
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -367,20 +347,11 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
-            - name: etc-kubernetes
-              mountPath: /hostfs/etc/kubernetes
+            - name: etc-full
+              mountPath: /hostfs/etc
               readOnly: true
             - name: var-lib
               mountPath: /hostfs/var/lib
-              readOnly: true
-            - name: passwd
-              mountPath: /hostfs/etc/passwd
-              readOnly: true
-            - name: group
-              mountPath: /hostfs/etc/group
-              readOnly: true
-            - name: etcsysmd
-              mountPath: /hostfs/etc/systemd
               readOnly: true
             - name: etc-mid
               mountPath: /etc/machine-id
@@ -398,26 +369,15 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
-        # Needed for cloudbeat
-        - name: etc-kubernetes
+        # The following volumes are needed for Cloud Security Posture integration (cloudbeat)
+        # If you are not using this integration, then these volumes and the corresponding
+        # mounts can be removed.
+        - name: etc-full
           hostPath:
-            path: /etc/kubernetes
-        # Needed for cloudbeat
+            path: /etc
         - name: var-lib
           hostPath:
             path: /var/lib
-        # Needed for cloudbeat
-        - name: passwd
-          hostPath:
-            path: /etc/passwd
-        # Needed for cloudbeat
-        - name: group
-          hostPath:
-            path: /etc/group
-        # Needed for cloudbeat
-        - name: etcsysmd
-          hostPath:
-            path: /etc/systemd
         # Mount /etc/machine-id from the host to determine host ID
         # Needed for Elastic Security integration
         - name: etc-mid

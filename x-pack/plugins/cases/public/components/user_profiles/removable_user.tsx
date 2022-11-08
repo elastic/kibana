@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
-import { Assignee } from './types';
+import type { Assignee } from './types';
 import { HoverableUserWithAvatar } from './hoverable_user_with_avatar';
 import { useCasesContext } from '../cases_context/use_cases_context';
 

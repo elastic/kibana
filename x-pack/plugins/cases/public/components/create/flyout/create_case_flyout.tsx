@@ -11,10 +11,10 @@ import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eu
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import * as i18n from '../translations';
-import { Case } from '../../../../common/ui/types';
+import type { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
-import { UseCreateAttachments } from '../../../containers/use_create_attachments';
-import { CaseAttachmentsWithoutOwner } from '../../../types';
+import type { UseCreateAttachments } from '../../../containers/use_create_attachments';
+import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface CreateCaseFlyoutProps {
@@ -25,6 +25,7 @@ export interface CreateCaseFlyoutProps {
   onClose?: () => void;
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachmentsWithoutOwner;
+  headerContent?: React.ReactNode;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -71,9 +72,10 @@ const FormWrapper = styled.div`
 `;
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, onClose, onSuccess, attachments }) => {
+  ({ afterCaseCreated, onClose, onSuccess, attachments, headerContent }) => {
     const handleCancel = onClose || function () {};
     const handleOnSuccess = onSuccess || async function () {};
+
     return (
       <QueryClientProvider client={casesQueryClient}>
         <GlobalStyle />
@@ -83,10 +85,11 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
           // maskProps is needed in order to apply the z-index to the parent overlay element, not to the flyout only
           maskProps={{ className: maskOverlayClassName }}
         >
-          <EuiFlyoutHeader hasBorder>
+          <EuiFlyoutHeader data-test-subj="create-case-flyout-header" hasBorder>
             <EuiTitle size="m">
               <h2>{i18n.CREATE_CASE_TITLE}</h2>
             </EuiTitle>
+            {headerContent && headerContent}
           </EuiFlyoutHeader>
           <StyledEuiFlyoutBody>
             <FormWrapper>

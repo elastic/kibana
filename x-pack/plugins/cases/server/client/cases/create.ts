@@ -12,11 +12,10 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
+import type { CaseResponse, CasePostRequest } from '../../../common/api';
 import {
   throwErrors,
   CaseResponseRt,
-  CaseResponse,
-  CasePostRequest,
   ActionTypes,
   CasePostRequestRt,
   excess,
@@ -28,7 +27,7 @@ import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/va
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
 /**

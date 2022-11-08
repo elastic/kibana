@@ -55,6 +55,8 @@ RUNTIME_DEPS = [
   "@npm//react",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
+  "@npm//@emotion/react",
+  "@npm//@emotion/css",
   "//packages/kbn-i18n-react",
   "//x-pack/packages/ml/aiops_utils",
 ]
@@ -78,6 +80,8 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
+  "@npm//@emotion/react",
+  "@npm//@emotion/css",
   "//packages/kbn-i18n-react:npm_module_types",
   "//x-pack/packages/ml/aiops_utils:npm_module_types",
 ]
@@ -127,6 +131,14 @@ js_library(
   visibility = ["//visibility:public"],
 )
 
+js_library(
+  name = "npm_module_types",
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
 pkg_npm(
   name = "npm_module",
   deps = [":" + PKG_DIRNAME],
@@ -138,17 +150,8 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
+pkg_npm(
   name = "build_types",
-  srcs = [":npm_module_types"],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

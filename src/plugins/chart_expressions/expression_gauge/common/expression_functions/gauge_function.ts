@@ -231,6 +231,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
             (handlers.variables?.embeddableTitle as string) ??
             handlers.getExecutionContext?.()?.description,
         },
+        canNavigateToLens: Boolean(handlers?.variables?.canNavigateToLens),
       },
     };
   },

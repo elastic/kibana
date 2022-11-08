@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
-  const toasts = getService('toasts');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
@@ -70,32 +69,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1000, 1100);
       const afterSize = await editor.getSize();
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
-    });
-
-    describe('with a data URI in the load_from query', () => {
-      it('loads the data from the URI', async () => {
-        await PageObjects.common.navigateToApp('console', {
-          hash: '#/console?load_from=data:text/plain,BYUwNmD2Q',
-        });
-
-        await retry.try(async () => {
-          const actualRequest = await PageObjects.console.getRequest();
-          log.debug(actualRequest);
-          expect(actualRequest.trim()).to.eql('hello');
-        });
-      });
-
-      describe('with invalid data', () => {
-        it('shows a toast error', async () => {
-          await PageObjects.common.navigateToApp('console', {
-            hash: '#/console?load_from=data:text/plain,BYUwNmD2',
-          });
-
-          await retry.try(async () => {
-            expect(await toasts.getToastCount()).to.equal(1);
-          });
-        });
-      });
     });
 
     describe('with kbn: prefix in request', () => {

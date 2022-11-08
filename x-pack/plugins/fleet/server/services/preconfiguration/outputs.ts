@@ -78,7 +78,7 @@ export async function createOrUpdatePreconfiguredOutputs(
         config_yaml: configYaml ?? null,
         // Set value to null to update these fields on update
         ca_sha256: outputData.ca_sha256 ?? null,
-        ca_trusted_fingerprint: outputData.ca_sha256 ?? null,
+        ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
         ssl: outputData.ssl ?? null,
       };
 

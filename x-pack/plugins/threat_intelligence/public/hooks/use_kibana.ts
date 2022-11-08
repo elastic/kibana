@@ -6,9 +6,9 @@
  */
 
 import {
+  context as KibanaContext,
   KibanaContextProvider,
   useKibana,
-  context as KibanaContext,
 } from '@kbn/kibana-react-plugin/public';
 import { Services } from '../types';
 

@@ -42,6 +42,7 @@ export const MonitorEnabled = ({
 
   const { isEnabled, updateMonitorEnabledState, status } = useMonitorEnableHandler({
     id,
+    isEnabled: monitor[ConfigKey.ENABLED],
     reloadPage,
     labels: statusLabels,
   });
@@ -51,7 +52,7 @@ export const MonitorEnabled = ({
 
   const handleEnabledChange = (event: EuiSwitchEvent) => {
     const checked = event.target.checked;
-    updateMonitorEnabledState(monitor, checked);
+    updateMonitorEnabledState(checked);
   };
 
   return (
