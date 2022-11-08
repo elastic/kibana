@@ -156,8 +156,8 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     },
     makeStartSyncRequest: () => clearFlashMessages(),
     recheckIndex: () => actions.fetchIndex(),
-    setIndexName: () => {
-      actions.startFetchIndexPoll(values.indexName);
+    setIndexName: ({ indexName }) => {
+      actions.startFetchIndexPoll(indexName);
     },
     startSync: () => {
       if (isConnectorIndex(values.fetchIndexApiData)) {

@@ -89,6 +89,7 @@ export const CachedFetchIndexApiLogic = kea<
     startPolling: ({ indexName }) => {
       // Recurring polls are created by apiSuccess and apiError, depending on pollTimeoutId
       if (values.pollTimeoutId) {
+        if (indexName === values.indexName) return;
         clearTimeout(values.pollTimeoutId);
       }
       actions.makeRequest({ indexName });
