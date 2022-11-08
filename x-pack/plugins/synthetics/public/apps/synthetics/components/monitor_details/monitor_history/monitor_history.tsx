@@ -7,7 +7,7 @@
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useGetUrlParams } from '../../../hooks';
+import { useUrlParams } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { AvailabilityPanel } from '../monitor_summary/availability_panel';
 import { DurationPanel } from '../monitor_summary/duration_panel';
@@ -22,7 +22,15 @@ import { DurationSparklines } from '../monitor_summary/duration_sparklines';
 import { MonitorCompleteSparklines } from '../monitor_summary/monitor_complete_sparklines';
 
 export const MonitorHistory = () => {
+  const [useGetUrlParams, updateUrlParams] = useUrlParams();
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+
+  const handleStatusChartBrushed = useCallback(
+    ({ fromUtc, toUtc }) => {
+      updateUrlParams({ dateRangeStart: fromUtc, dateRangeEnd: toUtc });
+    },
+    [updateUrlParams]
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -94,11 +102,14 @@ export const MonitorHistory = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel hasShadow={false} hasBorder={true}>
-          <EuiTitle size="xs">
-            <h3>{STATUS_LABEL}</h3>
-          </EuiTitle>
-        </EuiPanel>
+        <MonitorStatusPanel
+          from={dateRangeStart}
+          to={dateRangeEnd}
+          showViewHistoryButton={false}
+          periodCaption={''}
+          brushable={true}
+          onBrushed={handleStatusChartBrushed}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <TestRunsTable from={dateRangeStart} to={dateRangeEnd} />
