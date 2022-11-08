@@ -51,7 +51,8 @@ export const OptionsListStrings = {
       }),
     getHideExistsQueryTooltip: () =>
       i18n.translate('controls.optionsList.editor.hideExistsQueryTooltip', {
-        defaultMessage: 'Returns the documents that contain an indexed value for the field.',
+        defaultMessage:
+          'Allows you to create an exists query, which returns all documents that contain an indexed value for the field.',
       }),
   },
   popover: {

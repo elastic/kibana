@@ -105,8 +105,8 @@ export function logAlerts<
           group: actionGroup,
           message,
           state,
+          flapping: false,
         });
-      }
     }
 
     for (const id of newAlertIds) {
@@ -119,6 +119,7 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
+        flapping: false,
       });
     }
 
@@ -132,6 +133,7 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
+        flapping: false,
       });
     }
   }
