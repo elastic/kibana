@@ -7,7 +7,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { BehaviorSubject, map, concatMap, of, Observable, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, map, Observable, firstValueFrom, concat } from 'rxjs';
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '@kbn/guided-onboarding';
 
 import { GuidedOnboardingApi } from '../types';
@@ -25,13 +25,14 @@ import { API_BASE_PATH } from '../../common/constants';
 
 export class ApiService implements GuidedOnboardingApi {
   private client: HttpSetup | undefined;
-  private onboardingGuideState$!: BehaviorSubject<GuideState | undefined>;
+  private guideState$!: BehaviorSubject<GuideState | undefined>;
   private isGuideStateLoading: boolean | undefined;
+  private isGuideStateInitialized: boolean | undefined;
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   public setup(httpClient: HttpSetup): void {
     this.client = httpClient;
-    this.onboardingGuideState$ = new BehaviorSubject<GuideState | undefined>(undefined);
+    this.guideState$ = new BehaviorSubject<GuideState | undefined>(undefined);
   }
 
   private createGetStateObservable(): Observable<GuideState | undefined> {
@@ -46,11 +47,13 @@ export class ApiService implements GuidedOnboardingApi {
         signal,
       })
         .then((response) => {
+          this.isGuideStateInitialized = true;
           this.isGuideStateLoading = false;
           // There should only be 1 active guide
           const hasState = response.state.length === 1;
           if (hasState) {
-            this.onboardingGuideState$.next(response.state[0]);
+            observer.next(response.state[0]);
+            this.guideState$.next(response.state[0]);
           }
           observer.complete();
         })
@@ -71,11 +74,15 @@ export class ApiService implements GuidedOnboardingApi {
    * Subsequently, the observable is updated automatically, when the state changes.
    */
   public fetchActiveGuideState$(): Observable<GuideState | undefined> {
-    return this.onboardingGuideState$.pipe(
-      concatMap((state) =>
-        !state && !this.isGuideStateLoading ? this.createGetStateObservable() : of(state)
-      )
-    );
+    const currentState = this.guideState$.value;
+    // if currentState is undefined, it can be because there is no active guide or we haven't fetched the data from the backend
+    // check if there is no request in flight
+    // also check if we have fetched the data from the backend already once, if yes no request is sent
+    if (!currentState && !this.isGuideStateLoading && !this.isGuideStateInitialized) {
+      this.isGuideStateLoading = true;
+      return concat(this.createGetStateObservable(), this.guideState$);
+    }
+    return this.guideState$;
   }
 
   /**
@@ -117,7 +124,7 @@ export class ApiService implements GuidedOnboardingApi {
         body: JSON.stringify(newState),
       });
       // broadcast the newState
-      this.onboardingGuideState$.next(newState);
+      this.guideState$.next(newState);
       this.isGuidePanelOpen$.next(panelState);
       return response;
     } catch (error) {
