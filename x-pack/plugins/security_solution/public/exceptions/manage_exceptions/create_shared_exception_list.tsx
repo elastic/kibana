@@ -54,19 +54,9 @@ export const CreateSharedListFlyout = memo(
     addError: (error: unknown, options: ErrorToastOptions) => Toast;
     handleCloseFlyout: () => void;
   }) => {
-    // const [listName, setListName] = useState('');
-    // const [description, setDescription] = useState('');
-
     const { start: createSharedExceptionList, ...createSharedExceptionListState } =
       useCreateSharedExceptionListWithOptionalSignal();
     const ctrl = useRef(new AbortController());
-
-    // const onListNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //   setListName(e.target.value);
-    // };
-    // const onDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    //   setDescription(e.target.value);
-    // };
 
     enum DetailProperty {
       name = 'name',
