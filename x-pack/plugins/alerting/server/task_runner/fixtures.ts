@@ -276,12 +276,12 @@ export const generateAlertInstance = (
         date: new Date(DATE_1970),
         group: 'default',
       },
+      flappingHistory,
     },
     state: {
       bar: false,
       duration,
       start,
     },
-    flappingHistory,
   },
 });

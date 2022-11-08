@@ -13,7 +13,6 @@ import {
   rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
-  AlertInstanceFlappingHistory,
   RawAlertRecoveredInstance,
 } from '../../common';
 
@@ -47,15 +46,17 @@ export class Alert<
   private meta: AlertInstanceMeta;
   private state: State;
   private context: Context;
-  private flappingHistory: AlertInstanceFlappingHistory;
   private readonly id: string;
 
-  constructor(id: string, { state, meta = {}, flappingHistory = [] }: RawAlertInstance = {}) {
+  constructor(id: string, { state, meta = {} }: RawAlertInstance = {}) {
     this.id = id;
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
-    this.flappingHistory = flappingHistory;
+
+    if (!this.meta.flappingHistory) {
+      this.meta.flappingHistory = [];
+    }
   }
 
   getId() {
@@ -176,43 +177,46 @@ export class Alert<
     return {
       state: this.state,
       meta: this.meta,
-      flappingHistory: this.flappingHistory,
     };
   }
 
   toRawRecovered(): RawAlertRecoveredInstance {
     return {
-      flappingHistory: this.flappingHistory,
+      meta: this.meta,
     };
   }
 
   setFlappingHistory(fh: boolean[]) {
-    this.flappingHistory = fh;
+    this.meta.flappingHistory = fh;
   }
 
   getFlappingHistory() {
-    return this.flappingHistory;
+    return this.meta.flappingHistory;
   }
 
   updateFlappingHistory(state: boolean) {
+    let flappingHistory: boolean[] = this.meta.flappingHistory || [];
     const { atCapacity, diff } = this.flappingHistoryAtCapacity();
     if (atCapacity) {
-      this.flappingHistory = drop(this.flappingHistory, diff);
+      flappingHistory = drop(flappingHistory, diff);
     }
-    this.flappingHistory.push(state);
+    flappingHistory.push(state);
+    this.meta.flappingHistory = flappingHistory;
   }
 
   isFlapping(): boolean {
+    const flappingHistory: boolean[] = this.meta.flappingHistory || [];
     const { atCapacity } = this.flappingHistoryAtCapacity();
     if (atCapacity) {
-      const numStateChanges = this.flappingHistory.filter((f) => f).length;
+      const numStateChanges = flappingHistory.filter((f) => f).length;
       return numStateChanges >= 4;
     }
     return false;
   }
 
   flappingHistoryAtCapacity() {
-    const len = this.flappingHistory.length;
+    const flappingHistory: boolean[] = this.meta.flappingHistory || [];
+    const len = flappingHistory.length;
     return {
       atCapacity: len >= 20,
       diff: len + 1 - 20,

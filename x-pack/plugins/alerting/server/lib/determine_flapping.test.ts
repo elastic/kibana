@@ -20,8 +20,8 @@ describe('determineFlapping', () => {
   });
   test('should return all active alerts regardless of flapping', () => {
     const activeAlerts = {
-      '1': new Alert('1', { flappingHistory: flapping }),
-      '2': new Alert('2', { flappingHistory: [false, false] }),
+      '1': new Alert('1', { meta: { flappingHistory: flapping } }),
+      '2': new Alert('2', { meta: { flappingHistory: [false, false] } }),
     };
     const { alertsToReturn } = determineFlapping(logger, activeAlerts, {});
     expect(size(alertsToReturn)).toEqual(2);
@@ -29,8 +29,8 @@ describe('determineFlapping', () => {
 
   test('should return all flapping recovered alerts', () => {
     const recoveredAlerts = {
-      '1': new Alert('1', { flappingHistory: flapping }),
-      '2': new Alert('2', { flappingHistory: notFlapping }),
+      '1': new Alert('1', { meta: { flappingHistory: flapping } }),
+      '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
     };
     const { recoveredAlertsToReturn } = determineFlapping(logger, {}, recoveredAlerts);
     expect(size(recoveredAlertsToReturn)).toEqual(1);
@@ -38,8 +38,8 @@ describe('determineFlapping', () => {
 
   test('should return all recovered alerts if flappingHistory is not at capacity', () => {
     const recoveredAlerts = {
-      '1': new Alert('1', { flappingHistory: [false, false, false] }),
-      '2': new Alert('2', { flappingHistory: notFlapping }),
+      '1': new Alert('1', { meta: { flappingHistory: [false, false, false] } }),
+      '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
     };
     const { recoveredAlertsToReturn } = determineFlapping(logger, {}, recoveredAlerts);
     expect(size(recoveredAlertsToReturn)).toEqual(1);
@@ -47,13 +47,13 @@ describe('determineFlapping', () => {
 
   test('should log message when alert is determined to be flapping', () => {
     const activeAlerts = {
-      '1': new Alert('1', { flappingHistory: flapping }),
-      '2': new Alert('2', { flappingHistory: [false, false] }),
+      '1': new Alert('1', { meta: { flappingHistory: flapping } }),
+      '2': new Alert('2', { meta: { flappingHistory: [false, false] } }),
     };
 
     const recoveredAlerts = {
-      '3': new Alert('3', { flappingHistory: flapping }),
-      '4': new Alert('4', { flappingHistory: notFlapping }),
+      '3': new Alert('3', { meta: { flappingHistory: flapping } }),
+      '4': new Alert('4', { meta: { flappingHistory: notFlapping } }),
     };
     determineFlapping(logger, activeAlerts, recoveredAlerts);
 

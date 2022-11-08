@@ -2299,12 +2299,12 @@ describe('Task Runner', () => {
                 date: new Date(DATE_1970),
                 group: 'default',
               },
+              flappingHistory: [false],
             },
             state: {
               duration: '0',
               start: '1970-01-01T00:00:00.000Z',
             },
-            flappingHistory: [false],
           },
         },
       })
@@ -2452,12 +2452,12 @@ describe('Task Runner', () => {
                 date: new Date(DATE_1970),
                 group: 'default',
               },
+              flappingHistory: [false],
             },
             state: {
               duration: '0',
               start: '1970-01-01T00:00:00.000Z',
             },
-            flappingHistory: [false],
           },
           '2': {
             meta: {
@@ -2465,12 +2465,12 @@ describe('Task Runner', () => {
                 date: new Date(DATE_1970),
                 group: 'default',
               },
+              flappingHistory: [false],
             },
             state: {
               duration: '0',
               start: '1970-01-01T00:00:00.000Z',
             },
-            flappingHistory: [false],
           },
         },
       })

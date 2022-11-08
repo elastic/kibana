@@ -34,8 +34,9 @@ describe('createAlertFactory()', () => {
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "flappingHistory": Array [],
-        "meta": Object {},
+        "meta": Object {
+          "flappingHistory": Array [],
+        },
         "state": Object {},
       }
     `);
@@ -58,8 +59,8 @@ describe('createAlertFactory()', () => {
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "flappingHistory": Array [],
         "meta": Object {
+          "flappingHistory": Array [],
           "lastScheduledActions": Object {
             "date": "1970-01-01T00:00:00.000Z",
             "group": "default",
@@ -83,8 +84,9 @@ describe('createAlertFactory()', () => {
     expect(alerts).toMatchInlineSnapshot(`
       Object {
         "1": Object {
-          "flappingHistory": Array [],
-          "meta": Object {},
+          "meta": Object {
+            "flappingHistory": Array [],
+          },
           "state": Object {},
         },
       }
@@ -118,10 +120,11 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
-      meta: {},
+      meta: {
+        flappingHistory: [],
+      },
       state: {},
       context: {},
-      flappingHistory: [],
       scheduledExecutionOptions: undefined,
       id: '1',
     });
@@ -158,10 +161,11 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
-      meta: {},
+      meta: {
+        flappingHistory: [],
+      },
       state: {},
       context: {},
-      flappingHistory: [],
       scheduledExecutionOptions: undefined,
       id: '1',
     });
@@ -183,10 +187,11 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
-      meta: {},
+      meta: {
+        flappingHistory: [],
+      },
       state: {},
       context: {},
-      flappingHistory: [],
       scheduledExecutionOptions: undefined,
       id: '1',
     });
@@ -207,10 +212,11 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
-      meta: {},
+      meta: {
+        flappingHistory: [],
+      },
       state: {},
       context: {},
-      flappingHistory: [],
       scheduledExecutionOptions: undefined,
       id: '1',
     });
@@ -230,10 +236,11 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
-      meta: {},
+      meta: {
+        flappingHistory: [],
+      },
       state: {},
       context: {},
-      flappingHistory: [],
       scheduledExecutionOptions: undefined,
       id: '1',
     });

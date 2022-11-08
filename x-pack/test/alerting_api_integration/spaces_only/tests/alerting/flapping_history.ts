@@ -67,22 +67,26 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
       objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
       let state = await getRuleState(start, alertId, reference);
-      expect(state.alertInstances.instance.flappingHistory).to.eql([false]);
+      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
       state = await getRuleState(start, alertId, reference, 2, true);
-      expect(state.alertInstances.instance.flappingHistory).to.eql([false, false]);
+      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false, false]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
       state = await getRuleState(start, alertId, reference, 3, true);
-      expect(state.alertRecoveredInstances.instance.flappingHistory).to.eql([false, false, true]);
+      expect(state.alertRecoveredInstances.instance.meta.flappingHistory).to.eql([
+        false,
+        false,
+        true,
+      ]);
       expect(state.alertInstances).to.eql({});
 
       start = new Date().toISOString();
       state = await getRuleState(start, alertId, reference, 4, true);
-      expect(state.alertInstances.instance.flappingHistory).to.eql([false, false, true, true]);
+      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false, false, true, true]);
       expect(state.alertRecoveredInstances).to.eql({});
     });
 
@@ -97,22 +101,27 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
       objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
       let state = await getRuleState(start, alertId, reference);
-      expect(state.alertInstances.instance.flappingHistory).to.eql([false]);
+      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
       state = await getRuleState(start, alertId, reference, 2, true);
-      expect(state.alertInstances.instance.flappingHistory).to.eql([false, false]);
+      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false, false]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
       state = await getRuleState(start, alertId, reference, 3, true);
-      expect(state.alertInstances.instance.flappingHistory).to.eql([false, false, false]);
+      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false, false, false]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
       state = await getRuleState(start, alertId, reference, 4, true);
-      expect(state.alertInstances.instance.flappingHistory).to.eql([false, false, false, false]);
+      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([
+        false,
+        false,
+        false,
+        false,
+      ]);
       expect(state.alertRecoveredInstances).to.eql({});
     });
 
@@ -127,22 +136,26 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
       objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
       let state = await getRuleState(start, alertId, reference);
-      expect(state.alertInstances.instance.flappingHistory).to.eql([false]);
+      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
       state = await getRuleState(start, alertId, reference, 2, true);
-      expect(state.alertRecoveredInstances.instance.flappingHistory).to.eql([false, true]);
+      expect(state.alertRecoveredInstances.instance.meta.flappingHistory).to.eql([false, true]);
       expect(state.alertInstances).to.eql({});
 
       start = new Date().toISOString();
       state = await getRuleState(start, alertId, reference, 3, true);
-      expect(state.alertRecoveredInstances.instance.flappingHistory).to.eql([false, true, false]);
+      expect(state.alertRecoveredInstances.instance.meta.flappingHistory).to.eql([
+        false,
+        true,
+        false,
+      ]);
       expect(state.alertInstances).to.eql({});
 
       start = new Date().toISOString();
       state = await getRuleState(start, alertId, reference, 4, true);
-      expect(state.alertRecoveredInstances.instance.flappingHistory).to.eql([
+      expect(state.alertRecoveredInstances.instance.meta.flappingHistory).to.eql([
         false,
         true,
         false,
@@ -152,7 +165,7 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
 
       start = new Date().toISOString();
       state = await getRuleState(start, alertId, reference, 5, true);
-      expect(state.alertRecoveredInstances.instance.flappingHistory).to.eql([
+      expect(state.alertRecoveredInstances.instance.meta.flappingHistory).to.eql([
         false,
         true,
         false,

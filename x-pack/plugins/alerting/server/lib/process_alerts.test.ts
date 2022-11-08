@@ -753,10 +753,11 @@ describe('processAlerts', () => {
       expect(activeAlerts).toMatchInlineSnapshot(`
         Object {
           "1": Object {
-            "flappingHistory": Array [
-              false,
-            ],
-            "meta": Object {},
+            "meta": Object {
+              "flappingHistory": Array [
+                false,
+              ],
+            },
             "state": Object {
               "duration": "0",
               "start": "1970-01-01T00:00:00.000Z",
@@ -767,10 +768,11 @@ describe('processAlerts', () => {
       expect(newAlerts).toMatchInlineSnapshot(`
         Object {
           "1": Object {
-            "flappingHistory": Array [
-              false,
-            ],
-            "meta": Object {},
+            "meta": Object {
+              "flappingHistory": Array [
+                false,
+              ],
+            },
             "state": Object {
               "duration": "0",
               "start": "1970-01-01T00:00:00.000Z",
@@ -783,7 +785,7 @@ describe('processAlerts', () => {
 
     test('if alert is still active, set flapping state to false', () => {
       const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
-        flappingHistory: [false],
+        meta: { flappingHistory: [false] },
       });
 
       const alerts = cloneDeep({ '1': activeAlert });
@@ -803,11 +805,12 @@ describe('processAlerts', () => {
       expect(activeAlerts).toMatchInlineSnapshot(`
         Object {
           "1": Object {
-            "flappingHistory": Array [
-              false,
-              false,
-            ],
-            "meta": Object {},
+            "meta": Object {
+              "flappingHistory": Array [
+                false,
+                false,
+              ],
+            },
             "state": Object {},
           },
         }
@@ -819,7 +822,7 @@ describe('processAlerts', () => {
     test('if alert is active and previously recovered, set flapping state to true', () => {
       const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1');
       const recoveredAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
-        flappingHistory: [false],
+        meta: { flappingHistory: [false] },
       });
 
       const alerts = cloneDeep({ '1': activeAlert });
@@ -840,11 +843,12 @@ describe('processAlerts', () => {
       expect(activeAlerts).toMatchInlineSnapshot(`
         Object {
           "1": Object {
-            "flappingHistory": Array [
-              false,
-              true,
-            ],
-            "meta": Object {},
+            "meta": Object {
+              "flappingHistory": Array [
+                false,
+                true,
+              ],
+            },
             "state": Object {
               "duration": "0",
               "start": "1970-01-01T00:00:00.000Z",
@@ -858,11 +862,11 @@ describe('processAlerts', () => {
 
     test('if alert is recovered and previously active, set flapping state to true', () => {
       const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
-        flappingHistory: [false],
+        meta: { flappingHistory: [false] },
       });
       activeAlert.scheduleActions('default', { foo: '1' });
       const recoveredAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
-        flappingHistory: [false],
+        meta: { flappingHistory: [false] },
       });
 
       const alerts = cloneDeep({ '1': recoveredAlert });
@@ -883,11 +887,12 @@ describe('processAlerts', () => {
       expect(recoveredAlerts).toMatchInlineSnapshot(`
         Object {
           "1": Object {
-            "flappingHistory": Array [
-              false,
-              true,
-            ],
-            "meta": Object {},
+            "meta": Object {
+              "flappingHistory": Array [
+                false,
+                true,
+              ],
+            },
             "state": Object {},
           },
         }
@@ -896,7 +901,7 @@ describe('processAlerts', () => {
 
     test('if alert is still recovered, set flapping state to false', () => {
       const recoveredAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
-        flappingHistory: [false],
+        meta: { flappingHistory: [false] },
       });
 
       const alerts = cloneDeep({ '1': recoveredAlert });
@@ -916,11 +921,12 @@ describe('processAlerts', () => {
       expect(recoveredAlerts).toMatchInlineSnapshot(`
         Object {
           "1": Object {
-            "flappingHistory": Array [
-              false,
-              false,
-            ],
-            "meta": Object {},
+            "meta": Object {
+              "flappingHistory": Array [
+                false,
+                false,
+              ],
+            },
             "state": Object {},
           },
         }
@@ -931,11 +937,11 @@ describe('processAlerts', () => {
       const activeAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1');
       activeAlert1.scheduleActions('default', { foo: '1' });
       const activeAlert2 = new Alert<{}, {}, DefaultActionGroupId>('2', {
-        flappingHistory: [false],
+        meta: { flappingHistory: [false] },
       });
       activeAlert2.scheduleActions('default', { foo: '1' });
       const recoveredAlert = new Alert<{}, {}, DefaultActionGroupId>('3', {
-        flappingHistory: [false],
+        meta: { flappingHistory: [false] },
       });
 
       const previouslyRecoveredAlerts = cloneDeep({ '3': recoveredAlert });
@@ -957,18 +963,20 @@ describe('processAlerts', () => {
       expect(activeAlerts).toMatchInlineSnapshot(`
         Object {
           "1": Object {
-            "flappingHistory": Array [],
-            "meta": Object {},
+            "meta": Object {
+              "flappingHistory": Array [],
+            },
             "state": Object {
               "duration": "0",
               "start": "1970-01-01T00:00:00.000Z",
             },
           },
           "2": Object {
-            "flappingHistory": Array [
-              false,
-            ],
-            "meta": Object {},
+            "meta": Object {
+              "flappingHistory": Array [
+                false,
+              ],
+            },
             "state": Object {},
           },
         }
@@ -976,8 +984,9 @@ describe('processAlerts', () => {
       expect(newAlerts).toMatchInlineSnapshot(`
         Object {
           "1": Object {
-            "flappingHistory": Array [],
-            "meta": Object {},
+            "meta": Object {
+              "flappingHistory": Array [],
+            },
             "state": Object {
               "duration": "0",
               "start": "1970-01-01T00:00:00.000Z",
@@ -988,10 +997,11 @@ describe('processAlerts', () => {
       expect(recoveredAlerts).toMatchInlineSnapshot(`
         Object {
           "3": Object {
-            "flappingHistory": Array [
-              false,
-            ],
-            "meta": Object {},
+            "meta": Object {
+              "flappingHistory": Array [
+                false,
+              ],
+            },
             "state": Object {},
           },
         }
@@ -1001,7 +1011,7 @@ describe('processAlerts', () => {
     describe('when hasReachedAlertLimit is true', () => {
       test('if alert is still active, set flapping state to false', () => {
         const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1', {
-          flappingHistory: [false],
+          meta: { flappingHistory: [false] },
         });
 
         const alerts = cloneDeep({ '1': activeAlert });
@@ -1021,11 +1031,12 @@ describe('processAlerts', () => {
         expect(activeAlerts).toMatchInlineSnapshot(`
           Object {
             "1": Object {
-              "flappingHistory": Array [
-                false,
-                false,
-              ],
-              "meta": Object {},
+              "meta": Object {
+                "flappingHistory": Array [
+                  false,
+                  false,
+                ],
+              },
               "state": Object {},
             },
           }
@@ -1036,7 +1047,7 @@ describe('processAlerts', () => {
 
       test('if new alert, set flapping state to false', () => {
         const activeAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1', {
-          flappingHistory: [false],
+          meta: { flappingHistory: [false] },
         });
         activeAlert1.scheduleActions('default', { foo: '1' });
         const activeAlert2 = new Alert<{}, {}, DefaultActionGroupId>('1');
@@ -1058,18 +1069,20 @@ describe('processAlerts', () => {
         expect(activeAlerts).toMatchInlineSnapshot(`
           Object {
             "1": Object {
-              "flappingHistory": Array [
-                false,
-                false,
-              ],
-              "meta": Object {},
+              "meta": Object {
+                "flappingHistory": Array [
+                  false,
+                  false,
+                ],
+              },
               "state": Object {},
             },
             "2": Object {
-              "flappingHistory": Array [
-                false,
-              ],
-              "meta": Object {},
+              "meta": Object {
+                "flappingHistory": Array [
+                  false,
+                ],
+              },
               "state": Object {
                 "duration": "0",
                 "start": "1970-01-01T00:00:00.000Z",
@@ -1080,10 +1093,11 @@ describe('processAlerts', () => {
         expect(newAlerts).toMatchInlineSnapshot(`
           Object {
             "2": Object {
-              "flappingHistory": Array [
-                false,
-              ],
-              "meta": Object {},
+              "meta": Object {
+                "flappingHistory": Array [
+                  false,
+                ],
+              },
               "state": Object {
                 "duration": "0",
                 "start": "1970-01-01T00:00:00.000Z",
@@ -1096,7 +1110,7 @@ describe('processAlerts', () => {
 
       test('if setFlapping is false should not update flappingHistory', () => {
         const activeAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1', {
-          flappingHistory: [false],
+          meta: { flappingHistory: [false] },
         });
         activeAlert1.scheduleActions('default', { foo: '1' });
         const activeAlert2 = new Alert<{}, {}, DefaultActionGroupId>('1');
@@ -1118,15 +1132,17 @@ describe('processAlerts', () => {
         expect(activeAlerts).toMatchInlineSnapshot(`
           Object {
             "1": Object {
-              "flappingHistory": Array [
-                false,
-              ],
-              "meta": Object {},
+              "meta": Object {
+                "flappingHistory": Array [
+                  false,
+                ],
+              },
               "state": Object {},
             },
             "2": Object {
-              "flappingHistory": Array [],
-              "meta": Object {},
+              "meta": Object {
+                "flappingHistory": Array [],
+              },
               "state": Object {
                 "duration": "0",
                 "start": "1970-01-01T00:00:00.000Z",
@@ -1137,8 +1153,9 @@ describe('processAlerts', () => {
         expect(newAlerts).toMatchInlineSnapshot(`
           Object {
             "2": Object {
-              "flappingHistory": Array [],
-              "meta": Object {},
+              "meta": Object {
+                "flappingHistory": Array [],
+              },
               "state": Object {
                 "duration": "0",
                 "start": "1970-01-01T00:00:00.000Z",
