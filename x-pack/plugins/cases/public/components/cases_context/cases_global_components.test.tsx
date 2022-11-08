@@ -34,9 +34,7 @@ describe('Cases context UI', () => {
         ...getInitialCasesContextState(),
         createCaseFlyout: {
           isFlyoutOpen: true,
-          autoSubmit: false,
           props: {
-            autoSubmit: false,
             attachments: [],
           },
         },
@@ -44,7 +42,6 @@ describe('Cases context UI', () => {
       appMock.render(<CasesGlobalComponents state={state} />);
       expect(getCreateCaseFlyoutLazyNoProviderMock).toHaveBeenCalledWith({
         attachments: [],
-        autoSubmit: false,
       });
     });
 
@@ -53,7 +50,6 @@ describe('Cases context UI', () => {
         ...getInitialCasesContextState(),
         createCaseFlyout: {
           isFlyoutOpen: false,
-          autoSubmit: false,
         },
       };
       appMock.render(<CasesGlobalComponents state={state} />);

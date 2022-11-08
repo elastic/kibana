@@ -13,7 +13,6 @@ export const getInitialCasesContextState = (): CasesContextState => {
   return {
     createCaseFlyout: {
       isFlyoutOpen: false,
-      autoSubmit: false,
     },
     selectCaseModal: {
       isModalOpen: false,
@@ -24,7 +23,6 @@ export const getInitialCasesContextState = (): CasesContextState => {
 export interface CasesContextState {
   createCaseFlyout: {
     isFlyoutOpen: boolean;
-    autoSubmit: boolean;
     props?: CreateCaseFlyoutProps;
   };
   selectCaseModal: {
@@ -38,7 +36,6 @@ export enum CasesContextStoreActionsList {
   CLOSE_CREATE_CASE_FLYOUT,
   OPEN_ADD_TO_CASE_MODAL,
   CLOSE_ADD_TO_CASE_MODAL,
-  SUBMIT_CASE_FROM_FLYOUT,
 }
 export type CasesContextStoreAction =
   | {
@@ -50,8 +47,7 @@ export type CasesContextStoreAction =
       type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL;
       payload: AllCasesSelectorModalProps;
     }
-  | { type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL }
-  | { type: CasesContextStoreActionsList.SUBMIT_CASE_FROM_FLYOUT };
+  | { type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL };
 
 export const casesContextReducer: React.Reducer<CasesContextState, CasesContextStoreAction> = (
   state: CasesContextState,
@@ -63,7 +59,6 @@ export const casesContextReducer: React.Reducer<CasesContextState, CasesContextS
         ...state,
         createCaseFlyout: {
           ...state.createCaseFlyout,
-          autoSubmit: false,
           isFlyoutOpen: true,
           props: action.payload,
         },
@@ -77,9 +72,6 @@ export const casesContextReducer: React.Reducer<CasesContextState, CasesContextS
     }
     case CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL: {
       return { ...state, selectCaseModal: { isModalOpen: false } };
-    }
-    case CasesContextStoreActionsList.SUBMIT_CASE_FROM_FLYOUT: {
-      return { ...state, createCaseFlyout: { ...state.createCaseFlyout, autoSubmit: true } };
     }
     default:
       assertNever(action);

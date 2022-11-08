@@ -108,17 +108,4 @@ describe('use cases add to new case flyout hook', () => {
       })
     );
   });
-
-  it('should dispatch the submit action when invoked', () => {
-    const { result } = renderHook(
-      () => {
-        return useCasesAddToNewCaseFlyout();
-      },
-      { wrapper }
-    );
-    result.current.submit();
-    expect(dispatch).toHaveBeenCalledWith({
-      type: CasesContextStoreActionsList.SUBMIT_CASE_FROM_FLYOUT,
-    });
-  });
 });

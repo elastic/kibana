@@ -22,7 +22,6 @@ export interface CreateCaseFlyoutProps {
     theCase: Case,
     createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
-  autoSubmit: boolean;
   onClose?: () => void;
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachmentsWithoutOwner;
@@ -74,15 +73,7 @@ const FormWrapper = styled.div`
 `;
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({
-    afterCaseCreated,
-    attachments,
-    autoSubmit,
-    headerContent,
-    initialValue,
-    onClose,
-    onSuccess,
-  }) => {
+  ({ afterCaseCreated, attachments, headerContent, initialValue, onClose, onSuccess }) => {
     const handleCancel = onClose || function () {};
     const handleOnSuccess = onSuccess || async function () {};
 
@@ -106,7 +97,6 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
               <CreateCaseForm
                 afterCaseCreated={afterCaseCreated}
                 attachments={attachments}
-                autoSubmit={autoSubmit}
                 onCancel={handleCancel}
                 onSuccess={handleOnSuccess}
                 withSteps={false}

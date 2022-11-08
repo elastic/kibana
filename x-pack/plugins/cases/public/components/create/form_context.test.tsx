@@ -89,7 +89,6 @@ const defaultPostCase = {
 };
 
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
-  autoSubmit: false,
   isLoadingConnectors: false,
   connectors: [],
   withSteps: true,

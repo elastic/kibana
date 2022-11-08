@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -57,13 +57,11 @@ const MySpinner = styled(EuiLoadingSpinner)`
 `;
 
 export interface CreateCaseFormFieldsProps {
-  autoSubmit: boolean;
   connectors: ActionConnector[];
   isLoadingConnectors: boolean;
   withSteps: boolean;
 }
-export interface CreateCaseFormProps
-  extends Pick<Partial<CreateCaseFormFieldsProps>, 'autoSubmit' | 'withSteps'> {
+export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
   afterCaseCreated?: (
@@ -77,15 +75,11 @@ export interface CreateCaseFormProps
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ autoSubmit, connectors, isLoadingConnectors, withSteps }) => {
-    const { isSubmitting, submit } = useFormContext();
+  ({ connectors, isLoadingConnectors, withSteps }) => {
+    const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
 
     const { owner } = useCasesContext();
-
-    useEffect(() => {
-      if (autoSubmit) submit();
-    }, [autoSubmit, submit]);
 
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
@@ -185,7 +179,6 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
   ({
     withSteps = true,
     afterCaseCreated,
-    autoSubmit = false,
     onCancel,
     onSuccess,
     timelineIntegration,
@@ -200,7 +193,6 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         initialValue={initialValue}
       >
         <CreateCaseFormFields
-          autoSubmit={autoSubmit}
           connectors={empty}
           isLoadingConnectors={false}
           withSteps={withSteps}

@@ -14,7 +14,7 @@ import { CasesContextStoreActionsList } from '../../cases_context/cases_context_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import type { CreateCaseFlyoutProps } from './create_case_flyout';
 
-type AddToNewCaseFlyoutProps = Omit<CreateCaseFlyoutProps, 'attachments' | 'autoSubmit'> & {
+type AddToNewCaseFlyoutProps = Omit<CreateCaseFlyoutProps, 'attachments'> & {
   toastTitle?: string;
   toastContent?: string;
 };
@@ -22,12 +22,6 @@ type AddToNewCaseFlyoutProps = Omit<CreateCaseFlyoutProps, 'attachments' | 'auto
 export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) => {
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
-
-  const submitFromFlyout = useCallback(() => {
-    dispatch({
-      type: CasesContextStoreActionsList.SUBMIT_CASE_FROM_FLYOUT,
-    });
-  }, [dispatch]);
 
   const closeFlyout = useCallback(() => {
     dispatch({
@@ -44,7 +38,6 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: {
           ...props,
-          autoSubmit: false,
           attachments,
           headerContent,
           onClose: () => {
@@ -80,7 +73,6 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
   return {
     open: openFlyout,
     close: closeFlyout,
-    submit: submitFromFlyout,
   };
 };
 
