@@ -16,6 +16,7 @@ import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 export const Findings = () => {
   const location = useLocation();
@@ -57,7 +58,11 @@ export const Findings = () => {
           />
           <Route
             path={findingsNavigation.findings_default.path}
-            render={() => <LatestFindingsContainer dataView={dataViewQuery.data!} />}
+            render={() => (
+              <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
+                <LatestFindingsContainer dataView={dataViewQuery.data!} />
+              </TrackApplicationView>
+            )}
           />
           <Route
             path={findingsNavigation.findings_by_resource.path}

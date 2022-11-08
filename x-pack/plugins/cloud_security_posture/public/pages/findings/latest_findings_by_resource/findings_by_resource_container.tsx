@@ -32,6 +32,7 @@ import { ResourceFindings } from './resource_findings/resource_findings_containe
 import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY } from '../../../../common/constants';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 const getDefaultQuery = ({
   query,
@@ -49,11 +50,19 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
     <Route
       exact
       path={findingsNavigation.findings_by_resource.path}
-      render={() => <LatestFindingsByResource dataView={dataView} />}
+      render={() => (
+        <TrackApplicationView viewId={findingsNavigation.findings_by_resource.id}>
+          <LatestFindingsByResource dataView={dataView} />
+        </TrackApplicationView>
+      )}
     />
     <Route
       path={findingsNavigation.resource_findings.path}
-      render={() => <ResourceFindings dataView={dataView} />}
+      render={() => (
+        <TrackApplicationView viewId={findingsNavigation.resource_findings.id}>
+          <ResourceFindings dataView={dataView} />
+        </TrackApplicationView>
+      )}
     />
   </Switch>
 );
