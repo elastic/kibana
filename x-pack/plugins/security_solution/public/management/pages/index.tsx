@@ -33,6 +33,7 @@ import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
 import { NoPermissions } from '../components/no_permissons';
+import { useCanSeeHostIsolationExceptionsMenu } from './host_isolation_exceptions/view/hooks';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -95,9 +96,9 @@ export const ManagementContainer = memo(() => {
     canReadEventFilters,
     canReadActionsLogManagement,
     canReadEndpointList,
-    canIsolateHost,
-    canAccessEndpointManagement, // is a superuser
   } = useUserPrivileges().endpointPrivileges;
+
+  const canSeeHostIsolationExceptionsPage = useCanSeeHostIsolationExceptionsMenu();
 
   // Lets wait until we can verify permissions
   if (loading) {
@@ -129,9 +130,7 @@ export const ManagementContainer = memo(() => {
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
-        // remove superuser check in v2 rbac
-        // and replace canIsolateHost with canReadHostIsolationExceptions
-        privilege={canAccessEndpointManagement || canIsolateHost}
+        privilege={canSeeHostIsolationExceptionsPage}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
