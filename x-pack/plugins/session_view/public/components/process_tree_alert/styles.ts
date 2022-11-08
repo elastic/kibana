@@ -69,9 +69,14 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       textTransform: 'capitalize',
     };
 
+    const processAlertDisplayContainer: CSSObject = {
+      display: 'flex',
+      alignItems: 'center',
+    };
+
     const alertName: CSSObject = {
       color: colors.title,
-      '& .categoryDetailText': {
+      '& .alertCategoryDetailText': {
         fontSize: size.m,
       },
     };
@@ -81,6 +86,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
     };
 
     const processPanel: CSSObject = {
+      marginLeft: '8px',
       border: `${border.width.thin} solid ${colors.lightShade}`,
       fontFamily: font.familyCode,
       padding: `${size.xs} ${size.s}`,
@@ -92,6 +98,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       alertName,
       actionBadge,
       processPanel,
+      processAlertDisplayContainer
     };
   }, [euiTheme, isInvestigated, isSelected, euiVars]);
 

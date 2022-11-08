@@ -105,24 +105,32 @@ export const ProcessTreeAlert = ({
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPanel
-            css={styles.processPanel}
-            color="subdued"
-            hasBorder
-            hasShadow={false}
-            borderRadius="m"
-          >
+          <div css={styles.processAlertDisplayContainer}>
             <EuiText
-              data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}-text`}
+              data-test-subj={`sessionView:sessionViewAlertDetailRuleName-${uuid}-text`}
               css={styles.alertName}
               size="s"
             >
-              {name}{' '}
-              {alertCategoryDetailDisplayText && (
-                <span className="categoryDetailText">{alertCategoryDetailDisplayText}</span>
-              )}
+              {dataOrDash(name)}
             </EuiText>
-          </EuiPanel>
+            <EuiPanel
+              css={styles.processPanel}
+              color="subdued"
+              hasBorder
+              hasShadow={false}
+              borderRadius="m"
+            >
+              <EuiText
+                data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}-text`}
+                css={styles.alertName}
+                size="s"
+              >
+                {alertCategoryDetailDisplayText && (
+                  <span className="alertCategoryDetailText">{alertCategoryDetailDisplayText}</span>
+                )}
+              </EuiText>
+            </EuiPanel>
+          </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>

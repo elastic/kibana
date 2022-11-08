@@ -70,7 +70,7 @@ describe('ProcessTreeAlerts component', () => {
     it('should get alert rule name text content when alert category is process', async () => {
       renderResult = mockedContext.render(<ProcessTreeAlert {...props} />);
       const alertText = renderResult.queryByTestId(
-        `sessionView:sessionViewAlertDetail-${mockAlert.kibana?.alert?.uuid}-text`
+        `sessionView:sessionViewAlertDetailRuleName-${mockAlert.kibana?.alert?.uuid}-text`
       );
 
       expect(alertText).toBeTruthy();
@@ -95,7 +95,7 @@ describe('ProcessTreeAlerts component', () => {
       expect(networkAlertText).toBeTruthy();
 
       expect(networkAlertText).toHaveTextContent(
-        `${mockNetworkAlert?.kibana?.alert?.rule?.name} ${mockNetworkAlert?.destination?.address}:${mockNetworkAlert?.destination?.port}`
+        `${mockNetworkAlert?.destination?.address}:${mockNetworkAlert?.destination?.port}`
       );
     });
 
