@@ -11,7 +11,7 @@ import { DataView, parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
-import { AdHocDataViewsService, extractOrGenerateDatasourceInfo } from '../lib/datasource';
+import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForMetric as getConfiguration } from '../lib/configurations/metric';
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
@@ -26,11 +26,9 @@ const invalidModelError = () => new Error('Invalid model');
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (
   { params: model },
-  timeRange,
-  clearAdHocDataViews
+  timeRange
 ) => {
   const dataViews = getDataViewsStart();
-  const adHocDataViewsService = new AdHocDataViewsService(dataViews);
   try {
     const seriesNum = model.series.filter((series) => !series.hidden).length;
 
@@ -45,8 +43,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
         Boolean(series.override_index_pattern),
         series.series_index_pattern,
         series.series_time_field,
-        dataViews,
-        adHocDataViewsService
+        dataViews
       );
 
       if (!datasourceInfo) {
@@ -133,10 +130,6 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
 
     const layers = Object.values(excludeMetaFromLayers({ 0: extendedLayer }));
 
-    if (clearAdHocDataViews) {
-      adHocDataViewsService.clearAll();
-    }
-
     return {
       type: 'lnsMetric',
       layers,
@@ -144,7 +137,6 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       indexPatternIds: getIndexPatternIds(layers),
     };
   } catch (e) {
-    adHocDataViewsService.clearAll();
     return null;
   }
 };

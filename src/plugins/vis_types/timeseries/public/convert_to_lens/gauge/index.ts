@@ -16,7 +16,7 @@ import {
 import { PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../common/enums';
 import { Metric } from '../../../common/types';
 import { getDataViewsStart } from '../../services';
-import { AdHocDataViewsService, extractOrGenerateDatasourceInfo } from '../lib/datasource';
+import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForGauge as getConfiguration } from '../lib/configurations/metric';
 import {
@@ -49,11 +49,9 @@ const invalidModelError = () => new Error('Invalid model');
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (
   { params: model },
-  timeRange,
-  clearAdHocDataViews
+  timeRange
 ) => {
   const dataViews = getDataViewsStart();
-  const adHocDataViewsService = new AdHocDataViewsService(dataViews);
   try {
     const series = model.series[0];
     // not valid time shift
@@ -76,8 +74,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       Boolean(series.override_index_pattern),
       series.series_index_pattern,
       series.series_time_field,
-      dataViews,
-      adHocDataViewsService
+      dataViews
     );
 
     if (!datasourceInfo) {
@@ -142,10 +139,6 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
 
     const layers = Object.values(excludeMetaFromLayers({ 0: layer }));
 
-    if (clearAdHocDataViews) {
-      adHocDataViewsService.clearAll();
-    }
-
     return {
       type: 'lnsMetric',
       layers,
@@ -153,7 +146,6 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       indexPatternIds: getIndexPatternIds(layers),
     };
   } catch (e) {
-    adHocDataViewsService.clearAll();
     return null;
   }
 };

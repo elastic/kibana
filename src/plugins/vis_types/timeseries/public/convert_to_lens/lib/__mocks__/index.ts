@@ -8,7 +8,6 @@
 
 import { PANEL_TYPES } from '../../../../common/enums';
 import { Panel, Series } from '../../../../common/types';
-import { AdHocDataViewsService } from '../datasource/adhoc_data_views_service';
 
 export const createSeries = (partialSeries?: Partial<Series>): Series => ({
   axis_position: 'right',
@@ -60,8 +59,3 @@ export const createPanel = (parialPanel?: Partial<Panel>): Panel => ({
   type: PANEL_TYPES.TIMESERIES,
   ...parialPanel,
 });
-
-export const mockAdHocDataViewsService = {
-  create: jest.fn(),
-  clearAll: jest.fn(),
-} as unknown as AdHocDataViewsService;

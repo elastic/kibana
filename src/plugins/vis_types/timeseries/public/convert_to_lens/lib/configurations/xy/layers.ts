@@ -33,7 +33,7 @@ import {
   AnyColumnWithReferences,
 } from '../../convert';
 import { getChartType } from './chart_type';
-import { AdHocDataViewsService, extractOrGenerateDatasourceInfo } from '../../datasource';
+import { extractOrGenerateDatasourceInfo } from '../../datasource';
 
 export const isColumnWithReference = (column: Column): column is AnyColumnWithReferences =>
   Boolean((column as AnyColumnWithReferences).references);
@@ -74,7 +74,6 @@ export const getLayers = async (
   dataSourceLayers: Record<number, Layer>,
   model: Panel,
   dataViews: DataViewsPublicPluginStart,
-  adHocDataViewsService: AdHocDataViewsService,
   isSingleAxis: boolean = false
 ): Promise<XYLayerConfig[] | null> => {
   const nonAnnotationsLayers: XYLayerConfig[] = Object.keys(dataSourceLayers).map((key) => {
@@ -164,8 +163,7 @@ export const getLayers = async (
           false,
           undefined,
           undefined,
-          dataViews,
-          adHocDataViewsService
+          dataViews
         );
 
         if (!result) {

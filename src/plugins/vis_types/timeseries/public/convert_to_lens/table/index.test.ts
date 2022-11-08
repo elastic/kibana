@@ -11,7 +11,7 @@ import { Vis } from '@kbn/visualizations-plugin/public';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { convertToLens } from '.';
-import { createPanel, createSeries, mockAdHocDataViewsService } from '../lib/__mocks__';
+import { createPanel, createSeries } from '../lib/__mocks__';
 import { Panel } from '../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../common/enums';
 
@@ -50,7 +50,6 @@ jest.mock('../lib/metrics', () => ({
 
 jest.mock('../lib/datasource', () => ({
   extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
-  AdHocDataViewsService: jest.fn(() => mockAdHocDataViewsService),
 }));
 
 describe('convertToLens', () => {

@@ -11,7 +11,7 @@ import { parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds, Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
-import { AdHocDataViewsService, extractOrGenerateDatasourceInfo } from '../lib/datasource';
+import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForTopN as getConfiguration, getLayers } from '../lib/configurations/xy';
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
@@ -32,11 +32,9 @@ const invalidModelError = () => new Error('Invalid model');
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (
   { params: model },
-  timeRange,
-  clearAdHocDataViews
+  timeRange
 ) => {
   const dataViews = getDataViewsStart();
-  const adHocDataViewsService = new AdHocDataViewsService(dataViews);
   try {
     const extendedLayers: Record<number, ExtendedLayer> = {};
     const seriesNum = model.series.filter((series) => !series.hidden).length;
@@ -62,8 +60,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
         Boolean(series.override_index_pattern),
         series.series_index_pattern,
         series.series_time_field,
-        dataViews,
-        adHocDataViewsService
+        dataViews
       );
 
       if (!datasourceInfo) {
@@ -95,22 +92,13 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       };
     }
 
-    const configLayers = await getLayers(
-      extendedLayers,
-      model,
-      dataViews,
-      adHocDataViewsService,
-      true
-    );
+    const configLayers = await getLayers(extendedLayers, model, dataViews, true);
     if (configLayers === null) {
       throw invalidModelError();
     }
 
     const layers = Object.values(excludeMetaFromLayers(extendedLayers));
 
-    if (clearAdHocDataViews) {
-      adHocDataViewsService.clearAll();
-    }
     return {
       type: 'lnsXY',
       layers,
@@ -118,7 +106,6 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       indexPatternIds: getIndexPatternIds(layers),
     };
   } catch (e) {
-    adHocDataViewsService.clearAll();
     return null;
   }
 };

@@ -16,10 +16,9 @@ import {
   PercentileRanksColumnWithCommonMeta,
 } from '../../convert';
 import { getLayers } from './layers';
-import { createPanel, createSeries, mockAdHocDataViewsService } from '../../__mocks__';
+import { createPanel, createSeries } from '../../__mocks__';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { AdHocDataViewsService } from '../../datasource';
 
 const mockExtractOrGenerateDatasourceInfo = jest.fn();
 
@@ -29,7 +28,6 @@ jest.mock('uuid', () => ({
 
 jest.mock('../../datasource', () => ({
   extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
-  AdHocDataViewsService: jest.fn(() => mockAdHocDataViewsService),
 }));
 
 const mockedIndices = [
@@ -372,7 +370,6 @@ describe('getLayers', () => {
   });
   beforeEach(() => {
     jest.clearAllMocks();
-    (mockAdHocDataViewsService.create as jest.Mock).mockReturnValue(mockedIndices[0]);
     mockExtractOrGenerateDatasourceInfo.mockReturnValue({
       indexPattern: mockedIndices[0],
       indexPatternId: mockedIndices[0].id,
@@ -383,13 +380,13 @@ describe('getLayers', () => {
   test.each<
     [
       string,
-      [Record<number, Layer>, Panel, DataViewsPublicPluginStart, AdHocDataViewsService, boolean],
+      [Record<number, Layer>, Panel, DataViewsPublicPluginStart, boolean],
       Array<Partial<XYLayerConfig>>
     ]
   >([
     [
       'data layer if columns do not include static column',
-      [dataSourceLayers, panel, indexPatternsService, mockAdHocDataViewsService, false],
+      [dataSourceLayers, panel, indexPatternsService, false],
       [
         {
           layerType: 'data',
@@ -410,7 +407,7 @@ describe('getLayers', () => {
     ],
     [
       'data layer with "left" axisMode if isSingleAxis is provided',
-      [dataSourceLayers, panel, indexPatternsService, mockAdHocDataViewsService, true],
+      [dataSourceLayers, panel, indexPatternsService, true],
       [
         {
           layerType: 'data',
@@ -431,13 +428,7 @@ describe('getLayers', () => {
     ],
     [
       'reference line layer if columns include static column',
-      [
-        dataSourceLayersWithStatic,
-        panelWithStaticValue,
-        indexPatternsService,
-        mockAdHocDataViewsService,
-        false,
-      ],
+      [dataSourceLayersWithStatic, panelWithStaticValue, indexPatternsService, false],
       [
         {
           layerType: 'referenceLine',
@@ -457,13 +448,7 @@ describe('getLayers', () => {
     ],
     [
       'correct colors if columns include percentile columns',
-      [
-        dataSourceLayersWithPercentile,
-        panelWithPercentileMetric,
-        indexPatternsService,
-        mockAdHocDataViewsService,
-        false,
-      ],
+      [dataSourceLayersWithPercentile, panelWithPercentileMetric, indexPatternsService, false],
       [
         {
           yConfig: [
@@ -487,7 +472,6 @@ describe('getLayers', () => {
         dataSourceLayersWithPercentileRank,
         panelWithPercentileRankMetric,
         indexPatternsService,
-        mockAdHocDataViewsService,
         false,
       ],
       [
@@ -509,13 +493,7 @@ describe('getLayers', () => {
     ],
     [
       'annotation layer gets correct params and converts color, extraFields and icons',
-      [
-        dataSourceLayersWithStatic,
-        panelWithSingleAnnotation,
-        indexPatternsService,
-        mockAdHocDataViewsService,
-        false,
-      ],
+      [dataSourceLayersWithStatic, panelWithSingleAnnotation, indexPatternsService, false],
       [
         {
           layerType: 'referenceLine',
@@ -565,7 +543,6 @@ describe('getLayers', () => {
         dataSourceLayersWithStatic,
         panelWithSingleAnnotationWithoutQueryStringAndTimefield,
         indexPatternsService,
-        mockAdHocDataViewsService,
         false,
       ],
       [
@@ -632,7 +609,6 @@ describe('getLayers', () => {
       dataSourceLayersWithStatic,
       panelWithMultiAnnotations,
       indexPatternsService,
-      mockAdHocDataViewsService,
       false
     );
 
@@ -743,7 +719,6 @@ describe('getLayers', () => {
       dataSourceLayersWithStatic,
       panelWithSingleAnnotationDefaultDataView,
       indexPatternsService,
-      mockAdHocDataViewsService,
       false
     );
 

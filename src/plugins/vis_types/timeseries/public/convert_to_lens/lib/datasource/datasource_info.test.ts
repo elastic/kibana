@@ -8,7 +8,6 @@
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import { extractOrGenerateDatasourceInfo } from './datasource_info';
-import { mockAdHocDataViewsService } from '../__mocks__';
 
 const dataViewsMap: Record<string, DataView> = {
   test1: { id: 'test1', title: 'test1', timeFieldName: 'timeField1' } as DataView,
@@ -25,19 +24,14 @@ const dataViewsMap: Record<string, DataView> = {
   } as DataView,
 };
 
-const mockFetchIndexPattern = jest.fn();
+const mockCreateDataView = jest.fn();
 
 jest.mock('../../../../common/index_patterns_utils', () => {
   const originalModule = jest.requireActual('../../../../common/index_patterns_utils');
   return {
-    fetchIndexPattern: jest.fn(() => mockFetchIndexPattern()),
     isStringTypeIndexPattern: originalModule.isStringTypeIndexPattern,
   };
 });
-
-jest.mock('./adhoc_data_views_service', () => ({
-  AdHocDataViewsService: jest.fn(() => mockAdHocDataViewsService),
-}));
 
 const getDataview = async (id: string): Promise<DataView | undefined> => dataViewsMap[id];
 
@@ -49,16 +43,15 @@ describe('extractOrGenerateDatasourceInfo', () => {
         return { id: '12345', title: 'default', timeFieldName: '@timestamp' };
       }),
       get: getDataview,
-      create: () => getDataview('test3'),
+      create: mockCreateDataView,
     } as unknown as DataViewsPublicPluginStart;
-    (mockAdHocDataViewsService.create as jest.Mock).mockReturnValue(dataViewsMap.test3);
   });
 
   beforeEach(() => {
-    mockFetchIndexPattern.mockReturnValue({
-      indexPattern: undefined,
-      indexPatternString: '',
-    });
+    mockCreateDataView.mockReturnValue(getDataview('test3'));
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -70,23 +63,15 @@ describe('extractOrGenerateDatasourceInfo', () => {
       false,
       undefined,
       undefined,
-      dataViews,
-      mockAdHocDataViewsService
+      dataViews
     );
     const { indexPatternId, timeField, indexPattern } = datasourceInfo!;
     expect(indexPatternId).toBe(dataViewsMap.test3.id);
-    expect(timeField).toBe(timeFieldName);
+    expect(timeField).toBe(dataViewsMap.test3.timeFieldName);
     expect(indexPattern).toBe(dataViewsMap.test3);
-    expect(mockAdHocDataViewsService.create).toBeCalledTimes(1);
-    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(0);
   });
 
   test('should return dataview if model_indexpattern is string and corresponding dataview is found by string', async () => {
-    mockFetchIndexPattern.mockReturnValueOnce({
-      indexPattern: dataViewsMap.test3,
-      indexPatternString: dataViewsMap.test3.name,
-    });
-
     const timeFieldName = 'timeField-3';
     const datasourceInfo = await extractOrGenerateDatasourceInfo(
       dataViewsMap.test3.name,
@@ -94,15 +79,12 @@ describe('extractOrGenerateDatasourceInfo', () => {
       false,
       undefined,
       undefined,
-      dataViews,
-      mockAdHocDataViewsService
+      dataViews
     );
     const { indexPatternId, timeField, indexPattern } = datasourceInfo!;
     expect(indexPatternId).toBe(dataViewsMap.test3.id);
     expect(timeField).toBe(dataViewsMap.test3.timeFieldName);
     expect(indexPattern).toBe(dataViewsMap.test3);
-    expect(mockAdHocDataViewsService.create).toBeCalledTimes(0);
-    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(0);
   });
 
   test('should return the correct dataview if model_indexpattern is object', async () => {
@@ -112,42 +94,31 @@ describe('extractOrGenerateDatasourceInfo', () => {
       false,
       undefined,
       undefined,
-      dataViews,
-      mockAdHocDataViewsService
+      dataViews
     );
     const { indexPatternId, timeField } = datasourceInfo!;
 
     expect(indexPatternId).toBe('dataview-1-id');
     expect(timeField).toBe('timeField-1');
-    expect(mockAdHocDataViewsService.create).toBeCalledTimes(0);
-    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(0);
   });
 
   test('should fetch the correct data if overwritten dataview is provided', async () => {
-    mockFetchIndexPattern.mockReturnValueOnce({
-      indexPattern: dataViewsMap.test2,
-      indexPatternString: dataViewsMap.test2.name,
-    });
     const datasourceInfo = await extractOrGenerateDatasourceInfo(
       { id: 'dataview-1-id' },
       'timeField-1',
       true,
       { id: 'test2' },
       undefined,
-      dataViews,
-      mockAdHocDataViewsService
+      dataViews
     );
     const { indexPatternId, timeField } = datasourceInfo!;
 
     expect(indexPatternId).toBe('test2');
     expect(timeField).toBe(dataViewsMap.test2.timeFieldName);
-    expect(mockFetchIndexPattern).toBeCalledTimes(1);
-    expect(mockAdHocDataViewsService.create).toBeCalledTimes(0);
-    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(0);
   });
 
   test('should return the correct dataview if overwritten dataview is string', async () => {
-    (mockAdHocDataViewsService.create as jest.Mock).mockReturnValue(dataViewsMap.test2);
+    mockCreateDataView.mockReturnValue(dataViewsMap.test2);
 
     const datasourceInfo = await extractOrGenerateDatasourceInfo(
       { id: 'dataview-1-id' },
@@ -155,19 +126,16 @@ describe('extractOrGenerateDatasourceInfo', () => {
       true,
       'test2',
       undefined,
-      dataViews,
-      mockAdHocDataViewsService
+      dataViews
     );
     const { indexPatternId, timeField } = datasourceInfo!;
 
     expect(indexPatternId).toBe('test2');
     expect(timeField).toBe('timeField2');
-    expect(mockAdHocDataViewsService.create).toBeCalledTimes(1);
-    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(0);
   });
 
   test('should return null if dataview is string and invalid', async () => {
-    (mockAdHocDataViewsService.create as jest.Mock).mockImplementationOnce(() => {
+    mockCreateDataView.mockImplementationOnce(() => {
       throw new Error();
     });
 
@@ -177,17 +145,14 @@ describe('extractOrGenerateDatasourceInfo', () => {
       false,
       undefined,
       undefined,
-      dataViews,
-      mockAdHocDataViewsService
+      dataViews
     );
 
     expect(datasourceInfo).toBeNull();
-    expect(mockAdHocDataViewsService.create).toBeCalledTimes(1);
-    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(1);
   });
 
   test('should return null if overritten dataview is string and invalid', async () => {
-    (mockAdHocDataViewsService.create as jest.Mock).mockImplementationOnce(() => {
+    mockCreateDataView.mockImplementationOnce(() => {
       throw new Error();
     });
 
@@ -197,12 +162,9 @@ describe('extractOrGenerateDatasourceInfo', () => {
       true,
       'test',
       undefined,
-      dataViews,
-      mockAdHocDataViewsService
+      dataViews
     );
 
     expect(datasourceInfo).toBeNull();
-    expect(mockAdHocDataViewsService.create).toBeCalledTimes(1);
-    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(1);
   });
 });

@@ -7,4 +7,3 @@
  */
 
 export * from './datasource_info';
-export * from './adhoc_data_views_service';

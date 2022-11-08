@@ -44,11 +44,7 @@ const getConvertFnByType = (type: PANEL_TYPES) => {
  * Returns the Lens model, only if it is supported. If not, it returns null.
  * In case of null, the menu item is disabled and the user can't navigate to Lens.
  */
-export const convertTSVBtoLensConfiguration = async (
-  vis: Vis<Panel>,
-  timeRange?: TimeRange,
-  clearAdHocDataViews: boolean = false
-) => {
+export const convertTSVBtoLensConfiguration = async (vis: Vis<Panel>, timeRange?: TimeRange) => {
   // Disables if model is invalid
   if (vis.params.isModelInvalid) {
     return null;
@@ -56,5 +52,5 @@ export const convertTSVBtoLensConfiguration = async (
 
   const convertFn = await getConvertFnByType(vis.params.type);
 
-  return (await convertFn?.(vis, timeRange, clearAdHocDataViews)) ?? null;
+  return (await convertFn?.(vis, timeRange)) ?? null;
 };
