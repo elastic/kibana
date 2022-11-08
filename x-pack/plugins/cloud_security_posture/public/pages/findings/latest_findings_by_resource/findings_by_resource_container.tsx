@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -80,8 +80,8 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
    */
   const findingsGroupByResource = useFindingsByResource({
     ...getPaginationQuery({
-      pageIndex: urlQuery.pageIndex,
-      pageSize: pageSize || urlQuery.pageSize,
+      pageIndex: 0,
+      pageSize: 500,
     }),
     sortDirection: urlQuery.sortDirection,
     query: baseEsQuery.query,
@@ -89,6 +89,14 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   });
 
   const error = findingsGroupByResource.error || baseEsQuery.error;
+
+  const slicedPage = useMemo(() => {
+    const pageSizes = pageSize !== undefined ? pageSize : 0;
+    const cursor = urlQuery.pageIndex * pageSizes;
+    if (findingsGroupByResource.data?.page !== undefined)
+      return findingsGroupByResource.data?.page.slice(cursor, cursor + pageSizes);
+    else return [];
+  }, [findingsGroupByResource.data?.page, urlQuery.pageIndex, pageSize]);
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
@@ -147,7 +155,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
                   pageSize: urlQuery.pageSize,
-                  currentPageSize: findingsGroupByResource.data.page.length,
+                  currentPageSize: pageSize,
                 }),
               }}
             />
@@ -155,7 +163,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
           <EuiSpacer />
           <FindingsByResourceTable
             loading={findingsGroupByResource.isFetching}
-            items={findingsGroupByResource.data?.page || []}
+            items={slicedPage}
             pagination={getPaginationTableParams({
               pageSize: pageSize || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,

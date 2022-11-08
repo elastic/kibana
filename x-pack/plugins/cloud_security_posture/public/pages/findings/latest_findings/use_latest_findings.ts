@@ -82,7 +82,6 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
   } = useKibana().services;
   const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
   const params = { ...options, pitId: pitIdRef.current };
-
   return useQuery(
     ['csp_findings', { params }],
     async () => {
@@ -93,9 +92,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
           params: getFindingsQuery(params),
         })
       );
-
       if (!aggregations) throw new Error('expected aggregations to be an defined');
-
       if (!Array.isArray(aggregations.count.buckets))
         throw new Error('expected buckets to be an array');
 
@@ -113,9 +110,6 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
       onSuccess: ({ newPitId }) => {
         setPitId(newPitId);
       },
-      // Refetching on an interval to ensure the PIT window stays open
-      refetchInterval: FINDINGS_REFETCH_INTERVAL_MS,
-      refetchIntervalInBackground: true,
     }
   );
 };

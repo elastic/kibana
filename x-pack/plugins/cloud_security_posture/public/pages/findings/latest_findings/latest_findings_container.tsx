@@ -34,6 +34,8 @@ import { ErrorCallout } from '../layout/error_callout';
 import { getLimitProperties } from '../utils/get_limit_properties';
 import { LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY } from '../../../../common/constants';
 
+const MAX_ITEMS = 500;
+
 export const getDefaultQuery = ({
   query,
   filters,
@@ -42,10 +44,8 @@ export const getDefaultQuery = ({
   filters,
   sort: { field: '@timestamp', direction: 'desc' },
   pageIndex: 0,
-  pageSize: 10,
+  pageSize: MAX_ITEMS,
 });
-
-const MAX_ITEMS = 500;
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
@@ -68,13 +68,21 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
    */
   const findingsGroupByNone = useLatestFindings({
     ...getPaginationQuery({
-      pageIndex: urlQuery.pageIndex,
-      pageSize: pageSize || urlQuery.pageSize,
+      pageIndex: 0,
+      pageSize: MAX_ITEMS,
     }),
     query: baseEsQuery.query,
     sort: urlQuery.sort,
     enabled: !baseEsQuery.error,
   });
+
+  const slicedPage = useMemo(() => {
+    const pageSizes = pageSize !== undefined ? pageSize : 0;
+    const cursor = urlQuery.pageIndex * pageSizes;
+    if (findingsGroupByNone.data?.page !== undefined)
+      return findingsGroupByNone.data?.page.slice(cursor, cursor + pageSizes);
+    else return [];
+  }, [findingsGroupByNone.data?.page, urlQuery.pageIndex, pageSize]);
 
   const error = findingsGroupByNone.error || baseEsQuery.error;
 
@@ -135,7 +143,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
                   pageSize: urlQuery.pageSize,
-                  currentPageSize: findingsGroupByNone.data.page.length,
+                  currentPageSize: pageSize,
                 }),
               }}
             />
@@ -143,7 +151,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
           <EuiSpacer />
           <FindingsTable
             loading={findingsGroupByNone.isFetching}
-            items={findingsGroupByNone.data?.page || []}
+            items={slicedPage}
             pagination={getPaginationTableParams({
               pageSize: pageSize || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,

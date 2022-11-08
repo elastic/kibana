@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiSpacer,
   EuiButtonEmpty,
@@ -111,8 +111,8 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
    */
   const resourceFindings = useResourceFindings({
     ...getPaginationQuery({
-      pageSize: pageSize || urlQuery.pageSize,
-      pageIndex: urlQuery.pageIndex,
+      pageIndex: 0,
+      pageSize: 500,
     }),
     sort: urlQuery.sort,
     query: baseEsQuery.query,
@@ -121,6 +121,14 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   });
 
   const error = resourceFindings.error || baseEsQuery.error;
+
+  const slicedPage = useMemo(() => {
+    const pageSizes = pageSize !== undefined ? pageSize : 0;
+    const cursor = urlQuery.pageIndex * pageSizes;
+    if (resourceFindings.data?.page !== undefined)
+      return resourceFindings.data?.page.slice(cursor, cursor + pageSizes);
+    else return [];
+  }, [resourceFindings.data?.page, urlQuery.pageIndex, pageSize]);
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
@@ -191,7 +199,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
                   pageSize: urlQuery.pageSize,
-                  currentPageSize: resourceFindings.data.page.length,
+                  currentPageSize: pageSize,
                 }),
               }}
             />
@@ -199,7 +207,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           <EuiSpacer />
           <ResourceFindingsTable
             loading={resourceFindings.isFetching}
-            items={resourceFindings.data?.page || []}
+            items={slicedPage}
             pagination={getPaginationTableParams({
               pageSize: pageSize || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
