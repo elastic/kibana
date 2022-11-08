@@ -168,7 +168,7 @@ export enum ActionConnectorMode {
 }
 
 export interface BulkDeleteResponse {
-  errors: BulkEditError[];
+  errors: BulkOperationError[];
   total: number;
 }
 
