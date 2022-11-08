@@ -14,12 +14,16 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
+import type { Role } from '@kbn/security-plugin/common';
 import { METADATA_DATASTREAM } from '../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion } from './common/stack_services';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
+import { withResponseActionsUser, noResponseActionsUser } from './common/roles_users';
+import { withResponseActionsRole } from './common/roles_users/with_response_actions_role';
+import { noResponseActionsRole } from './common/roles_users/without_response_actions_role';
 
 main();
 
@@ -43,19 +47,44 @@ async function deleteIndices(indices: string[], client: Client) {
   }
 }
 
+async function addRole(kbnClient: KbnClient, role: Role): Promise<string | undefined> {
+  if (!role) {
+    console.log('No role data given');
+    return;
+  }
+
+  const { name, ...permissions } = role;
+  const path = `/api/security/role/${name}?createOnly=true`;
+
+  // add role if doesn't exist already
+  try {
+    console.log(`Adding ${name} role`);
+    await kbnClient.request({
+      method: 'PUT',
+      path,
+      body: permissions,
+    });
+
+    return name;
+  } catch (error) {
+    console.log(error);
+    handleErr(error);
+  }
+}
+
 interface UserInfo {
   username: string;
   password: string;
+  full_name?: string;
+  roles?: string[];
 }
 
-async function addUser(
-  esClient: Client,
-  user?: { username: string; password: string }
-): Promise<UserInfo | undefined> {
+async function addUser(esClient: Client, user?: UserInfo): Promise<UserInfo | undefined> {
   if (!user) {
     return;
   }
 
+  const superuserRole = ['superuser', 'kibana_system'];
   const path = `_security/user/${user.username}`;
   // add user if doesn't exist already
   try {
@@ -65,8 +94,9 @@ async function addUser(
       path,
       body: {
         password: user.password,
-        roles: ['superuser', 'kibana_system'],
-        full_name: user.username,
+        roles: user.roles ?? superuserRole,
+        full_name: user.full_name ?? user.username,
+        username: user.username,
       },
     });
     if (addedUser.created) {
@@ -260,6 +290,13 @@ async function main() {
         'will result in random version being generated',
       default: false,
     },
+    rbacUser: {
+      alias: 'rbac',
+      describe:
+        "Creates the 'WithResponseActions'  and 'NoResponseActions' users and roles, password=changeme. The former has the kibana permissions for response actions and the latter does not. Neither have the superuser role. ",
+      type: 'boolean',
+      default: false,
+    },
   }).argv;
   let ca: Buffer;
 
@@ -331,6 +368,32 @@ async function main() {
       [argv.eventIndex, argv.metadataIndex, argv.policyIndex, argv.alertIndex],
       client
     );
+  }
+
+  if (argv.rbacUser) {
+    // Add role and user with response actions kibana privileges
+    const withRARole = await addRole(kbnClient, {
+      name: 'withResponseActions',
+      ...withResponseActionsRole,
+    });
+    if (withRARole) {
+      console.log(`Successfully added ${withRARole} role`);
+      await addUser(client, withResponseActionsUser);
+    } else {
+      console.log('Failed to add role, withResponseActions');
+    }
+
+    // Add role and user with no response actions kibana privileges
+    const noRARole = await addRole(kbnClient, {
+      name: 'noResponseActions',
+      ...noResponseActionsRole,
+    });
+    if (noRARole) {
+      console.log(`Successfully added ${noRARole} role`);
+      await addUser(client, noResponseActionsUser);
+    } else {
+      console.log('Failed to add role, noResponseActions');
+    }
   }
 
   let seed = argv.seed;

@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './mock_saved_objects';
+import withResponseActionsUser from './with_response_actions_user.json';
+import noResponseActionsUser from './without_response_actions_user.json';
+export { withResponseActionsUser, noResponseActionsUser };
