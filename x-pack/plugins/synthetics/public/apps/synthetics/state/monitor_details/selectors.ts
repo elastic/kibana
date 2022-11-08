@@ -17,7 +17,7 @@ export const selectSelectedLocationId = createSelector(
   (state) => state.selectedLocationId
 );
 
-export const selectLatestPing = createSelector(getState, (state) => state.pings.data[0] ?? null);
+export const selectLastRunMetadata = createSelector(getState, (state) => state.lastRun);
 
 export const selectPingsLoading = createSelector(getState, (state) => state.pings.loading);
 

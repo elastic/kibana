@@ -13,6 +13,7 @@ import cuid from 'cuid';
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
 import type {
   File,
   FileJSON,
@@ -34,6 +35,11 @@ import { createAuditEvent } from '../audit_events';
 import type { FileClient, CreateArgs, DeleteArgs, P1, ShareArgs } from './types';
 import { serializeJSON, toJSON } from '../file/to_json';
 import { createDefaultFileAttributes } from './utils';
+import {
+  PerfArgs,
+  withReportPerformanceMetric,
+  FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
+} from '../performance';
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 
@@ -219,10 +225,21 @@ export class FileClientImpl implements FileClient {
     });
   };
 
-  public download: BlobStorageClient['download'] = (args) => {
+  public download: BlobStorageClient['download'] = async (args) => {
     this.incrementUsageCounter('DOWNLOAD');
     try {
-      return this.blobStorageClient.download(args);
+      const perf: PerfArgs = {
+        eventData: {
+          eventName: FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
+          key1: 'size',
+          value1: args.size,
+          meta: {
+            id: args.id,
+          },
+        },
+      };
+
+      return withReportPerformanceMetric(perf, () => this.blobStorageClient.download(args));
     } catch (e) {
       this.incrementUsageCounter('DOWNLOAD_ERROR');
       throw e;

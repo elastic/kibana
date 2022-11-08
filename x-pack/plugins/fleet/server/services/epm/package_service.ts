@@ -26,6 +26,7 @@ import { checkSuperuser } from '../../routes/security';
 import { FleetUnauthorizedError } from '../../errors';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
+import type { FetchFindLatestPackageOptions } from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 import { ensureInstalledPackage, getInstallation } from './packages';
 
@@ -45,7 +46,10 @@ export interface PackageClient {
     spaceId?: string;
   }): Promise<Installation | undefined>;
 
-  fetchFindLatestPackage(packageName: string): Promise<RegistryPackage | BundledPackage>;
+  fetchFindLatestPackage(
+    packageName: string,
+    options?: FetchFindLatestPackageOptions
+  ): Promise<RegistryPackage | BundledPackage>;
 
   getPackage(
     packageName: string,
@@ -116,9 +120,12 @@ class PackageClientImpl implements PackageClient {
     });
   }
 
-  public async fetchFindLatestPackage(packageName: string) {
+  public async fetchFindLatestPackage(
+    packageName: string,
+    options?: FetchFindLatestPackageOptions
+  ): Promise<RegistryPackage | BundledPackage> {
     await this.#runPreflight();
-    return fetchFindLatestPackageOrThrow(packageName);
+    return fetchFindLatestPackageOrThrow(packageName, options);
   }
 
   public async getPackage(

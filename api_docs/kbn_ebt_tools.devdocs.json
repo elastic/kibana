@@ -138,7 +138,7 @@
             "tags": [],
             "label": "eventData",
             "description": [
-              "The data to send, conforming the structure of a {@link MetricEvent }."
+              "The data to send, conforming the structure of a {@link PerformanceMetricEvent }."
             ],
             "signature": [
               {
