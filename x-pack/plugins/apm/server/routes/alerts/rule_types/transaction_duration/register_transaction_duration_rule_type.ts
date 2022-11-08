@@ -253,16 +253,6 @@ export function registerTransactionDurationRuleType({
           windowUnit: ruleParams.windowUnit,
         });
 
-        const viewInAppUrl = addSpaceIdToPath(
-          basePath.publicBaseUrl,
-          spaceId,
-          getAlertUrlTransaction(
-            serviceName,
-            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
-            transactionType
-          )
-        );
-
         const id = `${ApmRuleType.TransactionDuration}_${environmentLabel}`;
 
         const alertUuid = getAlertUuid?.(id) || '';
@@ -271,6 +261,16 @@ export function registerTransactionDurationRuleType({
           basePath,
           spaceId,
           alertUuid
+        );
+
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          getAlertUrlTransaction(
+            serviceName,
+            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
+            transactionType
+          )
         );
 
         services
