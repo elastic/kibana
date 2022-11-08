@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
@@ -180,9 +181,12 @@ export const GroupByExpression = ({
 
           {groupByTypes[groupBy].sizeRequired ? (
             <>
-              <EuiFlexItem grow={true}>
+              <EuiFlexItem grow={false}>
                 <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
                   <EuiFieldNumber
+                    css={css`
+                      min-width: 50px;
+                    `}
                     isInvalid={errors.termSize.length > 0}
                     value={termSize || ''}
                     onChange={(e) => {

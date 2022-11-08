@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export * from './lib/date_range_info';
+export * from './lib/build_agg';
 export interface TimeSeriesResult {
   results: TimeSeriesResultRow[];
   truncated: boolean;
