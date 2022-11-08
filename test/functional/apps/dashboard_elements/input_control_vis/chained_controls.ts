@@ -16,10 +16,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
+  const log = getService('log');
 
   // FLAKY: https://github.com/elastic/kibana/issues/96997
   // FLAKY: https://github.com/elastic/kibana/issues/100372
-  describe.skip('chained controls', function () {
+  describe('chained controls', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -41,6 +42,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should filter child control options by parent control value', async () => {
+      // await PageObjects.common.sleep(3000);
+      // "optionList open: false" --- when the test passes.
+      log.debug(
+        `------ optionList open: ${await testSubjects.exists('~comboBoxOptionsList', {
+          timeout: 50,
+        })}`
+      );
+
       await comboBox.set('listControlSelect0', 'BR');
 
       const childControlMenu = await comboBox.getOptionsList('listControlSelect1');
