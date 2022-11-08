@@ -23,7 +23,11 @@ import type {
 import type { AllUsersAggEsItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 import type { RiskSeverity, UserRiskScore } from '../../../../../../common/search_strategy';
-import { buildUserNamesFilter, getUserRiskIndex } from '../../../../../../common/search_strategy';
+import {
+  RiskScoreEntity,
+  buildUserNamesFilter,
+  getUserRiskIndex,
+} from '../../../../../../common/search_strategy';
 
 export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
   buildDsl: (options: UsersRequestOptions) => {
@@ -123,6 +127,7 @@ async function getUserRiskData(
       buildRiskScoreQuery({
         defaultIndex: [getUserRiskIndex(spaceId)],
         filterQuery: buildUserNamesFilter(userNames),
+        riskScoreEntity: RiskScoreEntity.user,
       })
     );
     return userRiskResponse;

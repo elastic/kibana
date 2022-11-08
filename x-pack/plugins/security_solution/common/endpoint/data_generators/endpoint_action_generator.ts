@@ -88,7 +88,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         output = {
           type: 'json',
           content: {
-            code: 'ra_get-file_success',
+            code: 'ra_get-file_success_done',
             path: '/some/path/bad_file.txt',
             size: 1234,
             zip_size: 123,
@@ -191,6 +191,21 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     }
 
     return details as unknown as ActionDetails<TOutputType, TParameters>;
+  }
+
+  randomGetFileFailureCode(): string {
+    return this.randomChoice([
+      'ra_get-file_error_not-found',
+      'ra_get-file_error_is-directory',
+      'ra_get-file_error_invalid-input',
+      'ra_get-file_error_not-permitted',
+      'ra_get-file_error_too-big',
+      'ra_get-file_error_disk-quota',
+      'ra_get-file_error_processing',
+      'ra_get-file_error_upload-api-unreachable',
+      'ra_get-file_error_upload-timeout',
+      'ra_get-file_error_queue-timeout',
+    ]);
   }
 
   generateActivityLogAction(

@@ -318,7 +318,7 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
   quickFunctionDocumentation: i18n.translate(
     'xpack.lens.indexPattern.avg.quickFunctionDescription',
     {
-      defaultMessage: 'The average value of a number field.',
+      defaultMessage: 'The mean value of a set of number fields.',
     }
   ),
 });

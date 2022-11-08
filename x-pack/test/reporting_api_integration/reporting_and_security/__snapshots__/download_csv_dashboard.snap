@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Reporting APIs CSV Generation from SearchSource _id field is a big integer passes through the value without mutation 1`] = `
+"\\"_id\\",\\"_index\\",\\"_score\\",\\"message_type\\",timestamp
+202209071000000604,\\"test_elastic\\",\\"-\\",OP,\\"Jan 1, 2020 @ 11:00:00.000\\"
+202209071000000605,\\"test_elastic\\",\\"-\\",OP,\\"Jan 1, 2020 @ 11:00:00.000\\"
+202209071000000606,\\"test_elastic\\",\\"-\\",OP,\\"Jan 1, 2020 @ 11:00:00.000\\"
+202209071000000607,\\"test_elastic\\",\\"-\\",OP,\\"Jan 1, 2020 @ 11:00:00.000\\"
+"
+`;
+
 exports[`Reporting APIs CSV Generation from SearchSource date formatting With filters and timebased data, default to UTC 1`] = `
 "\\"@timestamp\\",clientip,extension
 \\"Sep 20, 2015 @ 10:26:48.725\\",\\"74.214.76.90\\",jpg

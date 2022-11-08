@@ -18,6 +18,7 @@ import {
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
+  KQLCustomTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
 import { IndicatorTypes } from '../../types/models';
@@ -32,6 +33,7 @@ import { createObservabilityServerRoute } from '../create_observability_server_r
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'slo.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
   'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+  'slo.kql.custom': new KQLCustomTransformGenerator(),
 };
 
 const createSLORoute = createObservabilityServerRoute({

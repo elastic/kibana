@@ -17,10 +17,10 @@ import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<
   string,
-  { warn: boolean; trigger: boolean; value: number | null }
+  { warn: boolean; trigger: boolean; value: number | null; bucketKey: BucketKey }
 >;
 
-type BucketKey = Record<string, string>;
+export type BucketKey = Record<string, string>;
 interface AggregatedValue {
   value: number | null;
   values?: Record<string, number | null>;
@@ -69,6 +69,7 @@ const NO_DATA_RESPONSE = {
     value: null,
     warn: false,
     trigger: false,
+    bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
   },
 };
 
@@ -112,6 +113,7 @@ export const getData = async (
             trigger: false,
             warn: false,
             value: null,
+            bucketKey: bucket.key,
           };
         } else {
           const value =
@@ -126,6 +128,7 @@ export const getData = async (
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
             warn: (shouldWarn && shouldWarn.value > 0) || false,
             value,
+            bucketKey: bucket.key,
           };
         }
       }
@@ -177,6 +180,7 @@ export const getData = async (
             value,
             warn,
             trigger,
+            bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
           },
         };
       }
@@ -185,6 +189,7 @@ export const getData = async (
           value,
           warn: (shouldWarn && shouldWarn.value > 0) || false,
           trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
+          bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
         },
       };
     } else {

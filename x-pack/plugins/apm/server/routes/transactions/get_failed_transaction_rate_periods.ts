@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Setup } from '../../lib/helpers/setup_request';
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getFailedTransactionRatePeriods({
   environment,
@@ -14,7 +14,7 @@ export async function getFailedTransactionRatePeriods({
   serviceName,
   transactionType,
   transactionName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
@@ -25,7 +25,7 @@ export async function getFailedTransactionRatePeriods({
   serviceName: string;
   transactionType: string;
   transactionName?: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
@@ -37,7 +37,7 @@ export async function getFailedTransactionRatePeriods({
     serviceName,
     transactionTypes: [transactionType],
     transactionName,
-    setup,
+    apmEventClient,
     searchAggregatedTransactions,
   };
 

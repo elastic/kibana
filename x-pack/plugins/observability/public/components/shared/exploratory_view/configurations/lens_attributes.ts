@@ -34,6 +34,8 @@ import {
   XYCurveType,
   XYState,
   YAxisMode,
+  HeatmapVisualizationState,
+  MetricState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
@@ -58,6 +60,7 @@ import {
   ParamFilter,
   SeriesConfig,
   SupportedOperations,
+  TermColumnParamsOrderBy,
   UrlFilter,
   URLReportDefinition,
 } from '../types';
@@ -151,7 +154,7 @@ export interface LayerConfig {
 
 export class LensAttributes {
   layers: Record<string, PersistedIndexPatternLayer>;
-  visualization?: XYState;
+  visualization?: XYState | HeatmapVisualizationState | MetricState;
   layerConfigs: LayerConfig[] = [];
   isMultiSeries?: boolean;
   seriesReferenceLines: Record<
@@ -175,6 +178,7 @@ export class LensAttributes {
     this.seriesReferenceLines = {};
     this.reportType = reportType;
     this.lensFormulaHelper = lensFormulaHelper;
+    this.isMultiSeries = layerConfigs.length > 1;
 
     layerConfigs.forEach(({ seriesConfig, operationType }) => {
       if (operationType && reportType !== ReportTypes.SINGLE_METRIC) {
@@ -186,14 +190,13 @@ export class LensAttributes {
         });
       }
     });
+    this.layerConfigs = layerConfigs;
+    this.globalFilter = this.getGlobalFilter(this.isMultiSeries);
 
     if (reportType === ReportTypes.SINGLE_METRIC) {
       return;
     }
 
-    this.layerConfigs = layerConfigs;
-    this.isMultiSeries = layerConfigs.length > 1;
-    this.globalFilter = this.getGlobalFilter(this.isMultiSeries);
     this.layers = this.getLayers();
     this.visualization = this.getXyState();
   }
@@ -217,34 +220,47 @@ export class LensAttributes {
   getBreakdownColumn({
     sourceField,
     layerId,
-    labels,
-    indexPattern,
     layerConfig,
+    alphabeticOrder,
+    size = 10,
   }: {
     sourceField: string;
     layerId: string;
-    labels: Record<string, string>;
-    indexPattern: DataView;
     layerConfig: LayerConfig;
+    alphabeticOrder?: boolean;
+    size?: number;
   }): TermsIndexPatternColumn {
-    const fieldMeta = indexPattern.getFieldByName(sourceField);
+    const { dataView, seriesConfig } = layerConfig;
 
-    const { sourceField: yAxisSourceField } = layerConfig.seriesConfig.yAxisColumns[0];
+    const fieldMeta = dataView.getFieldByName(sourceField);
+
+    const { sourceField: yAxisSourceField } = seriesConfig.yAxisColumns[0];
+
+    const labels = seriesConfig.labels ?? {};
 
     const isFormulaColumn = yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
 
+    let orderBy: TermColumnParamsOrderBy = {
+      type: 'column',
+      columnId: `y-axis-column-${layerId}-0`,
+    };
+
+    if (isFormulaColumn) {
+      orderBy = { type: 'custom' };
+    } else if (alphabeticOrder) {
+      orderBy = { type: 'alphabetical', fallback: true };
+    }
+
     return {
       sourceField,
-      label: `Top values of ${labels[sourceField]}`,
+      label: labels[sourceField],
       dataType: fieldMeta?.type as DataType,
       operationType: 'terms',
       scale: 'ordinal',
       isBucketed: true,
       params: {
-        orderBy: isFormulaColumn
-          ? { type: 'custom' }
-          : { type: 'column', columnId: `y-axis-column-${layerId}-0` },
-        size: 10,
+        orderBy,
+        size,
         orderDirection: 'desc',
         otherBucket: true,
         missingBucket: false,
@@ -504,9 +520,7 @@ export class LensAttributes {
       return this.getBreakdownColumn({
         layerId,
         layerConfig,
-        indexPattern: layerConfig.dataView,
         sourceField: layerConfig.breakdown || layerConfig.seriesConfig.breakdownFields[0],
-        labels: layerConfig.seriesConfig.labels,
       });
     }
 
@@ -1006,8 +1020,6 @@ export class LensAttributes {
       ? this.getBreakdownColumn({
           layerId,
           sourceField: breakdown!,
-          indexPattern: layerConfig.dataView,
-          labels: layerConfig.seriesConfig.labels,
           layerConfig,
         })
       : null;
@@ -1230,7 +1242,10 @@ export class LensAttributes {
     return { internalReferences, adHocDataViews };
   }
 
-  getJSON(lastRefresh?: number): TypedLensByValueInput['attributes'] {
+  getJSON(
+    visualizationType: 'lnsXY' | 'lnsLegacyMetric' | 'lnsHeatmap' = 'lnsXY',
+    lastRefresh?: number
+  ): TypedLensByValueInput['attributes'] {
     const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
 
     const { internalReferences, adHocDataViews } = this.getReferences();
@@ -1238,7 +1253,7 @@ export class LensAttributes {
     return {
       title: 'Prefilled from exploratory view app',
       description: lastRefresh ? `Last refreshed at ${new Date(lastRefresh).toISOString()}` : '',
-      visualizationType: 'lnsXY',
+      visualizationType,
       references: [],
       state: {
         internalReferences,

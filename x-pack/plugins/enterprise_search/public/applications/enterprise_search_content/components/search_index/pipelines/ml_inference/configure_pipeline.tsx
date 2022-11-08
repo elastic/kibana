@@ -30,10 +30,25 @@ import { docLinks } from '../../../../../shared/doc_links';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
-import { MLInferenceLogic } from './ml_inference_logic';
+import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { MlModelSelectOption } from './model_select_option';
+import { PipelineSelectOption } from './pipeline_select_option';
 
 const MODEL_SELECT_PLACEHOLDER_VALUE = 'model_placeholder$$';
+const PIPELINE_SELECT_PLACEHOLDER_VALUE = 'pipeline_placeholder$$';
+
+const CHOOSE_EXISTING_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.chooseLabel',
+  { defaultMessage: 'Choose' }
+);
+const CHOOSE_NEW_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.newLabel',
+  { defaultMessage: 'New' }
+);
+const CHOOSE_PIPELINE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.existingLabel',
+  { defaultMessage: 'Existing' }
+);
 
 const NoSourceFieldsError: React.FC = () => (
   <FormattedMessage
@@ -56,14 +71,15 @@ export const ConfigurePipeline: React.FC = () => {
   const {
     addInferencePipelineModal: { configuration },
     formErrors,
+    existingInferencePipelines,
     supportedMLModels,
     sourceFields,
   } = useValues(MLInferenceLogic);
-  const { setInferencePipelineConfiguration } = useActions(MLInferenceLogic);
+  const { selectExistingPipeline, setInferencePipelineConfiguration } =
+    useActions(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
 
   const { destinationField, modelID, pipelineName, sourceField } = configuration;
-  const models = supportedMLModels ?? [];
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
   const emptySourceFields = (sourceFields?.length ?? 0) === 0;
 
@@ -76,12 +92,30 @@ export const ConfigurePipeline: React.FC = () => {
       ),
       value: MODEL_SELECT_PLACEHOLDER_VALUE,
     },
-    ...models.map((model) => ({
+    ...supportedMLModels.map((model) => ({
       dropdownDisplay: <MlModelSelectOption model={model} />,
       inputDisplay: model.model_id,
       value: model.model_id,
     })),
   ];
+  const pipelineOptions: Array<EuiSuperSelectOption<string>> = [
+    {
+      disabled: true,
+      inputDisplay: i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.placeholder',
+        { defaultMessage: 'Select one' }
+      ),
+      value: PIPELINE_SELECT_PLACEHOLDER_VALUE,
+    },
+    ...(existingInferencePipelines?.map((pipeline) => ({
+      disabled: pipeline.disabled,
+      dropdownDisplay: <PipelineSelectOption pipeline={pipeline} />,
+      inputDisplay: pipeline.pipelineName,
+      value: pipeline.pipelineName,
+    })) ?? []),
+  ];
+
+  const inputsDisabled = configuration.existingPipeline !== false;
 
   return (
     <>
@@ -106,45 +140,107 @@ export const ConfigurePipeline: React.FC = () => {
       </EuiText>
       <EuiSpacer />
       <EuiForm component="form">
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.nameLabel',
-            {
-              defaultMessage: 'Name',
-            }
-          )}
-          helpText={
-            !nameError &&
-            i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.name.helpText',
-              {
-                defaultMessage:
-                  'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens. The pipeline name will be automatically prefixed with "ml-inference-".',
-              }
-            )
-          }
-          error={nameError && formErrors.pipelineName}
-          isInvalid={nameError}
-        >
-          <EuiFieldText
-            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-uniqueName`}
-            fullWidth
-            placeholder={i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.namePlaceholder',
-              {
-                defaultMessage: 'Enter a unique name for this pipeline',
-              }
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              label={i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.chooseExistingLabel',
+                { defaultMessage: 'New or existing' }
+              )}
+            >
+              <EuiSelect
+                options={[
+                  {
+                    disabled: true,
+                    text: CHOOSE_EXISTING_LABEL,
+                    value: '',
+                  },
+                  {
+                    text: CHOOSE_NEW_LABEL,
+                    value: 'false',
+                  },
+                  {
+                    disabled:
+                      !existingInferencePipelines || existingInferencePipelines.length === 0,
+                    text: CHOOSE_PIPELINE_LABEL,
+                    value: 'true',
+                  },
+                ]}
+                onChange={(e) =>
+                  setInferencePipelineConfiguration({
+                    ...EMPTY_PIPELINE_CONFIGURATION,
+                    existingPipeline: e.target.value === 'true',
+                  })
+                }
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {configuration.existingPipeline === true ? (
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipelineLabel',
+                  {
+                    defaultMessage: 'Select an existing inference pipeline',
+                  }
+                )}
+              >
+                <EuiSuperSelect
+                  fullWidth
+                  hasDividers
+                  data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectExistingPipeline`}
+                  valueOfSelected={
+                    pipelineName.length > 0 ? pipelineName : PIPELINE_SELECT_PLACEHOLDER_VALUE
+                  }
+                  options={pipelineOptions}
+                  onChange={(value) => selectExistingPipeline(value)}
+                />
+              </EuiFormRow>
+            ) : (
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.nameLabel',
+                  {
+                    defaultMessage: 'Name',
+                  }
+                )}
+                helpText={
+                  !nameError &&
+                  i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.name.helpText',
+                    {
+                      defaultMessage:
+                        'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens. The pipeline name will be automatically prefixed with "ml-inference-".',
+                    }
+                  )
+                }
+                error={nameError && formErrors.pipelineName}
+                isInvalid={nameError}
+              >
+                <EuiFieldText
+                  data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-uniqueName`}
+                  disabled={inputsDisabled}
+                  fullWidth
+                  placeholder={i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.namePlaceholder',
+                    {
+                      defaultMessage: 'Enter a unique name for this pipeline',
+                    }
+                  )}
+                  value={pipelineName}
+                  onChange={(e) =>
+                    setInferencePipelineConfiguration({
+                      ...configuration,
+                      pipelineName: e.target.value,
+                    })
+                  }
+                />
+              </EuiFormRow>
             )}
-            value={pipelineName}
-            onChange={(e) =>
-              setInferencePipelineConfiguration({
-                ...configuration,
-                pipelineName: e.target.value,
-              })
-            }
-          />
-        </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer />
         <EuiFormRow
           label={i18n.translate(
@@ -159,6 +255,7 @@ export const ConfigurePipeline: React.FC = () => {
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectTrainedModel`}
             fullWidth
             hasDividers
+            disabled={inputsDisabled}
             itemLayoutAlign="top"
             onChange={(value) =>
               setInferencePipelineConfiguration({
@@ -185,6 +282,7 @@ export const ConfigurePipeline: React.FC = () => {
             >
               <EuiSelect
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectSchemaField`}
+                disabled={inputsDisabled}
                 value={sourceField}
                 options={[
                   {
@@ -235,6 +333,7 @@ export const ConfigurePipeline: React.FC = () => {
             >
               <EuiFieldText
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-destionationField`}
+                disabled={inputsDisabled}
                 placeholder="custom_field_name"
                 value={destinationField}
                 onChange={(e) =>

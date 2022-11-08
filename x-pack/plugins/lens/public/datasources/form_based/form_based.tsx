@@ -36,6 +36,7 @@ import type {
   IndexPatternField,
   IndexPattern,
   IndexPatternRef,
+  DatasourceLayerSettingsProps,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -64,7 +65,7 @@ import {
 
 import {
   getFiltersInLayer,
-  getTSDBRollupWarningMessages,
+  getShardFailuresWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
@@ -88,14 +89,15 @@ import {
 } from './operations/layer_helpers';
 import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
-import { Datasource, VisualizeEditorContext } from '../../types';
+import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
-import { DraggingIdentifier } from '../../drag_drop';
+import type { DraggingIdentifier } from '../../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
+import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer } from '../..';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
@@ -218,27 +220,47 @@ export function getFormBasedDatasource({
     removeLayer(state: FormBasedPrivateState, layerId: string) {
       const newLayers = { ...state.layers };
       delete newLayers[layerId];
+      const removedLayerIds: string[] = [layerId];
 
       // delete layers linked to this layer
       Object.keys(newLayers).forEach((id) => {
         const linkedLayers = newLayers[id]?.linkToLayers;
         if (linkedLayers && linkedLayers.includes(layerId)) {
           delete newLayers[id];
+          removedLayerIds.push(id);
         }
       });
 
       return {
-        ...state,
-        layers: newLayers,
+        removedLayerIds,
+        newState: {
+          ...state,
+          layers: newLayers,
+        },
       };
     },
 
     clearLayer(state: FormBasedPrivateState, layerId: string) {
+      const newLayers = { ...state.layers };
+
+      const removedLayerIds: string[] = [];
+      // delete layers linked to this layer
+      Object.keys(newLayers).forEach((id) => {
+        const linkedLayers = newLayers[id]?.linkToLayers;
+        if (linkedLayers && linkedLayers.includes(layerId)) {
+          delete newLayers[id];
+          removedLayerIds.push(id);
+        }
+      });
+
       return {
-        ...state,
-        layers: {
-          ...state.layers,
-          [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
+        removedLayerIds,
+        newState: {
+          ...state,
+          layers: {
+            ...newLayers,
+            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
+          },
         },
       };
     },
@@ -392,8 +414,34 @@ export function getFormBasedDatasource({
       return fields;
     },
 
-    toExpression: (state, layerId, indexPatterns) =>
-      toExpression(state, layerId, indexPatterns, uiSettings),
+    toExpression: (state, layerId, indexPatterns, searchSessionId) =>
+      toExpression(state, layerId, indexPatterns, uiSettings, searchSessionId),
+
+    renderLayerSettings(
+      domElement: Element,
+      props: DatasourceLayerSettingsProps<FormBasedPrivateState>
+    ) {
+      render(
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+                unifiedSearch,
+                discover,
+              }}
+            >
+              <LayerSettingsPanel {...props} />
+            </KibanaContextProvider>
+          </I18nProvider>
+        </KibanaThemeProvider>,
+        domElement
+      );
+    },
 
     renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<FormBasedPrivateState>) {
       const { onChangeIndexPattern, ...otherProps } = props;
@@ -569,6 +617,22 @@ export function getFormBasedDatasource({
 
     getDropProps,
     onDrop,
+    getSupportedActionsForLayer(layerId, state, _, openLayerSettings) {
+      if (!openLayerSettings) {
+        return [];
+      }
+      return [
+        {
+          displayName: i18n.translate('xpack.lens.indexPattern.layerSettingsAction', {
+            defaultMessage: 'Layer settings',
+          }),
+          execute: openLayerSettings,
+          icon: 'gear',
+          isCompatible: Boolean(state.layers[layerId]),
+          'data-test-subj': 'lnsLayerSettings',
+        },
+      ];
+    },
 
     getCustomWorkspaceRenderer: (
       state: FormBasedPrivateState,
@@ -833,8 +897,8 @@ export function getFormBasedDatasource({
         ),
       ];
     },
-    getSearchWarningMessages: (state, warning) => {
-      return [...getTSDBRollupWarningMessages(state, warning)];
+    getSearchWarningMessages: (state, warning, request, response) => {
+      return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
     },
     getDeprecationMessages: () => {
       const deprecatedMessages: React.ReactNode[] = [];
@@ -931,5 +995,6 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
     linkToLayers,
     columns: {},
     columnOrder: [],
+    sampling: 1,
   };
 }

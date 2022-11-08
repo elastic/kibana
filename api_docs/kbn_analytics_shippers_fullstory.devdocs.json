@@ -36,7 +36,13 @@
             "text": "FullStoryShipper"
           },
           " implements ",
-          "IShipper"
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.IShipper",
+            "text": "IShipper"
+          }
         ],
         "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
         "deprecated": false,
@@ -104,7 +110,13 @@
                   "{@link AnalyticsClientInitContext }"
                 ],
                 "signature": [
-                  "AnalyticsClientInitContext"
+                  {
+                    "pluginId": "@kbn/analytics-client",
+                    "scope": "common",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
+                    "section": "def-common.AnalyticsClientInitContext",
+                    "text": "AnalyticsClientInitContext"
+                  }
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
@@ -125,7 +137,13 @@
             ],
             "signature": [
               "(newContext: ",
-              "EventContext",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.EventContext",
+                "text": "EventContext"
+              },
               ") => void"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
@@ -142,7 +160,13 @@
                   "The full new context to set {@link EventContext }"
                 ],
                 "signature": [
-                  "EventContext"
+                  {
+                    "pluginId": "@kbn/analytics-client",
+                    "scope": "common",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
+                    "section": "def-common.EventContext",
+                    "text": "EventContext"
+                  }
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
@@ -199,7 +223,13 @@
             ],
             "signature": [
               "(events: ",
-              "Event",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.Event",
+                "text": "Event"
+              },
               "<Record<string, unknown>>[]) => void"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
@@ -216,7 +246,13 @@
                   "batched events {@link Event }"
                 ],
                 "signature": [
-                  "Event",
+                  {
+                    "pluginId": "@kbn/analytics-client",
+                    "scope": "common",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
+                    "section": "def-common.Event",
+                    "text": "Event"
+                  },
                   "<Record<string, unknown>>[]"
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",

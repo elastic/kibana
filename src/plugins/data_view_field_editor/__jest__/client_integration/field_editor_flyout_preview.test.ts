@@ -27,7 +27,7 @@ describe('Field editor Preview panel', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {
