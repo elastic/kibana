@@ -84,7 +84,6 @@ export class ImageEmbeddableFactoryDefinition
   }
 
   public extract(state: EmbeddableStateWithType) {
-    debugger;
     const imageEmbeddableInput = state as unknown as ImageEmbeddableInput;
     const references: SavedObjectReference[] = [];
     if (imageEmbeddableInput.imageConfig?.src?.type === 'file') {
@@ -99,7 +98,6 @@ export class ImageEmbeddableFactoryDefinition
   }
 
   public inject(state: EmbeddableStateWithType, references: SavedObjectReference[]) {
-    debugger;
     const imageEmbeddableInput = state as unknown as ImageEmbeddableInput & { type: string };
 
     if (imageEmbeddableInput.imageConfig?.src?.type === 'file') {
