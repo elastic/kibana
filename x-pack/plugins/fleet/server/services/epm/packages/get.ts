@@ -300,8 +300,14 @@ export async function getPackageFromSource(options: {
       }
     }
   } else {
-    res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
-    logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+    res = getArchivePackage({ name: pkgName, version: pkgVersion });
+
+    if (res) {
+      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from cache`);
+    } else {
+      res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+    }
   }
   if (!res) {
     throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);

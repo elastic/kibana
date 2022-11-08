@@ -46,6 +46,7 @@ export const GetInfoRequestSchema = {
   query: schema.object({
     ignoreUnverified: schema.maybe(schema.boolean()),
     prerelease: schema.maybe(schema.boolean()),
+    full: schema.maybe(schema.boolean()),
   }),
 };
 

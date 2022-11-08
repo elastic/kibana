@@ -251,14 +251,7 @@ export async function fetchCategories(
 
 export async function getInfo(name: string, version: string) {
   return withPackageSpan('Fetch package info', async () => {
-    let packageInfo = getPackageInfo({ name, version });
-    if (!packageInfo) {
-      packageInfo = await fetchInfo(name, version);
-      // only cache registry pkg info for integration pkgs because
-      // input type packages must get their pkg info from the archive
-      if (packageInfo.type === 'integration') setPackageInfo({ name, version, packageInfo });
-    }
-
+    const packageInfo = await fetchInfo(name, version);
     return packageInfo as RegistryPackage;
   });
 }
@@ -272,15 +265,12 @@ async function getPackageInfoFromArchiveOrCache(
   archivePath: string
 ): Promise<ArchivePackage> {
   const cachedInfo = getPackageInfo({ name, version });
-
   if (!cachedInfo) {
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(
       archiveBuffer,
       ensureContentType(archivePath)
     );
-    // set the download URL as it isn't contained in the manifest
-    // this allows us to re-download the archive during package install
-    setPackageInfo({ packageInfo: { ...packageInfo, download: archivePath }, name, version });
+    setPackageInfo({ packageInfo, name, version });
     return packageInfo;
   } else {
     return cachedInfo;
