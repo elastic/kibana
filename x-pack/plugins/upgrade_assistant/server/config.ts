@@ -9,7 +9,7 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 
 // -------------------------------
 // >= 8.6 UA is always enabled to guide stack upgrades
-// even for minors releases.
+// even for minor releases.
 // -------------------------------
 const configSchema = schema.object({
   featureSet: schema.object({
