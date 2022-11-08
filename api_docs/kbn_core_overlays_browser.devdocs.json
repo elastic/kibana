@@ -673,7 +673,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "ButtonColor",
+              "EuiButtonColor",
               " | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
