@@ -111,6 +111,7 @@ describe('Fleet startup', () => {
       cy.getBySel(AGENT_FLYOUT.POLICY_DROPDOWN);
 
       // verify fleet server enroll command contains created policy id
+      cy.getBySel(FLEET_SERVER_SETUP.SELECT_HOSTS).click();
       cy.getBySel(FLEET_SERVER_SETUP.ADD_HOST_BTN).click();
       cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('New host');
       cy.get('[placeholder="Specify host URL"').type('https://localhost:8220');
