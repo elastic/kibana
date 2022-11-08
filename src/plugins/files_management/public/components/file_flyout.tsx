@@ -53,7 +53,7 @@ export const FileFlyout: FunctionComponent<Props> = ({ onClose, file }) => {
                           : 'warning'
                       }
                     >
-                      {file.status}
+                      {i18nTexts.filesStatus[file.status]}
                     </EuiHealth>
                   ),
                 },

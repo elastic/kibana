@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { FileStatus } from '@kbn/files-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
@@ -68,4 +69,21 @@ export const i18nTexts = {
   filesFlyoutUpdated: i18n.translate('filesManagement.filesFlyout.updatedLabel', {
     defaultMessage: 'Updated',
   }),
+  filesStatus: {
+    AWAITING_UPLOAD: i18n.translate('filesManagement.filesFlyout.status.awaitingUpload', {
+      defaultMessage: 'Awaiting upload',
+    }),
+    DELETED: i18n.translate('filesManagement.filesFlyout.status.deleted', {
+      defaultMessage: 'Deleted',
+    }),
+    READY: i18n.translate('filesManagement.filesFlyout.status.ready', {
+      defaultMessage: 'Available',
+    }),
+    UPLOADING: i18n.translate('filesManagement.filesFlyout.status.uploading', {
+      defaultMessage: 'Uploading',
+    }),
+    UPLOAD_ERROR: i18n.translate('filesManagement.filesFlyout.status.uploadError', {
+      defaultMessage: 'Upload error',
+    }),
+  } as Record<FileStatus, string>,
 };
