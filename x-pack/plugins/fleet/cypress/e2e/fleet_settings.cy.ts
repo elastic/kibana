@@ -69,6 +69,8 @@ describe('Edit settings', () => {
 
   it('should allow to create new Fleet server hosts', () => {
     cy.getBySel(SETTINGS_FLEET_SERVER_HOSTS.ADD_BUTTON).click();
+    cy.getBySel(FLEET_SERVER_SETUP.ADD_HOST_BTN).click();
+
     cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('New Host');
     cy.getBySel(FLEET_SERVER_SETUP.DEFAULT_SWITCH).click();
     cy.get('[placeholder="Specify host URL"').type('https://localhost:8221');

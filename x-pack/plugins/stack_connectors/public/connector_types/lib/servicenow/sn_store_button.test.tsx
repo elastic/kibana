@@ -19,7 +19,7 @@ describe('SNStoreButton', () => {
 
   it('should render a danger button', () => {
     render(<SNStoreButton color="danger" appId={appId} />);
-    expect(screen.getByRole('link')).toHaveClass('euiButton--danger');
+    expect(screen.getByRole('link').classList[1]).toContain('danger');
   });
 
   it('should render with correct href', () => {
