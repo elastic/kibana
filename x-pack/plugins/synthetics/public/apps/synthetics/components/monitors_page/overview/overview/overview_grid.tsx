@@ -94,7 +94,7 @@ export const OverviewGrid = () => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
           <OverviewStatus />
         </EuiFlexItem>
