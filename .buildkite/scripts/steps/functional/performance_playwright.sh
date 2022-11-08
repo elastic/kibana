@@ -119,13 +119,13 @@ if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
   cd "$KIBANA_DIR"
 fi
 
-echo "--- report/record failed journeys"
-if [ "${failedJourneys[*]}" != "" ]; then
-  buildkite-agent meta-data set "failed-journeys" "$(printf "%s\n" "${failedJourneys[@]}")"
+# echo "--- report/record failed journeys"
+# if [ "${failedJourneys[*]}" != "" ]; then
+#   buildkite-agent meta-data set "failed-journeys" "$(printf "%s\n" "${failedJourneys[@]}")"
 
-  echo "failed journeys: ${failedJourneys[*]}"
-  exit 1
-fi
+#   echo "failed journeys: ${failedJourneys[*]}"
+#   exit 1
+# fi
 
 echo "--- 🔎 Shutdown ES"
 check_running_processes
