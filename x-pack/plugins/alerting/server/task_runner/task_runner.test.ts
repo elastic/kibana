@@ -259,6 +259,10 @@ describe('Task Runner', () => {
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
     );
     expect(logger.debug).nthCalledWith(
+      3,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}'
+    );
+    expect(logger.debug).nthCalledWith(
       4,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
     );
@@ -336,6 +340,10 @@ describe('Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         3,
         'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      );
+      expect(logger.debug).nthCalledWith(
+        4,
+        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}'
       );
       expect(logger.debug).nthCalledWith(
         5,
@@ -418,6 +426,10 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(
       4,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+    );
+    expect(logger.debug).nthCalledWith(
+      5,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}'
     );
     expect(logger.debug).nthCalledWith(
       6,
@@ -592,6 +604,10 @@ describe('Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         4,
         'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":2,"new":2,"recovered":0,"ignored":0}}'
       );
       expect(logger.debug).nthCalledWith(
         6,
@@ -1025,6 +1041,10 @@ describe('Task Runner', () => {
         'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
       );
       expect(logger.debug).nthCalledWith(
+        5,
+        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}'
+      );
+      expect(logger.debug).nthCalledWith(
         6,
         'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
       );
@@ -1136,6 +1156,10 @@ describe('Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         4,
         `deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}'
       );
       expect(logger.debug).nthCalledWith(
         6,
@@ -2084,6 +2108,10 @@ describe('Task Runner', () => {
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
     );
     expect(logger.debug).nthCalledWith(
+      3,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}'
+    );
+    expect(logger.debug).nthCalledWith(
       4,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
     );
@@ -2173,6 +2201,79 @@ describe('Task Runner', () => {
     ruleType.executor.mockClear();
     expect(runnerResult).toEqual(
       generateRunnerResult({ successRatio: 0.75, history: [true, true, true, false] })
+    );
+  });
+
+  test('successfully stores next run', async () => {
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
+    );
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    rulesClient.get.mockResolvedValue({
+      ...mockedRuleTypeSavedObject,
+      schedule: { interval: '50s' },
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
+
+    await taskRunner.run();
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(
+      ...generateSavedObjectParams({
+        nextRun: '1970-01-01T00:00:50.000Z',
+      })
+    );
+  });
+
+  test('updates the rule saved object correctly when failed', async () => {
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
+    );
+    expect(AlertingEventLogger).toHaveBeenCalled();
+
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        throw new Error(GENERIC_ERROR_MESSAGE);
+      }
+    );
+    await taskRunner.run();
+    ruleType.executor.mockClear();
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(
+      ...generateSavedObjectParams({
+        error: {
+          message: GENERIC_ERROR_MESSAGE,
+          reason: 'execute',
+        },
+        outcome: 'failed',
+        status: 'error',
+        successRatio: 0,
+        history: [
+          {
+            success: false,
+            timestamp: 0,
+          },
+        ],
+        nextRun: null,
+      })
     );
   });
 

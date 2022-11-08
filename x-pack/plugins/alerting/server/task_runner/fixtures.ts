@@ -6,7 +6,7 @@
  */
 
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { Rule, RuleTypeParams, RecoveredActionGroup } from '../../common';
+import { Rule, RuleTypeParams, RecoveredActionGroup, RuleMonitoring } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -54,17 +54,30 @@ export const RULE_ACTIONS = [
   },
 ];
 
+const defaultHistory = [
+  {
+    success: true,
+    timestamp: 0,
+  },
+];
+
 export const generateSavedObjectParams = ({
   error = null,
   warning = null,
   status = 'ok',
   outcome = 'succeeded',
+  nextRun = '1970-01-01T00:00:10.000Z',
+  successRatio = 1,
+  history = defaultHistory,
   alertsCount,
 }: {
   error?: null | { reason: string; message: string };
   warning?: null | { reason: string; message: string };
   status?: string;
   outcome?: string;
+  nextRun?: string | null;
+  successRatio?: number;
+  history?: RuleMonitoring['run']['history'];
   alertsCount?: Record<string, number>;
 }) => [
   'alert',
@@ -73,14 +86,9 @@ export const generateSavedObjectParams = ({
     monitoring: {
       run: {
         calculated_metrics: {
-          success_ratio: 1,
+          success_ratio: successRatio,
         },
-        history: [
-          {
-            success: true,
-            timestamp: 0,
-          },
-        ],
+        history,
         last_run: {
           timestamp: '1970-01-01T00:00:00.000Z',
           metrics: {
@@ -112,7 +120,7 @@ export const generateSavedObjectParams = ({
         ...(alertsCount || {}),
       },
     },
-    nextRun: '1970-01-01T00:00:10.000Z',
+    nextRun,
   },
   { refresh: false, namespace: undefined },
 ];
