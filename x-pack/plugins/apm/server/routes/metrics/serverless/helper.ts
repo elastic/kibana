@@ -47,17 +47,23 @@ const GB = 1024 ** 3;
 export function calcComputeUsageGBSeconds({
   billedDuration,
   totalMemory,
+  countInvocations,
 }: {
   billedDuration?: number | null;
   totalMemory?: number | null;
+  countInvocations?: number | null;
 }) {
-  if (!isFiniteNumber(billedDuration) || !isFiniteNumber(totalMemory)) {
+  if (
+    !isFiniteNumber(billedDuration) ||
+    !isFiniteNumber(totalMemory) ||
+    !isFiniteNumber(countInvocations)
+  ) {
     return undefined;
   }
 
   const totalMemoryGB = totalMemory / GB;
-  const billedDurationSec = billedDuration / 1000;
-  return totalMemoryGB * billedDurationSec;
+  const faasBilledDurationSec = billedDuration / 1000;
+  return totalMemoryGB * faasBilledDurationSec * countInvocations;
 }
 
 export function calcEstimatedCost({
@@ -67,6 +73,7 @@ export function calcEstimatedCost({
   billedDuration,
   totalMemory,
   awsLambdaRequestCostPerMillion,
+  countInvocations,
 }: {
   awsLambdaPriceFactor?: AWSLambdaPriceFactor;
   architecture?: AwsLambdaArchitecture;
@@ -74,11 +81,13 @@ export function calcEstimatedCost({
   billedDuration?: number | null;
   totalMemory?: number | null;
   awsLambdaRequestCostPerMillion?: number;
+  countInvocations?: number | null;
 }) {
   try {
     const computeUsage = calcComputeUsageGBSeconds({
       billedDuration,
       totalMemory,
+      countInvocations,
     });
     if (
       !awsLambdaPriceFactor ||

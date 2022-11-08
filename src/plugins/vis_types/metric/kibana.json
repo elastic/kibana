@@ -17,7 +17,7 @@
   ],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Registers the Metric aggregation-based visualization."
 }
