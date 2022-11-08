@@ -164,19 +164,21 @@ export async function updateTagsBatch(
   // creating an action doc so that update tags  shows up in activity
   await createAgentAction(esClient, {
     id: actionId,
-    agents: options.kuery !== undefined ? [] : agentIds,
+    agents: options.kuery === undefined ? agentIds : [],
     created_at: new Date().toISOString(),
     type: 'UPDATE_TAGS',
     total,
   });
 
+  // creating unique 0...n ids to use as agentId, as we don't have all agent ids in case of action by kuery
+  const getArray = (count: number) => [...Array(count).keys()];
+
   // writing successful action results
   if (res.updated ?? 0 > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-      // we don't have all agent ids in case of kuery
-      // it would be better to be able to write 1 action doc for multiple agents at once
-      (options.kuery !== undefined ? [...Array(res.updated).keys()] : agentIds).map((id) => ({
+
+      (options.kuery === undefined ? agentIds : getArray(res.updated!)).map((id) => ({
         agentId: id + '',
         actionId,
       }))
@@ -195,18 +197,17 @@ export async function updateTagsBatch(
     );
   }
 
-  // writing hosted agent errors - hosted agents filtered out when kuery is passed
+  // writing hosted agent errors - hosted agents filtered out
   if ((res.total ?? total) < total) {
     await bulkCreateAgentActionResults(
       esClient,
-      (options.kuery === undefined
-        ? hostedAgentIds
-        : [...Array(total - (res.total ?? total)).keys()]
-      ).map((id) => ({
-        agentId: id + '',
-        actionId,
-        error: hostedAgentError,
-      }))
+      (options.kuery === undefined ? hostedAgentIds : getArray(total - (res.total ?? total))).map(
+        (id) => ({
+          agentId: id + '',
+          actionId,
+          error: hostedAgentError,
+        })
+      )
     );
   }
 
