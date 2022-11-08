@@ -22,8 +22,8 @@ import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/gene
 import { fetchStackVersion } from './common/stack_services';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
 import { withResponseActionsUser, noResponseActionsUser } from './common/roles_users';
-import { withResponseActionsRole } from './common/roles_users/with_response_actions_role.json';
-import { noResponseActionsRole } from './common/roles_users/without_response_actions_role.json';
+import { withResponseActionsRole } from './common/roles_users/with_response_actions_role';
+import { noResponseActionsRole } from './common/roles_users/without_response_actions_role';
 
 main();
 

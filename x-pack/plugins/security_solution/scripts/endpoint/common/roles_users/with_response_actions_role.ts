@@ -6,60 +6,22 @@
  */
 
 import type { Role } from '@kbn/security-plugin/common';
+import { noResponseActionsRole } from './without_response_actions_role';
 
 export const withResponseActionsRole: Omit<Role, 'name'> = {
-  elasticsearch: {
-    cluster: ['manage'],
-    indices: [
-      {
-        names: [
-          '.alerts-security.alerts-default',
-          '.alerts-security.alerts-*',
-          '.siem-signals-*',
-          '.items-*',
-          '.lists-*',
-        ],
-        privileges: ['manage', 'write', 'read', 'view_index_metadata'],
-      },
-    ],
-    run_as: [],
-  },
+  ...noResponseActionsRole,
   kibana: [
     {
-      base: [],
+      ...noResponseActionsRole.kibana[0],
       feature: {
-        actions: ['all'],
-        advancedSettings: ['all'],
-        dev_tools: ['all'],
-        fleet: ['all'],
-        generalCases: ['all'],
-        indexPatterns: ['all'],
-        osquery: ['all'],
-        savedObjectsManagement: ['all'],
-        savedObjectsTagging: ['all'],
+        ...noResponseActionsRole.kibana[0].feature,
         siem: [
-          'minimal_all',
-          'endpoint_list_all',
-          'endpoint_list_read',
-          'trusted_applications_all',
-          'trusted_applications_read',
-          'host_isolation_exceptions_all',
-          'host_isolation_exceptions_read',
-          'blocklist_all',
-          'blocklist_read',
-          'event_filters_all',
-          'event_filters_read',
-          'policy_management_all',
-          'policy_management_read',
-          'actions_log_management_all',
-          'actions_log_management_read',
+          ...noResponseActionsRole.kibana[0].feature.siem,
           'host_isolation_all',
           'process_operations_all',
           'file_operations_all',
         ],
-        stackAlerts: ['all'],
       },
-      spaces: ['*'],
     },
   ],
 };
