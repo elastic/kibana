@@ -27,7 +27,6 @@ const findProjects = (patterns: string[]) =>
   globby.sync(patterns, { cwd: REPO_ROOT }).map((path) => createProject(path));
 
 export const PROJECTS = [
-  createProject('tsconfig.json'),
   createProject('test/tsconfig.json', { name: 'kibana/test' }),
   createProject('x-pack/test/tsconfig.json', { name: 'x-pack/test' }),
   createProject('x-pack/performance/tsconfig.json', { name: 'x-pack/performance' }),
