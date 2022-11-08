@@ -31,7 +31,7 @@ import { DiscoverSidebar } from './discover_sidebar';
 import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
-// import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
+import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { getDataViewFieldList } from './lib/get_data_view_field_list';
@@ -284,7 +284,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           <EuiButton
             contentProps={{
               className: 'dscSidebar__mobileButton',
-              // id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields, // TODO: fix tour step for mobiel view
+              id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
             }}
             fullWidth
             onClick={() => setIsFlyoutVisible(true)}

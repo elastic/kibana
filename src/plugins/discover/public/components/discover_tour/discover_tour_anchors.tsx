@@ -9,11 +9,12 @@
 import { htmlIdGenerator } from '@elastic/eui';
 
 export const DISCOVER_TOUR_STEP_ANCHOR_IDS = {
+  addFields: htmlIdGenerator('dsc-tour-step-add-fields')(),
   expandDocument: htmlIdGenerator('dsc-tour-step-expand')(),
 };
 
 export const DISCOVER_TOUR_STEP_ANCHORS = {
-  addFields: '[data-test-subj="fieldListGroupedAvailableFields"]',
+  addFields: `[data-test-subj="fieldListGroupedAvailableFields-count"], #${DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields}`,
   reorderColumns: '[data-test-subj="dataGridColumnSelectorButton"]',
   sort: '[data-test-subj="dataGridColumnSortingButton"]',
   changeRowHeight: '[data-test-subj="dataGridDisplaySelectorButton"]',
