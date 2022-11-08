@@ -117,3 +117,17 @@ export const MANAGE_RULES_DESCRIPTION = i18n.translate(
     defaultMessage: 'Link or unlink rules to this exception list.',
   }
 );
+
+export const DELETE_EXCEPTION_LIST = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.deleteExceptionList',
+  {
+    defaultMessage: 'Delete Exception List',
+  }
+);
+
+export const EXPORT_EXCEPTION_LIST = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.exportExceptionList',
+  {
+    defaultMessage: 'Export Exception List',
+  }
+);

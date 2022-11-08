@@ -14,8 +14,7 @@ import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import { useGeneratedHtmlId } from '@elastic/eui';
 import type { ExceptionListInfo } from '../use_all_exception_lists';
 import { useListExceptionItems } from '../use_list_exception_items';
-import * as i18n from '../../translations/translations';
-import * as i18nListDetails from '../../translations/list_details.translations';
+import * as i18n from '../../translations/list_details';
 import { checkIfListCannotBeEdited } from '../../utils/list.utils';
 
 interface ListAction {
@@ -66,10 +65,10 @@ export const useExceptionsListCard = ({
     onPaginationChange,
   } = useListExceptionItems({
     list: exceptionsList,
-    deleteToastTitle: i18nListDetails.EXCEPTION_ITEM_DELETE_TITLE,
-    deleteToastBody: (name) => i18nListDetails.EXCEPTION_ITEM_DELETE_TEXT(name),
-    errorToastBody: i18nListDetails.EXCEPTION_ERROR_DESCRIPTION,
-    errorToastTitle: i18nListDetails.EXCEPTION_ERROR_TITLE,
+    deleteToastTitle: i18n.EXCEPTION_ITEM_DELETE_TITLE,
+    deleteToastBody: (name) => i18n.EXCEPTION_ITEM_DELETE_TEXT(name),
+    errorToastBody: i18n.EXCEPTION_ERROR_DESCRIPTION,
+    errorToastTitle: i18n.EXCEPTION_ERROR_TITLE,
     onEditListExceptionItem: onEditExceptionItem,
     onFinishFetchingExceptions,
   });

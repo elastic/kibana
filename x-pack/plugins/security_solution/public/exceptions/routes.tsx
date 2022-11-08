@@ -9,7 +9,7 @@ import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import * as i18n from './translations/translations';
+import * as i18n from './translations';
 import { EXCEPTIONS_PATH, SecurityPageName } from '../../common/constants';
 import { SharedLists } from './pages/shared_lists';
 import { SpyRoute } from '../common/utils/route/spy_routes';

@@ -32,7 +32,7 @@ import { Loader } from '../../../common/components/loader';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-import * as i18n from '../../translations/shared_list.translations';
+import * as i18n from '../../translations/shared_list';
 import { ExceptionsTableUtilityBar } from '../../components/shared_list_utilty_bar';
 import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
 import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';

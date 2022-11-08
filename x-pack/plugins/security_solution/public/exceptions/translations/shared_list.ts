@@ -201,3 +201,74 @@ export const IMPORT_EXCEPTION_LIST = i18n.translate(
     defaultMessage: 'Import exception list',
   }
 );
+
+export const IMPORT_EXCEPTION_LIST_HEADER = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.importExceptionListFlyoutHeader',
+  {
+    defaultMessage: 'Import shared exception list',
+  }
+);
+
+export const IMPORT_EXCEPTION_LIST_BODY = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.importExceptionListFlyoutBody',
+  {
+    defaultMessage: 'Select shared exception lists to import',
+  }
+);
+export const IMPORT_EXCEPTION_LIST_WARNING = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.importExceptionListWarning',
+  {
+    defaultMessage: 'We found a pre-existing list with that id',
+  }
+);
+
+export const IMPORT_EXCEPTION_LIST_OVERWRITE = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.importExceptionListOverwrite',
+  {
+    defaultMessage: 'Overwrite the existing list',
+  }
+);
+
+export const IMPORT_EXCEPTION_LIST_AS_NEW_LIST = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.importExceptionListAsNewList',
+  {
+    defaultMessage: 'Create new list',
+  }
+);
+
+export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.exceptions.badge.readOnly.tooltip',
+  {
+    defaultMessage: 'Unable to create, edit or delete exceptions',
+  }
+);
+
+export const CLOSE_FLYOUT = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionListsCloseImportFlyout',
+  {
+    defaultMessage: 'Close',
+  }
+);
+export const IMPORT_PROMPT = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionListsFilePickerPrompt',
+  {
+    defaultMessage: 'Select or drag and drop multiple files',
+  }
+);
+
+export const RULES = i18n.translate('xpack.securitySolution.exceptionsTable.rulesCountLabel', {
+  defaultMessage: 'Rules',
+});
+export const CREATED_BY = i18n.translate('xpack.securitySolution.exceptionsTable.createdBy', {
+  defaultMessage: 'Created By',
+});
+
+export const DATE_CREATED = i18n.translate('xpack.securitySolution.exceptionsTable.createdAt', {
+  defaultMessage: 'Date created',
+});
+export const EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.exceptionsCountLabel',
+  {
+    defaultMessage: 'Exceptions',
+  }
+);

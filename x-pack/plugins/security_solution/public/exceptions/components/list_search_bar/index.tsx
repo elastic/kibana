@@ -9,7 +9,7 @@ import React from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import { EuiSearchBar } from '@elastic/eui';
 
-import * as i18n from '../../translations/shared_list.translations';
+import * as i18n from '../../translations';
 
 interface ExceptionListsTableSearchProps {
   onSearch: (args: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]) => void;

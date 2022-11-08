@@ -28,7 +28,7 @@ import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/c
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import type { ExceptionListInfo } from '../../hooks/use_all_exception_lists';
 import { TitleBadge } from '../title_badge';
-import * as i18n from '../../translations/translations';
+import * as i18n from '../../translations';
 import { ListExceptionItems } from '../list_exception_items';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
 
@@ -181,7 +181,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   onDeleteException={onDeleteException}
                   onEditExceptionItem={onEditExceptionItem}
                   onPaginationChange={onPaginationChange}
-                  onCreateExceptionListItem={onAddExceptionClick} // remove from here
+                  onCreateExceptionListItem={onAddExceptionClick}
                   lastUpdated={null}
                 />
               </ExceptionPanel>

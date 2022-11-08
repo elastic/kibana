@@ -14,7 +14,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../common/components/utility_bar';
-import * as i18n from '../../translations/shared_list.translations';
+import * as i18n from '../../translations';
 
 interface ExceptionsTableUtilityBarProps {
   onRefresh?: () => void;
