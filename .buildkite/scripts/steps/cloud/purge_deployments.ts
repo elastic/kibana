@@ -25,6 +25,7 @@ for (const deployment of prDeployments) {
     const prNumber = deployment.name.match(/^kibana-pr-([0-9]+)$/)[1];
     const prJson = execSync(`gh pr view '${prNumber}' --json state,labels,commits`).toString();
     const pullRequest = JSON.parse(prJson);
+    const prOpen = pullRequest.state === 'OPEN';
 
     const lastCommit = pullRequest.commits.slice(-1)[0];
     const lastCommitTimestamp = new Date(lastCommit.committedDate).getTime() / 1000;
@@ -32,11 +33,11 @@ for (const deployment of prDeployments) {
     const persistDeployment = Boolean(
       pullRequest.labels.filter((label: any) => label.name === 'ci:cloud-persist-deployment').length
     );
-    if (persistDeployment) {
+    if (prOpen && persistDeployment) {
       continue;
     }
 
-    if (pullRequest.state !== 'OPEN') {
+    if (!prOpen) {
       console.log(`Pull Request #${prNumber} is no longer open, will delete associated deployment`);
       deploymentsToPurge.push(deployment);
     } else if (
