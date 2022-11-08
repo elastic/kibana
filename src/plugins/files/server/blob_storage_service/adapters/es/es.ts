@@ -15,6 +15,9 @@ import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
 import { lastValueFrom, defer } from 'rxjs';
+import { PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { FilesPlugin } from '../../../plugin';
+import { FILE_UPLOAD_PERFORMANCE_EVENT_NAME } from '../../../performance';
 import type { BlobStorageClient } from '../../types';
 import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
@@ -29,8 +32,14 @@ export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 
 export const MAX_BLOB_STORE_SIZE_BYTES = 50 * 1024 * 1024 * 1024; // 50 GiB
 
+interface UploadOptions {
+  transforms?: Transform[];
+  id?: string;
+}
+
 export class ElasticsearchBlobStorageClient implements BlobStorageClient {
   private static defaultSemaphore: Semaphore;
+
   /**
    * Call this function once to globally set a concurrent upload limit for
    * all {@link ElasticsearchBlobStorageClient} instances.
@@ -89,14 +98,14 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     }
   });
 
-  public async upload(
-    src: Readable,
-    { transforms, id }: { transforms?: Transform[]; id?: string } = {}
-  ): Promise<{ id: string; size: number }> {
+  public async upload(src: Readable, options: UploadOptions = {}) {
+    const { transforms, id } = options;
+
     await this.createIndexIfNotExists();
 
     const processUpload = async () => {
       try {
+        const analytics = FilesPlugin.getAnalytics();
         const dest = getWritableContentStream({
           id,
           client: this.esClient,
@@ -106,14 +115,32 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
             maxChunkSize: this.chunkSize,
           },
         });
-        await pipeline.apply(null, [src, ...(transforms ?? []), dest] as unknown as Parameters<
-          typeof pipeline
-        >);
 
-        return {
-          id: dest.getContentReferenceId()!,
-          size: dest.getBytesWritten(),
+        const start = performance.now();
+        await pipeline([src, ...(transforms ?? []), dest]);
+        const end = performance.now();
+
+        const _id = dest.getContentReferenceId()!;
+        const size = dest.getBytesWritten();
+
+        const perfArgs: PerformanceMetricEvent = {
+          eventName: FILE_UPLOAD_PERFORMANCE_EVENT_NAME,
+          duration: end - start,
+          key1: 'size',
+          value1: size,
+          meta: {
+            datasource: 'es',
+            id: _id,
+            index: this.index,
+            chunkSize: this.chunkSize,
+          },
         };
+
+        if (analytics) {
+          reportPerformanceMetricEvent(analytics, perfArgs);
+        }
+
+        return { id: _id, size };
       } catch (e) {
         this.logger.error(`Could not write chunks to Elasticsearch for id ${id}: ${e}`);
         throw e;
