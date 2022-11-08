@@ -2784,7 +2784,6 @@ export class RulesClient {
     );
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
-    this.logger.info(`disableWithOCC / enabled: ${attributes.enabled}`);
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
@@ -2803,13 +2802,9 @@ export class RulesClient {
       // remove the task, otherwise mark the task as disabled
       if (attributes.scheduledTaskId) {
         if (attributes.scheduledTaskId !== id) {
-          this.logger.info(`disableWithOCC diff / scheduledTaskId: ${attributes.scheduledTaskId}`);
           await this.taskManager.removeIfExists(attributes.scheduledTaskId);
         } else {
-          this.logger.info(`disableWithOCC / scheduledTaskId: ${attributes.scheduledTaskId}`);
-          const task = await this.taskManager.bulkDisable([attributes.scheduledTaskId]);
-          this.logger.info(`disableWithOCC / task: ${JSON.stringify(task)}`);
-          return task;
+          await this.taskManager.bulkDisable([attributes.scheduledTaskId]);
         }
       }
     }
