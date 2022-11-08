@@ -137,6 +137,12 @@ export class ElasticV3ServerShipper implements IShipper {
       return;
     }
 
+    this.initContext.logger.debug(
+      `[Server shipper]: adding events to queue ${
+        events.length
+      } - ${events.map((e) => e.event_type).join(',')}`
+    );
+
     const freeSpace = MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE - this.internalQueue.length;
 
     // As per design, we only want store up-to 1000 events at a time. Drop anything that goes beyond that limit
@@ -157,6 +163,7 @@ export class ElasticV3ServerShipper implements IShipper {
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
+    this.initContext.logger.debug('[Server shipper]: shutdown');
     this.shutdown$.next();
     this.shutdown$.complete();
     this.isOptedIn$.complete();
@@ -311,6 +318,12 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   private async makeRequest(events: Event[]): Promise<string> {
+    this.initContext.logger.debug(
+      `[Server shipper]: sending ${
+        events.length
+      } events - ${events.map((e) => e.event_type).join(',')}`
+    );
+
     const response = await fetch(this.url, {
       method: 'POST',
       body: eventsToNDJSON(events),
