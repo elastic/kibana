@@ -68,7 +68,19 @@ Once the Tines connector has been configured in an Alerting Rule.
 [role="screenshot"]
 image::../images/tines-alerting.png[Tines rule alert]
 
-It will send a POST request to the Tines webhook action on every action execution that had at least one result.
+It will send a POST request to the Tines webhook action on every action execution with at least one result.
+
+[float]
+[[webhookUrlFallback-tines-configuration]]
+==== Webhook URL fallback
+
+It is possible for the requests to the Tines API, to get the stories and webhooks for the selectors, to hit the 500 results limit; in this scenario, the webhook URL fallback text field will be displayed.
+Users can still use the selectors if the story or webhook exists in the 500 options loaded. Otherwise, users can paste the webhook URL in the test input field, it can be copied from the Tines webhook configuration. 
+
+When the webhook URL is defined, the connector will use it directly in the execution stage, and the story and webhook selectors will be disabled and ignored. To re-enable the story and webhook selectors, remove the webhook URL value.
+
+[role="screenshot"]
+image::../images/tines-webhook-url-fallback.png[Tines Webhook URL fallback]
 
 [float]
 [[tines-story-library]]
