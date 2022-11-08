@@ -54,14 +54,6 @@ Object {
               >
                 cmd test alert
               </div>
-              <div
-                class="euiPanel euiPanel--subdued euiPanel--paddingMedium emotion-EuiPanel"
-              >
-                <div
-                  class="euiText emotion-EuiText"
-                  data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38-text"
-                />
-              </div>
             </div>
           </div>
           <div
@@ -155,14 +147,6 @@ Object {
               data-test-subj="sessionView:sessionViewAlertDetailRuleName-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38-text"
             >
               cmd test alert
-            </div>
-            <div
-              class="euiPanel euiPanel--subdued euiPanel--paddingMedium emotion-EuiPanel"
-            >
-              <div
-                class="euiText emotion-EuiText"
-                data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38-text"
-              />
             </div>
           </div>
         </div>

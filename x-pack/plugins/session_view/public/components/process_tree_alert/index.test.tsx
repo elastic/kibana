@@ -73,8 +73,13 @@ describe('ProcessTreeAlerts component', () => {
         `sessionView:sessionViewAlertDetailRuleName-${mockAlert.kibana?.alert?.uuid}-text`
       );
 
+      const categoryDetailPanel = renderResult.queryByTestId(
+        `sessionView:sessionViewAlertDetail-${mockFileAlert.kibana?.alert?.uuid}-text`
+      );
+
       expect(alertText).toBeTruthy();
       expect(alertText).toHaveTextContent('cmd test alert');
+      expect(categoryDetailPanel).toBeNull();
     });
 
     it('should get file path for  text content when alert category is file', async () => {

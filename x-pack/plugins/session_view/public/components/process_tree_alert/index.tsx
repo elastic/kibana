@@ -113,23 +113,23 @@ export const ProcessTreeAlert = ({
             >
               {dataOrDash(name)}
             </EuiText>
-            <EuiPanel
-              css={styles.processPanel}
-              color="subdued"
-              hasBorder
-              hasShadow={false}
-              borderRadius="m"
-            >
-              <EuiText
-                data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}-text`}
-                css={styles.alertName}
-                size="s"
+            {alertCategoryDetailDisplayText && (
+              <EuiPanel
+                css={styles.processPanel}
+                color="subdued"
+                hasBorder
+                hasShadow={false}
+                borderRadius="m"
               >
-                {alertCategoryDetailDisplayText && (
+                <EuiText
+                  data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}-text`}
+                  css={styles.alertName}
+                  size="s"
+                >
                   <span className="alertCategoryDetailText">{alertCategoryDetailDisplayText}</span>
-                )}
-              </EuiText>
-            </EuiPanel>
+                </EuiText>
+              </EuiPanel>
+            )}
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
