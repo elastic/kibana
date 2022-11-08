@@ -34,7 +34,7 @@ Object {
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <span
-              class="euiToolTipAnchor"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
               <span
                 color="danger"
@@ -128,7 +128,7 @@ Object {
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            class="euiToolTipAnchor"
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
             <span
               color="danger"
