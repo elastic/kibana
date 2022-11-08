@@ -15,6 +15,20 @@ import { Duration, DurationUnit } from '../../types/models';
 import { createSLO } from './fixtures/slo';
 import { DefaultSLIClient } from './sli_client';
 
+const commonEsResponse = {
+  took: 100,
+  timed_out: false,
+  _shards: {
+    total: 0,
+    successful: 0,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    hits: [],
+  },
+};
+
 describe('SLIClient', () => {
   let esClientMock: ElasticsearchClientMock;
 
@@ -32,17 +46,7 @@ describe('SLIClient', () => {
           },
         });
         esClientMock.search.mockResolvedValueOnce({
-          took: 100,
-          timed_out: false,
-          _shards: {
-            total: 0,
-            successful: 0,
-            skipped: 0,
-            failed: 0,
-          },
-          hits: {
-            hits: [],
-          },
+          ...commonEsResponse,
           aggregations: {},
         });
         const sliClient = new DefaultSLIClient(esClientMock);
@@ -61,17 +65,7 @@ describe('SLIClient', () => {
             },
           });
           esClientMock.search.mockResolvedValueOnce({
-            took: 100,
-            timed_out: false,
-            _shards: {
-              total: 0,
-              successful: 0,
-              skipped: 0,
-              failed: 0,
-            },
-            hits: {
-              hits: [],
-            },
+            ...commonEsResponse,
             aggregations: {
               good: { value: 90 },
               total: { value: 100 },
@@ -127,17 +121,7 @@ describe('SLIClient', () => {
             },
           });
           esClientMock.search.mockResolvedValueOnce({
-            took: 100,
-            timed_out: false,
-            _shards: {
-              total: 0,
-              successful: 0,
-              skipped: 0,
-              failed: 0,
-            },
-            hits: {
-              hits: [],
-            },
+            ...commonEsResponse,
             aggregations: {
               good: { value: 90 },
               total: { value: 100 },
@@ -193,17 +177,7 @@ describe('SLIClient', () => {
         });
 
         esClientMock.search.mockResolvedValueOnce({
-          took: 100,
-          timed_out: false,
-          _shards: {
-            total: 0,
-            successful: 0,
-            skipped: 0,
-            failed: 0,
-          },
-          hits: {
-            hits: [],
-          },
+          ...commonEsResponse,
           aggregations: {},
         });
         const sliClient = new DefaultSLIClient(esClientMock);
@@ -230,17 +204,7 @@ describe('SLIClient', () => {
             },
           });
           esClientMock.search.mockResolvedValueOnce({
-            took: 100,
-            timed_out: false,
-            _shards: {
-              total: 0,
-              successful: 0,
-              skipped: 0,
-              failed: 0,
-            },
-            hits: {
-              hits: [],
-            },
+            ...commonEsResponse,
             aggregations: {
               slices: { buckets: [] },
               good: { value: 90 },
@@ -339,17 +303,7 @@ describe('SLIClient', () => {
             },
           });
           esClientMock.search.mockResolvedValueOnce({
-            took: 100,
-            timed_out: false,
-            _shards: {
-              total: 0,
-              successful: 0,
-              skipped: 0,
-              failed: 0,
-            },
-            hits: {
-              hits: [],
-            },
+            ...commonEsResponse,
             aggregations: {
               good: { value: 90 },
               total: { value: 100 },
