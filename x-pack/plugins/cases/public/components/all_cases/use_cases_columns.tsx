@@ -26,6 +26,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 import { Status } from '@kbn/cases-components';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import type { Case } from '../../../common/ui/types';
 import type { ActionConnector } from '../../../common/api';
@@ -56,6 +57,16 @@ type CasesColumns =
 
 const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
+`;
+
+const LINE_CLAMP = 3;
+const LineClampedEuiBadgeGroup = euiStyled(EuiBadgeGroup)`
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: ${LINE_CLAMP};
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: normal;
 `;
 
 const renderStringField = (field: string, dataTestSubj: string) =>
@@ -184,7 +195,7 @@ export const useCasesColumns = ({
     render: (tags: Case['tags']) => {
       if (tags != null && tags.length > 0) {
         const badges = (
-          <EuiBadgeGroup data-test-subj="case-table-column-tags">
+          <LineClampedEuiBadgeGroup data-test-subj="case-table-column-tags">
             {tags.map((tag: string, i: number) => (
               <EuiBadge
                 color="hollow"
@@ -194,7 +205,7 @@ export const useCasesColumns = ({
                 {tag}
               </EuiBadge>
             ))}
-          </EuiBadgeGroup>
+          </LineClampedEuiBadgeGroup>
         );
 
         return (
@@ -209,7 +220,7 @@ export const useCasesColumns = ({
       }
       return getEmptyTagValue();
     },
-    truncateText: true,
+    width: '10%',
   });
 
   if (isAlertsEnabled) {
