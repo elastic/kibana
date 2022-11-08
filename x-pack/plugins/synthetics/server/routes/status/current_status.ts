@@ -35,7 +35,7 @@ export async function queryMonitorStatus(
   esClient: UptimeEsClient,
   maxLocations: number,
   maxPeriod: number,
-  ids: Array<string | undefined>
+  ids: string[]
 ): Promise<Omit<OverviewStatus, 'disabledCount'>> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
   const pageCount = Math.ceil(ids.length / idSize);
@@ -135,7 +135,7 @@ export async function queryMonitorStatus(
       });
     });
   }
-  return { up, down, upConfigs, downConfigs };
+  return { up, down, upConfigs, downConfigs, enabledIds: ids };
 }
 
 /**
@@ -150,7 +150,7 @@ export async function getStatus(
   syntheticsMonitorClient: SyntheticsMonitorClient
 ) {
   let monitors;
-  const enabledIds: Array<string | undefined> = [];
+  const enabledIds: string[] = [];
   let disabledCount = 0;
   let page = 1;
   let maxPeriod = 0;
