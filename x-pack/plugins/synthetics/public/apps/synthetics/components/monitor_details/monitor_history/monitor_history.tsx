@@ -6,7 +6,7 @@
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useUrlParams } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { AvailabilityPanel } from '../monitor_summary/availability_panel';
@@ -20,6 +20,7 @@ import { MonitorErrorSparklines } from '../monitor_summary/monitor_error_sparkli
 import { AvailabilitySparklines } from '../monitor_summary/availability_sparklines';
 import { DurationSparklines } from '../monitor_summary/duration_sparklines';
 import { MonitorCompleteSparklines } from '../monitor_summary/monitor_complete_sparklines';
+import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 
 export const MonitorHistory = () => {
   const [useGetUrlParams, updateUrlParams] = useUrlParams();
@@ -124,8 +125,4 @@ const STATS_LABEL = i18n.translate('xpack.synthetics.historyPanel.stats', {
 
 const DURATION_TREND_LABEL = i18n.translate('xpack.synthetics.historyPanel.durationTrends', {
   defaultMessage: 'Duration trends',
-});
-
-const STATUS_LABEL = i18n.translate('xpack.synthetics.historyPanel.status', {
-  defaultMessage: 'Status',
 });
