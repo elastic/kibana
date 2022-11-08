@@ -21,7 +21,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
-import { css } from '@emotion/css';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
