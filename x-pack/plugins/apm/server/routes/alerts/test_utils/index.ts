@@ -51,16 +51,17 @@ export const createRuleTypeMocks = () => {
   return {
     dependencies: {
       alerting,
+      basePath: {
+        prepend: (path: string) => `http://localhost:5601/eyr${path}`,
+        publicBaseUrl: 'http://localhost:5601/eyr',
+        serverBasePath: '/eyr',
+      } as IBasePath,
       config$: mockedConfig$,
+      getAlertDetailsConfig: jest.fn().mockReturnValue({ apm: true }),
       logger: loggerMock,
       ruleDataClient: ruleRegistryMocks.createRuleDataClient(
         '.alerts-observability.apm.alerts'
       ) as IRuleDataClient,
-      basePath: {
-        serverBasePath: '/eyr',
-        publicBaseUrl: 'http://localhost:5601/eyr',
-        prepend: (path: string) => `http://localhost:5601/eyr${path}`,
-      } as IBasePath,
     },
     services,
     scheduleActions,
