@@ -53,7 +53,7 @@ fi
 failedJourneys=()
 
 echo "--- Stop bazel(kibana) process"
-bazelPid=(pgrep "bazel(kibana)")
+bazelPid=(pgrep -f bazel)
 echo "bazelPid=$bazelPid"
 killall -SIGKILL "$bazelPid" || true
 
