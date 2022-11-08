@@ -11,11 +11,13 @@ import {
   testGuideNotActiveState,
 } from '@kbn/guided-onboarding-plugin/public/services/api.mocks';
 import { guidedSetupSavedObjectsType } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
-import type { GuideId } from '@kbn/guided-onboarding';
+import type { GuideState } from '@kbn/guided-onboarding';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-const testGuideA = testGuideStep1ActiveState;
-const testGuideB = { ...testGuideNotActiveState, guideId: 'testGuideB' as GuideId }; // different guideId
+const mockSearchGuideNotActiveState: GuideState = {
+  ...testGuideNotActiveState,
+  guideId: 'search',
+};
 
 export default function testPutState({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -31,9 +33,9 @@ export default function testPutState({ getService }: FtrProviderContext) {
       // Create a saved object for the guide
       await kibanaServer.savedObjects.create({
         type: guidedSetupSavedObjectsType,
-        id: testGuideA.guideId,
+        id: testGuideStep1ActiveState.guideId,
         overwrite: true,
-        attributes: testGuideA,
+        attributes: testGuideStep1ActiveState,
       });
 
       // Update the state of the guide
@@ -41,7 +43,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
         .put(`/api/guided_onboarding/state`)
         .set('kbn-xsrf', 'true')
         .send({
-          ...testGuideA,
+          ...testGuideStep1ActiveState,
           status: 'complete',
         })
         .expect(200);
@@ -57,7 +59,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
         .put(`/api/guided_onboarding/state`)
         .set('kbn-xsrf', 'true')
         .send({
-          ...testGuideA,
+          ...testGuideStep1ActiveState,
           status: 'ready_to_complete',
         })
         .expect(200);
@@ -74,7 +76,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
         .put(`/api/guided_onboarding/state`)
         .set('kbn-xsrf', 'true')
         .send({
-          ...testGuideA,
+          ...testGuideStep1ActiveState,
           isActive: true,
         })
         .expect(200);
@@ -84,7 +86,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
         .put(`/api/guided_onboarding/state`)
         .set('kbn-xsrf', 'true')
         .send({
-          ...testGuideB,
+          ...mockSearchGuideNotActiveState,
           isActive: false,
         })
         .expect(200);
@@ -94,7 +96,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
         .put(`/api/guided_onboarding/state`)
         .set('kbn-xsrf', 'true')
         .send({
-          guideId: 'testGuideC',
+          guideId: 'observability',
           isActive: true,
           status: 'in_progress',
           steps: [
@@ -120,7 +122,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
       expect(guides.length).to.eql(3);
       const activeGuides = guides.filter((guide: { isActive: boolean }) => guide.isActive);
       expect(activeGuides.length).to.eql(1);
-      expect(activeGuides[0].guideId).to.eql('testGuideC');
+      expect(activeGuides[0].guideId).to.eql('observability');
     });
   });
 }
