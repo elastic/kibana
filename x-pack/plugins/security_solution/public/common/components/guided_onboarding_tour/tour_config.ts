@@ -31,6 +31,7 @@ export type StepConfig = Pick<
   | 'content'
   | 'anchorPosition'
   | 'title'
+  | 'ownFocus'
   | 'initialFocus'
   | 'anchor'
   | 'offset'
@@ -50,6 +51,9 @@ const defaultConfig = {
   maxWidth: 360,
   offset: 10,
   repositionOnScroll: true,
+  // need both properties below to focus the next button
+  ownFocus: true,
+  initialFocus: `[tour-step="nextButton"]`,
 };
 
 export const getTourAnchor = (step: number, stepId: SecurityStepId) =>
@@ -145,6 +149,7 @@ const alertsCasesConfig: StepConfig[] = [
     anchorPosition: 'leftUp',
     dataTestSubj: getTourAnchor(AlertsCasesTourSteps.createCase, SecurityStepId.alertsCases),
     offset: 20,
+    repositionOnScroll: false,
   },
   {
     ...defaultConfig,
@@ -163,6 +168,8 @@ const alertsCasesConfig: StepConfig[] = [
     hideNextButton: true,
     dataTestSubj: getTourAnchor(AlertsCasesTourSteps.submitCase, SecurityStepId.alertsCases),
     offset: 20,
+    ownFocus: false,
+    initialFocus: `[data-test-subj="create-case-flyout"] [data-test-subj="create-case-submit"]`,
   },
   {
     ...defaultConfig,

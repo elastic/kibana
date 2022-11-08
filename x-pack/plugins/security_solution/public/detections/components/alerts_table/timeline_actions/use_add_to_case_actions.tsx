@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
@@ -30,6 +30,44 @@ export interface UseAddToCaseActions {
   isActiveTimelines: boolean;
   isInDetections: boolean;
 }
+
+const getSubmitButton = (): HTMLElement | null =>
+  document.querySelector(`[data-test-subj="create-case-submit"]`);
+
+const CasesTourSteps = () => {
+  const [activeStep, setActiveStep] = useState(AlertsCasesTourSteps.createCase);
+
+  const scrollToSubmitButton = useCallback(() => {
+    getSubmitButton()?.scrollIntoView();
+  }, []);
+
+  const onClick = useCallback(() => {
+    setActiveStep(AlertsCasesTourSteps.submitCase);
+    scrollToSubmitButton();
+    setTimeout(() => {
+      // something is resetting focus to close flyout button
+      getSubmitButton()?.focus();
+    }, 500);
+  }, [scrollToSubmitButton]);
+
+  return (
+    <>
+      {activeStep === AlertsCasesTourSteps.createCase && (
+        <GuidedOnboardingTourStep
+          onClick={onClick}
+          step={AlertsCasesTourSteps.createCase}
+          stepId={SecurityStepId.alertsCases}
+        />
+      )}
+      {activeStep === AlertsCasesTourSteps.submitCase && (
+        <GuidedOnboardingTourStep
+          step={AlertsCasesTourSteps.submitCase}
+          stepId={SecurityStepId.alertsCases}
+        />
+      )}
+    </>
+  );
+};
 
 export const useAddToCaseActions = ({
   onMenuItemClick,
@@ -64,7 +102,8 @@ export const useAddToCaseActions = ({
 
   const afterCaseCreated = useCallback(async () => {
     if (isTourShown(SecurityStepId.alertsCases)) {
-      incrementStep(SecurityStepId.alertsCases);
+      // user could be on step 5 or 6 at this point, increment to 7 no matter what
+      incrementStep(SecurityStepId.alertsCases, AlertsCasesTourSteps.viewCase);
     }
   }, [incrementStep, isTourShown]);
 
@@ -72,7 +111,8 @@ export const useAddToCaseActions = ({
     () =>
       isTourShown(SecurityStepId.alertsCases) &&
       (activeStep === AlertsCasesTourSteps.addAlertToCase ||
-        activeStep === AlertsCasesTourSteps.createCase)
+        activeStep === AlertsCasesTourSteps.createCase ||
+        activeStep === AlertsCasesTourSteps.submitCase)
         ? sampleCase
         : {},
     [activeStep, isTourShown]
@@ -95,22 +135,11 @@ export const useAddToCaseActions = ({
     onMenuItemClick();
     createCaseFlyout.open({
       attachments: caseAttachments,
-      // activeStep will be 4 on first render because not yet incremented
-      // if the user closes the flyout without completing the form and comes back, we will be at step 5
-      ...(isTourShown(SecurityStepId.alertsCases) &&
-      (activeStep === AlertsCasesTourSteps.addAlertToCase ||
-        activeStep === AlertsCasesTourSteps.createCase)
+      // activeStep will be AlertsCasesTourSteps.addAlertToCase on first render because not yet incremented
+      // if the user closes the flyout without completing the form and comes back, we will be at step AlertsCasesTourSteps.createCase
+      ...(isTourShown(SecurityStepId.alertsCases)
         ? {
-            headerContent: (
-              // isTourAnchor=true no matter what in order to
-              // force active guide step outside of security solution (cases)
-              <GuidedOnboardingTourStep
-                onClick={createCaseFlyout.submit}
-                isTourAnchor
-                step={AlertsCasesTourSteps.createCase}
-                stepId={SecurityStepId.alertsCases}
-              />
-            ),
+            headerContent: <CasesTourSteps />,
           }
         : {}),
     });

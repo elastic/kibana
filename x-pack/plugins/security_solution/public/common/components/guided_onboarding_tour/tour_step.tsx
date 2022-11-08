@@ -27,7 +27,8 @@ interface SecurityTourStep {
 }
 
 const isStepExternallyMounted = (stepId: SecurityStepId, step: number) =>
-  step === AlertsCasesTourSteps.createCase && stepId === SecurityStepId.alertsCases;
+  (step === AlertsCasesTourSteps.createCase || step === AlertsCasesTourSteps.submitCase) &&
+  stepId === SecurityStepId.alertsCases;
 
 const StyledTourStep = styled(EuiTourStep)<EuiTourStepProps & { stepId: SecurityStepId }>`
   &.euiPopover__panel[data-popover-open] {
@@ -61,7 +62,7 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
     }
   }, []);
 
-  // step === AlertsCasesTourSteps.createCase && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
+  // steps in Cases app are out of context.
   // If we mount this step, we know we need to render it
   // we are also managing the context on the siem end in the background
   const overrideContext = isStepExternallyMounted(stepId, step);
@@ -110,9 +111,6 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
       </>
     ),
     footerAction,
-    // need both properties below to focus the next button
-    ownFocus: true,
-    initialFocus: `[tour-step="nextButton"]`,
     // we would not have mounted this component if it was not open
     isStepOpen: true,
     // guided onboarding does not allow skipping tour through the steps

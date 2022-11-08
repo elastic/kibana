@@ -14,12 +14,13 @@ import { useLocation } from 'react-router-dom';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { isTourPath } from '../../../helpers';
 import { useKibana } from '../../lib/kibana';
+import type { AlertsCasesTourSteps } from './tour_config';
 import { securityTourConfig, SecurityStepId } from './tour_config';
 
 export interface TourContextValue {
   activeStep: number;
   endTourStep: (stepId: SecurityStepId) => void;
-  incrementStep: (stepId: SecurityStepId) => void;
+  incrementStep: (stepId: SecurityStepId, step?: AlertsCasesTourSteps) => void;
   isTourShown: (stepId: SecurityStepId) => boolean;
 }
 
@@ -63,9 +64,11 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
   const isTourShown = useCallback((stepId: SecurityStepId) => tourStatus[stepId], [tourStatus]);
   const [activeStep, _setActiveStep] = useState<number>(1);
 
-  const incrementStep = useCallback((stepId: SecurityStepId) => {
-    _setActiveStep(
-      (prevState) => (prevState >= securityTourConfig[stepId].length ? 0 : prevState) + 1
+  const incrementStep = useCallback((stepId: SecurityStepId, step?: number) => {
+    _setActiveStep((prevState) =>
+      step != null && step <= securityTourConfig[stepId].length
+        ? step
+        : (prevState >= securityTourConfig[stepId].length ? 0 : prevState) + 1
     );
   }, []);
 

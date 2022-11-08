@@ -8,7 +8,7 @@
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import type { SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
@@ -263,13 +263,17 @@ const CaseDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   detailName: string;
   title?: string;
-}> = ({ children, detailName, title }) => {
+  index?: number;
+}> = ({ index, children, detailName, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const { activeStep, endTourStep, isTourShown } = useTourContext();
   const isTourActive = useMemo(
-    () => activeStep === AlertsCasesTourSteps.viewCase && isTourShown(SecurityStepId.alertsCases),
-    [activeStep, isTourShown]
+    () =>
+      activeStep === AlertsCasesTourSteps.viewCase &&
+      isTourShown(SecurityStepId.alertsCases) &&
+      index === 0,
+    [activeStep, index, isTourShown]
   );
   const endTour = useCallback(() => {
     if (isTourActive) endTourStep(SecurityStepId.alertsCases);
@@ -286,6 +290,11 @@ const CaseDetailsLinkComponent: React.FC<{
     },
     [detailName, navigateToApp, endTour, search]
   );
+
+  useEffect(() => {
+    if (isTourActive)
+      document.querySelector(`[data-test-subj="RelatedCases-accordion"]`)?.scrollIntoView();
+  }, [isTourActive]);
 
   return (
     <GuidedOnboardingTourStep

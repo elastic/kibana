@@ -63,6 +63,7 @@ export const InsightAccordion = React.memo<Props>(
         // The accordion can display the content now
         return (
           <StyledAccordion
+            data-test-subj={`${prefix}-accordion`}
             id={accordionId}
             buttonContent={text}
             onToggle={onToggle}

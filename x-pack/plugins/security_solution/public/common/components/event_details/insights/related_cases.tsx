@@ -103,7 +103,7 @@ function renderCaseContent(relatedCases: RelatedCaseList = []) {
         id && title ? (
           <span key={id}>
             {' '}
-            <CaseDetailsLink detailName={id} title={title}>
+            <CaseDetailsLink detailName={id} title={title} index={index}>
               {title}
             </CaseDetailsLink>
             {relatedCases[index + 1] ? ',' : ''}
