@@ -19,21 +19,16 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ExceptionListInfo } from './use_all_exception_lists';
 import { TitleBadge } from './title_badge';
 import * as i18n from './translations';
-import {
-  SecuritySolutionLinkAnchor,
-  useGetSecuritySolutionLinkProps,
-} from '../../common/components/links';
-import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
+import { useGetSecuritySolutionLinkProps } from '../../common/components/links';
+import { SecurityPageName } from '../../../common/constants';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
-  http: HttpSetup;
   handleDelete: ({
     id,
     listId,
@@ -56,10 +51,8 @@ interface ExceptionsListCardProps {
 }
 
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
-  ({ exceptionsList, http, handleDelete, handleExport, readOnly }) => {
-    // const { navigateToApp } = useKibana().services.application;
-
-    const { onClick: goToExceptionDetail, href } = useGetSecuritySolutionLinkProps()({
+  ({ exceptionsList, handleDelete, handleExport, readOnly }) => {
+    const { onClick: goToExceptionDetail } = useGetSecuritySolutionLinkProps()({
       deepLinkId: SecurityPageName.sharedExceptionListDetails,
       path: `/exceptions/shared/${exceptionsList.list_id}`,
     });
@@ -78,21 +71,8 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   <EuiFlexItem grow={true}>
                     <EuiFlexGroup direction="column" alignItems="flexStart">
                       <EuiFlexItem grow={false} component={'span'}>
-                        <EuiLink
-                          data-test-subj="exception-list-name"
-                          // href={href}
-                          onClick={goToExceptionDetail}
-                          // onClick={navigateToApp(APP_UI_ID, {
-                          //   deepLinkId: SecurityPageName.sharedExceptionListDetails,
-                          //   path: `/exceptions/shared/${exceptionsList.list_id}`,
-                          // })}
-                        >
-                          {/* <SecuritySolutionLinkAnchor
-                            deepLinkId={SecurityPageName.sharedExceptionListDetails}
-                            path={}
-                          > */}
+                        <EuiLink data-test-subj="exception-list-name" onClick={goToExceptionDetail}>
                           {exceptionsList.name.toString()}
-                          {/* </SecuritySolutionLinkAnchor> */}
                         </EuiLink>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>

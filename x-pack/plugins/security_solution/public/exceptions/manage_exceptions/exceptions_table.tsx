@@ -418,7 +418,6 @@ export const ExceptionListsTable = React.memo(() => {
                     key={excList.list_id}
                     data-test-subj="exceptionsListCard"
                     readOnly={canUserREAD && !canUserCRUD}
-                    http={http}
                     exceptionsList={excList}
                     handleDelete={handleDelete}
                     handleExport={handleExport}
