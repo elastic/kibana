@@ -9020,27 +9020,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.SearchSourceFields.searchAfter",
-            "type": "Object",
-            "tags": [],
-            "label": "searchAfter",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.EsQuerySearchAfter",
-                "text": "EsQuerySearchAfter"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-public.SearchSourceFields.timeout",
             "type": "string",
             "tags": [],
@@ -9062,6 +9041,38 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchSourceFields.searchAfter",
+            "type": "Array",
+            "tags": [],
+            "label": "searchAfter",
+            "description": [],
+            "signature": [
+              "SortResults",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchSourceFields.pit",
+            "type": "Object",
+            "tags": [],
+            "label": "pit",
+            "description": [
+              "\nAllow querying to use a point-in-time ID for paging results"
+            ],
+            "signature": [
+              "SearchPointInTimeReference",
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
@@ -10665,13 +10676,7 @@
             "text": "DataViewSpec"
           },
           " | undefined; searchAfter?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.EsQuerySearchAfter",
-            "text": "EsQuerySearchAfter"
-          },
+          "SortResults",
           " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
           {
             "pluginId": "data",
@@ -13426,10 +13431,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
               },
               {
                 "plugin": "graph",
@@ -21124,10 +21125,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
               },
               {
                 "plugin": "graph",

@@ -3100,6 +3100,22 @@
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-server.CreateFileArgs.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nUser data associated with this file"
+            ],
+            "signature": [
+              "{ name?: string | undefined; id?: string | undefined; } | undefined"
+            ],
+            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3315,7 +3331,7 @@
             "signature": [
               "<M = unknown>(arg: ",
               "CreateArgs",
-              ") => Promise<",
+              "<M>) => Promise<",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -3339,7 +3355,8 @@
                   "- Arg to create a file."
                 ],
                 "signature": [
-                  "CreateArgs"
+                  "CreateArgs",
+                  "<M>"
                 ],
                 "path": "src/plugins/files/server/file_client/types.ts",
                 "deprecated": false,
@@ -5387,7 +5404,7 @@
               "\nThe file's metadata."
             ],
             "signature": [
-              "{ name?: string | undefined; created?: string | undefined; Status?: \"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\" | undefined; Updated?: string | undefined; mime_type?: string | undefined; size?: number | undefined; hash?: { [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined; extension?: string | undefined; Alt?: string | undefined; ChunkSize?: number | undefined; Compression?: ",
+              "{ name?: string | undefined; created?: string | undefined; Status?: \"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\" | undefined; Updated?: string | undefined; mime_type?: string | undefined; size?: number | undefined; hash?: { [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined; user?: { name?: string | undefined; id?: string | undefined; } | undefined; extension?: string | undefined; Alt?: string | undefined; ChunkSize?: number | undefined; Compression?: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -6333,6 +6350,22 @@
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-common.FileJSON.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nUser data associated with this file"
+            ],
+            "signature": [
+              "{ name?: string | undefined; id?: string | undefined; } | undefined"
+            ],
+            "path": "src/plugins/files/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6733,7 +6766,7 @@
           "\nFile metadata fields are defined per the ECS specification:\n\nhttps://www.elastic.co/guide/en/ecs/current/ecs-file.html\n\nCustom fields are named according to the custom field convention: \"CustomFieldName\"."
         ],
         "signature": [
-          "{ name?: string | undefined; mime_type?: string | undefined; created?: string | undefined; size?: number | undefined; hash?: { [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined; extension?: string | undefined; Alt?: string | undefined; Updated?: string | undefined; Status?: ",
+          "{ name?: string | undefined; mime_type?: string | undefined; created?: string | undefined; size?: number | undefined; hash?: { [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined; user?: { name?: string | undefined; id?: string | undefined; } | undefined; extension?: string | undefined; Alt?: string | undefined; Updated?: string | undefined; Status?: ",
           {
             "pluginId": "files",
             "scope": "common",

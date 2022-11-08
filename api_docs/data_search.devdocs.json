@@ -3133,7 +3133,15 @@
                 "signature": [
                   "{ filter?: any; search?: string | undefined; fields?: string[] | undefined; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; searchAfter?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
+                  "> | undefined; searchAfter?: string[] | undefined; pit?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsPitParams",
+                    "text": "SavedObjectsPitParams"
+                  },
+                  " | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
                   {
@@ -3167,15 +3175,7 @@
                     "section": "def-server.SavedObjectsFindOptionsReference",
                     "text": "SavedObjectsFindOptionsReference"
                   },
-                  "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; pit?: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsPitParams",
-                    "text": "SavedObjectsPitParams"
-                  },
-                  " | undefined; }"
+                  "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false,
@@ -30503,27 +30503,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSourceFields.searchAfter",
-            "type": "Object",
-            "tags": [],
-            "label": "searchAfter",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.EsQuerySearchAfter",
-                "text": "EsQuerySearchAfter"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.SearchSourceFields.timeout",
             "type": "string",
             "tags": [],
@@ -30545,6 +30524,38 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSourceFields.searchAfter",
+            "type": "Array",
+            "tags": [],
+            "label": "searchAfter",
+            "description": [],
+            "signature": [
+              "SortResults",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSourceFields.pit",
+            "type": "Object",
+            "tags": [],
+            "label": "pit",
+            "description": [
+              "\nAllow querying to use a point-in-time ID for paging results"
+            ],
+            "signature": [
+              "SearchPointInTimeReference",
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
@@ -32314,15 +32325,39 @@
         "parentPluginId": "data",
         "id": "def-common.EsQuerySearchAfter",
         "type": "Type",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "EsQuerySearchAfter",
         "description": [],
         "signature": [
           "[string | number, string | number]"
         ],
         "path": "src/plugins/data/common/search/search_source/types.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/context/utils/fetch_hits_in_interval.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/context/utils/fetch_hits_in_interval.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -35011,13 +35046,7 @@
             "text": "DataViewSpec"
           },
           " | undefined; searchAfter?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.EsQuerySearchAfter",
-            "text": "EsQuerySearchAfter"
-          },
+          "SortResults",
           " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
           {
             "pluginId": "data",
