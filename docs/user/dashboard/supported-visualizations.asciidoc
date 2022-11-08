@@ -278,6 +278,8 @@ a| *&check;*
 [[supported-visualizations-metric-alternatives]]
 ==== Alternative goal and single value visualizations
 
+Consider the alertnative goal and single value visualizations for best displaying your data. 
+
 * *Bar chart* When your metric visualizations share the same scale, such as percentage, use a bar chart to easily compare side-by-side.
 
 * *Table* Tables allow you to sort and format the data, but with additional options.
@@ -288,14 +290,73 @@ a| *&check;*
 
 [discrete]
 [[supported-visualizations-line-and-area]]
-=== Line and area (Giovanni)
+=== Line and area
 
-Supported visualizations:
+Line and area charts allow you visualize trends in data over intervals of time. Use line and area charts to visualize your time series data. 
+
+Line charts display your data as a series of ordered measurement points, typically by the x-axis values, which are connected by segments of straight lines. 
+
+{kib} supports the following line and area charts:
 
 * Area
 * Area percentage
 * Area stacked
 * Line
+
+[discrete]
+[[components-of-a-line-chart]]
+==== Components of line and area charts
+
+All line and area charts include the same set of components for visualizing your data. 
+
+[role="screenshot"]
+image:images/lens_anatomyOfLineAndAreaCharts_8.6.png[Line chart with callouts for each line chart part]
++
+[cols=2*]
+|===
+| *1*
+| *Axis tick label* The labeled category or measurement that appears along the corresponding axis.
+
+| *2*
+| *Vertical axis* Displays a set of measurable and incremental ticks that guide analysis.
+
+| *3*
+| *Data point* The ordered measurement point, typically in relation to the x-axis values.
+
+| *4*
+| *Area* In an area chart, the space below the line that is colored or shaded.
+
+| *5*
+| *Baseline* The common base value for each line, which is always zero. You can display bars above and below the baseline. 
+
+| *6*
+| *Line* The segement that connects each data point.
+
+| *7*
+| *Horizontal axis* Displays a set of incremental ticks that represent the time series scale.
+
+| *8*
+| *Tick* A visually aligned and labeled category or measurement that appears along the corresponding axis.
+
+| *9*
+| *Grid line* A visual indicator of the data point value. 
+|===
+
+[discrete]
+[[supported-visualizations-line-and-area-best-practices]]
+==== Line and area chart best practices
+
+To create line and area charts that best display your data, review the best practices. 
+
+[discrete]
+[[supported-visualizations-line-and-area-chart-alternatives]]
+==== Alternative line and area chart visualizations
+
+Consider the alertnative line and area chart visualizations for best displaying your data. 
+
+* *Bar chart* When you want to show how your data changes between categories, use a bar chart.
+
+* *Metric*
 
 [discrete]
 [[supported-visualizations-magnitude]]
