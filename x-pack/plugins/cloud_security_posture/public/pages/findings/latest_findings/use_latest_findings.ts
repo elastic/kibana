@@ -19,7 +19,6 @@ import { extractErrorMessage } from '../../../../common/utils/helpers';
 import type { Sort } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
-import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
