@@ -7,62 +7,37 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { ToastsService } from '../services/toasts';
 import { waitForVisualizations } from '../utils';
 
-const sampleData = ['ecommerce', 'flights', 'logs'];
-
 export const journey = new Journey({
-  skipAutoLogin: true,
-  extendContext: ({ page, log }) => ({
-    toasts: new ToastsService(log, page),
-  }),
+  esArchives: [
+    'x-pack/performance/es_archives/sample_data_ecommerce',
+    'x-pack/performance/es_archives/sample_data_flights',
+    'x-pack/performance/es_archives/sample_data_logs',
+  ],
+  kbnArchives: [
+    'x-pack/performance/kbn_archives/ecommerce_no_map_dashboard',
+    'x-pack/performance/kbn_archives/flights_no_map_dashboard',
+    'x-pack/performance/kbn_archives/logs_no_map_dashboard',
+  ],
 })
-  .step('Load sample data via API', async ({ kibanaServer, log }) => {
-    for (const name of sampleData) {
-      const { status } = await kibanaServer.request({
-        path: `/api/sample_data/${name}`,
-        method: 'POST',
-      });
-      log.debug(`Data set '${name}' is added with code '${status}'`);
-    }
-  })
-
-  .step('Login to Kibana', async ({ page, kbnUrl, inputDelays }) => {
-    await page.goto(kbnUrl.get());
-
-    await page.type(subj('loginUsername'), 'elastic', { delay: inputDelays.TYPING });
-    await page.type(subj('loginPassword'), 'changeme', { delay: inputDelays.TYPING });
-    await page.click(subj('loginSubmit'), { delay: inputDelays.MOUSE_CLICK });
-
-    await page.waitForSelector('#headerUserMenu');
-  })
-
-  .step('Go to Sample Data', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get(`/app/home#/tutorial_directory/sampleData`));
-    await page.waitForSelector(subj('showSampleDataButton'));
-  })
-
   .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/dashboards`));
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Flights Dasboard', async ({ page, log }) => {
-    log.debug('Loading Flights dashboard');
-    await page.click(subj('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'));
-    log.debug('Loading eCommerce dashboard');
-    await waitForVisualizations(page, log, 16);
-  })
-
-  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get(`/app/dashboards`));
-    await page.waitForSelector('#dashboardListingHeading');
-  })
-
-  .step('Go to eCommerce Dasboard', async ({ page, log }) => {
-    log.debug('Loading eCommerce dashboard');
+  .step('Go to Ecommerce Dashboard', async ({ page, log }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-Revenue-Dashboard'));
+    await waitForVisualizations(page, log, 13);
+  })
+
+  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/dashboards`));
+    await page.waitForSelector('#dashboardListingHeading');
+  })
+
+  .step('Go to Flights Dashboard', async ({ page, log }) => {
+    await page.click(subj('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'));
     await waitForVisualizations(page, log, 14);
   })
 
@@ -71,42 +46,7 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Logs Dasboard', async ({ page, log }) => {
-    log.debug('Loading logs dashboard');
+  .step('Go to Web Logs Dashboard', async ({ page, log }) => {
     await page.click(subj('dashboardListingTitleLink-[Logs]-Web-Traffic'));
-    await waitForVisualizations(page, log, 12);
-  })
-
-  .step('Go to Discover', async ({ page, kbnUrl, log }) => {
-    log.debug('Loading eCommerce Discover view last 7d');
-    await page.goto(
-      kbnUrl.get(
-        '/app/discover#/view/3ba638e0-b894-11e8-a6d9-e546fe2bba5f?_g=(time:(from:now-7d,to:now))'
-      )
-    );
-    await page.waitForSelector(subj('discoverDocTable'));
-    log.debug('Loading Flights Discover view last 7d');
-    await page.goto(
-      kbnUrl.get(
-        '/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d?_g=(time:(from:now-7d,to:now))'
-      )
-    );
-    await page.waitForSelector(subj('discoverDocTable'));
-    log.debug('Loading Logs Discover view last 7d');
-    await page.goto(
-      kbnUrl.get(
-        '/app/discover#/view/2f360f30-ea74-11eb-b4c6-3d2afc1cb389?_g=(time:(from:now-7d,to:now))'
-      )
-    );
-    await page.waitForSelector(subj('discoverDocTable'));
-  })
-
-  .step('Remove Sample Data via API', async ({ kibanaServer, log }) => {
-    for (const name of sampleData) {
-      const { status } = await kibanaServer.request({
-        path: `/api/sample_data/${name}`,
-        method: 'DELETE',
-      });
-      log.debug(`Data set '${name}' is deleted with code '${status}'`);
-    }
+    await waitForVisualizations(page, log, 11);
   });

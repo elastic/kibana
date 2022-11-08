@@ -72,41 +72,30 @@ echo "✅ ES is ready and will run in the background"
 curl -I -XGET "${TEST_ES_URL}/_cat/indices"
 curl -I -XGET "${TEST_ES_URL}/_cat/count?v=true"
 
-while read -r journey; do
-  if [ "$journey" == "" ] || [ "$journey" == "x-pack/performance/journeys/warmup.ts" ] ; then
-    continue;
-  fi
+echo "--- Run warmup journey"
+node scripts/functional_tests \
+  --config "x-pack/performance/journeys/warmup.ts" \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+  --debug \
+  --bail
 
-  echo "--- Wait 30 sec for ES"
-  sleep 30
+killall -SIGKILL node || true
 
-  phases=("WARMUP" "TEST")
-  status=0
-  for phase in "${phases[@]}"; do
-    echo "--- $journey - $phase"
+journey="x-pack/performance/journeys/data_stress_test_lens.ts"
+for ((i=1;i<=20;i++)); do
+    echo "--- $journey - $i"
+    echo "Wait 30 sec"
+    sleep 30
+    export TEST_PERFORMANCE_PHASE="TEST"
 
-    export TEST_PERFORMANCE_PHASE="$phase"
-
-    set +e
     node scripts/functional_tests \
       --config "$journey" \
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
       --debug \
       --bail
-    status=$?
-    set -e
 
-    if [ $status -ne 0 ]; then
-      failedJourneys+=("$journey")
-      echo "^^^ +++"
-      echo "❌ FTR failed with status code: $status"
-      break
-    fi
-  done
-
-  # remove trap, we're manually shutting down
-  trap - EXIT;
-done <<< "$journeys"
+    killall -SIGKILL node || true
+done
 
 echo "--- 🔎 Shutdown ES"
 killall node
@@ -120,7 +109,6 @@ while is_running $esPid; do
   if [ $dur -ge $timeout ]; then
     echo "es still running after $dur seconds, killing ES and node forcefully";
     killall -SIGKILL java
-    killall -SIGKILL node
     sleep 5;
   fi
 done
