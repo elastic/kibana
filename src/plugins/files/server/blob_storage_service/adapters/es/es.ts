@@ -9,13 +9,14 @@
 import assert from 'assert';
 import { once } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
-import type { AnalyticsServiceStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Semaphore } from '@kbn/std';
 import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
 import { lastValueFrom, defer } from 'rxjs';
 import { PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { FilesPlugin } from '../../../plugin';
 import { FILE_UPLOAD_PERFORMANCE_EVENT_NAME } from '../../../performance';
 import type { BlobStorageClient } from '../../types';
 import type { ReadableContentStream } from './content_stream';
@@ -34,7 +35,6 @@ export const MAX_BLOB_STORE_SIZE_BYTES = 50 * 1024 * 1024 * 1024; // 50 GiB
 interface UploadOptions {
   transforms?: Transform[];
   id?: string;
-  analytics?: AnalyticsServiceStart;
 }
 
 export class ElasticsearchBlobStorageClient implements BlobStorageClient {
@@ -99,12 +99,13 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
   });
 
   public async upload(src: Readable, options: UploadOptions = {}) {
-    const { transforms, id, analytics } = options;
+    const { transforms, id } = options;
 
     await this.createIndexIfNotExists();
 
     const processUpload = async () => {
       try {
+        const analytics = FilesPlugin.getAnalytics();
         const dest = getWritableContentStream({
           id,
           client: this.esClient,

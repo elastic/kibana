@@ -6,22 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { AnalyticsClient } from '@kbn/analytics-client';
 import { PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { Optional } from 'utility-types';
+import { FilesPlugin } from '../plugin';
 
 export interface PerfArgs {
-  analytics?: Pick<AnalyticsClient, 'reportEvent'>;
   eventData: Optional<PerformanceMetricEvent, 'duration'>;
 }
 
 export async function withReportPerformanceMetric<T>(perfArgs: PerfArgs, cb: () => Promise<T>) {
+  const analytics = FilesPlugin.getAnalytics();
+
   const start = performance.now();
   const response = await cb();
   const end = performance.now();
 
-  if (perfArgs.analytics) {
-    reportPerformanceMetricEvent(perfArgs.analytics, {
+  if (analytics) {
+    reportPerformanceMetricEvent(analytics, {
       ...perfArgs.eventData,
       duration: end - start,
     });

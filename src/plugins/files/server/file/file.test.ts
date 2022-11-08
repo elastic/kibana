@@ -59,8 +59,7 @@ describe('File', () => {
       fileShareService,
       undefined,
       getFileKindsRegistry(),
-      logger,
-      undefined
+      logger
     );
   });
 

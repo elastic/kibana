@@ -11,7 +11,6 @@ import { Readable } from 'stream';
 import mimeType from 'mime';
 import cuid from 'cuid';
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
@@ -51,7 +50,6 @@ export function createFileClient({
   internalFileShareService,
   logger,
   metadataClient,
-  analytics,
 }: {
   fileKindDescriptor: FileKind;
   metadataClient: FileMetadataClient;
@@ -59,7 +57,6 @@ export function createFileClient({
   internalFileShareService: undefined | InternalFileShareService;
   auditLogger: undefined | AuditLogger;
   logger: Logger;
-  analytics?: AnalyticsServiceStart;
 }) {
   return new FileClientImpl(
     fileKindDescriptor,
@@ -67,8 +64,7 @@ export function createFileClient({
     blobStorageClient,
     internalFileShareService,
     auditLogger,
-    logger,
-    analytics
+    logger
   );
 }
 
@@ -90,8 +86,7 @@ export class FileClientImpl implements FileClient {
     private readonly blobStorageClient: BlobStorageClient,
     private readonly internalFileShareService: undefined | InternalFileShareService,
     auditLogger: undefined | AuditLogger,
-    private readonly logger: Logger,
-    private readonly analytics?: AnalyticsServiceStart
+    private readonly logger: Logger
   ) {
     this.logAuditEvent = (e) => {
       if (auditLogger) {
@@ -227,7 +222,6 @@ export class FileClientImpl implements FileClient {
         enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity),
       ],
       id,
-      analytics: this.analytics,
     });
   };
 
@@ -235,7 +229,6 @@ export class FileClientImpl implements FileClient {
     this.incrementUsageCounter('DOWNLOAD');
     try {
       const perf: PerfArgs = {
-        analytics: this.analytics,
         eventData: {
           eventName: FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
           key1: 'size',

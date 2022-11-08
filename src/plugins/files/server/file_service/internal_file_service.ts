@@ -7,7 +7,6 @@
  */
 
 import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 
 import { BlobStorageService } from '../blob_storage_service';
@@ -39,8 +38,7 @@ export class InternalFileService {
     private readonly fileShareService: InternalFileShareService,
     private readonly auditLogger: undefined | AuditLogger,
     private readonly fileKindRegistry: FileKindsRegistry,
-    private readonly logger: Logger,
-    private readonly analytics?: AnalyticsServiceStart
+    private readonly logger: Logger
   ) {}
 
   public async createFile(args: CreateFileArgs): Promise<IFile> {
@@ -140,7 +138,6 @@ export class InternalFileService {
       internalFileShareService: this.fileShareService,
       logger: this.logger,
       metadataClient: this.metadataClient,
-      analytics: this.analytics,
     });
   }
 }
