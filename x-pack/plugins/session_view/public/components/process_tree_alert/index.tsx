@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiButtonIcon,
   EuiToolTip,
+  EuiPanel,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { ALERT_ICONS } from '../../../common/constants';
@@ -72,7 +73,7 @@ export const ProcessTreeAlert = ({
   if (!(alert.kibana && rule)) {
     return null;
   }
-
+  const { name } = rule;
   const processEventAlertCategory = category ?? 'alert';
   const alertCategoryDetailDisplayText = getAlertCategoryDisplayText(alert, category);
 
@@ -104,13 +105,24 @@ export const ProcessTreeAlert = ({
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText
-            data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}-text`}
-            css={styles.alertName}
-            size="s"
+          <EuiPanel
+            css={styles.processPanel}
+            color="subdued"
+            hasBorder
+            hasShadow={false}
+            borderRadius="m"
           >
-            {alertCategoryDetailDisplayText}
-          </EuiText>
+            <EuiText
+              data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}-text`}
+              css={styles.alertName}
+              size="s"
+            >
+              {name}{' '}
+              {alertCategoryDetailDisplayText && (
+                <span className="categoryDetailText">{alertCategoryDetailDisplayText}</span>
+              )}
+            </EuiText>
+          </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>

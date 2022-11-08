@@ -95,7 +95,7 @@ describe('ProcessTreeAlerts component', () => {
       expect(networkAlertText).toBeTruthy();
 
       expect(networkAlertText).toHaveTextContent(
-        'Transport protocol: TCP | Network protocol: http | Destination: 127.0.0.1:2222'
+        `${mockNetworkAlert?.kibana?.alert?.rule?.name} ${mockNetworkAlert?.destination?.address}:${mockNetworkAlert?.destination?.port}`
       );
     });
 

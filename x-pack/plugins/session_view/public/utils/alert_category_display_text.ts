@@ -9,32 +9,21 @@ import {
   ProcessEvent,
   ProcessEventAlertCategory,
   ProcessEventIPAddress,
-  ProcessEventNetwork,
 } from '../../common/types/process_tree';
 import { dataOrDash } from './data_or_dash';
 
 export const getAlertCategoryDisplayText = (alert: ProcessEvent, category: string | undefined) => {
   const destination = alert?.destination;
-  const network = alert?.network;
   const filePath = alert?.file?.path;
-  const ruleName = alert?.kibana?.alert?.rule?.name;
 
   if (filePath && category === ProcessEventAlertCategory.file) return dataOrDash(filePath);
-  if (destination && network && category === ProcessEventAlertCategory.network)
-    return getAlertNetworkDisplay(network, destination);
-
-  return dataOrDash(ruleName);
+  if (destination?.address && category === ProcessEventAlertCategory.network)
+    return dataOrDash(getAlertNetworkDisplay(destination));
+  return;
 };
 
-export const getAlertNetworkDisplay = (
-  network: ProcessEventNetwork,
-  destination: ProcessEventIPAddress
-) => {
+export const getAlertNetworkDisplay = (destination: ProcessEventIPAddress) => {
   const hasIpAddressPort = !!destination?.address && !!destination?.port;
   const ipAddressPort = `${destination?.address}:${destination?.port}`;
-  const transportLayer = network?.transport;
-  const appLayerProtocol = network?.protocol;
-  return `Transport protocol: ${dataOrDash(transportLayer)} | Network protocol: ${dataOrDash(
-    appLayerProtocol
-  )} | Destination: ${hasIpAddressPort ? ipAddressPort : dataOrDash(destination?.address)}`;
+  return `${hasIpAddressPort ? ipAddressPort : destination?.address}`;
 };

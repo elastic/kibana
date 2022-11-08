@@ -46,10 +46,15 @@ Object {
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="euiText emotion-EuiText"
-              data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38-text"
+              class="euiPanel euiPanel--subdued euiPanel--paddingMedium emotion-EuiPanel"
             >
-              cmd test alert
+              <div
+                class="euiText emotion-EuiText"
+                data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38-text"
+              >
+                cmd test alert
+                 
+              </div>
             </div>
           </div>
           <div
@@ -136,10 +141,15 @@ Object {
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiText emotion-EuiText"
-            data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38-text"
+            class="euiPanel euiPanel--subdued euiPanel--paddingMedium emotion-EuiPanel"
           >
-            cmd test alert
+            <div
+              class="euiText emotion-EuiText"
+              data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38-text"
+            >
+              cmd test alert
+               
+            </div>
           </div>
         </div>
         <div
