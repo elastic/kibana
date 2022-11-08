@@ -67,7 +67,7 @@ describe('MetricEmbeddable', () => {
   });
 
   it('render titles', () => {
-    expect(res.getAllByText('Source')).toHaveLength(2);
-    expect(res.getAllByText('Dest.')).toHaveLength(2);
+    expect(res.getAllByText('Source')).toHaveLength(1);
+    expect(res.getAllByText('Dest.')).toHaveLength(1);
   });
 });
