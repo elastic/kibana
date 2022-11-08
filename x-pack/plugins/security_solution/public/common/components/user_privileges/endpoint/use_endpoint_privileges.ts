@@ -127,6 +127,10 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   // Check if Host Isolation Exceptions exist if license is not Platinum+
   useEffect(() => {
     if (!isPlatinumPlus) {
+      // Reset these back to false. Case license is changed while the user is logged in.
+      setHasHostIsolationExceptionsItems(false);
+      setCheckHostIsolationExceptionsDone(false);
+
       HostIsolationExceptionsApiClient.getInstance(http)
         .hasData()
         .then((hasData) => {
