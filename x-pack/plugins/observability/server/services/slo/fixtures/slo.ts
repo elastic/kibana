@@ -17,7 +17,7 @@ import {
 } from '../../../types/models';
 import { CreateSLOParams } from '../../../types/rest_specs';
 import { Paginated } from '../slo_repository';
-import { sevenDays } from './duration';
+import { oneMinute, sevenDays } from './duration';
 import { sevenDaysRolling } from './time_window';
 
 export const createAPMTransactionErrorRateIndicator = (

@@ -117,11 +117,9 @@ export class DefaultSLIClient implements SLIClient {
       is_rolling: true,
     });
 
+    type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
     if (occurencesBudgetingMethodSchema.is(slo.budgeting_method)) {
-      const result = await this.esClient.search<
-        unknown,
-        Record<string, AggregationsDateRangeAggregate>
-      >({
+      const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, longestDateRange),
         aggs: toLookbackWindowsAggregationsQuery(sortedLookbackWindows),
       });
@@ -130,10 +128,7 @@ export class DefaultSLIClient implements SLIClient {
     }
 
     if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
-      const result = await this.esClient.search<
-        unknown,
-        Record<string, AggregationsDateRangeAggregate>
-      >({
+      const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, longestDateRange),
         aggs: toLookbackWindowsSlicedAggregationsQuery(slo, sortedLookbackWindows),
       });
@@ -201,11 +196,8 @@ function toLookbackWindowsAggregationsQuery(sortedLookbackWindow: LookbackWindow
   );
 }
 
-function toLookbackWindowsSlicedAggregationsQuery(
-  slo: SLO,
-  sortedLookbackWindow: LookbackWindow[]
-) {
-  return sortedLookbackWindow.reduce<Record<string, AggregationsAggregationContainer>>(
+function toLookbackWindowsSlicedAggregationsQuery(slo: SLO, lookbackWindows: LookbackWindow[]) {
+  return lookbackWindows.reduce<Record<string, AggregationsAggregationContainer>>(
     (acc, lookbackWindow) => ({
       ...acc,
       [lookbackWindow.name]: {
@@ -270,7 +262,7 @@ function toLookbackWindowsSlicedAggregationsQuery(
 }
 
 function handleWindowedResult(
-  aggregations: Record<string, AggregationsDateRangeAggregate> | undefined,
+  aggregations: Record<WindowName, AggregationsDateRangeAggregate> | undefined,
   lookbackWindows: LookbackWindow[]
 ): Record<WindowName, IndicatorData> {
   if (aggregations === undefined) {
@@ -279,7 +271,7 @@ function handleWindowedResult(
 
   const indicatorDataPerLookbackWindow: Record<WindowName, IndicatorData> = {};
   lookbackWindows.forEach((lookbackWindow) => {
-    const windowAggBuckets = aggregations[lookbackWindow.name].buckets;
+    const windowAggBuckets = aggregations[lookbackWindow.name]?.buckets;
     if (!Array.isArray(windowAggBuckets) || windowAggBuckets.length === 0) {
       throw new InternalQueryError('Invalid aggregation bucket response');
     }
