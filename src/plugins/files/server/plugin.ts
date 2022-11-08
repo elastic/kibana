@@ -34,6 +34,7 @@ import type {
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes, registerFileKindRoutes } from './routes';
 import { Counters, registerUsageCollector } from './usage';
+import { registerBaseFileKind } from './register_base_file_kind';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
   private static analytics?: AnalyticsServiceStart;
@@ -90,6 +91,9 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
       usageCollection,
       getFileService: () => this.fileServiceFactory?.asInternal(),
     });
+
+    // Now that everything is set up:
+    registerBaseFileKind();
 
     return {
       registerFileKind(fileKind) {

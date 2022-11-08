@@ -7,6 +7,7 @@
  */
 
 export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME, ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
+export { baseFileKind } from './base_file_kind';
 
 export type {
   File,
