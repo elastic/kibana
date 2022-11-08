@@ -6,6 +6,13 @@
  */
 
 import * as t from 'io-ts';
+import { LimitedSizeArray } from '@kbn/securitysolution-io-ts-types';
+
+export const AlertSuppressionGroupBy = LimitedSizeArray({
+  codec: t.string,
+  minSize: 1,
+  maxSize: 3,
+});
 
 /**
  * Schema for fields relating to alert suppression, which enables limiting the number of alerts per entity.
@@ -15,6 +22,6 @@ import * as t from 'io-ts';
 export type AlertSuppression = t.TypeOf<typeof AlertSuppression>;
 export const AlertSuppression = t.exact(
   t.type({
-    group_by: t.array(t.string),
+    group_by: AlertSuppressionGroupBy,
   })
 );

@@ -24,7 +24,7 @@ import { singleSearchAfter } from '../single_search_after';
 
 export interface BucketHistory {
   key: Record<string, string | number>;
-  endDate: Date;
+  endDate: string;
 }
 
 /**
@@ -56,7 +56,7 @@ export const buildBucketHistoryFilter = ({
                 },
               })),
               buildTimeRangeFilter({
-                to: bucket.endDate.toISOString(),
+                to: bucket.endDate,
                 from: from.toISOString(),
                 primaryTimestamp,
                 secondaryTimestamp,
@@ -76,7 +76,7 @@ export const filterBucketHistory = ({
   bucketHistory: BucketHistory[];
   fromDate: Date;
 }) => {
-  return bucketHistory.filter((bucket) => bucket.endDate > fromDate);
+  return bucketHistory.filter((bucket) => new Date(bucket.endDate) > fromDate);
 };
 
 export const groupAndBulkCreate = async ({
@@ -202,8 +202,8 @@ export const groupAndBulkCreate = async ({
             // This cast should be safe as we just filtered out buckets where any key has a null value.
             key: bucket.key as Record<string, string | number>,
             endDate: bucket.max_timestamp.value_as_string
-              ? new Date(bucket.max_timestamp.value_as_string)
-              : tuple.to.toDate(),
+              ? bucket.max_timestamp.value_as_string
+              : tuple.to.toISOString(),
           };
         });
 

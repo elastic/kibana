@@ -39,6 +39,7 @@ import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import {
   AlertsIndex,
   AlertsIndexNamespace,
+  AlertSuppressionGroupBy,
   BuildingBlockType,
   DataViewId,
   EventCategoryOverride,
@@ -88,7 +89,7 @@ const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export type AlertSuppressionCamel = t.TypeOf<typeof AlertSuppressionCamel>;
 const AlertSuppressionCamel = t.exact(
   t.type({
-    groupBy: t.array(t.string),
+    groupBy: AlertSuppressionGroupBy,
   })
 );
 

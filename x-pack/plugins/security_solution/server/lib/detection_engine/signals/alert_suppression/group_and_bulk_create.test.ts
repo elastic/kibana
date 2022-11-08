@@ -16,14 +16,14 @@ describe('groupAndBulkCreate utils', () => {
         'host.name': 'host-0',
         'source.ip': '127.0.0.1',
       },
-      endDate: new Date('2022-11-01T12:00:00Z'),
+      endDate: '2022-11-01T12:00:00Z',
     },
     {
       key: {
         'host.name': 'host-1',
         'source.ip': '192.0.0.1',
       },
-      endDate: new Date('2022-11-01T12:05:00Z'),
+      endDate: '2022-11-01T12:05:00Z',
     },
   ];
 
@@ -51,7 +51,7 @@ describe('groupAndBulkCreate utils', () => {
           'host.name': 'host-1',
           'source.ip': '192.0.0.1',
         },
-        endDate: new Date('2022-11-01T12:05:00Z'),
+        endDate: '2022-11-01T12:05:00Z',
       },
     ]);
   });
