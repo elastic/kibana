@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  AggregationsCalendarInterval,
-  MappingRuntimeFieldType,
-  TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { InvalidTransformError } from '../../../errors';
@@ -23,7 +19,7 @@ import {
 } from '../../../assets/constants';
 import { KQLCustomIndicator, SLO } from '../../../types/models';
 
-export class KQLCustomTransformGenerator implements TransformGenerator {
+export class KQLCustomTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
@@ -33,7 +29,7 @@ export class KQLCustomTransformGenerator implements TransformGenerator {
       this.buildTransformId(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(),
+      this.buildCommonGroupBy(slo),
       this.buildAggregations(slo, slo.indicator)
     );
   }
@@ -46,20 +42,7 @@ export class KQLCustomTransformGenerator implements TransformGenerator {
     const filter = getElastichsearchQueryOrThrow(indicator.params.query_filter);
     return {
       index: indicator.params.index,
-      runtime_mappings: {
-        'slo.id': {
-          type: 'keyword' as MappingRuntimeFieldType,
-          script: {
-            source: `emit('${slo.id}')`,
-          },
-        },
-        'slo.revision': {
-          type: 'long' as MappingRuntimeFieldType,
-          script: {
-            source: `emit(${slo.revision})`,
-          },
-        },
-      },
+      runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: filter,
     };
   }
@@ -68,27 +51,6 @@ export class KQLCustomTransformGenerator implements TransformGenerator {
     return {
       pipeline: SLO_INGEST_PIPELINE_NAME,
       index: SLO_DESTINATION_INDEX_NAME,
-    };
-  }
-
-  private buildGroupBy() {
-    return {
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
-        },
-      },
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          calendar_interval: '1m' as AggregationsCalendarInterval,
-        },
-      },
     };
   }
 

@@ -1229,14 +1229,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const tiles = await this.getMetricTiles();
       const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
 
-      const metricData = [];
+      const metricDataPromises = [];
       for (const tile of tiles) {
-        metricData.push({
-          ...(await this.getMetricDatum(tile)),
-          showingBar,
-        });
+        metricDataPromises.push(this.getMetricDatum(tile));
       }
-      return metricData;
+      const metricData = await Promise.all(metricDataPromises);
+      return metricData.map((d) => ({ ...d, showingBar }));
     },
 
     /**
@@ -1335,9 +1333,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('indexPattern-add-field');
     },
 
-    async createAdHocDataView(name: string) {
+    async createAdHocDataView(name: string, hasTimeField?: boolean) {
       await testSubjects.click('lns-dataView-switch-link');
-      await PageObjects.unifiedSearch.createNewDataView(name, true);
+      await PageObjects.unifiedSearch.createNewDataView(name, true, hasTimeField);
     },
 
     async switchToTextBasedLanguage(language: string) {
@@ -1637,6 +1635,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           return { stop: await stop.getAttribute('value'), color: colors[index] };
         })
       );
+    },
+
+    async findFieldIdsByType(
+      type: 'string' | 'number' | 'date' | 'geo_point' | 'ip_range',
+      group: 'available' | 'empty' | 'meta' = 'available'
+    ) {
+      const groupCapitalized = `${group[0].toUpperCase()}${group.slice(1).toLowerCase()}`;
+      const allFieldsForType = await find.allByCssSelector(
+        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .lnsFieldItem--${type}`
+      );
+      // map to testSubjId
+      return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));
     },
   });
 }

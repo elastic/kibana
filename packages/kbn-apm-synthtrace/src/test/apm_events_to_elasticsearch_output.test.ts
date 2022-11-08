@@ -59,9 +59,6 @@ describe('output apm events to elasticsearch', () => {
             "name": "instance-a",
           },
         },
-        "timestamp": Object {
-          "us": 1609455600000000,
-        },
       }
     `);
   });

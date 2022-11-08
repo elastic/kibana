@@ -34,7 +34,13 @@
             "text": "StorybookMock"
           },
           " extends ",
-          "AbstractStorybookMock",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
           "<",
           "KibanaPageTemplateProps",
           ", ",
@@ -106,7 +112,13 @@
             "label": "dependencies",
             "description": [],
             "signature": [
-              "NoDataConfigPageStorybookMock",
+              {
+                "pluginId": "@kbn/shared-ux-page-no-data-config-mocks",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPageNoDataConfigMocksPluginApi",
+                "section": "def-common.NoDataConfigPageStorybookMock",
+                "text": "NoDataConfigPageStorybookMock"
+              },
               "[]"
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
@@ -227,7 +239,13 @@
             "text": "StorybookMock"
           },
           " extends ",
-          "AbstractStorybookMock",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
           "<",
           "KibanaPageTemplateProps",
           ", ",
@@ -287,7 +305,13 @@
             "label": "dependencies",
             "description": [],
             "signature": [
-              "NoDataConfigPageStorybookMock",
+              {
+                "pluginId": "@kbn/shared-ux-page-no-data-config-mocks",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPageNoDataConfigMocksPluginApi",
+                "section": "def-common.NoDataConfigPageStorybookMock",
+                "text": "NoDataConfigPageStorybookMock"
+              },
               "[]"
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
@@ -408,7 +432,13 @@
             "text": "StorybookMock"
           },
           " extends ",
-          "AbstractStorybookMock",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
           "<",
           "KibanaPageTemplateProps",
           ", ",
@@ -468,7 +498,13 @@
             "label": "dependencies",
             "description": [],
             "signature": [
-              "NoDataConfigPageStorybookMock",
+              {
+                "pluginId": "@kbn/shared-ux-page-no-data-config-mocks",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPageNoDataConfigMocksPluginApi",
+                "section": "def-common.NoDataConfigPageStorybookMock",
+                "text": "NoDataConfigPageStorybookMock"
+              },
               "[]"
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
@@ -589,7 +625,13 @@
             "text": "StorybookMock"
           },
           " extends ",
-          "AbstractStorybookMock",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
           "<",
           "KibanaPageTemplateProps",
           ", ",
@@ -801,17 +843,37 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "ArgumentParams",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
           "<PropArguments, {}> & ",
-          "ArgumentParams",
-          "<",
-          "PropArguments",
-          ", {}> & ",
-          "ArgumentParams",
-          "<",
-          "PropArguments",
-          ", {}> & ",
-          "NoDataCardStorybookParams"
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
+          "<PropArguments, {}> & ",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
+          "<PropArguments, {}> & ",
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-mocks",
+            "scope": "common",
+            "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
+            "section": "def-common.Params",
+            "text": "Params"
+          }
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
         "deprecated": false,
@@ -826,19 +888,39 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "ArgumentParams",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
           "<",
           "NoDataConfigArguments",
           ", {}> & ",
-          "ArgumentParams",
-          "<",
-          "PropArguments",
-          ", {}> & ",
-          "ArgumentParams",
-          "<",
-          "PropArguments",
-          ", {}> & ",
-          "NoDataCardStorybookParams"
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
+          "<PropArguments, {}> & ",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
+          "<PropArguments, {}> & ",
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-mocks",
+            "scope": "common",
+            "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
+            "section": "def-common.Params",
+            "text": "Params"
+          }
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
         "deprecated": false,
@@ -853,19 +935,39 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "ArgumentParams",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
           "<",
           "SolutionNavArguments",
           ", {}> & ",
-          "ArgumentParams",
-          "<",
-          "PropArguments",
-          ", {}> & ",
-          "ArgumentParams",
-          "<",
-          "PropArguments",
-          ", {}> & ",
-          "NoDataCardStorybookParams"
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
+          "<PropArguments, {}> & ",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
+          "<PropArguments, {}> & ",
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-mocks",
+            "scope": "common",
+            "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
+            "section": "def-common.Params",
+            "text": "Params"
+          }
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
         "deprecated": false,
@@ -880,17 +982,37 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "ArgumentParams",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
           "<PropArguments, {}> & ",
-          "ArgumentParams",
-          "<",
-          "PropArguments",
-          ", {}> & ",
-          "ArgumentParams",
-          "<",
-          "PropArguments",
-          ", {}> & ",
-          "NoDataCardStorybookParams"
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
+          "<PropArguments, {}> & ",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
+          "<PropArguments, {}> & ",
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-mocks",
+            "scope": "common",
+            "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
+            "section": "def-common.Params",
+            "text": "Params"
+          }
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
         "deprecated": false,

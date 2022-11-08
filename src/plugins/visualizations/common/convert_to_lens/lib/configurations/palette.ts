@@ -74,6 +74,21 @@ const convertToPercentColorStops = (
   return { ...colorStops, stop };
 };
 
+export const getPaletteFromStopsWithColors = (
+  config: PaletteConfig,
+  percentageModeConfig: PercentageModeConfig,
+  isPercentPaletteSupported: boolean = false
+) => {
+  const percentStopsWithColors = percentageModeConfig.isPercentageMode
+    ? convertToPercentColorStops(config, percentageModeConfig, isPercentPaletteSupported)
+    : config;
+
+  return buildCustomPalette(
+    buildPaletteParams(percentStopsWithColors),
+    isPercentPaletteSupported && percentageModeConfig.isPercentageMode
+  );
+};
+
 export const getPalette = (
   params: PaletteParams,
   percentageModeConfig: PercentageModeConfig,
@@ -86,12 +101,10 @@ export const getPalette = (
   }
 
   const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
-  const percentStopsWithColors = percentageModeConfig.isPercentageMode
-    ? convertToPercentColorStops(stopsWithColors, percentageModeConfig, isPercentPaletteSupported)
-    : stopsWithColors;
 
-  return buildCustomPalette(
-    buildPaletteParams(percentStopsWithColors),
-    isPercentPaletteSupported && percentageModeConfig.isPercentageMode
+  return getPaletteFromStopsWithColors(
+    stopsWithColors,
+    percentageModeConfig,
+    isPercentPaletteSupported
   );
 };

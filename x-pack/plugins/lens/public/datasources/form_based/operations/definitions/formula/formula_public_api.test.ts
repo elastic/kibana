@@ -103,4 +103,54 @@ describe('createFormulaPublicApi', () => {
       { indexPattern: {} }
     );
   });
+
+  test('should pass over advanced parameters as global params for formula', () => {
+    const baseLayer = getBaseLayer();
+
+    publicApiHelper.insertOrReplaceFormulaColumn(
+      'col',
+      {
+        formula: 'count()',
+        timeScale: 'd',
+        filter: { query: 'myField: *', language: 'kuery' },
+        reducedTimeRange: '30s',
+      },
+      baseLayer,
+      dataView
+    );
+
+    expect(insertOrReplaceFormulaColumn).toHaveBeenCalledWith(
+      'col',
+      {
+        customLabel: false,
+        dataType: 'number',
+        isBucketed: false,
+        label: 'count()',
+        operationType: 'formula',
+        params: { formula: 'count()', format: undefined },
+        filter: {
+          language: 'kuery',
+          query: 'myField: *',
+        },
+        timeScale: 'd',
+        reducedTimeRange: '30s',
+        references: [],
+      },
+      {
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '@timestamp',
+            operationType: 'date_histogram',
+            params: { interval: 'auto' },
+            scale: 'interval',
+          },
+        },
+        indexPatternId: undefined,
+      },
+      { indexPattern: {} }
+    );
+  });
 });

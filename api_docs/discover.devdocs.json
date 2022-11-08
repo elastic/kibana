@@ -141,7 +141,7 @@
             "section": "def-public.SavedSearch",
             "text": "SavedSearch"
           },
-          ") => Promise<string>"
+          ") => Promise<any>"
         ],
         "path": "src/plugins/saved_search/public/services/saved_searches/saved_searches_utils.ts",
         "deprecated": false,
@@ -256,7 +256,13 @@
             "text": "DiscoverAppLocatorParams"
           },
           " extends ",
-          "SerializableRecord"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
@@ -389,7 +395,13 @@
               "\nOptionally set the time range in the time picker."
             ],
             "signature": [
-              "TimeRange",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -415,7 +427,13 @@
                 "text": "RefreshInterval"
               },
               " & ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ") | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -432,7 +450,13 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -449,9 +473,21 @@
               "\nOptionally set a query."
             ],
             "signature": [
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | ",
-              "AggregateQuery",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -957,7 +993,13 @@
                 "text": "SerializedSearchSourceFields"
               },
               "; serialize: () => { searchSourceJSON: string; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]; }; toExpressionAst: ({ asDatatable }?: ExpressionAstOptions) => ",
               {
                 "pluginId": "expressions",
@@ -1307,7 +1349,13 @@
             "label": "query",
             "description": [],
             "signature": [
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
@@ -1322,7 +1370,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",

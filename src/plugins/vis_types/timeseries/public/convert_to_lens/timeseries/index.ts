@@ -14,7 +14,6 @@ import {
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { Panel } from '../../../common/types';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
@@ -41,7 +40,7 @@ const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<st
   return newLayers;
 };
 
-export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel) => {
+export const convertToLens: ConvertTsvbToLensVisualization = async ({ params: model }) => {
   const dataViews: DataViewsPublicPluginStart = getDataViewsStart();
   const extendedLayers: Record<number, ExtendedLayer> = {};
   const seriesNum = model.series.filter((series) => !series.hidden).length;
