@@ -385,7 +385,7 @@ export function getTextBasedDatasource({
 
       render(
         <EuiButtonEmpty
-          color={customLabel ? 'primary' : 'danger'}
+          color={customLabel && selectedField ? 'primary' : 'danger'}
           onClick={() => {}}
           data-test-subj="lns-dimensionTrigger-textBased"
         >
