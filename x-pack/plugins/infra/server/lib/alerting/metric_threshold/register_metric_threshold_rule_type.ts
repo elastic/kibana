@@ -125,5 +125,6 @@ export async function registerMetricThresholdRuleType(
       ],
     },
     producer: 'infrastructure',
+    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
   });
 }
