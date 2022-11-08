@@ -424,7 +424,7 @@ describe.skip('Update Api Key', () => {
   });
 });
 
-describe.skip('rules_list component empty', () => {
+describe('rules_list component empty', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
     loadRulesWithKueryFilter.mockResolvedValue({
@@ -1927,7 +1927,7 @@ describe('rules_list with disabled items', () => {
 });
 
 // Failing: https://github.com/elastic/kibana/issues/141052
-describe.skip('Rules list bulk actions', () => {
+describe('Rules list bulk actions', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(authorized: boolean = true) {
@@ -2017,7 +2017,7 @@ describe.skip('Rules list bulk actions', () => {
     expect(wrapper.find('[data-test-subj="deleteAll"]').first().prop('isDisabled')).toBeTruthy();
   });
 
-  it('can bulk snooze', async () => {
+  it.skip('can bulk snooze', async () => {
     await setup();
     wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
     wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
@@ -2044,7 +2044,7 @@ describe.skip('Rules list bulk actions', () => {
     );
   });
 
-  it('can bulk unsnooze', async () => {
+  it.skip('can bulk unsnooze', async () => {
     await setup();
     wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
     wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
@@ -2071,7 +2071,7 @@ describe.skip('Rules list bulk actions', () => {
     );
   });
 
-  it('can bulk add snooze schedule', async () => {
+  it.skip('can bulk add snooze schedule', async () => {
     await setup();
     wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
     wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
@@ -2097,7 +2097,7 @@ describe.skip('Rules list bulk actions', () => {
     );
   });
 
-  it('can bulk remove snooze schedule', async () => {
+  it.skip('can bulk remove snooze schedule', async () => {
     await setup();
     wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
     wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
@@ -2127,7 +2127,7 @@ describe.skip('Rules list bulk actions', () => {
     );
   });
 
-  it('can bulk update API key', async () => {
+  it.skip('can bulk update API key', async () => {
     await setup();
     wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
     wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
