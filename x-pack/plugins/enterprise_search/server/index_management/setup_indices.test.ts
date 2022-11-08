@@ -40,7 +40,12 @@ describe('Setup Indices', () => {
       },
       description: { type: 'text' },
       error: { type: 'keyword' },
-      features: { type: 'keyword' },
+      features: {
+        properties: {
+          filtering_advanced_config: { type: 'boolean' },
+          filtering_rules: { type: 'boolean' },
+        },
+      },
       filtering: {
         properties: {
           active: {
