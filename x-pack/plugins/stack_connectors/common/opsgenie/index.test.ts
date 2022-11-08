@@ -6,7 +6,12 @@
  */
 
 import { AlertProvidedActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { RULE_TAGS_TEMPLATE } from '.';
 
-export const DEFAULT_ALIAS = `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`;
-
-export const DEFAULT_URL = 'https://api.opsgenie.com' as const;
+describe('index', () => {
+  describe('tags', () => {
+    it('uses the same string as the public directory', () => {
+      expect(`{{${AlertProvidedActionVariables.ruleTags}}}`).toEqual(RULE_TAGS_TEMPLATE);
+    });
+  });
+});

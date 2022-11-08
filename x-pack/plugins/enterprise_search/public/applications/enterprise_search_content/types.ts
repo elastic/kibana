@@ -18,6 +18,7 @@ export enum IngestionMethod {
 }
 
 export enum IngestionStatus {
+  CONFIGURED,
   CONNECTED,
   ERROR,
   SYNC_ERROR,
