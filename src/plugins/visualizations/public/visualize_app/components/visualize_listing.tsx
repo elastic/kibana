@@ -164,7 +164,8 @@ export const VisualizeListing = () => {
         getTypes(),
         searchTerm,
         listingLimit,
-        references
+        references,
+        referencesToExclude
       ).then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => ({
         total,
         hits: hits
