@@ -42,11 +42,8 @@ import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { severities } from '../severity/config';
-import { UserToolTip } from '../user_profiles/user_tooltip';
-import { useAssignees } from '../../containers/user_profiles/use_assignees';
-import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
-import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { AssigneesColumn } from './assignees_column';
 
 type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -59,41 +56,6 @@ const MediumShadeText = styled.p`
 
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
-
-const AssigneesColumn: React.FC<{
-  assignees: Case['assignees'];
-  userProfiles: Map<string, UserProfileWithAvatar>;
-}> = ({ assignees, userProfiles }) => {
-  const { allAssignees } = useAssignees({
-    caseAssignees: assignees,
-    userProfiles,
-  });
-
-  if (allAssignees.length <= 0) {
-    return getEmptyTagValue();
-  }
-
-  return (
-    <EuiFlexGroup gutterSize="none" data-test-subj="case-table-column-assignee" wrap>
-      {allAssignees.map((assignee) => {
-        const dataTestSubjName = getUsernameDataTestSubj(assignee);
-        return (
-          <EuiFlexItem
-            grow={false}
-            key={assignee.uid}
-            data-test-subj={`case-table-column-assignee-${dataTestSubjName}`}
-          >
-            <UserToolTip userInfo={assignee.profile}>
-              <SmallUserAvatar userInfo={assignee.profile} />
-            </UserToolTip>
-          </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
-  );
-};
-
-AssigneesColumn.displayName = 'AssigneesColumn';
 
 export interface GetCasesColumn {
   filterStatus: string;
@@ -166,6 +128,7 @@ export const useCasesColumns = ({
       render: (assignees: Case['assignees']) => (
         <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
       ),
+      width: '20%',
     });
   }
 
