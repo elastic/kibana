@@ -12,8 +12,8 @@ import {
   EuiBasicTableColumn,
   EuiCode,
   EuiCodeBlock,
+  EuiPanel,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -62,28 +62,38 @@ export const FilteringPanel: React.FC<FilteringPanelProps> = ({
     },
   ];
   return (
-    <FlyoutPanel
-      title={i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.filteringTitle', {
-        defaultMessage: 'Filtering',
-      })}
-    >
-      <EuiBasicTable columns={columns} items={filteringRules} />
-      {advancedSnippet && (
+    <>
+      <FlyoutPanel
+        title={i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.filteringTitle', {
+          defaultMessage: 'Filtering',
+        })}
+      >
+        <EuiBasicTable
+          columns={columns}
+          items={filteringRules.sort(({ order }, { order: secondOrder }) => order - secondOrder)}
+        />
+      </FlyoutPanel>
+      {!!advancedSnippet?.value ? (
         <>
           <EuiSpacer />
-          <EuiTitle size="xs">
-            <h4>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.index.syncJobs.advancedFilteringRules',
-                {
-                  defaultMessage: 'Advanced filtering rules',
-                }
-              )}
-            </h4>
-          </EuiTitle>
-          <EuiCodeBlock language="json">{advancedSnippet.value}</EuiCodeBlock>
+          <FlyoutPanel
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.index.syncJobs.filteringAdvancedTitle',
+              {
+                defaultMessage: 'Advanced filtering rules',
+              }
+            )}
+          >
+            <EuiPanel hasShadow={false}>
+              <EuiCodeBlock transparentBackground language="json">
+                {JSON.stringify(advancedSnippet.value, undefined, 2)}
+              </EuiCodeBlock>
+            </EuiPanel>
+          </FlyoutPanel>
         </>
+      ) : (
+        <></>
       )}
-    </FlyoutPanel>
+    </>
   );
 };
