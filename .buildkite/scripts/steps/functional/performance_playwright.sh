@@ -111,22 +111,6 @@ for ((i=1;i<=20;i++)); do
     check_running_processes
 done
 
-echo "--- 🔎 Shutdown ES"
-check_running_processes
-echo "waiting for $esPid to exit gracefully";
-
-timeout=30 #seconds
-dur=0
-while is_running $esPid; do
-  sleep 1;
-  ((dur=dur+1))
-  if [ $dur -ge $timeout ]; then
-    echo "es still running after $dur seconds, killing ES and node forcefully";
-    killall -SIGKILL java
-    sleep 5;
-  fi
-done
-
 echo "--- Upload journey step screenshots"
 JOURNEY_SCREENSHOTS_DIR="${KIBANA_DIR}/data/journey_screenshots"
 if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
@@ -142,3 +126,19 @@ if [ "${failedJourneys[*]}" != "" ]; then
   echo "failed journeys: ${failedJourneys[*]}"
   exit 1
 fi
+
+echo "--- 🔎 Shutdown ES"
+check_running_processes
+echo "waiting for $esPid to exit gracefully";
+
+timeout=30 #seconds
+dur=0
+while is_running $esPid; do
+  sleep 1;
+  ((dur=dur+1))
+  if [ $dur -ge $timeout ]; then
+    echo "es still running after $dur seconds, killing ES and node forcefully";
+    kill_all_by_name "java"
+    sleep 5;
+  fi
+done
