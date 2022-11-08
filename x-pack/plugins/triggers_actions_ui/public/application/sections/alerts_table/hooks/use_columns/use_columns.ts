@@ -7,12 +7,12 @@
 
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsTableStorage } from '../../alerts_table_state';
-import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
 import { toggleColumn } from './toggle_column';
+import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
 
 interface UseColumnsArgs {
   featureIds: AlertConsumers[];
@@ -29,42 +29,61 @@ const fieldTypeToDataGridColumnTypeMapper = (fieldType: string | undefined) => {
   return fieldType;
 };
 
+const getFieldCategoryFromColumnId = (columnId: string): string => {
+  const fieldName = columnId.split('.');
+
+  if (fieldName.length === 1) {
+    return 'base';
+  }
+
+  return fieldName[0];
+};
+
 /**
  * EUI Data Grid expects the columns to have a property 'schema' defined for proper sorting
  * this schema as its own types as can be check out in the docs so we add it here manually
  * https://eui.elastic.co/#/tabular-content/data-grid-schema-columns
  */
 const euiColumnFactory = (
-  column: EuiDataGridColumn,
-  browserFields: BrowserFields
+  columnId: string,
+  browserFields: BrowserFields,
+  defaultColumns: EuiDataGridColumn[]
 ): EuiDataGridColumn => {
-  const browserFieldsProps = getBrowserFieldProps(column.id, browserFields);
+  const defaultColumn = getColumnByColumnId(defaultColumns, columnId);
+  const column = defaultColumn ? defaultColumn : { id: columnId };
+
+  const browserFieldsProps = getBrowserFieldProps(columnId, browserFields);
   return {
     ...column,
     schema: fieldTypeToDataGridColumnTypeMapper(browserFieldsProps.type),
   };
 };
 
-/**
- * Searches in browser fields object for a specific field
- */
 const getBrowserFieldProps = (
   columnId: string,
   browserFields: BrowserFields
 ): Partial<BrowserField> => {
-  for (const [, categoryDescriptor] of Object.entries(browserFields)) {
-    if (!categoryDescriptor.fields) {
-      continue;
-    }
+  const notFoundSpecs = { type: 'string' };
 
-    for (const [fieldName, fieldDescriptor] of Object.entries(categoryDescriptor.fields)) {
-      if (fieldName === columnId) {
-        return fieldDescriptor;
-      }
-    }
+  if (!browserFields || Object.keys(browserFields).length === 0) {
+    return notFoundSpecs;
   }
-  return { type: 'string' };
+
+  const category = getFieldCategoryFromColumnId(columnId);
+  if (!browserFields[category]) {
+    return notFoundSpecs;
+  }
+
+  const categorySpecs = browserFields[category].fields;
+  if (!categorySpecs) {
+    return notFoundSpecs;
+  }
+
+  const fieldSpecs = categorySpecs[columnId];
+  return fieldSpecs ? fieldSpecs : notFoundSpecs;
 };
+
+const isPopulatedColumn = (column: EuiDataGridColumn) => Boolean(column.schema);
 
 /**
  * @param columns Columns to be considered in the alerts table
@@ -73,10 +92,13 @@ const getBrowserFieldProps = (
  */
 const populateColumns = (
   columns: EuiDataGridColumn[],
-  browserFields: BrowserFields
+  browserFields: BrowserFields,
+  defaultColumns: EuiDataGridColumn[]
 ): EuiDataGridColumn[] => {
   return columns.map((column: EuiDataGridColumn) => {
-    return euiColumnFactory(column, browserFields);
+    return isPopulatedColumn(column)
+      ? column
+      : euiColumnFactory(column.id, browserFields, defaultColumns);
   });
 };
 
@@ -128,10 +150,10 @@ export const useColumns = ({
   useEffect(() => {
     if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
 
-    const populatedColumns = populateColumns(columns, browserFields);
+    const populatedColumns = populateColumns(columns, browserFields, defaultColumns);
     setColumnsPopulated(true);
     setColumns(populatedColumns);
-  }, [browserFields, columns, isBrowserFieldDataLoading, isColumnsPopulated]);
+  }, [browserFields, columns, defaultColumns, isBrowserFieldDataLoading, isColumnsPopulated]);
 
   const setColumnsAndSave = useCallback(
     (newColumns: EuiDataGridColumn[]) => {
@@ -156,15 +178,12 @@ export const useColumns = ({
 
   const onToggleColumn = useCallback(
     (columnId: string): void => {
-      const newColumnIds = toggleColumn({
-        columnId,
-        columnIds: getColumnIds(columns),
-        defaultColumns,
-      });
+      const column = euiColumnFactory(columnId, browserFields, defaultColumns);
 
-      const newColumns = newColumnIds.map((_columnId: string) => {
-        const column = getColumnByColumnId(defaultColumns, _columnId);
-        return euiColumnFactory(column ? column : { id: _columnId }, browserFields);
+      const newColumns = toggleColumn({
+        column,
+        columns,
+        defaultColumns,
       });
 
       setColumnsAndSave(newColumns);
@@ -173,7 +192,7 @@ export const useColumns = ({
   );
 
   const onResetColumns = useCallback(() => {
-    const populatedDefaultColumns = populateColumns(defaultColumns, browserFields);
+    const populatedDefaultColumns = populateColumns(defaultColumns, browserFields, defaultColumns);
     setColumnsAndSave(populatedDefaultColumns);
   }, [browserFields, defaultColumns, setColumnsAndSave]);
 

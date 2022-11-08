@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { isCommentRequestTypePersistableState } from '../../common/utils/attachments';
-import { CommentRequest, CommentRequestPersistableStateType } from '../../common/api';
-import { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
+import type { CommentRequest, CommentRequestPersistableStateType } from '../../common/api';
+import type { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
 
 interface SavedObjectAttributesAndReferences {
   state: CommentRequestPersistableStateType;

@@ -17,7 +17,25 @@ import {
   mocked as eventLoopDelaysMonitorMock,
   collectorMock,
 } from '@kbn/core-metrics-collectors-server-mocks';
-import type { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
+import type {
+  ElasticsearchClientsMetrics,
+  MetricsServiceSetup,
+  MetricsServiceStart,
+} from '@kbn/core-metrics-server';
+
+export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
+  protocol: 'https',
+  connectedNodes: 3,
+  nodesWithActiveSockets: 3,
+  nodesWithIdleSockets: 1,
+  totalActiveSockets: 25,
+  totalIdleSockets: 2,
+  totalQueuedRequests: 0,
+  mostActiveNodeSockets: 15,
+  averageActiveSocketsPerNode: 8,
+  mostIdleNodeSockets: 2,
+  averageIdleSocketsPerNode: 0.5,
+};
 
 const createInternalSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalMetricsServiceSetup> = {
@@ -39,6 +57,7 @@ const createInternalSetupContractMock = () => {
         memory: { total_in_bytes: 1, free_in_bytes: 1, used_in_bytes: 1 },
         uptime_in_millis: 1,
       },
+      elasticsearch_client: sampleEsClientMetrics,
       response_times: { avg_in_millis: 1, max_in_millis: 1 },
       requests: { disconnects: 1, total: 1, statusCodes: { '200': 1 } },
       concurrent_connections: 1,

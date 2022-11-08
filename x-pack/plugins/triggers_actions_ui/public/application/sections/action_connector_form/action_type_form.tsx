@@ -36,6 +36,7 @@ import {
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
+  ActionConnectorMode,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -280,6 +281,7 @@ export const ActionTypeForm = ({
               messageVariables={availableActionVariables}
               defaultMessage={selectedActionGroup?.defaultActionMessage ?? defaultActionMessage}
               actionConnector={actionConnector}
+              executionMode={ActionConnectorMode.ActionForm}
             />
           </Suspense>
         </EuiErrorBoundary>

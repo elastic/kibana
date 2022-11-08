@@ -9,7 +9,7 @@ import type { DatatableProps } from '../../../common/expressions';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import type { FormatFactory } from '../../../common';
 import { getDatatable } from '../../../common/expressions';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';

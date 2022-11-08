@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiTourStep,
 } from '@elastic/eui';
+import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -66,7 +67,6 @@ export function OverviewPage() {
     },
   ]);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [refreshNow, setRefreshNow] = useState<number>();
 
   const {
     cases,
@@ -77,6 +77,12 @@ export function OverviewPage() {
 
   const { ObservabilityPageTemplate } = usePluginContext();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
+  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>(
+    buildEsQuery({
+      from: relativeStart,
+      to: relativeEnd,
+    })
+  );
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
 
@@ -105,9 +111,14 @@ export function OverviewPage() {
   }, [trackMetric, isGuidedSetupProgressDismissed, hideGuidedSetupTour]);
 
   const onTimeRangeRefresh = useCallback(() => {
-    setRefreshNow(new Date().getTime());
+    setEsQuery(
+      buildEsQuery({
+        from: relativeStart,
+        to: relativeEnd,
+      })
+    );
     return refetch.current && refetch.current();
-  }, []);
+  }, [relativeEnd, relativeStart]);
 
   const CasesContext = cases.ui.getCasesContext();
   const userCasesPermissions = useGetUserCasesPermissions();
@@ -183,13 +194,9 @@ export function OverviewPage() {
                     AlertConsumers.LOGS,
                     AlertConsumers.UPTIME,
                   ]}
-                  query={buildEsQuery({
-                    from: relativeStart,
-                    to: relativeEnd,
-                  })}
+                  query={esQuery}
                   showExpandToDetails={false}
                   pageSize={ALERTS_PER_PAGE}
-                  refreshNow={refreshNow}
                 />
               </CasesContext>
             </SectionContainer>
@@ -226,10 +233,13 @@ export function OverviewPage() {
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id="statusVisualizationFlyoutTitle">
+              <h2
+                id="statusVisualizationFlyoutTitle"
+                data-test-subj="statusVisualizationFlyoutTitle"
+              >
                 <FormattedMessage
                   id="xpack.observability.overview.statusVisualizationFlyoutTitle"
-                  defaultMessage="Guided setup"
+                  defaultMessage="Data assistant"
                 />
               </h2>
             </EuiTitle>
@@ -289,7 +299,7 @@ function PageHeader({
           color="text"
           iconType="wrench"
           onClick={() => {
-            // End the Observability tour if it's visible and the user clicks the guided setup button
+            // End the Observability tour if it's visible and the user clicks the data assistant button
             if (isObservabilityTourVisible) {
               endObservabilityTour();
             }
@@ -298,7 +308,7 @@ function PageHeader({
         >
           <FormattedMessage
             id="xpack.observability.overview.guidedSetupButton"
-            defaultMessage="Guided setup"
+            defaultMessage="Data assistant"
           />
         </EuiButton>
         {showTour ? (
@@ -307,13 +317,13 @@ function PageHeader({
             anchor={() => buttonRef.current}
             isStepOpen
             title={i18n.translate('xpack.observability.overview.guidedSetupTourTitle', {
-              defaultMessage: 'Guided setup is always available',
+              defaultMessage: 'Data assistant is always available',
             })}
             content={
               <EuiText size="s">
                 <FormattedMessage
                   id="xpack.observability.overview.guidedSetupTourContent"
-                  defaultMessage="If you're ever in doubt you can always access the integration status and view next steps by clicking on this action."
+                  defaultMessage="If you're ever in doubt you can always access the data assistant and view your next steps by clicking here."
                 />
               </EuiText>
             }

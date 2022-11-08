@@ -76,7 +76,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  describe('Response Actions Responder', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/142148
+  describe.skip('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 
@@ -116,7 +117,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('from timeline', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/140546
+    describe.skip('from timeline', () => {
       let timeline: TimelineResponse;
 
       before(async () => {

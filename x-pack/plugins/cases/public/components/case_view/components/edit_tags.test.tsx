@@ -8,7 +8,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { EditTags, EditTagsProps } from './edit_tags';
+import type { EditTagsProps } from './edit_tags';
+import { EditTags } from './edit_tags';
 import { getFormMock } from '../../__mock__/form';
 import { readCasesPermissions, TestProviders } from '../../../common/mock';
 import { waitFor } from '@testing-library/react';

@@ -12,27 +12,26 @@ import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../lib/helpers/setup_request';
 import { maybe } from '../../../common/utils/maybe';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServiceInstanceMetadataDetails({
   serviceName,
   serviceNodeName,
-  setup,
+  apmEventClient,
   start,
   end,
 }: {
   serviceName: string;
   serviceNodeName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [SERVICE_NODE_NAME]: serviceNodeName } },

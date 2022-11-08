@@ -1,0 +1,137 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kpiHostMetricLensAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "416b6fad-1923-4f6a-a2df-b223bb287e30": Object {
+            "columnOrder": Array [
+              "b00c65ea-32be-4163-bfc8-f795b1ef9d06",
+            ],
+            "columns": Object {
+              "b00c65ea-32be-4163-bfc8-f795b1ef9d06": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "isBucketed": false,
+                "label": " ",
+                "operationType": "unique_count",
+                "scale": "ratio",
+                "sourceField": "host.name",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.name",
+          "negate": false,
+          "params": Object {
+            "query": "mockHost",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.name": "mockHost",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"query\\": {\\"bool\\": {\\"filter\\": [{\\"bool\\": {\\"should\\": [{\\"exists\\": {\\"field\\": \\"host.name\\"}}],\\"minimum_should_match\\": 1}}]}}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "host.name",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "accessor": "b00c65ea-32be-4163-bfc8-f795b1ef9d06",
+      "layerId": "416b6fad-1923-4f6a-a2df-b223bb287e30",
+      "layerType": "data",
+    },
+  },
+  "title": "[Host] Hosts - metric",
+  "visualizationType": "lnsLegacyMetric",
+}
+`;

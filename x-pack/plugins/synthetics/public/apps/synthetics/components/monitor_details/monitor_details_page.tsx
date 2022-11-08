@@ -5,30 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import React from 'react';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
-import { useSelectedLocation } from './hooks/use_selected_location';
-import { getMonitorAction, getMonitorRecentPingsAction } from '../../state/monitor_details';
 import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumbs';
-export const MonitorDetailsPage = () => {
+
+export const MonitorDetailsPage: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { monitor } = useSelectedMonitor();
-
   useMonitorListBreadcrumbs([{ text: monitor?.name ?? '' }]);
-
-  const dispatch = useDispatch();
-
-  const selectedLocation = useSelectedLocation();
-  const { monitorId } = useParams<{ monitorId: string }>();
-
-  useEffect(() => {
-    dispatch(getMonitorAction.get({ monitorId }));
-
-    if (selectedLocation) {
-      dispatch(getMonitorRecentPingsAction.get({ monitorId, locationId: selectedLocation.id }));
-    }
-  }, [dispatch, monitorId, selectedLocation]);
-
-  return <></>;
+  return children;
 };

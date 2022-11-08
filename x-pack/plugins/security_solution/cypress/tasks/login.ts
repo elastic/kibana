@@ -57,7 +57,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-export const getUrlWithRoute = (role: ROLES, route: string) => {
+const getUrlWithRoute = (role: ROLES, route: string) => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
@@ -100,14 +100,14 @@ export const constructUrlWithUser = (user: User, route: string) => {
   return builtUrl.href;
 };
 
-export const getCurlScriptEnvVars = () => ({
+const getCurlScriptEnvVars = () => ({
   ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
   ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
   ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
   KIBANA_URL: Cypress.config().baseUrl,
 });
 
-export const postRoleAndUser = (role: ROLES) => {
+const postRoleAndUser = (role: ROLES) => {
   const env = getCurlScriptEnvVars();
   const detectionsRoleScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh`;
   const detectionsRoleJsonPath = `./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`;
@@ -152,7 +152,7 @@ export const loginWithUser = (user: User) => {
   });
 };
 
-export const loginWithRole = async (role: ROLES) => {
+const loginWithRole = async (role: ROLES) => {
   postRoleAndUser(role);
   const theUrl = Url.format({
     auth: `${role}:changeme`,

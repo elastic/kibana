@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { curry, isUndefined, pick, omitBy } from 'lodash';
+import { isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import moment from 'moment';
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -138,7 +137,7 @@ function validateParams(paramsObject: unknown): string | void {
 
 export const ConnectorTypeId = '.pagerduty';
 // connector type definition
-export function getConnectorType({ logger }: { logger: Logger }): PagerDutyConnectorType {
+export function getConnectorType(): PagerDutyConnectorType {
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
@@ -162,7 +161,7 @@ export function getConnectorType({ logger }: { logger: Logger }): PagerDutyConne
         schema: ParamsSchema,
       },
     },
-    executor: curry(executor)({ logger }),
+    executor,
   };
 }
 
@@ -192,15 +191,10 @@ function getPagerDutyApiUrl(config: ConnectorTypeConfigType): string {
 // action executor
 
 async function executor(
-  { logger }: { logger: Logger },
   execOptions: PagerDutyConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const actionId = execOptions.actionId;
-  const config = execOptions.config;
-  const secrets = execOptions.secrets;
-  const params = execOptions.params;
-  const services = execOptions.services;
-  const configurationUtilities = execOptions.configurationUtilities;
+  const { actionId, config, secrets, params, services, configurationUtilities, logger } =
+    execOptions;
 
   const apiUrl = getPagerDutyApiUrl(config);
   const headers = {
@@ -226,6 +220,20 @@ async function executor(
       actionId,
       message,
       serviceMessage: err.message,
+    };
+  }
+
+  if (response == null) {
+    const message = i18n.translate(
+      'xpack.stackConnectors.pagerduty.unexpectedNullResponseErrorMessage',
+      {
+        defaultMessage: 'unexpected null response from pagerduty',
+      }
+    );
+    return {
+      status: 'error',
+      actionId,
+      message,
     };
   }
 

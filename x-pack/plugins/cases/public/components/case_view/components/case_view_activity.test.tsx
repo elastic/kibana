@@ -13,15 +13,12 @@ import {
   getAlertUserAction,
 } from '../../../containers/mock';
 import React from 'react';
-import {
-  AppMockRenderer,
-  createAppMockRenderer,
-  noUpdateCasesPermissions,
-} from '../../../common/mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
 import { CaseViewActivity } from './case_view_activity';
 import { ConnectorTypes } from '../../../../common/api/connectors';
-import { Case } from '../../../../common';
-import { CaseViewProps } from '../types';
+import type { Case } from '../../../../common';
+import type { CaseViewProps } from '../types';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';

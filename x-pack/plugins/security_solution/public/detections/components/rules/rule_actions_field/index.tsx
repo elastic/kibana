@@ -86,8 +86,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       updatedActions[index] = deepMerge(updatedActions[index], { id });
       field.setValue(updatedActions);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [field.setValue, actions]
+    [field, actions]
   );
 
   const setAlertActionsProperty = useCallback(
@@ -98,20 +97,26 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
   const setActionParamsProperty = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (key: string, value: any, index: number) => {
-      field.setValue((prevValue: RuleAction[]) => {
-        const updatedActions = [...prevValue];
-        updatedActions[index] = {
-          ...updatedActions[index],
-          params: {
-            ...updatedActions[index].params,
-            [key]: value,
-          },
-        };
-        return updatedActions;
-      });
+      // validation is not triggered correctly when actions params updated (more details in https://github.com/elastic/kibana/issues/142217)
+      // wrapping field.setValue in setTimeout fixes the issue above
+      // and triggers validation after params have been updated
+      setTimeout(
+        () =>
+          field.setValue((prevValue: RuleAction[]) => {
+            const updatedActions = [...prevValue];
+            updatedActions[index] = {
+              ...updatedActions[index],
+              params: {
+                ...updatedActions[index].params,
+                [key]: value,
+              },
+            };
+            return updatedActions;
+          }),
+        0
+      );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [field.setValue]
+    [field]
   );
 
   const actionForm = useMemo(

@@ -42,6 +42,11 @@ export interface DataViewPickerProps {
    */
   onChangeDataView: (newId: string) => void;
   /**
+   * Callback that is called when the user edits the current data view via flyout.
+   * The first parameter is the updated data view stub without fetched fields
+   */
+  onEditDataView?: (updatedDataViewStub: DataView) => void;
+  /**
    * The id of the selected dataview.
    */
   currentDataViewId?: string;
@@ -63,6 +68,8 @@ export interface DataViewPickerProps {
    * Also works as a flag to show the create dataview button.
    */
   onDataViewCreated?: () => void;
+
+  onCreateDefaultAdHocDataView?: (pattern: string) => void;
   /**
    * List of the supported text based languages (SQL, ESQL) etc.
    * Defined per application, if not provided, no text based languages
@@ -96,6 +103,7 @@ export const DataViewPicker = ({
   currentDataViewId,
   adHocDataViews,
   onChangeDataView,
+  onEditDataView,
   onAddField,
   onDataViewCreated,
   trigger,
@@ -104,6 +112,7 @@ export const DataViewPicker = ({
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  onCreateDefaultAdHocDataView,
   isDisabled,
 }: DataViewPickerPropsExtended) => {
   return (
@@ -111,8 +120,10 @@ export const DataViewPicker = ({
       isMissingCurrent={isMissingCurrent}
       currentDataViewId={currentDataViewId}
       onChangeDataView={onChangeDataView}
+      onEditDataView={onEditDataView}
       onAddField={onAddField}
       onDataViewCreated={onDataViewCreated}
+      onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
       trigger={trigger}
       adHocDataViews={adHocDataViews}
       selectableProps={selectableProps}

@@ -30,7 +30,7 @@ describe('Core web vital config test', function () {
     color: 'green',
     name: 'test-series',
     breakdown: USER_AGENT_OS,
-    indexPattern: mockDataView,
+    dataView: mockDataView,
     time: { from: 'now-15m', to: 'now' },
     reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
     selectedMetricField: LCP_FIELD,

@@ -17,7 +17,7 @@ import { LensAppServices } from '../../app_plugin/types';
 export const QueryInput = ({
   value,
   onChange,
-  indexPatternTitle,
+  indexPattern,
   isInvalid,
   onSubmit,
   disableAutoFocus,
@@ -26,7 +26,7 @@ export const QueryInput = ({
 }: {
   value: Query;
   onChange: (input: Query) => void;
-  indexPatternTitle: string;
+  indexPattern: string | { type: 'title' | 'id'; value: string };
   isInvalid: boolean;
   onSubmit: () => void;
   disableAutoFocus?: boolean;
@@ -36,7 +36,7 @@ export const QueryInput = ({
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
   const lensAppServices = useKibana<LensAppServices>().services;
 
-  const { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch } =
+  const { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews } =
     lensAppServices;
 
   return (
@@ -46,7 +46,7 @@ export const QueryInput = ({
       disableAutoFocus={disableAutoFocus}
       isInvalid={isInvalid}
       bubbleSubmitEvent={false}
-      indexPatterns={[indexPatternTitle]}
+      indexPatterns={[indexPattern]}
       query={inputValue}
       onChange={(newQuery) => {
         if (!isEqual(newQuery, inputValue)) {
@@ -74,7 +74,7 @@ export const QueryInput = ({
       appName={i18n.translate('xpack.lens.queryInput.appName', {
         defaultMessage: 'Lens',
       })}
-      deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
+      deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage, dataViews }}
     />
   );
 };

@@ -9,7 +9,7 @@
 import React from 'react';
 import { IndicesList } from '.';
 import { shallow } from 'enzyme';
-import { MatchedItem } from '../../../types';
+import { MatchedItem } from '@kbn/data-views-plugin/public';
 
 const indices = [
   { name: 'kibana', tags: [] },

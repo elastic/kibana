@@ -32,7 +32,7 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
   const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
 
   const isTourActive = useObservable(
-    guidedOnboardingApi!.isGuideStepActive$('search', 'add_data'),
+    guidedOnboardingApi!.isGuideStepActive$('testGuide', 'step1'),
     false
   );
   useEffect(() => {
@@ -45,7 +45,7 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
           <h2>
             <FormattedMessage
               id="guidedOnboardingExample.stepOne.title"
-              defaultMessage="Example step Add data"
+              defaultMessage="Example step 1"
             />
           </h2>
         </EuiTitle>
@@ -55,9 +55,8 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
           <p>
             <FormattedMessage
               id="guidedOnboardingExample.guidesSelection.stepOne.explanation"
-              defaultMessage="The code on this page is listening to the guided setup state. If the state is set to
-              Search guide, step Add data, a EUI tour will be displayed, pointing to the button below. Alternatively,
-              the tour can be displayed via a localStorage value or a url param (see step 2)."
+              defaultMessage="The code on this page is listening to the guided setup state with a useObservable hook. If the state is set to
+              Test guide, step 1, a EUI tour will be displayed, pointing to the button below."
             />
           </p>
         </EuiText>
@@ -73,12 +72,12 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
           onFinish={() => setIsTourStepOpen(false)}
           step={1}
           stepsTotal={1}
-          title="Step Add data"
+          title="Step 1"
           anchorPosition="rightUp"
         >
           <EuiButton
             onClick={async () => {
-              await guidedOnboardingApi?.completeGuideStep('search', 'add_data');
+              await guidedOnboardingApi?.completeGuideStep('testGuide', 'step1');
             }}
           >
             Complete step 1

@@ -12,7 +12,7 @@ import type { ESClusterInfo, ESLicense, TelemetryEvent } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS, TASK_METRICS_CHANNEL } from '../constants';
 import { batchTelemetryRecords, tlog, createTaskMetric } from '../helpers';
-import { copyAllowlistedFields, prebuiltRuleAllowlistFields } from '../filterlists';
+import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
   return {
@@ -64,7 +64,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
 
         const processedAlerts = telemetryEvents.map(
           (event: TelemetryEvent): TelemetryEvent =>
-            copyAllowlistedFields(prebuiltRuleAllowlistFields, event)
+            copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
         );
 
         const enrichedAlerts = processedAlerts.map(

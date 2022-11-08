@@ -215,6 +215,14 @@ export const TIMELINE_KQLMODE_SEARCH = '[data-test-subj="kqlModePopoverSearch"]'
 
 export const TIMELINE_KQLMODE_FILTER = '[data-test-subj="kqlModePopoverFilter"]';
 
+export const TIMELINE_SHOWQUERYBARMENU_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="showQueryBarMenu"]`;
+
+export const TIMELINE_SWITCHQUERYLANGUAGE_BUTTON = '[data-test-subj="switchQueryLanguageButton"]';
+
+export const TIMELINE_LUCENELANGUAGE_BUTTON = '[data-test-subj="luceneLanguageMenuItem"]';
+
+export const TIMELINE_KQLLANGUAGE_BUTTON = '[data-test-subj="kqlLanguageMenuItem"]';
+
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 
 export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-title"]';
@@ -227,6 +235,8 @@ export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
 
 export const TIMELINE_EDIT_MODAL_OPEN_BUTTON = '[data-test-subj="save-timeline-button-icon"]';
 
+export const TIMELINE_SAVE_MODAL = '[data-test-subj="save-timeline-modal"]';
+
 export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 
 export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
@@ -235,7 +245,7 @@ export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
 
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 
-export const TIMELINE_ROW_RENDERERS_MODAL = '[data-test-subj="row-renderers-modal"]';
+const TIMELINE_ROW_RENDERERS_MODAL = '[data-test-subj="row-renderers-modal"]';
 
 export const TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN = `[data-test-subj="disable-all"]`;
 
@@ -281,13 +291,8 @@ export const ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE = '[data-test-subj="add-to
 export const ACTIVE_TIMELINE_BOTTOM_BAR =
   '[data-test-subj="flyoutBottomBar"]  .active-timeline-button';
 
-export const DATA_GRID_BODY = '[data-test-subj=body-data-grid] .euiDataGrid__virtualized';
-
 export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>
   `[data-test-subj="draggable-content-${fieldName}"]`;
-
-export const GET_TIMELINE_GRID_HEADER = (fieldName: string) =>
-  `[data-test-subj="header-${fieldName}"]`;
 
 export const EMPTY_DROPPABLE_DATA_PROVIDER_GROUP = `.empty-providers-group`;
 

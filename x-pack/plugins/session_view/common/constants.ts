@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+export const SESSION_VIEW_APP_ID = 'sessionView';
+
 // routes
 export const PROCESS_EVENTS_ROUTE = '/internal/session_view/process_events';
 export const ALERTS_ROUTE = '/internal/session_view/alerts';
 export const ALERT_STATUS_ROUTE = '/internal/session_view/alert_status';
 export const IO_EVENTS_ROUTE = '/internal/session_view/io_events';
 export const GET_TOTAL_IO_BYTES_ROUTE = '/internal/session_view/get_total_io_bytes';
+
+export const SECURITY_APP_ID = 'security';
+export const POLICIES_PAGE_PATH = '/administration/policy';
 
 // index patterns
 export const PROCESS_EVENTS_INDEX = '*:logs-endpoint.events.process*,logs-endpoint.events.process*'; // match on both cross cluster and local indices
@@ -48,8 +53,7 @@ export const ALERT_STATUS = {
 export const LOCAL_STORAGE_DISPLAY_OPTIONS_KEY = 'sessionView:displayOptions';
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
 export const DEBOUNCE_TIMEOUT = 500;
-export const DEFAULT_TTY_PLAYSPEED_MS = 50; // milliseconds per render loop
-export const TTY_LINES_PER_FRAME = 5; // number of lines to print to xterm on each render loop
+export const DEFAULT_TTY_PLAYSPEED_MS = 30; // milliseconds per render loop
 export const TTY_LINES_PRE_SEEK = 200; // number of lines to redraw before the point we are seeking to.
 export const DEFAULT_TTY_FONT_SIZE = 11;
 export const DEFAULT_TTY_ROWS = 66;

@@ -17,6 +17,7 @@ import { Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { TimelineId } from '../../../../../common/types';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -37,7 +38,11 @@ describe('Providers', () => {
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+        <Providers
+          browserFields={{}}
+          dataProviders={mockDataProviders}
+          timelineId={TimelineId.test}
+        />
       );
       expect(wrapper).toMatchSnapshot();
     });
@@ -46,7 +51,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={mockDataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -64,7 +73,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={mockDataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -80,7 +93,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={mockDataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -97,7 +114,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={mockDataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -117,7 +138,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={mockDataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -143,7 +168,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={mockDataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -158,7 +187,7 @@ describe('Providers', () => {
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         andProviderId: undefined,
         enabled: false,
-        id: 'test',
+        id: 'timeline-test',
         providerId: 'id-Provider 1',
       });
     });
@@ -172,7 +201,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={mockDataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -199,7 +232,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={mockDataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -216,7 +253,7 @@ describe('Providers', () => {
       expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
         andProviderId: undefined,
         excluded: true,
-        id: 'test',
+        id: 'timeline-test',
         providerId: 'id-Provider 1',
       });
     });
@@ -231,7 +268,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={mockDataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -257,7 +298,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={dataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -279,7 +324,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={mockDataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -295,7 +344,7 @@ describe('Providers', () => {
 
       expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',
-        id: 'test',
+        id: 'timeline-test',
         providerId: 'id-Provider 1',
       });
     });
@@ -308,7 +357,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={mockDataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -336,7 +389,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={dataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -358,7 +415,7 @@ describe('Providers', () => {
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',
         enabled: false,
-        id: 'test',
+        id: 'timeline-test',
         providerId: 'id-Provider 1',
       });
     });
@@ -375,7 +432,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={dataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -408,7 +469,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={dataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -430,7 +495,7 @@ describe('Providers', () => {
       expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',
         excluded: true,
-        id: 'test',
+        id: 'timeline-test',
         providerId: 'id-Provider 1',
       });
     });
@@ -447,7 +512,11 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
+            <Providers
+              browserFields={{}}
+              dataProviders={dataProviders}
+              timelineId={TimelineId.test}
+            />
           </DroppableWrapper>
         </TestProviders>
       );

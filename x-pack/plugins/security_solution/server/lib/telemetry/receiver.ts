@@ -232,8 +232,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.policy*`,
       ignore_unavailable: false,
-      size: 0, // no query results required - only aggregation quantity
       body: {
+        size: 0, // no query results required - only aggregation quantity
         query: {
           range: {
             '@timestamp': {
@@ -279,8 +279,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.metrics-*`,
       ignore_unavailable: false,
-      size: 0, // no query results required - only aggregation quantity
       body: {
+        size: 0, // no query results required - only aggregation quantity
         query: {
           range: {
             '@timestamp': {
@@ -331,8 +331,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.metadata-*`,
       ignore_unavailable: false,
-      size: 0, // no query results required - only aggregation quantity
       body: {
+        size: 0, // no query results required - only aggregation quantity
         query: {
           range: {
             '@timestamp': {
@@ -476,8 +476,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.kibanaIndex}*`,
       ignore_unavailable: true,
-      size: this.maxRecords,
       body: {
+        size: this.maxRecords,
         query: {
           bool: {
             must: [
@@ -556,8 +556,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.alertsIndex}*`,
       ignore_unavailable: true,
-      size: 1_000,
       body: {
+        size: 1_000,
         _source: {
           exclude: [
             'message',
@@ -690,8 +690,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.alertsIndex}*`,
       ignore_unavailable: true,
-      size: 30,
       body: {
+        size: 30,
         query: {
           bool: {
             filter: [
@@ -778,8 +778,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: [`${this.alertsIndex}*`, 'logs-*'],
       ignore_unavailable: true,
-      size: 100,
       body: {
+        size: 100,
         _source: {
           include: [
             '@timestamp',
@@ -822,8 +822,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: '.lists-*',
       ignore_unavailable: true,
-      size: 0, // no query results required - only aggregation quantity
       body: {
+        size: 0, // no query results required - only aggregation quantity
         aggs: {
           total_value_list_count: {
             cardinality: {
@@ -843,8 +843,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: '.items-*',
       ignore_unavailable: true,
-      size: 0, // no query results required - only aggregation quantity
       body: {
+        size: 0, // no query results required - only aggregation quantity
         aggs: {
           value_list_item_count: {
             terms: {
@@ -859,8 +859,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.kibanaIndex}*`,
       ignore_unavailable: true,
-      size: 0, // no query results required - only aggregation quantity
       body: {
+        size: 0, // no query results required - only aggregation quantity
         query: {
           bool: {
             must: [{ match: { 'exception-list.entries.type': 'list' } }],
@@ -879,8 +879,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.kibanaIndex}*`,
       ignore_unavailable: true,
-      size: 0,
       body: {
+        size: 0,
         query: {
           bool: {
             must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
@@ -921,6 +921,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
+    // @ts-expect-error version.build_date is of type estypes.DateTime
     return this.esClient.info();
   }
 

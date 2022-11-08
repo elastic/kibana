@@ -72,13 +72,9 @@ export interface PostBulkAgentUnenrollRequest {
   };
 }
 
-export type BulkAgentAction = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
-> & { actionId?: string };
+export interface BulkAgentAction {
+  actionId: string;
+}
 
 export type PostBulkAgentUnenrollResponse = BulkAgentAction;
 

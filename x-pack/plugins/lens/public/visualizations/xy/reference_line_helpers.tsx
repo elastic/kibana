@@ -9,7 +9,7 @@ import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { IconChartBarReferenceLine } from '@kbn/chart-icons';
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { DatasourceLayers, FramePublicAPI, Visualization } from '../../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
@@ -314,7 +314,7 @@ export const getReferenceSupportedLayer = (
     : undefined;
 
   return {
-    type: layerTypes.REFERENCELINE,
+    type: LayerTypes.REFERENCELINE,
     label: i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabel', {
       defaultMessage: 'Reference lines',
     }),
@@ -461,7 +461,7 @@ export const getReferenceConfiguration = ({
       accessors: config.map(({ forAccessor, color }) => getSingleColorConfig(forAccessor, color)),
       filterOperations: isNumericMetric,
       supportsMoreColumns: true,
-      required: false,
+      requiredMinDimensionCount: 0,
       enableDimensionEditor: true,
       supportStaticValue: true,
       paramEditorCustomProps: {

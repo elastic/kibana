@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`guide card snapshots should render use case card component for observability 1`] = `
+<UseCaseCard
+  addBasePath={[MockFunction]}
+  description="Monitor your Kubernetes infrastructure by consolidating your logs and metrics."
+  footer={
+    <GuideCardFooter
+      activateGuide={[MockFunction]}
+      guides={Array []}
+      useCase="observability"
+    />
+  }
+  isDarkTheme={false}
+  title="Observe my Kubernetes infrastructure"
+  useCase="observability"
+/>
+`;
+
+exports[`guide card snapshots should render use case card component for search 1`] = `
+<UseCaseCard
+  addBasePath={[MockFunction]}
+  description="Create a search experience for your websites, applications, workplace content, or anything in between."
+  footer={
+    <GuideCardFooter
+      activateGuide={[MockFunction]}
+      guides={Array []}
+      useCase="search"
+    />
+  }
+  isDarkTheme={false}
+  title="Search my data"
+  useCase="search"
+/>
+`;
+
+exports[`guide card snapshots should render use case card component for security 1`] = `
+<UseCaseCard
+  addBasePath={[MockFunction]}
+  description="Defend your environment against threats by unifying SIEM, endpoint security, and cloud security."
+  footer={
+    <GuideCardFooter
+      activateGuide={[MockFunction]}
+      guides={Array []}
+      useCase="security"
+    />
+  }
+  isDarkTheme={false}
+  title="Protect my environment"
+  useCase="security"
+/>
+`;

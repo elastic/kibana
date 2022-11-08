@@ -172,8 +172,7 @@ export function fetchAll(
 
         dataSubjects.charts$.next({
           fetchStatus: FetchStatus.COMPLETE,
-          chartData: chart.chartData,
-          bucketInterval: chart.bucketInterval,
+          response: chart.response,
           recordRawType,
         });
 

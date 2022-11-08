@@ -35,6 +35,6 @@ export interface AlertStatus {
   status: AlertStatusValues;
   muted: boolean;
   actionGroupId?: string;
-  actionSubgroup?: string;
   activeStartDate?: string;
+  flapping: boolean;
 }

@@ -7,7 +7,6 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Setup } from '../../lib/helpers/setup_request';
 import {
   HOST_NAME,
   CONTAINER_ID,
@@ -21,25 +20,25 @@ import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../common/utils/environment_query';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServiceNodeMetadata({
   kuery,
   serviceName,
   serviceNodeName,
-  setup,
+  apmEventClient,
   start,
   end,
+  environment,
 }: {
   kuery: string;
   serviceName: string;
   serviceNodeName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
+  environment: string;
 }) {
-  const { apmEventClient } = setup;
-
   const params = {
     apm: {
       events: [ProcessorEvent.metric],
@@ -52,7 +51,7 @@ export async function getServiceNodeMetadata({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
-            ...environmentQuery(ENVIRONMENT_ALL.value),
+            ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...serviceNodeNameQuery(serviceNodeName),
           ],

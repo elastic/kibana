@@ -7,7 +7,6 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  addProviderToTimeline,
   applyDeltaToColumnWidth,
   clearEventsDeleted,
   clearEventsLoading,
@@ -19,7 +18,6 @@ import {
   setEventsLoading,
   setTGridSelectAll,
   setSelected,
-  setTimelineUpdatedAt,
   toggleDetailPanel,
   updateColumnOrder,
   updateColumns,
@@ -29,149 +27,153 @@ import {
   updateItemsPerPageOptions,
   updateSort,
   upsertColumn,
+  updateGraphEventId,
+  updateSessionViewConfig,
+  setTableUpdatedAt,
 } from './actions';
 
 import {
-  addProviderToTimelineHelper,
-  applyDeltaToTimelineColumnWidth,
+  applyDeltaToTableColumnWidth,
   createInitTGrid,
   setInitializeTgridSettings,
-  removeTimelineColumn,
-  setDeletedTimelineEvents,
-  setLoadingTimelineEvents,
-  setSelectedTimelineEvents,
+  removeTableColumn,
+  setDeletedTableEvents,
+  setLoadingTableEvents,
+  setSelectedTableEvents,
   updateTGridColumnOrder,
   updateTGridColumnWidth,
-  updateTimelineColumns,
-  updateTimelineItemsPerPage,
-  updateTimelinePerPageOptions,
-  updateTimelineSort,
-  upsertTimelineColumn,
-  updateTimelineDetailsPanel,
+  updateTableColumns,
+  updateTableItemsPerPage,
+  updateTablePerPageOptions,
+  updateTableSort,
+  upsertTableColumn,
+  updateTableDetailsPanel,
+  updateTableGraphEventId,
+  updateTableSessionViewConfig,
 } from './helpers';
 
-import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
+import { TableState, EMPTY_TABLE_BY_ID } from './types';
 
-export const initialTGridState: TimelineState = {
-  timelineById: EMPTY_TIMELINE_BY_ID,
+export const initialTGridState: TableState = {
+  tableById: EMPTY_TABLE_BY_ID,
 };
 
-/** The reducer for all timeline actions  */
+/** The reducer for all data table actions  */
 export const tGridReducer = reducerWithInitialState(initialTGridState)
   .case(upsertColumn, (state, { column, id, index }) => ({
     ...state,
-    timelineById: upsertTimelineColumn({ column, id, index, timelineById: state.timelineById }),
+    tableById: upsertTableColumn({ column, id, index, tableById: state.tableById }),
   }))
-  .case(createTGrid, (state, timelineProps) => {
+  .case(createTGrid, (state, tableProps) => {
     return {
       ...state,
-      timelineById: createInitTGrid({
-        ...timelineProps,
-        timelineById: state.timelineById,
+      tableById: createInitTGrid({
+        ...tableProps,
+        tableById: state.tableById,
       }),
     };
   })
   .case(toggleDetailPanel, (state, action) => ({
     ...state,
-    timelineById: {
-      ...state.timelineById,
-      [action.timelineId]: {
-        ...state.timelineById[action.timelineId],
+    tableById: {
+      ...state.tableById,
+      [action.id]: {
+        ...state.tableById[action.id],
         expandedDetail: {
-          ...state.timelineById[action.timelineId].expandedDetail,
-          ...updateTimelineDetailsPanel(action),
+          ...state.tableById[action.id].expandedDetail,
+          ...updateTableDetailsPanel(action),
         },
       },
     },
   }))
   .case(applyDeltaToColumnWidth, (state, { id, columnId, delta }) => ({
     ...state,
-    timelineById: applyDeltaToTimelineColumnWidth({
+    tableById: applyDeltaToTableColumnWidth({
       id,
       columnId,
       delta,
-      timelineById: state.timelineById,
+      tableById: state.tableById,
     }),
   }))
   .case(updateColumnOrder, (state, { id, columnIds }) => ({
     ...state,
-    timelineById: updateTGridColumnOrder({
+    tableById: updateTGridColumnOrder({
       columnIds,
       id,
-      timelineById: state.timelineById,
+      tableById: state.tableById,
     }),
   }))
   .case(updateColumnWidth, (state, { id, columnId, width }) => ({
     ...state,
-    timelineById: updateTGridColumnWidth({
+    tableById: updateTGridColumnWidth({
       columnId,
       id,
-      timelineById: state.timelineById,
+      tableById: state.tableById,
       width,
     }),
   }))
   .case(removeColumn, (state, { id, columnId }) => ({
     ...state,
-    timelineById: removeTimelineColumn({
+    tableById: removeTableColumn({
       id,
       columnId,
-      timelineById: state.timelineById,
+      tableById: state.tableById,
     }),
   }))
   .case(setEventsDeleted, (state, { id, eventIds, isDeleted }) => ({
     ...state,
-    timelineById: setDeletedTimelineEvents({
+    tableById: setDeletedTableEvents({
       id,
       eventIds,
-      timelineById: state.timelineById,
+      tableById: state.tableById,
       isDeleted,
     }),
   }))
   .case(clearEventsDeleted, (state, { id }) => ({
     ...state,
-    timelineById: {
-      ...state.timelineById,
+    tableById: {
+      ...state.tableById,
       [id]: {
-        ...state.timelineById[id],
+        ...state.tableById[id],
         deletedEventIds: [],
       },
     },
   }))
   .case(setEventsLoading, (state, { id, eventIds, isLoading }) => ({
     ...state,
-    timelineById: setLoadingTimelineEvents({
+    tableById: setLoadingTableEvents({
       id,
       eventIds,
-      timelineById: state.timelineById,
+      tableById: state.tableById,
       isLoading,
     }),
   }))
   .case(clearEventsLoading, (state, { id }) => ({
     ...state,
-    timelineById: {
-      ...state.timelineById,
+    tableById: {
+      ...state.tableById,
       [id]: {
-        ...state.timelineById[id],
+        ...state.tableById[id],
         loadingEventIds: [],
       },
     },
   }))
   .case(setSelected, (state, { id, eventIds, isSelected, isSelectAllChecked }) => ({
     ...state,
-    timelineById: setSelectedTimelineEvents({
+    tableById: setSelectedTableEvents({
       id,
       eventIds,
-      timelineById: state.timelineById,
+      tableById: state.tableById,
       isSelected,
       isSelectAllChecked,
     }),
   }))
   .case(clearSelected, (state, { id }) => ({
     ...state,
-    timelineById: {
-      ...state.timelineById,
+    tableById: {
+      ...state.tableById,
       [id]: {
-        ...state.timelineById[id],
+        ...state.tableById[id],
         selectedEventIds: {},
         isSelectAllChecked: false,
       },
@@ -179,70 +181,78 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
   }))
   .case(updateIsLoading, (state, { id, isLoading }) => ({
     ...state,
-    timelineById: {
-      ...state.timelineById,
+    tableById: {
+      ...state.tableById,
       [id]: {
-        ...state.timelineById[id],
+        ...state.tableById[id],
         isLoading,
       },
     },
   }))
   .case(updateColumns, (state, { id, columns }) => ({
     ...state,
-    timelineById: updateTimelineColumns({
+    tableById: updateTableColumns({
       id,
       columns,
-      timelineById: state.timelineById,
+      tableById: state.tableById,
     }),
   }))
   .case(updateSort, (state, { id, sort }) => ({
     ...state,
-    timelineById: updateTimelineSort({ id, sort, timelineById: state.timelineById }),
+    tableById: updateTableSort({ id, sort, tableById: state.tableById }),
   }))
   .case(updateItemsPerPage, (state, { id, itemsPerPage }) => ({
     ...state,
-    timelineById: updateTimelineItemsPerPage({
+    tableById: updateTableItemsPerPage({
       id,
       itemsPerPage,
-      timelineById: state.timelineById,
+      tableById: state.tableById,
     }),
   }))
   .case(updateItemsPerPageOptions, (state, { id, itemsPerPageOptions }) => ({
     ...state,
-    timelineById: updateTimelinePerPageOptions({
+    tableById: updateTablePerPageOptions({
       id,
       itemsPerPageOptions,
-      timelineById: state.timelineById,
+      tableById: state.tableById,
     }),
   }))
   .case(initializeTGridSettings, (state, { id, ...tGridSettingsProps }) => ({
     ...state,
-    timelineById: setInitializeTgridSettings({
+    tableById: setInitializeTgridSettings({
       id,
-      timelineById: state.timelineById,
+      tableById: state.tableById,
       tGridSettingsProps,
     }),
   }))
   .case(setTGridSelectAll, (state, { id, selectAll }) => ({
     ...state,
-    timelineById: {
-      ...state.timelineById,
+    tableById: {
+      ...state.tableById,
       [id]: {
-        ...state.timelineById[id],
+        ...state.tableById[id],
         selectAll,
       },
     },
   }))
-  .case(addProviderToTimeline, (state, { id, dataProvider }) => ({
+  .case(updateGraphEventId, (state, { id, graphEventId }) => ({
     ...state,
-    timelineById: addProviderToTimelineHelper(id, dataProvider, state.timelineById),
+    tableById: updateTableGraphEventId({ id, graphEventId, tableById: state.tableById }),
   }))
-  .case(setTimelineUpdatedAt, (state, { id, updated }) => ({
+  .case(updateSessionViewConfig, (state, { id, sessionViewConfig }) => ({
     ...state,
-    timelineById: {
-      ...state.timelineById,
+    tableById: updateTableSessionViewConfig({
+      id,
+      sessionViewConfig,
+      tableById: state.tableById,
+    }),
+  }))
+  .case(setTableUpdatedAt, (state, { id, updated }) => ({
+    ...state,
+    tableById: {
+      ...state.tableById,
       [id]: {
-        ...state.timelineById[id],
+        ...state.tableById[id],
         updated,
       },
     },

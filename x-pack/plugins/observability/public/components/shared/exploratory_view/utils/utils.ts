@@ -8,6 +8,9 @@
 import { uniq } from 'lodash';
 import { ApmIndicesConfig } from '../../../../../common/typings';
 
-export function getApmDataViewTitle(apmIndicesConfig: ApmIndicesConfig) {
+export function getApmDataViewTitle(apmIndicesConfig?: ApmIndicesConfig) {
+  if (!apmIndicesConfig) {
+    return;
+  }
   return uniq([apmIndicesConfig.transaction, apmIndicesConfig.metric]).join(',');
 }

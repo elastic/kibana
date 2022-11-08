@@ -33,8 +33,8 @@ export const getAnomalies = async (
   const boolCriteria = buildCriteria(params);
   return mlAnomalySearch(
     {
-      size: params.maxRecords || 100,
       body: {
+        size: params.maxRecords || 100,
         query: {
           bool: {
             filter: [

@@ -13,10 +13,10 @@ jest.doMock('@kbn/core-http-server-internal', () => ({
   HttpService: jest.fn(() => mockHttpService),
 }));
 
-import { pluginServiceMock } from './plugins/plugins_service.mock';
+import { pluginServiceMock } from '@kbn/core-plugins-server-mocks';
 
 export const mockPluginsService = pluginServiceMock.create();
-jest.doMock('./plugins/plugins_service', () => ({
+jest.doMock('@kbn/core-plugins-server-internal', () => ({
   PluginsService: jest.fn(() => mockPluginsService),
 }));
 
@@ -63,10 +63,12 @@ jest.doMock('@kbn/core-config-server-internal', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
 }));
 
-import { RenderingService, mockRenderingService } from './rendering/__mocks__/rendering_service';
+import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
 
-export { mockRenderingService };
-jest.doMock('./rendering/rendering_service', () => ({ RenderingService }));
+export const mockRenderingService = renderingServiceMock.create();
+jest.doMock('@kbn/core-rendering-server-internal', () => ({
+  RenderingService: jest.fn(() => mockRenderingService),
+}));
 
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 

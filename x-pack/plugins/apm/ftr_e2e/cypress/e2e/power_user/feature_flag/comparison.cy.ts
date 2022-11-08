@@ -36,19 +36,19 @@ describe('Comparison feature flag', () => {
     it('shows the comparison feature enabled in services overview', () => {
       cy.visitKibana('/app/apm/services');
       cy.get('input[type="checkbox"]#comparison').should('be.checked');
-      cy.get('[data-test-subj="comparisonSelect"]').should('not.be.disabled');
+      cy.getByTestSubj('comparisonSelect').should('not.be.disabled');
     });
 
     it('shows the comparison feature enabled in dependencies overview', () => {
       cy.visitKibana('/app/apm/dependencies');
       cy.get('input[type="checkbox"]#comparison').should('be.checked');
-      cy.get('[data-test-subj="comparisonSelect"]').should('not.be.disabled');
+      cy.getByTestSubj('comparisonSelect').should('not.be.disabled');
     });
 
     it('shows the comparison feature disabled in service map overview page', () => {
       cy.visitKibana('/app/apm/service-map');
       cy.get('input[type="checkbox"]#comparison').should('be.checked');
-      cy.get('[data-test-subj="comparisonSelect"]').should('not.be.disabled');
+      cy.getByTestSubj('comparisonSelect').should('not.be.disabled');
     });
   });
 
@@ -71,7 +71,7 @@ describe('Comparison feature flag', () => {
     it('shows the comparison feature disabled in services overview', () => {
       cy.visitKibana('/app/apm/services');
       cy.get('input[type="checkbox"]#comparison').should('not.be.checked');
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
+      cy.getByTestSubj('comparisonSelect').should('be.disabled');
     });
 
     it('shows the comparison feature disabled in dependencies overview page', () => {
@@ -81,13 +81,13 @@ describe('Comparison feature flag', () => {
       cy.visitKibana('/app/apm/dependencies');
       cy.wait('@topDependenciesRequest');
       cy.get('input[type="checkbox"]#comparison').should('not.be.checked');
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
+      cy.getByTestSubj('comparisonSelect').should('be.disabled');
     });
 
     it('shows the comparison feature disabled in service map overview page', () => {
       cy.visitKibana('/app/apm/service-map');
       cy.get('input[type="checkbox"]#comparison').should('not.be.checked');
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
+      cy.getByTestSubj('comparisonSelect').should('be.disabled');
     });
   });
 });

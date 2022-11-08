@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-test-helpers-so-type-serializer",
+  "owner": "@elastic/kibana-core",
+  "runtimeDeps": [],
+  "typeDeps": [],
+}

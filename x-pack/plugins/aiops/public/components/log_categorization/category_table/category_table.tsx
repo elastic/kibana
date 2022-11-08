@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import {
+  useEuiBackgroundColor,
   EuiButton,
   EuiSpacer,
   EuiFlexGroup,
@@ -62,6 +63,7 @@ export const CategoryTable: FC<Props> = ({
   setSelectedCategory,
 }) => {
   const euiTheme = useEuiTheme();
+  const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { openInDiscoverWithFilter } = useDiscoverLinks();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
@@ -193,22 +195,18 @@ export const CategoryTable: FC<Props> = ({
       pinnedCategory.key === category.key
     ) {
       return {
-        backgroundColor: 'rgb(227,240,249,0.37)',
+        backgroundColor: primaryBackgroundColor,
       };
     }
 
-    if (
-      selectedCategory &&
-      selectedCategory.key === category.key &&
-      selectedCategory.key === category.key
-    ) {
+    if (selectedCategory && selectedCategory.key === category.key) {
       return {
         backgroundColor: euiTheme.euiColorLightestShade,
       };
     }
 
     return {
-      backgroundColor: 'white',
+      backgroundColor: euiTheme.euiColorEmptyShade,
     };
   };
 

@@ -6,11 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import {
-  getPushedInfo,
-  useGetCaseUserActions,
-  UseGetCaseUserActions,
-} from './use_get_case_user_actions';
+import type { UseGetCaseUserActions } from './use_get_case_user_actions';
+import { getPushedInfo, useGetCaseUserActions } from './use_get_case_user_actions';
 import {
   basicCase,
   basicPush,

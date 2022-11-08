@@ -32,6 +32,8 @@ const DEFAULT_VALUES = {
   indexName: '',
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
+  isCanceling: false,
+  isConnectorIndex: false,
   isSyncing: false,
   isWaitingForSync: false,
   lastUpdated: null,
@@ -93,8 +95,11 @@ describe('IndexViewLogic', () => {
               ...CONNECTOR_VALUES.index,
               connector: { ...CONNECTOR_VALUES.index.connector, sync_now: true },
             },
+            isCanceling: false,
+            isConnectorIndex: true,
             isWaitingForSync: true,
             localSyncNowValue: true,
+            pipelineData: undefined,
             syncStatus: SyncStatus.COMPLETED,
           })
         );
@@ -199,7 +204,7 @@ describe('IndexViewLogic', () => {
   describe('createNewFetchIndexTimeout', () => {
     it('should trigger fetchIndex after timeout', async () => {
       IndexViewLogic.actions.fetchIndex = jest.fn();
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       IndexViewLogic.actions.createNewFetchIndexTimeout(1);
       expect(IndexViewLogic.actions.fetchIndex).not.toHaveBeenCalled();
       jest.advanceTimersByTime(2);

@@ -15,6 +15,7 @@ import { DashboardApplicationService } from './application/types';
 import { DashboardChromeService } from './chrome/types';
 import { DashboardCoreContextService } from './core_context/types';
 import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
+import { DashboardSavedObjectService } from './dashboard_saved_object/types';
 import { DashboardSessionStorageServiceType } from './dashboard_session_storage/types';
 import { DashboardDataService } from './data/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
@@ -25,7 +26,6 @@ import { DashboardInitializerContextService } from './initializer_context/types'
 import { DashboardNavigationService } from './navigation/types';
 import { DashboardNotificationsService } from './notifications/types';
 import { DashboardOverlaysService } from './overlays/types';
-import { DashboardSavedObjectsService } from './saved_objects/types';
 import { DashboardSavedObjectsTaggingService } from './saved_objects_tagging/types';
 import { DashboardScreenshotModeService } from './screenshot_mode/types';
 import { DashboardSettingsService } from './settings/types';
@@ -39,12 +39,14 @@ export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardSt
   initContext: PluginInitializerContext; // need a custom type so that initContext is a required parameter for initializerContext
 };
 export interface DashboardServices {
+  dashboardSavedObject: DashboardSavedObjectService;
+  dashboardSessionStorage: DashboardSessionStorageServiceType;
+
   analytics: DashboardAnalyticsService;
   application: DashboardApplicationService;
   chrome: DashboardChromeService;
   coreContext: DashboardCoreContextService;
   dashboardCapabilities: DashboardCapabilitiesService;
-  dashboardSessionStorage: DashboardSessionStorageServiceType;
   data: DashboardDataService;
   dataViewEditor: DashboardDataViewEditorService; // this service is used only for the no data state
   documentationLinks: DashboardDocumentationLinksService;
@@ -54,7 +56,6 @@ export interface DashboardServices {
   navigation: DashboardNavigationService;
   notifications: DashboardNotificationsService;
   overlays: DashboardOverlaysService;
-  savedObjects: DashboardSavedObjectsService;
   savedObjectsTagging: DashboardSavedObjectsTaggingService; // TODO: make this optional in follow up
   screenshotMode: DashboardScreenshotModeService;
   settings: DashboardSettingsService;

@@ -29,7 +29,7 @@ export interface FilterQuery {
 
 export interface Filter {
   input: FilterQuery;
-  label: string;
+  label?: string;
 }
 
 export interface Range {
@@ -45,3 +45,20 @@ export interface NumberValueFormat {
     suffix?: string;
   };
 }
+
+export interface MinMax {
+  min: number;
+  max: number;
+}
+
+export interface BasicFullPercentageModeConfig {
+  isPercentageMode: boolean;
+}
+
+export interface BasicPercentageModeConfig {
+  isPercentageMode: false;
+}
+
+export type PercentageModeConfigWithMinMax = BasicFullPercentageModeConfig & MinMax;
+
+export type PercentageModeConfig = BasicPercentageModeConfig | PercentageModeConfigWithMinMax;

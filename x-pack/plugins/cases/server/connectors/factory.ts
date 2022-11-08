@@ -6,7 +6,7 @@
  */
 
 import { ConnectorTypes } from '../../common/api';
-import { ICasesConnector, CasesConnectorsMap } from './types';
+import type { ICasesConnector, CasesConnectorsMap } from './types';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';
 import { getCaseConnector as getCasesWebhookCaseConnector } from './cases_webook';

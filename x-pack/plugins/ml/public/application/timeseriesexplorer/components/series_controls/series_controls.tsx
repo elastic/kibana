@@ -26,7 +26,7 @@ import {
   PartitionFieldConfig,
   PartitionFieldsConfig,
 } from '../../../../../common/types/storage';
-import { useStorage } from '../../../contexts/ml/use_storage';
+import { useStorage } from '../../../contexts/storage';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';

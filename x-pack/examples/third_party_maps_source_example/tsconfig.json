@@ -9,7 +9,7 @@
     "common/**/*.ts",
     "../../../typings/**/*",
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../plugins/maps/tsconfig.json"},
     { "path": "../../../examples/developer_examples/tsconfig.json" },

@@ -254,6 +254,7 @@ export class KbnClientSavedObjects {
       'epm-packages',
       'epm-packages-assets',
       'fleet-preconfiguration-deletion-record',
+      'fleet-fleet-server-host',
     ];
 
     const newOptions = { types, space: options?.space };

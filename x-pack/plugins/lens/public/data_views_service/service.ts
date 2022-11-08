@@ -14,14 +14,8 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import type { DateRange } from '../../common';
 import type { IndexPattern, IndexPatternMap, IndexPatternRef } from '../types';
-import {
-  ensureIndexPattern,
-  loadIndexPatternRefs,
-  loadIndexPatterns,
-  syncExistingFields,
-} from './loader';
+import { ensureIndexPattern, loadIndexPatternRefs, loadIndexPatterns } from './loader';
 import type { DataViewsState } from '../state_management';
 import { generateId } from '../id_generator';
 
@@ -71,18 +65,6 @@ export interface IndexPatternServiceAPI {
     id: string;
     cache: IndexPatternMap;
   }) => Promise<IndexPatternMap | undefined>;
-  /**
-   * Loads the existingFields map given the current context
-   */
-  refreshExistingFields: (args: {
-    dateRange: DateRange;
-    currentIndexPatternTitle: string;
-    dslQuery: object;
-    onNoData?: () => void;
-    existingFields: Record<string, Record<string, boolean>>;
-    indexPatternList: IndexPattern[];
-    isFirstExistenceFetch: boolean;
-  }) => Promise<void>;
 
   replaceDataViewId: (newDataView: DataView) => Promise<void>;
   /**
@@ -150,14 +132,6 @@ export function createIndexPatternService({
     },
     ensureIndexPattern: (args) =>
       ensureIndexPattern({ onError: onChangeError, dataViews, ...args }),
-    refreshExistingFields: (args) =>
-      syncExistingFields({
-        updateIndexPatterns,
-        ...args,
-        data,
-        dataViews,
-        core,
-      }),
     loadIndexPatternRefs: async ({ isFullEditor }) =>
       isFullEditor ? loadIndexPatternRefs(dataViews) : [],
     getDefaultIndex: () => core.uiSettings.get('defaultIndex'),

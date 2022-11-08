@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "__jest__/**/*",
@@ -14,7 +13,7 @@
     "__fixtures__/*",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },

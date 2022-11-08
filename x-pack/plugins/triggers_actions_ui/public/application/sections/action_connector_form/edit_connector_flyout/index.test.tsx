@@ -11,10 +11,7 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/dom';
 import { act } from '@testing-library/react';
-import {
-  AppMockRenderer,
-  createAppMockRenderer,
-} from '../../../components/builtin_action_types/test_utils';
+import { AppMockRenderer, createAppMockRenderer } from '../../../components/test_utils';
 import EditConnectorFlyout from '.';
 import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
 import { betaBadgeProps } from '../beta_badge_props';
@@ -88,6 +85,52 @@ describe('EditConnectorFlyout', () => {
     expect(getByTestId('edit-connector-flyout-footer')).toBeInTheDocument();
   });
 
+  it('enables save button when the form is modified', async () => {
+    const { getByTestId } = appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+    expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
+
+    await act(async () => {
+      await userEvent.clear(getByTestId('nameInput'));
+      await userEvent.type(getByTestId('nameInput'), 'My new name', {
+        delay: 10,
+      });
+    });
+
+    expect(getByTestId('edit-connector-flyout-save-btn')).not.toBeDisabled();
+  });
+
+  it('shows a confirmation modal on close if the form is modified', async () => {
+    const { getByTestId, getByText } = appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+    expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
+
+    await act(async () => {
+      await userEvent.clear(getByTestId('nameInput'));
+      await userEvent.type(getByTestId('nameInput'), 'My new name', {
+        delay: 10,
+      });
+    });
+
+    act(() => {
+      userEvent.click(getByTestId('edit-connector-flyout-close-btn'));
+    });
+
+    expect(getByText('Discard unsaved changes to connector?')).toBeInTheDocument();
+  });
+
   it('renders the connector form correctly', async () => {
     const { getByTestId, queryByText } = appMockRenderer.render(
       <EditConnectorFlyout
@@ -136,6 +179,81 @@ describe('EditConnectorFlyout', () => {
     );
 
     expect(getByText('This connector is readonly.')).toBeInTheDocument();
+  });
+
+  it('shows the buttons', async () => {
+    const { getByTestId } = appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(getByTestId('edit-connector-flyout-save-btn')).toBeInTheDocument();
+    expect(getByTestId('edit-connector-flyout-close-btn')).toBeInTheDocument();
+  });
+
+  it('does not show the save button if the use does not have permissions to update connector', async () => {
+    appMockRenderer.coreStart.application.capabilities = {
+      ...appMockRenderer.coreStart.application.capabilities,
+      actions: { save: false, show: true },
+    };
+
+    const { queryByTestId } = appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(queryByTestId('edit-connector-flyout-save-btn')).not.toBeInTheDocument();
+  });
+
+  it('does not show the save button if the connector is preconfigured', async () => {
+    const { queryByTestId } = appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={{ ...connector, isPreconfigured: true }}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(queryByTestId('edit-connector-flyout-save-btn')).not.toBeInTheDocument();
+  });
+
+  it('disables the buttons when there are error on the form', async () => {
+    const { getByTestId } = appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
+    });
+
+    act(() => {
+      /**
+       * Clear the name so the form can be invalid
+       */
+      userEvent.clear(getByTestId('nameInput'));
+    });
+    act(() => {
+      userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('edit-connector-flyout-close-btn')).not.toBeDisabled();
+      expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
+    });
   });
 
   describe('Header', () => {
@@ -327,7 +445,7 @@ describe('EditConnectorFlyout', () => {
     });
 
     it('updates the connector and close the flyout correctly', async () => {
-      const { getByTestId } = appMockRenderer.render(
+      const { getByTestId, getByText } = appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
@@ -351,7 +469,7 @@ describe('EditConnectorFlyout', () => {
       });
 
       act(() => {
-        userEvent.click(getByTestId('edit-connector-flyout-save-close-btn'));
+        userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
       });
 
       await waitFor(() => {
@@ -361,6 +479,12 @@ describe('EditConnectorFlyout', () => {
             body: '{"name":"My new name","config":{"testTextField":"My text field"},"secrets":{"secretTextField":"password"}}',
           }
         );
+      });
+
+      expect(getByText('Changes Saved')).toBeInTheDocument();
+
+      act(() => {
+        userEvent.click(getByTestId('edit-connector-flyout-close-btn'));
       });
 
       expect(onClose).toHaveBeenCalled();
@@ -393,6 +517,13 @@ describe('EditConnectorFlyout', () => {
 
       await waitFor(() => {
         expect(getByTestId('test-connector-error-text-field')).toBeInTheDocument();
+      });
+
+      await act(async () => {
+        await userEvent.clear(getByTestId('nameInput'));
+        await userEvent.type(getByTestId('nameInput'), 'My new name', {
+          delay: 100,
+        });
       });
 
       act(() => {
@@ -557,102 +688,6 @@ describe('EditConnectorFlyout', () => {
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
       expect(getByTestId('executeActionButton')).toBeDisabled();
-    });
-  });
-
-  describe('Footer', () => {
-    it('shows the buttons', async () => {
-      const { getByTestId } = appMockRenderer.render(
-        <EditConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          connector={connector}
-          onConnectorUpdated={onConnectorUpdated}
-        />
-      );
-
-      expect(getByTestId('edit-connector-flyout-cancel-btn')).toBeInTheDocument();
-      expect(getByTestId('edit-connector-flyout-save-btn')).toBeInTheDocument();
-      expect(getByTestId('edit-connector-flyout-save-close-btn')).toBeInTheDocument();
-    });
-
-    it('does not show the save and save and close button if the use does not have permissions to update connector', async () => {
-      appMockRenderer.coreStart.application.capabilities = {
-        ...appMockRenderer.coreStart.application.capabilities,
-        actions: { save: false, show: true },
-      };
-
-      const { queryByTestId } = appMockRenderer.render(
-        <EditConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          connector={connector}
-          onConnectorUpdated={onConnectorUpdated}
-        />
-      );
-
-      expect(queryByTestId('edit-connector-flyout-save-btn')).not.toBeInTheDocument();
-      expect(queryByTestId('edit-connector-flyout-save-close-btn')).not.toBeInTheDocument();
-    });
-
-    it('does not show the save and save and close button if the connector is preconfigured', async () => {
-      const { queryByTestId } = appMockRenderer.render(
-        <EditConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          connector={{ ...connector, isPreconfigured: true }}
-          onConnectorUpdated={onConnectorUpdated}
-        />
-      );
-
-      expect(queryByTestId('edit-connector-flyout-save-btn')).not.toBeInTheDocument();
-      expect(queryByTestId('edit-connector-flyout-save-close-btn')).not.toBeInTheDocument();
-    });
-
-    it('closes the flyout when pressing cancel', async () => {
-      const { getByTestId } = appMockRenderer.render(
-        <EditConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          connector={connector}
-          onConnectorUpdated={onConnectorUpdated}
-        />
-      );
-
-      act(() => {
-        userEvent.click(getByTestId('edit-connector-flyout-cancel-btn'));
-      });
-
-      expect(onClose).toHaveBeenCalled();
-    });
-
-    it('disables the buttons when there are error on the form', async () => {
-      const { getByTestId } = appMockRenderer.render(
-        <EditConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          connector={connector}
-          onConnectorUpdated={onConnectorUpdated}
-        />
-      );
-
-      await waitFor(() => {
-        expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
-      });
-
-      act(() => {
-        /**
-         * Clear the name so the form can be invalid
-         */
-        userEvent.clear(getByTestId('nameInput'));
-        userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
-      });
-
-      await waitFor(() => {
-        expect(getByTestId('edit-connector-flyout-cancel-btn')).not.toBeDisabled();
-        expect(getByTestId('edit-connector-flyout-save-close-btn')).toBeDisabled();
-        expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
-      });
     });
   });
 });

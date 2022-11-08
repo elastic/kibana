@@ -7,7 +7,6 @@ get:
     feature privileges, depending on the owner of the cases you're seeking.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/parameters/space_id.yaml'
     - name: defaultSearchOperator
@@ -139,9 +138,7 @@ get:
               cases:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    $ref: '../components/schemas/case_response_properties.yaml'
+                  $ref: '../components/schemas/case_response_properties.yaml'
               count_closed_cases:
                 type: integer
               count_in_progress_cases:

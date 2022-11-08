@@ -40,6 +40,10 @@ export class BaseSpan extends Serializable<ApmFields> {
     return this;
   }
 
+  getChildren() {
+    return this._children;
+  }
+
   children(...children: BaseSpan[]): this {
     children.forEach((child) => {
       child.parent(this);
@@ -83,5 +87,11 @@ export class BaseSpan extends Serializable<ApmFields> {
       this.fields[`labels.${key}`] = value;
     });
     return this;
+  }
+
+  override timestamp(timestamp: number) {
+    const ret = super.timestamp(timestamp);
+    this.fields['timestamp.us'] = timestamp * 1000;
+    return ret;
   }
 }

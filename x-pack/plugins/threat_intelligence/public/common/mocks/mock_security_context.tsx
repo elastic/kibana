@@ -36,4 +36,12 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     ({ dataProviders, from, to }) =>
     () =>
       new Promise((resolve) => window.alert('investigate in timeline')),
+
+  SiemSearchBar: () => <div data-test-subj="SiemSearchBar">mock siem search</div>,
+
+  useFilters: () => [],
+
+  useGlobalTime: () => ({ from: '', to: '' }),
+
+  useQuery: () => ({ language: 'kuery', query: '' }),
 });

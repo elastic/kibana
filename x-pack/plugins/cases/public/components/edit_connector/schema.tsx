@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FormSchema, FIELD_TYPES } from '../../common/shared_imports';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export interface FormProps {
   connectorId: string;

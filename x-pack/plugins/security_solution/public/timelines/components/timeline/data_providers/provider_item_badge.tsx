@@ -23,6 +23,7 @@ import { ProviderItemActions } from './provider_item_actions';
 import type { DataProvidersAnd, QueryOperator } from './data_provider';
 import { DataProviderType } from './data_provider';
 import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 
 interface ProviderItemBadgeProps {
   andProviderId?: string;
@@ -78,9 +79,9 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
 
       return getTimeline(state, timelineId)?.timelineType ?? TimelineType.default;
     });
-    const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-    const { isLoading } = useDeepEqualSelector((state) =>
-      getManageTimeline(state, timelineId ?? '')
+
+    const { isLoading } = useDeepEqualSelector(
+      (state) => getTimeline(state, timelineId ?? '') ?? timelineDefaults
     );
 
     const togglePopover = useCallback(() => {

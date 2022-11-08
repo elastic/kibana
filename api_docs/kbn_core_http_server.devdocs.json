@@ -28,7 +28,13 @@
             "text": "RouteValidationError"
           },
           " extends ",
-          "SchemaTypeError"
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.SchemaTypeError",
+            "text": "SchemaTypeError"
+          }
         ],
         "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
         "deprecated": false,
@@ -2322,7 +2328,13 @@
               "\nA set of policies describing which external urls are allowed."
             ],
             "signature": [
-              "IExternalUrlPolicy",
+              {
+                "pluginId": "@kbn/core-http-common",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpCommonPluginApi",
+                "section": "def-common.IExternalUrlPolicy",
+                "text": "IExternalUrlPolicy"
+              },
               "[]"
             ],
             "path": "packages/core/http/core-http-server/src/external_url.ts",
@@ -4229,9 +4241,21 @@
             ],
             "signature": [
               "{ readonly path: string; readonly method: ",
-              "RecursiveReadonly",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonly",
+                "text": "RecursiveReadonly"
+              },
               "<Method>; readonly options: ",
-              "RecursiveReadonly",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonly",
+                "text": "RecursiveReadonly"
+              },
               "<",
               {
                 "pluginId": "@kbn/core-http-server",
@@ -5571,7 +5595,13 @@
             ],
             "signature": [
               "<T extends Exclude<keyof this, \"resolve\">>(parts: T[]) => Promise<",
-              "AwaitedProperties",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.AwaitedProperties",
+                "text": "AwaitedProperties"
+              },
               "<Pick<this, T>>>"
             ],
             "path": "packages/core/http/core-http-server/src/router/request_handler_context.ts",
@@ -6693,18 +6723,10 @@
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.AuthResult",
-            "text": "AuthResult"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any> | Promise<",
+          "<any> | ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -6712,7 +6734,7 @@
             "section": "def-server.AuthResult",
             "text": "AuthResult"
           },
-          " | ",
+          " | Promise<",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -6720,7 +6742,15 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>>"
+          "<any> | ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.AuthResult",
+            "text": "AuthResult"
+          },
+          ">"
         ],
         "path": "packages/core/http/core-http-server/src/lifecycle/auth.ts",
         "deprecated": false,
@@ -7143,7 +7173,13 @@
             "text": "KibanaResponseFactory"
           },
           ") => ",
-          "MaybePromise",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.MaybePromise",
+            "text": "MaybePromise"
+          },
           "<Awaited<Context[ContextName]>>"
         ],
         "path": "packages/core/http/core-http-server/src/router/context_provider.ts",
@@ -7643,18 +7679,10 @@
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.OnPreAuthNextResult",
-            "text": "OnPreAuthNextResult"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any> | Promise<",
+          "<any> | ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -7662,7 +7690,7 @@
             "section": "def-server.OnPreAuthNextResult",
             "text": "OnPreAuthNextResult"
           },
-          " | ",
+          " | Promise<",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -7670,7 +7698,15 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>>"
+          "<any> | ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.OnPreAuthNextResult",
+            "text": "OnPreAuthNextResult"
+          },
+          ">"
         ],
         "path": "packages/core/http/core-http-server/src/lifecycle/on_pre_auth.ts",
         "deprecated": false,
@@ -8745,9 +8781,21 @@
           "\nAllowed property validation options: either @kbn/config-schema validations or custom validation functions\n\nSee {@link RouteValidationFunction} for custom validation.\n"
         ],
         "signature": [
-          "ObjectType",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ObjectType",
+            "text": "ObjectType"
+          },
           "<any> | ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
           "<T> | ",
           {
             "pluginId": "@kbn/core-http-server",

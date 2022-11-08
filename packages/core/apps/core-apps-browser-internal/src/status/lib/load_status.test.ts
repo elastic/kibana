@@ -61,6 +61,19 @@ const mockedResponse: StatusResponse = {
         '15m': 0.1,
       },
     },
+    elasticsearch_client: {
+      protocol: 'https',
+      connectedNodes: 3,
+      nodesWithActiveSockets: 3,
+      nodesWithIdleSockets: 1,
+      totalActiveSockets: 25,
+      totalIdleSockets: 2,
+      totalQueuedRequests: 0,
+      mostActiveNodeSockets: 15,
+      averageActiveSocketsPerNode: 8,
+      mostIdleNodeSockets: 2,
+      averageIdleSocketsPerNode: 0.5,
+    },
     process: {
       pid: 1,
       memory: {

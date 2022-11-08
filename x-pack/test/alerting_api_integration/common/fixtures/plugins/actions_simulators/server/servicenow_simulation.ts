@@ -6,6 +6,8 @@
  */
 
 import http from 'http';
+import { isEmpty } from 'lodash';
+import { getDataFromRequest } from './data_handler';
 
 /**
  * This server records the data from a create incident request. It only saves the most recent request. When building tests,
@@ -14,6 +16,7 @@ import http from 'http';
 export class RecordingServiceNowSimulator {
   private _incident: Record<string, unknown> | undefined;
   private _server: http.Server | undefined;
+  private _allRequestData: Array<Record<string, unknown>> = [];
 
   private constructor() {}
 
@@ -28,11 +31,15 @@ export class RecordingServiceNowSimulator {
   }
 
   private handler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
-    const data = await getData(request);
+    const data = await getDataFromRequest(request);
     const pathName = request.url!;
 
     if (isCreateRequest(pathName)) {
       this._incident = data;
+    }
+
+    if (!isEmpty(data)) {
+      this._allRequestData.push(data);
     }
 
     return handleSendingResponse(request, response, data);
@@ -44,6 +51,10 @@ export class RecordingServiceNowSimulator {
 
   public get server() {
     return this._server!;
+  }
+
+  public get allRequestData() {
+    return this._allRequestData!;
   }
 }
 
@@ -62,7 +73,7 @@ const sendResponse = (response: http.ServerResponse, data: any) => {
 };
 
 const requestHandler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
-  const data: Record<string, unknown> = await getData(request);
+  const data: Record<string, unknown> = await getDataFromRequest(request);
 
   return handleSendingResponse(request, response, data);
 };
@@ -229,20 +240,4 @@ const handleSendingResponse = async (
   response.statusCode = 400;
   response.setHeader('Content-Type', 'application/json');
   response.end('Not supported endpoint to request servicenow simulator');
-};
-
-const getData = async (request: http.IncomingMessage) => {
-  let data: Record<string, unknown> = {};
-
-  if (request.method === 'POST') {
-    const buffers = [];
-
-    for await (const chunk of request) {
-      buffers.push(chunk);
-    }
-
-    data = JSON.parse(Buffer.concat(buffers).toString());
-  }
-
-  return data;
 };

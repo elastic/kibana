@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asDuration } from '../../utils/formatters/as_duration';
+import { asNumber } from '../../utils/formatters/as_number';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
 
@@ -23,21 +24,19 @@ const CO2_PER_KWH = 0.92;
 const CORE_COST_PER_HOUR = 0.0425;
 
 export function getImpactRows({
-  samples,
-  childSamples,
-  sampledTraces,
-  totalTraces,
+  countInclusive,
+  countExclusive,
+  totalSamples,
   totalSeconds,
 }: {
-  samples: number;
-  childSamples: number;
-  sampledTraces: number;
-  totalTraces: number;
+  countInclusive: number;
+  countExclusive: number;
+  totalSamples: number;
   totalSeconds: number;
 }) {
-  const percentage = samples / sampledTraces;
-  const percentageNoChildren = (samples - childSamples) / sampledTraces;
-  const totalCoreSeconds = totalTraces / 20;
+  const percentage = countInclusive / totalSamples;
+  const percentageNoChildren = countExclusive / totalSamples;
+  const totalCoreSeconds = totalSamples / 20;
   const coreSeconds = totalCoreSeconds * percentage;
   const coreSecondsNoChildren = totalCoreSeconds * percentageNoChildren;
   const coreHours = coreSeconds / (60 * 60);
@@ -70,10 +69,16 @@ export function getImpactRows({
       value: asPercentage(percentageNoChildren),
     },
     {
-      label: i18n.translate('xpack.profiling.flameGraphInformationWindow.samplesLabel', {
+      label: i18n.translate('xpack.profiling.flameGraphInformationWindow.samplesInclusiveLabel', {
         defaultMessage: 'Samples',
       }),
-      value: samples,
+      value: asNumber(countInclusive),
+    },
+    {
+      label: i18n.translate('xpack.profiling.flameGraphInformationWindow.samplesExclusiveLabel', {
+        defaultMessage: 'Samples (excl. children)',
+      }),
+      value: asNumber(countExclusive),
     },
     {
       label: i18n.translate(

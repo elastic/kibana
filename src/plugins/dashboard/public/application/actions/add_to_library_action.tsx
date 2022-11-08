@@ -18,8 +18,9 @@ import {
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { dashboardAddToLibraryAction } from '../../dashboard_strings';
-import { type DashboardPanelState, DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '..';
+import { type DashboardPanelState, type DashboardContainer } from '..';
 import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 

@@ -8,8 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Columns, Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
 import { PaginatedTable } from '../../../common/components/paginated_table';
 
@@ -31,10 +30,6 @@ import type {
   RiskSeverity,
   UserRiskScore,
 } from '../../../../common/search_strategy';
-
-const IconWrapper = styled.span`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -152,21 +147,6 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
     </EuiFlexGroup>
   );
 
-  const headerTitle = (
-    <>
-      {i18nUsers.NAVIGATION_RISK_TITLE}
-      <IconWrapper>
-        <EuiIconTip
-          color="subdued"
-          content={i18n.USER_RISK_TABLE_TOOLTIP}
-          position="right"
-          size="l"
-          type="iInCircle"
-        />
-      </IconWrapper>
-    </>
-  );
-
   const getUserRiskScoreFilterQuerySelector = useMemo(
     () => usersSelectors.userRiskScoreSeverityFilterSelector(),
     []
@@ -201,7 +181,8 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
         />
       }
       headerSupplement={risk}
-      headerTitle={headerTitle}
+      headerTitle={i18nUsers.NAVIGATION_RISK_TITLE}
+      headerTooltip={i18n.USER_RISK_TABLE_TOOLTIP}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
       isInspect={isInspect}

@@ -8,8 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { EMPTY_VALUE } from '../../../../../common/constants';
-import { AddToTimeline } from './add_to_timeline';
+import { EMPTY_VALUE } from '../../../../common/constants';
+import { AddToTimelineButtonIcon } from '.';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 
 describe('<AddToTimeline />', () => {
@@ -19,7 +19,7 @@ describe('<AddToTimeline />', () => {
 
     const component = render(
       <TestProvidersComponent>
-        <AddToTimeline field={mockField} data={mockData} />
+        <AddToTimelineButtonIcon field={mockField} data={mockData} />
       </TestProvidersComponent>
     );
     expect(component).toMatchSnapshot();
@@ -31,7 +31,7 @@ describe('<AddToTimeline />', () => {
 
     const component = render(
       <TestProvidersComponent>
-        <AddToTimeline field={mockField} data={mockString} />
+        <AddToTimelineButtonIcon field={mockField} data={mockString} />
       </TestProvidersComponent>
     );
     expect(component).toMatchSnapshot();
@@ -43,7 +43,7 @@ describe('<AddToTimeline />', () => {
 
     const component = render(
       <TestProvidersComponent>
-        <AddToTimeline field={mockField} data={mockData} />
+        <AddToTimelineButtonIcon field={mockField} data={mockData} />
       </TestProvidersComponent>
     );
     expect(component).toMatchSnapshot();
@@ -56,7 +56,7 @@ describe('<AddToTimeline />', () => {
 
     const component = render(
       <TestProvidersComponent>
-        <AddToTimeline field={mockField} data={mockData} />
+        <AddToTimelineButtonIcon field={mockField} data={mockData} />
       </TestProvidersComponent>
     );
     expect(component).toMatchSnapshot();
@@ -69,7 +69,7 @@ describe('<AddToTimeline />', () => {
 
     const component = render(
       <TestProvidersComponent>
-        <AddToTimeline field={mockField} data={mockData} />
+        <AddToTimelineButtonIcon field={mockField} data={mockData} />
       </TestProvidersComponent>
     );
     expect(component).toMatchSnapshot();
@@ -81,7 +81,7 @@ describe('<AddToTimeline />', () => {
 
     const component = render(
       <TestProvidersComponent>
-        <AddToTimeline field={mockField} data={mockData} />
+        <AddToTimelineButtonIcon field={mockField} data={mockData} />
       </TestProvidersComponent>
     );
     expect(component).toMatchSnapshot();

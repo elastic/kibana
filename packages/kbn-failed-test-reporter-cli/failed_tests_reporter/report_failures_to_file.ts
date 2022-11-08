@@ -44,12 +44,26 @@ async function getJourneySnapshotHtml(log: ToolingLog, journeyMeta: JourneyMeta)
   return [
     '<section>',
     '<h5>Steps</h5>',
-    ...screenshots.get().flatMap(({ title, path }) => {
+    ...screenshots.get().flatMap(({ title, path, fullscreenPath }) => {
       const base64 = Fs.readFileSync(path, 'base64');
+      const fullscreenBase64 = Fs.readFileSync(fullscreenPath, 'base64');
 
       return [
         `<p><strong>${escape(title)}</strong></p>`,
-        `<img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${base64}" />`,
+        `<div class="screenshotContainer">
+          <img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${base64}" />
+          <img class="screenshot img-fluid img-thumbnail fs" src="data:image/png;base64,${fullscreenBase64}" />
+          <button type="button" class="toggleFs on" title="Expand screenshot to full page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-expand" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 8zM7.646.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 1.707V5.5a.5.5 0 0 1-1 0V1.707L6.354 2.854a.5.5 0 1 1-.708-.708l2-2zM8 10a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 14.293V10.5A.5.5 0 0 1 8 10z"/>
+            </svg>
+          </button>
+          <button type="button" class="toggleFs off" title="Restrict screenshot to content visible in the viewport">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-collapse" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 8zm7-8a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 4.293V.5A.5.5 0 0 1 8 0zm-.5 11.707-1.146 1.147a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 11.707V15.5a.5.5 0 0 1-1 0v-3.793z"/>
+            </svg>
+          </button>
+        </div>`,
       ];
     }),
     '</section>',
@@ -88,7 +102,11 @@ function getFtrScreenshotHtml(log: ToolingLog, failureName: string) {
     .filter((s) => s.name.startsWith(FtrScreenshotFilename.create(failureName, { ext: false })))
     .map((s) => {
       const base64 = Fs.readFileSync(s.path).toString('base64');
-      return `<img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${base64}" />`;
+      return `
+        <div class="screenshotContainer">
+          <img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${base64}" />
+        </div>
+      `;
     })
     .join('\n');
 }

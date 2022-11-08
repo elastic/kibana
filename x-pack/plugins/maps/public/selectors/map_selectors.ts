@@ -20,6 +20,7 @@ import {
   GeoJsonVectorLayer,
 } from '../classes/layers/vector_layer';
 import { VectorStyle } from '../classes/styles/vector/vector_style';
+import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 import { HeatmapLayer } from '../classes/layers/heatmap_layer';
 import { getTimeFilter } from '../kibana_services';
 import { getChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
@@ -47,6 +48,7 @@ import {
   Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
+  LayerGroupDescriptor,
   MapCenter,
   MapExtent,
   MapSettings,
@@ -54,10 +56,10 @@ import {
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { ISource } from '../classes/sources/source';
-import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
 import { EMSTMSSource } from '../classes/sources/ems_tms_source';
+import { IRasterSource } from '../classes/sources/raster_source';
 import { ILayer } from '../classes/layers/layer';
 import { getIsReadOnly } from './ui_selectors';
 
@@ -74,11 +76,14 @@ export function createLayerInstance(
   customIcons: CustomIcon[],
   chartsPaletteServiceGetColor?: (value: string) => string | null
 ): ILayer {
-  const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor);
+  if (layerDescriptor.type === LAYER_TYPE.LAYER_GROUP) {
+    return new LayerGroup({ layerDescriptor: layerDescriptor as LayerGroupDescriptor });
+  }
 
+  const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor);
   switch (layerDescriptor.type) {
     case LAYER_TYPE.RASTER_TILE:
-      return new RasterTileLayer({ layerDescriptor, source: source as ITMSSource });
+      return new RasterTileLayer({ layerDescriptor, source: source as IRasterSource });
     case LAYER_TYPE.EMS_VECTOR_TILE:
       return new EmsVectorTileLayer({
         layerDescriptor: layerDescriptor as EMSVectorTileLayerDescriptor,
@@ -324,9 +329,32 @@ export const getLayerList = createSelector(
   getChartsPaletteServiceGetColor,
   getCustomIcons,
   (layerDescriptorList, chartsPaletteServiceGetColor, customIcons) => {
-    return layerDescriptorList.map((layerDescriptor) =>
+    const layers = layerDescriptorList.map((layerDescriptor) =>
       createLayerInstance(layerDescriptor, customIcons, chartsPaletteServiceGetColor)
     );
+
+    const childrenMap = new Map<string, ILayer[]>();
+    layers.forEach((layer) => {
+      const parent = layer.getParent();
+      if (!parent) {
+        return;
+      }
+
+      const children = childrenMap.has(parent) ? childrenMap.get(parent)! : [];
+      childrenMap.set(parent, [...children, layer]);
+    });
+
+    childrenMap.forEach((children, parent) => {
+      const parentLayer = layers.find((layer) => {
+        return layer.getId() === parent;
+      });
+      if (!parentLayer || !isLayerGroup(parentLayer)) {
+        return;
+      }
+      (parentLayer as LayerGroup).setChildren(children);
+    });
+
+    return layers;
   }
 );
 

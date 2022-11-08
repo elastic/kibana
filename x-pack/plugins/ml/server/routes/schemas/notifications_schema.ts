@@ -9,25 +9,9 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const getNotificationsQuerySchema = schema.object({
   /**
-   * Message level, e.g. info, error
-   */
-  level: schema.maybe(schema.string()),
-  /**
-   * Message type, e.g. anomaly_detector
-   */
-  type: schema.maybe(schema.string()),
-  /**
    * Search string for the message content
    */
   queryString: schema.maybe(schema.string()),
-  /**
-   * Page numer, zero-indexed
-   */
-  from: schema.number({ defaultValue: 0 }),
-  /**
-   * Number of messages to return
-   */
-  size: schema.number({ defaultValue: 10 }),
   /**
    * Sort field
    */

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Format } from './types';
+import type { Format } from './types';
 
 export const format: Format = (theCase) => {
   return {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildEmptyFilter, Filter } from '@kbn/es-query';
+import { buildEmptyFilter, Filter, FilterItem } from '@kbn/es-query';
 import { ConditionTypes } from '../utils';
 import {
   getFilterByPath,
@@ -16,7 +16,6 @@ import {
   moveFilter,
   normalizeFilters,
 } from './filters_builder_utils';
-import type { FilterItem } from '../utils';
 import { getConditionalOperationType } from '../utils';
 
 import {

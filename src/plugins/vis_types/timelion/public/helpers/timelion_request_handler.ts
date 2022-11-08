@@ -102,16 +102,9 @@ export function getTimelionRequestHandler({
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
 
-    // parse the time range client side to make sure it behaves like other charts
-    const timeRangeBounds = timefilter.calculateBounds(timeRange);
-    const untrackSearch =
-      dataSearch.session.isCurrentSession(searchSessionId) &&
-      dataSearch.session.trackSearch({
-        abort: () => abortController.abort(),
-      });
-
-    try {
-      const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
+    const doSearch = async (
+      searchOptions: ReturnType<typeof dataSearch.session.getSearchOptions>
+    ): Promise<TimelionSuccessResponse> => {
       return await http.post('/api/timelion/run', {
         body: JSON.stringify({
           sheet: [expression],
@@ -126,14 +119,40 @@ export function getTimelionRequestHandler({
             interval: visParams.interval,
             timezone,
           },
-          ...(searchSessionOptions && {
-            searchSession: searchSessionOptions,
-          }),
+          ...(searchOptions
+            ? {
+                searchSession: searchOptions,
+              }
+            : {}),
         }),
         context: executionContext,
         signal: abortController.signal,
       });
+    };
+
+    // parse the time range client side to make sure it behaves like other charts
+    const timeRangeBounds = timefilter.calculateBounds(timeRange);
+    const searchTracker = dataSearch.session.isCurrentSession(searchSessionId)
+      ? dataSearch.session.trackSearch({
+          abort: () => abortController.abort(),
+          poll: async () => {
+            // don't use, keep this empty, onSavingSession is used instead
+          },
+          onSavingSession: async (searchSessionOptions) => {
+            await doSearch(searchSessionOptions);
+          },
+        })
+      : undefined;
+
+    try {
+      const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
+      const visData = await doSearch(searchSessionOptions);
+
+      searchTracker?.complete();
+      return visData;
     } catch (e) {
+      searchTracker?.error();
+
       if (e && e.body) {
         const err = new Error(
           `${i18n.translate('timelion.requestHandlerErrorTitle', {
@@ -146,10 +165,6 @@ export function getTimelionRequestHandler({
         throw e;
       }
     } finally {
-      if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
-        // call `untrack` if this search still belongs to current session
-        untrackSearch();
-      }
       expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
     }
   };

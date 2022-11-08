@@ -3,7 +3,7 @@ load("@npm//peggy:index.bzl", "peggy")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-interpreter"
+PKG_DIRNAME = "kbn-interpreter"
 PKG_REQUIRE_NAME = "@kbn/interpreter"
 
 SOURCE_FILES = glob(
@@ -94,25 +94,30 @@ ts_project(
   deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   tsconfig = ":tsconfig",
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES + [":grammar"],
   deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
+js_library(
+  name = "npm_module_types",
+  srcs = NPM_MODULE_EXTRA_FILES + [":grammar"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
@@ -123,19 +128,8 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
+pkg_npm(
   name = "build_types",
-  srcs = [
-    ":npm_module_types",
-  ],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

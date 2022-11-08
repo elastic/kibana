@@ -9,13 +9,13 @@ import { useQuery } from '@tanstack/react-query';
 import * as i18n from '../translations';
 import { fetchActionTypes } from './api';
 import { useToasts } from '../../common/lib/kibana';
-import { CASE_CONFIGURATION_CACHE_KEY } from '../constants';
-import { ServerError } from '../../types';
+import { casesQueriesKeys } from '../constants';
+import type { ServerError } from '../../types';
 
 export const useGetActionTypes = () => {
   const toasts = useToasts();
   return useQuery(
-    [CASE_CONFIGURATION_CACHE_KEY, 'actionTypes'],
+    casesQueriesKeys.connectorTypes(),
     () => {
       const abortController = new AbortController();
       return fetchActionTypes({ signal: abortController.signal });

@@ -8,25 +8,22 @@
 
 import _ from 'lodash';
 import { merge } from 'rxjs';
-import { debounceTime, finalize, map, switchMap, tap } from 'rxjs/operators';
+import { finalize, map, switchMap, tap } from 'rxjs/operators';
 import {
   connectToQueryState,
   GlobalQueryStateFromUrl,
-  syncQueryStateWithUrl,
+  syncGlobalQueryStateWithUrl,
   waitUntilNextSessionCompletes$,
 } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
 import { cleanFiltersForSerialize } from '.';
-import { setQuery } from '../state';
 import type { DashboardBuildContext, DashboardState } from '../../types';
-import type { DashboardSavedObject } from '../../saved_dashboards';
 import { setFiltersAndQuery } from '../state/dashboard_state_slice';
 import { pluginServices } from '../../services/plugin_services';
 
 type SyncDashboardFilterStateProps = DashboardBuildContext & {
   initialDashboardState: DashboardState;
-  savedDashboard: DashboardSavedObject;
 };
 
 /**
@@ -35,7 +32,6 @@ type SyncDashboardFilterStateProps = DashboardBuildContext & {
  * and the dashboard Redux store.
  */
 export const syncDashboardFilterState = ({
-  savedDashboard,
   kbnUrlStateStorage,
   initialDashboardState,
   $checkForUnsavedChanges,
@@ -46,25 +42,17 @@ export const syncDashboardFilterState = ({
   const {
     data: { query: queryService, search },
   } = pluginServices.getServices();
-  const { filterManager, queryString, timefilter } = queryService;
+  const { queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
 
   // apply initial dashboard filter state.
   applyDashboardFilterState({
     currentDashboardState: initialDashboardState,
     kbnUrlStateStorage,
-    savedDashboard,
   });
 
-  // this callback will be used any time new filters and query need to be applied.
-  const applyFilters = (query: Query, filters: Filter[]) => {
-    savedDashboard.searchSource.setField('query', query);
-    savedDashboard.searchSource.setField('filter', filters);
-    dispatchDashboardStateChange(setQuery(query));
-  };
-
   // starts syncing `_g` portion of url with query services
-  const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+  const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
     queryService,
     kbnUrlStateStorage
   );
@@ -81,7 +69,6 @@ export const syncDashboardFilterState = ({
       set: ({ filters, query }) => {
         intermediateFilterState.filters = cleanFiltersForSerialize(filters ?? []) || [];
         intermediateFilterState.query = query || queryString.getDefaultQuery();
-        applyFilters(intermediateFilterState.query, intermediateFilterState.filters);
         dispatchDashboardStateChange(setFiltersAndQuery(intermediateFilterState));
       },
       state$: $onDashboardStateChange.pipe(
@@ -96,11 +83,6 @@ export const syncDashboardFilterState = ({
       filters: true,
     }
   );
-
-  // apply filters when the filter manager changes
-  const filterManagerSubscription = merge(filterManager.getUpdates$(), queryString.getUpdates$())
-    .pipe(debounceTime(100))
-    .subscribe(() => applyFilters(queryString.getQuery() as Query, filterManager.getFilters()));
 
   const timeRefreshSubscription = merge(
     timefilterService.getRefreshIntervalUpdate$(),
@@ -127,26 +109,23 @@ export const syncDashboardFilterState = ({
     .subscribe();
 
   const stopSyncingDashboardFilterState = () => {
-    filterManagerSubscription.unsubscribe();
     forceRefreshSubscription.unsubscribe();
     timeRefreshSubscription.unsubscribe();
     stopSyncingQueryServiceStateWithUrl();
     stopSyncingAppFilters();
   };
 
-  return { applyFilters, stopSyncingDashboardFilterState };
+  return { stopSyncingDashboardFilterState };
 };
 
 interface ApplyDashboardFilterStateProps {
   kbnUrlStateStorage: DashboardBuildContext['kbnUrlStateStorage'];
   currentDashboardState: DashboardState;
-  savedDashboard: DashboardSavedObject;
 }
 
 export const applyDashboardFilterState = ({
   currentDashboardState,
   kbnUrlStateStorage,
-  savedDashboard,
 }: ApplyDashboardFilterStateProps) => {
   const {
     data: {
@@ -155,13 +134,9 @@ export const applyDashboardFilterState = ({
   } = pluginServices.getServices();
   const { timefilter: timefilterService } = timefilter;
 
-  // apply filters to the query service and to the saved dashboard
+  // apply filters and query to the query service
   filterManager.setAppFilters(_.cloneDeep(currentDashboardState.filters));
-  savedDashboard.searchSource.setField('filter', currentDashboardState.filters);
-
-  // apply query to the query service and to the saved dashboard
   queryString.setQuery(currentDashboardState.query);
-  savedDashboard.searchSource.setField('query', currentDashboardState.query);
 
   /**
    * If a global time range is not set explicitly and the time range was saved with the dashboard, apply
@@ -169,18 +144,11 @@ export const applyDashboardFilterState = ({
    */
   if (currentDashboardState.timeRestore) {
     const globalQueryState = kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g');
-    if (!globalQueryState?.time) {
-      if (savedDashboard.timeFrom && savedDashboard.timeTo) {
-        timefilterService.setTime({
-          from: savedDashboard.timeFrom,
-          to: savedDashboard.timeTo,
-        });
-      }
+    if (!globalQueryState?.time && currentDashboardState.timeRange) {
+      timefilterService.setTime(currentDashboardState.timeRange);
     }
-    if (!globalQueryState?.refreshInterval) {
-      if (savedDashboard.refreshInterval) {
-        timefilterService.setRefreshInterval(savedDashboard.refreshInterval);
-      }
+    if (!globalQueryState?.refreshInterval && currentDashboardState.refreshInterval) {
+      timefilterService.setRefreshInterval(currentDashboardState.refreshInterval);
     }
   }
 };

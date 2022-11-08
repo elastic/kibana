@@ -78,7 +78,7 @@ import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useMlContext } from '../contexts/ml';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
-import { useStorage } from '../contexts/ml/use_storage';
+import { useStorage } from '../contexts/storage';
 
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;
@@ -609,6 +609,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
             tableData={tableData}
             influencerFilter={applyFilter}
             sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+            selectedJobs={selectedJobs}
           />
         </EuiPanel>
       )}

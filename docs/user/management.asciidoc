@@ -176,8 +176,6 @@ see the https://www.elastic.co/subscriptions[subscription page].
 
 --
 
-include::{kib-repo-dir}/management/advanced-options.asciidoc[]
-
 include::{kib-repo-dir}/management/cases/index.asciidoc[]
 
 include::{kib-repo-dir}/management/action-types.asciidoc[]
@@ -196,6 +194,10 @@ include::security/index.asciidoc[]
 
 include::{kib-repo-dir}/spaces/index.asciidoc[]
 
+include::{kib-repo-dir}/management/advanced-options.asciidoc[]
+
 include::{kib-repo-dir}/management/managing-tags.asciidoc[]
 
 include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]
+
+

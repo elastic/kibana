@@ -9,6 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import type {
   BulkResponse,
   ClosePointInTimeResponse,
+  DeleteByQueryResponse,
   OpenPointInTimeResponse,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -1237,7 +1238,7 @@ describe('Session index', () => {
 
   describe('#invalidate', () => {
     beforeEach(() => {
-      mockElasticsearchClient.deleteByQuery.mockResponse({ deleted: 10 });
+      mockElasticsearchClient.deleteByQuery.mockResponse({ deleted: 10 } as DeleteByQueryResponse);
     });
 
     it('[match=sid] throws if call to Elasticsearch fails', async () => {

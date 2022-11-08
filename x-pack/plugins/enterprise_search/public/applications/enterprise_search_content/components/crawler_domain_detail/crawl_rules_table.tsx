@@ -126,6 +126,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
     {
       editingRender: (crawlRule, onChange, { isInvalid, isLoading }) => (
         <EuiSelect
+          data-telemetry-id="entSearchContent-crawler-domainDetail-crawlRules-policy"
           fullWidth
           hasNoInitialSelection
           value={(crawlRule as CrawlRule).policy}
@@ -151,6 +152,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
     {
       editingRender: (crawlRule, onChange, { isInvalid, isLoading }) => (
         <EuiSelect
+          data-telemetry-id="entSearchContent-crawler-domainDetail-crawlRules-rule"
           fullWidth
           hasNoInitialSelection
           value={(crawlRule as CrawlRule).rule}

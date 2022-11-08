@@ -9,19 +9,21 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import uuid from 'uuid';
 import { difference, uniq } from 'lodash';
 
-import type { Agent, BulkActionResult } from '../../types';
-
-import { appContextService } from '../app_context';
+import type { Agent } from '../../types';
 
 import { ActionRunner } from './action_runner';
 
-import { errorsToResults, bulkUpdateAgents } from './crud';
+import { bulkUpdateAgents } from './crud';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 import { filterHostedPolicies } from './filter_hosted_agents';
-import { bulkCreateAgentActionResults, createAgentAction } from './actions';
+import {
+  createErrorActionResults,
+  bulkCreateAgentActionResults,
+  createAgentAction,
+} from './actions';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
-  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
+  protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
     return await updateTagsBatch(
       this.soClient,
       this.esClient,
@@ -32,9 +34,7 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
         tagsToRemove: this.actionParams?.tagsToRemove,
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
-      },
-      undefined,
-      true
+      }
     );
   }
 
@@ -57,10 +57,8 @@ export async function updateTagsBatch(
     tagsToRemove: string[];
     actionId?: string;
     total?: number;
-  },
-  agentIds?: string[],
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
+  }
+): Promise<{ actionId: string }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const filteredAgents = await filterHostedPolicies(
@@ -94,12 +92,12 @@ export async function updateTagsBatch(
       data: {
         tags: getNewTags(agent),
       },
-    }))
+    })),
+    errors
   );
 
   const actionId = options.actionId ?? uuid();
   const total = options.total ?? givenAgents.length;
-  const errorCount = Object.keys(errors).length;
 
   // creating an action doc so that update tags  shows up in activity
   await createAgentAction(esClient, {
@@ -117,23 +115,12 @@ export async function updateTagsBatch(
     }))
   );
 
-  if (errorCount > 0) {
-    appContextService
-      .getLogger()
-      .info(
-        `Skipping ${errorCount} agents, as failed validation (cannot modified tags on hosted agents)`
-      );
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    errors,
+    'cannot modified tags on hosted agents'
+  );
 
-    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
-    await bulkCreateAgentActionResults(
-      esClient,
-      Object.keys(errors).map((agentId) => ({
-        agentId,
-        actionId,
-        error: errors[agentId].message,
-      }))
-    );
-  }
-
-  return { items: errorsToResults(filteredAgents, errors, agentIds, skipSuccess) };
+  return { actionId };
 }

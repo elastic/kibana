@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../../hooks';
 
-type TTYPlayerLineMarkerType = 'output' | 'data_limited';
+import { TTYPlayerLineMarkerType } from '.';
 
 export const useStyles = (progress: number) => {
   const { euiTheme, euiVars } = useEuiTheme();
@@ -30,7 +30,7 @@ export const useStyles = (progress: number) => {
     };
 
     const getMarkerBackgroundColor = (type: TTYPlayerLineMarkerType, selected: boolean) => {
-      if (type === 'data_limited') {
+      if (type === TTYPlayerLineMarkerType.ProcessDataLimitReached) {
         return euiVars.terminalOutputMarkerWarning;
       }
       if (selected) {
@@ -105,7 +105,7 @@ export const useStyles = (progress: number) => {
       left: progress + '%',
       top: 16,
       fill:
-        type === 'data_limited'
+        type === TTYPlayerLineMarkerType.ProcessDataLimitReached
           ? euiVars.terminalOutputMarkerWarning
           : euiVars.terminalOutputMarkerAccent,
     });

@@ -11,11 +11,11 @@ import {
   FieldValuePair,
 } from '../../../../../common/correlations/types';
 import { BooleanFieldStats } from '../../../../../common/correlations/field_stats_types';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from '../get_common_correlations_query';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchBooleanFieldStats = async ({
-  setup,
+  apmEventClient,
   eventType,
   start,
   end,
@@ -24,12 +24,10 @@ export const fetchBooleanFieldStats = async ({
   field,
   query,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   eventType: ProcessorEvent;
   field: FieldValuePair;
 }): Promise<BooleanFieldStats> => {
-  const { apmEventClient } = setup;
-
   const { fieldName } = field;
 
   const { aggregations } = await apmEventClient.search(
