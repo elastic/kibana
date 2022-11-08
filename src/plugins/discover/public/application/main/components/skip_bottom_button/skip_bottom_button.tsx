@@ -22,7 +22,7 @@ export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
   return (
     <EuiSkipLink
       size="s"
-      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+      onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
         // prevent the anchor to reload the page on click
         event.preventDefault();
         // The destinationId prop cannot be leveraged here as the table needs
