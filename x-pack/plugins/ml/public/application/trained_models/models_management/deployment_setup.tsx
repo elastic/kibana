@@ -43,6 +43,7 @@ interface DeploymentSetupProps {
 export interface ThreadingParams {
   numOfAllocations: number;
   threadsPerAllocations?: number;
+  priority?: 'low' | 'normal';
 }
 
 const THREADS_MAX_EXPONENT = 4;
@@ -71,6 +72,74 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
 
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
+      {config.priority !== undefined ? (
+        <EuiDescribedFormGroup
+          titleSize={'xxs'}
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.priorityLabel"
+                defaultMessage="Priority"
+              />
+            </h3>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.priorityHelp"
+              defaultMessage="Blah blah blah"
+            />
+          }
+        >
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.priorityLabel"
+                defaultMessage="Priority"
+              />
+            }
+            hasChildLabel={false}
+          >
+            <EuiButtonGroup
+              legend={i18n.translate(
+                'xpack.ml.trainedModels.modelsList.startDeployment.priorityLegend',
+                {
+                  defaultMessage: 'Priority selector',
+                }
+              )}
+              name={'priority'}
+              isFullWidth
+              idSelected={config.priority}
+              onChange={(optionId: string) => {
+                onConfigChange({ ...config, priority: optionId as ThreadingParams['priority'] });
+              }}
+              options={[
+                {
+                  id: 'low',
+                  value: 'low',
+                  label: i18n.translate(
+                    'xpack.ml.trainedModels.modelsList.startDeployment.lowPriorityLabel',
+                    {
+                      defaultMessage: 'Low',
+                    }
+                  ),
+                },
+                {
+                  id: 'normal',
+                  value: 'normal',
+                  label: i18n.translate(
+                    'xpack.ml.trainedModels.modelsList.startDeployment.normalPriorityLabel',
+                    {
+                      defaultMessage: 'Normal',
+                    }
+                  ),
+                },
+              ]}
+              data-test-subj={'mlModelsStartDeploymentModalPriority'}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+      ) : null}
+
       <EuiDescribedFormGroup
         titleSize={'xxs'}
         title={
@@ -186,6 +255,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     initialParams ?? {
       numOfAllocations: 1,
       threadsPerAllocations: 1,
+      priority: 'low',
     }
   );
 
