@@ -33,6 +33,11 @@ jest.mock('../../../common/containers/use_full_screen', () => ({
   useTimelineFullScreen: jest.fn(),
 }));
 
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
+
 jest.mock('../../../resolver/view/use_resolver_query_params_cleaner');
 jest.mock('../../../resolver/view/use_state_syncing_actions');
 const useStateSyncingActionsMock = useStateSyncingActions as jest.Mock;
@@ -183,6 +188,7 @@ describe('GraphOverlay', () => {
     });
 
     test('it gets index pattern from Timeline data view', () => {
+      const mockedDefaultDataViewPattern = 'default-dataview-pattern';
       render(
         <TestProviders
           store={createStore(
@@ -199,6 +205,10 @@ describe('GraphOverlay', () => {
               },
               sourcerer: {
                 ...mockGlobalState.sourcerer,
+                defaultDataView: {
+                  ...mockGlobalState.sourcerer.defaultDataView,
+                  patternList: [mockedDefaultDataViewPattern],
+                },
                 sourcererScopes: {
                   ...mockGlobalState.sourcerer.sourcererScopes,
                   [SourcererScopeName.timeline]: {
@@ -218,7 +228,10 @@ describe('GraphOverlay', () => {
         </TestProviders>
       );
 
-      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual(mockIndexNames.sort());
+      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual([
+        ...mockIndexNames.sort(),
+        mockedDefaultDataViewPattern,
+      ]);
     });
 
     test('it renders session view controls', () => {
