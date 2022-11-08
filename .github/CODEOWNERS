@@ -6,7 +6,7 @@
 # used for the 'team' designator within Kibana Stats
 
 # Alerting commmunal ownership
-/x-pack/plugins/rule_registry/ @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
+/x-pack/plugins/rule_registry/ @elastic/response-ops @elastic/actionable-observability
 
 # Data Discovery
 /src/plugins/discover/ @elastic/kibana-data-discovery
