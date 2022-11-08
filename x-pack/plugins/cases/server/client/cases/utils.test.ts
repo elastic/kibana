@@ -95,6 +95,7 @@ describe('utils', () => {
         connector,
         alerts: [],
         casesConnectors,
+        spaceId: 'default',
       });
 
       expect(res).toEqual({
@@ -127,6 +128,7 @@ describe('utils', () => {
         connector,
         alerts: [],
         casesConnectors,
+        spaceId: 'default',
       });
 
       expect(res).toEqual({
@@ -153,6 +155,7 @@ describe('utils', () => {
         connector,
         alerts: [],
         casesConnectors,
+        spaceId: 'default',
       });
 
       expect(res.comments).toEqual([
@@ -173,6 +176,7 @@ describe('utils', () => {
         connector,
         alerts: [],
         casesConnectors,
+        spaceId: 'default',
       });
 
       expect(res.comments).toEqual([
@@ -197,6 +201,7 @@ describe('utils', () => {
         connector,
         alerts: [],
         casesConnectors,
+        spaceId: 'default',
       });
 
       expect(res.comments).toEqual([
@@ -224,6 +229,7 @@ describe('utils', () => {
         connector,
         alerts: [],
         casesConnectors,
+        spaceId: 'default',
       });
 
       expect(res.comments).toEqual([
@@ -242,6 +248,7 @@ describe('utils', () => {
         alerts: [],
         casesConnectors,
         publicBaseUrl: 'https://example.com',
+        spaceId: 'default',
       });
 
       expect(res).toEqual({
@@ -253,6 +260,32 @@ describe('utils', () => {
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/app/security/cases/mock-id-1',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('adds the backlink with spaceId to cases correctly', async () => {
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector,
+        alerts: [],
+        casesConnectors,
+        publicBaseUrl: 'https://example.com',
+        spaceId: 'test-space',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          priority: null,
+          labels: ['defacement'],
+          issueType: null,
+          parent: null,
+          summary: 'Super Bad Security Issue',
+          description:
+            'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/s/test-space/app/security/cases/mock-id-1',
           externalId: null,
         },
         comments: [],
@@ -271,6 +304,7 @@ describe('utils', () => {
         alerts: [],
         casesConnectors,
         userProfiles: userProfilesMap,
+        spaceId: 'default',
       });
 
       expect(res).toEqual({
@@ -308,6 +342,7 @@ describe('utils', () => {
         alerts: [],
         casesConnectors,
         userProfiles: userProfilesMap,
+        spaceId: 'default',
       });
 
       expect(res).toEqual({
@@ -359,6 +394,7 @@ describe('utils', () => {
         alerts: [],
         casesConnectors,
         publicBaseUrl: 'https://example.com',
+        spaceId: 'default',
       });
 
       expect(res.comments).toEqual([
@@ -369,6 +405,33 @@ describe('utils', () => {
         {
           comment:
             'Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('adds a backlink with spaceId to the total alert comments correctly', async () => {
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          comments: [commentObj, commentAlert, commentAlertMultipleIds],
+        },
+        userActions,
+        connector,
+        alerts: [],
+        casesConnectors,
+        publicBaseUrl: 'https://example.com',
+        spaceId: 'test-space',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
+          commentId: 'comment-user-1',
+        },
+        {
+          comment:
+            'Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -429,7 +492,13 @@ describe('utils', () => {
       const latestPushInfo = getLatestPushInfo('not-exists', userActions);
 
       expect(
-        formatComments({ userActions, theCase, latestPushInfo, userProfiles: userProfilesMap })
+        formatComments({
+          userActions,
+          theCase,
+          latestPushInfo,
+          userProfiles: userProfilesMap,
+          spaceId: 'default',
+        })
       ).toEqual([
         {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
@@ -473,7 +542,13 @@ describe('utils', () => {
       const latestPushInfo = getLatestPushInfo('not-exists', userActions);
 
       expect(
-        formatComments({ userActions, theCase, latestPushInfo, userProfiles: userProfilesMap })
+        formatComments({
+          userActions,
+          theCase,
+          latestPushInfo,
+          userProfiles: userProfilesMap,
+          spaceId: 'default',
+        })
       ).toEqual([
         {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by Damaged Raccoon.',
@@ -518,7 +593,13 @@ describe('utils', () => {
 
       const latestPushInfo = getLatestPushInfo('456', userActions);
       expect(
-        formatComments({ userActions, theCase, latestPushInfo, userProfiles: userProfilesMap })
+        formatComments({
+          userActions,
+          theCase,
+          latestPushInfo,
+          userProfiles: userProfilesMap,
+          spaceId: 'default',
+        })
       ).toEqual([
         {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
@@ -543,7 +624,13 @@ describe('utils', () => {
       const latestPushInfo = getLatestPushInfo('not-exists', userActions);
 
       expect(
-        formatComments({ userActions, theCase, latestPushInfo, userProfiles: userProfilesMap })
+        formatComments({
+          userActions,
+          theCase,
+          latestPushInfo,
+          userProfiles: userProfilesMap,
+          spaceId: 'default',
+        })
       ).toEqual([
         {
           comment: 'Elastic Alerts attached to the case: 1',
@@ -564,7 +651,13 @@ describe('utils', () => {
       const latestPushInfo = getLatestPushInfo('456', userActions);
 
       expect(
-        formatComments({ userActions, theCase, latestPushInfo, userProfiles: userProfilesMap })
+        formatComments({
+          userActions,
+          theCase,
+          latestPushInfo,
+          userProfiles: userProfilesMap,
+          spaceId: 'default',
+        })
       ).toEqual([]);
     });
 
@@ -580,7 +673,13 @@ describe('utils', () => {
       const latestPushInfo = getLatestPushInfo('456', userActions);
 
       expect(
-        formatComments({ userActions, theCase, latestPushInfo, userProfiles: userProfilesMap })
+        formatComments({
+          userActions,
+          theCase,
+          latestPushInfo,
+          userProfiles: userProfilesMap,
+          spaceId: 'default',
+        })
       ).toEqual([]);
     });
 
@@ -602,11 +701,41 @@ describe('utils', () => {
           latestPushInfo,
           userProfiles: userProfilesMap,
           publicBaseUrl: 'https://example.com',
+          spaceId: 'default',
         })
       ).toEqual([
         {
           comment:
             'Elastic Alerts attached to the case: 1\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('adds a backlink with spaceId to the total alerts comment', () => {
+      const theCase = {
+        ...flattenCaseSavedObject({
+          savedObject: mockCases[0],
+        }),
+        comments: [commentAlert],
+        totalComments: 1,
+      };
+
+      const latestPushInfo = getLatestPushInfo('not-exists', userActions);
+
+      expect(
+        formatComments({
+          userActions,
+          theCase,
+          latestPushInfo,
+          userProfiles: userProfilesMap,
+          publicBaseUrl: 'https://example.com',
+          spaceId: 'test-space',
+        })
+      ).toEqual([
+        {
+          comment:
+            'Elastic Alerts attached to the case: 1\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -631,6 +760,7 @@ describe('utils', () => {
             created_by: { ...theCase.created_by, profile_uid: userProfiles[0].uid },
             updated_by: null,
           },
+          'default',
           userProfilesMap,
           publicBaseUrl
         )
@@ -640,8 +770,25 @@ describe('utils', () => {
     });
 
     it('adds the kibana information to description correctly without publicBaseUrl and userProfilesMap', () => {
-      expect(addKibanaInformationToDescription(theCase)).toBe(
+      expect(addKibanaInformationToDescription(theCase, 'default')).toBe(
         'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.'
+      );
+    });
+
+    it('adds the kibana information with spaceId to description correctly', () => {
+      expect(
+        addKibanaInformationToDescription(
+          {
+            ...theCase,
+            created_by: { ...theCase.created_by, profile_uid: userProfiles[0].uid },
+            updated_by: null,
+          },
+          'test-space',
+          userProfilesMap,
+          publicBaseUrl
+        )
+      ).toBe(
+        'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/s/test-space/app/security/cases/mock-id-1'
       );
     });
   });

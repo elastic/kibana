@@ -133,6 +133,7 @@ export class CasesClientFactory {
       externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
+      spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
     });
   }
 
