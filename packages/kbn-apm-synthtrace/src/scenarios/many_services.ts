@@ -53,8 +53,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
               })
               .instance(`instance-${index}-${instanceIndex}`)
               .defaults({
-                'agent.version':
-                  agentLanguageVersions[Math.floor(Math.random() * agentLanguageVersions.length)],
+                'agent.version': agentLanguageVersions[index % agentLanguageVersions.length],
                 'service.language.name': language,
               })
           );

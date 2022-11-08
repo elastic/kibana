@@ -100,6 +100,8 @@ function getTabs({
         query: {
           environment: defaultEnvironment,
           kuery: '',
+          agentLanguage: '',
+          serviceName: '',
         },
       }),
       append: <TechnicalPreviewBadge icon="beaker" />,

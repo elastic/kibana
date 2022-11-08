@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       APIClientRequestParamsOf<'GET /internal/apm/get_agents_per_service'>['params']
     >
   ) {
-    return await apmApiClient.monitorClusterAndIndicesUser({
+    return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/get_agents_per_service',
       params: {
         query: {
