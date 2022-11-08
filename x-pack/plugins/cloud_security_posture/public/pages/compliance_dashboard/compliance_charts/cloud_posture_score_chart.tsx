@@ -172,7 +172,7 @@ export const CloudPostureScoreChart = ({
           <PercentageInfo {...data} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexEnd" style={{ paddingRight: 16 }}>
+          <EuiFlexGroup justifyContent="flexEnd" style={{ paddingRight: 42 }}>
             <EuiLink color="text" css={{ display: 'flex' }}>
               <EuiText color="success" style={{ fontWeight: 500 }} size="s">
                 <CompactFormattedNumber number={285} abbreviateAbove={999} />
