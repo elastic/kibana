@@ -18,14 +18,13 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import { CaseStatuses } from '../../../common';
-import { userProfilesMap, userProfiles } from '../../containers/user_profiles/api.mock';
+import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 
 describe('useCasesColumns ', () => {
   let appMockRender: AppMockRenderer;
   const useCasesColumnsProps: GetCasesColumn = {
     filterStatus: CaseStatuses.open,
     userProfiles: userProfilesMap,
-    currentUserProfile: userProfiles[0],
     isSelectorView: false,
     showSolutionColumn: true,
   };
