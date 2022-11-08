@@ -81,6 +81,7 @@ export interface RuleExecutorServices<
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
+  getAlertUuid?: (alertId: string) => string | null;
 }
 
 export interface RuleExecutorOptions<
