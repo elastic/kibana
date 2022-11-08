@@ -141,6 +141,7 @@ interface QueryParams {
   hasNoReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
 }
+
 // A de-duplicated set of namespaces makes for a more efficient query.
 const uniqNamespaces = (namespacesToNormalize?: string[]) =>
   namespacesToNormalize ? Array.from(new Set(namespacesToNormalize)) : undefined;
