@@ -26,7 +26,6 @@ export interface AppPluginStartDependencies {
 
 export interface GuidedOnboardingApi {
   setup: (httpClient: HttpSetup, isCloudEnabled: boolean) => void;
-  fetchActiveGuideState$: () => Observable<GuideState | undefined>;
   fetchAllGuidesState: () => Promise<{ state: GuideState[] } | undefined>;
   updateGuideState: (
     newState: GuideState,
@@ -51,9 +50,8 @@ export interface GuidedOnboardingApi {
     integration?: string
   ) => Promise<{ state: GuideState } | undefined>;
   isGuidePanelOpen$: Observable<boolean>;
-  fetchPluginState: () => Promise<PluginState | undefined>;
   fetchPluginState$: () => Observable<PluginState | undefined>;
-  updatePluginState: (status: PluginStatus) => Promise<PluginState | undefined>;
+  updatePluginStatus: (status: PluginStatus) => Promise<PluginState | undefined>;
   skipGuidedOnboarding: () => Promise<PluginState | undefined>;
 }
 

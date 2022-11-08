@@ -9,14 +9,8 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import type { GuideState } from '@kbn/guided-onboarding';
-import {
-  guideStateSavedObjectsType,
-  pluginStateSavedObjectsType,
-  pluginStateSavedObjectsId,
-  PluginStateSO,
-} from '../saved_objects';
-import { registerGetPluginState } from './plugin_state_routes';
-import { calculateIsActivePeriod } from '../helpers';
+import { guideStateSavedObjectsType } from '../saved_objects';
+import { registerGetPluginState, registerPutPluginState } from './plugin_state_routes';
 import { API_BASE_PATH } from '../../common/constants';
 
 const findGuideById = async (savedObjectsClient: SavedObjectsClient, guideId: string) => {
@@ -171,41 +165,5 @@ export function defineRoutes(router: IRouter) {
 
   registerGetPluginState(router);
 
-  router.put(
-    {
-      path: `${API_BASE_PATH}/plugin_state`,
-      validate: {
-        body: schema.object({
-          status: schema.string(),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      const updatedPluginState = request.body;
-
-      const coreContext = await context.core;
-      const savedObjectsClient = coreContext.savedObjects.client as SavedObjectsClient;
-
-      const { attributes } = await savedObjectsClient.update<PluginStateSO>(
-        pluginStateSavedObjectsType,
-        pluginStateSavedObjectsId,
-        {
-          ...updatedPluginState,
-        },
-        {
-          // if there is no saved object yet, insert a new SO with the creation date
-          upsert: { ...updatedPluginState, creationDate: new Date() },
-        }
-      );
-
-      return response.ok({
-        body: {
-          pluginState: {
-            status: attributes.status,
-            isActivePeriod: calculateIsActivePeriod(attributes.creationDate),
-          },
-        },
-      });
-    }
-  );
+  registerPutPluginState(router);
 }

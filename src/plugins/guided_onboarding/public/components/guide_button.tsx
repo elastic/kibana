@@ -11,13 +11,12 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GuideState } from '@kbn/guided-onboarding';
 
-import { GuidedOnboardingPluginState } from '../types';
+import type { PluginState } from '../../common/types';
 import { getStepConfig } from '../services/helpers';
 import { GuideButtonPopover } from './guide_button_popover';
 
 interface GuideButtonProps {
-  pluginState: GuidedOnboardingPluginState | undefined;
-  guideState: GuideState | undefined;
+  pluginState: PluginState | undefined;
   toggleGuidePanel: () => void;
   isGuidePanelOpen: boolean;
   navigateToLandingPage: () => void;
@@ -43,7 +42,6 @@ const getStepNumber = (state: GuideState): number | undefined => {
 
 export const GuideButton = ({
   pluginState,
-  guideState,
   toggleGuidePanel,
   isGuidePanelOpen,
   navigateToLandingPage,
@@ -52,7 +50,7 @@ export const GuideButton = ({
   // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
 
   // if there is no active guide
-  if (!guideState || !guideState.isActive) {
+  if (!pluginState || !pluginState.activeGuide || !pluginState.activeGuide.isActive) {
     // if still active period and the user quit or skipped the guide,
     // display the button that redirects to the landing page
     if (
@@ -76,8 +74,10 @@ export const GuideButton = ({
 
     return null;
   }
-  const stepNumber = getStepNumber(guideState);
-  const stepReadyToComplete = guideState.steps.find((step) => step.status === 'ready_to_complete');
+  const stepNumber = getStepNumber(pluginState.activeGuide);
+  const stepReadyToComplete = pluginState.activeGuide.steps.find(
+    (step) => step.status === 'ready_to_complete'
+  );
   const button = (
     <EuiButton
       onClick={toggleGuidePanel}
@@ -99,7 +99,7 @@ export const GuideButton = ({
     </EuiButton>
   );
   if (stepReadyToComplete) {
-    const stepConfig = getStepConfig(guideState.guideId, stepReadyToComplete.id);
+    const stepConfig = getStepConfig(pluginState.activeGuide.guideId, stepReadyToComplete.id);
     // check if the stepConfig has manualCompletion info
     if (stepConfig && stepConfig.manualCompletion) {
       return (

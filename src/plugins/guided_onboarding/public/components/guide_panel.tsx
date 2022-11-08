@@ -32,13 +32,9 @@ import { ApplicationStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
 import { GuideId } from '@kbn/guided-onboarding';
-import type {
-  GuideConfig,
-  GuidedOnboardingApi,
-  GuidedOnboardingPluginState,
-  StepConfig,
-} from '../types';
+import type { GuideConfig, GuidedOnboardingApi, StepConfig } from '../types';
 
+import type { PluginState } from '../../common/types';
 import { getGuideConfig } from '../services/helpers';
 
 import { GuideStep } from './guide_panel_step';
@@ -81,10 +77,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const { euiTheme } = useEuiTheme();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isQuitGuideModalOpen, setIsQuitGuideModalOpen] = useState(false);
-  const [guideState, setGuideState] = useState<GuideState | undefined>(undefined);
-  const [pluginState, setPluginState] = useState<GuidedOnboardingPluginState | undefined>(
-    undefined
-  );
+  const [pluginState, setPluginState] = useState<PluginState | undefined>(undefined);
 
   const styles = getGuidePanelStyles(euiTheme);
 
@@ -93,15 +86,15 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   };
 
   const handleStepButtonClick = async (step: GuideStepStatus, stepConfig: StepConfig) => {
-    if (guideState) {
+    if (pluginState) {
       const { id, status } = step;
 
       if (status === 'ready_to_complete') {
-        return await api.completeGuideStep(guideState?.guideId, id);
+        return await api.completeGuideStep(pluginState!.activeGuide!.guideId!, id);
       }
 
       if (status === 'active' || status === 'in_progress') {
-        await api.startGuideStep(guideState!.guideId, id);
+        await api.startGuideStep(pluginState!.activeGuide!.guideId!, id);
 
         if (stepConfig.location) {
           await application.navigateToApp(stepConfig.location.appID, {
@@ -109,7 +102,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           });
 
           if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
-            await api.completeGuideStep(guideState.guideId, id);
+            await api.completeGuideStep(pluginState!.activeGuide!.guideId!, id);
           }
         }
       }
@@ -124,7 +117,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const completeGuide = async (
     completedGuideRedirectLocation: GuideConfig['completedGuideRedirectLocation']
   ) => {
-    await api.completeGuide(guideState!.guideId);
+    await api.completeGuide(pluginState!.activeGuide!.guideId!);
 
     if (completedGuideRedirectLocation) {
       const { appID, path } = completedGuideRedirectLocation;
@@ -144,8 +137,8 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   };
 
   useEffect(() => {
-    const subscription = api.fetchActiveGuideState$().subscribe((newGuideState) => {
-      setGuideState(newGuideState);
+    const subscription = api.fetchPluginState$().subscribe((newPluginState) => {
+      setPluginState(newPluginState);
     });
     return () => subscription.unsubscribe();
   }, [api]);
@@ -164,17 +157,16 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     return () => subscription.unsubscribe();
   }, [api]);
 
-  const guideConfig = getGuideConfig(guideState?.guideId)!;
+  const guideConfig = getGuideConfig(pluginState?.activeGuide?.guideId)!;
 
-  const stepsCompleted = getProgress(guideState);
-  const isGuideReadyToComplete = guideState?.status === 'ready_to_complete';
-  const telemetryGuideId = getTelemetryGuideId(guideState?.guideId);
+  const stepsCompleted = getProgress(pluginState?.activeGuide);
+  const isGuideReadyToComplete = pluginState?.activeGuide?.status === 'ready_to_complete';
+  const telemetryGuideId = getTelemetryGuideId(pluginState?.activeGuide?.guideId);
 
   return (
     <>
       <GuideButton
         pluginState={pluginState}
-        guideState={guideState}
         toggleGuidePanel={toggleGuide}
         isGuidePanelOpen={isGuideOpen}
         navigateToLandingPage={navigateToLandingPage}
@@ -279,7 +271,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
 
               {guideConfig?.steps.map((step, index) => {
                 const accordionId = htmlIdGenerator(`accordion${index}`)();
-                const stepState = guideState?.steps[index];
+                const stepState = pluginState?.activeGuide?.steps[index];
 
                 if (stepState) {
                   return (
@@ -382,7 +374,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
       {isQuitGuideModalOpen && (
         <QuitGuideModal
           closeModal={closeQuitGuideModal}
-          currentGuide={guideState!}
+          currentGuide={pluginState!.activeGuide!}
           telemetryGuideId={telemetryGuideId!}
         />
       )}
