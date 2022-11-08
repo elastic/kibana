@@ -16,7 +16,7 @@ function is_running {
 }
 
 function kill_all_by_name {
-  killall "$1" &>/dev/null || echo "node found process: $1"
+  killall "$1" &>/dev/null || echo "didnt find process: $1"
 }
 
 function check_running_processes {
