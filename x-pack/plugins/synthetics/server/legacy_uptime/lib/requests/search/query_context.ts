@@ -96,7 +96,7 @@ export class QueryContext {
   // which is a bit dicey since we may have data that predates this field existing,
   // or we may have data that has it, but a slow ingestion process.
   timespanClause() {
-    // We subtract 5m from the start to account for data that shows up late,
+    // We subtract 20m from the start to account for data that shows up late,
     // for instance, with a large value for the elasticsearch refresh interval
     // setting it lower can work very well on someone's laptop, but with real world
     // latencies and slowdowns that's dangerous. Making this value larger makes things
@@ -107,7 +107,7 @@ export class QueryContext {
       return {
         range: {
           'monitor.timespan': {
-            gte: 'now-5m',
+            gte: 'now-20m',
             lte: 'now',
           },
         },
