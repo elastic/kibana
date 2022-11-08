@@ -30,27 +30,7 @@ import { RowAction } from './row_action';
 
 const EmptyHeaderCellRender: ComponentType = () => null;
 
-export const transformControlColumns = ({
-  columnHeaders,
-  controlColumns,
-  data,
-  fieldBrowserOptions,
-  loadingEventIds,
-  onRowSelected,
-  onRuleChange,
-  selectedEventIds,
-  showCheckboxes,
-  tabType,
-  timelineId,
-  isSelectAllChecked,
-  onSelectPage,
-  browserFields,
-  pageSize,
-  sort,
-  theme,
-  setEventsLoading,
-  setEventsDeleted,
-}: {
+export interface TransformColumnsProps {
   columnHeaders: ColumnHeaderOptions[];
   controlColumns: ControlColumnProps[];
   data: TimelineItem[];
@@ -71,7 +51,29 @@ export const transformControlColumns = ({
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
-}): EuiDataGridControlColumn[] =>
+}
+
+export const transformControlColumns = ({
+  columnHeaders,
+  controlColumns,
+  data,
+  fieldBrowserOptions,
+  loadingEventIds,
+  onRowSelected,
+  onRuleChange,
+  selectedEventIds,
+  showCheckboxes,
+  tabType,
+  timelineId,
+  isSelectAllChecked,
+  onSelectPage,
+  browserFields,
+  pageSize,
+  sort,
+  theme,
+  setEventsLoading,
+  setEventsDeleted,
+}: TransformColumnsProps): EuiDataGridControlColumn[] =>
   controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
       id: `${columnId}`,

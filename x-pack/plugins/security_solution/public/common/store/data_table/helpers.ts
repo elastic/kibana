@@ -10,10 +10,7 @@ import { omit, union } from 'lodash/fp';
 import { isEmpty } from 'lodash';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { SessionViewConfig } from '../../../../common/types/session_view';
-import type {
-  DataExpandedDetail,
-  DataExpandedDetailType,
-} from '../../../../common/types/detail_panel';
+import type { ExpandedDetail, ExpandedDetailType } from '../../../../common/types/detail_panel';
 import type { ColumnHeaderOptions, SortColumnTable } from '../../../../common/types';
 import type { TableToggleDetailPanel } from './actions';
 import type { DataTablePersistInput, TableById } from './types';
@@ -444,7 +441,7 @@ export const setSelectedTableEvents = ({
   };
 };
 
-export const updateTableDetailsPanel = (action: TableToggleDetailPanel): DataExpandedDetail => {
+export const updateTableDetailsPanel = (action: TableToggleDetailPanel): ExpandedDetail => {
   const { tabType, id, ...expandedDetails } = action;
 
   const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
@@ -452,7 +449,7 @@ export const updateTableDetailsPanel = (action: TableToggleDetailPanel): DataExp
   const newExpandDetails = {
     params: expandedDetails.params ? { ...expandedDetails.params } : {},
     panelView: expandedDetails.panelView,
-  } as DataExpandedDetailType;
+  } as ExpandedDetailType;
   return {
     [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
       ? newExpandDetails

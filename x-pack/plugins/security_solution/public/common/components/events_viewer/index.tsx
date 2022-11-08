@@ -184,7 +184,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const editorActionsRef = useRef<FieldEditorActions>(null);
   useEffect(() => {
     if (!initialized) {
-      console.log('createDataTable');
       dispatch(
         dataTableActions.createDataTable({
           columns,

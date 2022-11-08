@@ -12,7 +12,7 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
   ControlColumnProps,
-  DataExpandedDetailType,
+  ExpandedDetailType,
 } from '../../../../../common/types';
 import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 
@@ -88,7 +88,7 @@ const RowActionComponent = ({
   );
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    const updatedExpandedDetail: DataExpandedDetailType = {
+    const updatedExpandedDetail: ExpandedDetailType = {
       panelView: 'eventDetail',
       params: {
         eventId: eventId ?? '',

@@ -60,10 +60,4 @@ export type ExpandedDetail = {
   [tab in TimelineTabs]?: ExpandedDetailType;
 };
 
-export type DataExpandedDetailType =
-  | ExpandedEventType
-  | ExpandedHostType
-  | ExpandedNetworkType
-  | ExpandedUserType;
-
-export type DataExpandedDetail = Partial<Record<string, DataExpandedDetailType>>;
+export type ExpandedDetail = Partial<Record<string, ExpandedDetailType>>;
