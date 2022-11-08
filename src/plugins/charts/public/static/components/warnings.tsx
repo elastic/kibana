@@ -25,7 +25,6 @@ export function Warnings({
   'data-test-subj': dataTestSubj = 'chart-inline-warning-button',
 }: {
   warnings: React.ReactNode[];
-  color?: string;
   compressed?: boolean;
   'data-test-subj'?: string;
 }) {
