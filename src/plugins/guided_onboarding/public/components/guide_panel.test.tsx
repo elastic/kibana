@@ -357,7 +357,7 @@ describe('Guided setup', () => {
         ).toBe(true);
       });
 
-      test('renders the step description as an unordered list if it is more than one sentence', async () => {
+      test('renders the step description list as an unordered list', async () => {
         const { find, component } = await setupComponentWithPluginStateMock(httpClient, {
           status: 'in_progress',
           isActivePeriod: true,
