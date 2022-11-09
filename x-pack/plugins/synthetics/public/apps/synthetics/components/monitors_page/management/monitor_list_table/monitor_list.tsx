@@ -16,7 +16,6 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ListFilters } from '../list_filters/list_filters';
 import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import { MonitorListPageState } from '../../../../state';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
@@ -117,8 +116,6 @@ export const MonitorList = ({
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-      <ListFilters />
-      <EuiSpacer />
       {recordRangeLabel}
       <EuiSpacer size="s" />
       <hr style={{ border: `1px solid ${euiTheme.colors.lightShade}` }} />

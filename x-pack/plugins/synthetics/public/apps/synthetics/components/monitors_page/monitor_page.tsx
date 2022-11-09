@@ -30,12 +30,13 @@ const MonitorPage: React.FC = () => {
 
   useMonitorListBreadcrumbs();
 
+  const monitorListProps = useMonitorList();
   const {
     syntheticsMonitors,
     loading: monitorsLoading,
     isDataQueried,
     absoluteTotal,
-  } = useMonitorList();
+  } = monitorListProps;
 
   const {
     error: enablementError,
@@ -86,7 +87,7 @@ const MonitorPage: React.FC = () => {
             <EuiSpacer size="s" />
           </>
         ) : null}
-        <MonitorListContainer isEnabled={isEnabled} />
+        <MonitorListContainer isEnabled={isEnabled} monitorListProps={monitorListProps} />
       </Loader>
       {showEmptyState && <EnablementEmptyState />}
     </>
