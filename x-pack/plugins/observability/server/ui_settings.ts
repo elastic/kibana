@@ -54,7 +54,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: false,
     description: i18n.translate(
-      'xpack.observability.enableNewSyntheticsViewExperimentDescription',
+      'xpack.observability.enableNewSyntheticsViewExperimentDescriptionBeta',
       {
         defaultMessage:
           '{technicalPreviewLabel} Enable new synthetic monitoring application in observability. Refresh the page to apply the setting.',
