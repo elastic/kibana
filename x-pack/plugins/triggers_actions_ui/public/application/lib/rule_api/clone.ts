@@ -18,7 +18,7 @@ export async function cloneRule({
   ruleId: string;
 }): Promise<Rule> {
   const res = await http.post<AsApiContract<Rule>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${ruleId}/_clone`
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}/_clone`
   );
   return transformRule(res);
 }
