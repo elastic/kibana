@@ -12,10 +12,10 @@ import {
   DefaultTransformManager,
   KibanaSavedObjectsSLORepository,
   GetSLO,
+  FindSLO,
   UpdateSLO,
   DefaultSLIClient,
 } from '../../services/slo';
-import { FindSLO } from '../../services/slo/find_slo';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
