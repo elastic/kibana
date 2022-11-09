@@ -254,8 +254,8 @@ export const getManagementFilteredLinks = async (
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
     const {
       canReadActionsLogManagement,
-      canIsolateHost: hasPlatinumLicense,
-      canUnIsolateHost: canIsolateHost,
+      canUnIsolateHost,
+      canIsolateHost,
       canAccessEndpointManagement,
     } = fleetAuthz
       ? calculateEndpointAuthz(
@@ -271,21 +271,20 @@ export const getManagementFilteredLinks = async (
       linksToExclude.push(SecurityPageName.responseActionsHistory);
     }
 
-    if (canIsolateHost && !hasPlatinumLicense) {
-      let shouldBeAbleToViewAndDeleteHIEArtifacts: boolean;
+    if (!canIsolateHost && canUnIsolateHost) {
+      let shouldBeAbleToDeleteEntries: boolean;
       try {
         const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
         // has an HIE entry and is a super user then set to TRUE
-        shouldBeAbleToViewAndDeleteHIEArtifacts =
-          hostExceptionCount !== 0 && canAccessEndpointManagement;
+        shouldBeAbleToDeleteEntries = hostExceptionCount !== 0 && canAccessEndpointManagement;
       } catch {
-        shouldBeAbleToViewAndDeleteHIEArtifacts = false;
+        shouldBeAbleToDeleteEntries = false;
       }
 
-      if (!shouldBeAbleToViewAndDeleteHIEArtifacts) {
+      if (!shouldBeAbleToDeleteEntries) {
         linksToExclude.push(SecurityPageName.hostIsolationExceptions);
       }
-    } else if (!hasPlatinumLicense) {
+    } else if (!canIsolateHost) {
       linksToExclude.push(SecurityPageName.hostIsolationExceptions);
     }
   } catch {
