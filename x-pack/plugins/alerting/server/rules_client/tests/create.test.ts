@@ -2683,7 +2683,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot mix and match per-action frequency params when notify_when or throttle are globally defined: default, default"`
+      `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default, default"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2713,7 +2713,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data: data2 })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot mix and match per-action frequency params when notify_when or throttle are globally defined: default"`
+      `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
