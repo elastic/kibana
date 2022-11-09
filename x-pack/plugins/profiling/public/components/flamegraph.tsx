@@ -9,7 +9,7 @@ import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings } from '@e
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiPanel, EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTextColor,
@@ -66,13 +66,13 @@ function TooltipRow({
   }
 
   return (
-    <EuiFlexItem style={{ width: 320, overflowWrap: 'anywhere' }}>
+    <EuiFlexItem style={{ width: 256, overflowWrap: 'anywhere' }}>
       <EuiFlexGroup direction="row" gutterSize="xs">
-        <EuiFlexItem grow={false} style={{ fontWeight: 'bold' }}>
-          {label}
-        </EuiFlexItem>
         <EuiFlexItem style={{}}>
           <EuiText size="xs">
+            <strong>{label}</strong>
+          </EuiText>
+          <EuiText size="xs" style={{ marginLeft: '20px' }}>
             {comparison !== undefined
               ? i18n.translate('xpack.profiling.flameGraphTooltip.valueLabel', {
                   defaultMessage: `{value} vs {comparison}`,
@@ -82,12 +82,11 @@ function TooltipRow({
                   },
                 })
               : valueLabel}
-          </EuiText>
-          <EuiText size="xs">
-            <EuiTextColor color={color}>{diffLabel}</EuiTextColor>
+            <EuiTextColor color={color}> {diffLabel}</EuiTextColor>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
     </EuiFlexItem>
   );
 }
@@ -132,7 +131,7 @@ function FlameGraphTooltip({
             ) : (
               <TooltipRow
                 label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
-                  defaultMessage: `Inclusive CPU:`,
+                  defaultMessage: `CPU incl. subfunctions`,
                 })}
                 value={countInclusive / totalSamples}
                 comparison={
@@ -149,7 +148,7 @@ function FlameGraphTooltip({
             ) : (
               <TooltipRow
                 label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
-                  defaultMessage: `Exclusive CPU:`,
+                  defaultMessage: `CPU`,
                 })}
                 value={countExclusive / totalSamples}
                 comparison={
@@ -163,7 +162,7 @@ function FlameGraphTooltip({
             )}
             <TooltipRow
               label={i18n.translate('xpack.profiling.flameGraphTooltip.samplesLabel', {
-                defaultMessage: `Samples:`,
+                defaultMessage: `Samples`,
               })}
               value={countInclusive}
               comparison={comparisonCountInclusive}
