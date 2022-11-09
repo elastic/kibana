@@ -70,7 +70,6 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
       onClearSavedQuery={onClearSavedQuery}
       showSaveQuery
       showQueryInput
-      // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
       onFiltersUpdated={onFilterChange}
     />
   );

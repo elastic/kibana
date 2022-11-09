@@ -11,11 +11,10 @@ import ReactDOM from 'react-dom';
 import { I18nStart } from '@kbn/core/public';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ISearchSource } from '@kbn/data-plugin/common';
+import type { DataView, ISearchSource } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { updateSearchSource } from '../../utils/update_search_source';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -27,16 +26,27 @@ interface AlertsPopoverProps {
   anchorElement: HTMLElement;
   searchSource: ISearchSource;
   savedQueryId?: string;
+  adHocDataViews: DataView[];
+  I18nContext: I18nStart['Context'];
+  services: DiscoverServices;
+  updateDataViewList: (dataViews: DataView[]) => Promise<void>;
+}
+
+interface EsQueryAlertMetaData {
+  isManagementPage?: boolean;
+  adHocDataViewList: DataView[];
 }
 
 export function AlertsPopover({
   searchSource,
   anchorElement,
   savedQueryId,
+  adHocDataViews,
+  services,
   onClose: originalOnClose,
+  updateDataViewList,
 }: AlertsPopoverProps) {
   const dataView = searchSource.getField('index')!;
-  const services = useDiscoverServices();
   const { triggersActionsUi } = services;
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState(false);
   const onClose = useCallback(() => {
@@ -63,20 +73,45 @@ export function AlertsPopover({
     };
   }, [savedQueryId, searchSource, services]);
 
+  const discoverMetadata: EsQueryAlertMetaData = useMemo(
+    () => ({
+      isManagementPage: false,
+      adHocDataViewList: adHocDataViews,
+    }),
+    [adHocDataViews]
+  );
+
   const SearchThresholdAlertFlyout = useMemo(() => {
     if (!alertFlyoutVisible) {
       return;
     }
+
+    const onFinishFlyoutInteraction = (metadata: EsQueryAlertMetaData) => {
+      updateDataViewList(metadata.adHocDataViewList);
+    };
+
     return triggersActionsUi?.getAddAlertFlyout({
+      metadata: discoverMetadata,
       consumer: 'discover',
-      onClose,
+      onClose: (_, metadata) => {
+        onFinishFlyoutInteraction(metadata as EsQueryAlertMetaData);
+        onClose();
+      },
+      onSave: async (metadata) => {
+        onFinishFlyoutInteraction(metadata as EsQueryAlertMetaData);
+      },
       canChangeTrigger: false,
       ruleTypeId: ALERT_TYPE_ID,
-      initialValues: {
-        params: getParams(),
-      },
+      initialValues: { params: getParams() },
     });
-  }, [getParams, onClose, triggersActionsUi, alertFlyoutVisible]);
+  }, [
+    alertFlyoutVisible,
+    triggersActionsUi,
+    discoverMetadata,
+    getParams,
+    updateDataViewList,
+    onClose,
+  ]);
 
   const hasTimeFieldName = dataView.timeFieldName;
   const panels = [
@@ -145,13 +180,17 @@ export function openAlertsPopover({
   anchorElement,
   searchSource,
   services,
+  adHocDataViews,
   savedQueryId,
+  updateDataViewList,
 }: {
   I18nContext: I18nStart['Context'];
   anchorElement: HTMLElement;
   searchSource: ISearchSource;
   services: DiscoverServices;
+  adHocDataViews: DataView[];
   savedQueryId?: string;
+  updateDataViewList: (dataViews: DataView[]) => Promise<void>;
 }) {
   if (isOpen) {
     closeAlertsPopover();
@@ -169,6 +208,10 @@ export function openAlertsPopover({
           anchorElement={anchorElement}
           searchSource={searchSource}
           savedQueryId={savedQueryId}
+          adHocDataViews={adHocDataViews}
+          I18nContext={I18nContext}
+          services={services}
+          updateDataViewList={updateDataViewList}
         />
       </KibanaContextProvider>
     </I18nContext>
