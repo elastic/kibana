@@ -23,16 +23,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
-  Filter,
-  FieldFilter,
-  buildFilter,
+  BooleanRelation,
+  buildCombinedFilter,
   buildCustomFilter,
+  buildEmptyFilter,
+  buildFilter,
   cleanFilter,
+  FieldFilter,
+  Filter,
   getFilterParams,
   isCombinedFilter,
-  buildCombinedFilter,
-  BooleanRelation,
-  buildEmptyFilter,
 } from '@kbn/es-query';
 import React, { Component } from 'react';
 import { XJsonLang } from '@kbn/monaco';
@@ -295,7 +295,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
           <FilterBadgeGroup
             filters={filters}
             dataViews={this.props.indexPatterns}
-            isRootLevel={true}
+            booleanRelation={BooleanRelation.AND}
           />
         </EuiFormRow>
       </>

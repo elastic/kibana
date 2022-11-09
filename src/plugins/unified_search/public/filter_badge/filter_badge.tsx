@@ -14,8 +14,7 @@ import type { Filter } from '@kbn/es-query';
 import { isCombinedFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FilterBadgeGroup } from './filter_badge_group';
-import { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
-import { getBooleanRelationType } from '../utils';
+import type { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
 
 export interface FilterBadgeProps {
   filter: Filter;
@@ -35,9 +34,7 @@ function FilterBadge({
 }: FilterBadgeProps) {
   const { euiTheme } = useEuiTheme();
 
-  const rootLevelConditionType = getBooleanRelationType(filter);
-
-  const badgePading = useMemo(
+  const badgePadding = useMemo(
     () => css`
       padding: calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});
     `,
@@ -73,7 +70,7 @@ function FilterBadge({
   };
 
   return (
-    <EuiBadge className={badgePading} color="hollow" iconType="cross" iconSide="right" {...rest}>
+    <EuiBadge className={badgePadding} color="hollow" iconType="cross" iconSide="right" {...rest}>
       {!hideAlias && filter.meta.alias !== null ? (
         <>
           <EuiIcon type="save" size="s" />
@@ -88,11 +85,8 @@ function FilterBadge({
           {isCombinedFilter(filter) ? prefix : null}
           <FilterBadgeGroup
             filters={[filter]}
-            booleanRelation={rootLevelConditionType}
-            isRootLevel={true}
             dataViews={dataViews}
             filterLabelStatus={valueLabel}
-            isRootCombinedFilterNegate={filter.meta.negate}
           />
         </div>
       )}

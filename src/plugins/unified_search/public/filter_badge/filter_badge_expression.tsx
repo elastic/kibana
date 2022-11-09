@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { BooleanRelation } from '@kbn/es-query';
 import { EuiTextColor, useEuiPaddingCSS, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FilterBadgeGroup } from './filter_badge_group';
@@ -20,11 +19,9 @@ import { FilterBadgeInvalidPlaceholder } from './filter_badge_invalid';
 
 export interface FilterBadgeExpressionProps {
   filter: Filter;
-  booleanRelation?: BooleanRelation;
-  isRootLevel?: boolean;
+  shouldShowBrackets?: boolean;
   dataViews: DataView[];
   filterLabelStatus?: string;
-  isRootCombinedFilterNegate?: boolean;
 }
 
 interface FilterBadgeContentProps {
@@ -48,20 +45,17 @@ const FilterBadgeContent = ({ filter, dataViews, filterLabelStatus }: FilterBadg
 
 export function FilterExpressionBadge({
   filter,
-  isRootLevel,
+  shouldShowBrackets,
   dataViews,
   filterLabelStatus,
-  isRootCombinedFilterNegate,
 }: FilterBadgeExpressionProps) {
   const conditionalOperationType = getBooleanRelationType(filter);
-  const shouldShowBrakets = isRootCombinedFilterNegate || !isRootLevel;
-
   const paddingLeft = useEuiPaddingCSS('left').xs;
   const paddingRight = useEuiPaddingCSS('right').xs;
 
   const { euiTheme } = useEuiTheme();
 
-  const bracketСolor = useMemo(
+  const bracketColor = useMemo(
     () => css`
       color: ${euiTheme.colors.primary};
     `,
@@ -70,21 +64,20 @@ export function FilterExpressionBadge({
 
   return conditionalOperationType ? (
     <>
-      {shouldShowBrakets ? (
+      {shouldShowBrackets ? (
         <span css={paddingLeft}>
-          <EuiTextColor className={bracketСolor}>(</EuiTextColor>
+          <EuiTextColor className={bracketColor}>(</EuiTextColor>
         </span>
       ) : null}
       <FilterBadgeGroup
         filters={filter.meta?.params}
-        booleanRelation={conditionalOperationType}
         dataViews={dataViews}
         filterLabelStatus={filterLabelStatus}
-        isRootCombinedFilterNegate={isRootCombinedFilterNegate}
+        booleanRelation={getBooleanRelationType(filter)}
       />
-      {shouldShowBrakets ? (
+      {shouldShowBrackets ? (
         <span css={paddingRight}>
-          <EuiTextColor className={bracketСolor}>)</EuiTextColor>
+          <EuiTextColor className={bracketColor}>)</EuiTextColor>
         </span>
       ) : null}
     </>

@@ -16,45 +16,40 @@ import { FilterExpressionBadge } from './filter_badge_expression';
 
 export interface FilterBadgeGroupProps {
   filters: Filter[];
-  booleanRelation?: BooleanRelation;
-  isRootLevel?: boolean;
   dataViews: DataView[];
   filterLabelStatus?: string;
-  isRootCombinedFilterNegate?: boolean;
+  booleanRelation?: BooleanRelation;
 }
 
 const BooleanRelationDelimiter = ({ conditional }: { conditional: BooleanRelation }) => {
   const { euiTheme } = useEuiTheme();
-  const bracketСolor = useMemo(
+  const bracketColor = useMemo(
     () => css`
       color: ${euiTheme.colors.primary};
     `,
     [euiTheme.colors.primary]
   );
 
-  return <EuiTextColor className={bracketСolor}>{conditional}</EuiTextColor>;
+  return <EuiTextColor className={bracketColor}>{conditional}</EuiTextColor>;
 };
 
 export function FilterBadgeGroup({
   filters,
-  booleanRelation,
-  isRootLevel,
   dataViews,
   filterLabelStatus,
-  isRootCombinedFilterNegate,
+  booleanRelation,
 }: FilterBadgeGroupProps) {
   return (
     <FilterBadgeErrorBoundary>
-      {filters.map((filter, index, acc) => (
+      {filters.map((filter, index, arrayRef) => (
         <>
           <FilterExpressionBadge
             filter={filter}
-            isRootLevel={isRootLevel}
+            shouldShowBrackets={arrayRef.length > 1}
             dataViews={dataViews}
             filterLabelStatus={filterLabelStatus}
-            isRootCombinedFilterNegate={isRootCombinedFilterNegate}
           />
-          {booleanRelation && index + 1 < acc.length ? (
+          {booleanRelation && index + 1 < arrayRef.length ? (
             <BooleanRelationDelimiter conditional={booleanRelation} />
           ) : null}
         </>
