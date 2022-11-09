@@ -9,6 +9,7 @@
 import React, { useMemo } from 'react';
 import type { Filter, BooleanRelation } from '@kbn/es-query';
 import { EuiTextColor, useEuiTheme } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { css } from '@emotion/css';
 import { FilterExpressionBadge } from './filter_badge_expression';
 
@@ -16,6 +17,9 @@ export interface FilterBadgeGroupProps {
   filters: Filter[];
   booleanRelation?: BooleanRelation;
   isRootLevel?: boolean;
+  dataViews: DataView[];
+  filterLabelStatus?: string;
+  isRootCombinedFilterNegate?: boolean;
 }
 
 const BooleanRelationDelimiter = ({ conditional }: { conditional: BooleanRelation }) => {
@@ -30,12 +34,25 @@ const BooleanRelationDelimiter = ({ conditional }: { conditional: BooleanRelatio
   return <EuiTextColor className={bracketСolor}>{conditional}</EuiTextColor>;
 };
 
-export function FilterBadgeGroup({ filters, booleanRelation, isRootLevel }: FilterBadgeGroupProps) {
+export function FilterBadgeGroup({
+  filters,
+  booleanRelation,
+  isRootLevel,
+  dataViews,
+  filterLabelStatus,
+  isRootCombinedFilterNegate,
+}: FilterBadgeGroupProps) {
   return (
     <>
       {filters.map((filter, index, acc) => (
         <>
-          <FilterExpressionBadge filter={filter} isRootLevel={isRootLevel} />
+          <FilterExpressionBadge
+            filter={filter}
+            isRootLevel={isRootLevel}
+            dataViews={dataViews}
+            filterLabelStatus={filterLabelStatus}
+            isRootCombinedFilterNegate={isRootCombinedFilterNegate}
+          />
           {booleanRelation && index + 1 < acc.length ? (
             <BooleanRelationDelimiter conditional={booleanRelation} />
           ) : null}
@@ -44,3 +61,7 @@ export function FilterBadgeGroup({ filters, booleanRelation, isRootLevel }: Filt
     </>
   );
 }
+
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FilterBadgeGroup;

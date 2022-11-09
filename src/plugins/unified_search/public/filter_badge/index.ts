@@ -23,14 +23,14 @@ export const FilterBadgeLazy = React.lazy(() => import('./filter_badge'));
 export const FilterBadge = withSuspense(FilterBadgeLazy);
 
 /**
- * The Lazily-loaded `FilterContent` component.  Consumers should use `React.Suspense` or
+ * The Lazily-loaded `FilterBadgeGroup` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */
-export const FilterContentLazy = React.lazy(() => import('./filter_content/filter_content'));
+export const FilterBadgeGroupLazy = React.lazy(() => import('./filter_badge_group'));
 
 /**
- * A `FilterContent` component that is wrapped by the `withSuspense` HOC. This component can
- * be used directly by consumers and will load the `FilterContentLazy` component lazily with
+ * A `FilterBadgeGroup` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `FilterBadgeGroupLazy` component lazily with
  * a predefined fallback and error boundary.
  */
-export const FilterContent = withSuspense(FilterContentLazy);
+export const FilterBadgeGroup = withSuspense(FilterBadgeGroupLazy);

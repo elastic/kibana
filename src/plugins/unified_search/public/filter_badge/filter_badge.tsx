@@ -15,7 +15,6 @@ import { isCombinedFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
-import { FilterBadgeContextType } from './filter_badge_context';
 import { getBooleanRelationType } from '../utils';
 
 export interface FilterBadgeProps {
@@ -85,22 +84,17 @@ function FilterBadge({
           </span>
         </>
       ) : (
-        <FilterBadgeContextType.Provider
-          value={{
-            dataViews,
-            filterLabelStatus: valueLabel,
-            isRootCombinedFilterNegate: filter.meta.negate,
-          }}
-        >
-          <div>
-            {isCombinedFilter(filter) ? prefix : null}
-            <FilterBadgeGroup
-              filters={[filter]}
-              booleanRelation={rootLevelConditionType}
-              isRootLevel={true}
-            />
-          </div>
-        </FilterBadgeContextType.Provider>
+        <div>
+          {isCombinedFilter(filter) ? prefix : null}
+          <FilterBadgeGroup
+            filters={[filter]}
+            booleanRelation={rootLevelConditionType}
+            isRootLevel={true}
+            dataViews={dataViews}
+            filterLabelStatus={valueLabel}
+            isRootCombinedFilterNegate={filter.meta.negate}
+          />
+        </div>
       )}
     </EuiBadge>
   );

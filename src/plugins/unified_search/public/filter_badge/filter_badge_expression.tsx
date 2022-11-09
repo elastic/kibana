@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -14,20 +14,22 @@ import type { BooleanRelation } from '@kbn/es-query';
 import { EuiTextColor, useEuiPaddingCSS, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FilterBadgeGroup } from './filter_badge_group';
-import { FilterContent } from './filter_content/filter_content';
+import { FilterContent } from './filter_content';
 import { getBooleanRelationType } from '../utils';
-import { FilterBadgeContextType } from './filter_badge_context';
 
 export interface FilterBadgeExpressionProps {
   filter: Filter;
   booleanRelation?: BooleanRelation;
   isRootLevel?: boolean;
+  dataViews: DataView[];
+  filterLabelStatus?: string;
+  isRootCombinedFilterNegate?: boolean;
 }
 
 interface FilterBadgeContentProps {
   filter: Filter;
   dataViews: DataView[];
-  filterLabelStatus: string;
+  filterLabelStatus?: string;
 }
 
 const FilterBadgeContent = ({ filter, dataViews, filterLabelStatus }: FilterBadgeContentProps) => {
@@ -38,9 +40,13 @@ const FilterBadgeContent = ({ filter, dataViews, filterLabelStatus }: FilterBadg
   return <FilterContent filter={filter} valueLabel={valueLabel} fieldLabel={fieldLabel} />;
 };
 
-export function FilterExpressionBadge({ filter, isRootLevel }: FilterBadgeExpressionProps) {
-  const { dataViews, filterLabelStatus, isRootCombinedFilterNegate } =
-    useContext(FilterBadgeContextType);
+export function FilterExpressionBadge({
+  filter,
+  isRootLevel,
+  dataViews,
+  filterLabelStatus,
+  isRootCombinedFilterNegate,
+}: FilterBadgeExpressionProps) {
   const conditionalOperationType = getBooleanRelationType(filter);
   const shouldShowBrakets = isRootCombinedFilterNegate || !isRootLevel;
 
@@ -63,7 +69,13 @@ export function FilterExpressionBadge({ filter, isRootLevel }: FilterBadgeExpres
           <EuiTextColor className={bracketСolor}>(</EuiTextColor>
         </span>
       ) : null}
-      <FilterBadgeGroup filters={filter.meta?.params} booleanRelation={conditionalOperationType} />
+      <FilterBadgeGroup
+        filters={filter.meta?.params}
+        booleanRelation={conditionalOperationType}
+        dataViews={dataViews}
+        filterLabelStatus={filterLabelStatus}
+        isRootCombinedFilterNegate={isRootCombinedFilterNegate}
+      />
       {shouldShowBrakets ? (
         <span css={paddingRight}>
           <EuiTextColor className={bracketСolor}>)</EuiTextColor>
