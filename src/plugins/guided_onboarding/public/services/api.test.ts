@@ -147,7 +147,6 @@ describe('GuidedOnboarding ApiService', () => {
     it('reactivates a guide that has already been started', async () => {
       await apiService.activateGuide(testGuide, testGuideStep1ActiveState);
 
-      // one call to update the guide state, because the plugin state is already in progress
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
@@ -204,7 +203,7 @@ describe('GuidedOnboarding ApiService', () => {
 
     it('the completed state is being broadcast after the update', async () => {
       httpClient.put.mockResolvedValueOnce({
-        // the put API should return the correct updated plugin state
+        // mock the put api response
         pluginState: { status: 'complete', isActivePeriod: true },
       });
       await apiService.completeGuide(testGuide);
