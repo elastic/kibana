@@ -88,7 +88,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
           description={
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.startDeployment.priorityHelp"
-              defaultMessage="Blah blah blah"
+              defaultMessage="Select low priority for demonstrations where each model will be very lightly used."
             />
           }
         >
