@@ -703,7 +703,6 @@ const createNewTermsTimeline = async (
   }
 };
 
-
 const getSuppressedAlertData = (ecsData: Ecs | Ecs[]) => {
   const normalizedEcsData: Ecs = Array.isArray(ecsData) ? ecsData[0] : ecsData;
   const from = getField(normalizedEcsData, ALERT_SUPPRESSION_START);
