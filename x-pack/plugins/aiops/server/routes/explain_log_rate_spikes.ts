@@ -286,10 +286,17 @@ export const defineExplainLogRateSpikesRoute = (
 
           logDebugMessage('Fetch p-values.');
 
+          let debugCount = 0;
+
           const pValuesQueue = queue(async function (fieldCandidate: string) {
             loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
 
             let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
+
+            debugCount++;
+            if (debugCount === 15 && request.body.overrides === undefined) {
+              throw new Error('OH GOD');
+            }
 
             try {
               pValues = await fetchChangePointPValues(
@@ -432,9 +439,9 @@ export const defineExplainLogRateSpikesRoute = (
               })
             );
 
-            // if (request.body.overrides === undefined) {
-            //   throw new Error('simulate error');
-            // }
+            if (request.body.overrides === undefined) {
+              throw new Error('simulate error');
+            }
 
             // To optimize the `frequent_items` query, we identify duplicate change points by count attributes.
             // Note this is a compromise and not 100% accurate because there could be change points that
