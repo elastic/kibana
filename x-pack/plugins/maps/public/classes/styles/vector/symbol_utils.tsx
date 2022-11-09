@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import xml2js from 'xml2js';
 import uuid from 'uuid/v4';
 import { Canvg } from 'canvg';
+// @ts-expect-error
 import calcSDF from 'bitmap-sdf';
 import {
   CUSTOM_ICON_SIZE,
@@ -41,7 +42,17 @@ export const SYMBOL_OPTIONS = Object.entries(MAKI_ICONS).map(([value, { svg, lab
  * @param {number} [radius=0.25] - size of SDF around the cutoff as percent of output icon size
  * @return {ImageData} image that can be added to a MapLibre map with option `{ sdf: true }`
  */
-export async function createSdfIcon({ svg, renderSize = 64, cutoff = 0.25, radius = 0.25 }) {
+export async function createSdfIcon({
+  svg,
+  renderSize = 64,
+  cutoff = 0.25,
+  radius = 0.25,
+}: {
+  svg: string;
+  renderSize?: number;
+  cutoff?: number;
+  radius?: number;
+}): Promise<ImageData | null> {
   const buffer = 3;
   const size = renderSize + buffer * 4;
   const svgCanvas = document.createElement('canvas');
@@ -66,6 +77,9 @@ export async function createSdfIcon({ svg, renderSize = 64, cutoff = 0.25, radiu
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return null;
+  }
 
   const imageData = ctx.createImageData(size, size);
   for (let i = 0; i < size; i++) {
@@ -79,11 +93,11 @@ export async function createSdfIcon({ svg, renderSize = 64, cutoff = 0.25, radiu
   return imageData;
 }
 
-export function getMakiSymbol(symbolId) {
+export function getMakiSymbol(symbolId: string) {
   return MAKI_ICONS?.[symbolId];
 }
 
-export function getMakiSymbolAnchor(symbolId) {
+export function getMakiSymbolAnchor(symbolId: string) {
   switch (symbolId) {
     case 'embassy':
     case 'marker':
@@ -98,14 +112,14 @@ export function getCustomIconId() {
   return `${CUSTOM_ICON_PREFIX_SDF}${uuid()}`;
 }
 
-export function buildSrcUrl(svgString) {
+export function buildSrcUrl(svgString: string) {
   const domUrl = window.URL || window.webkitURL || window;
   const svg = new Blob([svgString], { type: 'image/svg+xml' });
   return domUrl.createObjectURL(svg);
 }
 
-export async function styleSvg(svgString, fill, stroke) {
-  const svgXml = await parseXmlString(svgString);
+export async function styleSvg(svgString: string, fill?: string, stroke?: string) {
+  const svgXml = (await parseXmlString(svgString)) as { svg: any };
 
   // Elements nested under svg root may define style attribute
   // Wildcard descendent selector provides more specificity to ensure root svg style attribute is applied instead of children style attributes
@@ -139,7 +153,7 @@ const ICON_PALETTES = [
 ];
 
 // PREFERRED_ICONS is used to provide less random default icon values for forms that need default icon values
-export const PREFERRED_ICONS = [];
+export const PREFERRED_ICONS: string[] = [];
 ICON_PALETTES.forEach((iconPalette) => {
   iconPalette.icons.forEach((icon) => {
     if (!PREFERRED_ICONS.includes(icon)) {
@@ -152,7 +166,7 @@ export function getIconPaletteOptions() {
   const isDarkMode = getIsDarkMode();
   return ICON_PALETTES.map(({ id, icons }) => {
     const iconsDisplay = icons.map((iconId) => {
-      const style = {
+      const style: CSSProperties = {
         width: '10%',
         position: 'relative',
         height: '100%',
@@ -177,7 +191,7 @@ export function getIconPaletteOptions() {
   });
 }
 
-export function getIconPalette(paletteId) {
+export function getIconPalette(paletteId: string | null) {
   const palette = ICON_PALETTES.find(({ id }) => id === paletteId);
   return palette ? [...palette.icons] : [];
 }

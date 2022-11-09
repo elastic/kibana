@@ -6,20 +6,21 @@
  */
 
 import _ from 'lodash';
+import { FeatureCollection } from 'geojson';
 import { extractPropertiesFromBucket } from '../../../../common/elasticsearch_util';
 
 const LAT_INDEX = 0;
 const LON_INDEX = 1;
 const PEW_PEW_BUCKET_KEYS_TO_IGNORE = ['key', 'sourceCentroid'];
 
-function parsePointFromKey(key) {
+function parsePointFromKey(key: string) {
   const split = key.split(',');
   const lat = parseFloat(split[LAT_INDEX]);
   const lon = parseFloat(split[LON_INDEX]);
   return [lon, lat];
 }
 
-export function convertToLines(esResponse) {
+export function convertToLines(esResponse: any) {
   const lineFeatures = [];
 
   const destBuckets = _.get(esResponse, 'aggregations.destSplit.buckets', []);
@@ -46,6 +47,6 @@ export function convertToLines(esResponse) {
     featureCollection: {
       type: 'FeatureCollection',
       features: lineFeatures,
-    },
+    } as FeatureCollection,
   };
 }

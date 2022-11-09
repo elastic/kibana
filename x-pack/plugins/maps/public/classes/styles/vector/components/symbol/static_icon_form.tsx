@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
+import { CustomIcon, IconStaticOptions } from '../../../../../../common/descriptor_types';
 import { IconSelect } from './icon_select';
+import { StaticIconProperty } from '../../properties/static_icon_property';
+
+interface Props {
+  customIcons: CustomIcon[];
+  onCustomIconsChange: (customIcons: CustomIcon[]) => void;
+  onStaticStyleChange: (propertyName: VECTOR_STYLES, options: IconStaticOptions) => void;
+  staticDynamicSelect?: ReactNode;
+  styleProperty: StaticIconProperty;
+}
 
 export function StaticIconForm({
   onStaticStyleChange,
@@ -15,8 +26,8 @@ export function StaticIconForm({
   customIcons,
   staticDynamicSelect,
   styleProperty,
-}) {
-  const onChange = ({ selectedIconId }) => {
+}: Props) {
+  const onChange = ({ selectedIconId }: { selectedIconId: string }) => {
     onStaticStyleChange(styleProperty.getStyleName(), {
       value: selectedIconId,
     });
