@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { prettyDOM, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
@@ -262,8 +262,6 @@ describe('APIKeysGridPage', () => {
       );
 
       expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
-      console.log(prettyDOM());
-
       expect(queryByText('Create API key')).toBeNull();
       expect(queryAllByText('Delete').length).toBe(0);
     });
