@@ -131,7 +131,7 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     const buckets = args.bucket ? [args.bucket] : [];
     const visConfig: PartitionVisParams = {
       ...args,
-      metricsToLabels: JSON.parse(args.metricsToLabels),
+      metricsToLabels: args.metricsToLabels ? JSON.parse(args.metricsToLabels) : {},
       ariaLabel:
         args.ariaLabel ??
         (handlers.variables?.embeddableTitle as string) ??

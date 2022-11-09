@@ -156,7 +156,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
 
     const visConfig: PartitionVisParams = {
       ...args,
-      metricsToLabels: JSON.parse(args.metricsToLabels),
+      metricsToLabels: args.metricsToLabels ? JSON.parse(args.metricsToLabels) : {},
       ariaLabel:
         args.ariaLabel ??
         (handlers.variables?.embeddableTitle as string) ??

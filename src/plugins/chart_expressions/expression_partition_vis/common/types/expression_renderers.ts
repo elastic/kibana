@@ -59,7 +59,7 @@ interface VisCommonParams {
 
 interface VisCommonConfig extends VisCommonParams {
   metrics: Array<ExpressionValueVisDimension | string>;
-  metricsToLabels: string;
+  metricsToLabels?: string;
   buckets?: Array<ExpressionValueVisDimension | string>;
   splitColumn?: Array<ExpressionValueVisDimension | string>;
   splitRow?: Array<ExpressionValueVisDimension | string>;
