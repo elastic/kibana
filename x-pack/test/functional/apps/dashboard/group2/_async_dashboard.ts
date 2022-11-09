@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe.only('sample data dashboard', function describeIndexTests() {
+  describe('sample data dashboard', function describeIndexTests() {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await PageObjects.common.sleep(5000);
