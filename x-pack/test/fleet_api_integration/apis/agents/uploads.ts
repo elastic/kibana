@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -17,24 +17,44 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
 
+  const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
+
   describe('fleet_uploads', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    beforeEach(async () => {
+
+    before(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
 
       await esClient.create({
-        index: '.fleet-actions',
-        id: 'action1',
+        index: AGENT_ACTIONS_INDEX,
+        id: new Date().toISOString(),
         refresh: true,
         body: {
           type: 'REQUEST_DIAGNOSTICS',
           action_id: 'action1',
           agents: ['agent1'],
-          '@timestamp': '2022-10-07T12:00:00.000Z',
+          '@timestamp': '2022-10-07T11:00:00.000Z',
         },
       });
+
+      await esClient.create(
+        {
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          id: new Date().toISOString(),
+          refresh: true,
+          body: {
+            action_id: 'action1',
+            agent_id: 'agent1',
+            '@timestamp': '2022-10-07T12:00:00.000Z',
+            data: {
+              file_id: 'file1',
+            },
+          },
+        },
+        ES_INDEX_OPTIONS
+      );
 
       await esClient.update({
         index: '.fleet-agent-files',
@@ -59,7 +79,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
-    afterEach(async () => {
+    after(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
