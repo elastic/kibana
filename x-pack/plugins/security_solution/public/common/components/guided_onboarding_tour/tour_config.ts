@@ -56,8 +56,8 @@ const defaultConfig = {
   initialFocus: `[tour-step="nextButton"]`,
 };
 
-export const getTourAnchor = (step: number, stepId: SecurityStepId) =>
-  `tourStepAnchor-${stepId}-${step}`;
+export const getTourAnchor = (step: number, tourId: SecurityStepId) =>
+  `tourStepAnchor-${tourId}-${step}`;
 
 const alertsCasesConfig: StepConfig[] = [
   {

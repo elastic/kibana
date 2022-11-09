@@ -262,7 +262,7 @@ export const TakeActionDropdown = React.memo(
         <GuidedOnboardingTourStep
           onClick={handleAddToNewCaseClick}
           step={AlertsCasesTourSteps.addAlertToCase}
-          stepId={SecurityStepId.alertsCases}
+          tourId={SecurityStepId.alertsCases}
         >
           <EuiButton
             data-test-subj="take-action-dropdown-btn"

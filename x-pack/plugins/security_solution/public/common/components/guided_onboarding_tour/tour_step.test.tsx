@@ -36,7 +36,7 @@ jest.mock('@elastic/eui', () => {
 const defaultProps = {
   isTourAnchor: true,
   step: 1,
-  stepId: SecurityStepId.alertsCases,
+  tourId: SecurityStepId.alertsCases,
 };
 
 const mockChildren = <h1 data-test-subj="h1">{'random child element'}</h1>;

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, render } from '@testing-library/react';
+import { act, render, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { NONE_CONNECTOR_ID } from '../../../common/api';
@@ -184,18 +184,20 @@ describe('CreateCaseForm', () => {
   });
 
   it('should not prefill the form when no initialValue provided', () => {
-    const { queryByDisplayValue } = render(
+    const { getByTestId } = render(
       <MockHookWrapperComponent>
         <CreateCaseForm {...casesFormProps} />
       </MockHookWrapperComponent>
     );
 
-    expect(queryByDisplayValue('title')).not.toBeInTheDocument();
-    expect(queryByDisplayValue('description')).not.toBeInTheDocument();
+    const titleInput = within(getByTestId('caseTitle')).getByTestId('input');
+    const descriptionInput = within(getByTestId('caseDescription')).getByRole('textbox');
+    expect(titleInput).toHaveValue('');
+    expect(descriptionInput).toHaveValue('');
   });
 
   it('should prefill the form when provided with initialValue', () => {
-    const { getByDisplayValue } = render(
+    const { getByTestId } = render(
       <MockHookWrapperComponent>
         <CreateCaseForm
           {...casesFormProps}
@@ -204,7 +206,10 @@ describe('CreateCaseForm', () => {
       </MockHookWrapperComponent>
     );
 
-    expect(getByDisplayValue('title')).toBeInTheDocument();
-    expect(getByDisplayValue('description')).toBeInTheDocument();
+    const titleInput = within(getByTestId('caseTitle')).getByTestId('input');
+    const descriptionInput = within(getByTestId('caseDescription')).getByRole('textbox');
+
+    expect(titleInput).toHaveValue('title');
+    expect(descriptionInput).toHaveValue('description');
   });
 });

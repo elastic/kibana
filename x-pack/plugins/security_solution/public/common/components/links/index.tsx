@@ -297,7 +297,7 @@ const CaseDetailsLinkComponent: React.FC<{
       onClick={goToCaseDetails}
       isTourAnchor={isTourStepActive}
       step={AlertsCasesTourSteps.viewCase}
-      stepId={SecurityStepId.alertsCases}
+      tourId={SecurityStepId.alertsCases}
     >
       <LinkAnchor
         onClick={goToCaseDetails}

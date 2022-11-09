@@ -19,9 +19,9 @@ import { securityTourConfig, SecurityStepId } from './tour_config';
 
 export interface TourContextValue {
   activeStep: number;
-  endTourStep: (stepId: SecurityStepId) => void;
-  incrementStep: (stepId: SecurityStepId, step?: AlertsCasesTourSteps) => void;
-  isTourShown: (stepId: SecurityStepId) => boolean;
+  endTourStep: (tourId: SecurityStepId) => void;
+  incrementStep: (tourId: SecurityStepId, step?: AlertsCasesTourSteps) => void;
+  isTourShown: (tourId: SecurityStepId) => boolean;
 }
 
 const initialState: TourContextValue = {
@@ -61,23 +61,16 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     [isRulesTourActive, isAlertsCasesTourActive]
   );
 
-  const isTourShown = useCallback((stepId: SecurityStepId) => tourStatus[stepId], [tourStatus]);
+  const isTourShown = useCallback((tourId: SecurityStepId) => tourStatus[tourId], [tourStatus]);
   const [activeStep, _setActiveStep] = useState<number>(1);
 
-  const incrementStep = useCallback((stepId: SecurityStepId, step?: number) => {
+  const incrementStep = useCallback((tourId: SecurityStepId, step?: number) => {
     _setActiveStep((prevState) =>
-      step != null && step <= securityTourConfig[stepId].length
+      step != null && step <= securityTourConfig[tourId].length
         ? step
-        : (prevState >= securityTourConfig[stepId].length ? 0 : prevState) + 1
+        : (prevState >= securityTourConfig[tourId].length ? 0 : prevState) + 1
     );
   }, []);
-
-  // TODO: @Steph figure out if we're allowing user to skip tour or not, implement this if so
-  // const onSkipTour = useCallback((stepId: SecurityStepId) => {
-  //   // active state means the user is on this step but has not yet begun. so when the user hits skip,
-  //   // the tour will go back to this step until they "re-start it"
-  //   // guidedOnboardingApi.idkSetStepTo(stepId, 'active')
-  // }, []);
 
   const [completeStep, setCompleteStep] = useState<null | SecurityStepId>(null);
 
@@ -99,8 +92,8 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     };
   }, [completeStep, guidedOnboardingApi]);
 
-  const endTourStep = useCallback((stepId: SecurityStepId) => {
-    setCompleteStep(stepId);
+  const endTourStep = useCallback((tourId: SecurityStepId) => {
+    setCompleteStep(tourId);
   }, []);
 
   const context = {

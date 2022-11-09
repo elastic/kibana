@@ -251,7 +251,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
         isTourAnchor={isTourAnchor}
         onClick={onExpandEvent}
         step={AlertsCasesTourSteps.expandEvent}
-        stepId={SecurityStepId.alertsCases}
+        tourId={SecurityStepId.alertsCases}
       >
         <div key="expand-event">
           <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>

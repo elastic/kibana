@@ -10,6 +10,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
 import { QueryClientProvider } from '@tanstack/react-query';
+import type { CasePostRequest } from '../../../../common/api';
 import * as i18n from '../translations';
 import type { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
@@ -26,7 +27,7 @@ export interface CreateCaseFlyoutProps {
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachmentsWithoutOwner;
   headerContent?: React.ReactNode;
-  initialValue?: Partial<Case>;
+  initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
 const StyledFlyout = styled(EuiFlyout)`

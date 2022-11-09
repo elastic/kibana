@@ -23,25 +23,25 @@ interface SecurityTourStep {
   children?: React.ReactElement;
   onClick?: () => void;
   step: number;
-  stepId: SecurityStepId;
+  tourId: SecurityStepId;
 }
 
-const isStepExternallyMounted = (stepId: SecurityStepId, step: number) =>
+const isStepExternallyMounted = (tourId: SecurityStepId, step: number) =>
   (step === AlertsCasesTourSteps.createCase || step === AlertsCasesTourSteps.submitCase) &&
-  stepId === SecurityStepId.alertsCases;
+  tourId === SecurityStepId.alertsCases;
 
-const StyledTourStep = styled(EuiTourStep)<EuiTourStepProps & { stepId: SecurityStepId }>`
+const StyledTourStep = styled(EuiTourStep)<EuiTourStepProps & { tourId: SecurityStepId }>`
   &.euiPopover__panel[data-popover-open] {
-    z-index: ${({ step, stepId }) =>
-      isStepExternallyMounted(stepId, step) ? '9000 !important' : '1000 !important'};
+    z-index: ${({ step, tourId }) =>
+      isStepExternallyMounted(tourId, step) ? '9000 !important' : '1000 !important'};
   }
 `;
 
-export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTourStep) => {
+export const SecurityTourStep = ({ children, onClick, step, tourId }: SecurityTourStep) => {
   const { activeStep, incrementStep, isTourShown } = useTourContext();
   const tourStep = useMemo(
-    () => securityTourConfig[stepId].find((config) => config.step === step),
-    [step, stepId]
+    () => securityTourConfig[tourId].find((config) => config.step === step),
+    [step, tourId]
   );
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -51,8 +51,8 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
 
   const onClickNext = useCallback(
     // onClick should call incrementStep itself
-    () => (onClick ? onClick() : incrementStep(stepId)),
-    [incrementStep, onClick, stepId]
+    () => (onClick ? onClick() : incrementStep(tourId)),
+    [incrementStep, onClick, tourId]
   );
 
   // EUI bug, will remove once bug resolve. will link issue here as soon as i have it
@@ -65,11 +65,11 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
   // steps in Cases app are out of context.
   // If we mount this step, we know we need to render it
   // we are also managing the context on the siem end in the background
-  const overrideContext = isStepExternallyMounted(stepId, step);
+  const overrideContext = isStepExternallyMounted(tourId, step);
 
   if (
     tourStep == null ||
-    ((step !== activeStep || !isTourShown(stepId)) && !overrideContext) ||
+    ((step !== activeStep || !isTourShown(tourId)) && !overrideContext) ||
     showTimeline
   ) {
     return children ? children : null;
@@ -115,7 +115,7 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
     isStepOpen: true,
     // guided onboarding does not allow skipping tour through the steps
     onFinish: () => null,
-    stepsTotal: securityTourConfig[stepId].length,
+    stepsTotal: securityTourConfig[tourId].length,
     panelProps: {
       'data-test-subj': dataTestSubj,
     },
@@ -125,11 +125,11 @@ export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTo
   //  see type EuiTourStepAnchorProps
   return anchor != null ? (
     <>
-      <StyledTourStep stepId={stepId} {...commonProps} anchor={anchor} />
+      <StyledTourStep tourId={tourId} {...commonProps} anchor={anchor} />
       <>{children}</>
     </>
   ) : children != null ? (
-    <StyledTourStep stepId={stepId} {...commonProps}>
+    <StyledTourStep tourId={tourId} {...commonProps}>
       {children}
     </StyledTourStep>
   ) : null;

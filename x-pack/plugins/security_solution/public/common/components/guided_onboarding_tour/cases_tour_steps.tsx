@@ -34,13 +34,13 @@ export const CasesTourSteps = () => {
         <GuidedOnboardingTourStep
           onClick={onClick}
           step={AlertsCasesTourSteps.createCase}
-          stepId={SecurityStepId.alertsCases}
+          tourId={SecurityStepId.alertsCases}
         />
       )}
       {activeStep === AlertsCasesTourSteps.submitCase && (
         <GuidedOnboardingTourStep
           step={AlertsCasesTourSteps.submitCase}
-          stepId={SecurityStepId.alertsCases}
+          tourId={SecurityStepId.alertsCases}
         />
       )}
     </>

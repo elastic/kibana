@@ -43,7 +43,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     <GuidedOnboardingTourStep
       isTourAnchor={isTourAnchor}
       step={AlertsCasesTourSteps.pointToAlertName}
-      stepId={SecurityStepId.alertsCases}
+      tourId={SecurityStepId.alertsCases}
     >
       <DefaultCellRenderer {...props} />
     </GuidedOnboardingTourStep>

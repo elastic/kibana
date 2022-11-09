@@ -38,6 +38,7 @@ import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { Severity } from './severity';
 import { Assignees } from './assignees';
+import type { CasePostRequest } from '../../../common/api';
 
 interface ContainerProps {
   big?: boolean;
@@ -70,7 +71,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;
-  initialValue?: Partial<Case>;
+  initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
 const empty: ActionConnector[] = [];

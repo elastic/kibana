@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../mock';
@@ -67,9 +67,8 @@ describe('Related Cases', () => {
             <RelatedCases eventId={eventId} />
           </TestProviders>
         );
-
-        expect(screen.queryByText('cases')).toBeNull();
       });
+      expect(screen.queryByText('cases')).toBeNull();
     });
   });
   describe('When user does have case read permissions', () => {
@@ -81,7 +80,6 @@ describe('Related Cases', () => {
             <RelatedCases eventId={eventId} />
           </TestProviders>
         );
-
         expect(screen.getByText(CASES_LOADING)).toBeInTheDocument();
       });
     });
@@ -94,11 +92,9 @@ describe('Related Cases', () => {
             <RelatedCases eventId={eventId} />
           </TestProviders>
         );
-
-        await waitFor(() => {
-          expect(screen.getByText(CASES_COUNT(0))).toBeInTheDocument();
-        });
       });
+
+      expect(screen.getByText(CASES_COUNT(0))).toBeInTheDocument();
     });
 
     test('Should show 1 related case', async () => {
@@ -109,11 +105,9 @@ describe('Related Cases', () => {
             <RelatedCases eventId={eventId} />
           </TestProviders>
         );
-        await waitFor(() => {
-          expect(screen.getByText(CASES_COUNT(1))).toBeInTheDocument();
-          expect(screen.getByTestId('case-details-link')).toHaveTextContent('Test Case');
-        });
       });
+      expect(screen.getByText(CASES_COUNT(1))).toBeInTheDocument();
+      expect(screen.getByTestId('case-details-link')).toHaveTextContent('Test Case');
     });
 
     test('Should show 2 related cases', async () => {
@@ -127,15 +121,12 @@ describe('Related Cases', () => {
             <RelatedCases eventId={eventId} />
           </TestProviders>
         );
-
-        await waitFor(() => {
-          expect(screen.getByText(CASES_COUNT(2))).toBeInTheDocument();
-          const cases = screen.getAllByTestId('case-details-link');
-          expect(cases).toHaveLength(2);
-          expect(cases[0]).toHaveTextContent('Test Case 1');
-          expect(cases[1]).toHaveTextContent('Test Case 2');
-        });
       });
+      expect(screen.getByText(CASES_COUNT(2))).toBeInTheDocument();
+      const cases = screen.getAllByTestId('case-details-link');
+      expect(cases).toHaveLength(2);
+      expect(cases[0]).toHaveTextContent('Test Case 1');
+      expect(cases[1]).toHaveTextContent('Test Case 2');
     });
 
     test('Should not open the related cases accordion when isTourActive=false', async () => {
@@ -146,13 +137,11 @@ describe('Related Cases', () => {
             <RelatedCases eventId={eventId} />
           </TestProviders>
         );
-        await waitFor(() => {
-          expect(scrollToMock).not.toHaveBeenCalled();
-          expect(
-            screen.getByTestId('RelatedCases-accordion').classList.contains('euiAccordion-isOpen')
-          ).toBe(false);
-        });
       });
+      expect(scrollToMock).not.toHaveBeenCalled();
+      expect(
+        screen.getByTestId('RelatedCases-accordion').classList.contains('euiAccordion-isOpen')
+      ).toBe(false);
     });
 
     test('Should automatically open the related cases accordion when isTourActive=true', async () => {
@@ -169,13 +158,11 @@ describe('Related Cases', () => {
             <RelatedCases eventId={eventId} />
           </TestProviders>
         );
-        await waitFor(() => {
-          expect(scrollToMock).toHaveBeenCalled();
-          expect(
-            screen.getByTestId('RelatedCases-accordion').classList.contains('euiAccordion-isOpen')
-          ).toBe(true);
-        });
       });
+      expect(scrollToMock).toHaveBeenCalled();
+      expect(
+        screen.getByTestId('RelatedCases-accordion').classList.contains('euiAccordion-isOpen')
+      ).toBe(true);
     });
   });
 });

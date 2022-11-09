@@ -1,5 +1,4 @@
 ## Security Guided Onboarding Tour
-This work required some creativity for reasons. Allow me to explain some weirdness
 
 The [`EuiTourStep`](https://elastic.github.io/eui/#/display/tour) component needs an **anchor** to attach on in the DOM. This can be defined in 2 ways:
 ```
@@ -47,7 +46,7 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
 
      <img width="1332" alt="1" src="https://user-images.githubusercontent.com/6935300/197848717-47c1959d-5dd5-4d72-a81d-786987000360.png">
 
-   The component for this anchor is `RenderCellValue` which returns `DefaultCellRenderer`. We wrap  `DefaultCellRenderer` with `GuidedOnboardingTourStep`, passing `step={AlertsCasesTourSteps.pointToAlertName}  stepId={SecurityStepId.alertsCases}` to indicate the step. Since there are many other iterations of this component on the page, we also need to pass the `isTourAnchor` property to determine which of these components should be the anchor. In the code, this looks something like:
+   The component for this anchor is `RenderCellValue` which returns `DefaultCellRenderer`. We wrap  `DefaultCellRenderer` with `GuidedOnboardingTourStep`, passing `step={AlertsCasesTourSteps.pointToAlertName}  tourId={SecurityStepId.alertsCases}` to indicate the step. Since there are many other iterations of this component on the page, we also need to pass the `isTourAnchor` property to determine which of these components should be the anchor. In the code, this looks something like:
 
       ```
       export const RenderCellValue = (props) => {
@@ -64,7 +63,7 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
           <GuidedOnboardingTourStep
             isTourAnchor={isTourAnchor}
             step={AlertsCasesTourSteps.pointToAlertName}
-            stepId={SecurityStepId.alertsCases}
+            tourId={SecurityStepId.alertsCases}
           >
             <DefaultCellRenderer {...props} />
           </GuidedOnboardingTourStep>
@@ -109,7 +108,7 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
               headerContent: (
                 // isTourAnchor=true no matter what in order to
                 // force active guide step outside of security solution (cases)
-                <GuidedOnboardingTourStep isTourAnchor step={AlertsCasesTourSteps.createCase} stepId={SecurityStepId.alertsCases} />
+                <GuidedOnboardingTourStep isTourAnchor step={AlertsCasesTourSteps.createCase} tourId={SecurityStepId.alertsCases} />
               ),
             }
           : {}),
@@ -120,9 +119,9 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
   ```
   export interface TourContextValue {
     activeStep: number;
-    endTourStep: (stepId: SecurityStepId) => void;
-    incrementStep: (stepId: SecurityStepId, step?: number) => void;
-    isTourShown: (stepId: SecurityStepId) => boolean;
+    endTourStep: (tourId: SecurityStepId) => void;
+    incrementStep: (tourId: SecurityStepId, step?: number) => void;
+    isTourShown: (tourId: SecurityStepId) => boolean;
   }
   ```
   When the tour step does not have a next button, the anchor component will need to call `incrementStep` after an action is taken. For example, in `SecurityStepId.alertsCases` step 4, the user needs to click the "Add to case" button to advance the tour.
