@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import {
   ALERT_UUID,
   ALERT_SUPPRESSION_TERMS,
-  ALERT_SUPPRESSION_COUNT,
+  ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
 } from '@kbn/rule-data-utils';
@@ -79,7 +79,7 @@ export const wrapSuppressedAlerts = ({
         [ALERT_SUPPRESSION_TERMS]: bucket.terms,
         [ALERT_SUPPRESSION_START]: bucket.start,
         [ALERT_SUPPRESSION_END]: bucket.end,
-        [ALERT_SUPPRESSION_COUNT]: bucket.count,
+        [ALERT_SUPPRESSION_DOCS_COUNT]: bucket.count,
         [ALERT_UUID]: id,
       },
     };

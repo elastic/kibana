@@ -24,7 +24,7 @@ import {
   ALERT_RULE_PARAMETERS,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
-  ALERT_SUPPRESSION_COUNT,
+  ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 
@@ -287,7 +287,7 @@ export const isNewTermsAlert = (ecsData: Ecs): boolean => {
 };
 
 const isSuppressedAlert = (ecsData: Ecs): boolean => {
-  return getField(ecsData, ALERT_SUPPRESSION_COUNT) != null;
+  return getField(ecsData, ALERT_SUPPRESSION_DOCS_COUNT) != null;
 };
 
 export const buildAlertsKqlFilter = (

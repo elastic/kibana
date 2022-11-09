@@ -10,7 +10,7 @@ import type {
   ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
-  ALERT_SUPPRESSION_COUNT,
+  ALERT_SUPPRESSION_DOCS_COUNT,
 } from '@kbn/rule-data-utils';
 
 import type { BaseFields840, DetectionAlert840 } from '../8.4.0';
@@ -27,7 +27,7 @@ export interface SuppressionFields860 extends BaseFields840 {
   [ALERT_SUPPRESSION_TERMS]: Array<{ field: string; value: string | number | null }>;
   [ALERT_SUPPRESSION_START]: Date;
   [ALERT_SUPPRESSION_END]: Date;
-  [ALERT_SUPPRESSION_COUNT]: number;
+  [ALERT_SUPPRESSION_DOCS_COUNT]: number;
 }
 
 export type SuppressionAlert860 = AlertWithCommonFields800<SuppressionFields860>;

@@ -14,7 +14,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
-  ALERT_SUPPRESSION_COUNT,
+  ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
@@ -465,7 +465,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
-          [ALERT_SUPPRESSION_COUNT]: 6,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 6,
         });
       });
 
@@ -505,7 +505,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
-          [ALERT_SUPPRESSION_COUNT]: 6,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 6,
         });
       });
 
@@ -548,7 +548,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
-          [ALERT_SUPPRESSION_COUNT]: 3,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
         });
       });
 
@@ -595,7 +595,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
-          [ALERT_SUPPRESSION_COUNT]: 3,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
         });
 
         expect(previewAlerts[1]._source).to.eql({
@@ -614,7 +614,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_ORIGINAL_TIME]: '2020-10-28T06:00:00.000Z',
           [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
-          [ALERT_SUPPRESSION_COUNT]: 3,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
         });
       });
 
@@ -655,7 +655,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:00.000Z',
-          [ALERT_SUPPRESSION_COUNT]: 1,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
       });
     });

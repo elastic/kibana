@@ -209,7 +209,7 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
-  [Fields.ALERT_SUPPRESSION_COUNT]: {
+  [Fields.ALERT_SUPPRESSION_DOCS_COUNT]: {
     type: 'long',
     array: false,
     required: false,
