@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { Provider, alertsPageStateContainer } from './state_container';
-export { useAlertsPageStateContainer } from './use_alerts_page_state_container';
+export { AlertSearchBar as ObservabilityAlertSearchBar } from './alert_search_bar';
+export { AlertSearchbarWithUrlSync as ObservabilityAlertSearchbarWithUrlSync } from './alert_search_bar_with_url_sync';

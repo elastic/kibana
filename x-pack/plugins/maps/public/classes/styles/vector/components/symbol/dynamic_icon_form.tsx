@@ -6,10 +6,23 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment } from 'react';
-import { FieldSelect } from '../field_select';
+import React, { Fragment, ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { IconMapSelect } from './icon_map_select';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
+import { CustomIcon, IconDynamicOptions } from '../../../../../../common/descriptor_types';
+import { FieldSelect } from '../field_select';
+import { IconMapSelect, StyleOptionChanges } from './icon_map_select';
+import { StyleField } from '../../style_fields_helper';
+import { DynamicIconProperty } from '../../properties/dynamic_icon_property';
+
+interface Props {
+  customIcons: CustomIcon[];
+  fields: StyleField[];
+  onCustomIconsChange: (customIcons: CustomIcon[]) => void;
+  onDynamicStyleChange: (propertyName: VECTOR_STYLES, options: IconDynamicOptions) => void;
+  staticDynamicSelect?: ReactNode;
+  styleProperty: DynamicIconProperty;
+}
 
 export function DynamicIconForm({
   fields,
@@ -18,10 +31,13 @@ export function DynamicIconForm({
   customIcons,
   staticDynamicSelect,
   styleProperty,
-}) {
+}: Props) {
   const styleOptions = styleProperty.getOptions();
 
-  const onFieldChange = ({ field }) => {
+  const onFieldChange = ({ field }: { field: StyleField | null }) => {
+    if (!field) {
+      return;
+    }
     const { name, origin } = field;
     onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
@@ -29,7 +45,7 @@ export function DynamicIconForm({
     });
   };
 
-  const onIconMapChange = (newOptions) => {
+  const onIconMapChange = (newOptions: StyleOptionChanges) => {
     onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
       ...newOptions,

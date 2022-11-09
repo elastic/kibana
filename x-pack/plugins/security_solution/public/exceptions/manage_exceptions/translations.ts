@@ -36,7 +36,7 @@ export const EXPORT_EXCEPTION_LIST = i18n.translate(
 );
 
 export const IMPORT_EXCEPTION_LIST_HEADER = i18n.translate(
-  'xpack.securitySolution.exceptionsTable.importExceptionListFlyoutHeader',
+  'xpack.securitySolution.exceptionsTable.importExceptionListHeader',
   {
     defaultMessage: 'Import shared exception list',
   }
@@ -102,5 +102,60 @@ export const IMPORT_PROMPT = i18n.translate(
   'xpack.securitySolution.exceptions.exceptionListsFilePickerPrompt',
   {
     defaultMessage: 'Select or drag and drop multiple files',
+  }
+);
+
+export const CREATE_SHARED_LIST_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.createSharedExceptionListTitle',
+  {
+    defaultMessage: 'Create shared exception list',
+  }
+);
+
+export const CREATE_SHARED_LIST_NAME_FIELD = i18n.translate(
+  'xpack.securitySolution.exceptions.createSharedExceptionListFlyoutNameField',
+  {
+    defaultMessage: 'Shared exception list name',
+  }
+);
+
+export const CREATE_SHARED_LIST_NAME_FIELD_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.createSharedExceptionListFlyoutNameFieldPlaceholder',
+  {
+    defaultMessage: 'New exception list',
+  }
+);
+
+export const CREATE_SHARED_LIST_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptions.createSharedExceptionListFlyoutDescription',
+  {
+    defaultMessage: 'Description (optional)',
+  }
+);
+
+export const CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.createSharedExceptionListFlyoutDescriptionPlaceholder',
+  {
+    defaultMessage: 'New exception list',
+  }
+);
+
+export const CREATE_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.createSharedExceptionListFlyoutCreateButton',
+  {
+    defaultMessage: 'Create shared exception list',
+  }
+);
+
+export const getSuccessText = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.createSharedExceptionListSuccessDescription', {
+    defaultMessage: 'list with name ${listName} was created!',
+    values: { listName },
+  });
+
+export const SUCCESS_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.createSharedExceptionListSuccessTitle',
+  {
+    defaultMessage: 'created list',
   }
 );
