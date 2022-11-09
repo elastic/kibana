@@ -9,7 +9,8 @@ import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings } from '@e
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel, EuiSpacer,
+  EuiPanel,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTextColor,
