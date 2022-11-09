@@ -313,6 +313,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
               justifyContent="center"
               gutterSize="xs"
               responsive={false}
+              wrap
             >
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
