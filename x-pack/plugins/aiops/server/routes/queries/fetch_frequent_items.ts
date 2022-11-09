@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/logging';
 import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-const FREQUENT_ITEMS_FIELDS_LIMIT = 15;
+const FREQUENT_ITEMS_FIELDS_LIMIT = 1000;
 
 interface FrequentItemsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {
@@ -111,7 +111,7 @@ export async function fetchFrequentItems(
       frequent_items: {
         minimum_set_size: 2,
         size: 50,
-        minimum_support: 0.01,
+        minimum_support: 0.001,
         fields: aggFields,
         filter: {
           bool: {
@@ -153,6 +153,8 @@ export async function fetchFrequentItems(
     size: 0,
     track_total_hits: true,
   };
+
+  console.log('ESBODY', JSON.stringify(esBody));
 
   const body = await client.search<
     unknown,
