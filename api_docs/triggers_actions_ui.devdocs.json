@@ -4223,6 +4223,20 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ConfigFieldSchema.defaultValue",
+            "type": "string",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
