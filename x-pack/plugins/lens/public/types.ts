@@ -30,7 +30,7 @@ import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
-import type { EuiButtonIconColor } from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
@@ -562,7 +562,7 @@ export interface LayerAction {
   description?: string;
   execute: () => void | Promise<void>;
   icon: IconType;
-  color?: EuiButtonIconColor;
+  color?: EuiButtonIconProps['color'];
   isCompatible: boolean;
   'data-test-subj'?: string;
 }
@@ -617,6 +617,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   supportStaticValue: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector: boolean;
+  dataSectionExtra?: React.ReactNode;
   formatSelectorOptions: FormatSelectorOptions | undefined;
 };
 
@@ -1131,7 +1132,7 @@ export interface Visualization<T = unknown, P = unknown> {
   ) => ((cleanupElement: Element) => void) | void;
 
   /**
-   * Additional editor that gets rendered inside the dimension popover.
+   * Additional editor that gets rendered inside the dimension popover in the "appearance" section.
    * This can be used to configure dimension-specific options
    */
   renderDimensionEditor?: (
@@ -1139,10 +1140,18 @@ export interface Visualization<T = unknown, P = unknown> {
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   /**
-   * Additional editor that gets rendered inside the dimension popover.
+   * Additional editor that gets rendered inside the dimension popover in an additional section below "appearance".
    * This can be used to configure dimension-specific options
    */
   renderDimensionEditorAdditionalSection?: (
+    domElement: Element,
+    props: VisualizationDimensionEditorProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+  /**
+   * Additional editor that gets rendered inside the data section.
+   * This can be used to configure dimension-specific options
+   */
+  renderDimensionEditorDataExtra?: (
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;

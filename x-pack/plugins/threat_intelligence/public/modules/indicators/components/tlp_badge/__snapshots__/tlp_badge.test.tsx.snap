@@ -3,15 +3,15 @@
 exports[`TLPBadge should handle proper value 1`] = `
 <DocumentFragment>
   <span
-    class="euiBadge euiBadge--iconLeft"
+    class="euiBadge emotion-euiBadge"
     style="background-color: rgb(109, 204, 177); color: rgb(0, 0, 0);"
     title="Green"
   >
     <span
-      class="euiBadge__content"
+      class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__text"
+        class="euiBadge__text emotion-euiBadge__text"
       >
         Green
       </span>
@@ -23,15 +23,15 @@ exports[`TLPBadge should handle proper value 1`] = `
 exports[`TLPBadge should handle value in various casing with extra spaces 1`] = `
 <DocumentFragment>
   <span
-    class="euiBadge euiBadge--iconLeft"
+    class="euiBadge emotion-euiBadge"
     style="background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
     title="Red"
   >
     <span
-      class="euiBadge__content"
+      class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__text"
+        class="euiBadge__text emotion-euiBadge__text"
       >
         Red
       </span>

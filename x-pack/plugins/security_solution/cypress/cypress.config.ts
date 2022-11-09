@@ -9,9 +9,9 @@ import { defineConfig } from 'cypress';
 
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({
-  defaultCommandTimeout: 20000,
-  execTimeout: 20000,
-  pageLoadTimeout: 20000,
+  defaultCommandTimeout: 60000,
+  execTimeout: 60000,
+  pageLoadTimeout: 60000,
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,

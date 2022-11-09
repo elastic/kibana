@@ -616,10 +616,6 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -649,39 +645,39 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression_form.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/expression/search_source_expression_form.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -8913,10 +8909,6 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -8946,39 +8938,39 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression_form.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/expression/search_source_expression_form.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -16291,10 +16283,6 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -16324,39 +16312,39 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression_form.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/expression/search_source_expression_form.tsx"
               },
               {
                 "plugin": "synthetics",

@@ -309,17 +309,9 @@ export interface BulkDeleteOptionsIds {
 
 export type BulkDeleteOptions = BulkDeleteOptionsFilter | BulkDeleteOptionsIds;
 
-export interface BulkEditError {
+export interface BulkOperationError {
   message: string;
-  rule: {
-    id: string;
-    name: string;
-  };
-}
-
-export interface BulkDeleteError {
-  message: string;
-  status: number;
+  status?: number;
   rule: {
     id: string;
     name: string;
@@ -1908,18 +1900,24 @@ export class RulesClient {
     );
 
     const taskIdsFailedToBeDeleted: string[] = [];
+    const taskIdsSuccessfullyDeleted: string[] = [];
     if (taskIdsToDelete.length > 0) {
       try {
         const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
         resultFromDeletingTasks?.statuses.forEach((status) => {
-          if (!status.success) {
+          if (status.success) {
+            taskIdsSuccessfullyDeleted.push(status.id);
+          } else {
             taskIdsFailedToBeDeleted.push(status.id);
           }
         });
         this.logger.debug(
-          `Successfully deleted schedules for underlying tasks: ${taskIdsToDelete
-            .filter((id) => taskIdsFailedToBeDeleted.includes(id))
-            .join(', ')}`
+          `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
+            ', '
+          )}`
+        );
+        this.logger.error(
+          `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(', ')}`
         );
       } catch (error) {
         this.logger.error(
@@ -1953,7 +1951,7 @@ export class RulesClient {
     const rules: SavedObjectsBulkDeleteObject[] = [];
     const apiKeysToInvalidate: string[] = [];
     const taskIdsToDelete: string[] = [];
-    const errors: BulkDeleteError[] = [];
+    const errors: BulkOperationError[] = [];
     const apiKeyToRuleIdMapping: Record<string, string> = {};
     const taskIdToRuleIdMapping: Record<string, string> = {};
     const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -2009,7 +2007,7 @@ export class RulesClient {
     options: BulkEditOptions<Params>
   ): Promise<{
     rules: Array<SanitizedRule<Params>>;
-    errors: BulkEditError[];
+    errors: BulkOperationError[];
     total: number;
   }> {
     const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
@@ -2176,7 +2174,7 @@ export class RulesClient {
     apiKeysToInvalidate: string[];
     rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
     resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
-    errors: BulkEditError[];
+    errors: BulkOperationError[];
   }> {
     const rulesFinder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
@@ -2189,7 +2187,7 @@ export class RulesClient {
       );
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-    const errors: BulkEditError[] = [];
+    const errors: BulkOperationError[] = [];
     const apiKeysToInvalidate: string[] = [];
     const apiKeysMap = new Map<string, { oldApiKey?: string; newApiKey?: string }>();
     const username = await this.getUserName();
