@@ -7,16 +7,16 @@
 
 import type { Role } from '@kbn/security-plugin/common';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { t1Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t1_analyst';
+import { t2Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t2_analyst';
+import { hunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/hunter';
+import { threadIntelligenceAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/thread_intelligence_analyst';
+import { socManager } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/soc_manager';
+import { platformEngineer } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/platform_engineer';
+import { endpointOperationsAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/endpoint_operations_analyst';
+import { endpointSecurityPolicyManager } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
 
-import { t1Analyst } from './t1_analyst';
-import { t2Analyst } from './t2_analyst';
-import { hunter } from './hunter';
-import { threadIntelligenceAnalyst } from './thread_intelligence_analyst';
-import { socManager } from './soc_manager';
-import { platformEngineer } from './platform_engineer';
-import { endpointOperationsAnalyst } from './endpoint_operations_analyst';
-import { endpointSecurityPolicyManager } from './endpoint_security_policy_manager';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export enum ROLE {
   t1_analyst = 't1Analyst',
