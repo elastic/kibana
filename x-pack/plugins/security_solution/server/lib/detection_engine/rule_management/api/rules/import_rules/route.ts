@@ -83,9 +83,10 @@ export const importRulesRoute = (
         });
         const savedObjectsClient = ctx.core.savedObjects.client;
         const exceptionsClient = ctx.lists?.getExceptionListClient();
+        const license = ctx.licensing.license;
 
         const mlAuthz = buildMlAuthz({
-          license: ctx.licensing.license,
+          license,
           ml,
           request,
           savedObjectsClient,
@@ -161,6 +162,7 @@ export const importRulesRoute = (
           exceptionsClient,
           spaceId: ctx.securitySolution.getSpaceId(),
           existingLists: foundReferencedExceptionLists,
+          license,
         });
 
         const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];

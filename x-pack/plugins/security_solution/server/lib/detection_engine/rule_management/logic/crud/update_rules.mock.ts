@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
   getUpdateMachineLearningSchemaMock,
   getUpdateRulesSchemaMock,
@@ -17,10 +18,16 @@ export const getUpdateRulesOptionsMock = () => ({
   rulesClient: rulesClientMock.create(),
   existingRule: getRuleMock(getQueryRuleParams()),
   ruleUpdate: getUpdateRulesSchemaMock(),
+  license: licensingMock.createLicense({
+    license: { status: 'active', type: 'basic' },
+  }),
 });
 
 export const getUpdateMlRulesOptionsMock = () => ({
   rulesClient: rulesClientMock.create(),
   existingRule: getRuleMock(getQueryRuleParams()),
   ruleUpdate: getUpdateMachineLearningSchemaMock(),
+  license: licensingMock.createLicense({
+    license: { status: 'active', type: 'basic' },
+  }),
 });

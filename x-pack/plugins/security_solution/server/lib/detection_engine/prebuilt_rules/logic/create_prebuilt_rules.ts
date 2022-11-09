@@ -6,13 +6,18 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ILicense } from '@kbn/licensing-plugin/server';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../common/constants';
 import type { PrebuiltRuleToInstall } from '../../../../../common/detection_engine/prebuilt_rules';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { createRules } from '../../rule_management/logic/crud/create_rules';
 
-export const createPrebuiltRules = (rulesClient: RulesClient, rules: PrebuiltRuleToInstall[]) =>
+export const createPrebuiltRules = (
+  rulesClient: RulesClient,
+  rules: PrebuiltRuleToInstall[],
+  license: ILicense
+) =>
   withSecuritySpan('createPrebuiltRules', async () => {
     const result = await initPromisePool({
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
@@ -23,6 +28,7 @@ export const createPrebuiltRules = (rulesClient: RulesClient, rules: PrebuiltRul
           params: rule,
           immutable: true,
           defaultEnabled: false,
+          license,
         });
       },
     });

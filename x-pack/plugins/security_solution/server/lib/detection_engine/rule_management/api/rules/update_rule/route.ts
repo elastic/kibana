@@ -47,9 +47,10 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
 
         const rulesClient = ctx.alerting.getRulesClient();
         const savedObjectsClient = ctx.core.savedObjects.client;
+        const license = ctx.licensing.license;
 
         const mlAuthz = buildMlAuthz({
-          license: ctx.licensing.license,
+          license,
           ml,
           request,
           savedObjectsClient,
@@ -73,6 +74,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
           rulesClient,
           existingRule: migratedRule,
           ruleUpdate: request.body,
+          license,
         });
 
         if (rule != null) {

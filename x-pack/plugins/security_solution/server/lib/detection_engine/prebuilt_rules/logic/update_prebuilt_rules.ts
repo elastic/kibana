@@ -8,6 +8,7 @@
 import { chunk } from 'lodash/fp';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
+import type { ILicense } from '@kbn/licensing-plugin/server';
 
 import type { PrebuiltRuleToInstall } from '../../../../../common/detection_engine/prebuilt_rules';
 import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
@@ -36,7 +37,8 @@ export const updatePrebuiltRules = async (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   rules: PrebuiltRuleToInstall[],
-  ruleExecutionLog: IRuleExecutionLogForRoutes
+  ruleExecutionLog: IRuleExecutionLogForRoutes,
+  license: ILicense
 ): Promise<void> => {
   const ruleChunks = chunk(MAX_RULES_TO_UPDATE_IN_PARALLEL, rules);
   for (const ruleChunk of ruleChunks) {
@@ -44,7 +46,8 @@ export const updatePrebuiltRules = async (
       rulesClient,
       savedObjectsClient,
       ruleChunk,
-      ruleExecutionLog
+      ruleExecutionLog,
+      license
     );
     await Promise.all(rulePromises);
   }
@@ -61,7 +64,8 @@ const createPromises = (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   rules: PrebuiltRuleToInstall[],
-  ruleExecutionLog: IRuleExecutionLogForRoutes
+  ruleExecutionLog: IRuleExecutionLogForRoutes,
+  license: ILicense
 ): Array<Promise<PartialRule<RuleParams> | null>> => {
   return rules.map(async (rule) => {
     const existingRule = await readRules({
@@ -99,6 +103,7 @@ const createPromises = (
           enabled: migratedRule.enabled,
           actions: migratedRule.actions.map(transformAlertToRuleAction),
         },
+        license,
       });
     } else {
       return patchRules({
@@ -110,6 +115,7 @@ const createPromises = (
           enabled: undefined,
           actions: undefined,
         },
+        license,
       });
     }
   });

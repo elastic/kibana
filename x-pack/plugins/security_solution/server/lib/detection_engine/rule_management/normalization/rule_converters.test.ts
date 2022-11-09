@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { convertPatchAPIToInternalSchema, patchTypeSpecificSnakeToCamel } from './rule_converters';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import {
+  convertCreateAPIToInternalSchema,
+  convertPatchAPIToInternalSchema,
+  patchTypeSpecificSnakeToCamel,
+} from './rule_converters';
 import {
   getEqlRuleParams,
   getMlRuleParams,
@@ -16,9 +21,30 @@ import {
   getThresholdRuleParams,
 } from '../../rule_schema/mocks';
 import { getRuleMock } from '../../routes/__mocks__/request_responses';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
+import type { QueryRuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
 
 describe('rule_converters', () => {
+  const basicLicense = licensingMock.createLicense({
+    license: { status: 'active', type: 'basic' },
+  });
+  const goldLicense = licensingMock.createLicense({
+    license: { status: 'active', type: 'gold' },
+  });
+
   describe('patchTypeSpecificSnakeToCamel', () => {
+    test('should reject alert suppression params when license is insufficient', () => {
+      const patchParams = {
+        alert_suppression: {
+          group_by: ['host.name'],
+        },
+      };
+      const rule = getQueryRuleParams();
+      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense)).toThrowError(
+        'Alert suppression requires a platinum license'
+      );
+    });
+
     test('should accept EQL params when existing rule type is EQL', () => {
       const patchParams = {
         timestamp_field: 'event.created',
@@ -26,7 +52,7 @@ describe('rule_converters', () => {
         tiebreaker_field: 'event.created',
       };
       const rule = getEqlRuleParams();
-      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           timestampField: 'event.created',
@@ -43,7 +69,7 @@ describe('rule_converters', () => {
         tiebreaker_field: 1,
       };
       const rule = getEqlRuleParams();
-      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense)).toThrowError(
         'Invalid value "1" supplied to "timestamp_field",Invalid value "1" supplied to "event_category_override",Invalid value "1" supplied to "tiebreaker_field"'
       );
     });
@@ -54,7 +80,7 @@ describe('rule_converters', () => {
         threat_query: 'test-query',
       };
       const rule = getThreatRuleParams();
-      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           threatIndicatorPath: 'my.indicator',
@@ -69,7 +95,7 @@ describe('rule_converters', () => {
         threat_query: 1,
       };
       const rule = getThreatRuleParams();
-      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense)).toThrowError(
         'Invalid value "1" supplied to "threat_query",Invalid value "1" supplied to "threat_indicator_path"'
       );
     });
@@ -80,7 +106,7 @@ describe('rule_converters', () => {
         language: 'lucene',
       };
       const rule = getQueryRuleParams();
-      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           index: ['new-test-index'],
@@ -95,7 +121,7 @@ describe('rule_converters', () => {
         language: 'non-language',
       };
       const rule = getQueryRuleParams();
-      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense)).toThrowError(
         'Invalid value "1" supplied to "index",Invalid value "non-language" supplied to "language"'
       );
     });
@@ -106,7 +132,7 @@ describe('rule_converters', () => {
         language: 'lucene',
       };
       const rule = getSavedQueryRuleParams();
-      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           index: ['new-test-index'],
@@ -121,7 +147,7 @@ describe('rule_converters', () => {
         language: 'non-language',
       };
       const rule = getSavedQueryRuleParams();
-      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense)).toThrowError(
         'Invalid value "1" supplied to "index",Invalid value "non-language" supplied to "language"'
       );
     });
@@ -134,7 +160,7 @@ describe('rule_converters', () => {
         },
       };
       const rule = getThresholdRuleParams();
-      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           threshold: {
@@ -153,7 +179,7 @@ describe('rule_converters', () => {
         },
       };
       const rule = getThresholdRuleParams();
-      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense)).toThrowError(
         'Invalid value "invalid" supplied to "threshold,value"'
       );
     });
@@ -163,7 +189,7 @@ describe('rule_converters', () => {
         anomaly_threshold: 5,
       };
       const rule = getMlRuleParams();
-      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           anomalyThreshold: 5,
@@ -176,7 +202,7 @@ describe('rule_converters', () => {
         anomaly_threshold: 'invalid',
       };
       const rule = getMlRuleParams();
-      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense)).toThrowError(
         'Invalid value "invalid" supplied to "anomaly_threshold"'
       );
     });
@@ -186,7 +212,7 @@ describe('rule_converters', () => {
         new_terms_fields: ['event.new_field'],
       };
       const rule = getNewTermsRuleParams();
-      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           newTermsFields: ['event.new_field'],
@@ -199,7 +225,7 @@ describe('rule_converters', () => {
         new_terms_fields: 'invalid',
       };
       const rule = getNewTermsRuleParams();
-      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule, goldLicense)).toThrowError(
         'Invalid value "invalid" supplied to "new_terms_fields"'
       );
     });
@@ -213,7 +239,7 @@ describe('rule_converters', () => {
         version: 3,
       };
       const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1 });
-      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
+      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           params: expect.objectContaining({ version: 3 }),
@@ -228,7 +254,7 @@ describe('rule_converters', () => {
         version: 3,
       };
       const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1, immutable: true });
-      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
+      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           params: expect.objectContaining({ version: 3 }),
@@ -242,7 +268,7 @@ describe('rule_converters', () => {
         language: 'lucene',
       };
       const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1, immutable: true });
-      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
+      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           params: expect.objectContaining({ version: 1 }),
@@ -256,7 +282,7 @@ describe('rule_converters', () => {
         language: 'lucene',
       };
       const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1 });
-      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
+      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           params: expect.objectContaining({ version: 2 }),
@@ -271,12 +297,32 @@ describe('rule_converters', () => {
         rule_id: 'some-rule-id',
       };
       const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1 });
-      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
+      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule, goldLicense);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           params: expect.objectContaining({ version: 1 }),
         })
       );
+    });
+  });
+
+  describe('convertCreateAPIToInternalSchema', () => {
+    test('should reject alert suppression params when license is insufficient', () => {
+      const suppressionRule: QueryRuleCreateProps = {
+        ...getCreateRulesSchemaMock(),
+        alert_suppression: {
+          group_by: ['host.name'],
+        },
+      };
+      expect(() => convertCreateAPIToInternalSchema(suppressionRule, goldLicense)).toThrowError(
+        'Alert suppression requires a platinum license'
+      );
+    });
+
+    test('should accept params without suppression with lower licenses', () => {
+      const suppressionRule: QueryRuleCreateProps = getCreateRulesSchemaMock();
+      const result = convertCreateAPIToInternalSchema(suppressionRule, basicLicense);
+      expect(result).toMatchSnapshot();
     });
   });
 });

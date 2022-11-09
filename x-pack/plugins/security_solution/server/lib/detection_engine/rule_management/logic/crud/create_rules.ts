@@ -7,6 +7,7 @@
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ILicense } from '@kbn/licensing-plugin/server';
 
 import type { RuleCreateProps } from '../../../../../../common/detection_engine/rule_schema';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
@@ -19,6 +20,7 @@ export interface CreateRulesOptions<T extends RuleCreateProps = RuleCreateProps>
   id?: string;
   immutable?: boolean;
   defaultEnabled?: boolean;
+  license: ILicense;
 }
 
 export const createRules = async ({
@@ -27,8 +29,9 @@ export const createRules = async ({
   id,
   immutable = false,
   defaultEnabled = true,
+  license,
 }: CreateRulesOptions): Promise<SanitizedRule<RuleParams>> => {
-  const internalRule = convertCreateAPIToInternalSchema(params, immutable, defaultEnabled);
+  const internalRule = convertCreateAPIToInternalSchema(params, license, immutable, defaultEnabled);
   const rule = await rulesClient.create<RuleParams>({
     options: {
       id,

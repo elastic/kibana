@@ -7,6 +7,7 @@
 
 /* eslint-disable complexity */
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
+import type { ILicense } from '@kbn/licensing-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
 import type { RuleUpdateProps } from '../../../../../../common/detection_engine/rule_schema';
 import { transformRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
@@ -20,18 +21,20 @@ export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   existingRule: RuleAlertType | null | undefined;
   ruleUpdate: RuleUpdateProps;
+  license: ILicense;
 }
 
 export const updateRules = async ({
   rulesClient,
   existingRule,
   ruleUpdate,
+  license,
 }: UpdateRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (existingRule == null) {
     return null;
   }
 
-  const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
+  const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate, license);
   const enabled = ruleUpdate.enabled ?? true;
   const newInternalRule: InternalRuleUpdate = {
     name: ruleUpdate.name,

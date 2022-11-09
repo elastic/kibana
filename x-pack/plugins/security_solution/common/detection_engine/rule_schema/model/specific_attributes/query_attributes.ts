@@ -25,3 +25,5 @@ export const AlertSuppression = t.exact(
     group_by: AlertSuppressionGroupBy,
   })
 );
+
+export const minimumLicenseForSuppression = 'platinum';

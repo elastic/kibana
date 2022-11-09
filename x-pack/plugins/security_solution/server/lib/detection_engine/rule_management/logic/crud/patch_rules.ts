@@ -6,6 +6,7 @@
  */
 
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
+import type { ILicense } from '@kbn/licensing-plugin/server';
 
 import type { PatchRuleRequestBody } from '../../../../../../common/detection_engine/rule_management';
 import type { RuleAlertType, RuleParams } from '../../../rule_schema';
@@ -16,18 +17,20 @@ export interface PatchRulesOptions {
   rulesClient: RulesClient;
   nextParams: PatchRuleRequestBody;
   existingRule: RuleAlertType | null | undefined;
+  license: ILicense;
 }
 
 export const patchRules = async ({
   rulesClient,
   existingRule,
   nextParams,
+  license,
 }: PatchRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (existingRule == null) {
     return null;
   }
 
-  const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule);
+  const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule, license);
 
   const update = await rulesClient.update({
     id: existingRule.id,

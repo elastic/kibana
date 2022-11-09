@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
@@ -18,6 +19,7 @@ export interface InstallPrepackagedRulesProps {
   request: KibanaRequest;
   alerts: AlertsStartContract;
   exceptionsClient: ExceptionListClient;
+  license: ILicense;
 }
 
 /**
@@ -30,6 +32,7 @@ export const installPrepackagedRules = async ({
   request,
   alerts,
   exceptionsClient,
+  license,
 }: InstallPrepackagedRulesProps): Promise<void> => {
   // Create detection index & rules (if necessary). move past any failure, this is just a convenience
   try {
@@ -48,6 +51,7 @@ export const installPrepackagedRules = async ({
     await createPrepackagedRules(
       context,
       alerts.getRulesClientWithRequest(request),
+      license,
       exceptionsClient
     );
   } catch (err) {

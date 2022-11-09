@@ -61,9 +61,10 @@ export const bulkUpdateRulesRoute = (
       const rulesClient = ctx.alerting.getRulesClient();
       const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
       const savedObjectsClient = ctx.core.savedObjects.client;
+      const license = ctx.licensing.license;
 
       const mlAuthz = buildMlAuthz({
-        license: ctx.licensing.license,
+        license,
         ml,
         request,
         savedObjectsClient,
@@ -100,6 +101,7 @@ export const bulkUpdateRulesRoute = (
               rulesClient,
               existingRule: migratedRule,
               ruleUpdate: payloadRule,
+              license,
             });
             if (rule != null) {
               const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);

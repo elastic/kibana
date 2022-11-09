@@ -59,9 +59,10 @@ export const bulkCreateRulesRoute = (
 
       const rulesClient = ctx.alerting.getRulesClient();
       const savedObjectsClient = ctx.core.savedObjects.client;
+      const license = ctx.licensing.license;
 
       const mlAuthz = buildMlAuthz({
-        license: ctx.licensing.license,
+        license,
         ml,
         request,
         savedObjectsClient,
@@ -104,6 +105,7 @@ export const bulkCreateRulesRoute = (
               const createdRule = await createRules({
                 rulesClient,
                 params: payloadRule,
+                license,
               });
 
               return transformValidateBulkError(createdRule.params.ruleId, createdRule, null);

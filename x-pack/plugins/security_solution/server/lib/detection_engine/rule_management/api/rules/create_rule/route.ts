@@ -56,6 +56,7 @@ export const createRuleRoute = (
         const rulesClient = ctx.alerting.getRulesClient();
         const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = ctx.core.savedObjects.client;
+        const license = ctx.licensing.license;
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
@@ -72,7 +73,7 @@ export const createRuleRoute = (
         }
 
         const mlAuthz = buildMlAuthz({
-          license: ctx.licensing.license,
+          license,
           ml,
           request,
           savedObjectsClient,
@@ -87,6 +88,7 @@ export const createRuleRoute = (
         const createdRule = await createRules({
           rulesClient,
           params: request.body,
+          license,
         });
 
         const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(createdRule.id);

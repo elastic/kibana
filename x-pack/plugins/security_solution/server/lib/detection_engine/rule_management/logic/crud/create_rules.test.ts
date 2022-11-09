@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { createRules } from './create_rules';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 import {
@@ -14,9 +15,16 @@ import {
 } from '../../../../../../common/detection_engine/rule_schema/mocks';
 
 describe('createRules', () => {
+  const basicLicense = licensingMock.createLicense({
+    license: { status: 'active', type: 'basic' },
+  });
   it('calls the rulesClient with legacy ML params', async () => {
     const rulesClient = rulesClientMock.create();
-    await createRules({ rulesClient, params: getCreateMachineLearningRulesSchemaMock() });
+    await createRules({
+      rulesClient,
+      params: getCreateMachineLearningRulesSchemaMock(),
+      license: basicLicense,
+    });
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -37,6 +45,7 @@ describe('createRules', () => {
         ...getCreateMachineLearningRulesSchemaMock(),
         machine_learning_job_id: ['new_job_1', 'new_job_2'],
       },
+      license: basicLicense,
     });
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -54,7 +63,7 @@ describe('createRules', () => {
     const rulesClient = rulesClientMock.create();
     const params = getCreateThreatMatchRulesSchemaMock();
     delete params.threat_indicator_path;
-    await createRules({ rulesClient, params });
+    await createRules({ rulesClient, params, license: basicLicense });
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -68,7 +77,11 @@ describe('createRules', () => {
 
   it('does not populate a threatIndicatorPath value for other rules if empty', async () => {
     const rulesClient = rulesClientMock.create();
-    await createRules({ rulesClient, params: getCreateMachineLearningRulesSchemaMock() });
+    await createRules({
+      rulesClient,
+      params: getCreateMachineLearningRulesSchemaMock(),
+      license: basicLicense,
+    });
     expect(rulesClient.create).not.toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({

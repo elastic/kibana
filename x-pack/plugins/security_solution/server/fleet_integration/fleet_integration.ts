@@ -89,16 +89,19 @@ export const getPackagePolicyCreateCallback = (
       request
     );
 
+    const license = licenseService.getLicenseInformation();
     // perform these operations in parallel in order to help in not delaying the API response too much
     const [, manifestValue] = await Promise.all([
       // Install Detection Engine prepackaged rules
       exceptionsClient &&
+        license &&
         installPrepackagedRules({
           logger,
           context: securitySolutionContext,
           request,
           alerts,
           exceptionsClient,
+          license,
         }),
 
       // create the Artifact Manifest for this policy

@@ -11,6 +11,7 @@ import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { ILicense } from '@kbn/licensing-plugin/server';
 
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
@@ -28,7 +29,9 @@ import type {
   RuleResponse,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
+  AlertSuppression,
 } from '../../../../../common/detection_engine/rule_schema';
+
 import {
   EqlPatchParams,
   MachineLearningPatchParams,
@@ -37,6 +40,7 @@ import {
   SavedQueryPatchParams,
   ThreatMatchPatchParams,
   ThresholdPatchParams,
+  minimumLicenseForSuppression,
 } from '../../../../../common/detection_engine/rule_schema';
 
 import {
@@ -84,6 +88,18 @@ import {
 } from './rule_actions';
 import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
 
+const checkLicenseForAlertSuppression = ({
+  license,
+  alertSuppression,
+}: {
+  license: ILicense;
+  alertSuppression: AlertSuppression | undefined;
+}) => {
+  if (!license.hasAtLeast(minimumLicenseForSuppression) && alertSuppression) {
+    throw new BadRequestError('Alert suppression requires a platinum license');
+  }
+};
+
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
 // required and default-able fields. However, it is still possible to add an optional field to the API schema
@@ -93,7 +109,8 @@ import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '
 // Notice that params.language is possibly undefined for most rule types in the API but we default it to kuery to match
 // the legacy API behavior
 export const typeSpecificSnakeToCamel = (
-  params: TypeSpecificCreateProps
+  params: TypeSpecificCreateProps,
+  license: ILicense
 ): TypeSpecificRuleParams => {
   switch (params.type) {
     case 'eql': {
@@ -129,6 +146,7 @@ export const typeSpecificSnakeToCamel = (
       };
     }
     case 'query': {
+      checkLicenseForAlertSuppression({ license, alertSuppression: params.alert_suppression });
       return {
         type: params.type,
         language: params.language ?? 'kuery',
@@ -142,6 +160,7 @@ export const typeSpecificSnakeToCamel = (
       };
     }
     case 'saved_query': {
+      checkLicenseForAlertSuppression({ license, alertSuppression: params.alert_suppression });
       return {
         type: params.type,
         language: params.language ?? 'kuery',
@@ -233,8 +252,10 @@ const patchThreatMatchParams = (
 
 const patchQueryParams = (
   params: QueryPatchParams,
-  existingRule: QueryRuleParams
+  existingRule: QueryRuleParams,
+  license: ILicense
 ): QuerySpecificRuleParams => {
+  checkLicenseForAlertSuppression({ license, alertSuppression: params.alert_suppression });
   return {
     type: existingRule.type,
     language: params.language ?? existingRule.language,
@@ -252,8 +273,10 @@ const patchQueryParams = (
 
 const patchSavedQueryParams = (
   params: SavedQueryPatchParams,
-  existingRule: SavedQueryRuleParams
+  existingRule: SavedQueryRuleParams,
+  license: ILicense
 ): SavedQuerySpecificRuleParams => {
+  checkLicenseForAlertSuppression({ license, alertSuppression: params.alert_suppression });
   return {
     type: existingRule.type,
     language: params.language ?? existingRule.language,
@@ -326,7 +349,8 @@ const parseValidationError = (error: string | null): BadRequestError => {
 
 export const patchTypeSpecificSnakeToCamel = (
   params: PatchRuleRequestBody,
-  existingRule: RuleParams
+  existingRule: RuleParams,
+  license: ILicense
 ): TypeSpecificRuleParams => {
   // Here we do the validation of patch params by rule type to ensure that the fields that are
   // passed in to patch are of the correct type, e.g. `query` is a string. Since the combined patch schema
@@ -353,14 +377,14 @@ export const patchTypeSpecificSnakeToCamel = (
       if (validated == null) {
         throw parseValidationError(error);
       }
-      return patchQueryParams(validated, existingRule);
+      return patchQueryParams(validated, existingRule, license);
     }
     case 'saved_query': {
       const [validated, error] = validateNonExact(params, SavedQueryPatchParams);
       if (validated == null) {
         throw parseValidationError(error);
       }
-      return patchSavedQueryParams(validated, existingRule);
+      return patchSavedQueryParams(validated, existingRule, license);
     }
     case 'threshold': {
       const [validated, error] = validateNonExact(params, ThresholdPatchParams);
@@ -417,9 +441,14 @@ export const convertPatchAPIToInternalSchema = (
     required_fields?: RequiredFieldArray;
     setup?: SetupGuide;
   },
-  existingRule: SanitizedRule<RuleParams>
+  existingRule: SanitizedRule<RuleParams>,
+  license: ILicense
 ): InternalRuleUpdate => {
-  const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
+  const typeSpecificParams = patchTypeSpecificSnakeToCamel(
+    nextParams,
+    existingRule.params,
+    license
+  );
   const existingParams = existingRule.params;
   return {
     name: nextParams.name ?? existingRule.name,
@@ -481,10 +510,11 @@ export const convertCreateAPIToInternalSchema = (
     required_fields?: RequiredFieldArray;
     setup?: SetupGuide;
   },
+  license: ILicense,
   immutable = false,
   defaultEnabled = true
 ): InternalRuleCreate => {
-  const typeSpecificParams = typeSpecificSnakeToCamel(input);
+  const typeSpecificParams = typeSpecificSnakeToCamel(input, license);
   const newRuleId = input.rule_id ?? uuid.v4();
   return {
     name: input.name,
