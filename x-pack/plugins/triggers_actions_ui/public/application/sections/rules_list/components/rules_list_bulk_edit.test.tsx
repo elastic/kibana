@@ -210,11 +210,17 @@ describe('Rules list bulk actions', () => {
     });
 
     it('can bulk unsnooze', async () => {
-      wrapper.find('[data-test-subj="bulkUnsnooze"]').first().simulate('click');
+      wrapper.find('[data-test-subj="bulkUnsnooze"]').hostNodes().first().simulate('click');
+
       expect(
         wrapper.find('[data-test-subj="bulkUnsnoozeConfirmationModal"]').exists()
       ).toBeTruthy();
-      wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+
+      wrapper
+        .find('[data-test-subj="confirmModalConfirmButton"]')
+        .hostNodes()
+        .first()
+        .simulate('click');
 
       await act(async () => {
         await nextTick();
@@ -235,9 +241,13 @@ describe('Rules list bulk actions', () => {
     });
 
     it('can bulk add snooze schedule', async () => {
-      wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').first().simulate('click');
+      wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').hostNodes().first().simulate('click');
       expect(wrapper.find('[data-test-subj="ruleSnoozeScheduler"]').exists()).toBeTruthy();
-      wrapper.find('[data-test-subj="scheduler-saveSchedule"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="scheduler-saveSchedule"]')
+        .hostNodes()
+        .first()
+        .simulate('click');
       await act(async () => {
         await nextTick();
         wrapper.update();
@@ -257,11 +267,19 @@ describe('Rules list bulk actions', () => {
     });
 
     it('can bulk remove snooze schedule', async () => {
-      wrapper.find('[data-test-subj="bulkRemoveSnoozeSchedule"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="bulkRemoveSnoozeSchedule"]')
+        .hostNodes()
+        .first()
+        .simulate('click');
       expect(
         wrapper.find('[data-test-subj="bulkRemoveScheduleConfirmationModal"]').exists()
       ).toBeTruthy();
-      wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="confirmModalConfirmButton"]')
+        .hostNodes()
+        .first()
+        .simulate('click');
 
       await act(async () => {
         await nextTick();
@@ -283,9 +301,13 @@ describe('Rules list bulk actions', () => {
     });
 
     it('can bulk update API key', async () => {
-      wrapper.find('[data-test-subj="updateAPIKeys"]').first().simulate('click');
+      wrapper.find('[data-test-subj="updateAPIKeys"]').hostNodes().first().simulate('click');
       expect(wrapper.find('[data-test-subj="updateApiKeyIdsConfirmation"]').exists()).toBeTruthy();
-      wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="confirmModalConfirmButton"]')
+        .hostNodes()
+        .first()
+        .simulate('click');
       await act(async () => {
         await nextTick();
         wrapper.update();
