@@ -47,7 +47,7 @@ export const NoPrivileges = React.memo<NoPrivilegesPageProps>(({ pageName = 'thi
     <EmptyPage
       actions={emptyPageActions}
       message={i18n.NO_PERMISSIONS_MSG(pageName)}
-      data-test-subj="no_feature_permissions-alerts"
+      data-test-subj="noPrivilegesPage"
       title={i18n.NO_PERMISSIONS_TITLE}
     />
   );

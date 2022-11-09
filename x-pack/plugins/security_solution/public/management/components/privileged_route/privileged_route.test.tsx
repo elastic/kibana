@@ -17,8 +17,8 @@ import { AdministrationSubTab } from '../../types';
 jest.mock('../../../common/hooks/use_experimental_features');
 
 describe('PrivilegedRoute', () => {
-  const superuserPattern = /must have the superuser role/;
-  const rbacPattern = /you must update privileges/;
+  const noPrivilegesPageTestId = 'noPrivilegesPage';
+  const noPermissionsPageTestId = 'noIngestPermissions';
 
   const componentTestId = 'component-to-render';
   let featureFlags: { endpointRbacEnabled: boolean; endpointRbacV1Enabled: boolean };
@@ -62,8 +62,8 @@ describe('PrivilegedRoute', () => {
       render();
 
       expect(renderResult.getByTestId(componentTestId)).toBeTruthy();
-      expect(renderResult.queryByText(superuserPattern)).toBeNull();
-      expect(renderResult.queryByText(rbacPattern)).toBeNull();
+      expect(renderResult.queryByTestId(noPermissionsPageTestId)).toBeNull();
+      expect(renderResult.queryByTestId(noPrivilegesPageTestId)).toBeNull();
     });
 
     it('renders nothing if path is different', async () => {
@@ -72,8 +72,8 @@ describe('PrivilegedRoute', () => {
       render();
 
       expect(renderResult.queryByTestId(componentTestId)).toBeNull();
-      expect(renderResult.queryByText(superuserPattern)).toBeNull();
-      expect(renderResult.queryByText(rbacPattern)).toBeNull();
+      expect(renderResult.queryByTestId(noPermissionsPageTestId)).toBeNull();
+      expect(renderResult.queryByTestId(noPrivilegesPageTestId)).toBeNull();
     });
   };
 
@@ -85,9 +85,9 @@ describe('PrivilegedRoute', () => {
 
       render();
 
-      expect(renderResult.getByText(superuserPattern)).toBeTruthy();
+      expect(renderResult.getByTestId(noPermissionsPageTestId)).toBeTruthy();
       expect(renderResult.queryByTestId(componentTestId)).toBeNull();
-      expect(renderResult.queryByText(rbacPattern)).toBeNull();
+      expect(renderResult.queryByTestId(noPrivilegesPageTestId)).toBeNull();
     });
   });
 
@@ -106,8 +106,8 @@ describe('PrivilegedRoute', () => {
 
         render();
 
-        expect(renderResult.getByText(rbacPattern)).toBeTruthy();
-        expect(renderResult.queryByText(superuserPattern)).toBeNull();
+        expect(renderResult.getByTestId(noPrivilegesPageTestId)).toBeTruthy();
+        expect(renderResult.queryByTestId(noPermissionsPageTestId)).toBeNull();
         expect(renderResult.queryByTestId(componentTestId)).toBeNull();
       });
 
@@ -116,8 +116,8 @@ describe('PrivilegedRoute', () => {
 
         render();
 
-        expect(renderResult.getByText(superuserPattern)).toBeTruthy();
-        expect(renderResult.queryByText(rbacPattern)).toBeNull();
+        expect(renderResult.getByTestId(noPermissionsPageTestId)).toBeTruthy();
+        expect(renderResult.queryByTestId(noPrivilegesPageTestId)).toBeNull();
         expect(renderResult.queryByTestId(componentTestId)).toBeNull();
       });
     });
@@ -135,8 +135,8 @@ describe('PrivilegedRoute', () => {
 
       render();
 
-      expect(renderResult.getByText(rbacPattern)).toBeTruthy();
-      expect(renderResult.queryByText(superuserPattern)).toBeNull();
+      expect(renderResult.getByTestId(noPrivilegesPageTestId)).toBeTruthy();
+      expect(renderResult.queryByTestId(noPermissionsPageTestId)).toBeNull();
       expect(renderResult.queryByTestId(componentTestId)).toBeNull();
     });
   });
