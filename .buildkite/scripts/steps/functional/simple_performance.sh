@@ -61,10 +61,27 @@ cd "$KIBANA_BUILD_LOCATION"
 
 echo "starting kibana"
 
-./bin/kibana &
-export kibPid=$!
+./bin/kibana \
+--csp.disableUnsafeEval=true  \
+--csp.strict=false  \
+--csp.warnLegacyBrowsers=false  \
+--elasticsearch.hosts=http://localhost:9200  \
+--elasticsearch.password=changeme  \
+--elasticsearch.username=kibana_system  \
+--env.name=development \
+--savedObjects.maxImportPayloadBytes=10485760  \
+--server.maxPayload=1679958  \
+--server.port=5620  \
+--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d  \
+--status.allowAnonymous=true  \
+--telemetry.banner=false  \
+--telemetry.labels="{\"branch\": \"$BUILDKITE_BRANCH\", \"ciBuildNumber\": \"10\", \"journeyName\":\"simple-test\"}"  \
+--telemetry.optIn=true  \
+--telemetry.sendUsageTo=staging  \
+--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf" &
+export kbnPid=$!
 
-echo "kibana started"
+echo "kibana started on $kbnPid";
 
 # wait until we can login to kibana
 curl 'http://localhost:5620/internal/security/login' \
@@ -72,16 +89,16 @@ curl 'http://localhost:5620/internal/security/login' \
   -H 'kbn-version: 8.6.0-SNAPSHOT' \
   -H 'x-kbn-context: %7B%22name%22%3A%22security_login%22%2C%22url%22%3A%22%2Flogin%22%7D' \
   --fail \
-  --silent \
   --retry 120 \
   --retry-delay 5 \
   --data-raw '{"providerType":"basic","providerName":"basic","currentURL":"http://localhost:5620/login?next=%2F","params":{"username":"elastic","password":"changeme"}}' \
   --compressed
-  > /dev/null
 
 
+echo "logged in to kibana";
 cd "$KIBANA_DIR"
 
+echo "running archivers";
 node scripts/es_archiver load test/functional/fixtures/es_archiver/stress_test --es-url "$TEST_ES_URL"
 node scripts/kbn_archiver load test/functional/fixtures/kbn_archiver/stress_test --kibana-url "http://elastic:changeme@localhost:5620/"
 
