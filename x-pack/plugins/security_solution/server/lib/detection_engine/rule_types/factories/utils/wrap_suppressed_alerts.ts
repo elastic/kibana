@@ -79,7 +79,7 @@ export const wrapSuppressedAlerts = ({
         [ALERT_SUPPRESSION_TERMS]: bucket.terms,
         [ALERT_SUPPRESSION_START]: bucket.start,
         [ALERT_SUPPRESSION_END]: bucket.end,
-        [ALERT_SUPPRESSION_DOCS_COUNT]: bucket.count,
+        [ALERT_SUPPRESSION_DOCS_COUNT]: bucket.count - 1,
         [ALERT_UUID]: id,
       },
     };
