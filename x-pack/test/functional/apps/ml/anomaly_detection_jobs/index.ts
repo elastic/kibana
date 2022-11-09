@@ -8,40 +8,55 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const config = getService('config');
+  const security = getService('security');
+  const isCcs = config.get('esTestCluster.ccs');
+  const esNode = isCcs ? getService('remoteEsArchiver' as 'esArchiver') : getService('esArchiver');
   const ml = getService('ml');
 
   describe('machine learning - anomaly detection', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await ml.securityCommon.createMlRoles();
-      await ml.securityCommon.createMlUsers();
+      if (isCcs) {
+        await security.testUser.setRoles(['superuser']);
+      } else {
+        await ml.securityCommon.createMlRoles();
+        await ml.securityCommon.createMlUsers();
+        await ml.securityUI.loginAsMlPowerUser();
+      }
     });
 
     after(async () => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await ml.securityUI.logout();
 
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
+      if (isCcs) {
+        await security.testUser.restoreDefaults();
+      } else {
+        await ml.securityCommon.cleanMlUsers();
+        await ml.securityCommon.cleanMlRoles();
+      }
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization_small');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/event_rate_nanos');
+      await esNode.unload('x-pack/test/functional/es_archives/ml/farequote');
+      await esNode.unload('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esNode.unload('x-pack/test/functional/es_archives/ml/categorization_small');
+      await esNode.unload('x-pack/test/functional/es_archives/ml/event_rate_nanos');
 
       await ml.testResources.resetKibanaTimeZone();
     });
 
     loadTestFile(require.resolve('./single_metric_job'));
-    loadTestFile(require.resolve('./single_metric_job_without_datafeed_start'));
-    loadTestFile(require.resolve('./multi_metric_job'));
-    loadTestFile(require.resolve('./population_job'));
-    loadTestFile(require.resolve('./saved_search_job'));
-    loadTestFile(require.resolve('./advanced_job'));
-    loadTestFile(require.resolve('./categorization_job'));
-    loadTestFile(require.resolve('./date_nanos_job'));
-    loadTestFile(require.resolve('./custom_urls'));
+
+    if (!config.get('esTestCluster.ccs')) {
+      loadTestFile(require.resolve('./single_metric_job_without_datafeed_start'));
+      loadTestFile(require.resolve('./multi_metric_job'));
+      loadTestFile(require.resolve('./population_job'));
+      loadTestFile(require.resolve('./saved_search_job'));
+      loadTestFile(require.resolve('./advanced_job'));
+      loadTestFile(require.resolve('./categorization_job'));
+      loadTestFile(require.resolve('./date_nanos_job'));
+      loadTestFile(require.resolve('./custom_urls'));
+    }
   });
 }

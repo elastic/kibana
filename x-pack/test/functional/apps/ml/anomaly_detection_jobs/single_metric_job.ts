@@ -8,7 +8,10 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const config = getService('config');
+  const esNode = config.get('esTestCluster.ccs')
+    ? getService('remoteEsArchiver' as 'esArchiver')
+    : getService('esArchiver');
   const ml = getService('ml');
   const browser = getService('browser');
 
@@ -70,16 +73,20 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
+  const remoteName = 'ftr-remote:';
+  const indexPatternName = 'ft_farequote';
+  const indexPatternString = config.get('esTestCluster.ccs')
+    ? remoteName + indexPatternName
+    : indexPatternName;
 
   describe('single metric', function () {
     this.tags(['ml']);
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await esNode.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await ml.testResources.createIndexPatternIfNeeded(indexPatternString, '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
-      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
@@ -96,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobManagement.navigateToNewJobSourceSelection();
 
       await ml.testExecution.logTestStep('job creation loads the job type selection page');
-      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_farequote');
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(indexPatternString);
 
       await ml.testExecution.logTestStep('job creation loads the single metric job wizard page');
       await ml.jobTypeSelection.selectSingleMetricJob();
@@ -204,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('job cloning fails in the single metric wizard if a matching data view does not exist', async () => {
       await ml.testExecution.logTestStep('delete data view used by job');
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle(indexPatternString);
 
       // Refresh page to ensure page has correct cache of data views
       await browser.refresh();
@@ -217,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('job cloning opens the existing job in the single metric wizard', async () => {
       await ml.testExecution.logTestStep('recreate data view used by job');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded(indexPatternString, '@timestamp');
 
       // Refresh page to ensure page has correct cache of data views
       await browser.refresh();
