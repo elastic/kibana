@@ -23,7 +23,7 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import type { ActionConnector } from '../../../common/api';
+import type { ActionConnector, CasePostRequest } from '../../../common/api';
 import type { Case } from '../../containers/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
@@ -38,7 +38,6 @@ import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { Severity } from './severity';
 import { Assignees } from './assignees';
-import type { CasePostRequest } from '../../../common/api';
 
 interface ContainerProps {
   big?: boolean;
