@@ -10,6 +10,7 @@ import React from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface MonitorErrorsCountProps {
   from: string;
@@ -23,6 +24,12 @@ export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
 
   const monitorId = useMonitorQueryId();
 
+  const selectedLocation = useSelectedLocation();
+
+  if (!selectedLocation) {
+    return null;
+  }
+
   return (
     <ExploratoryViewEmbeddable
       customHeight="70px"
@@ -30,7 +37,10 @@ export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
       attributes={[
         {
           time: props,
-          reportDefinitions: { 'monitor.id': [monitorId] },
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation?.label],
+          },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
           name: 'synthetics-series-1',
