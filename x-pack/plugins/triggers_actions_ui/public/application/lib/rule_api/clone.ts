@@ -7,7 +7,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { Rule } from '../../../types';
-import { BASE_ALERTING_API_PATH } from '../../constants';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { transformRule } from './common_transformations';
 
 export async function cloneRule({
@@ -17,6 +17,8 @@ export async function cloneRule({
   http: HttpSetup;
   ruleId: string;
 }): Promise<Rule> {
-  const res = await http.post<AsApiContract<Rule>>(`${BASE_ALERTING_API_PATH}/rule/${ruleId}/_clone`);
+  const res = await http.post<AsApiContract<Rule>>(
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${ruleId}/_clone`
+  );
   return transformRule(res);
 }

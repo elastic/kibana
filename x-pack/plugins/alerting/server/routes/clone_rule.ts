@@ -8,15 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import {
-  verifyAccessAndContext,
-  RewriteResponseCase,
-  handleDisabledApiKeysError,
-} from './lib';
+import { verifyAccessAndContext, RewriteResponseCase, handleDisabledApiKeysError } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
-  BASE_ALERTING_API_PATH,
+  INTERNAL_BASE_ALERTING_API_PATH,
   PartialRule,
 } from '../types';
 
@@ -82,7 +78,7 @@ export const cloneRuleRoute = (
 ) => {
   router.post(
     {
-      path: `${BASE_ALERTING_API_PATH}/rule/{id}/_clone/{newId?}`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_clone/{newId?}`,
       validate: {
         params: paramSchema,
       },
