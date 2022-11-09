@@ -88,11 +88,11 @@ curl 'http://localhost:5620/internal/security/login' \
   -H 'Content-Type: application/json' \
   -H 'kbn-version: 8.6.0-SNAPSHOT' \
   -H 'x-kbn-context: %7B%22name%22%3A%22security_login%22%2C%22url%22%3A%22%2Flogin%22%7D' \
-  --fail \
   --retry 120 \
   --retry-delay 5 \
+  --retry-connrefused \
   --data-raw '{"providerType":"basic","providerName":"basic","currentURL":"http://localhost:5620/login?next=%2F","params":{"username":"elastic","password":"changeme"}}' \
-  --compressed
+  --compressed || true
 
 
 echo "logged in to kibana";
