@@ -83,9 +83,9 @@ function TooltipRow({
                 })
               : valueLabel}
           </EuiText>
-          <EuiTextColor color={color} size="xs">
-            {diffLabel}
-          </EuiTextColor>
+          <EuiText size="xs">
+            <EuiTextColor color={color}>{diffLabel}</EuiTextColor>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
