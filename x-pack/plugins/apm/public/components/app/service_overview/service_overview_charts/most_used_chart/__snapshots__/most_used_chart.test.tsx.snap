@@ -85,7 +85,9 @@ Object {
           "layerId": "host-os-version",
           "layerType": "data",
           "legendDisplay": "hide",
-          "metric": "countColumn",
+          "metrics": Array [
+            "countColumn",
+          ],
           "numberDisplay": "percent",
           "primaryGroups": Array [
             "termsColumn",
