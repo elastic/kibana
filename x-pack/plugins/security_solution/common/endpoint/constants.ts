@@ -42,8 +42,8 @@ export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
 // File storage indexes supporting endpoint Upload/download
-export const FILE_STORAGE_METADATA_INDEX = '.fleet-endpoint-files';
-export const FILE_STORAGE_DATA_INDEX = '.fleet-endpoint-file-data';
+export const FILE_STORAGE_METADATA_INDEX = '.fleet-files-endpoint';
+export const FILE_STORAGE_DATA_INDEX = '.fleet-file-data-endpoint';
 
 // Endpoint API routes
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
